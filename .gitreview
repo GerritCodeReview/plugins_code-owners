@@ -1,0 +1,5 @@
+[gerrit]
+host=gerrit-review.googlesource.com
+scheme=https
+project=plugins/code-owners.git
+defaultbranch=master
