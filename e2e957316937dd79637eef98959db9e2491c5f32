@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "54ad8696_a81700b7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1006192
+      },
+      "writtenOn": "2020-05-15T15:16:19Z",
+      "side": 1,
+      "message": "@Edwin the checks validation says \"failed\". We should investigate why it is flaky, because after this getting merged, it will block the merges.",
+      "revId": "e2e957316937dd79637eef98959db9e2491c5f32",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
