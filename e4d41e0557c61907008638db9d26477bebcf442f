@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0245977d_84b62e71",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1087826
+      },
+      "writtenOn": "2020-05-15T14:31:22Z",
+      "side": 1,
+      "message": "Interesting, it looks like there may have been an issue fetching from Gerrit at the time.  Zuul tried 3 times:\n\n```\n2020-05-15 11:34:36,559 ERROR zuul.Repo: [e: 2a2ca3c32a6c47ceb422023a93a1e233] Retry 1: Fetch /var/lib/zuul/executor-git/gerrit.googlesource.com/plugins/code-owners origin refs/changes/20/267620/1\n...\ngit.exc.GitCommandError: Cmd(\u0027git\u0027) failed due to: exit code(128)\n  cmdline: git fetch -f origin refs/changes/20/267620/1\n  stderr: \u0027fatal: Couldn\u0027t find remote ref refs/changes/20/267620/1\u0027\n\n2020-05-15 11:35:06,854 ERROR zuul.Repo: [e: 2a2ca3c32a6c47ceb422023a93a1e233] Retry 2: Fetch /var/lib/zuul/executor-git/gerrit.googlesource.com/plugins/code-owners origin refs/changes/20/267620/1\n...\ngit.exc.GitCommandError: Cmd(\u0027git\u0027) failed due to: exit code(128)\n  cmdline: git fetch -f origin refs/changes/20/267620/1\n  stderr: \u0027error: RPC failed; HTTP 400 curl 22 The requested URL returned error: 400 \nfatal: the remote end hung up unexpectedly\u0027\n\n2020-05-15 11:35:07,112 DEBUG zuul.Merger: [e: 2a2ca3c32a6c47ceb422023a93a1e233] Unable to merge {\u0027project\u0027: \u0027plugins/code-owners\u0027, \u0027connection\u0027: \u0027gerrit\u0027, \u0027merge_mode\u0027: 2, \u0027ref\u0027: \u0027refs/changes/20/267620/1\u0027, \u0027branch\u0027: \u0027master\u0027, \u0027buildset_uuid\u0027: \u0027d108972935fc4b26b0ebf17d23ba72de\u0027, \u0027number\u0027: \u0027267620\u0027, \u0027patchset\u0027: \u00271\u0027, \u0027oldrev\u0027: None, \u0027newrev\u0027: None}\n...\ngit.exc.GitCommandError: Cmd(\u0027git\u0027) failed due to: exit code(128)\n  cmdline: git fetch -f origin refs/changes/20/267620/1\n  stderr: \u0027error: RPC failed; HTTP 400 curl 22 The requested URL returned error: 400 \nfatal: the remote end hung up unexpectedly\u0027\n```\n\nMaybe that was a one-off event?  Clearly it would be great if we could report a better error message.  :/\n\nI hit the re-run button and it\u0027s happy now.",
+      "revId": "e4d41e0557c61907008638db9d26477bebcf442f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
