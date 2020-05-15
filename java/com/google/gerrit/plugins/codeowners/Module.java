@@ -16,7 +16,11 @@ package com.google.gerrit.plugins.codeowners;
 
 import com.google.gerrit.extensions.config.FactoryModule;
 
-/** Guice module that registers the extensions of the code-owners plugin. */
+/**
+ * Guice module that registers the extensions of the code-owners plugin.
+ *
+ * <p>Test modification to check if the CI works.
+ */
 public class Module extends FactoryModule {
   @Override
   protected void configure() {
