@@ -16,6 +16,29 @@
       "revId": "e2e957316937dd79637eef98959db9e2491c5f32",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b664a10_547ab144",
+        "filename": "project.config",
+        "patchSetId": 2
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1011123
+      },
+      "writtenOn": "2020-05-16T01:35:24Z",
+      "side": 1,
+      "message": "Is it still necessary to grant this permission?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 47
+      },
+      "revId": "e2e957316937dd79637eef98959db9e2491c5f32",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
