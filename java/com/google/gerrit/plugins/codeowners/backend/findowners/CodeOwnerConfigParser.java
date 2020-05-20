@@ -16,7 +16,11 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.server.mail.send.OutgoingEmailValidator;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
 /**
  * Parser for {@code OWNERS} files as they are used by the {@code find-owners} plugin.
@@ -31,41 +35,54 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
  *   <li>code owner emails: a line can be the email of a code owner
  * </ul>
  *
- * <p>Invalid lines are silently ignored.
+ * <p>Invalid lines and invalid emails are silently ignored.
  */
-final class CodeOwnerConfigParser {
+@Singleton
+class CodeOwnerConfigParser {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  /**
+   * To validate emails we use the same validator that Gerrit core is using to validate emails for
+   * Gerrit accounts.
+   *
+   * <p>Emails in code owner configurations must be resolveable to Gerrit accounts. This means any
+   * email that is invalid for Gerrit accounts, is also invalid as code owner (if an email cannot be
+   * added to a Gerrit account, it can never be resolved to a Gerrit account and hence it makes no
+   * sense to allow it as code owner).
+   */
+  private final OutgoingEmailValidator emailValidator;
+
+  @Inject
+  CodeOwnerConfigParser(OutgoingEmailValidator emailValidator) {
+    this.emailValidator = emailValidator;
+  }
   /**
    * Parses a {@link CodeOwnerConfig} from a string that represents the content of an {@code OWNERS}
    * file.
    *
-   * <p>Invalid lines are silently ignored.
+   * <p>Invalid lines and invalid emails are silently ignored.
    *
    * @param codeOwnerConfigKey the key of the code owner config that should be parsed
    * @param codeOwnerConfigFileContent string that represents the content of an {@code OWNERS} file
    * @return the parsed {@link CodeOwnerConfig}
    */
-  static CodeOwnerConfig parse(
-      CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigFileContent) {
+  CodeOwnerConfig parse(CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigFileContent) {
     CodeOwnerConfig.Builder codeOwnerConfig = CodeOwnerConfig.builder(codeOwnerConfigKey);
 
     Streams.stream(Splitter.on('\n').split(codeOwnerConfigFileContent))
         .map(String::trim)
-        .filter(CodeOwnerConfigParser::isEmail)
+        .filter(this::isEmail)
         .distinct()
         .forEach(codeOwnerConfig::addCodeOwnerEmail);
 
     return codeOwnerConfig.build();
   }
 
-  private static boolean isEmail(String trimmedLine) {
-    // TODO(ekempin): Make this check smarter.
-    return trimmedLine.contains("@");
+  private boolean isEmail(String trimmedLine) {
+    if (!emailValidator.isValid(trimmedLine)) {
+      logger.atInfo().log("Skipping line that is not an email: %s", trimmedLine);
+      return false;
+    }
+    return true;
   }
-
-  /**
-   * Private constructor to prevent instantiation of this class.
-   *
-   * <p>The class only contains static methods, hence the class never needs to be instantiated.
-   */
-  private CodeOwnerConfigParser() {}
 }
