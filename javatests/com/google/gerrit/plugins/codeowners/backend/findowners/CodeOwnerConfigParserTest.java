@@ -115,6 +115,22 @@ public class CodeOwnerConfigParserTest extends LightweightPluginDaemonTest {
     assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2);
   }
 
+  @Test
+  public void codeOwnerConfigWithCommentLines_CommentLinesAreIgnored() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        parse(String.format("# a@test.com\n%s\n # b@test.com\n%s\n#c@test.com", EMAIL_1, EMAIL_2));
+    assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2);
+  }
+
+  @Test
+  public void
+      codeOwnerConfigWithInlineComments_LinesWithInlineCommentsAreConsideredAsInvalidAndAreIgnored()
+          throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        parse(String.format("foo.bar@test.com # Foo Bar\n%s\n%s", EMAIL_1, EMAIL_2));
+    assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2);
+  }
+
   /**
    * Parses the given code owner config.
    *
