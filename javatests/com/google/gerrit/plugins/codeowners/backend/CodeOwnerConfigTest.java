@@ -52,6 +52,38 @@ public class CodeOwnerConfigTest {
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
   }
 
+  @Test
+  public void addCodeOwnersByEmail() throws Exception {
+    String codeOwnerEmail1 = "jdoe@example.com";
+    String codeOwnerEmail2 = "jroe@example.com";
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder = createCodeOwnerBuilder();
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail1);
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail2);
+    CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
+    assertThat(codeOwnerConfig.codeOwners())
+        .containsExactly(
+            CodeOwnerReference.create(codeOwnerEmail1), CodeOwnerReference.create(codeOwnerEmail2));
+  }
+
+  @Test
+  public void addDuplicateCodeOwnersByEmail() throws Exception {
+    String codeOwnerEmail = "jdoe@example.com";
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder = createCodeOwnerBuilder();
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail);
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail);
+    CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
+    assertThat(codeOwnerConfig.codeOwners())
+        .containsExactly(CodeOwnerReference.create(codeOwnerEmail));
+  }
+
+  @Test
+  public void cannotAddNullAsCodeOwnerEmail() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> createCodeOwnerBuilder().addCodeOwnerEmail(null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerEmail");
+  }
+
   private static CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
         CodeOwnerConfig.Key.create(
