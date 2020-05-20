@@ -16,12 +16,23 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 
+import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
+import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigParser}. */
-public class CodeOwnerConfigParserTest {
+@TestPlugin(name = "code-owners", sysModule = "com.google.gerrit.plugins.codeowners.Module")
+public class CodeOwnerConfigParserTest extends LightweightPluginDaemonTest {
+  private CodeOwnerConfigParser codeOwnerConfigParser;
+
+  @Before
+  public void setUpCodeOwnersPlugin() throws Exception {
+    codeOwnerConfigParser = plugin.getSysInjector().getInstance(CodeOwnerConfigParser.class);
+  }
+
   @Test
   public void emptyCodeOwnerConfig() throws Exception {
     CodeOwnerConfig codeOwnerConfig = parse("");
@@ -91,7 +102,14 @@ public class CodeOwnerConfigParserTest {
         .containsExactly("admin@test.com", "user@test.com");
   }
 
-  // TODO: add tests with invalid emails, e.g. "@test.com", "admin@", "admin@test@com".
+  @Test
+  public void codeOwnerConfigWithInvalidEmails_InvalidEmailsAreIgnored() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        parse("admin@test.com\n@test.com\nadmin@\nadmin@test@com\nuser@test.com");
+    assertThat(codeOwnerConfig)
+        .hasCodeOwnersEmailsThat()
+        .containsExactly("admin@test.com", "user@test.com");
+  }
 
   @Test
   public void codeOwnerConfigWithInvalidLines_InvalidLinesAreIgnored() throws Exception {
@@ -110,6 +128,6 @@ public class CodeOwnerConfigParserTest {
   private CodeOwnerConfig parse(String codeOwnerConfig) {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
-    return CodeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfig);
+    return codeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfig);
   }
 }
