@@ -14,10 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import static java.util.stream.Collectors.joining;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.mail.send.OutgoingEmailValidator;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -81,6 +84,22 @@ class CodeOwnerConfigParser {
         .forEach(codeOwnerConfig::addCodeOwnerEmail);
 
     return codeOwnerConfig.build();
+  }
+
+  /**
+   * Formats the given code owner config as string that represents the code owner config in an
+   * {@code OWNERS} file.
+   *
+   * @param codeOwnerConfig the code owner config that should be formatted
+   * @return the code owner config as string that represents the code owner config in an {@code
+   *     OWNERS} file
+   */
+  String format(CodeOwnerConfig codeOwnerConfig) {
+    return codeOwnerConfig.codeOwners().stream()
+        .map(CodeOwnerReference::email)
+        .sorted()
+        .distinct()
+        .collect(joining("\n"));
   }
 
   private static boolean isComment(String trimmedLine) {
