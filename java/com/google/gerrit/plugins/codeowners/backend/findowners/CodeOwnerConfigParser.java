@@ -31,10 +31,14 @@ import com.google.inject.Singleton;
  * following syntax elements are supported:
  *
  * <ul>
+ *   <li>comment: a line can be a comment (comments must start with '#')
  *   <li>code owner emails: a line can be the email of a code owner
  * </ul>
  *
- * <p>Invalid lines and invalid emails are silently ignored.
+ * <p>Comment lines, invalid lines and invalid emails are silently ignored.
+ *
+ * <p>Comments cannot appear as part of syntax lines, but only as separate lines (e.g. using
+ * 'foo.bar@example.com # Foo Bar' would be invalid).
  */
 @Singleton
 class CodeOwnerConfigParser {
@@ -57,7 +61,7 @@ class CodeOwnerConfigParser {
    * Parses a {@link CodeOwnerConfig} from a string that represents the content of an {@code OWNERS}
    * file.
    *
-   * <p>Invalid lines and invalid emails are silently ignored.
+   * <p>Comment lines, invalid lines and invalid emails are silently ignored.
    *
    * @param codeOwnerConfigKey the key of the code owner config that should be parsed
    * @param codeOwnerConfigFileContent string that represents the content of an {@code OWNERS} file
@@ -68,11 +72,16 @@ class CodeOwnerConfigParser {
 
     Streams.stream(Splitter.on('\n').split(codeOwnerConfigFileContent))
         .map(String::trim)
+        .filter(line -> !isComment(line))
         .filter(this::isEmail)
         .distinct()
         .forEach(codeOwnerConfig::addCodeOwnerEmail);
 
     return codeOwnerConfig.build();
+  }
+
+  private static boolean isComment(String trimmedLine) {
+    return trimmedLine.startsWith("#");
   }
 
   private boolean isEmail(String trimmedLine) {

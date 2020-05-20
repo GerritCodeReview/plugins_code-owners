@@ -119,6 +119,26 @@ public class CodeOwnerConfigParserTest extends LightweightPluginDaemonTest {
         .containsExactly("admin@test.com", "user@test.com");
   }
 
+  @Test
+  public void codeOwnerConfigWithCommentLines_CommentLinesAreIgnored() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        parse("# a@test.com\nadmin@test.com\n # b@test.com\nuser@test.com\n#c@test.com");
+    assertThat(codeOwnerConfig)
+        .hasCodeOwnersEmailsThat()
+        .containsExactly("admin@test.com", "user@test.com");
+  }
+
+  @Test
+  public void
+      codeOwnerConfigWithInlineComments_LinesWithInlineCommentsAreConsideredAsInvalidAndAreIgnored()
+          throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        parse("foo.bar@test.com # Foo Bar\nadmin@test.com\nuser@test.com");
+    assertThat(codeOwnerConfig)
+        .hasCodeOwnersEmailsThat()
+        .containsExactly("admin@test.com", "user@test.com");
+  }
+
   /**
    * Parses the given code owner config.
    *
