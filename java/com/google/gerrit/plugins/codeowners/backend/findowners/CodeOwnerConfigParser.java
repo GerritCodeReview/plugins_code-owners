@@ -14,10 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import static java.util.stream.Collectors.joining;
+
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.mail.send.OutgoingEmailValidator;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -66,6 +69,12 @@ class CodeOwnerConfigParser {
    *
    * <p>Comment lines, invalid lines and invalid emails are silently ignored.
    *
+   * <p><strong>Note:</strong> Parsing a code owner config by using the {@link
+   * #parse(CodeOwnerConfig.Key, String)} and then formatting the parsed code owner config back to a
+   * string by using {@link #formatAsString(CodeOwnerConfig)} is not guaranteed to result in the
+   * exact same code owner config file (e.g. comment lines, invalid lines and invalid emails are
+   * dropped and emails may be reordered).
+   *
    * @param codeOwnerConfigKey the key of the code owner config that should be parsed
    * @param codeOwnerConfigFileContent string that represents the content of an {@code OWNERS} file
    * @return the parsed {@link CodeOwnerConfig}
@@ -81,6 +90,22 @@ class CodeOwnerConfigParser {
         .forEach(codeOwnerConfig::addCodeOwnerEmail);
 
     return codeOwnerConfig.build();
+  }
+
+  /**
+   * Formats the given code owner config as string that represents the code owner config in an
+   * {@code OWNERS} file.
+   *
+   * @param codeOwnerConfig the code owner config that should be formatted
+   * @return the code owner config as string that represents the code owner config in an {@code
+   *     OWNERS} file
+   */
+  String formatAsString(CodeOwnerConfig codeOwnerConfig) {
+    return codeOwnerConfig.codeOwners().stream()
+        .map(CodeOwnerReference::email)
+        .sorted()
+        .distinct()
+        .collect(joining("\n"));
   }
 
   private static boolean isComment(String trimmedLine) {
