@@ -111,6 +111,55 @@ public abstract class CodeOwnerConfig {
     public abstract Path folderPath();
 
     /**
+     * Gets the project to which the code owner config belongs.
+     *
+     * @return the project to which the code owner config belongs
+     */
+    public Project.NameKey project() {
+      return branch().project();
+    }
+
+    /**
+     * Gets the ref name of the branch to which the code owner config belongs.
+     *
+     * @return the ref name of the branch to which the code owner config belongs
+     */
+    public String ref() {
+      return branch().branch();
+    }
+
+    /**
+     * Gets the path for the given code owner config file name.
+     *
+     * @param codeOwnerConfigfileName the name of the code owner config file for which the path
+     *     should be returned
+     * @return the path for the given file code owner config file name
+     */
+    public Path filePath(String codeOwnerConfigfileName) {
+      return folderPath().resolve(codeOwnerConfigfileName);
+    }
+
+    /**
+     * Gets the path for the given code owner config file name as string that can be used for the
+     * jgit API.
+     *
+     * <p>The jgit API doesn't accept leading '/' for absolute paths, so this method makes sure to
+     * remove it.
+     *
+     * @param codeOwnerConfigfileName the name of the code owner config file for which the path
+     *     should be returned
+     * @return the path for the given file code owner config file name as string that can be used
+     *     for the jgit API
+     */
+    public String filePathForJgit(String codeOwnerConfigfileName) {
+      String filePath = filePath(codeOwnerConfigfileName).toString();
+      if (filePath.startsWith("/")) {
+        filePath = filePath.substring(1);
+      }
+      return filePath;
+    }
+
+    /**
      * Creates a code owner config key.
      *
      * @param project the project to which the code owner config belongs
