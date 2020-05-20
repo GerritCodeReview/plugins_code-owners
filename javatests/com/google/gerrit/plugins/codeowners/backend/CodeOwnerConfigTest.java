@@ -15,11 +15,13 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import java.nio.file.Paths;
 import org.junit.Test;
 
@@ -36,6 +38,55 @@ public class CodeOwnerConfigTest {
         CodeOwnerConfig.Key.create(BranchNameKey.create(project, branch), Paths.get(folderPath));
     assertThat(codeOwnerConfigKeyCreatedByCustomConstructor)
         .isEqualTo(codeOwnerConfigKeyCreatedByAutoValueConstructor);
+  }
+
+  @Test
+  public void getProject() throws Exception {
+    Project.NameKey project = Project.nameKey("project");
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "master", "/foo/bar/");
+    assertThat(codeOwnerConfigKey.project()).isEqualTo(project);
+  }
+
+  @Test
+  public void getRef() throws Exception {
+    String branch = "master";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("project"), branch, "/foo/bar/");
+    assertThat(codeOwnerConfigKey.ref()).isEqualTo(RefNames.REFS_HEADS + branch);
+  }
+
+  @Test
+  public void getFilePath() throws Exception {
+    String folderPath = "/foo/bar/";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", folderPath);
+    assertThat(codeOwnerConfigKey.filePath("OWNERS")).isEqualTo(Paths.get(folderPath, "OWNERS"));
+  }
+
+  @Test
+  public void cannotGetFilePathForNullFileName() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/foo/bar/");
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> codeOwnerConfigKey.filePath(null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileName");
+  }
+
+  @Test
+  public void getFilePathForJgit() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/foo/bar/");
+    assertThat(codeOwnerConfigKey.filePathForJgit("OWNERS")).isEqualTo("foo/bar/OWNERS");
+  }
+
+  @Test
+  public void cannotGetFilePathForJgitForNullFileName() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/foo/bar/");
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> codeOwnerConfigKey.filePathForJgit(null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileName");
   }
 
   @Test
