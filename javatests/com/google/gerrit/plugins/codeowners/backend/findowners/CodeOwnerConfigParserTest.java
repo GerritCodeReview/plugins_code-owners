@@ -17,16 +17,14 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 
-import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
-import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigParser}. */
-@TestPlugin(name = "code-owners", sysModule = "com.google.gerrit.plugins.codeowners.Module")
-public class CodeOwnerConfigParserTest extends LightweightPluginDaemonTest {
+public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   /** Callback interface that allows to assert a code owner config. */
   @FunctionalInterface
   interface CodeOwnerConfigAsserter {
