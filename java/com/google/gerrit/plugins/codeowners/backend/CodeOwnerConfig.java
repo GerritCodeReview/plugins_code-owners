@@ -19,7 +19,9 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /** Code owner configuration for a folder in a branch. */
 @AutoValue
@@ -74,6 +76,16 @@ public abstract class CodeOwnerConfig {
     abstract ImmutableSet.Builder<CodeOwnerReference> codeOwnersBuilder();
 
     /**
+     * Adds a code owner for the given email.
+     *
+     * @param email email of the code owner
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addCodeOwnerEmail(String email) {
+      return addCodeOwner(CodeOwnerReference.create(requireNonNull(email)));
+    }
+
+    /**
      * Adds a code owner.
      *
      * @param codeOwnerReference reference to the code owner
@@ -112,6 +124,18 @@ public abstract class CodeOwnerConfig {
      * @return the path of the folder to which the code owner config belongs.
      */
     public abstract Path folderPath();
+
+    /**
+     * Creates a code owner config key.
+     *
+     * @param project the project to which the code owner config belongs
+     * @param branch the branch to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs
+     * @return the code owner config key
+     */
+    public static Key create(Project.NameKey project, String branch, String folderPath) {
+      return create(BranchNameKey.create(project, branch), Paths.get(folderPath));
+    }
 
     /**
      * Creates a code owner config key.
