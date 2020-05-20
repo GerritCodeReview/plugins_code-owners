@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.entities.BranchNameKey;
@@ -25,6 +26,19 @@ import org.junit.Test;
 /** Tests for {@link CodeOwnerConfig}. */
 public class CodeOwnerConfigTest {
   @Test
+  public void createKey() throws Exception {
+    Project.NameKey project = Project.nameKey("project");
+    String branch = "master";
+    String folderPath = "/foo/bar/";
+    CodeOwnerConfig.Key codeOwnerConfigKeyCreatedByCustomConstructor =
+        CodeOwnerConfig.Key.create(project, branch, folderPath);
+    CodeOwnerConfig.Key codeOwnerConfigKeyCreatedByAutoValueConstructor =
+        CodeOwnerConfig.Key.create(BranchNameKey.create(project, branch), Paths.get(folderPath));
+    assertThat(codeOwnerConfigKeyCreatedByCustomConstructor)
+        .isEqualTo(codeOwnerConfigKeyCreatedByAutoValueConstructor);
+  }
+
+  @Test
   public void addCodeOwners() throws Exception {
     CodeOwnerReference codeOwner1 = CodeOwnerReference.create("jdoe@example.com");
     CodeOwnerReference codeOwner2 = CodeOwnerReference.create("jroe@example.com");
@@ -32,7 +46,7 @@ public class CodeOwnerConfigTest {
     codeOwnerConfigBuilder.addCodeOwner(codeOwner1);
     codeOwnerConfigBuilder.addCodeOwner(codeOwner2);
     CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
-    assertThat(codeOwnerConfig.codeOwners()).containsExactly(codeOwner1, codeOwner2);
+    assertThat(codeOwnerConfig).hasCodeOwnersThat().containsExactly(codeOwner1, codeOwner2);
   }
 
   @Test
@@ -42,7 +56,7 @@ public class CodeOwnerConfigTest {
     codeOwnerConfigBuilder.addCodeOwner(codeOwner);
     codeOwnerConfigBuilder.addCodeOwner(codeOwner);
     CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
-    assertThat(codeOwnerConfig.codeOwners()).containsExactly(codeOwner);
+    assertThat(codeOwnerConfig).hasCodeOwnersThat().containsExactly(codeOwner);
   }
 
   @Test
@@ -50,6 +64,37 @@ public class CodeOwnerConfigTest {
     NullPointerException npe =
         assertThrows(NullPointerException.class, () -> createCodeOwnerBuilder().addCodeOwner(null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
+  }
+
+  @Test
+  public void addCodeOwnersByEmail() throws Exception {
+    String codeOwnerEmail1 = "jdoe@example.com";
+    String codeOwnerEmail2 = "jroe@example.com";
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder = createCodeOwnerBuilder();
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail1);
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail2);
+    CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
+    assertThat(codeOwnerConfig)
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(codeOwnerEmail1, codeOwnerEmail2);
+  }
+
+  @Test
+  public void addDuplicateCodeOwnersByEmail() throws Exception {
+    String codeOwnerEmail = "jdoe@example.com";
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder = createCodeOwnerBuilder();
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail);
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail);
+    CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
+    assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(codeOwnerEmail);
+  }
+
+  @Test
+  public void cannotAddNullAsCodeOwnerEmail() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> createCodeOwnerBuilder().addCodeOwnerEmail(null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerEmail");
   }
 
   private static CodeOwnerConfig.Builder createCodeOwnerBuilder() {
