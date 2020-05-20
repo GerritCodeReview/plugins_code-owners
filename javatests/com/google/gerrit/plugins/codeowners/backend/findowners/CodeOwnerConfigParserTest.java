@@ -16,16 +16,27 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 
+import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
+import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigParser}. */
-public class CodeOwnerConfigParserTest {
+@TestPlugin(name = "code-owners", sysModule = "com.google.gerrit.plugins.codeowners.Module")
+public class CodeOwnerConfigParserTest extends LightweightPluginDaemonTest {
   // Emails for testing, sorted alphabetically.
   private static final String EMAIL_1 = "admin@test.com";
   private static final String EMAIL_2 = "jdoe@test.com";
   private static final String EMAIL_3 = "jroe@test.com";
+
+  private CodeOwnerConfigParser codeOwnerConfigParser;
+
+  @Before
+  public void setUpCodeOwnersPlugin() throws Exception {
+    codeOwnerConfigParser = plugin.getSysInjector().getInstance(CodeOwnerConfigParser.class);
+  }
 
   @Test
   public void emptyCodeOwnerConfig() throws Exception {
@@ -90,7 +101,12 @@ public class CodeOwnerConfigParserTest {
     assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2);
   }
 
-  // TODO: add tests with invalid emails, e.g. "@test.com", "admin@", "admin@test@com".
+  @Test
+  public void codeOwnerConfigWithInvalidEmails_InvalidEmailsAreIgnored() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        parse(String.format("%s\n@test.com\nadmin@\nadmin@test@com\n%s", EMAIL_1, EMAIL_2));
+    assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2);
+  }
 
   @Test
   public void codeOwnerConfigWithInvalidLines_InvalidLinesAreIgnored() throws Exception {
@@ -108,6 +124,6 @@ public class CodeOwnerConfigParserTest {
   private CodeOwnerConfig parse(String codeOwnerConfig) {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
-    return CodeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfig);
+    return codeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfig);
   }
 }
