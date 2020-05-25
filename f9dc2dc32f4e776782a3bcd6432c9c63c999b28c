@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "8211de31_129852ca",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T09:17:57Z",
+      "side": 1,
+      "message": "Consider also writing a short unit test.\nThe unit test would be more important especially if you move \u0027addCodeOwnerEmail\u0027 from the next change here, and also add \u0027remove\u0027 and \u0027clear\u0027 as suggested in my other comment.",
+      "range": {
+        "startLine": 26,
+        "startChar": 22,
+        "endLine": 26,
+        "endChar": 37
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "9be960be_e4c18fee",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
         "patchSetId": 1
