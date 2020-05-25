@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e7bf35d2_1c01ebd2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:21:02Z",
+      "side": 1,
+      "message": "As far as I understand, the only correct way to create this class is via the parser class.\n\nDoes it make sense to make this a static class inside CodeOwnersConfigParser? Probably not:\nI think it makes more sense to just delete CodeOwnersConfigParser and add the parse method to this class, making the builders private so that the class can only be created with the \"parse\" method.",
+      "range": {
+        "startLine": 28,
+        "startChar": 22,
+        "endLine": 28,
+        "endChar": 37
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bbb4f0ad_5a07d9af",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:21:02Z",
+      "side": 1,
+      "message": "as mentioned in the previous change, this is the method that can be moved to the previous change and then tested there.",
+      "range": {
+        "startLine": 84,
+        "startChar": 19,
+        "endLine": 84,
+        "endChar": 36
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e6c1f9db_a13b5379",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigSubject.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:21:02Z",
+      "side": 1,
+      "message": "similar to the comment in the previous change, I feel like this @return line can be omitted (same for other @return lines that are the same as the summary).",
+      "range": {
+        "startLine": 62,
+        "startChar": 6,
+        "endLine": 62,
+        "endChar": 12
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2cd7c5c4_ee2087fc",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:21:02Z",
+      "side": 1,
+      "message": "[optional] applies to all tests:\nmake the names e.g admin@test.com as constants. You can even make them class constants and reuse the same names. For example this test would like (maybe think of better names than \"email1\"):\nparse(String.format(%s\\n%s\\n%s, email1, email2, email3));\n..\ncontainsExactly(email1, email2, email3);",
+      "range": {
+        "startLine": 32,
+        "startChar": 14,
+        "endLine": 32,
+        "endChar": 41
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca387a59_08b12121",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:21:02Z",
+      "side": 1,
+      "message": "Also admin.email.com (you can add that one now).\nFor the TODO also admin@@email.com, admin@email.\nMaybe also check legal characters? Can emails contain anything other than [a-zA-Z0-9.@-_]?\nThis is the regex that could be helpful: https://stackoverflow.com/questions/10042329/validating-email-in-java\n\nBut since this it\u0027s a TODO, it can be a follow-up change.",
+      "range": {
+        "startLine": 94,
+        "startChar": 26,
+        "endLine": 94,
+        "endChar": 40
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
