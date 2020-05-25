@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9be960be_e4c18fee",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T09:04:27Z",
+      "side": 1,
+      "message": "Style guide for javadocs here:\nhttps://google.github.io/styleguide/javaguide.html#s7-javadoc\n\nI can\u0027t tell you to omit the summary fragment according to the style guide above. However, I don\u0027t like that this comment has 2 identical sentences one after the other. Maybe omit the @return line?\n\nI think that the following comment looks better and more concise:\n/**\n * Gets the code owners of this code owner config.\n */\n\n\nThe same applies to many other methods in this class (and also CodeOwnerReference class).\nWDYT?",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 0
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eba92178_f5155f49",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T09:04:27Z",
+      "side": 1,
+      "message": "Maybe \"removeCodeOwner\" and \"clearCodeOwners\" could be useful too?",
+      "range": {
+        "startLine": 82,
+        "startChar": 19,
+        "endLine": 82,
+        "endChar": 31
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2adbad1e_bae0ff5b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerReference.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T09:04:27Z",
+      "side": 1,
+      "message": "(See other comment about javadoc first).\nIn this case, I\u0027d say that the @param line is also redundant: I think the summary line perfectly describes what this function is doing and it\u0027s not necessary to reiterate it here. Same applies for a few other methods in this class and in the other one.",
+      "range": {
+        "startLine": 50,
+        "startChar": 8,
+        "endLine": 50,
+        "endChar": 47
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
