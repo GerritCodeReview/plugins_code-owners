@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "349f7f9e_0a1540bc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T11:01:22Z",
+      "side": 1,
+      "message": "I guess this is not strictly necessary yet since comments will be ignored anyway atm, and this is just preparation for when we stop ignoring invalid lines.",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 21
+      },
+      "revId": "df955b4afef400dd085b435bf5ba903af6be1b79",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6662d120_5a30f8b9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T11:01:22Z",
+      "side": 1,
+      "message": "Maybe also support \"//\"?",
+      "range": {
+        "startLine": 84,
+        "startChar": 35,
+        "endLine": 84,
+        "endChar": 36
+      },
+      "revId": "df955b4afef400dd085b435bf5ba903af6be1b79",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6adcd068_0f9d7507",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T11:01:22Z",
+      "side": 1,
+      "message": "I think this is a problem, and we should probably either log this case, or support inline comments. Shouldn\u0027t be too complicated to support inline comments since # is not a legal part of an email AFAIK, so if it exists you can treat whatever is before # as the email (and then see if it\u0027s legal).",
+      "range": {
+        "startLine": 133,
+        "startChar": 6,
+        "endLine": 133,
+        "endChar": 98
+      },
+      "revId": "df955b4afef400dd085b435bf5ba903af6be1b79",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
