@@ -114,6 +114,30 @@
       "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "befa8864_7578d152",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:23:33Z",
+      "side": 1,
+      "message": "I just saw the follow-up change, so this is resolved by using OutgoingEmailValidator :-)",
+      "parentUuid": "ca387a59_08b12121",
+      "range": {
+        "startLine": 94,
+        "startChar": 26,
+        "endLine": 94,
+        "endChar": 40
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
