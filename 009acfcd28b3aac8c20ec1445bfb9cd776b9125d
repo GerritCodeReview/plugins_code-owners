@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "eb4e9b6e_00ed91f1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:32:39Z",
+      "side": 1,
+      "message": "nit: although",
+      "range": {
+        "startLine": 15,
+        "startChar": 22,
+        "endLine": 15,
+        "endChar": 31
+      },
+      "revId": "009acfcd28b3aac8c20ec1445bfb9cd776b9125d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9fa3dd20_ae957b95",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:32:39Z",
+      "side": 1,
+      "message": "nit: Outgoing",
+      "range": {
+        "startLine": 23,
+        "startChar": 47,
+        "endLine": 23,
+        "endChar": 69
+      },
+      "revId": "009acfcd28b3aac8c20ec1445bfb9cd776b9125d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e3a12ab0_7e9baa78",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-25T10:32:39Z",
+      "side": 1,
+      "message": "I can understand why we ignore invalid lines (cause we plan to support more syntaxes). But this argument doesn\u0027t stand for invalid emails: Shouldn\u0027t we at least log invalid emails?",
+      "range": {
+        "startLine": 60,
+        "startChar": 26,
+        "endLine": 60,
+        "endChar": 40
+      },
+      "revId": "009acfcd28b3aac8c20ec1445bfb9cd776b9125d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
