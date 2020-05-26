@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "7a97da37_2dadb999",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T07:47:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8211de31_129852ca",
+      "range": {
+        "startLine": 26,
+        "startChar": 22,
+        "endLine": 26,
+        "endChar": 37
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9be960be_e4c18fee",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a9c48f7_d580c1a3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T07:47:10Z",
+      "side": 1,
+      "message": "I\u0027m fine with dropping @return for simple getters. -\u003e Done.\n\nI think in general we are missing Javadoc guidelines for the Gerrit project. If we can define/agree on Javadoc guidelines I\u0027m happy to adapt all code in this plugin to them, but while Javadoc guidelines are missing I would like to avoid spending much time on discussing them in a code review, that\u0027s something that should be discussed on the mailing list, involving the whole community. At this point it\u0027s not an important discussion for me and I would rather not spend much time on it, but if you feel interested in driving this discussion, it would be nice to get this clarified :)",
+      "parentUuid": "9be960be_e4c18fee",
+      "range": {
+        "startLine": 34,
+        "startChar": 0,
+        "endLine": 39,
+        "endChar": 0
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "7b5db324_87234262",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T07:47:10Z",
+      "side": 1,
+      "message": "I\u0027m not sure, this is a builder to create a new CodeOwnerConfig instance. So instead of adding and then removing a code owner, we could just not add it. Once the CodeOwnerConfig instance is built, it is immutable and hence code owners cannot be removed. I agree there is a slight possibility that these methods will become useful, but then let\u0027s add them only at that moment when we have a real use-case for them.",
+      "parentUuid": "eba92178_f5155f49",
+      "range": {
+        "startLine": 82,
+        "startChar": 19,
+        "endLine": 82,
+        "endChar": 31
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2adbad1e_bae0ff5b",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerReference.java",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "40509a03_89456a10",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerReference.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T07:47:10Z",
+      "side": 1,
+      "message": "(see reply on other comment first)\nI prefer to keep the @param lines and would remove them only if we agree on general Javadoc guidelines that say so.",
+      "parentUuid": "2adbad1e_bae0ff5b",
+      "range": {
+        "startLine": 50,
+        "startChar": 8,
+        "endLine": 50,
+        "endChar": 47
+      },
+      "revId": "f9dc2dc32f4e776782a3bcd6432c9c63c999b28c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
