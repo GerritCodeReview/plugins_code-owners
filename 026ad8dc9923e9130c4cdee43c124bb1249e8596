@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dc517acb_c4f237a9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:26:16Z",
+      "side": 1,
+      "message": "super-nit: capital G (here and elsewhere)",
+      "range": {
+        "startLine": 144,
+        "startChar": 8,
+        "endLine": 144,
+        "endChar": 9
+      },
+      "revId": "026ad8dc9923e9130c4cdee43c124bb1249e8596",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ab34d66f_3803ba9e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:26:16Z",
+      "side": 1,
+      "message": "I assume most callers won\u0027t have an open Repo handle. Should we offer the same method without it?",
+      "range": {
+        "startLine": 70,
+        "startChar": 28,
+        "endLine": 70,
+        "endChar": 51
+      },
+      "revId": "026ad8dc9923e9130c4cdee43c124bb1249e8596",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a58bfc19_f157cd96",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:26:16Z",
+      "side": 1,
+      "message": "(now or in the future)\n\nplease add trace spans to the loading methods so that we get performance log entries",
+      "revId": "026ad8dc9923e9130c4cdee43c124bb1249e8596",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
