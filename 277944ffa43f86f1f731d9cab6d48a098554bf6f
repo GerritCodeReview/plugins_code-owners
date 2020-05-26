@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d6d1736_7df4fb52",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:11:33Z",
+      "side": 1,
+      "message": "Can we change that (either now or in the future)?\n\nThis seems like a potential UX pain because I can see cases where users might want to explain who was added why, or what competency someone has,...\n\nekempin@g.c # Owners Guru",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 33
+      },
+      "revId": "277944ffa43f86f1f731d9cab6d48a098554bf6f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
