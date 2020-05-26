@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1e0978fb_abd6bde5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-26T07:56:38Z",
+      "side": 1,
+      "message": "If you already started omitting those - this one can also be omitted.",
+      "range": {
+        "startLine": 78,
+        "startChar": 0,
+        "endLine": 78,
+        "endChar": 51
+      },
+      "revId": "20145483b7540c54be47d1426341fcfd9cb26a05",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e55d27a3_3e34ad02",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 131,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-26T07:56:38Z",
+      "side": 1,
+      "message": "can omit",
+      "range": {
+        "startLine": 131,
+        "startChar": 0,
+        "endLine": 131,
+        "endChar": 41
+      },
+      "revId": "20145483b7540c54be47d1426341fcfd9cb26a05",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3bcf5fb5_4b049821",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerReference.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-26T07:56:38Z",
+      "side": 1,
+      "message": "can omit",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 54,
+        "endChar": 54
+      },
+      "revId": "20145483b7540c54be47d1426341fcfd9cb26a05",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
