@@ -17,9 +17,11 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.gerrit.extensions.restapi.NotImplementedException;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.git.meta.VersionedMetaData;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -29,13 +31,19 @@ import java.util.function.Consumer;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.treewalk.TreeWalk;
 
 /**
  * A representation of a code owner config that is stored as an {@code OWNERS} file in a source
  * branch.
  *
- * <p>For reading code owner configs, refer to {@link Factory#load(CodeOwnerConfig.Key)}.
+ * <p>For reading code owner configs or creating/updating them, refer to {@link
+ * Factory#load(CodeOwnerConfig.Key)}.
+ *
+ * <p><strong>Note:</strong> Any modification (code owner config creation or update) only becomes
+ * permanent (and hence written to repository) if {@link
+ * #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)} is called.
  */
 class CodeOwnerConfigFile extends VersionedMetaData {
   /** Name of the file in which the code owner config for a folder in a branch is stored. */
@@ -62,6 +70,11 @@ class CodeOwnerConfigFile extends VersionedMetaData {
      * #getLoadedCodeOwnerConfig()} won't return any code owner config. Thus, the existence of a
      * code owner config can be easily tested.
      *
+     * <p>The code owner config represented by the returned {@link CodeOwnerConfigFile} can be
+     * created/updated by setting an {@link CodeOwnerConfigUpdate} via {@link
+     * #setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate)} and committing the {@link
+     * CodeOwnerConfigUpdate} via {@link #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)}.
+     *
      * @param codeOwnerConfigKey the key of the code owner config
      * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
      * @throws IOException if the repository can't be accessed for some reason
@@ -84,6 +97,7 @@ class CodeOwnerConfigFile extends VersionedMetaData {
 
   private boolean isLoaded = false;
   private Optional<CodeOwnerConfig> loadedCodeOwnersConfig = Optional.empty();
+  private Optional<CodeOwnerConfigUpdate> codeOwnerConfigUpdate = Optional.empty();
 
   private CodeOwnerConfigFile(
       CodeOwnerConfigParser codeOwnerConfigParser, CodeOwnerConfig.Key codeOwnerConfigKey) {
@@ -101,6 +115,25 @@ class CodeOwnerConfigFile extends VersionedMetaData {
     checkLoaded();
 
     return loadedCodeOwnersConfig;
+  }
+
+  /**
+   * Specifies how the current code owner config should be updated.
+   *
+   * <p>If the code owner config is newly created, the {@link CodeOwnerConfigUpdate} can be used to
+   * specify optional properties.
+   *
+   * <p>If the update leads to an empty code owner config, the code owner config file is deleted.
+   *
+   * <p><strong>Note:</strong> This method doesn't perform the update. It only contains the
+   * instructions for the update. To apply the update for real, call {@link
+   * #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)} on this {@link CodeOwnerConfigFile}.
+   *
+   * @param codeOwnerConfigUpdate an {@code CodeOwnerConfigUpdate} outlining the modifications which
+   *     should be applied
+   */
+  public void setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
+    this.codeOwnerConfigUpdate = Optional.of(codeOwnerConfigUpdate);
   }
 
   @Override
@@ -144,11 +177,59 @@ class CodeOwnerConfigFile extends VersionedMetaData {
   }
 
   @Override
+  public RevCommit commit(MetaDataUpdate update) throws IOException {
+    // Reject the creation of a code owner config if the branch doesn't exist.
+    checkState(
+        update.getRepository().exactRef(getRefName()) != null,
+        "branch %s does not exist",
+        getRefName());
+
+    return super.commit(update);
+  }
+
+  @Override
   protected boolean onSave(CommitBuilder commit) throws IOException, ConfigInvalidException {
     checkLoaded();
 
-    // TODO(ekempin): Implement this method
-    throw new NotImplementedException();
+    if (!codeOwnerConfigUpdate.isPresent()) {
+      // Code owner config was neither created nor changed. -> A new commit isn't necessary.
+      return false;
+    }
+
+    // Update the code owner config.
+    CodeOwnerConfig originalCodeOwnerConfig =
+        loadedCodeOwnersConfig.orElse(CodeOwnerConfig.builder(codeOwnerConfigKey).build());
+    CodeOwnerConfig updatedCodeOwnerConfig =
+        updateCodeOwnerConfig(originalCodeOwnerConfig, codeOwnerConfigUpdate.get());
+
+    // Do not create a new commit if the code owner config didn't change.
+    if (updatedCodeOwnerConfig.equals(originalCodeOwnerConfig)) {
+      return false;
+    }
+
+    // Save the new code owner config.
+    String codeOwnerConfigFileContent =
+        codeOwnerConfigParser.formatAsString(updatedCodeOwnerConfig);
+    saveUTF8(codeOwnerConfigKey.filePathForJgit(FILE_NAME), codeOwnerConfigFileContent);
+
+    // If the file content is empty, the update led to a deletion of the code owner config file.
+    loadedCodeOwnersConfig =
+        codeOwnerConfigFileContent.isEmpty()
+            ? Optional.empty()
+            : Optional.of(updatedCodeOwnerConfig);
+    codeOwnerConfigUpdate = Optional.empty();
+
+    return true;
+  }
+
+  private CodeOwnerConfig updateCodeOwnerConfig(
+      CodeOwnerConfig codeOwnerConfig, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
+    return codeOwnerConfig
+        .toBuilder()
+        .setCodeOwners(
+            ImmutableSet.copyOf(
+                codeOwnerConfigUpdate.codeOwnerModification().apply(codeOwnerConfig.codeOwners())))
+        .build();
   }
 
   private void checkLoaded() {

@@ -38,6 +38,13 @@ public abstract class CodeOwnerConfig {
   public abstract ImmutableSet<CodeOwnerReference> codeOwners();
 
   /**
+   * Creates a builder form this code owner config.
+   *
+   * @return builder that was created from this code owner config
+   */
+  public abstract Builder toBuilder();
+
+  /**
    * Creates a builder for a code owner config.
    *
    * @param key the key of the code owner config
