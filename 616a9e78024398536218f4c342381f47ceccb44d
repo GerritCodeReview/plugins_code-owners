@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7201714b_d7b84e1c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:15:11Z",
+      "side": 1,
+      "message": "nit: maybe document that parsing/formatting might not produce the same content as originally parsed (b/c we are omitting corrupt configs, etc.)",
+      "revId": "616a9e78024398536218f4c342381f47ceccb44d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c9c9f93_7b565012",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:15:11Z",
+      "side": 1,
+      "message": "nit: asString?",
+      "range": {
+        "startLine": 97,
+        "startChar": 9,
+        "endLine": 97,
+        "endChar": 15
+      },
+      "revId": "616a9e78024398536218f4c342381f47ceccb44d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
