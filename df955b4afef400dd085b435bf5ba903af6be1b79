@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c1b151d7_a5c161a8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T09:29:15Z",
+      "side": 1,
+      "message": "Right, added this to the commit message.",
+      "parentUuid": "349f7f9e_0a1540bc",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 21
+      },
+      "revId": "df955b4afef400dd085b435bf5ba903af6be1b79",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6662d120_5a30f8b9",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "6c34a4ca_4db68b41",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T09:29:15Z",
+      "side": 1,
+      "message": "\"//\" is not supported by the find-owners plugin, hence we also don\u0027t want to support it (see [1]). I\u0027ve mentioned this in the commit message now.\n\n[1] https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md",
+      "parentUuid": "6662d120_5a30f8b9",
+      "range": {
+        "startLine": 84,
+        "startChar": 35,
+        "endLine": 84,
+        "endChar": 36
+      },
+      "revId": "df955b4afef400dd085b435bf5ba903af6be1b79",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6adcd068_0f9d7507",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "df955b4afef400dd085b435bf5ba903af6be1b79",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5803dde5_a8333401",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T09:29:15Z",
+      "side": 1,
+      "message": "I agree, but we want to be compatible with the find-owners plugin and this plugin doesn\u0027t support this case either (see [1]). Since we only need the find-owners parser for migrating the existing OWNERS files to a new proto file format, we also have no interest in improving that format.\n\nSince we log invalid emails now, we will have a warning log now.\n\nFWIW in the end this will be a case that will also be handled in the upload validator that prevents adding such lines in the first place.\n\nSo I think for now, we don\u0027t need any better handling for this case here.\n\n[1] https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md",
+      "parentUuid": "6adcd068_0f9d7507",
+      "range": {
+        "startLine": 133,
+        "startChar": 6,
+        "endLine": 133,
+        "endChar": 98
+      },
+      "revId": "df955b4afef400dd085b435bf5ba903af6be1b79",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
