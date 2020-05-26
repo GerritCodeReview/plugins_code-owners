@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "342c85ae_6b05dfe4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T08:21:10Z",
+      "side": 1,
+      "message": "No, this class and the parser should be separate classes.\n\nThis is a representation of a code owner config that is independent of any code owner backend and a specific syntax of the code owner config files. E.g. there will be multiple code owner backends that each have a a different parser, but all parsers produce a CodeOwnerConfig. That\u0027s also why CodeOwnerConfig and CodeOwnerConfigParser are in different packages.\n\nClarified this in the Javadoc.",
+      "parentUuid": "e7bf35d2_1c01ebd2",
+      "range": {
+        "startLine": 28,
+        "startChar": 22,
+        "endLine": 28,
+        "endChar": 37
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "bbb4f0ad_5a07d9af",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eabcc1ae_fb32ed50",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T08:21:10Z",
+      "side": 1,
+      "message": "I prefer to add this method only here in this change where we have a use-case for it.\n\nAdded a test for it.",
+      "parentUuid": "bbb4f0ad_5a07d9af",
+      "range": {
+        "startLine": 84,
+        "startChar": 19,
+        "endLine": 84,
+        "endChar": 36
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "e57a4160_777aba09",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigSubject.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T08:21:10Z",
+      "side": 1,
+      "message": "I agree to drop @return for simple getters, but this is not a simple getter, hence I prefer to keep it.",
+      "parentUuid": "e6c1f9db_a13b5379",
+      "range": {
+        "startLine": 62,
+        "startChar": 6,
+        "endLine": 62,
+        "endChar": 12
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2cd7c5c4_ee2087fc",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
         "patchSetId": 1
@@ -91,6 +163,30 @@
       "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8de8608f_0393e4f5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T08:21:10Z",
+      "side": 1,
+      "message": "Not sure, if it makes a difference/improvement to the readability of the tests, but done.",
+      "parentUuid": "2cd7c5c4_ee2087fc",
+      "range": {
+        "startLine": 32,
+        "startChar": 14,
+        "endLine": 32,
+        "endChar": 41
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
