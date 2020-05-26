@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "1f0b711b_b364a7e6",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-26T09:37:38Z",
+      "side": 1,
+      "message": "Nice :)",
+      "parentUuid": "7fc6d484_dcd5599d",
+      "range": {
+        "startLine": 32,
+        "startChar": 14,
+        "endLine": 32,
+        "endChar": 41
+      },
+      "revId": "a16b4e8658d9c077c2fadd4259c63cff4ea5f272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ca387a59_08b12121",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParserTest.java",
         "patchSetId": 1
