@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a312aeb4_86b458dd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:09:07Z",
+      "side": 1,
+      "message": "nit: rename?\n\nCould this just be \"EmailValidator\"? At least in this context, nothing is \"outgoing\"",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 24
+      },
+      "revId": "1b094e58df6f75e16f91291bb385d1ec46c549b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2993fdf0_1348ccbc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-26T12:09:07Z",
+      "side": 1,
+      "message": "This will spam our logs in case there is an invalid email.\n\nShould we decrease it to info hence only log when traced?",
+      "range": {
+        "startLine": 83,
+        "startChar": 13,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "1b094e58df6f75e16f91291bb385d1ec46c549b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
