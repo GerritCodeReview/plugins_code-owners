@@ -22,6 +22,30 @@
       "revId": "2c50b98ee080c33f714a6d9a48cb515ca40cfcee",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "48e87292_056478cd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T12:57:37Z",
+      "side": 1,
+      "message": "The signature of this method is defined in the parent class which comes from Gerrit core. This means callers need to handle the IOException even if we would wrap in into StorageException here.\n\nBut on the next-higher level, we will catch this IOException and wrap it into StorageException. This will be part of one of the next changes in this series.",
+      "parentUuid": "e4c46442_1ac6ea07",
+      "range": {
+        "startLine": 180,
+        "startChar": 56,
+        "endLine": 180,
+        "endChar": 67
+      },
+      "revId": "2c50b98ee080c33f714a6d9a48cb515ca40cfcee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
