@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "19bfa10d_b772b2bc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigUpdate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-05-27T13:12:45Z",
+      "side": 1,
+      "message": "Do we need this behavior (setting a default in the builder)?\n\ncould the class instead expose a \"create\" method that forces the caller to specify a CodeOwnerModification. Or do you expect more fields to be added and implement this pattern because of that (so that only parts can be updated).",
+      "range": {
+        "startLine": 45,
+        "startChar": 78,
+        "endLine": 46,
+        "endChar": 61
+      },
+      "revId": "2c50b98ee080c33f714a6d9a48cb515ca40cfcee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e4c46442_1ac6ea07",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
         "patchSetId": 1
