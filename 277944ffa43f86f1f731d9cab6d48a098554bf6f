@@ -22,6 +22,30 @@
       "revId": "277944ffa43f86f1f731d9cab6d48a098554bf6f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "62192a4f_c625529c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T09:59:04Z",
+      "side": 1,
+      "message": "We do not want to add any new features to a deprecated syntax that we are not going to use once the migration to the new proto syntax is done.\n\nI would only do this, if:\n\n* we decide to continue using this format\n* it turns out that the documentation at [1] is wrong and the find-owners plugin actually does support inline comments\n\nI think the latter is not unlikely, but then we will notice and fix this when we look into the migration code.",
+      "parentUuid": "3d6d1736_7df4fb52",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 13,
+        "endChar": 33
+      },
+      "revId": "277944ffa43f86f1f731d9cab6d48a098554bf6f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
