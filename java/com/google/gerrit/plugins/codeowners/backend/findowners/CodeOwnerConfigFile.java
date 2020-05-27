@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
@@ -64,6 +65,25 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
     /**
      * Creates a {@link CodeOwnerConfigFile} for a code owner config.
      *
+     * <p>Same as {@link #load(Repository, CodeOwnerConfig.Key)}, but takes care to open/close the
+     * repository.
+     *
+     * @param codeOwnerConfigKey the key of the code owner config
+     * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
+     * @throws IOException if the repository can't be accessed for some reason
+     * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
+     *     invalid format
+     */
+    CodeOwnerConfigFile load(CodeOwnerConfig.Key codeOwnerConfigKey)
+        throws IOException, ConfigInvalidException {
+      try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
+        return load(repository, codeOwnerConfigKey);
+      }
+    }
+
+    /**
+     * Creates a {@link CodeOwnerConfigFile} for a code owner config.
+     *
      * <p>The code owner config is automatically loaded within this method and can be accessed via
      * {@link #getLoadedCodeOwnerConfig()}.
      *
@@ -76,19 +96,18 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
      * #setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate)} and committing the {@link
      * CodeOwnerConfigUpdate} via {@link #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)}.
      *
+     * @param repository the repository in which the code owner config is stored
      * @param codeOwnerConfigKey the key of the code owner config
      * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
      * @throws IOException if the repository can't be accessed for some reason
      * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
      *     invalid format
      */
-    CodeOwnerConfigFile load(CodeOwnerConfig.Key codeOwnerConfigKey)
+    CodeOwnerConfigFile load(Repository repository, CodeOwnerConfig.Key codeOwnerConfigKey)
         throws IOException, ConfigInvalidException {
       CodeOwnerConfigFile codeOwnerConfigFile =
           new CodeOwnerConfigFile(codeOwnerConfigParser, codeOwnerConfigKey);
-      try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
-        codeOwnerConfigFile.load(codeOwnerConfigKey.project(), repository);
-      }
+      codeOwnerConfigFile.load(codeOwnerConfigKey.project(), repository);
       return codeOwnerConfigFile;
     }
   }
@@ -132,9 +151,11 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
    *
    * @param codeOwnerConfigUpdate an {@code CodeOwnerConfigUpdate} outlining the modifications which
    *     should be applied
+   * @return this {@code CodeOwnerConfigFile} instance to allow chaining calls
    */
-  public void setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
+  public CodeOwnerConfigFile setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     this.codeOwnerConfigUpdate = Optional.of(codeOwnerConfigUpdate);
+    return this;
   }
 
   @Override
@@ -208,16 +229,25 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
       return false;
     }
 
-    // Save the new code owner config.
+    // Compute the new content of the code owner config file.
     String codeOwnerConfigFileContent =
         codeOwnerConfigParser.formatAsString(updatedCodeOwnerConfig);
+
+    // Save the new code owner config.
     saveUTF8(codeOwnerConfigKey.filePathForJgit(FILE_NAME), codeOwnerConfigFileContent);
 
     // If the file content is empty, the update led to a deletion of the code owner config file.
-    loadedCodeOwnersConfig =
-        codeOwnerConfigFileContent.isEmpty()
-            ? Optional.empty()
-            : Optional.of(updatedCodeOwnerConfig);
+    boolean isDeleted = codeOwnerConfigFileContent.isEmpty();
+
+    // Set a commit message if none was set yet.
+    if (Strings.isNullOrEmpty(commit.getMessage())) {
+      commit.setMessage(
+          String.format(
+              "%s code owner config",
+              loadedCodeOwnersConfig.isPresent() ? (isDeleted ? "Delete" : "Update") : "Create"));
+    }
+
+    loadedCodeOwnersConfig = isDeleted ? Optional.empty() : Optional.of(updatedCodeOwnerConfig);
     codeOwnerConfigUpdate = Optional.empty();
 
     return true;
