@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "aa128b4f_04fb89b5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T09:58:27Z",
+      "side": 1,
+      "message": "This is a Gerrit core class, and would need to be renamed there. But for Gerrit core it\u0027s used to validate outgoing emails (it\u0027s not only checking the email format, but also if the TLD is allowed for email sending) and hence for Gerrit core the name makes sense and renaming it there is not justified.\n\nI tried to explain in the javadoc and the commit message why we want/need to use this validator here, although it does more than just validating the email syntax. Do you think that needs to be clearer?\n\nSince the class comes from Gerrit core where the name makes sense, I would not rename it.",
+      "parentUuid": "a312aeb4_86b458dd",
+      "range": {
+        "startLine": 53,
+        "startChar": 16,
+        "endLine": 53,
+        "endChar": 24
+      },
+      "revId": "1b094e58df6f75e16f91291bb385d1ec46c549b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2993fdf0_1348ccbc",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "1b094e58df6f75e16f91291bb385d1ec46c549b4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d910e2e_e357e6d5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T09:58:27Z",
+      "side": 1,
+      "message": "OK, we can decrease it to INFO.\n\nWhen the plugin is fully implemented, this should only be possible to happen if people push code owner config files bypassing Gerrit or when the plugin is disabled, as the plugin will validate code owner config files on push/submit and prevent invalid lines from being added.",
+      "parentUuid": "2993fdf0_1348ccbc",
+      "range": {
+        "startLine": 83,
+        "startChar": 13,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "1b094e58df6f75e16f91291bb385d1ec46c549b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
