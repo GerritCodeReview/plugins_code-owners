@@ -12,15 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners;
+package com.google.gerrit.plugins.codeowners.backend;
 
+import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
-import com.google.gerrit.plugins.codeowners.backend.BackendModule;
+import com.google.gerrit.extensions.registration.DynamicMap;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 
-/** Guice module that registers the extensions of the code-owners plugin. */
-public class Module extends FactoryModule {
+/** Guice module to bind code owner backends. */
+public class BackendModule extends FactoryModule {
   @Override
   protected void configure() {
-    install(new BackendModule());
+    DynamicMap.mapOf(binder(), CodeOwnersBackend.class);
+    bind(CodeOwnersBackend.class)
+        .annotatedWith(Exports.named(FindOwnersBackend.ID))
+        .to(FindOwnersBackend.class);
   }
 }

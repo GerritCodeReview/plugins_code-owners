@@ -36,6 +36,9 @@ import org.eclipse.jgit.lib.Repository;
 
 @Singleton
 public class FindOwnersBackend implements CodeOwnersBackend {
+  /** The ID of this code owner backend. */
+  public static final String ID = "find-owners";
+
   private final CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory;
   private final GitRepositoryManager repoManager;
   private final PersonIdent serverIdent;
