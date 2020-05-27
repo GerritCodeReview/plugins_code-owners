@@ -45,9 +45,10 @@ import org.eclipse.jgit.treewalk.TreeWalk;
  * permanent (and hence written to repository) if {@link
  * #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)} is called.
  */
-class CodeOwnerConfigFile extends VersionedMetaData {
+@VisibleForTesting
+public class CodeOwnerConfigFile extends VersionedMetaData {
   /** Name of the file in which the code owner config for a folder in a branch is stored. */
-  @VisibleForTesting static final String FILE_NAME = "OWNERS";
+  @VisibleForTesting public static final String FILE_NAME = "OWNERS";
 
   @Singleton
   static class Factory {

@@ -25,16 +25,12 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.testing.findowners.FindOwnersTestUtil;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
 import java.util.Optional;
-import org.eclipse.jgit.junit.TestRepository;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevObject;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.util.RawParseUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,14 +38,14 @@ import org.junit.Test;
 public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   @Inject private MetaDataUpdate.Server metaDataUpdateServer;
 
+  private FindOwnersTestUtil findOwnersTestUtil;
   private CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory;
-  private CodeOwnerConfigParser codeOwnerConfigParser;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
+    findOwnersTestUtil = plugin.getSysInjector().getInstance(FindOwnersTestUtil.class);
     codeOwnerConfigFileFactory =
         plugin.getSysInjector().getInstance(CodeOwnerConfigFile.Factory.class);
-    codeOwnerConfigParser = plugin.getSysInjector().getInstance(CodeOwnerConfigParser.class);
   }
 
   @Test
@@ -72,7 +68,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   public void loadEmptyCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig = CodeOwnerConfig.builder(codeOwnerConfigKey).build();
-    writeCodeOwnerConfig(codeOwnerConfig);
+    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     CodeOwnerConfigFile codeOwnerConfigFile = codeOwnerConfigFileFactory.load(codeOwnerConfigKey);
     assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
@@ -84,7 +80,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    writeCodeOwnerConfig(codeOwnerConfig);
+    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     CodeOwnerConfigFile codeOwnerConfigFile = codeOwnerConfigFileFactory.load(codeOwnerConfigKey);
     assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
@@ -103,7 +99,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the code owner config doesn't exist yet.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Remember head so that we can check that the branch is changed.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -125,7 +121,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .containsExactly(admin.email());
 
       // Check that the code owner config was created in the repository.
-      Optional<CodeOwnerConfig> codeOwnerConfigInRepo = readCodeOwnerConfig(codeOwnerConfigKey);
+      Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
+          findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isPresent();
       assertThat(codeOwnerConfigInRepo.get())
           .hasCodeOwnersEmailsThat()
@@ -146,7 +143,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the code owner config doesn't exist yet.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Remember head so that we can check that the branch doesn't change.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -158,7 +155,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that no code owner config was created in the repository.
-      Optional<CodeOwnerConfig> codeOwnerConfigInRepo = readCodeOwnerConfig(codeOwnerConfigKey);
+      Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
+          findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isEmpty();
 
       // Check that the branch didn't change.
@@ -176,7 +174,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the code owner config doesn't exist yet.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Remember head so that we can check that the branch doesn't change.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -189,7 +187,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that no code owner config was created in the repository.
-      Optional<CodeOwnerConfig> codeOwnerConfigInRepo = readCodeOwnerConfig(codeOwnerConfigKey);
+      Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
+          findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isEmpty();
 
       // Check that the branch didn't change.
@@ -207,7 +206,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the code owner config doesn't exist yet.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Create the code owner config.
       String email = "admin@example.com";
@@ -228,7 +227,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that the code owner config was not created in the repository.
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Check that the branch was not created.
       assertThat(repo.exactRef(codeOwnerConfigKey.ref())).isNull();
@@ -240,7 +239,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    writeCodeOwnerConfig(codeOwnerConfig);
+    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     try (Repository repo = repoManager.openRepository(project);
         MetaDataUpdate metaDataUpdate = metaDataUpdateServer.create(project)) {
@@ -248,7 +247,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the code owner config exists.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
 
       // Remember head so that we can check that the branch is changed.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -270,7 +269,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .containsExactly(admin.email(), user.email());
 
       // Check that the code owner config was updated in the repository.
-      Optional<CodeOwnerConfig> codeOwnerConfigInRepo = readCodeOwnerConfig(codeOwnerConfigKey);
+      Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
+          findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isPresent();
       assertThat(codeOwnerConfigInRepo.get())
           .hasCodeOwnersEmailsThat()
@@ -286,7 +286,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    writeCodeOwnerConfig(codeOwnerConfig);
+    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     try (Repository repo = repoManager.openRepository(project);
         MetaDataUpdate metaDataUpdate = metaDataUpdateServer.create(project)) {
@@ -294,7 +294,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the code owner config exists.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
 
       // Remember head so that we can check that the branch doesn't change.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -310,7 +310,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .containsExactly(admin.email());
 
       // Check that the code owner config in the repository didn't change.
-      Optional<CodeOwnerConfig> codeOwnerConfigInRepo = readCodeOwnerConfig(codeOwnerConfigKey);
+      Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
+          findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isPresent();
       assertThat(codeOwnerConfigInRepo.get())
           .hasCodeOwnersEmailsThat()
@@ -326,7 +327,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    writeCodeOwnerConfig(codeOwnerConfig);
+    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     try (Repository repo = repoManager.openRepository(project);
         MetaDataUpdate metaDataUpdate = metaDataUpdateServer.create(project)) {
@@ -334,7 +335,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the code owner config exists.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
 
       // Remember head so that we can check that the branch is changed.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -350,52 +351,10 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that the code owner config was deleted in the repository.
-      assertThat(readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThat(findOwnersTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Check that the branch was changed.
       assertThat(head).isNotEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
-    }
-  }
-
-  private void writeCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) throws Exception {
-    String formattedCodeOwnerConfig = codeOwnerConfigParser.formatAsString(codeOwnerConfig);
-    try (TestRepository<Repository> testRepo =
-        new TestRepository<>(repoManager.openRepository(project))) {
-      testRepo.update(
-          codeOwnerConfig.key().ref(),
-          testRepo
-              .commit()
-              .parent(getHead(testRepo.getRepository(), codeOwnerConfig.key().ref()))
-              .message("Add test code owner config")
-              .add(
-                  codeOwnerConfig.key().filePathForJgit(CodeOwnerConfigFile.FILE_NAME),
-                  formattedCodeOwnerConfig));
-    }
-  }
-
-  private Optional<CodeOwnerConfig> readCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey)
-      throws Exception {
-    try (TestRepository<Repository> testRepo =
-        new TestRepository<>(repoManager.openRepository(project))) {
-      Ref ref = testRepo.getRepository().exactRef(codeOwnerConfigKey.ref());
-      if (ref == null) {
-        // branch does not exist
-        return Optional.empty();
-      }
-
-      RevCommit commit = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      String filePath = codeOwnerConfigKey.filePathForJgit(CodeOwnerConfigFile.FILE_NAME);
-      try (TreeWalk tw =
-          TreeWalk.forPath(testRepo.getRevWalk().getObjectReader(), filePath, commit.getTree())) {
-        if (tw == null) {
-          // file does not exist
-          return Optional.empty();
-        }
-      }
-      RevObject blob = testRepo.get(commit.getTree(), filePath);
-      byte[] data = testRepo.getRepository().open(blob).getCachedBytes(Integer.MAX_VALUE);
-      return Optional.of(
-          codeOwnerConfigParser.parse(codeOwnerConfigKey, RawParseUtils.decode(data)));
     }
   }
 }
