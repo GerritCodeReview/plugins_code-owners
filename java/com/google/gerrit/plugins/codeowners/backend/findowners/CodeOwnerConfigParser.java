@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static java.util.stream.Collectors.joining;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
@@ -45,7 +46,8 @@ import com.google.inject.Singleton;
  * 'foo.bar@example.com # Foo Bar' would be invalid).
  */
 @Singleton
-class CodeOwnerConfigParser {
+@VisibleForTesting
+public class CodeOwnerConfigParser {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -79,7 +81,9 @@ class CodeOwnerConfigParser {
    * @param codeOwnerConfigFileContent string that represents the content of an {@code OWNERS} file
    * @return the parsed {@link CodeOwnerConfig}
    */
-  CodeOwnerConfig parse(CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigFileContent) {
+  @VisibleForTesting
+  public CodeOwnerConfig parse(
+      CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigFileContent) {
     CodeOwnerConfig.Builder codeOwnerConfig = CodeOwnerConfig.builder(codeOwnerConfigKey);
 
     Streams.stream(Splitter.on('\n').split(codeOwnerConfigFileContent))
@@ -100,7 +104,8 @@ class CodeOwnerConfigParser {
    * @return the code owner config as string that represents the code owner config in an {@code
    *     OWNERS} file
    */
-  String formatAsString(CodeOwnerConfig codeOwnerConfig) {
+  @VisibleForTesting
+  public String formatAsString(CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.codeOwners().stream()
         .map(CodeOwnerReference::email)
         .sorted()
