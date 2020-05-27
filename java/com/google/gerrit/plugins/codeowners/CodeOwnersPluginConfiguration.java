@@ -14,30 +14,42 @@
 
 package com.google.gerrit.plugins.codeowners;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.server.config.PluginConfigFactory;
+import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Optional;
+import org.eclipse.jgit.lib.Config;
 
 /**
  * The configuration of the code-owners plugin.
  *
- * <p>The configuration of the code-owners plugin is stored globally in the {@code gerrit.config}
- * file in the {@code plugin.code-owners} subsection.
+ * <p>The global configuration of the code-owners plugin is stored in the {@code gerrit.config} file
+ * in the {@code plugin.code-owners} subsection.
+ *
+ * <p>In addition there is configuration on project level that is stored in {@code
+ * code-owners.config} files that are stored in the {@code refs/meta/config} branches of the
+ * projects.
+ *
+ * <p>Parameters that are not set for a project are inherited from the parent project.
  */
 @Singleton
 public class CodeOwnersPluginConfiguration {
-  private static final String KEY_BACKEND = "backend";
+  @VisibleForTesting public static final String KEY_BACKEND = "backend";
+  @VisibleForTesting public static final String SECTION_CODE_OWNERS = "codeOwners";
 
   private final String pluginName;
+  private final PluginConfigFactory pluginConfigFactory;
   private final DynamicMap<CodeOwnersBackend> codeOwnersBackends;
 
-  /** The name of the configured code owners backend. */
-  private final String backendName;
+  /** The name of the configured code owners default backend. */
+  private final String defaultBackendName;
 
   @Inject
   CodeOwnersPluginConfiguration(
@@ -45,9 +57,10 @@ public class CodeOwnersPluginConfiguration {
       PluginConfigFactory pluginConfigFactory,
       DynamicMap<CodeOwnersBackend> codeOwnersBackends) {
     this.pluginName = pluginName;
+    this.pluginConfigFactory = pluginConfigFactory;
     this.codeOwnersBackends = codeOwnersBackends;
 
-    this.backendName =
+    this.defaultBackendName =
         pluginConfigFactory
             .getFromGerritConfig(pluginName)
             .getString(KEY_BACKEND, FindOwnersBackend.ID);
@@ -56,17 +69,54 @@ public class CodeOwnersPluginConfiguration {
   /**
    * Returns the configured {@link CodeOwnersBackend}.
    *
+   * <p>Callers must ensure that the specified project exists. If the specified project doesn't
+   * exist the call fails with {@link IllegalStateException}.
+   *
+   * @param project project for which the configured code owners backend should be returned
    * @return the {@link CodeOwnersBackend} that should be used
    */
-  public CodeOwnersBackend getBackend() {
+  public CodeOwnersBackend getBackend(Project.NameKey project) {
+    Config pluginConfig = getPluginConfig(project);
+    String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
+    if (backendName == null) {
+      return getDefaultBackend();
+    }
     return lookupBackend(backendName)
+        .orElseThrow(
+            () ->
+                new IllegalStateException(
+                    String.format(
+                        "Code owner backend '%s' that is configured in %s.config"
+                            + " (parameter %s.%s) not found",
+                        backendName, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND)));
+  }
+
+  private CodeOwnersBackend getDefaultBackend() {
+    return lookupBackend(defaultBackendName)
         .orElseThrow(
             () ->
                 new IllegalStateException(
                     String.format(
                         "Code owner backend '%s' that is configured in gerrit.config"
                             + " (parameter plugin.%s.%s) not found",
-                        backendName, pluginName, KEY_BACKEND)));
+                        defaultBackendName, pluginName, KEY_BACKEND)));
+  }
+
+  /**
+   * Reads and returns the config from the {@code code-owners.config} file in {@code
+   * refs/meta/config} branch of the given project.
+   *
+   * @param project the project for which the code owners configurations should be returned
+   * @return the code owners configurations for the given project
+   */
+  private Config getPluginConfig(Project.NameKey project) {
+    try {
+      return pluginConfigFactory.getProjectPluginConfigWithInheritance(project, pluginName);
+    } catch (NoSuchProjectException e) {
+      throw new IllegalStateException(
+          String.format("cannot code-owners plugin config for non-existing project %s", project),
+          e);
+    }
   }
 
   private Optional<CodeOwnersBackend> lookupBackend(String backendName) {
