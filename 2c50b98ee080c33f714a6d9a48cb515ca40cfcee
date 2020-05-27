@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6be3a254_571a8667",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigUpdate.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T13:21:41Z",
+      "side": 1,
+      "message": "Exactly the latter. We will have more properties that can be updated and users should be able to do partial updates (by just specifying the parts that should be updated and not worry about the rest).",
+      "parentUuid": "19bfa10d_b772b2bc",
+      "range": {
+        "startLine": 45,
+        "startChar": 78,
+        "endLine": 46,
+        "endChar": 61
+      },
+      "revId": "2c50b98ee080c33f714a6d9a48cb515ca40cfcee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e4c46442_1ac6ea07",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
         "patchSetId": 1
