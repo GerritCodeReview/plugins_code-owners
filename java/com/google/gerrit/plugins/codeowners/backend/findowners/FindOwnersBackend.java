@@ -14,22 +14,46 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import com.google.common.base.Throwables;
+import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
+import com.google.gerrit.server.GerritPersonIdent;
+import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.git.meta.MetaDataUpdate;
+import com.google.gerrit.server.update.RetryHelper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
 import org.eclipse.jgit.errors.ConfigInvalidException;
+import org.eclipse.jgit.lib.PersonIdent;
+import org.eclipse.jgit.lib.Repository;
 
 @Singleton
 public class FindOwnersBackend implements CodeOwnersBackend {
   private final CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory;
+  private final GitRepositoryManager repoManager;
+  private final PersonIdent serverIdent;
+  private final MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory;
+  private final RetryHelper retryHelper;
 
   @Inject
-  FindOwnersBackend(CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory) {
+  FindOwnersBackend(
+      CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory,
+      GitRepositoryManager repoManager,
+      @GerritPersonIdent PersonIdent serverIdent,
+      MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
+      RetryHelper retryHelper) {
     this.codeOwnerConfigFileFactory = codeOwnerConfigFileFactory;
+    this.repoManager = repoManager;
+    this.serverIdent = serverIdent;
+    this.metaDataUpdateInternalFactory = metaDataUpdateInternalFactory;
+    this.retryHelper = retryHelper;
   }
 
   @Override
@@ -39,6 +63,66 @@ public class FindOwnersBackend implements CodeOwnersBackend {
     } catch (IOException | ConfigInvalidException e) {
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
+    }
+  }
+
+  @Override
+  public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
+      CodeOwnerConfig.Key codeOwnerConfigKey,
+      CodeOwnerConfigUpdate codeOwnerConfigUpdate,
+      @Nullable IdentifiedUser currentUser)
+      throws StorageException {
+    try {
+      return retryHelper
+          .pluginUpdate(
+              "upsertCodeOwnerConfigInSourceBranch",
+              () ->
+                  upsertCodeOwnerConfigInSourceBranch(
+                      currentUser, codeOwnerConfigKey, codeOwnerConfigUpdate))
+          .call();
+    } catch (Exception e) {
+      Throwables.throwIfUnchecked(e);
+      throw new StorageException(e);
+    }
+  }
+
+  private Optional<CodeOwnerConfig> upsertCodeOwnerConfigInSourceBranch(
+      @Nullable IdentifiedUser currentUser,
+      CodeOwnerConfig.Key codeOwnerConfigKey,
+      CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
+    try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
+      CodeOwnerConfigFile codeOwnerConfigFile =
+          codeOwnerConfigFileFactory
+              .load(repository, codeOwnerConfigKey)
+              .setCodeOwnerConfigUpdate(codeOwnerConfigUpdate);
+
+      try (MetaDataUpdate metaDataUpdate =
+          createMetaDataUpdate(codeOwnerConfigKey.project(), repository, currentUser)) {
+        codeOwnerConfigFile.commit(metaDataUpdate);
+      }
+
+      return codeOwnerConfigFile.getLoadedCodeOwnerConfig();
+    } catch (IOException | ConfigInvalidException e) {
+      throw new StorageException(
+          String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
+    }
+  }
+
+  private MetaDataUpdate createMetaDataUpdate(
+      Project.NameKey project, Repository repository, @Nullable IdentifiedUser currentUser) {
+    MetaDataUpdate metaDataUpdate = metaDataUpdateInternalFactory.create(project, repository, null);
+    try {
+      metaDataUpdate.getCommitBuilder().setCommitter(serverIdent);
+      if (currentUser != null) {
+        metaDataUpdate.setAuthor(currentUser);
+      } else {
+        metaDataUpdate.getCommitBuilder().setAuthor(serverIdent);
+      }
+      return metaDataUpdate;
+    } catch (Throwable t) {
+      metaDataUpdate.close();
+      Throwables.throwIfUnchecked(t);
+      throw new StorageException("Failed to create MetaDataUpdate", t);
     }
   }
 }
