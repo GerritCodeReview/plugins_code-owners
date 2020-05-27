@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a7b8ac7c_00f665a7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 144,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T10:00:36Z",
+      "side": 1,
+      "message": "Are you sure? If I google \"jgit\" the spelling is mostly \"JGit\" or \"jgit\" (and \"jGit\" is used only very rarely).",
+      "parentUuid": "dc517acb_c4f237a9",
+      "range": {
+        "startLine": 144,
+        "startChar": 8,
+        "endLine": 144,
+        "endChar": 9
+      },
+      "revId": "026ad8dc9923e9130c4cdee43c124bb1249e8596",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ab34d66f_3803ba9e",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0e3a5ac2_bf1570d1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T10:00:36Z",
+      "side": 1,
+      "message": "Good idea! Done.",
+      "parentUuid": "ab34d66f_3803ba9e",
+      "range": {
+        "startLine": 70,
+        "startChar": 28,
+        "endLine": 70,
+        "endChar": 51
+      },
+      "revId": "026ad8dc9923e9130c4cdee43c124bb1249e8596",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a58bfc19_f157cd96",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
         "patchSetId": 2
@@ -62,6 +110,24 @@
       "revId": "026ad8dc9923e9130c4cdee43c124bb1249e8596",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "08397830_ac69b39e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-27T10:00:36Z",
+      "side": 1,
+      "message": "The base class (VersionedMetaData) already takes care of this.\n\nBut at later stage of the plugin implementation, I will look more into the tracing topic and check what else we need.",
+      "parentUuid": "a58bfc19_f157cd96",
+      "revId": "026ad8dc9923e9130c4cdee43c124bb1249e8596",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
