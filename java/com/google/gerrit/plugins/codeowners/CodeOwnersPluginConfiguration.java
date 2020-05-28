@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -70,12 +71,16 @@ public class CodeOwnersPluginConfiguration {
    * <p>Callers must ensure that the specified project exists. If the specified project doesn't
    * exist the call fails with {@link IllegalStateException}.
    *
-   * @param project project for which the configured code owners backend should be returned
+   * @param branch branch for which the configured code owners backend should be returned
    * @return the {@link CodeOwnersBackend} that should be used
    */
-  public CodeOwnersBackend getBackend(Project.NameKey project) {
-    Config pluginConfig = getPluginConfig(project);
-    String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
+  public CodeOwnersBackend getBackend(BranchNameKey branch) {
+    Config pluginConfig = getPluginConfig(branch.project());
+    String backendName =
+        pluginConfig.getString(SECTION_CODE_OWNERS, branch.shortName(), KEY_BACKEND);
+    if (backendName == null) {
+      backendName = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
+    }
     if (backendName == null) {
       return getDefaultBackend();
     }
