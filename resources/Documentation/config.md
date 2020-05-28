@@ -38,5 +38,20 @@ Parameters that are not set for a project are inherited from the parent project.
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`
         is used.
 
+<a id="codeOwners.branch.backend">codeOwners.<branch>.backend</a>
+:       The code owners backend that should be used for this branch.
+
+        The branch can be the short or full name. If both configurations exist
+        the one for the full name takes precedence.
+
+        Overrides the per repository setting
+        [codeOwners.backend](#codeOwnersBackend).
+
+        The supported code owner backends are listed at the
+        [Backends](../../../Documentation/backends.html) page.
+
+        If not set, the project level configuration
+        [codeOwners.backend](#codeOwnersBackend) is used.
+
 Part of [Gerrit Code Review](../../../Documentation/index.html)
 

@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -69,26 +70,86 @@ public class CodeOwnersPluginConfiguration {
   /**
    * Returns the configured {@link CodeOwnersBackend}.
    *
-   * <p>Callers must ensure that the specified project exists. If the specified project doesn't
+   * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
    * exist the call fails with {@link IllegalStateException}.
    *
-   * @param project project for which the configured code owners backend should be returned
+   * <p>The code owners backend configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>backend configuration for branch (with inheritance, first by full branch name, then by
+   *       short branch name)
+   *   <li>backend configuration for project (with inheritance)
+   *   <li>default backend (first globally configured backend, then hard-coded default backend)
+   * </ul>
+   *
+   * <p>The first code owners backend configuration that exists counts and the evaluation is
+   * stopped.
+   *
+   * @param branchNameKey project and branch for which the configured code owners backend should be
+   *     returned
    * @return the {@link CodeOwnersBackend} that should be used
    */
-  public CodeOwnersBackend getBackend(Project.NameKey project) {
-    Config pluginConfig = getPluginConfig(project);
+  public CodeOwnersBackend getBackend(BranchNameKey branchNameKey) {
+    Config pluginConfig = getPluginConfig(branchNameKey.project());
+
+    // check if a branch specific backend is configured
+    Optional<CodeOwnersBackend> codeOwnersBackend =
+        getBackendForBranch(pluginConfig, branchNameKey);
+    if (codeOwnersBackend.isPresent()) {
+      return codeOwnersBackend.get();
+    }
+
+    // check if a project specific backend is configured
+    codeOwnersBackend = getBackendForProject(pluginConfig);
+    if (codeOwnersBackend.isPresent()) {
+      return codeOwnersBackend.get();
+    }
+
+    // fall back to the default backend
+    return getDefaultBackend();
+  }
+
+  private Optional<CodeOwnersBackend> getBackendForBranch(
+      Config pluginConfig, BranchNameKey branch) {
+    // check for branch specific backend by full branch name
+    Optional<CodeOwnersBackend> backend = getBackendForBranch(pluginConfig, branch.branch());
+    if (!backend.isPresent()) {
+      // check for branch specific backend by short branch name
+      backend = getBackendForBranch(pluginConfig, branch.shortName());
+    }
+    return backend;
+  }
+
+  private Optional<CodeOwnersBackend> getBackendForBranch(Config pluginConfig, String branch) {
+    String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, branch, KEY_BACKEND);
+    if (backendName == null) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        lookupBackend(backendName)
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        String.format(
+                            "Code owner backend '%s' that is configured in %s.config"
+                                + " (parameter %s.%s.%s) not found",
+                            backendName, pluginName, SECTION_CODE_OWNERS, branch, KEY_BACKEND))));
+  }
+
+  private Optional<CodeOwnersBackend> getBackendForProject(Config pluginConfig) {
     String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
     if (backendName == null) {
-      return getDefaultBackend();
+      return Optional.empty();
     }
-    return lookupBackend(backendName)
-        .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    String.format(
-                        "Code owner backend '%s' that is configured in %s.config"
-                            + " (parameter %s.%s) not found",
-                        backendName, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND)));
+    return Optional.of(
+        lookupBackend(backendName)
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        String.format(
+                            "Code owner backend '%s' that is configured in %s.config"
+                                + " (parameter %s.%s) not found",
+                            backendName, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND))));
   }
 
   private CodeOwnersBackend getDefaultBackend() {
