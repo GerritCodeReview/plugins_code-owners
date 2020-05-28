@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "490dd6e8_42fc0178",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-28T13:00:00Z",
+      "side": 1,
+      "message": "Maybe a link to the syntax will be helpful?",
+      "range": {
+        "startLine": 13,
+        "startChar": 63,
+        "endLine": 13,
+        "endChar": 69
+      },
+      "revId": "c517b4703041c42f3a45a8069a4439592322db35",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
