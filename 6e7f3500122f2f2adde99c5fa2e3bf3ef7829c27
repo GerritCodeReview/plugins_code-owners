@@ -22,6 +22,30 @@
       "revId": "6e7f3500122f2f2adde99c5fa2e3bf3ef7829c27",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c2552cf_f317b914",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackend.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-05-28T09:43:43Z",
+      "side": 1,
+      "message": "Using Optional\u0027s for parameters is controversial, see [1].\nAs in this case using Optional doesn\u0027t give us any advantage (e.g. it\u0027s not making it easier for callers), I prefer a nullable parameter.\n\n\u003e Also, don\u0027t we put @Nullable as the last argument?\n\nNot sure, that we have this rule, but I agree that changing the order here looks better. Will upload a new patch set.\n\n[1] https://stackoverflow.com/questions/31922866/why-should-java-8s-optional-not-be-used-in-arguments",
+      "parentUuid": "dcef5914_e350c637",
+      "range": {
+        "startLine": 52,
+        "startChar": 6,
+        "endLine": 52,
+        "endChar": 42
+      },
+      "revId": "6e7f3500122f2f2adde99c5fa2e3bf3ef7829c27",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
