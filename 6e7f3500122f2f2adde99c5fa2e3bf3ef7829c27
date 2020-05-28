@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "dcef5914_e350c637",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackend.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-05-28T09:18:23Z",
+      "side": 1,
+      "message": "Maybe optional?\nAlso, don\u0027t we put @Nullable as the last argument?",
+      "range": {
+        "startLine": 52,
+        "startChar": 6,
+        "endLine": 52,
+        "endChar": 42
+      },
+      "revId": "6e7f3500122f2f2adde99c5fa2e3bf3ef7829c27",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
