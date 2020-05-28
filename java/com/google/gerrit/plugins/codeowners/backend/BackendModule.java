@@ -18,14 +18,34 @@ import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
+import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.ServerInitiated;
+import com.google.gerrit.server.UserInitiated;
+import com.google.inject.Provides;
 
 /** Guice module to bind code owner backends. */
 public class BackendModule extends FactoryModule {
   @Override
   protected void configure() {
+    factory(CodeOwnersUpdate.Factory.class);
+
     DynamicMap.mapOf(binder(), CodeOwnersBackend.class);
     bind(CodeOwnersBackend.class)
         .annotatedWith(Exports.named(FindOwnersBackend.ID))
         .to(FindOwnersBackend.class);
+  }
+
+  @Provides
+  @ServerInitiated
+  CodeOwnersUpdate provideServerInitiatedCheckersUpdate(
+      CodeOwnersUpdate.Factory codeOwnersUpdateFactory) {
+    return codeOwnersUpdateFactory.createWithServerIdent();
+  }
+
+  @Provides
+  @UserInitiated
+  CodeOwnersUpdate provideUserInitiatedCheckersUpdate(
+      CodeOwnersUpdate.Factory codeOwnersUpdateFactory, IdentifiedUser currentUser) {
+    return codeOwnersUpdateFactory.create(currentUser);
   }
 }
