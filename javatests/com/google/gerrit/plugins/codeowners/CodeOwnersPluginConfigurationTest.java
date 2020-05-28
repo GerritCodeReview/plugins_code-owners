@@ -19,6 +19,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -60,7 +61,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         assertThrows(
             IllegalStateException.class,
             () ->
-                codeOwnersPluginConfiguration.getBackend(Project.nameKey("non-existing-project")));
+                codeOwnersPluginConfiguration.getBackend(
+                    BranchNameKey.create(Project.nameKey("non-existing-project"), "master")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -68,8 +70,15 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getBackendForNonExistingBranch() throws Exception {
+    assertThat(
+            codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "non-existing")))
+        .isInstanceOf(FindOwnersBackend.class);
+  }
+
+  @Test
   public void getDefaultBackendWhenNoBackendIsConfigured() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getBackend(project))
+    assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
         .isInstanceOf(FindOwnersBackend.class);
   }
 
@@ -77,7 +86,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnersBackend.ID)
   public void getConfiguredDefaultBackend() throws Exception {
     try (AutoCloseable registration = registerTestBackend()) {
-      assertThat(codeOwnersPluginConfiguration.getBackend(project))
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(TestCodeOwnersBackend.class);
     }
   }
@@ -87,7 +96,9 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void cannotGetBackendIfNonExistingBackendIsConfigured() throws Exception {
     IllegalStateException exception =
         assertThrows(
-            IllegalStateException.class, () -> codeOwnersPluginConfiguration.getBackend(project));
+            IllegalStateException.class,
+            () ->
+                codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -99,7 +110,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void getBackendConfiguredOnProjectLevel() throws Exception {
     configureBackend(project, TestCodeOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
-      assertThat(codeOwnersPluginConfiguration.getBackend(project))
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(TestCodeOwnersBackend.class);
     }
   }
@@ -109,7 +120,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void backendConfiguredOnProjectLevelOverridesDefaultBackend() throws Exception {
     configureBackend(project, TestCodeOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
-      assertThat(codeOwnersPluginConfiguration.getBackend(project))
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(TestCodeOwnersBackend.class);
     }
   }
@@ -118,7 +129,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void backendIsInheritedFromParentProject() throws Exception {
     configureBackend(allProjects, TestCodeOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
-      assertThat(codeOwnersPluginConfiguration.getBackend(project))
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(TestCodeOwnersBackend.class);
     }
   }
@@ -128,7 +139,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void inheritedBackendOverridesDefaultBackend() throws Exception {
     configureBackend(allProjects, TestCodeOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
-      assertThat(codeOwnersPluginConfiguration.getBackend(project))
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(TestCodeOwnersBackend.class);
     }
   }
@@ -138,7 +149,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     configureBackend(allProjects, TestCodeOwnersBackend.ID);
     configureBackend(project, FindOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
-      assertThat(codeOwnersPluginConfiguration.getBackend(project))
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(FindOwnersBackend.class);
     }
   }
@@ -148,7 +159,9 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     configureBackend(project, "non-existing-backend");
     IllegalStateException exception =
         assertThrows(
-            IllegalStateException.class, () -> codeOwnersPluginConfiguration.getBackend(project));
+            IllegalStateException.class,
+            () ->
+                codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -156,11 +169,64 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
                 + " (parameter codeOwners.backend) not found");
   }
 
+  @Test
+  public void getBackendConfiguredOnBranchLevel() throws Exception {
+    configureBackend(project, "refs/heads/master", TestCodeOwnersBackend.ID);
+    try (AutoCloseable registration = registerTestBackend()) {
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+          .isInstanceOf(TestCodeOwnersBackend.class);
+    }
+  }
+
+  @Test
+  public void getBackendConfiguredOnBranchLevelShortName() throws Exception {
+    configureBackend(project, "master", TestCodeOwnersBackend.ID);
+    try (AutoCloseable registration = registerTestBackend()) {
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+          .isInstanceOf(TestCodeOwnersBackend.class);
+    }
+  }
+
+  @Test
+  public void branchLevelBackendOnFullNameTakesPrecedenceOverBranchLevelBackendOnShortName()
+      throws Exception {
+    configureBackend(project, "master", TestCodeOwnersBackend.ID);
+    configureBackend(project, "refs/heads/master", FindOwnersBackend.ID);
+    try (AutoCloseable registration = registerTestBackend()) {
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+          .isInstanceOf(FindOwnersBackend.class);
+    }
+  }
+
+  @Test
+  public void branchLevelBackendOverridesProjectLevelBackend() throws Exception {
+    configureBackend(project, TestCodeOwnersBackend.ID);
+    configureBackend(project, "master", FindOwnersBackend.ID);
+    try (AutoCloseable registration = registerTestBackend()) {
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+          .isInstanceOf(FindOwnersBackend.class);
+    }
+  }
+
+  @Test
+  public void branchLevelBackendForOtherBranchHasNoEffect() throws Exception {
+    configureBackend(project, "foo", TestCodeOwnersBackend.ID);
+    try (AutoCloseable registration = registerTestBackend()) {
+      assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+          .isInstanceOf(FindOwnersBackend.class);
+    }
+  }
+
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
+    configureBackend(project, null, backendName);
+  }
+
+  private void configureBackend(
+      Project.NameKey project, @Nullable String branch, String backendName) throws Exception {
     Config codeOwnersConfig = new Config();
     codeOwnersConfig.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        null,
+        branch,
         CodeOwnersPluginConfiguration.KEY_BACKEND,
         backendName);
     try (TestRepository<Repository> testRepo =
