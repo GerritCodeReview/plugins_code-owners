@@ -109,8 +109,24 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
                       String.format("code owner config %s does not exist", codeOwnerConfigKey)));
     }
 
+    @Override
+    public TestCodeOwnerConfigUpdate.Builder forUpdate() {
+      return TestCodeOwnerConfigUpdate.builder(this::updateNewCodeOwnerConfig);
+    }
+
     private Optional<CodeOwnerConfig> getCodeOwnerConfig() {
       return codeOwners.get(codeOwnerConfigKey);
+    }
+
+    private void updateNewCodeOwnerConfig(TestCodeOwnerConfigUpdate codeOwnerConfigUpdate)
+        throws Exception {
+      codeOwnersUpdate
+          .get()
+          .upsertCodeOwnerConfig(
+              codeOwnerConfigKey,
+              CodeOwnerConfigUpdate.builder()
+                  .setCodeOwnerModification(codeOwnerConfigUpdate.codeOwnerModification()::apply)
+                  .build());
     }
   }
 }
