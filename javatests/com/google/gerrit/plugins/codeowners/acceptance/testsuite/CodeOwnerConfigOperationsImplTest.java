@@ -40,6 +40,8 @@ import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigOperationsImpl}. */
 public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
+  // Use specific subclass instead of depending on the interface field from the base class.
+  @SuppressWarnings("hiding")
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
 
   private CodeOwners codeOwners;
