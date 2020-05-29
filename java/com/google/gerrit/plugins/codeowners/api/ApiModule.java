@@ -12,19 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners;
+package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.extensions.config.FactoryModule;
-import com.google.gerrit.plugins.codeowners.api.ApiModule;
-import com.google.gerrit.plugins.codeowners.backend.BackendModule;
-import com.google.gerrit.plugins.codeowners.restapi.RestApiModule;
 
-/** Guice module that registers the extensions of the code-owners plugin. */
-public class Module extends FactoryModule {
+/** Guice module that binds the Java extension API for the code-owners plugin. */
+public class ApiModule extends FactoryModule {
   @Override
   protected void configure() {
-    install(new ApiModule());
-    install(new BackendModule());
-    install(new RestApiModule());
+    factory(CodeOwnerConfigsInBranchImpl.Factory.class);
   }
 }

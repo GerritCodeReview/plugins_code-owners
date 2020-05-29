@@ -18,38 +18,46 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import org.junit.Test;
-
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigJson}. */
 public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
-	@Test
-	public void formatCodeOwnerReference() throws Exception {
-		CodeOwnerReference codeOwnerReference = CodeOwnerReference.create(admin.email());
-	  CodeOwnerReferenceInfo codeOwnerReferenceInfo = CodeOwnerConfigJson.format(codeOwnerReference);
-	  assertThat(codeOwnerReferenceInfo.email).isEqualTo(admin.email());
-	}
-	
-	@Test
-	public void cannotFormatNullCodeOwnerReferenceInfo() throws Exception {
-	  NullPointerException npe = assertThrows(NullPointerException.class, () -> CodeOwnerConfigJson.format((CodeOwnerReference)null));
-	  assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
-	}
-	
-	@Test
-	public void formatCodeOwnerConfig() throws Exception {
-		CodeOwnerConfig codeOwnerConfig = CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project,  "master", "/"))
-				.addCodeOwnerEmail(admin.email()).build();
-	  CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
-	  assertThat(codeOwnerConfigInfo).hasCodeOwnersEmailsThat().containsExactly(admin.email());
-	}
-	
-	@Test
-	public void cannotFormatNullCodeOwnerConfigInfo() throws Exception {
-	  NullPointerException npe = assertThrows(NullPointerException.class, () -> CodeOwnerConfigJson.format((CodeOwnerConfig)null));
-	  assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
-	}
+  @Test
+  public void formatCodeOwnerReference() throws Exception {
+    CodeOwnerReference codeOwnerReference = CodeOwnerReference.create(admin.email());
+    CodeOwnerReferenceInfo codeOwnerReferenceInfo = CodeOwnerConfigJson.format(codeOwnerReference);
+    assertThat(codeOwnerReferenceInfo.email).isEqualTo(admin.email());
+  }
+
+  @Test
+  public void cannotFormatNullCodeOwnerReferenceInfo() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> CodeOwnerConfigJson.format((CodeOwnerReference) null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
+  }
+
+  @Test
+  public void formatCodeOwnerConfig() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerEmail(admin.email())
+            .build();
+    CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
+    assertThat(codeOwnerConfigInfo).hasCodeOwnersEmailsThat().containsExactly(admin.email());
+  }
+
+  @Test
+  public void cannotFormatNullCodeOwnerConfigInfo() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> CodeOwnerConfigJson.format((CodeOwnerConfig) null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
+  }
 }

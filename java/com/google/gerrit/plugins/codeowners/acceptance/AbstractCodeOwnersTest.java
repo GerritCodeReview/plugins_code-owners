@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance;
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
 import org.junit.Before;
 
 /**
@@ -38,12 +39,12 @@ import org.junit.Before;
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
 public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   protected CodeOwnerConfigOperations codeOwnerConfigOperations;
+  protected CodeOwnerConfigsFactory codeOwnerConfigsApiFactory;
 
   @Before
   public void baseSetup() throws Exception {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
-
-    // TODO(ekempin): Add code to instantiate the code owner API classes, once they exist.
+    codeOwnerConfigsApiFactory = plugin.getSysInjector().getInstance(CodeOwnerConfigsFactory.class);
   }
 }
