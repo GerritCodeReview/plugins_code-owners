@@ -20,11 +20,11 @@ import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
-import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigJson;
-import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerReferenceInfo;
 import java.util.Objects;
 import java.util.Optional;
 
