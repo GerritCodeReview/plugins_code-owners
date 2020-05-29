@@ -16,6 +16,8 @@ package com.google.gerrit.plugins.codeowners.acceptance;
 
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import org.junit.Before;
 
 /**
  * Base class for code owner integration tests.
@@ -31,7 +33,17 @@ import com.google.gerrit.acceptance.TestPlugin;
  *       class, as having this code in every test class would be too much overhead.
  * </ul>
  */
-@TestPlugin(name = "code-owners", sysModule = "com.google.gerrit.plugins.codeowners.Module")
+@TestPlugin(
+    name = "code-owners",
+    sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
 public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
-  // TODO(ekempin): Add code to instantiate the code owner API classes, once they exist.
+  protected CodeOwnerConfigOperations codeOwnerConfigOperations;
+
+  @Before
+  public void baseSetup() throws Exception {
+    codeOwnerConfigOperations =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
+
+    // TODO(ekempin): Add code to instantiate the code owner API classes, once they exist.
+  }
 }

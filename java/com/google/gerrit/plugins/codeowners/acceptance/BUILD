@@ -11,6 +11,7 @@ java_library(
     deps = [
         "//java/com/google/gerrit/acceptance:lib",
         "//plugins/code-owners:code-owners__plugin",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
     ],
 )
 
