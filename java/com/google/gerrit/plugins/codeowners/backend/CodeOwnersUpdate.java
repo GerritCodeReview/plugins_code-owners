@@ -93,7 +93,7 @@ public class CodeOwnersUpdate {
    * @return the updated/created code owner config, {@link Optional#empty()} if the update led to a
    *     deletion of the code owner config or if the creation was a no-op
    */
-  Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
+  public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     CodeOwnersBackend codeOwnersBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
