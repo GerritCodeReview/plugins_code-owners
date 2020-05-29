@@ -49,6 +49,14 @@ public class CodeOwnerConfigTest {
   }
 
   @Test
+  public void getBranchName() throws Exception {
+    String branch = "master";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("project"), branch, "/foo/bar/");
+    assertThat(codeOwnerConfigKey.branchName()).isEqualTo(branch);
+  }
+
+  @Test
   public void getRef() throws Exception {
     String branch = "master";
     CodeOwnerConfig.Key codeOwnerConfigKey =
