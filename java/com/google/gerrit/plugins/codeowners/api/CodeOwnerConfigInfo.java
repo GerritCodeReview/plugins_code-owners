@@ -12,37 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.restapi;
+package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.common.base.MoreObjects;
+import java.util.List;
 import java.util.Objects;
 
 /**
- * Representation of a {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference} in
- * the REST API.
+ * Representation of a {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig} in the
+ * REST API.
  *
- * <p>This class determines the JSON format of code owner references in the REST API.
+ * <p>This class determines the JSON format of code owner configs in the REST API.
  */
-public class CodeOwnerReferenceInfo {
-  /** The email of the code owner. */
-  public String email;
+public class CodeOwnerConfigInfo {
+  /** The code owners of this code owner config. */
+  public List<CodeOwnerReferenceInfo> codeOwners;
 
   @Override
   public int hashCode() {
-    return Objects.hash(email);
+    return Objects.hash(codeOwners);
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof CodeOwnerReferenceInfo)) {
+    if (!(o instanceof CodeOwnerConfigInfo)) {
       return false;
     }
-    CodeOwnerReferenceInfo other = (CodeOwnerReferenceInfo) o;
-    return Objects.equals(email, other.email);
+    CodeOwnerConfigInfo other = (CodeOwnerConfigInfo) o;
+    return Objects.equals(codeOwners, other.codeOwners);
   }
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("email", email).toString();
+    return MoreObjects.toStringHelper(this).add("codeOwners", codeOwners).toString();
   }
 }
