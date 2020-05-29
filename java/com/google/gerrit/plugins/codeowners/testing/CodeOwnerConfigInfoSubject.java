@@ -18,8 +18,8 @@ import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigJson;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerConfigInfo}s. */
