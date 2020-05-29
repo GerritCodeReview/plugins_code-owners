@@ -89,5 +89,29 @@ public interface CodeOwnerConfigOperations {
      * @return the corresponding {@code CodeOwnerConfig}
      */
     CodeOwnerConfig get();
+
+    /**
+     * Starts the fluent chain to update a code owner config. The returned builder can be used to
+     * specify how the attributes of the code owner config should be modified. To update the code
+     * owner config for real, {@link TestCodeOwnerConfigUpdate.Builder#update()} must be called.
+     *
+     * <p>Example:
+     *
+     * <pre>
+     * codeOwnerOperations
+     *   .codeOwnerConfig(codeOwnerConfigKey)
+     *   .forUpdate()
+     *   .addCodeOwnerEmail("jane.roe@example.com")
+     *   .removeCodeOwnerEmail("joe.doe@example.com")
+     *   .update();
+     * </pre>
+     *
+     * <p><strong>Note:</strong> The update will fail with an {@link IllegalStateException} if the
+     * code owner config to update doesn't exist. If you want to check for the existence of a code
+     * owner config, use {@link #exists()}.
+     *
+     * @return a builder to update the code owner config
+     */
+    TestCodeOwnerConfigUpdate.Builder forUpdate();
   }
 }
