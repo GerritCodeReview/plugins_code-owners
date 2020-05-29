@@ -34,6 +34,41 @@ public interface CodeOwnerConfigOperations {
    */
   PerCodeOwnerConfigOperations codeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey);
 
+  /**
+   * Starts the fluent chain to create a code owner config. The returned builder can be used to
+   * specify the attributes of the new code owner config. To create the code owner config for real,
+   * {@link TestCodeOwnerConfigCreation.Builder#create()} must be called.
+   *
+   * <p>Example:
+   *
+   * <pre>
+   * CodeOwnerConfigKey createdCodeOwnerConfigKey = codeOwnerConfigOperations
+   *     .newCodeOwnerConfig
+   *     .project(project)
+   *     .branch("master")
+   *     .folderPath("/foo/bar/")
+   *     .addCodeOwnerEmail("jane.roe@example.com")
+   *     .addCodeOwnerEmail("joe.doe@example.com")
+   *     .create();
+   * </pre>
+   *
+   * <p>Specifying the project is required, if the project is not set the code owner config will be
+   * rejected.
+   *
+   * <p>If a branch is not specified, {@code master} is used by default.
+   *
+   * <p>If a folder path is not specified, {@code /} is used by default.
+   *
+   * <p>Specifying code owner is required, if no code owners are not set the code owner config will
+   * be rejected.
+   *
+   * <p><strong>Note:</strong> If another code owner config with the provided project, branch and
+   * folder already exists, the creation of the code owner config will be rejected.
+   *
+   * @return a builder to create the new code owner config
+   */
+  TestCodeOwnerConfigCreation.Builder newCodeOwnerConfig();
+
   /** An aggregation of methods on a specific code owner config. */
   interface PerCodeOwnerConfigOperations {
 
