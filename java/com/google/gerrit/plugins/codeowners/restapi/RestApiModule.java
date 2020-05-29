@@ -12,17 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners;
+package com.google.gerrit.plugins.codeowners.restapi;
 
-import com.google.gerrit.extensions.config.FactoryModule;
-import com.google.gerrit.plugins.codeowners.backend.BackendModule;
-import com.google.gerrit.plugins.codeowners.restapi.RestApiModule;
+import static com.google.gerrit.server.project.BranchResource.BRANCH_KIND;
 
-/** Guice module that registers the extensions of the code-owners plugin. */
-public class Module extends FactoryModule {
+import com.google.gerrit.extensions.registration.DynamicMap;
+
+/** Guice module that binds the REST API for the code-owners plugin. */
+public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiModule {
   @Override
   protected void configure() {
-    install(new BackendModule());
-    install(new RestApiModule());
+    DynamicMap.mapOf(binder(), CodeOwnerConfigsInBranchCollection.PathResource.PATH_KIND);
+
+    child(BRANCH_KIND, "code_owners.config").to(CodeOwnerConfigsInBranchCollection.class);
+    get(CodeOwnerConfigsInBranchCollection.PathResource.PATH_KIND)
+        .to(GetCodeOwnerConfigForPathInBranch.class);
   }
 }
