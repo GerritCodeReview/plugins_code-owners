@@ -127,6 +127,15 @@ public abstract class CodeOwnerConfig {
     }
 
     /**
+     * Gets the short name of the branch of this owner config key.
+     *
+     * @return the short name of the branch of this owner config key
+     */
+    public String shortBranchName() {
+      return branch().shortName();
+    }
+
+    /**
      * Gets the ref name of the branch to which the code owner config belongs.
      *
      * @return the ref name of the branch to which the code owner config belongs
