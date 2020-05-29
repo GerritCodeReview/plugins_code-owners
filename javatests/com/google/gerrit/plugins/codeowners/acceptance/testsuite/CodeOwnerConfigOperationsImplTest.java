@@ -15,19 +15,25 @@
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations.PerCodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
+import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -35,12 +41,14 @@ import org.junit.Test;
 public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
 
+  private CodeOwners codeOwners;
   private Provider<CodeOwnersUpdate> codeOwnersUpdate;
 
   @Before
   public void setUp() {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperationsImpl.class);
+    codeOwners = plugin.getSysInjector().getInstance(CodeOwners.class);
     codeOwnersUpdate =
         plugin
             .getSysInjector()
@@ -68,6 +76,153 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfig.key());
     assertThat(perCodeOwnerConfigOperations.exists()).isTrue();
     assertThat(perCodeOwnerConfigOperations.get()).isEqualTo(codeOwnerConfig);
+  }
+
+  @Test
+  public void codeOwnerConfigCreationRequiresProject() throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigOperations.newCodeOwnerConfig().create());
+    assertThat(exception).hasMessageThat().contains("project not specified");
+  }
+
+  @Test
+  public void codeOwnerConfigCanBeCreatedWithoutSpecifyingBranch() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigKey).isEqualTo(CodeOwnerConfig.Key.create(project, "master", "/"));
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void specifiedBranchIsARespectedForCodeOwnerConfigCreation() throws Exception {
+    String branchName = "foo";
+    gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
+
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branchName)
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigKey.branchName()).isEqualTo(branchName);
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void cannotCreateCodeOwnerConfigIfBranchDoesNotExist() throws Exception {
+    String branchName = "non-existing";
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnerConfigOperations
+                    .newCodeOwnerConfig()
+                    .project(project)
+                    .branch(branchName)
+                    .addCodeOwnerEmail(admin.email())
+                    .create());
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(String.format("branch %s does not exist", RefNames.REFS_HEADS + branchName));
+  }
+
+  @Test
+  public void codeOwnerConfigCanBeCreatedWithoutSpecifyingFolderPath() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigKey).isEqualTo(CodeOwnerConfig.Key.create(project, "master", "/"));
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void specifiedFolderPathIsARespectedForCodeOwnerConfigCreation() throws Exception {
+    String folderPath = "/foo/bar";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .folderPath(folderPath)
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Paths.get(folderPath));
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void codeOwnerConfigCreationRequiresCodeOwners() throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigOperations.newCodeOwnerConfig().project(project).create());
+    assertThat(exception).hasMessageThat().contains("code owner config must not be empty");
+  }
+
+  @Test
+  public void specifiedCodeOwnersAreRespectedForCodeOwnerConfigCreation() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void cannotCreateCodeOwnerConfigIfItAlreadyExists() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnerConfigOperations
+                    .newCodeOwnerConfig()
+                    .project(project)
+                    .addCodeOwnerEmail(user.email())
+                    .create());
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(String.format("code owner config %s already exists", codeOwnerConfigKey));
+  }
+
+  private CodeOwnerConfig getCodeOwnerConfigFromServer(CodeOwnerConfig.Key codeOwnerConfigKey) {
+    return codeOwners
+        .get(codeOwnerConfigKey)
+        .orElseThrow(
+            () ->
+                new IllegalStateException(
+                    String.format("code owner config %s does not exist", codeOwnerConfigKey)));
   }
 
   private CodeOwnerConfig createArbitraryCodeOwnerConfig() {
