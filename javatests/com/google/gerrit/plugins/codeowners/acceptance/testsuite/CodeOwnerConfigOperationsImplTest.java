@@ -26,6 +26,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations.PerCodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate.CodeOwnerModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
@@ -216,6 +217,69 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .contains(String.format("code owner config %s already exists", codeOwnerConfigKey));
   }
 
+  @Test
+  public void addCodeOwner() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .addCodeOwnerEmail(user.email())
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void removeCodeOwner() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            codeOwners ->
+                ImmutableSet.of(
+                    CodeOwnerReference.create(admin.email()),
+                    CodeOwnerReference.create(user.email())));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .removeCodeOwnerEmail(user.email())
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void clearCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            codeOwners ->
+                ImmutableSet.of(
+                    CodeOwnerReference.create(admin.email()),
+                    CodeOwnerReference.create(user.email())));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .clearCodeOwners()
+        .update();
+
+    // Removing all code owners leads to a deletion of the code owner config file.
+    assertThat(codeOwners.get(codeOwnerConfig.key())).isEmpty();
+  }
+
+  @Test
+  public void cannotUpdateNonExistingCodeOwnerConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("code owner config %s does not exist", codeOwnerConfigKey));
+  }
+
   private CodeOwnerConfig getCodeOwnerConfigFromServer(CodeOwnerConfig.Key codeOwnerConfigKey) {
     return codeOwners
         .get(codeOwnerConfigKey)
@@ -226,12 +290,14 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   private CodeOwnerConfig createArbitraryCodeOwnerConfig() {
+    return createCodeOwnerConfig(
+        codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+  }
+
+  private CodeOwnerConfig createCodeOwnerConfig(CodeOwnerModification codeOwnerModification) {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfigUpdate codeOwnerConfigUpdate =
-        CodeOwnerConfigUpdate.builder()
-            .setCodeOwnerModification(
-                codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())))
-            .build();
+        CodeOwnerConfigUpdate.builder().setCodeOwnerModification(codeOwnerModification).build();
     return codeOwnersUpdate
         .get()
         .upsertCodeOwnerConfig(codeOwnerConfigKey, codeOwnerConfigUpdate)
