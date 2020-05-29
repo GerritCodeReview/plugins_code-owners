@@ -19,6 +19,8 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSu
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import org.junit.Test;
