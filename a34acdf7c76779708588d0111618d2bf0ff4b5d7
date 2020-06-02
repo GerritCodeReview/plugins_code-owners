@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e76bcfff_9252a177",
+        "filename": "java/com/google/gerrit/plugins/codeowners/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-02T07:06:10Z",
+      "side": 1,
+      "message": "Consider making each of these a method, for extra readability",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 63
+      },
+      "revId": "a34acdf7c76779708588d0111618d2bf0ff4b5d7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ba9a3581_99eea861",
+        "filename": "java/com/google/gerrit/plugins/codeowners/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-02T07:06:10Z",
+      "side": 1,
+      "message": "Would be nice to explain what this object is (contains both branch and project)",
+      "range": {
+        "startLine": 88,
+        "startChar": 19,
+        "endLine": 88,
+        "endChar": 25
+      },
+      "revId": "a34acdf7c76779708588d0111618d2bf0ff4b5d7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8d5a958_0bcc3f3a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-02T07:06:10Z",
+      "side": 1,
+      "message": "I liked the previous code here better :) I guess it doesn\u0027t make a difference, so up to you.",
+      "range": {
+        "startLine": 104,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 0
+      },
+      "revId": "a34acdf7c76779708588d0111618d2bf0ff4b5d7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
