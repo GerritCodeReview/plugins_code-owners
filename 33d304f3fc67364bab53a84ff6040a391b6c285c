@@ -22,6 +22,30 @@
       "revId": "33d304f3fc67364bab53a84ff6040a391b6c285c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "479b62d2_85d08ea7",
+        "filename": "resources/Documentation/backends.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 8,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-02T15:25:00Z",
+      "side": 1,
+      "message": "Glad that you find this plugin interesting :)\n\n\u003e What\u0027s the process for adding a backend?\n\nMake a code contribution that implements the CodeOwnersBackend interface :)\n\nIn general I expect that adding a backend for the owners-plugin syntax should be pretty straight-forward, but there are some things to note:\n\n1. The CodeOwnersBackend is not complete yet:\n   This means at the moment it\u0027s still too early to add a backend for the owners-plugin syntax.\n\n2. The initial version of this plugin will not support groups as code owners:\n   You may work around this by resolving groups to users in the group backend.\n   We likely want to have proper support for groups as code owners, but at this stage it\u0027s unknown when/if this will be done.",
+      "parentUuid": "6ad0caa2_e52d8ff4",
+      "range": {
+        "startLine": 5,
+        "startChar": 0,
+        "endLine": 8,
+        "endChar": 10
+      },
+      "revId": "33d304f3fc67364bab53a84ff6040a391b6c285c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
