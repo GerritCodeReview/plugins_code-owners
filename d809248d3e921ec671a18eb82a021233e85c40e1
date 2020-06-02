@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a7378b42_d2afe770",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/CodeOwnersPluginConfigurationTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-02T05:40:39Z",
+      "side": 1,
+      "message": "Another test:\nEnsure that if one project has project level backend defined, the default backend will still be applied to other projects.",
+      "range": {
+        "startLine": 45,
+        "startChar": 13,
+        "endLine": 45,
+        "endChar": 46
+      },
+      "revId": "d809248d3e921ec671a18eb82a021233e85c40e1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1cd373a2_abde5c3e",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 7
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-02T05:40:39Z",
+      "side": 1,
+      "message": "the project",
+      "range": {
+        "startLine": 6,
+        "startChar": 46,
+        "endLine": 6,
+        "endChar": 53
+      },
+      "revId": "d809248d3e921ec671a18eb82a021233e85c40e1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d279ed14_9f687e80",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-02T05:40:39Z",
+      "side": 1,
+      "message": "This is duplicated, but I see it\u0027s fixed in the next change :-)",
+      "range": {
+        "startLine": 19,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 0
+      },
+      "revId": "d809248d3e921ec671a18eb82a021233e85c40e1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
