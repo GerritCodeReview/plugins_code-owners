@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b8b66ff5_9276da36",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersBackend.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-02T13:25:15Z",
+      "side": 1,
+      "message": "I was asking this myself when I copy-pasted this code. Added a comment with an explanation.",
+      "parentUuid": "b3e208cd_61a3aea9",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 65
+      },
+      "revId": "e72a0e614f02fa5277497512de0628b10adf3418",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "970b9f97_25a3618a",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersBackendTest.java",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "e72a0e614f02fa5277497512de0628b10adf3418",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e92fed7e_6ed3025d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersBackendTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-02T13:25:15Z",
+      "side": 1,
+      "message": "A test runner is not a good fit here, since not all tests in this class need to be executed once for user initiated and once for server initiated.\n\nI refactored the tests now to avoid some code duplication. Initially I didn\u0027t do it because I prefer easily readable tests over compact test where it\u0027s difficult to understand what they are testing.",
+      "parentUuid": "970b9f97_25a3618a",
+      "range": {
+        "startLine": 74,
+        "startChar": 44,
+        "endLine": 74,
+        "endChar": 52
+      },
+      "revId": "e72a0e614f02fa5277497512de0628b10adf3418",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
