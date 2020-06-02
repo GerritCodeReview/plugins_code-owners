@@ -16,6 +16,24 @@
       "revId": "954d60b80e240d13159969696ceefe2ed4606277",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "65dbfd3d_80726cd7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-02T12:46:34Z",
+      "side": 1,
+      "message": "Revisiting this again after I chatted with Edwin offline. There will be multiple backends (one legacy and a new implementation), so there is a need for this switch.\n\nIn this case, we\u0027ll have to protect the member here.\n\nMaybe we just remove the member and use the DynamicMap directly? I don\u0027t think it makes a difference performance-wise if you load the backendName in the constructor and hold onto that (we do that with configs elsewhere).",
+      "parentUuid": "6e705357_24fd903a",
+      "revId": "954d60b80e240d13159969696ceefe2ed4606277",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
