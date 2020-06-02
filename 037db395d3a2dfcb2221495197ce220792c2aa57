@@ -22,6 +22,30 @@
       "revId": "037db395d3a2dfcb2221495197ce220792c2aa57",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0f01d33_b61abee2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-02T07:13:47Z",
+      "side": 1,
+      "message": "Yes. I don\u0027t intent to implement any, but code owner backends are free to store the code owner configuration wherever they want.",
+      "parentUuid": "8989b47f_85164006",
+      "range": {
+        "startLine": 10,
+        "startChar": 23,
+        "endLine": 10,
+        "endChar": 31
+      },
+      "revId": "037db395d3a2dfcb2221495197ce220792c2aa57",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
