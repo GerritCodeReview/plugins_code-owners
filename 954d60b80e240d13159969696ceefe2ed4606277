@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6e705357_24fd903a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-02T12:33:27Z",
+      "side": 1,
+      "message": "This method is part of a singleton and mutates a local member variable. However, it\u0027s not protected against multi-threadded races.\n\nI think you can easily avoid this by just not using DynamicMap and Gerrit\u0027s plugin binder for binding the CodeOwnersBackend. It\u0027s unlikely in the near future that someone writes their own backend. By using an interface as abstraction, you already prepare for that, but I wouldn\u0027t complicate the binding. Instead, just bind COBackend to FindOwnersBackend in the module.\n\nIf someone desires to use their own, they can still just bind a different module and you spare the complexity otherwise required for protecting against threading here.\n\nThe alternative is to protect the member here.",
+      "revId": "954d60b80e240d13159969696ceefe2ed4606277",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
