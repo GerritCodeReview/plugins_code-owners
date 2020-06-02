@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b3e208cd_61a3aea9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersBackend.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-02T12:25:38Z",
+      "side": 1,
+      "message": "Why is one called on the MD and the other on the CB?",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 119,
+        "endChar": 65
+      },
+      "revId": "e72a0e614f02fa5277497512de0628b10adf3418",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "970b9f97_25a3618a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersBackendTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-02T12:25:38Z",
+      "side": 1,
+      "message": "this is a lot of duplicate code (1x ByServer and 1x ByUser). Could we use a test runner or utilities to scale down on the overhead?",
+      "range": {
+        "startLine": 74,
+        "startChar": 44,
+        "endLine": 74,
+        "endChar": 52
+      },
+      "revId": "e72a0e614f02fa5277497512de0628b10adf3418",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
