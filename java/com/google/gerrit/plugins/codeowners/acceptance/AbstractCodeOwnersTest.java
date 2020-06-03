@@ -16,35 +16,17 @@ package com.google.gerrit.plugins.codeowners.acceptance;
 
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.TestPlugin;
-import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
-import org.junit.Before;
 
 /**
  * Base class for code owner integration tests.
  *
- * <p>There are 2 reasons why we have this base class:
+ * <p>We have this base class because hard-coding the {@link TestPlugin} annotation for each test
+ * class would be too much overhead.
  *
- * <ul>
- *   <li>Hard-coding the {@link TestPlugin} annotation for each test class would be too much
- *       overhead.
- *   <li>The code owner API classes cannot be injected into the test classes because the plugin is
- *       not loaded yet when injections are resolved. Instantiating them will require a bit of
- *       boilerplate code. We prefer to have this boilerplate code only once here in this base
- *       class, as having this code in every test class would be too much overhead.
- * </ul>
+ * <p>Integration tests should extend {@link AbstractCodeOwnersIT} instead of exting this class
+ * directly.
  */
 @TestPlugin(
     name = "code-owners",
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
-public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
-  protected CodeOwnerConfigOperations codeOwnerConfigOperations;
-  protected CodeOwnerConfigsFactory codeOwnerConfigsApiFactory;
-
-  @Before
-  public void baseSetup() throws Exception {
-    codeOwnerConfigOperations =
-        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
-    codeOwnerConfigsApiFactory = plugin.getSysInjector().getInstance(CodeOwnerConfigsFactory.class);
-  }
-}
+public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {}

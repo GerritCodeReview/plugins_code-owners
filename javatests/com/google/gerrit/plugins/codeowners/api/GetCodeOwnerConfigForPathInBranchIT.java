@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.api;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThat;
 
-import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import java.util.Optional;
 import org.junit.Test;
@@ -31,7 +31,7 @@ import org.junit.Test;
  * that require using the REST API are implemented in {@link
  * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigForPathInBranchRestIT}.
  */
-public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersTest {
+public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
   @Test
   public void getNonExistingCodeOwnerConfig() throws Exception {
     assertThat(codeOwnerConfigsApiFactory.branch(project, "master").get("/")).isEmpty();
