@@ -22,6 +22,9 @@ import java.util.Optional;
  * Interface for code owner backends.
  *
  * <p>Allows to implement different syntaxes and storages for code owner configurations.
+ *
+ * <p>New code owners backend implementations must be registered in {@link BackendModule} and an
+ * enum value for their ID (aka export name) must be added to {@link CodeOwnersBackendId}.
  */
 public interface CodeOwnersBackend {
   /**
