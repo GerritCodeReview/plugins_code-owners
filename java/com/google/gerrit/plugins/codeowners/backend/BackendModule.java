@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.extensions.registration.DynamicMap;
-import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.UserInitiated;
@@ -30,9 +29,15 @@ public class BackendModule extends FactoryModule {
     factory(CodeOwnersUpdate.Factory.class);
 
     DynamicMap.mapOf(binder(), CodeOwnersBackend.class);
-    bind(CodeOwnersBackend.class)
-        .annotatedWith(Exports.named(FindOwnersBackend.ID))
-        .to(FindOwnersBackend.class);
+
+    // Register all code owners backends.
+    // New code owners backends should be added to CodeOwnersBackendId so that they get registered
+    // by the following code (do not add code to bind new code owners backends individually here).
+    for (CodeOwnersBackendId codeOwnersBackendId : CodeOwnersBackendId.values()) {
+      bind(CodeOwnersBackend.class)
+          .annotatedWith(Exports.named(codeOwnersBackendId.getBackendId()))
+          .to(codeOwnersBackendId.getCodeOwnersBackendClass());
+    }
   }
 
   @Provides
