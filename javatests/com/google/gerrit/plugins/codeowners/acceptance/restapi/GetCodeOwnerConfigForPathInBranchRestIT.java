@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.extensions.restapi.IdString;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import org.junit.Test;
 
@@ -30,6 +31,9 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigForPathInBranch} REST endpoint
  * that can use the Java API are implemented in {@link
  * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnerConfigForPathInBranchIT}.
+ *
+ * <p>The tests in this class do not depend on the used code owners backend, hence we do not need to
+ * extend {@link AbstractCodeOwnersIT}.
  */
 public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersTest {
   @Test

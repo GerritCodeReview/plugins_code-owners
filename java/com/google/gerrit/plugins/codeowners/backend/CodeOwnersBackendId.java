@@ -20,6 +20,9 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend
  * Enum of all code owner backend IDs.
  *
  * <p>This enum should contain all registered code owner backends.
+ *
+ * <p>This enum is used to execute the integration tests for all code owner backends (see {@link
+ * com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT}.
  */
 public enum CodeOwnersBackendId {
   FIND_OWNERS(FindOwnersBackend.ID, FindOwnersBackend.class);
