@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.rest.util.RestApiCallHelper;
 import com.google.gerrit.acceptance.rest.util.RestCall;
 import com.google.gerrit.extensions.restapi.IdString;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import org.junit.Test;
 
@@ -30,6 +31,9 @@ import org.junit.Test;
  * <p>This test is necessary since all other integration tests for code owners use the Java
  * extension API and hence would not detect issues with the Guice bindings of the code owners REST
  * endpoints.
+ *
+ * <p>The tests in this class are not depending on the used code owners backend, hence we do not
+ * need to extend {@link AbstractCodeOwnersIT}.
  */
 public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
   private static final ImmutableList<RestCall> BRANCH_CODE_OWNER_CONFIGS_ENDPOINTS =
