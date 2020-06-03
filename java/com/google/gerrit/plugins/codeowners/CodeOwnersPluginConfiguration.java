@@ -20,7 +20,7 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackendId;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.inject.Inject;
@@ -64,7 +64,7 @@ public class CodeOwnersPluginConfiguration {
     this.defaultBackendName =
         pluginConfigFactory
             .getFromGerritConfig(pluginName)
-            .getString(KEY_BACKEND, FindOwnersBackend.ID);
+            .getString(KEY_BACKEND, CodeOwnersBackendId.FIND_OWNERS.getBackendId());
   }
 
   /**
