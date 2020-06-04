@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "20e11a55_0a5ad9ca",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwners.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-04T11:29:55Z",
+      "side": 1,
+      "message": "Can you think of a way to enforce it?",
+      "range": {
+        "startLine": 26,
+        "startChar": 3,
+        "endLine": 26,
+        "endChar": 39
+      },
+      "revId": "b2162d2f85793c5172f96e48af4b29831c59138a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
