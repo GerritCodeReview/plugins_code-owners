@@ -22,6 +22,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject;
 import java.nio.file.Paths;
 import org.junit.Test;
 
@@ -154,6 +155,33 @@ public class CodeOwnerConfigTest {
         assertThrows(
             NullPointerException.class, () -> createCodeOwnerBuilder().addCodeOwnerEmail(null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerEmail");
+  }
+
+  @Test
+  public void getEmptyLocalCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
+    assertThat(codeOwnerConfig.localCodeOwners(Paths.get("/foo/bar/baz.md"))).isEmpty();
+  }
+
+  @Test
+  public void getLocalCodeOwners() throws Exception {
+    String codeOwnerEmail1 = "jdoe@example.com";
+    String codeOwnerEmail2 = "jroe@example.com";
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder = createCodeOwnerBuilder();
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail1);
+    codeOwnerConfigBuilder.addCodeOwnerEmail(codeOwnerEmail2);
+    CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
+    assertThat(codeOwnerConfig.localCodeOwners(Paths.get("/foo/bar/baz.md")))
+        .comparingElementsUsing(CodeOwnerConfigSubject.CODE_OWNER_REFERENCE_TO_EMAIL)
+        .containsExactly(codeOwnerEmail1, codeOwnerEmail2);
+  }
+
+  @Test
+  public void cannotGetLocalCodeOwnersForNullPath() throws Exception {
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> codeOwnerConfig.localCodeOwners(null));
+    assertThat(npe).hasMessageThat().isEqualTo("relativePath");
   }
 
   private static CodeOwnerConfig.Builder createCodeOwnerBuilder() {
