@@ -28,7 +28,7 @@ import java.util.Optional;
 /** {@link Subject} for doing assertions on {@link CodeOwnerConfig}s. */
 public class CodeOwnerConfigSubject extends Subject {
   /** {@link Correspondence} that maps {@link CodeOwnerReference}s to emails. */
-  private static final Correspondence<CodeOwnerReference, String> CODE_OWNER_REFERENCE_TO_EMAIL =
+  public static final Correspondence<CodeOwnerReference, String> CODE_OWNER_REFERENCE_TO_EMAIL =
       Correspondence.from(
           (actualCodeOwnerReference, expectedEmail) -> {
             String email =
