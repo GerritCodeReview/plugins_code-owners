@@ -34,8 +34,31 @@ public abstract class CodeOwnerConfig {
   /** Gets the key of this code owner config. */
   public abstract Key key();
 
+  // TODO(ekempin): add field for included code owner configs
+
   /** Gets the code owners of this code owner config. */
   public abstract ImmutableSet<CodeOwnerReference> codeOwners();
+
+  // TODO(ekempin): add field for per-file code owners
+
+  /**
+   * Computes the local code owners for the given path.
+   *
+   * <p>This method computes the <strong>local</strong> code owners which means that only code
+   * owners that are directly mentioned in this code owner config are considered. Code owners in
+   * inherited and included code owner configs are not considered.
+   *
+   * @param relativePath path for which the local code owners should be returned; the path must be
+   *     relative to the {@link Key#folderPath()} of this code owner config; can be the path of a
+   *     file or folder; the path may or may not exist
+   * @return the local code owners for the given path
+   */
+  public ImmutableSet<CodeOwnerReference> localCodeOwners(Path relativePath) {
+    requireNonNull(relativePath, "relativePath");
+    // TODO(ekempin): Check for matching per-file code owner definitions once we support per-file
+    // code owner definitions
+    return codeOwners();
+  }
 
   /**
    * Creates a builder form this code owner config.
