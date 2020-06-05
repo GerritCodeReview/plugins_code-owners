@@ -23,9 +23,13 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
   @Override
   protected void configure() {
     DynamicMap.mapOf(binder(), CodeOwnerConfigsInBranchCollection.PathResource.PATH_KIND);
-
     child(BRANCH_KIND, "code_owners.config").to(CodeOwnerConfigsInBranchCollection.class);
     get(CodeOwnerConfigsInBranchCollection.PathResource.PATH_KIND)
         .to(GetCodeOwnerConfigForPathInBranch.class);
+
+    factory(CodeOwnerJson.Factory.class);
+    DynamicMap.mapOf(binder(), CodeOwnersInBranchCollection.PathResource.PATH_KIND);
+    child(BRANCH_KIND, "code_owners").to(CodeOwnersInBranchCollection.class);
+    get(CodeOwnersInBranchCollection.PathResource.PATH_KIND).to(GetCodeOwnersForPathInBranch.class);
   }
 }
