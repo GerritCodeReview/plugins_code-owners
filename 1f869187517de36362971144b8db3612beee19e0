@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "129bbe22_77575927",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/BackendModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-05T08:16:02Z",
+      "side": 1,
+      "message": "Here and below: I think you you mean CodeOwners :)",
+      "range": {
+        "startLine": 40,
+        "startChar": 41,
+        "endLine": 40,
+        "endChar": 49
+      },
+      "revId": "1f869187517de36362971144b8db3612beee19e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a524f0d0_e7cc4edb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-05T08:16:02Z",
+      "side": 1,
+      "message": "I probably missed this from a previous change: I don\u0027t see \"throws IllegalStateException\", I think codeOwnersBackend.upsertCodeOwnerConfig should also have the \"throws\" statement.",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 0
+      },
+      "revId": "1f869187517de36362971144b8db3612beee19e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de003b86_5b6a31d5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdateTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-05T08:16:02Z",
+      "side": 1,
+      "message": "Can you make those tests will less duplication as you did in I515e65a2f?",
+      "range": {
+        "startLine": 64,
+        "startChar": 14,
+        "endLine": 64,
+        "endChar": 72
+      },
+      "revId": "1f869187517de36362971144b8db3612beee19e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
