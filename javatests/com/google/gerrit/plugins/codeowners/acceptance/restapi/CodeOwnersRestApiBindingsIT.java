@@ -39,11 +39,24 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
   private static final ImmutableList<RestCall> BRANCH_CODE_OWNER_CONFIGS_ENDPOINTS =
       ImmutableList.of(RestCall.get("/projects/%s/branches/%s/code-owners~code_owners.config/%s"));
 
+  private static final ImmutableList<RestCall> BRANCH_CODE_OWNERS_ENDPOINTS =
+      ImmutableList.of(RestCall.get("/projects/%s/branches/%s/code-owners~code_owners/%s"));
+
   @Test
   public void branchCodeOwnerConfigsEndpoints() throws Exception {
     RestApiCallHelper.execute(
         adminRestSession,
         BRANCH_CODE_OWNER_CONFIGS_ENDPOINTS,
+        urlEncode(project.get()),
+        urlEncode("master"),
+        urlEncode("foo/bar.baz"));
+  }
+
+  @Test
+  public void branchCodeOwnersEndpoints() throws Exception {
+    RestApiCallHelper.execute(
+        adminRestSession,
+        BRANCH_CODE_OWNERS_ENDPOINTS,
         urlEncode(project.get()),
         urlEncode("master"),
         urlEncode("foo/bar.baz"));
