@@ -20,8 +20,7 @@ import com.google.gerrit.extensions.restapi.ChildCollection;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestView;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigsInBranchCollection.PathResource;
+import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInBranchCollection.PathResource;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,21 +29,20 @@ import java.nio.file.Path;
 
 /**
  * REST collection that serves requests to {@code
- * /projects/<project-name>/branches/<branch-name>/code_owners.config/}.
+ * /projects/<project-name>/branches/<branch-name>/code_owners/}.
  */
 @Singleton
-public class CodeOwnerConfigsInBranchCollection
-    implements ChildCollection<BranchResource, PathResource> {
+public class CodeOwnersInBranchCollection implements ChildCollection<BranchResource, PathResource> {
   private final DynamicMap<RestView<PathResource>> views;
 
   @Inject
-  CodeOwnerConfigsInBranchCollection(DynamicMap<RestView<PathResource>> views) {
+  CodeOwnersInBranchCollection(DynamicMap<RestView<PathResource>> views) {
     this.views = views;
   }
 
   @Override
   public RestView<BranchResource> list() throws ResourceNotFoundException {
-    // Listing paths with code owner configs is not implemented.
+    // Listing paths that have code owners is not implemented.
     throw new ResourceNotFoundException();
   }
 
@@ -60,7 +58,7 @@ public class CodeOwnerConfigsInBranchCollection
 
   /**
    * REST resource representing an arbitrary path in a branch under the {@link
-   * CodeOwnerConfigsInBranchCollection} REST collection.
+   * CodeOwnersInBranchCollection} REST collection.
    *
    * <p>The path may or may not exist in the branch.
    */
@@ -79,10 +77,6 @@ public class CodeOwnerConfigsInBranchCollection
 
     private PathResource(BranchResource branchResource, Path path) {
       super(branchResource, path);
-    }
-
-    public CodeOwnerConfig.Key getCodeOwnerConfigKey() {
-      return CodeOwnerConfig.Key.create(getBranch(), getPath());
     }
   }
 }

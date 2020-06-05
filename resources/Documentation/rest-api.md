@@ -42,6 +42,53 @@ Gets a code owner config for a path in a branch.
 If the path does not exist or if no code owner config exists for the path
 '`204 No Content`' is returned.
 
+## <a id="branch-endpoints"> Branch Endpoints
+
+### <a id="list-code-owners"> List Code Owners
+_'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners/[\{path\}](#path)'_
+
+Lists the accounts that are code owners of a file or folder in a branch.
+
+The code owners are computed from the owner configuration at the tip of the
+specified branch.
+
+Code owners that are
+
+* not resolvable (emails for which no Gerrit account exists) or
+* ambiguous (the same email is assigned to multiple accounts)
+
+are omitted from the result.
+
+As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
+
+#### Request
+
+```
+  GET /projects/foo%2Fbar/branches/master/code_owners/docs%2Findex.md HTTP/1.0
+```
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    {
+      "account": {
+        "_account_id": 1000096
+      }
+    },
+    {
+      "account": {
+        "_account_id": 1001439
+      },
+    }
+  ]
+```
+
 ## <a id="ids"> IDs
 
 ### <a id="path"> \{path\}
@@ -62,6 +109,15 @@ for a path.
 | Field Name    | Description |
 | ------------- | ----------- |
 | `code_owners` | The list of code owners as [CodeOwnerReferenceInfo](#code-owner-reference-info) entities.
+
+---
+
+### <a id="code-owner-info"> CodeOwnerInfo
+The `CodeOwnerInfo` entity contains information about a code owner.
+
+| Field Name  |          | Description |
+| ----------- | -------- | ----------- |
+| `account`   | optional | The account of the code owner as an [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entity. At the moment the `account` field is always set, but it's marked as optional as in the future we may also return groups as code owner and then the `account` field would be unset.
 
 ---
 
