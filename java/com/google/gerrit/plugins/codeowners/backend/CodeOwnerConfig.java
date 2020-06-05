@@ -61,6 +61,17 @@ public abstract class CodeOwnerConfig {
   }
 
   /**
+   * Relativizes the given path in relation to the folder path of this code owner config.
+   *
+   * @param path the path that should be relativized
+   * @return the relativized path of the given path in relation to the folder path of this code
+   *     owner config
+   */
+  public Path relativize(Path path) {
+    return key().folderPath().relativize(requireNonNull(path, "path"));
+  }
+
+  /**
    * Creates a builder form this code owner config.
    *
    * @return builder that was created from this code owner config
