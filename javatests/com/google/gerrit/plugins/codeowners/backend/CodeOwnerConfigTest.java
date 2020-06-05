@@ -23,6 +23,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Test;
 
@@ -182,6 +183,26 @@ public class CodeOwnerConfigTest {
     NullPointerException npe =
         assertThrows(NullPointerException.class, () -> codeOwnerConfig.localCodeOwners(null));
     assertThat(npe).hasMessageThat().isEqualTo("relativePath");
+  }
+
+  @Test
+  public void cannotRelativizeNullPath() throws Exception {
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> codeOwnerConfig.relativize(null));
+    assertThat(npe).hasMessageThat().isEqualTo("path");
+  }
+
+  @Test
+  public void relativizePath() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(
+                CodeOwnerConfig.Key.create(
+                    BranchNameKey.create(Project.nameKey("project"), "master"),
+                    Paths.get("/foo/bar/")))
+            .build();
+    Path relativizedPath = codeOwnerConfig.relativize(Paths.get("/foo/bar/baz.md"));
+    assertThat(relativizedPath).isEqualTo(Paths.get("baz.md"));
   }
 
   private static CodeOwnerConfig.Builder createCodeOwnerBuilder() {
