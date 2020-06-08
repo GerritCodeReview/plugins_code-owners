@@ -21,5 +21,6 @@ public class ApiModule extends FactoryModule {
   @Override
   protected void configure() {
     factory(CodeOwnerConfigsInBranchImpl.Factory.class);
+    factory(CodeOwnersInBranchImpl.Factory.class);
   }
 }
