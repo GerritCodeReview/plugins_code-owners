@@ -21,6 +21,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.server.account.AccountCache;
+import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.gerrit.server.account.externalids.ExternalIds;
@@ -36,11 +37,16 @@ public class CodeOwnerResolver {
 
   private final ExternalIds externalIds;
   private final AccountCache accountCache;
+  private final AccountControl.Factory accountControlFactory;
 
   @Inject
-  CodeOwnerResolver(ExternalIds externalIds, AccountCache accountCache) {
+  CodeOwnerResolver(
+      ExternalIds externalIds,
+      AccountCache accountCache,
+      AccountControl.Factory accountControlFactory) {
     this.externalIds = externalIds;
     this.accountCache = accountCache;
+    this.accountControlFactory = accountControlFactory;
   }
 
   /**
@@ -62,6 +68,9 @@ public class CodeOwnerResolver {
    *       Gerrit core that also treats ambiguous identifiers as non-resolveable.
    * </ul>
    *
+   * <p>This methods checks whether the calling user can see the accounts of the code owners and
+   * returns code owners whose accounts are visible.
+   *
    * @param codeOwnerReference the code owner reference that should be resolved
    * @return the {@link CodeOwner} for the code owner reference if it was resolved, otherwise {@link
    *     Optional#empty()}
@@ -71,7 +80,7 @@ public class CodeOwnerResolver {
 
     Optional<AccountState> accountState =
         lookupEmail(email).flatMap(accountId -> lookupAccount(accountId, email));
-    if (!accountState.isPresent()) {
+    if (!accountState.isPresent() || !isVisible(accountState.get(), email)) {
       return Optional.empty();
     }
 
@@ -127,5 +136,25 @@ public class CodeOwnerResolver {
       return Optional.empty();
     }
     return accountState;
+  }
+
+  /**
+   * Checks whether the given account is visible to the calling user.
+   *
+   * @param accountState the account for which it should be checked whether it's visible to the
+   *     calling user
+   * @param email email that was used to reference the account
+   * @return {@code true} if the given account is visible to the calling user, otherwise {@code
+   *     false}
+   */
+  private boolean isVisible(AccountState accountState, String email) {
+    if (!accountControlFactory.get().canSee(accountState)) {
+      logger.atFine().log(
+          "cannot resolve code owner email %s: account %s is not visible to calling user",
+          email, accountState.account().id());
+      return false;
+    }
+
+    return true;
   }
 }
