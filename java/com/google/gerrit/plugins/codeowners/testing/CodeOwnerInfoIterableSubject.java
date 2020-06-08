@@ -29,7 +29,7 @@ import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.gerrit.entities.Account;
-import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;

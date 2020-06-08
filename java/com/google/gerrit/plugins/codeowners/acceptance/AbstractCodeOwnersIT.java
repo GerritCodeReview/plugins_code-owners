@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackends;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Map;
@@ -72,11 +73,13 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
 
   protected CodeOwnerConfigOperations codeOwnerConfigOperations;
   protected CodeOwnerConfigsFactory codeOwnerConfigsApiFactory;
+  protected CodeOwnersFactory codeOwnersApiFactory;
 
   @Before
   public void baseSetup() throws Exception {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
     codeOwnerConfigsApiFactory = plugin.getSysInjector().getInstance(CodeOwnerConfigsFactory.class);
+    codeOwnersApiFactory = plugin.getSysInjector().getInstance(CodeOwnersFactory.class);
   }
 }
