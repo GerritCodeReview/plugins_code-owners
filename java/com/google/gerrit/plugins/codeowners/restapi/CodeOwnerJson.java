@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
