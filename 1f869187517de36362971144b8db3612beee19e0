@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e74d9b6b_a57bcfcb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/BackendModule.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-08T13:43:11Z",
+      "side": 1,
+      "message": "Hah, now you discovered my copy\u0026paste secrets.\n\nDone",
+      "parentUuid": "129bbe22_77575927",
+      "range": {
+        "startLine": 40,
+        "startChar": 41,
+        "endLine": 40,
+        "endChar": 49
+      },
+      "revId": "1f869187517de36362971144b8db3612beee19e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a524f0d0_e7cc4edb",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdate.java",
         "patchSetId": 3
@@ -36,6 +60,30 @@
       "writtenOn": "2020-06-05T08:16:02Z",
       "side": 1,
       "message": "I probably missed this from a previous change: I don\u0027t see \"throws IllegalStateException\", I think codeOwnersBackend.upsertCodeOwnerConfig should also have the \"throws\" statement.",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 0
+      },
+      "revId": "1f869187517de36362971144b8db3612beee19e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "69f8b594_21eb2ccd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-08T13:43:11Z",
+      "side": 1,
+      "message": "\u003e  I think codeOwnersBackend.upsertCodeOwnerConfig should also have the \"throws\" statement.\n\nIt\u0027s actually also documented there as part of the method description [1] (not as throws statement).\n\nI was considering to use @throws instead of describing this as part of the method description, but if we use @throws it feels like IllegalStateException should then also be explicitly mentioned in the throws declaration of the method, which we normally never do for IllegalStateException. So I thought that doing this would be too much overhead, but if anyone thinks this is better, I can switch to this style. Just let me know.\n\n[1]\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/269177/3/java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackend.java#41",
+      "parentUuid": "a524f0d0_e7cc4edb",
       "range": {
         "startLine": 88,
         "startChar": 0,
@@ -68,6 +116,30 @@
       "revId": "1f869187517de36362971144b8db3612beee19e0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fea2267b_0b6deeae",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdateTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-08T13:43:11Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "de003b86_5b6a31d5",
+      "range": {
+        "startLine": 64,
+        "startChar": 14,
+        "endLine": 64,
+        "endChar": 72
+      },
+      "revId": "1f869187517de36362971144b8db3612beee19e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
