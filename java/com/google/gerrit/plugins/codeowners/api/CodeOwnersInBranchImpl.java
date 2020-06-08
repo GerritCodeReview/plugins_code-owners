@@ -52,19 +52,17 @@ public class CodeOwnersInBranchImpl implements CodeOwners {
     return new QueryRequest() {
       @Override
       public List<CodeOwnerInfo> get(Path path) throws RestApiException {
-        return CodeOwnersInBranchImpl.this.get(path);
+        try {
+          GetCodeOwnersForPathInBranch getCodeOwners = getCodeOwnersProvider.get();
+          getOptions().forEach(getCodeOwners::addOption);
+          CodeOwnersInBranchCollection.PathResource pathInBranchResource =
+              codeOwnersInBranchCollection.parse(
+                  branchResource, IdString.fromDecoded(path.toString()));
+          return getCodeOwners.apply(pathInBranchResource).value();
+        } catch (Exception e) {
+          throw asRestApiException("Cannot get code owners", e);
+        }
       }
     };
-  }
-
-  private List<CodeOwnerInfo> get(Path path) throws RestApiException {
-    try {
-      GetCodeOwnersForPathInBranch getCodeOwners = getCodeOwnersProvider.get();
-      CodeOwnersInBranchCollection.PathResource pathInBranchResource =
-          codeOwnersInBranchCollection.parse(branchResource, IdString.fromDecoded(path.toString()));
-      return getCodeOwners.apply(pathInBranchResource).value();
-    } catch (Exception e) {
-      throw asRestApiException("Cannot get code owners", e);
-    }
   }
 }

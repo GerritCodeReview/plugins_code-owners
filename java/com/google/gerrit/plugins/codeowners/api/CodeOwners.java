@@ -14,11 +14,18 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Java API for code owners in a branch.
@@ -36,6 +43,8 @@ public interface CodeOwners {
    * {@link #get(String)}.
    */
   abstract class QueryRequest {
+    private Set<ListAccountsOption> options = EnumSet.noneOf(ListAccountsOption.class);
+
     /**
      * Lists the code owners for the given path.
      *
@@ -54,6 +63,35 @@ public interface CodeOwners {
      */
     public List<CodeOwnerInfo> get(String path) throws RestApiException {
       return get(Paths.get(path));
+    }
+
+    /**
+     * Adds {@link ListAccountsOption} options on the request to control which account fields should
+     * be populated in the {@link CodeOwnerInfo#account} field of the returned {@link
+     * CodeOwnerInfo}s.
+     *
+     * <p>Appends to the options which have been set so far.
+     */
+    public QueryRequest withOptions(
+        ListAccountsOption option, ListAccountsOption... furtherOptions) {
+      this.options.add(requireNonNull(option, "option"));
+      this.options.addAll(Arrays.asList(requireNonNull(furtherOptions, "furtherOptions")));
+      return this;
+    }
+
+    /** Returns the {@link ListAccountsOption} options which have been set on the request. */
+    public ImmutableSet<ListAccountsOption> getOptions() {
+      return ImmutableSet.copyOf(options);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('{');
+      if (!options.isEmpty()) {
+        sb.append("options=").append(options);
+      }
+      sb.append('}');
+      return sb.toString();
     }
   }
 
