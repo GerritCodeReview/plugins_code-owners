@@ -20,6 +20,8 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -45,6 +47,7 @@ import org.junit.Test;
 public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private RequestScopeOperations requestScopeOperations;
+  @Inject private GroupOperations groupOperations;
 
   @Test
   public void getCodeOwnersWhenNoCodeOwnerConfigsExist() throws Exception {
@@ -201,5 +204,56 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
                     .withOption(ListAccountsOption.ALL_EMAILS)
                     .get("/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("modify account not permitted");
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  public void nonVisibleCodeOwnersAreFilteredOut() throws Exception {
+    // Create 2 accounts that share a group.
+    TestAccount user2 = accountCreator.user2();
+    TestAccount user3 = accountCreator.create("user23", "user3@example.com", "User3", null);
+    groupOperations.newGroup().addMember(user2.id()).addMember(user3.id()).create();
+
+    // Create some code owner configs.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user3.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // Make the request as admin who can see all accounts.
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id(), user3.id());
+
+    // Make the request as user2. This user only shares a group with user3. Since
+    // "accounts.visibility" is set to "SAME_GROUP" user2 can only see user3's account (besides
+    // the own account).
+    requestScopeOperations.setApiUser(user2.id());
+
+    // We expect only user2 and user3 as code owner (user and admin should be filtered
+    // out because user2 cannot see their accounts).
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .hasAccountIdsThat()
+        .containsExactly(user2.id(), user3.id());
   }
 }
