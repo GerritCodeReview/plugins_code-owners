@@ -24,24 +24,24 @@ import org.junit.Test;
 
 /**
  * Acceptance test for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigForPathInBranch} REST endpoint
- * that require using via REST.
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint. that
+ * require using via REST.
  *
  * <p>Acceptance test for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigForPathInBranch} REST endpoint
- * that can use the Java API are implemented in {@link
- * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnerConfigForPathInBranchIT}.
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint that can
+ * use the Java API are implemented in {@link
+ * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnersForPathInBranchIT}.
  *
- * <p>The tests in this class do not depend on the used code owners backend, hence we do not need to
- * extend {@link AbstractCodeOwnersIT}.
+ * <p>The tests in this class are not depending on the used code owners backend, hence we do not
+ * need to extend {@link AbstractCodeOwnersIT}.
  */
-public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersTest {
+public class GetCodeOwnersForPathInBranchRestIT extends AbstractCodeOwnersTest {
   @Test
-  public void getCodeOwnersForInvalidPath() throws Exception {
+  public void getCodeOwnerConfigForInvalidPath() throws Exception {
     RestResponse r =
         adminRestSession.get(
             String.format(
-                "/projects/%s/branches/%s/code_owners.config/%s",
+                "/projects/%s/branches/%s/code_owners/%s",
                 IdString.fromDecoded(project.get()),
                 IdString.fromDecoded("master"),
                 IdString.fromDecoded("\0")));
