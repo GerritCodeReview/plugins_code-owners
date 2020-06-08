@@ -14,10 +14,23 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.extensions.client.ListAccountsOption;
+import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.server.ServerInitiated;
+import com.google.gerrit.server.account.AccountsUpdate;
+import com.google.gerrit.server.account.externalids.ExternalId;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import java.util.List;
 import org.junit.Test;
 
 /**
@@ -30,6 +43,9 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnersForPathInBranchRestIT}.
  */
 public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
+  @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
+  @Inject private RequestScopeOperations requestScopeOperations;
+
   @Test
   public void getCodeOwnersWhenNoCodeOwnerConfigsExist() throws Exception {
     assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
@@ -87,13 +103,103 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user2.email())
         .create();
 
-    assertThat(
-            codeOwnersApiFactory
-                .branch(project, "master")
-                .query()
-                .get(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md"))
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory
+            .branch(project, "master")
+            .query()
+            .get(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
         .hasAccountIdsThat()
         .containsExactly(admin.id(), user.id(), user2.id())
         .inOrder();
+    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null, null);
+  }
+
+  @Test
+  public void getCodeOwnersWithAccountDetails() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory
+            .branch(project, "master")
+            .query()
+            .withOption(ListAccountsOption.DETAILS)
+            .get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
+    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(admin.fullName());
+  }
+
+  @Test
+  public void getCodeOwnersWithSecondaryEmails() throws Exception {
+    // create a code owner config
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // add secondary email to admin account
+    String secondaryEmail = "admin@foo.bar";
+    accountsUpdate
+        .get()
+        .update(
+            "Add secondary email to admin test account",
+            admin.id(),
+            (a, u) -> u.addExternalId(ExternalId.createEmail(admin.id(), secondaryEmail)));
+
+    // Make the request with the admin user that has the 'Modify Account' global capability.
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory
+            .branch(project, "master")
+            .query()
+            .withOption(ListAccountsOption.ALL_EMAILS)
+            .get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
+    assertThat(Iterables.getOnlyElement(codeOwnerInfos).account.secondaryEmails)
+        .containsExactly(secondaryEmail);
+  }
+
+  @Test
+  public void cannotGetCodeOwnersWithSecondaryEmailsWithoutModifyAccountCapability()
+      throws Exception {
+    // create a code owner config
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // add secondary email to admin account
+    String secondaryEmail = "admin@foo.bar";
+    accountsUpdate
+        .get()
+        .update(
+            "Add secondary email to admin test account",
+            admin.id(),
+            (a, u) -> u.addExternalId(ExternalId.createEmail(admin.id(), secondaryEmail)));
+
+    // Make the request with a user that doesn't have the 'Modify Account' global capability.
+    requestScopeOperations.setApiUser(user.id());
+
+    AuthException exception =
+        assertThrows(
+            AuthException.class,
+            () ->
+                codeOwnersApiFactory
+                    .branch(project, "master")
+                    .query()
+                    .withOption(ListAccountsOption.ALL_EMAILS)
+                    .get("/foo/bar/baz.md"));
+    assertThat(exception).hasMessageThat().isEqualTo("modify account not permitted");
   }
 }
