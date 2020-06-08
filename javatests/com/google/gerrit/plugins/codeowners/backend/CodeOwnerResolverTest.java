@@ -19,6 +19,9 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.ServerInitiated;
@@ -35,6 +38,7 @@ import org.junit.Test;
 
 /** Tests for {@link CodeOwnerResolver}. */
 public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
+  @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private @ServerInitiated Provider<AccountsUpdate> accountsUpdate;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
 
@@ -92,5 +96,18 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     }
 
     assertThat(codeOwnerResolver.resolve(CodeOwnerReference.create(email))).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  public void resolveCodeOwnerReferenceForNonVisibleAccount() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // Set user2 as current user.
+    requestScopeOperations.setApiUser(user2.id());
+
+    // user2 cannot see the admin account since they do not share any group and
+    // "accounts.visibility" is set to "SAME_GROUP".
+    assertThat(codeOwnerResolver.resolve(CodeOwnerReference.create(admin.email()))).isEmpty();
   }
 }
