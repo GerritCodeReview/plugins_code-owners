@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.api;
 
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
+import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInBranchCollection;
@@ -52,14 +53,17 @@ public class CodeOwnersInBranchImpl implements CodeOwners {
     return new QueryRequest() {
       @Override
       public List<CodeOwnerInfo> get(Path path) throws RestApiException {
-        return CodeOwnersInBranchImpl.this.get(path);
+        return CodeOwnersInBranchImpl.this.get(path, this);
       }
     };
   }
 
-  private List<CodeOwnerInfo> get(Path path) throws RestApiException {
+  private List<CodeOwnerInfo> get(Path path, QueryRequest queryRequest) throws RestApiException {
     try {
       GetCodeOwnersForPathInBranch getCodeOwners = getCodeOwnersProvider.get();
+      for (ListAccountsOption option : queryRequest.getOptions()) {
+        getCodeOwners.addOption(option);
+      }
       CodeOwnersInBranchCollection.PathResource pathInBranchResource =
           codeOwnersInBranchCollection.parse(branchResource, IdString.fromDecoded(path.toString()));
       return getCodeOwners.apply(pathInBranchResource).value();
