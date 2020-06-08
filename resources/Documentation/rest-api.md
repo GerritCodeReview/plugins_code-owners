@@ -59,6 +59,13 @@ Code owners that are
 
 are omitted from the result.
 
+The following request parameters can be specified:
+
+| Field Name  |          | Description |
+| ----------- | -------- | ----------- |
+| `o`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) that controls which fields in the returned accounts should be populated. Can be specified multiple times. If not given, only the `_account_id` field for the account ID is populated.
+| `O`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
+
 As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
 
 #### Request

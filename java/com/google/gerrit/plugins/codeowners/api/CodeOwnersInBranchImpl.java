@@ -52,14 +52,15 @@ public class CodeOwnersInBranchImpl implements CodeOwners {
     return new QueryRequest() {
       @Override
       public List<CodeOwnerInfo> get(Path path) throws RestApiException {
-        return CodeOwnersInBranchImpl.this.get(path);
+        return CodeOwnersInBranchImpl.this.get(path, this);
       }
     };
   }
 
-  private List<CodeOwnerInfo> get(Path path) throws RestApiException {
+  private List<CodeOwnerInfo> get(Path path, QueryRequest queryRequest) throws RestApiException {
     try {
       GetCodeOwnersForPathInBranch getCodeOwners = getCodeOwnersProvider.get();
+      queryRequest.getOptions().forEach(getCodeOwners::addOption);
       CodeOwnersInBranchCollection.PathResource pathInBranchResource =
           codeOwnersInBranchCollection.parse(branchResource, IdString.fromDecoded(path.toString()));
       return getCodeOwners.apply(pathInBranchResource).value();
