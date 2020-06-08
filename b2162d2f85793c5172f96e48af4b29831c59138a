@@ -22,6 +22,30 @@
       "revId": "b2162d2f85793c5172f96e48af4b29831c59138a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d627b240_e54d0e53",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwners.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-08T13:20:45Z",
+      "side": 1,
+      "message": "Not really, but starting from change 269980 [1] we run all acceptance tests against all backends. If any code wrongly hard-codes against a certain backend, that should make some tests fail.\n\nFWIW we have the exact same situation for other classes without enforcement too, e.g. see the comment in the Groups class [2].\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/269980\n\n[2] https://source.corp.google.com/piper///depot/google3/third_party/java_src/gerritcodereview/gerrit/java/com/google/gerrit/server/group/db/Groups.java;rcl\u003d304149089;l\u003d41",
+      "parentUuid": "20e11a55_0a5ad9ca",
+      "range": {
+        "startLine": 26,
+        "startChar": 3,
+        "endLine": 26,
+        "endChar": 39
+      },
+      "revId": "b2162d2f85793c5172f96e48af4b29831c59138a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
