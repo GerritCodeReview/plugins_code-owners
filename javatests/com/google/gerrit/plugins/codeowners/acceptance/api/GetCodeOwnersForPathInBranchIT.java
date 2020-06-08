@@ -12,29 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.acceptance.restapi;
+package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
 
-import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.acceptance.TestAccount;
-import com.google.gerrit.entities.Project;
-import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerInfo;
-import com.google.gson.reflect.TypeToken;
-import java.util.List;
 import org.junit.Test;
 
 /**
  * Acceptance test for the {@link
  * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint.
+ *
+ * <p>Further tests for the {@link
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint that
+ * require using the REST API are implemented in {@link
+ * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnersForPathInBranchRestIT}.
  */
 public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
   @Test
   public void getCodeOwnersWhenNoCodeOwnerConfigsExist() throws Exception {
-    assertThat(getCodeOwnersViaRest(project, "master", "/foo/bar/baz.md")).isEmpty();
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .isEmpty();
   }
 
   @Test
@@ -47,7 +46,8 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .addCodeOwnerEmail(user.email())
         .create();
-    assertThat(getCodeOwnersViaRest(project, "master", "/foo/bar/baz.md")).isEmpty();
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .isEmpty();
   }
 
   @Test
@@ -88,36 +88,12 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
         .create();
 
     assertThat(
-            getCodeOwnersViaRest(
-                project, "master", useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md"))
+            codeOwnersApiFactory
+                .branch(project, "master")
+                .query()
+                .get(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md"))
         .hasAccountIdsThat()
         .containsExactly(admin.id(), user.id(), user2.id())
         .inOrder();
-  }
-
-  @Test
-  public void getCodeOwnersForInvalidPath() throws Exception {
-    RestResponse r =
-        adminRestSession.get(
-            String.format(
-                "/projects/%s/branches/%s/code_owners/%s",
-                IdString.fromDecoded(project.get()),
-                IdString.fromDecoded("master"),
-                IdString.fromDecoded("\0")));
-    r.assertBadRequest();
-    assertThat(r.getEntityContent()).contains("Nul character not allowed");
-  }
-
-  private List<CodeOwnerInfo> getCodeOwnersViaRest(
-      Project.NameKey project, String branchName, String path) throws Exception {
-    RestResponse r =
-        adminRestSession.get(
-            String.format(
-                "/projects/%s/branches/%s/code_owners/%s",
-                IdString.fromDecoded(project.get()),
-                IdString.fromDecoded(branchName),
-                IdString.fromDecoded(path)));
-    r.assertOK();
-    return newGson().fromJson(r.getReader(), new TypeToken<List<CodeOwnerInfo>>() {}.getType());
   }
 }
