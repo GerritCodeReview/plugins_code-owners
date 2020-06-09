@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fbadb8c5_0193c81f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigCreation.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-09T11:43:41Z",
+      "side": 1,
+      "message": "Can you add explanation why is this (and below) optional? I understand that branch and folder path have some default, but at the very least project should always be set? Also, branch and folderPath should be set to their defaults rather than to Optional.empty.",
+      "range": {
+        "startLine": 45,
+        "startChar": 18,
+        "endLine": 45,
+        "endChar": 26
+      },
+      "revId": "abe2ac2c2d83b54c0833be51456f83179909e7fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "86946652_91cf7fcb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-09T11:43:41Z",
+      "side": 1,
+      "message": "shortBranchName?",
+      "range": {
+        "startLine": 134,
+        "startChar": 18,
+        "endLine": 134,
+        "endChar": 28
+      },
+      "revId": "abe2ac2c2d83b54c0833be51456f83179909e7fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7f03ceb0_4dd304c5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-09T11:43:41Z",
+      "side": 1,
+      "message": "getShortBranchName?",
+      "range": {
+        "startLine": 52,
+        "startChar": 14,
+        "endLine": 52,
+        "endChar": 27
+      },
+      "revId": "abe2ac2c2d83b54c0833be51456f83179909e7fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
