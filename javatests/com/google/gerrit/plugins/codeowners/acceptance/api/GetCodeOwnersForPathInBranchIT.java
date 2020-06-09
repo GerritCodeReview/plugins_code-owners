@@ -329,4 +329,76 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // there is no assertion for this.
     assertThat(Iterables.getFirst(codeOwnerInfos, null)).hasAccountIdThat().isEqualTo(user.id());
   }
+
+  @Test
+  public void getCodeOwnersWithLimit() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // get code owners with different limits
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(1).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(1);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them we get when the limit is 1
+    assertThat(Iterables.getFirst(codeOwnerInfos, null))
+        .hasAccountIdThatIsEqualToEitherOr(user.id(), user2.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(2).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user.id(), user2.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(3).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  public void getCodeOwnersWithZeroLimitIsUnlimited() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // get code owners with '0' as limit
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(0).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
 }

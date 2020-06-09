@@ -41,6 +41,7 @@ public interface CodeOwners {
    */
   abstract class QueryRequest {
     private Set<ListAccountsOption> options = EnumSet.noneOf(ListAccountsOption.class);
+    private int limit;
 
     /**
      * Lists the code owners for the given path.
@@ -86,9 +87,24 @@ public interface CodeOwners {
       return this;
     }
 
+    /**
+     * Sets a limit on the number of code owners that should be returned
+     *
+     * @param limit the limit
+     */
+    public QueryRequest withLimit(int limit) {
+      this.limit = limit;
+      return this;
+    }
+
     /** Returns the {@link ListAccountsOption} options which have been set on the request. */
     public Set<ListAccountsOption> getOptions() {
       return options;
+    }
+
+    /** Returns the limit which has been set on the request. */
+    public int getLimit() {
+      return limit;
     }
 
     @Override
