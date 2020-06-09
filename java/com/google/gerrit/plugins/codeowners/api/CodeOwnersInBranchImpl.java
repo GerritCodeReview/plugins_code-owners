@@ -55,6 +55,7 @@ public class CodeOwnersInBranchImpl implements CodeOwners {
         try {
           GetCodeOwnersForPathInBranch getCodeOwners = getCodeOwnersProvider.get();
           getOptions().forEach(getCodeOwners::addOption);
+          getCodeOwners.setLimit(getLimit());
           CodeOwnersInBranchCollection.PathResource pathInBranchResource =
               codeOwnersInBranchCollection.parse(
                   branchResource, IdString.fromDecoded(path.toString()));
