@@ -19,15 +19,17 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterable
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
 import com.google.gerrit.server.account.externalids.ExternalId;
@@ -167,7 +169,9 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .withOptions(ListAccountsOption.ALL_EMAILS)
             .get("/foo/bar/baz.md");
     assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
-    assertThat(Iterables.getOnlyElement(codeOwnerInfos).account.secondaryEmails)
+    assertThatList(codeOwnerInfos)
+        .onlyElement()
+        .hasSecondaryEmailsThat()
         .containsExactly(secondaryEmail);
   }
 
@@ -235,7 +239,9 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .get("/foo/bar/baz.md");
     assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
     assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(admin.fullName());
-    assertThat(Iterables.getOnlyElement(codeOwnerInfos).account.secondaryEmails)
+    assertThatList(codeOwnerInfos)
+        .onlyElement()
+        .hasSecondaryEmailsThat()
         .containsExactly(secondaryEmail);
   }
 
@@ -382,5 +388,101 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // The other 2 code owners come in a random order, but verifying this in a test is hard, hence
     // there is no assertion for this.
     assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isEqualTo(user.id());
+  }
+
+  @Test
+  public void getCodeOwnersIsLimitedByDefault() throws Exception {
+    // Create a code owner config that has more code owners than the number of code owners which are
+    // returned by default.
+    TestCodeOwnerConfigCreation.Builder codeOwnerConfigCreation =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/");
+    for (int i = 1; i <= GetCodeOwnersForPathInBranch.DEFAULT_LIMIT + 1; i++) {
+      TestAccount user =
+          accountCreator.create("foo" + i, "foo" + i + "@test.com", "Foo " + i, null);
+      codeOwnerConfigCreation.addCodeOwnerEmail(user.email());
+    }
+    codeOwnerConfigCreation.create();
+
+    // Assert that the result is limited by the default limit.
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar.md");
+    assertThat(codeOwnerInfos).hasSize(GetCodeOwnersForPathInBranch.DEFAULT_LIMIT);
+  }
+
+  @Test
+  public void getCodeOwnersWithLimit() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // get code owners with different limits
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(1).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(1);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them we get when the limit is 1
+    assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isAnyOf(user.id(), user2.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(2).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user.id(), user2.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(3).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  public void cannotGetCodeOwnersWithoutLimit() throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                codeOwnersApiFactory
+                    .branch(project, "master")
+                    .query()
+                    .withLimit(GetCodeOwnersForPathInBranch.UNLIMITED)
+                    .get("/foo/bar/baz.md"));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "limit cannot be %d (unlimited)", GetCodeOwnersForPathInBranch.UNLIMITED));
+  }
+
+  @Test
+  public void limitCannotBeNegative() throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                codeOwnersApiFactory
+                    .branch(project, "master")
+                    .query()
+                    .withLimit(-1)
+                    .get("/foo/bar/baz.md"));
+    assertThat(exception).hasMessageThat().isEqualTo("limit cannot be negative");
   }
 }
