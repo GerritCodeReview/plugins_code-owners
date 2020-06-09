@@ -57,6 +57,7 @@ Code owners that are
 * not visible to the calling user (according to
 [accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
 setting),
+* are referenced by non-visible secondary emails
 * not resolvable (emails for which no Gerrit account exists) or
 * ambiguous (the same email is assigned to multiple accounts)
 
