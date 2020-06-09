@@ -14,15 +14,17 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy.CodeOwnerConfigVisitor;
 import java.nio.file.Paths;
-import java.util.function.Consumer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InOrder;
@@ -42,7 +44,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
 
   @Test
   public void visitorNotInvokedIfNotCodeOwnerConfigExists() throws Exception {
-    Consumer<CodeOwnerConfig> visitor = createVisitorMock();
+    CodeOwnerConfigVisitor visitor = mock(CodeOwnerConfigVisitor.class);
     codeOwnerConfigHierarchy.visit(
         BranchNameKey.create(project, "master"), Paths.get("/foo/bar/baz.md"), visitor);
     verifyZeroInteractions(visitor);
@@ -60,7 +62,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    Consumer<CodeOwnerConfig> visitor = createVisitorMock();
+    CodeOwnerConfigVisitor visitor = mock(CodeOwnerConfigVisitor.class);
     codeOwnerConfigHierarchy.visit(
         BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz.md"), visitor);
     verifyZeroInteractions(visitor);
@@ -97,7 +99,8 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             .addCodeOwnerEmail(admin.email())
             .create();
 
-    Consumer<CodeOwnerConfig> visitor = createVisitorMock();
+    CodeOwnerConfigVisitor visitor = mock(CodeOwnerConfigVisitor.class);
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
     codeOwnerConfigHierarchy.visit(
         BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz.md"), visitor);
 
@@ -106,18 +109,62 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     InOrder orderVerifier = Mockito.inOrder(visitor);
     orderVerifier
         .verify(visitor)
-        .accept(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
     orderVerifier
         .verify(visitor)
-        .accept(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
     orderVerifier
         .verify(visitor)
-        .accept(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
   }
 
-  @SuppressWarnings("unchecked")
-  private Consumer<CodeOwnerConfig> createVisitorMock() {
-    return mock(Consumer.class);
+  @Test
+  public void visitorCanStopTheIterationOverCodeOwnerConfigsByReturningFalse() throws Exception {
+    String branch = "master";
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branch)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key fooBarCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/bar/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfigVisitor visitor = mock(CodeOwnerConfigVisitor.class);
+    // Return true for the first time the visitor is invoked, and false for all further invocations.
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true).thenReturn(false);
+    codeOwnerConfigHierarchy.visit(
+        BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz.md"), visitor);
+
+    // Verify that we received the callbacks in the right order, starting from the folder of the
+    // given path up to the root folder. We expect only 2 callbacks, since the visitor returns false
+    // for the second invocation.
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
   }
 }
