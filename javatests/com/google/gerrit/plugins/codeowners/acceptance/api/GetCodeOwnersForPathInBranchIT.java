@@ -289,4 +289,43 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
         .hasAccountIdsThat()
         .containsExactly(user2.id(), user3.id());
   }
+
+  @Test
+  public void getCodeOwnersReferencedBySecondaryEmails() throws Exception {
+    // add secondary email to user account
+    String secondaryEmail = "user@foo.bar";
+    accountsUpdate
+        .get()
+        .update(
+            "Add secondary email to user test account",
+            user.id(),
+            (a, u) -> u.addExternalId(ExternalId.createEmail(user.id(), secondaryEmail)));
+
+    // create a code owner config
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(secondaryEmail)
+        .create();
+
+    // admin has the "Modify Account" global capability and hence can see secondary emails
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .hasAccountIdsThat()
+        .containsExactly(user.id());
+
+    // user can see the own secondary email
+    requestScopeOperations.setApiUser(user.id());
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .hasAccountIdsThat()
+        .containsExactly(user.id());
+
+    // user2 doesn't have the 'Modify Account' global capability and hence cannot see the secondary
+    // email
+    TestAccount user2 = accountCreator.user2();
+    requestScopeOperations.setApiUser(user2.id());
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .isEmpty();
+  }
 }
