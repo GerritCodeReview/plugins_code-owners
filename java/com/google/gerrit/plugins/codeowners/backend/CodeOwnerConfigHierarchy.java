@@ -18,7 +18,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
-import java.util.function.Consumer;
+import java.util.Optional;
 
 /**
  * Class to visit the code owner configs in a given branch that apply for a given path by following
@@ -26,6 +26,18 @@ import java.util.function.Consumer;
  */
 @Singleton
 public class CodeOwnerConfigHierarchy {
+  /** Callback interface to visit a code owner config. */
+  @FunctionalInterface
+  public interface CodeOwnerConfigVisitor {
+    /**
+     * Callback for a code owner config.
+     *
+     * @param codeOwnerConfig the code owner config that was found
+     * @return whether further code owner configs should be visited
+     */
+    boolean visit(CodeOwnerConfig codeOwnerConfig);
+  }
+
   private final CodeOwners codeOwners;
 
   @Inject
@@ -43,7 +55,7 @@ public class CodeOwnerConfigHierarchy {
    *     configs
    */
   public void visit(
-      BranchNameKey branch, Path path, Consumer<CodeOwnerConfig> codeOwnerConfigVisitor) {
+      BranchNameKey branch, Path path, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
     // Next path in which we look for a code owner configuration. We start at the given path and
     // then go up the parent hierarchy.
     Path ownerConfigFolder = path;
@@ -52,9 +64,14 @@ public class CodeOwnerConfigHierarchy {
     while (ownerConfigFolder != null) {
       // Read code owner config and invoke the codeOwnerConfigVisitor if the code owner config
       // exists.
-      codeOwners
-          .get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder))
-          .ifPresent(codeOwnerConfigVisitor);
+      Optional<CodeOwnerConfig> codeOwnerConfig =
+          codeOwners.get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder));
+      if (codeOwnerConfig.isPresent()) {
+        boolean visitFurtherCodeOwnerConfigs = codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
+        if (!visitFurtherCodeOwnerConfigs) {
+          return;
+        }
+      }
 
       // Continue the loop with the next parent folder.
       ownerConfigFolder = ownerConfigFolder.getParent();

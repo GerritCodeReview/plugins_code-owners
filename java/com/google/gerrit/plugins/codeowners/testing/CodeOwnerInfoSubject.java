@@ -50,6 +50,25 @@ public class CodeOwnerInfoSubject extends Subject {
     return check("accountId()").that(Account.id(codeOwnerInfo().account._accountId));
   }
 
+  /**
+   * Asserts that the account ID of the code owner info is one of the given account IDs.
+   *
+   * <p>The assertion fails if the account ID of the code owner info does not match any of the given
+   * account IDs.
+   *
+   * @param eitherAccountId first account ID which is OK
+   * @param orAccountId second account ID which is OK
+   */
+  public void hasAccountIdThatIsEqualToEitherOr(
+      Account.Id eitherAccountId, Account.Id orAccountId) {
+    Account.Id actualAccountId = Account.id(codeOwnerInfo().account._accountId);
+    if (!actualAccountId.equals(eitherAccountId) && !actualAccountId.equals(orAccountId)) {
+      check("accountId()")
+          .withMessage("is neither account ID %s nor account ID %s", eitherAccountId, orAccountId)
+          .fail();
+    }
+  }
+
   private CodeOwnerInfo codeOwnerInfo() {
     isNotNull();
     return codeOwnerInfo;
