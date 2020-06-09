@@ -26,6 +26,7 @@ import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.server.ServerInitiated;
@@ -361,5 +362,91 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // The other 2 code owners come in a random order, but verifying this is a test is hard, hence
     // there is no assertion for this.
     assertThat(Iterables.getFirst(codeOwnerInfos, null)).hasAccountIdThat().isEqualTo(user.id());
+  }
+
+  @Test
+  public void getCodeOwnersWithLimit() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // get code owners with different limits
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(1).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(1);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them we get when the limit is 1
+    assertThat(Iterables.getFirst(codeOwnerInfos, null))
+        .hasAccountIdThatIsEqualToEitherOr(user.id(), user2.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(2).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user.id(), user2.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(3).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  public void getCodeOwnersWithZeroLimitIsUnlimited() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // get code owners with '0' as limit
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withLimit(0).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  public void limitCannotBeNegative() throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                codeOwnersApiFactory
+                    .branch(project, "master")
+                    .query()
+                    .withLimit(-1)
+                    .get("/foo/bar/baz.md"));
+    assertThat(exception).hasMessageThat().isEqualTo("limit cannot be negative");
   }
 }
