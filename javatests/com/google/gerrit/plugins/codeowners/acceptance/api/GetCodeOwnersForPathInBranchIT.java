@@ -113,7 +113,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .get(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md");
     assertThat(codeOwnerInfos)
         .hasAccountIdsThat()
-        .containsExactly(admin.id(), user.id(), user2.id())
+        .containsExactly(user2.id(), user.id(), admin.id())
         .inOrder();
     assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null, null);
   }
