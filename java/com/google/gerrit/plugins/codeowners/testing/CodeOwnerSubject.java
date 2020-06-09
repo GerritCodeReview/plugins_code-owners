@@ -21,6 +21,8 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.truth.OptionalSubject;
+import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link CodeOwner}s. */
 public class CodeOwnerSubject extends Subject {
@@ -32,6 +34,22 @@ public class CodeOwnerSubject extends Subject {
    */
   public static CodeOwnerSubject assertThat(CodeOwner codeOwner) {
     return assertAbout(CodeOwnerSubject::new).that(codeOwner);
+  }
+
+  /**
+   * Starts fluent chain to do assertions on an {@link Optional} {@link CodeOwner}.
+   *
+   * @param codeOwner optional code owner on which assertions should be done
+   * @return the created {@link OptionalSubject}
+   */
+  public static OptionalSubject<CodeOwnerSubject, CodeOwner> assertThat(
+      Optional<CodeOwner> codeOwner) {
+    return OptionalSubject.assertThat(codeOwner, codeOwners());
+  }
+
+  /** Creates subject factory for mapping {@link CodeOwner}s to {@link CodeOwnerSubject}s. */
+  private static Subject.Factory<CodeOwnerSubject, CodeOwner> codeOwners() {
+    return CodeOwnerSubject::new;
   }
 
   private final CodeOwner codeOwner;
