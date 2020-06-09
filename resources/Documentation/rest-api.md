@@ -71,6 +71,9 @@ The following request parameters can be specified:
 | `O`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
 
 As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
+The returned code owners are sorted by an internal score that expresses how good
+the code owners are considered as reviewers/approvers for the path. Code owners
+with higher scores are returned first.
 
 #### Request
 
