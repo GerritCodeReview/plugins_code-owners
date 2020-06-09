@@ -55,6 +55,8 @@ import org.kohsuke.args4j.Option;
  */
 public class GetCodeOwnersForPathInBranch
     implements RestReadView<CodeOwnersInBranchCollection.PathResource> {
+  private static final int UNLIMITED = 0;
+
   private final PermissionBackend permissionBackend;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final CodeOwnerResolver codeOwnerResolver;
@@ -62,6 +64,7 @@ public class GetCodeOwnersForPathInBranch
 
   private EnumSet<ListAccountsOption> options;
   private Set<String> hexOptions;
+  private int limit;
 
   @Option(
       name = "-o",
@@ -76,6 +79,15 @@ public class GetCodeOwnersForPathInBranch
           "Options to control which fields should be populated for the returned account, in hex")
   void setOptionFlagsHex(String hex) {
     hexOptions.add(hex);
+  }
+
+  @Option(
+      name = "--limit",
+      aliases = {"-n"},
+      metaVar = "CNT",
+      usage = "maximum number of code owners to list (0 = unlimited)")
+  public void setLimit(int limit) {
+    this.limit = limit;
   }
 
   @Inject
@@ -97,6 +109,10 @@ public class GetCodeOwnersForPathInBranch
       throws AuthException, BadRequestException, PermissionBackendException {
     parseHexOptions();
 
+    if (limit < 0) {
+      throw new BadRequestException("limit cannot be negative");
+    }
+
     // The maximal possible distance. This is the distance that applies to code owners that are
     // defined in the root code owner configuration.
     int maxDistance = rsrc.getPath().getNameCount();
@@ -114,11 +130,24 @@ public class GetCodeOwnersForPathInBranch
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
           localCodeOwners.forEach(
               localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
+          if (limit != UNLIMITED && codeOwners.size() >= limit) {
+            // We have gathered enough code owners and do not need to look at further code owner
+            // configs.
+            // We can abort here, since all further code owners will have a lower distance scoring
+            // and hence they would appear at the end of the sorted code owners list and be dropped
+            // due to the limit.
+            return false;
+          }
+          return true;
         });
+
+    // TODO(ekempin): Add a _more_code_owners field to CodeOwnerInfo and populate it if there are
+    // further results which are dropped due to the limit.
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(sortCodeOwners(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+            .format(
+                limit(sortCodeOwners(distanceScoring.build(), ImmutableSet.copyOf(codeOwners)))));
   }
 
   private void parseHexOptions() throws BadRequestException {
@@ -146,6 +175,13 @@ public class GetCodeOwnersForPathInBranch
       fillOptions.add(FillOptions.SECONDARY_EMAILS);
     }
     return fillOptions;
+  }
+
+  private ImmutableList<CodeOwner> limit(ImmutableList<CodeOwner> codeOwners) {
+    if (limit == UNLIMITED) {
+      return codeOwners;
+    }
+    return codeOwners.stream().limit(limit).collect(toImmutableList());
   }
 
   /**
