@@ -20,12 +20,17 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.gerrit.server.account.externalids.ExternalIds;
+import com.google.gerrit.server.permissions.GlobalPermission;
+import com.google.gerrit.server.permissions.PermissionBackend;
+import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
@@ -35,15 +40,21 @@ import java.util.Optional;
 public class CodeOwnerResolver {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final PermissionBackend permissionBackend;
+  private final Provider<CurrentUser> currentUser;
   private final ExternalIds externalIds;
   private final AccountCache accountCache;
   private final AccountControl.Factory accountControlFactory;
 
   @Inject
   CodeOwnerResolver(
+      PermissionBackend permissionBackend,
+      Provider<CurrentUser> currentUser,
       ExternalIds externalIds,
       AccountCache accountCache,
       AccountControl.Factory accountControlFactory) {
+    this.permissionBackend = permissionBackend;
+    this.currentUser = currentUser;
     this.externalIds = externalIds;
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
@@ -127,13 +138,16 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Checks whether the given account is visible to the calling user.
+   * Checks whether the given account and email are visible to the calling user.
+   *
+   * <p>If the email is a secondary email it is only visible if it is owned by the calling user or
+   * if the calling user has the {@code Modify Account} global capability.
    *
    * @param accountState the account for which it should be checked whether it's visible to the
    *     calling user
    * @param email email that was used to reference the account
-   * @return {@code true} if the given account is visible to the calling user, otherwise {@code
-   *     false}
+   * @return {@code true} if the given account and email are visible to the calling user, otherwise
+   *     {@code false}
    */
   private boolean isVisible(AccountState accountState, String email) {
     if (!accountControlFactory.get().canSee(accountState)) {
@@ -141,6 +155,34 @@ public class CodeOwnerResolver {
           "cannot resolve code owner email %s: account %s is not visible to calling user",
           email, accountState.account().id());
       return false;
+    }
+
+    if (!email.equals(accountState.account().preferredEmail())) {
+      // the email is a secondary email of the account
+
+      if (currentUser.get().isIdentifiedUser()
+          && currentUser.get().asIdentifiedUser().hasEmailAddress(email)) {
+        // it's a secondary email of the calling user, users can always see their own secondary
+        // emails
+        return true;
+      }
+
+      // the email is a secondary email of another account, check if the calling user can see
+      // secondary emails
+      try {
+        if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
+          logger.atFine().log(
+              "cannot resolve code owner email %s: account %s is referenced by secondary email,"
+                  + " but the calling user cannot see secondary emails",
+              email, accountState.account().id());
+          return false;
+        }
+      } catch (PermissionBackendException e) {
+        throw new StorageException(
+            String.format(
+                "failed to test the %s global capability", GlobalPermission.MODIFY_ACCOUNT),
+            e);
+      }
     }
 
     return true;
