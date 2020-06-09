@@ -10,6 +10,7 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         "//java/com/google/gerrit/entities",
+        "//java/com/google/gerrit/truth",
         "//lib/truth",
         "//plugins/code-owners:code-owners__plugin",
     ],
