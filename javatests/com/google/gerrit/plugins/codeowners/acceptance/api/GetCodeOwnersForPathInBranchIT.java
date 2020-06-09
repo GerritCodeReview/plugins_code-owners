@@ -113,7 +113,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .get(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md");
     assertThat(codeOwnerInfos)
         .hasAccountIdsThat()
-        .containsExactly(admin.id(), user.id(), user2.id())
+        .containsExactly(user2.id(), user.id(), admin.id())
         .inOrder();
     assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null, null);
   }
@@ -243,7 +243,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // Make the request as admin who can see all accounts.
     assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
         .hasAccountIdsThat()
-        .containsExactly(admin.id(), user.id(), user2.id(), user3.id())
+        .containsExactly(user2.id(), user.id(), admin.id(), user3.id())
         .inOrder();
 
     // Make the request as user2. This user only shares a group with user3. Since
