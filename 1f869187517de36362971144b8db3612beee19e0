@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "5acd2207_f18edd3d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-09T08:21:54Z",
+      "side": 1,
+      "message": "I don\u0027t have a strong opinion, so I\u0027ll let Patrick weigh in on this.",
+      "parentUuid": "69f8b594_21eb2ccd",
+      "range": {
+        "startLine": 88,
+        "startChar": 0,
+        "endLine": 90,
+        "endChar": 0
+      },
+      "revId": "1f869187517de36362971144b8db3612beee19e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "de003b86_5b6a31d5",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdateTest.java",
         "patchSetId": 3
