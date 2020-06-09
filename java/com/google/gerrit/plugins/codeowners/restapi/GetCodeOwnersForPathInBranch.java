@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.extensions.client.ListAccountsOption;
@@ -56,6 +57,9 @@ import org.kohsuke.args4j.Option;
  */
 public class GetCodeOwnersForPathInBranch
     implements RestReadView<CodeOwnersInBranchCollection.PathResource> {
+  @VisibleForTesting public static final int DEFAULT_LIMIT = 10;
+  @VisibleForTesting public static final int UNLIMITED = 0;
+
   private final PermissionBackend permissionBackend;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final CodeOwnerResolver codeOwnerResolver;
@@ -63,6 +67,7 @@ public class GetCodeOwnersForPathInBranch
 
   private EnumSet<ListAccountsOption> options;
   private Set<String> hexOptions;
+  private int limit = DEFAULT_LIMIT;
 
   @Option(
       name = "-o",
@@ -77,6 +82,15 @@ public class GetCodeOwnersForPathInBranch
           "Options to control which fields should be populated for the returned account, in hex")
   void setOptionFlagsHex(String hex) {
     hexOptions.add(hex);
+  }
+
+  @Option(
+      name = "--limit",
+      aliases = {"-n"},
+      metaVar = "CNT",
+      usage = "maximum number of code owners to list (default = " + DEFAULT_LIMIT + ")")
+  public void setLimit(int limit) {
+    this.limit = limit;
   }
 
   @Inject
@@ -97,6 +111,7 @@ public class GetCodeOwnersForPathInBranch
   public Response<List<CodeOwnerInfo>> apply(PathResource rsrc)
       throws AuthException, BadRequestException, PermissionBackendException {
     parseHexOptions();
+    validateLimit();
 
     // The maximal possible distance. This is the distance that applies to code owners that are
     // defined in the root code owner configuration.
@@ -115,11 +130,19 @@ public class GetCodeOwnersForPathInBranch
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
           localCodeOwners.forEach(
               localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
+
+          // If codeOwners.size() >= limit we have gathered enough code owners and do not need to
+          // look at further code owner configs.
+          // We can abort here, since all further code owners will have a lower distance scoring
+          // and hence they would appear at the end of the sorted code owners list and be dropped
+          // due to the limit.
+          return codeOwners.size() < limit;
         });
+
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(sortCodeOwners(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+            .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
   }
 
   private void parseHexOptions() throws BadRequestException {
@@ -131,6 +154,14 @@ public class GetCodeOwnersForPathInBranch
         throw new BadRequestException(
             String.format("\"%s\" is not a valid value for \"-O\"", hexOption), e);
       }
+    }
+  }
+
+  private void validateLimit() throws BadRequestException {
+    if (limit < 0) {
+      throw new BadRequestException("limit cannot be negative");
+    } else if (limit == UNLIMITED) {
+      throw new BadRequestException(String.format("limit cannot be %d (unlimited)", UNLIMITED));
     }
   }
 
@@ -149,6 +180,11 @@ public class GetCodeOwnersForPathInBranch
     return fillOptions;
   }
 
+  private ImmutableList<CodeOwner> sortAndLimit(
+      CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
+    return sortCodeOwners(distanceScoring, codeOwners).limit(limit).collect(toImmutableList());
+  }
+
   /**
    * Sorts the code owners.
    *
@@ -160,11 +196,9 @@ public class GetCodeOwnersForPathInBranch
    * @param codeOwners the code owners that should be sorted
    * @return the sorted code owners
    */
-  private static ImmutableList<CodeOwner> sortCodeOwners(
+  private static Stream<CodeOwner> sortCodeOwners(
       CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
-    return randomizeOrder(codeOwners)
-        .sorted(distanceScoring.comparingByScoring())
-        .collect(toImmutableList());
+    return randomizeOrder(codeOwners).sorted(distanceScoring.comparingByScoring());
   }
 
   /**
