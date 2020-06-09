@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
@@ -59,6 +60,15 @@ public class CodeOwnerInfoSubject extends Subject {
    */
   public ComparableSubject<Account.Id> hasAccountIdThat() {
     return check("accountId()").that(Account.id(codeOwnerInfo().account._accountId));
+  }
+
+  /**
+   * Returns an {@link IterableSubject} for the secondary emails of the code owner infos.
+   *
+   * @return {@link IterableSubject} for the secondary emails of the code owner infos
+   */
+  public IterableSubject hasSecondaryEmailsThat() {
+    return check("account().secondaryEmails()").that(codeOwnerInfo().account.secondaryEmails);
   }
 
   private CodeOwnerInfo codeOwnerInfo() {
