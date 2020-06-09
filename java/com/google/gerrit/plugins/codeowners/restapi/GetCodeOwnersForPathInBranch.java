@@ -27,6 +27,8 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInBranchCollection.PathResource;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
@@ -34,7 +36,6 @@ import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -89,17 +90,30 @@ public class GetCodeOwnersForPathInBranch
   @Override
   public Response<List<CodeOwnerInfo>> apply(PathResource rsrc)
       throws AuthException, PermissionBackendException {
+    // The maximal possible distance. This is the distance that applies to code owners that are
+    // defined in the root code owner configuration.
+    int maxDistance = rsrc.getPath().getNameCount();
+
+    CodeOwnerScoring.Builder distanceScoring = CodeOwnerScore.DISTANCE.createScoring(maxDistance);
+
     Set<CodeOwner> codeOwners = new HashSet<>();
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
         rsrc.getPath(),
-        codeOwnerConfig ->
-            codeOwners.addAll(
-                codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath())));
+        codeOwnerConfig -> {
+          ImmutableSet<CodeOwner> localCodeOwners =
+              codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath());
+          codeOwners.addAll(localCodeOwners);
+          int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
+          localCodeOwners.forEach(
+              localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
+        });
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(sortCodeOwnersByAccountId(ImmutableSet.copyOf(codeOwners))));
+            .format(
+                sortCodeOwnersByDistance(
+                    distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
   }
 
   private Set<FillOptions> getFillOptions() throws AuthException, PermissionBackendException {
@@ -117,10 +131,10 @@ public class GetCodeOwnersForPathInBranch
     return fillOptions;
   }
 
-  private static ImmutableList<CodeOwner> sortCodeOwnersByAccountId(
-      ImmutableSet<CodeOwner> codeOwners) {
+  private static ImmutableList<CodeOwner> sortCodeOwnersByDistance(
+      CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
     return codeOwners.stream()
-        .sorted(Comparator.comparing(CodeOwner::accountId))
+        .sorted(distanceScoring.comparingByScoring().thenComparing(CodeOwner::accountId))
         .collect(toImmutableList());
   }
 }
