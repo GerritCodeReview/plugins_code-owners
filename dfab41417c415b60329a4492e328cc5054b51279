@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9b1ce970_16f377b2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperations.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-09T15:13:46Z",
+      "side": 1,
+      "message": "If it\u0027s the sole purpose of this API to do what the production logic does, but without a permission check, could we solve this similar to what we have internally where we can swap out the permission backend in tests?\n\ntry (AutoClosable ignored \u003d testPermissionBackend.allChecksSucceed()) {\n  // ... access owners without any permission check.\n}\n\nThere might be more that this test API will do (ignore certain validations, etc.), but if it\u0027s solely permissions, I think the generic solution using a test permission backend would be easier.",
+      "revId": "dfab41417c415b60329a4492e328cc5054b51279",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "56439d4d_06c68a52",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-09T15:13:46Z",
+      "side": 1,
+      "message": "nit: could this be static and you pass down codeOwners in the constructor?",
+      "revId": "dfab41417c415b60329a4492e328cc5054b51279",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
