@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerIterableSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
@@ -30,6 +31,7 @@ import com.google.gerrit.server.account.externalids.ExternalIdNotes;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Repository;
 import org.junit.Before;
@@ -148,5 +150,59 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // email of the admin account.
     requestScopeOperations.setApiUser(user.id());
     assertThat(codeOwnerResolver.resolve(CodeOwnerReference.create(secondaryEmail))).isEmpty();
+  }
+
+  @Test
+  public void resolveLocalCodeOwnersForEmptyCodeOwnerConfig() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/")).build();
+    assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
+        .isEmpty();
+  }
+
+  @Test
+  public void resolveLocalCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user.email())
+            .build();
+    assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id());
+  }
+
+  @Test
+  public void resolveLocalCodeOwnersNonResolvableCodeOwnersAreFilteredOut() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail("non-existing@test.com")
+            .build();
+    assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
+        .hasAccountIdsThat()
+        .containsExactly(admin.id());
+  }
+
+  @Test
+  public void cannotResolveLocalCodeOwnersOfNullCodeOwnerConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerResolver.resolveLocalCodeOwners(null, Paths.get("/README.md")));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
+  }
+
+  @Test
+  public void cannotResolveLocalCodeOwnersForNullPath() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerEmail(admin.email())
+            .build();
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, null));
+    assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 }

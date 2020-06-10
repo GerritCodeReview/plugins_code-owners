@@ -99,11 +99,8 @@ public class GetCodeOwnersForPathInBranch
         rsrc.getBranch(),
         rsrc.getPath(),
         codeOwnerConfig ->
-            codeOwnerConfig
-                .localCodeOwners(rsrc.getPath())
-                .forEach(
-                    codeOwnerReference ->
-                        codeOwnerResolver.resolve(codeOwnerReference).ifPresent(codeOwners::add)));
+            codeOwners.addAll(
+                codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath())));
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
