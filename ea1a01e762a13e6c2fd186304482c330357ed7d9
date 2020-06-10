@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "411a6fc1_d1b0cfad",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigsInBranchCollection.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-10T13:36:03Z",
+      "side": 1,
+      "message": "No, it should be ResourceNotFoundException as this results in a \"404 Not Found\" response to the user, which is the same response code that they get for all other URLs for which we have not implemented a REST endpoint (yet).\n\nThrowing NotImplementedException would lead to a different response code.\n\nIt\u0027s also consistent with what REST collections in Gerrit core are doing when they do not offer the listing functionality, e.g. see com.google.gerrit.server.restapi.project.FilesCollection",
+      "parentUuid": "c6c25e82_b57aab5d",
+      "range": {
+        "startLine": 51,
+        "startChar": 39,
+        "endLine": 51,
+        "endChar": 41
+      },
+      "revId": "ea1a01e762a13e6c2fd186304482c330357ed7d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "873b651f_f2786127",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigsInBranchCollection.java",
         "patchSetId": 8
