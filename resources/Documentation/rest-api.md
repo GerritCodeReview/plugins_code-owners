@@ -73,7 +73,8 @@ The following request parameters can be specified:
 As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
 The returned code owners are sorted by an internal score that expresses how good
 the code owners are considered as reviewers/approvers for the path. Code owners
-with higher scores are returned first.
+with higher scores are returned first. If code owners have the same score the
+order is random.
 
 #### Request
 
