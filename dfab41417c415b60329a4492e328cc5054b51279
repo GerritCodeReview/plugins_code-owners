@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "d01c3713_07823b5e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperations.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-10T07:01:46Z",
+      "side": 1,
+      "message": "\u003e If it\u0027s the sole purpose of this API\n\nIt\u0027s not the only purpose of the API, but an important behaviour of the API that callers should be aware of, which is why it\u0027s mentioned here.\n\nLikely the test API will also offer functionality which is not exposed via the normal API.\n\n\u003e to do what the production logic does, but without a permission check,\n\u003e could we solve this similar to what we have internally where we can swap out the permission backend in tests?\n\nI don\u0027t think this is feasible. A test is usually doing this:\n\n1. create test data using the test API (no permission checks)\n2. execute logic using the Java API (with permission checks(\n3. assert results, optionally against data loaded from the test API (no permission checks)\n\nThen tests can also mix and repeat these steps.\n\nIf we wanted to disable permission checks via a permission backend, we would constantly need to switch the permission backend, or turn on/off permission checks between these steps.\n\n\u003e \n\u003e try (AutoClosable ignored \u003d testPermissionBackend.allChecksSucceed()) {\n\u003e   // ... access owners without any permission check.\n\u003e }\n\u003e \n\u003e There might be more that this test API will do (ignore certain validations, etc.),\n\nYes, it\u0027s likely we will add additional test logic in the test API.\n\n\u003e but if it\u0027s solely permissions,\n\u003e I think the generic solution using a test permission backend would be easier.\n\nI think having these try blocks in the tests would negative effect the readability of the tests.\n\nIn general regarding the test API I prefer following the examples that are set in core as it\u0027s working well there. For the plugin I would rather not want to experiment with new ideas in this area as the timeline is already tight. If we want to try out new approaches I would suggest to try them in Gerrit core with the test APIs that we have there.",
+      "parentUuid": "9b1ce970_16f377b2",
+      "revId": "dfab41417c415b60329a4492e328cc5054b51279",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56439d4d_06c68a52",
         "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImpl.java",
         "patchSetId": 5
@@ -33,6 +51,24 @@
       "revId": "dfab41417c415b60329a4492e328cc5054b51279",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d14b1072_029557e2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImpl.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-10T07:01:46Z",
+      "side": 1,
+      "message": "It\u0027s intentional non-static so that we do not need to pass everything that is injected into the parent class to the constructor of this class :) \n\nFWIW all the other Per...OperationsImpl classes in core are also non-static for this reason.",
+      "parentUuid": "56439d4d_06c68a52",
+      "revId": "dfab41417c415b60329a4492e328cc5054b51279",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
