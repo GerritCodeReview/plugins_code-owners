@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
@@ -33,6 +34,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
 
 /** Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s. */
@@ -58,6 +60,27 @@ public class CodeOwnerResolver {
     this.externalIds = externalIds;
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
+  }
+
+  /**
+   * Resolves the local code owners from the given code owner config for the given path from {@link
+   * CodeOwnerReference}s to a {@link CodeOwner}s.
+   *
+   * <p>Non-resolvable code owners are filtered out.
+   *
+   * @param codeOwnerConfig the code owner config for which the local owners for the given path
+   *     should be resolved
+   * @param path the path for which the local owners for the given path should be resolved
+   * @return the resolved code owners
+   */
+  public ImmutableSet<CodeOwner> resolveLocalCodeOwners(
+      CodeOwnerConfig codeOwnerConfig, Path path) {
+    return requireNonNull(codeOwnerConfig, "codeOwnerConfig")
+        .localCodeOwners(requireNonNull(path, "path")).stream()
+        .map(this::resolve)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(toImmutableSet());
   }
 
   /**
