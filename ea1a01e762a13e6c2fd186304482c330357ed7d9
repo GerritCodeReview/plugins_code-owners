@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "c6c25e82_b57aab5d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigsInBranchCollection.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-10T13:26:33Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this be NotImplementedException?",
+      "parentUuid": "1744b3be_804d45bb",
+      "range": {
+        "startLine": 51,
+        "startChar": 39,
+        "endLine": 51,
+        "endChar": 41
+      },
+      "revId": "ea1a01e762a13e6c2fd186304482c330357ed7d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "873b651f_f2786127",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigsInBranchCollection.java",
         "patchSetId": 8
@@ -131,6 +155,30 @@
       "side": 1,
       "message": "No \"Nul\" is correct here. That\u0027s also an error message that is coming from the Java Path implementation (so we couldn\u0027t change it if we wanted). Looking at wiki [1] \"Nul\" is actually a correct spelling here.\n\n[1] https://en.wikipedia.org/wiki/Null_character",
       "parentUuid": "f5d0e679_c2c63d10",
+      "range": {
+        "startLine": 76,
+        "startChar": 47,
+        "endLine": 76,
+        "endChar": 50
+      },
+      "revId": "ea1a01e762a13e6c2fd186304482c330357ed7d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99fc6460_60d3377d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnerConfigForPathInBranchIT.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-10T13:26:33Z",
+      "side": 1,
+      "message": "great to learn something new ;)",
+      "parentUuid": "fe7403c4_4b79a9ba",
       "range": {
         "startLine": 76,
         "startChar": 47,
