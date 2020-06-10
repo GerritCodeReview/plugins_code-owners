@@ -95,7 +95,7 @@ public class GetCodeOwnersForPathInBranch
         rsrc.getPath(),
         codeOwnerConfig ->
             codeOwnerConfig
-                .localCodeOwners(codeOwnerConfig.relativize(rsrc.getPath()))
+                .localCodeOwners(rsrc.getPath())
                 .forEach(
                     codeOwnerReference ->
                         codeOwnerResolver.resolve(codeOwnerReference).ifPresent(codeOwners::add)));
