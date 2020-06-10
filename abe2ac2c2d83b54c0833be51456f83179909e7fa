@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c07688d8_8d6edd07",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigCreation.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-10T07:26:17Z",
+      "side": 1,
+      "message": "Good point. I added more javadoc to make this clearer.\n\nYes, setting a project is mandatory, but for branch and folder path we have defaults.\nThese fields are optional, to distinguish the cases where the caller has set a value and where the caller didn\u0027t set a value. We could also cover this by allowing the fields to be Nullable, but we prefer using Optionals.",
+      "parentUuid": "fbadb8c5_0193c81f",
+      "range": {
+        "startLine": 45,
+        "startChar": 18,
+        "endLine": 45,
+        "endChar": 26
+      },
+      "revId": "abe2ac2c2d83b54c0833be51456f83179909e7fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "86946652_91cf7fcb",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "2943a961_a9ffeaa4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-10T07:26:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86946652_91cf7fcb",
+      "range": {
+        "startLine": 134,
+        "startChar": 18,
+        "endLine": 134,
+        "endChar": 28
+      },
+      "revId": "abe2ac2c2d83b54c0833be51456f83179909e7fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7f03ceb0_4dd304c5",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigTest.java",
         "patchSetId": 4
@@ -68,6 +116,30 @@
       "revId": "abe2ac2c2d83b54c0833be51456f83179909e7fa",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "144695c0_e0e00aa6",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-10T07:26:17Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7f03ceb0_4dd304c5",
+      "range": {
+        "startLine": 52,
+        "startChar": 14,
+        "endLine": 52,
+        "endChar": 27
+      },
+      "revId": "abe2ac2c2d83b54c0833be51456f83179909e7fa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
