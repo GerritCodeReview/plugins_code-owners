@@ -37,6 +37,8 @@ import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -116,9 +118,7 @@ public class GetCodeOwnersForPathInBranch
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(
-                sortCodeOwnersByDistance(
-                    distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+            .format(sortCodeOwners(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
   }
 
   private void parseHexOptions() throws BadRequestException {
@@ -148,10 +148,36 @@ public class GetCodeOwnersForPathInBranch
     return fillOptions;
   }
 
-  private static ImmutableList<CodeOwner> sortCodeOwnersByDistance(
+  /**
+   * Sorts the code owners.
+   *
+   * <p>Code owners with higher distance score are returned first.
+   *
+   * <p>The order of code owners with the same distance score is random.
+   *
+   * @param distanceScoring the distance scorings for the code owners
+   * @param codeOwners the code owners that should be sorted
+   * @return the sorted code owners
+   */
+  private static ImmutableList<CodeOwner> sortCodeOwners(
       CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
+    ImmutableList<CodeOwner> randomlyOrderedCodeOwners = randomizeOrder(codeOwners);
     return codeOwners.stream()
-        .sorted(distanceScoring.comparingByScoring().thenComparing(CodeOwner::accountId))
+        .sorted(
+            distanceScoring.comparingByScoring().thenComparing(randomlyOrderedCodeOwners::indexOf))
         .collect(toImmutableList());
+  }
+
+  /**
+   * Returns the given code owners in a random order.
+   *
+   * @param codeOwners the code owners that should be returned in a random order
+   * @return the given code owners in a random order
+   */
+  private static ImmutableList<CodeOwner> randomizeOrder(ImmutableSet<CodeOwner> codeOwners) {
+    List<CodeOwner> randomlyOrderedCodeOwners = new ArrayList<>();
+    randomlyOrderedCodeOwners.addAll(codeOwners);
+    Collections.shuffle(randomlyOrderedCodeOwners);
+    return ImmutableList.copyOf(randomlyOrderedCodeOwners);
   }
 }

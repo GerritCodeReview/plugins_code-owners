@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.Iterables;
@@ -327,5 +328,38 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     requestScopeOperations.setApiUser(user2.id());
     assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
         .isEmpty();
+  }
+
+  @Test
+  public void getCodeOwnersOrderNotDefinedIfCodeOwnersHaveTheSameScoring() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar.md");
+    assertThat(codeOwnerInfos)
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    // The first code owner in the result should be user as user has the best distance score.
+    // The other 2 code owners come in a random order, but verifying this is a test is hard, hence
+    // there is no assertion for this.
+    assertThat(Iterables.getFirst(codeOwnerInfos, null)).hasAccountIdThat().isEqualTo(user.id());
   }
 }
