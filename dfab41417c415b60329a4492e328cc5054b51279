@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "1a24ec4f_099d12f2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperations.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-10T14:08:36Z",
+      "side": 1,
+      "message": "\u003e Yes, it\u0027s likely we will add additional test logic in the test API.\n\nThanks, this is why I asked.",
+      "parentUuid": "d01c3713_07823b5e",
+      "revId": "dfab41417c415b60329a4492e328cc5054b51279",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "56439d4d_06c68a52",
         "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImpl.java",
         "patchSetId": 5
