@@ -182,7 +182,20 @@ public class CodeOwnerConfigTest {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
         assertThrows(NullPointerException.class, () -> codeOwnerConfig.localCodeOwners(null));
-    assertThat(npe).hasMessageThat().isEqualTo("relativePath");
+    assertThat(npe).hasMessageThat().isEqualTo("path");
+  }
+
+  @Test
+  public void cannotGetLocalCodeOwnersForRelativePath() throws Exception {
+    String relativePath = "foo/bar/baz.md";
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfig.localCodeOwners(Paths.get(relativePath)));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("path %s must be absolute", relativePath));
   }
 
   @Test
