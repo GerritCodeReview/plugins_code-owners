@@ -1,13 +1,9 @@
 {
   "checks": {
     "zuul-check:plugins_code-owners": {
-      "state": "FAILED",
-      "message": "Change failed",
-      "url": "https://ci.gerritcodereview.com/t/gerrit/buildset/b99a268cf250431d98bf50fc5011c965",
-      "started": "2020-06-10T11:16:54Z",
-      "finished": "2020-06-10T11:23:26Z",
+      "state": "NOT_STARTED",
       "created": "2020-06-10T11:16:55Z",
-      "updated": "2020-06-10T11:23:26Z"
+      "updated": "2020-06-10T11:24:07Z"
     }
   }
 }
