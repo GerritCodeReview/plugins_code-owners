@@ -46,6 +46,30 @@
       "revId": "e3d0b3d3135bf3a4f35d391664b67144d7364b54",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "877a8457_f13df584",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigUpdate.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-10T15:18:00Z",
+      "side": 1,
+      "message": "Sure, SGTM. Thanks.",
+      "parentUuid": "d7c51992_12879580",
+      "range": {
+        "startLine": 42,
+        "startChar": 27,
+        "endLine": 42,
+        "endChar": 39
+      },
+      "revId": "e3d0b3d3135bf3a4f35d391664b67144d7364b54",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
