@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d43483bf_bc4a72b0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigUpdate.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-10T14:21:32Z",
+      "side": 1,
+      "message": "I am using the same pattern for implementing ProjectConfigUpdate where we mutate lots of collections and have been wondering if these lambda parameters should be mutable or immutable. I went with mutable in the end, because it allows the lambda implementor [1] to use less boiler plate and I din\u0027t see the necessity why these should be immutable.\n\nWas it a conscious decision to make the argument immutable but the return type mutable?\n\n[1]\ncodeOwnerModification(x -\u003e { \n  x.remove(foo);\n  return x;\n});",
+      "range": {
+        "startLine": 42,
+        "startChar": 27,
+        "endLine": 42,
+        "endChar": 39
+      },
+      "revId": "e3d0b3d3135bf3a4f35d391664b67144d7364b54",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
