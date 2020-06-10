@@ -14,9 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -48,13 +50,16 @@ public abstract class CodeOwnerConfig {
    * owners that are directly mentioned in this code owner config are considered. Code owners in
    * inherited and included code owner configs are not considered.
    *
-   * @param relativePath path for which the local code owners should be returned; the path must be
-   *     relative to the {@link Key#folderPath()} of this code owner config; can be the path of a
-   *     file or folder; the path may or may not exist
+   * @param path path for which the local code owners should be returned; the path must be absolute;
+   *     can be the path of a file or folder; the path may or may not exist
    * @return the local code owners for the given path
    */
-  public ImmutableSet<CodeOwnerReference> localCodeOwners(Path relativePath) {
-    requireNonNull(relativePath, "relativePath");
+  public ImmutableSet<CodeOwnerReference> localCodeOwners(Path path) {
+    checkState(requireNonNull(path, "path").isAbsolute(), "path %s must be absolute", path);
+
+    @SuppressWarnings("unused")
+    Path relativePath = relativize(path);
+
     // TODO(ekempin): Check for matching per-file code owner definitions once we support per-file
     // code owner definitions
     return codeOwners();
@@ -67,7 +72,8 @@ public abstract class CodeOwnerConfig {
    * @return the relativized path of the given path in relation to the folder path of this code
    *     owner config
    */
-  public Path relativize(Path path) {
+  @VisibleForTesting
+  Path relativize(Path path) {
     return key().folderPath().relativize(requireNonNull(path, "path"));
   }
 
