@@ -22,6 +22,30 @@
       "revId": "e3d0b3d3135bf3a4f35d391664b67144d7364b54",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7c51992_12879580",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigUpdate.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-10T15:16:31Z",
+      "side": 1,
+      "message": "Interesting. I didn\u0027t think about this but just copy\u0026pasted this from TestGroupUpdate#memberModification.\nLooks like making this mutable has indeed some advantages. If you don\u0027t mind I would submit this as is for now and follow-up with a separate change to address this.",
+      "parentUuid": "d43483bf_bc4a72b0",
+      "range": {
+        "startLine": 42,
+        "startChar": 27,
+        "endLine": 42,
+        "endChar": 39
+      },
+      "revId": "e3d0b3d3135bf3a4f35d391664b67144d7364b54",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
