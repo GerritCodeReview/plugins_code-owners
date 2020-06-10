@@ -182,7 +182,7 @@ public class CodeOwnerConfigTest {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
         assertThrows(NullPointerException.class, () -> codeOwnerConfig.localCodeOwners(null));
-    assertThat(npe).hasMessageThat().isEqualTo("relativePath");
+    assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 
   @Test
