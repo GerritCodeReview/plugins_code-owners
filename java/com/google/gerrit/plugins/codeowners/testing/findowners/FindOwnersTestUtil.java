@@ -16,7 +16,7 @@ package com.google.gerrit.plugins.codeowners.testing.findowners;
 
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.CodeOwnerConfigFile;
-import com.google.gerrit.plugins.codeowners.backend.findowners.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import java.util.Optional;
@@ -31,11 +31,11 @@ import org.eclipse.jgit.util.RawParseUtils;
 /** Test utility to read/write find-owners code owner configs directly from/to a repository. */
 public class FindOwnersTestUtil {
   private final GitRepositoryManager repoManager;
-  private final CodeOwnerConfigParser codeOwnerConfigParser;
+  private final FindOwnersCodeOwnerConfigParser codeOwnerConfigParser;
 
   @Inject
   FindOwnersTestUtil(
-      GitRepositoryManager repoManager, CodeOwnerConfigParser codeOwnerConfigParser) {
+      GitRepositoryManager repoManager, FindOwnersCodeOwnerConfigParser codeOwnerConfigParser) {
     this.repoManager = repoManager;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
   }
