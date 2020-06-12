@@ -43,6 +43,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.kohsuke.args4j.Option;
 
 /**
@@ -65,6 +66,7 @@ public class GetCodeOwnersForPathInBranch
   private EnumSet<ListAccountsOption> options;
   private Set<String> hexOptions;
   private int limit;
+  private int start;
 
   @Option(
       name = "-o",
@@ -90,6 +92,15 @@ public class GetCodeOwnersForPathInBranch
     this.limit = limit;
   }
 
+  @Option(
+      name = "--start",
+      aliases = {"-S"},
+      metaVar = "CNT",
+      usage = "Number of code owners to skip")
+  public void setStart(int start) {
+    this.start = start;
+  }
+
   @Inject
   GetCodeOwnersForPathInBranch(
       PermissionBackend permissionBackend,
@@ -112,6 +123,9 @@ public class GetCodeOwnersForPathInBranch
     if (limit < 0) {
       throw new BadRequestException("limit cannot be negative");
     }
+    if (start < 0) {
+      throw new BadRequestException("start cannot be negative");
+    }
 
     // The maximal possible distance. This is the distance that applies to code owners that are
     // defined in the root code owner configuration.
@@ -119,6 +133,7 @@ public class GetCodeOwnersForPathInBranch
 
     CodeOwnerScoring.Builder distanceScoring = CodeOwnerScore.DISTANCE.createScoring(maxDistance);
 
+    AtomicInteger skippedCodeOwnersCount = new AtomicInteger(0);
     Set<CodeOwner> codeOwners = new HashSet<>();
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
@@ -126,10 +141,16 @@ public class GetCodeOwnersForPathInBranch
         codeOwnerConfig -> {
           ImmutableSet<CodeOwner> localCodeOwners =
               codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath());
-          codeOwners.addAll(localCodeOwners);
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
           localCodeOwners.forEach(
-              localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
+              localCodeOwner -> {
+                if (skippedCodeOwnersCount.get() < start) {
+                  skippedCodeOwnersCount.incrementAndGet();
+                } else {
+                  codeOwners.add(localCodeOwner);
+                  distanceScoring.putValueForCodeOwner(localCodeOwner, distance);
+                }
+              });
           if (limit != UNLIMITED && codeOwners.size() >= limit + 1) {
             // We have gathered enough code owners and do not need to look at further code owner
             // configs.
