@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -44,9 +45,29 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotParseIfCodeOwnerConfigKeyIsNull() throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> codeOwnerConfigParser.parse(null, ""));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
+  }
+
+  @Test
+  public void cannotFormatNullCodeOwnerConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> codeOwnerConfigParser.formatAsString(null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
+  }
+
+  @Test
   public void emptyCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
         "", codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty());
+  }
+
+  @Test
+  public void nullCodeOwnerConfig() throws Exception {
+    assertParseAndFormat(
+        null, codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(), "");
   }
 
   @Test
