@@ -130,7 +130,7 @@ public class GetCodeOwnersForPathInBranch
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
           localCodeOwners.forEach(
               localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
-          if (limit != UNLIMITED && codeOwners.size() >= limit) {
+          if (limit != UNLIMITED && codeOwners.size() >= limit + 1) {
             // We have gathered enough code owners and do not need to look at further code owner
             // configs.
             // We can abort here, since all further code owners will have a lower distance scoring
@@ -141,13 +141,13 @@ public class GetCodeOwnersForPathInBranch
           return true;
         });
 
-    // TODO(ekempin): Add a _more_code_owners field to CodeOwnerInfo and populate it if there are
-    // further results which are dropped due to the limit.
+    boolean moreCodeOwners = limit != UNLIMITED && codeOwners.size() > limit;
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
             .format(
-                limit(sortCodeOwners(distanceScoring.build(), ImmutableSet.copyOf(codeOwners)))));
+                limit(sortCodeOwners(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))),
+                moreCodeOwners));
   }
 
   private void parseHexOptions() throws BadRequestException {
