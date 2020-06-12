@@ -12,37 +12,60 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.backend.findowners;
+package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static java.util.stream.Collectors.joining;
 
+import com.google.common.base.Function;
+import com.google.common.base.Splitter;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import java.io.IOException;
+import java.util.stream.StreamSupport;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link CodeOwnerConfigParser}. */
-public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
+/**
+ * Base class for testing {@link CodeOwnerConfigParser}s.
+ *
+ * <p>All {@link CodeOwnersBackend}s implement {@link CodeOwnerConfigParser} that need to be tested.
+ * To avoid code duplication for these tests, the common parts are implemented in this class.
+ */
+public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   /** Callback interface that allows to assert a code owner config. */
   @FunctionalInterface
-  interface CodeOwnerConfigAsserter {
+  protected interface CodeOwnerConfigAsserter {
     void doAssert(CodeOwnerConfig codeOwnerConfig);
   }
 
   // Emails for testing, sorted alphabetically.
-  private static final String EMAIL_1 = "admin@test.com";
-  private static final String EMAIL_2 = "jdoe@test.com";
-  private static final String EMAIL_3 = "jroe@test.com";
+  protected static final String EMAIL_1 = "admin@test.com";
+  protected static final String EMAIL_2 = "jdoe@test.com";
+  protected static final String EMAIL_3 = "jroe@test.com";
 
-  private CodeOwnerConfigParser codeOwnerConfigParser;
+  protected CodeOwnerConfigParser codeOwnerConfigParser;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    codeOwnerConfigParser = plugin.getSysInjector().getInstance(CodeOwnerConfigParser.class);
+    codeOwnerConfigParser = plugin.getSysInjector().getInstance(getCodeOwnerConfigParserClass());
   }
+
+  /** Must return the {@link CodeOwnerConfigParser} class that should be tested. */
+  protected abstract Class<? extends CodeOwnerConfigParser> getCodeOwnerConfigParserClass();
+
+  /** Must return the expected code owner config string for an empty code owner config. */
+  protected abstract String getEmptyCodeOwnerConfig();
+
+  /**
+   * Must return the expected code owner config string for a code owner config with the given
+   * emails.
+   *
+   * <p>The order of the emails must be preserved in the code owner config string.
+   */
+  protected abstract String getCodeOwnerConfig(String... emails);
 
   @Test
   public void cannotParseIfCodeOwnerConfigKeyIsNull() throws Exception {
@@ -61,19 +84,23 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   @Test
   public void emptyCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        "", codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty());
+        "",
+        codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(),
+        getEmptyCodeOwnerConfig());
   }
 
   @Test
   public void nullCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        null, codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(), "");
+        null,
+        codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(),
+        getEmptyCodeOwnerConfig());
   }
 
   @Test
   public void codeOwnerConfigWithOneEmail() throws Exception {
     assertParseAndFormat(
-        EMAIL_1,
+        getCodeOwnerConfig(EMAIL_1),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1));
   }
@@ -81,7 +108,7 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   @Test
   public void codeOwnerConfigWithMultipleEmails() throws Exception {
     assertParseAndFormat(
-        String.format("%s\n%s\n%s", EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
                 .hasCodeOwnersEmailsThat()
@@ -91,97 +118,65 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   @Test
   public void codeOwnerConfigWithTrailingLineBreak() throws Exception {
     assertParseAndFormat(
-        String.format("%s\n%s\n%s\n", EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3) + "\n",
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
-        String.format("%s\n%s\n%s", EMAIL_1, EMAIL_2, EMAIL_3));
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 
   @Test
   public void codeOwnerConfigWithWindowsLineBreaks() throws Exception {
     assertParseAndFormat(
-        String.format("%s\r\n%s\r\n%s", EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3).replaceAll("\n", "\r\n"),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
-        String.format("%s\n%s\n%s", EMAIL_1, EMAIL_2, EMAIL_3));
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 
   @Test
   public void codeOwnerConfigWithEmptyLines() throws Exception {
     assertParseAndFormat(
-        String.format("\n%s\n\n%s", EMAIL_1, EMAIL_2),
+        modifyLines(getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3), line -> line + "\n"),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 
   @Test
   public void codeOwnerConfigWithWhitespace() throws Exception {
     assertParseAndFormat(
-        String.format("\t %s\t \n \t%s\t ", EMAIL_1, EMAIL_2),
+        modifyLines(getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3), line -> " \t" + line + " \t"),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 
   @Test
   public void codeOwnerConfigWithDuplicateEmails() throws Exception {
     assertParseAndFormat(
-        String.format("%s\n%s\n%s\n%s", EMAIL_1, EMAIL_1, EMAIL_2, EMAIL_1),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_1),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2));
   }
 
   @Test
   public void codeOwnerConfigWithNonSortedEmails() throws Exception {
     assertParseAndFormat(
-        String.format("%s\n%s", EMAIL_2, EMAIL_1),
+        getCodeOwnerConfig(EMAIL_3, EMAIL_2, EMAIL_1),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
-  }
-
-  @Test
-  public void codeOwnerConfigWithInvalidEmails_InvalidEmailsAreIgnored() throws Exception {
-    assertParseAndFormat(
-        String.format("%s\n@test.com\nadmin@\nadmin@test@com\n%s", EMAIL_1, EMAIL_2),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
-  }
-
-  @Test
-  public void codeOwnerConfigWithInvalidLines_InvalidLinesAreIgnored() throws Exception {
-    assertParseAndFormat(
-        String.format("%s\nINVALID\nNOT_AN_EMAIL\n%s", EMAIL_1, EMAIL_2),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
-  }
-
-  @Test
-  public void codeOwnerConfigWithCommentLines_CommentLinesAreIgnored() throws Exception {
-    assertParseAndFormat(
-        String.format("# a@test.com\n%s\n # b@test.com\n%s\n#c@test.com", EMAIL_1, EMAIL_2),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
-  }
-
-  @Test
-  public void
-      codeOwnerConfigWithInlineComments_LinesWithInlineCommentsAreConsideredAsInvalidAndAreIgnored()
-          throws Exception {
-    assertParseAndFormat(
-        String.format("foo.bar@test.com # Foo Bar\n%s\n%s", EMAIL_1, EMAIL_2),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        String.format("%s\n%s", EMAIL_1, EMAIL_2));
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 
   /**
@@ -192,8 +187,8 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
    *     result of formatting the parsed code owner config
    * @param codeOwnerConfigAsserter asserter that asserts the parsed code owner config
    */
-  private void assertParseAndFormat(
-      String codeOwnerConfig, CodeOwnerConfigAsserter codeOwnerConfigAsserter) {
+  protected void assertParseAndFormat(
+      String codeOwnerConfig, CodeOwnerConfigAsserter codeOwnerConfigAsserter) throws IOException {
     assertParseAndFormat(codeOwnerConfig, codeOwnerConfigAsserter, codeOwnerConfig);
   }
 
@@ -206,10 +201,11 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
    * @param expectedConfig the code owner config that is expected as result of formatting the parsed
    *     code owner config
    */
-  private void assertParseAndFormat(
+  protected void assertParseAndFormat(
       String codeOwnerConfig,
       CodeOwnerConfigAsserter codeOwnerConfigAsserter,
-      String expectedConfig) {
+      String expectedConfig)
+      throws IOException {
     // Parse the provided code owner config.
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
@@ -222,5 +218,25 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
     // Format the parsed code owner config and assert the formatted code owner config.
     assertThat(codeOwnerConfigParser.formatAsString(parsedCodeOwnerConfig))
         .isEqualTo(expectedConfig);
+  }
+
+  @Test
+  public void codeOwnerConfigWithCommentLines_CommentLinesAreIgnored() throws Exception {
+    assertParseAndFormat(
+        modifyLines(
+            getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3), line -> line + "\n# foo.bar@test.com"),
+        codeOwnerConfig ->
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+  }
+
+  private static String modifyLines(
+      String codeOwnerConfigAsString, Function<String, String> lineModifier) {
+    return StreamSupport.stream(
+            Splitter.on('\n').split(codeOwnerConfigAsString).spliterator(), false)
+        .map(lineModifier::apply)
+        .collect(joining("\n"));
   }
 }
