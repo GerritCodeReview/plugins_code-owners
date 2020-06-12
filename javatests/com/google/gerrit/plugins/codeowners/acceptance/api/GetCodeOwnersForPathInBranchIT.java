@@ -420,4 +420,65 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
                     .get("/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("limit cannot be negative");
   }
+
+  @Test
+  public void getCodeOwnersWithStart() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // get code owners with different start values
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withStart(0).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .hasAccountIdsThat()
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withStart(1).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(2);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them is skipped when the start is 1
+    assertThat(Iterables.getFirst(codeOwnerInfos, null))
+        .hasAccountIdThatIsEqualToEitherOr(user.id(), user2.id());
+    assertThat(Iterables.getLast(codeOwnerInfos)).hasAccountIdThat().isEqualTo(admin.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withStart(2).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
+
+    codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().withStart(3).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).isEmpty();
+  }
+
+  @Test
+  public void startCannotBeNegative() throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                codeOwnersApiFactory
+                    .branch(project, "master")
+                    .query()
+                    .withStart(-1)
+                    .get("/foo/bar/baz.md"));
+    assertThat(exception).hasMessageThat().isEqualTo("start cannot be negative");
+  }
 }
