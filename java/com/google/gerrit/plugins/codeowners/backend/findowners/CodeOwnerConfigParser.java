@@ -14,10 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
+import com.google.common.base.Strings;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -85,9 +87,10 @@ public class CodeOwnerConfigParser {
   @VisibleForTesting
   public CodeOwnerConfig parse(
       CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigFileContent) {
-    CodeOwnerConfig.Builder codeOwnerConfig = CodeOwnerConfig.builder(codeOwnerConfigKey);
+    CodeOwnerConfig.Builder codeOwnerConfig =
+        CodeOwnerConfig.builder(requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"));
 
-    Streams.stream(Splitter.on('\n').split(codeOwnerConfigFileContent))
+    Streams.stream(Splitter.on('\n').split(Strings.nullToEmpty(codeOwnerConfigFileContent)))
         .map(String::trim)
         .filter(line -> !isComment(line))
         .filter(this::isEmail)
@@ -107,7 +110,7 @@ public class CodeOwnerConfigParser {
    */
   @VisibleForTesting
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) {
-    return codeOwnerConfig.codeOwners().stream()
+    return requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().stream()
         .map(CodeOwnerReference::email)
         .sorted()
         .distinct()
