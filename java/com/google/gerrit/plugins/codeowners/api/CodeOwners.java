@@ -45,6 +45,7 @@ public interface CodeOwners {
   abstract class QueryRequest {
     private Set<ListAccountsOption> options = EnumSet.noneOf(ListAccountsOption.class);
     private int limit;
+    private int start;
 
     /**
      * Lists the code owners for the given path.
@@ -90,6 +91,16 @@ public interface CodeOwners {
       return this;
     }
 
+    /**
+     * Sets a the number of code owners that should be skipped.
+     *
+     * @param start the number of code owners that should be skipped
+     */
+    public QueryRequest withStart(int start) {
+      this.start = start;
+      return this;
+    }
+
     /** Returns the {@link ListAccountsOption} options which have been set on the request. */
     public ImmutableSet<ListAccountsOption> getOptions() {
       return ImmutableSet.copyOf(options);
@@ -98,6 +109,13 @@ public interface CodeOwners {
     /** Returns the limit which has been set on the request. */
     public int getLimit() {
       return limit;
+    }
+
+    /**
+     * Returns the number of code owners that should be skipped which has been set on the request.
+     */
+    public int getStart() {
+      return start;
     }
 
     @Override
