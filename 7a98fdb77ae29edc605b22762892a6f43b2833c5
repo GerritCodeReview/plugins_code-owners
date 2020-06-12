@@ -22,6 +22,30 @@
       "revId": "7a98fdb77ae29edc605b22762892a6f43b2833c5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7fcefa95_83ba14c4",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 15
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-12T14:53:36Z",
+      "side": 1,
+      "message": "We have chosen to return a list of CodeOwnerInfo\u0027s because it\u0027s extensible, e.g. we may want to return a score for each of the returned code owners, which we can easily add to CodeOwnerInfo but not to AccountInfo. Also when we support groups, CodeOwnerInfo will either contain an account or a group (which is consistent with SuggestedReviewerInfo in Gerrit core).\n\nIn general the JSON entities that we return from the REST API have already been discussed/agreed with our TL\u0027s and stakeholders (see go/gerrit-code-owners-rest-api). If we want to change them we might need to double-check with them first.",
+      "parentUuid": "84341cae_83ed6283",
+      "range": {
+        "startLine": 62,
+        "startChar": 16,
+        "endLine": 62,
+        "endChar": 20
+      },
+      "revId": "7a98fdb77ae29edc605b22762892a6f43b2833c5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
