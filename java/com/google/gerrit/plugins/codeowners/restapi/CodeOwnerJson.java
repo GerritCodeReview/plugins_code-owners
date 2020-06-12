@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
@@ -58,16 +59,25 @@ class CodeOwnerJson {
    * Formats the provided {@link CodeOwner}s as {@link CodeOwnerInfo}s.
    *
    * @param codeOwners the code owners that should be formatted as {@link CodeOwnerInfo}s
+   * @param moreCodeOwners whether there are more code owners that could be returned, but which are
+   *     omitted due to a user-provided limit
    * @return the provided code owners as {@link CodeOwnerInfo}s
    */
-  ImmutableList<CodeOwnerInfo> format(ImmutableList<CodeOwner> codeOwners)
+  ImmutableList<CodeOwnerInfo> format(ImmutableList<CodeOwner> codeOwners, boolean moreCodeOwners)
       throws PermissionBackendException {
+    if (requireNonNull(codeOwners, "codeOwners").isEmpty()) {
+      return ImmutableList.of();
+    }
+
     AccountLoader accountLoader = accountLoaderFactory.create(accountOptions);
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
-        requireNonNull(codeOwners, "codeOwners").stream()
+        codeOwners.stream()
             .map(codeOwner -> format(accountLoader, codeOwner))
             .collect(toImmutableList());
     accountLoader.fill();
+
+    Iterables.getLast(codeOwnerInfos)._moreCodeOwners = moreCodeOwners ? true : null;
+
     return codeOwnerInfos;
   }
 
