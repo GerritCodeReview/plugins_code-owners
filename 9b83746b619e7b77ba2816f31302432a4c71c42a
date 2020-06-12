@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "74b7c4f1_41824f36",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackendsTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-12T10:53:36Z",
+      "side": 1,
+      "message": "For consistency, I think we should change this name to CodeOwnersBackendIdTest",
+      "range": {
+        "startLine": 28,
+        "startChar": 13,
+        "endLine": 28,
+        "endChar": 35
+      },
+      "revId": "9b83746b619e7b77ba2816f31302432a4c71c42a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87cb407a_a634bd61",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackendsTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-12T10:53:36Z",
+      "side": 1,
+      "message": "id",
+      "range": {
+        "startLine": 38,
+        "startChar": 31,
+        "endLine": 38,
+        "endChar": 32
+      },
+      "revId": "9b83746b619e7b77ba2816f31302432a4c71c42a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
