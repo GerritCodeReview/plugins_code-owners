@@ -442,16 +442,19 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // the first 2 code owners have the same scoring, so their order is random and we don't know
     // which of them we get when the limit is 1
     assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isAnyOf(user.id(), user2.id());
+    assertThatList(codeOwnerInfos).lastElement().hasMoreCodeOwnersThat().isTrue();
 
     codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().withLimit(2).get("/foo/bar/baz.md");
     assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user.id(), user2.id());
+    assertThatList(codeOwnerInfos).lastElement().hasMoreCodeOwnersThat().isTrue();
 
     codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().withLimit(3).get("/foo/bar/baz.md");
     assertThat(codeOwnerInfos)
         .hasAccountIdsThat()
         .containsExactly(admin.id(), user.id(), user2.id());
+    assertThatList(codeOwnerInfos).lastElement().hasMoreCodeOwnersThat().isNull();
   }
 
   @Test

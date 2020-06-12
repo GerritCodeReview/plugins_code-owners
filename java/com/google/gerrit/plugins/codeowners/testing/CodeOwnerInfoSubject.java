@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
 
+import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
@@ -69,6 +70,15 @@ public class CodeOwnerInfoSubject extends Subject {
    */
   public IterableSubject hasSecondaryEmailsThat() {
     return check("account().secondaryEmails()").that(codeOwnerInfo().account.secondaryEmails);
+  }
+
+  /**
+   * Returns a subject for the more code owners flag of the code owner info.
+   *
+   * @return subject for the more code owners flag of the code owner info
+   */
+  public BooleanSubject hasMoreCodeOwnersThat() {
+    return check("moreCodeOwners()").that(codeOwnerInfo()._moreCodeOwners);
   }
 
   private CodeOwnerInfo codeOwnerInfo() {

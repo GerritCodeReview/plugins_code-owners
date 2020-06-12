@@ -133,12 +133,13 @@ public class GetCodeOwnersForPathInBranch
           return !isLimitReached(ImmutableSet.copyOf(codeOwners));
         });
 
-    // TODO(ekempin): Add a _more_code_owners field to CodeOwnerInfo and populate it if there are
-    // further results which are dropped due to the limit.
+    boolean moreCodeOwners = codeOwners.size() > limit;
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+            .format(
+                sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners)),
+                moreCodeOwners));
   }
 
   private void parseHexOptions() throws BadRequestException {
@@ -172,7 +173,9 @@ public class GetCodeOwnersForPathInBranch
   }
 
   private boolean isLimitReached(ImmutableSet<CodeOwner> codeOwners) {
-    if (codeOwners.size() >= limit) {
+    // We gather one more result than the limit so that we can tell the caller if there would have
+    // been more results if a higher limit was specified.
+    if (codeOwners.size() >= limit + 1) {
       // We have gathered enough code owners and do not need to look at further code owner
       // configs.
       // We can abort here, since all further code owners will have a lower distance scoring

@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -47,7 +48,10 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void formatEmptyListOfCodeOwners() throws Exception {
-    assertThat(codeOwnerJsonFactory.create(EnumSet.of(FillOptions.ID)).format(ImmutableList.of()))
+    assertThat(
+            codeOwnerJsonFactory
+                .create(EnumSet.of(FillOptions.ID))
+                .format(ImmutableList.of(), false))
         .isEmpty();
   }
 
@@ -56,7 +60,8 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID))
-            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())));
+            .format(
+                ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), false);
     assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id(), user.id()).inOrder();
     assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null);
   }
@@ -66,7 +71,8 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<CodeOwnerInfo> codeOwnerInfos =
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID, FillOptions.NAME))
-            .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())));
+            .format(
+                ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), false);
     assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id(), user.id()).inOrder();
     assertThat(codeOwnerInfos)
         .hasAccountNamesThat()
@@ -79,7 +85,36 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerJsonFactory.create(EnumSet.of(FillOptions.ID)).format(null));
+            () -> codeOwnerJsonFactory.create(EnumSet.of(FillOptions.ID)).format(null, false));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwners");
+  }
+
+  @Test
+  public void formatEmptyListOfCodeOwnersWithMoreCodeOwners() throws Exception {
+    assertThat(
+            codeOwnerJsonFactory
+                .create(EnumSet.of(FillOptions.ID))
+                .format(ImmutableList.of(), true))
+        .isEmpty();
+  }
+
+  @Test
+  public void formatCodeOwnersWithMoreCodeOwners() throws Exception {
+    ImmutableList<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnerJsonFactory
+            .create(EnumSet.of(FillOptions.ID))
+            .format(
+                ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), true);
+    assertThatList(codeOwnerInfos).lastElement().hasMoreCodeOwnersThat().isTrue();
+  }
+
+  @Test
+  public void formatCodeOwnersWithoutMoreCodeOwners() throws Exception {
+    ImmutableList<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnerJsonFactory
+            .create(EnumSet.of(FillOptions.ID))
+            .format(
+                ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())), false);
+    assertThatList(codeOwnerInfos).lastElement().hasMoreCodeOwnersThat().isNull();
   }
 }
