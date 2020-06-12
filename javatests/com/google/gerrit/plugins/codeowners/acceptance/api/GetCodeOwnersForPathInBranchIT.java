@@ -416,16 +416,19 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // which of them we get when the limit is 1
     assertThat(Iterables.getFirst(codeOwnerInfos, null))
         .hasAccountIdThatIsEqualToEitherOr(user.id(), user2.id());
+    assertThat(Iterables.getLast(codeOwnerInfos)._moreCodeOwners).isTrue();
 
     codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().withLimit(2).get("/foo/bar/baz.md");
     assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user.id(), user2.id());
+    assertThat(Iterables.getLast(codeOwnerInfos)._moreCodeOwners).isTrue();
 
     codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().withLimit(3).get("/foo/bar/baz.md");
     assertThat(codeOwnerInfos)
         .hasAccountIdsThat()
         .containsExactly(admin.id(), user.id(), user2.id());
+    assertThat(Iterables.getLast(codeOwnerInfos)._moreCodeOwners).isNull();
   }
 
   @Test
@@ -456,6 +459,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerInfos)
         .hasAccountIdsThat()
         .containsExactly(admin.id(), user.id(), user2.id());
+    assertThat(Iterables.getLast(codeOwnerInfos)._moreCodeOwners).isNull();
   }
 
   @Test
