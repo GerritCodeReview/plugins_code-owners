@@ -27,6 +27,16 @@ public class CodeOwnerInfo {
   /** The account of the code owner. */
   public AccountInfo account;
 
+  /**
+   * Whether there are more code owners that could be returned, but which are omitted due to a
+   * user-provided limit.
+   *
+   * <p>Only set for the last {@link CodeOwnerInfo} in a list of {@link CodeOwnerInfo}s.
+   *
+   * <p>Not set if {@code false}.
+   */
+  public Boolean _moreCodeOwners;
+
   @Override
   public int hashCode() {
     return Objects.hash(account);
