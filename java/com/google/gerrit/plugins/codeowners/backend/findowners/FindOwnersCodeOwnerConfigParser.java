@@ -23,13 +23,15 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.mail.send.OutgoingEmailValidator;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 /**
- * Parser for {@code OWNERS} files as they are used by the {@code find-owners} plugin.
+ * Parser and formatter for the syntax that is used to store {@link CodeOwnerConfig}s in {@code
+ * OWNERS} files as they are used by the {@code find-owners} plugin.
  *
  * <p>The syntax is described at in the {@code find-owners} plugin documentation at:
  * https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md
@@ -49,7 +51,7 @@ import com.google.inject.Singleton;
  */
 @Singleton
 @VisibleForTesting
-public class CodeOwnerConfigParser {
+public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   /**
@@ -64,33 +66,17 @@ public class CodeOwnerConfigParser {
   private final OutgoingEmailValidator emailValidator;
 
   @Inject
-  CodeOwnerConfigParser(OutgoingEmailValidator emailValidator) {
+  FindOwnersCodeOwnerConfigParser(OutgoingEmailValidator emailValidator) {
     this.emailValidator = emailValidator;
   }
 
-  /**
-   * Parses a {@link CodeOwnerConfig} from a string that represents the content of an {@code OWNERS}
-   * file.
-   *
-   * <p>Comment lines, invalid lines and invalid emails are silently ignored.
-   *
-   * <p><strong>Note:</strong> Parsing a code owner config by using the {@link
-   * #parse(CodeOwnerConfig.Key, String)} and then formatting the parsed code owner config back to a
-   * string by using {@link #formatAsString(CodeOwnerConfig)} is not guaranteed to result in the
-   * exact same code owner config file (e.g. comment lines, invalid lines and invalid emails are
-   * dropped and emails may be reordered).
-   *
-   * @param codeOwnerConfigKey the key of the code owner config that should be parsed
-   * @param codeOwnerConfigFileContent string that represents the content of an {@code OWNERS} file
-   * @return the parsed {@link CodeOwnerConfig}
-   */
-  @VisibleForTesting
+  @Override
   public CodeOwnerConfig parse(
-      CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigFileContent) {
+      CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
     CodeOwnerConfig.Builder codeOwnerConfig =
         CodeOwnerConfig.builder(requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"));
 
-    Streams.stream(Splitter.on('\n').split(Strings.nullToEmpty(codeOwnerConfigFileContent)))
+    Streams.stream(Splitter.on('\n').split(Strings.nullToEmpty(codeOwnerConfigAsString)))
         .map(String::trim)
         .filter(line -> !isComment(line))
         .filter(this::isEmail)
@@ -100,15 +86,7 @@ public class CodeOwnerConfigParser {
     return codeOwnerConfig.build();
   }
 
-  /**
-   * Formats the given code owner config as string that represents the code owner config in an
-   * {@code OWNERS} file.
-   *
-   * @param codeOwnerConfig the code owner config that should be formatted
-   * @return the code owner config as string that represents the code owner config in an {@code
-   *     OWNERS} file
-   */
-  @VisibleForTesting
+  @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) {
     return requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().stream()
         .map(CodeOwnerReference::email)

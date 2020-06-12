@@ -19,4 +19,5 @@ gerrit_plugin(
     ],
     resource_strip_prefix = "plugins/code-owners/resources",
     resources = glob(["resources/**/*"]),
+    deps = ["//plugins/code-owners/proto:owners_metadata_java_proto"],
 )
