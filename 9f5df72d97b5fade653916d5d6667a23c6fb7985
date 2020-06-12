@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "01830d9a_bbda9ee3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwner.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-12T13:49:39Z",
+      "side": 1,
+      "message": "Does it make sense to have CodeOwners with one method called \"id\", and then have CodeOwnerAccount (and later maybe CodeOwnerGroup) that implement CodeOwners?\n\nI can see the problem here being inability to tell those classes apart when resolving the account/group, which will require \"if(x instanceof X)\", which is not great.\n\nThis is just some idea on top of my mind, cause the way this will scale is having CodeOwners having both \"accountId\" and \"groupId\" forcing only one of them to be not null, which I think is not great, unless you have another idea on how to extend it?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 0
+      },
+      "revId": "9f5df72d97b5fade653916d5d6667a23c6fb7985",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "791dc1ea_c08917cc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-12T13:49:39Z",
+      "side": 1,
+      "message": "why?\nI guess because we ignore invalid lines in the config file, which is not completely relevant to the class. Up to you if you want to mention that.",
+      "range": {
+        "startLine": 54,
+        "startChar": 36,
+        "endLine": 54,
+        "endChar": 53
+      },
+      "revId": "9f5df72d97b5fade653916d5d6667a23c6fb7985",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
