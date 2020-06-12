@@ -65,6 +65,7 @@ public class CodeOwnerConfigParser {
   CodeOwnerConfigParser(OutgoingEmailValidator emailValidator) {
     this.emailValidator = emailValidator;
   }
+
   /**
    * Parses a {@link CodeOwnerConfig} from a string that represents the content of an {@code OWNERS}
    * file.
