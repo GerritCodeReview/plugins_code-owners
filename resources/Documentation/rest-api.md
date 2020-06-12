@@ -134,6 +134,7 @@ The `CodeOwnerInfo` entity contains information about a code owner.
 | Field Name  |          | Description |
 | ----------- | -------- | ----------- |
 | `account`   | optional | The account of the code owner as an [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entity. At the moment the `account` field is always set, but it's marked as optional as in the future we may also return groups as code owner and then the `account` field would be unset.
+| `_more_code_owners` | optional, not set if `false` | Whether there are more code owners that could be returned, but which are omitted due to a user-provided limit. Only set for the last CodeOwnerInfo in a list of CodeOwnerInfo's.
 
 ---
 
