@@ -22,6 +22,30 @@
       "revId": "02fa221b871c0546d2bc7b59eb53f03230ec224d",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9a3a72dc_3f27fc85",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-12T13:41:09Z",
+      "side": 1,
+      "message": "It was supposed to be \"visitorNotInvokedIfNoCodeOwnerConfigExists\" :) \n\nDone",
+      "parentUuid": "630af21f_0762121b",
+      "range": {
+        "startLine": 44,
+        "startChar": 14,
+        "endLine": 44,
+        "endChar": 57
+      },
+      "revId": "02fa221b871c0546d2bc7b59eb53f03230ec224d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
