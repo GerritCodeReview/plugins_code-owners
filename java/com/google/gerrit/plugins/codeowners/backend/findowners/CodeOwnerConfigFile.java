@@ -54,10 +54,11 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   @Singleton
   static class Factory {
     private final GitRepositoryManager repoManager;
-    private final CodeOwnerConfigParser codeOwnerConfigParser;
+    private final FindOwnersCodeOwnerConfigParser codeOwnerConfigParser;
 
     @Inject
-    Factory(GitRepositoryManager repoManager, CodeOwnerConfigParser codeOwnerConfigParser) {
+    Factory(
+        GitRepositoryManager repoManager, FindOwnersCodeOwnerConfigParser codeOwnerConfigParser) {
       this.repoManager = repoManager;
       this.codeOwnerConfigParser = codeOwnerConfigParser;
     }
@@ -112,7 +113,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
     }
   }
 
-  private final CodeOwnerConfigParser codeOwnerConfigParser;
+  private final FindOwnersCodeOwnerConfigParser codeOwnerConfigParser;
   private final CodeOwnerConfig.Key codeOwnerConfigKey;
 
   private boolean isLoaded = false;
@@ -120,7 +121,8 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   private Optional<CodeOwnerConfigUpdate> codeOwnerConfigUpdate = Optional.empty();
 
   private CodeOwnerConfigFile(
-      CodeOwnerConfigParser codeOwnerConfigParser, CodeOwnerConfig.Key codeOwnerConfigKey) {
+      FindOwnersCodeOwnerConfigParser codeOwnerConfigParser,
+      CodeOwnerConfig.Key codeOwnerConfigKey) {
     this.codeOwnerConfigParser = codeOwnerConfigParser;
     this.codeOwnerConfigKey = codeOwnerConfigKey;
   }
