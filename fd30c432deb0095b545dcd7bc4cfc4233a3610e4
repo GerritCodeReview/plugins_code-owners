@@ -16,6 +16,24 @@
       "revId": "fd30c432deb0095b545dcd7bc4cfc4233a3610e4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "31e34b7f_e8e17e95",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-15T15:53:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "337738a9_1fd2cd33",
+      "revId": "fd30c432deb0095b545dcd7bc4cfc4233a3610e4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
