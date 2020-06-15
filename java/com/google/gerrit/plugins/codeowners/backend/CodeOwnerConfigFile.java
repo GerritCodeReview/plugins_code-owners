@@ -12,15 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.backend.findowners;
+package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.git.meta.VersionedMetaData;
@@ -28,7 +26,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.function.Consumer;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.CommitBuilder;
 import org.eclipse.jgit.lib.Repository;
@@ -39,8 +36,8 @@ import org.eclipse.jgit.treewalk.TreeWalk;
  * A representation of a code owner config that is stored as an {@code OWNERS} file in a source
  * branch.
  *
- * <p>For reading code owner configs or creating/updating them, refer to {@link
- * Factory#load(CodeOwnerConfig.Key)}.
+ * <p>For reading code owner configs or creating/updating them, refer to {@link Factory#load(String,
+ * CodeOwnerConfigParser, CodeOwnerConfig.Key)}.
  *
  * <p><strong>Note:</strong> Any modification (code owner config creation or update) only becomes
  * permanent (and hence written to repository) if {@link
@@ -48,37 +45,36 @@ import org.eclipse.jgit.treewalk.TreeWalk;
  */
 @VisibleForTesting
 public class CodeOwnerConfigFile extends VersionedMetaData {
-  /** Name of the file in which the code owner config for a folder in a branch is stored. */
-  @VisibleForTesting public static final String FILE_NAME = "OWNERS";
-
   @Singleton
-  static class Factory {
+  public static class Factory {
     private final GitRepositoryManager repoManager;
-    private final FindOwnersCodeOwnerConfigParser codeOwnerConfigParser;
 
     @Inject
-    Factory(
-        GitRepositoryManager repoManager, FindOwnersCodeOwnerConfigParser codeOwnerConfigParser) {
+    Factory(GitRepositoryManager repoManager) {
       this.repoManager = repoManager;
-      this.codeOwnerConfigParser = codeOwnerConfigParser;
     }
 
     /**
      * Creates a {@link CodeOwnerConfigFile} for a code owner config.
      *
-     * <p>Same as {@link #load(Repository, CodeOwnerConfig.Key)}, but takes care to open/close the
-     * repository.
+     * <p>Same as {@link #load(String, CodeOwnerConfigParser, Repository, CodeOwnerConfig.Key)}, but
+     * takes care to open/close the repository.
      *
+     * @param fileName name of the code owner configuration files
+     * @param codeOwnerConfigParser the parser that should be used to parse code owner config files
      * @param codeOwnerConfigKey the key of the code owner config
      * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
      * @throws IOException if the repository can't be accessed for some reason
      * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
      *     invalid format
      */
-    CodeOwnerConfigFile load(CodeOwnerConfig.Key codeOwnerConfigKey)
+    public CodeOwnerConfigFile load(
+        String fileName,
+        CodeOwnerConfigParser codeOwnerConfigParser,
+        CodeOwnerConfig.Key codeOwnerConfigKey)
         throws IOException, ConfigInvalidException {
       try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
-        return load(repository, codeOwnerConfigKey);
+        return load(fileName, codeOwnerConfigParser, repository, codeOwnerConfigKey);
       }
     }
 
@@ -97,6 +93,8 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
      * #setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate)} and committing the {@link
      * CodeOwnerConfigUpdate} via {@link #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)}.
      *
+     * @param fileName name of the code owner configuration files
+     * @param codeOwnerConfigParser the parser that should be used to parse code owner config files
      * @param repository the repository in which the code owner config is stored
      * @param codeOwnerConfigKey the key of the code owner config
      * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
@@ -104,16 +102,21 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
      * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
      *     invalid format
      */
-    CodeOwnerConfigFile load(Repository repository, CodeOwnerConfig.Key codeOwnerConfigKey)
+    public CodeOwnerConfigFile load(
+        String fileName,
+        CodeOwnerConfigParser codeOwnerConfigParser,
+        Repository repository,
+        CodeOwnerConfig.Key codeOwnerConfigKey)
         throws IOException, ConfigInvalidException {
       CodeOwnerConfigFile codeOwnerConfigFile =
-          new CodeOwnerConfigFile(codeOwnerConfigParser, codeOwnerConfigKey);
+          new CodeOwnerConfigFile(fileName, codeOwnerConfigParser, codeOwnerConfigKey);
       codeOwnerConfigFile.load(codeOwnerConfigKey.project(), repository);
       return codeOwnerConfigFile;
     }
   }
 
-  private final FindOwnersCodeOwnerConfigParser codeOwnerConfigParser;
+  private final String fileName;
+  private final CodeOwnerConfigParser codeOwnerConfigParser;
   private final CodeOwnerConfig.Key codeOwnerConfigKey;
 
   private boolean isLoaded = false;
@@ -121,8 +124,10 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   private Optional<CodeOwnerConfigUpdate> codeOwnerConfigUpdate = Optional.empty();
 
   private CodeOwnerConfigFile(
-      FindOwnersCodeOwnerConfigParser codeOwnerConfigParser,
+      String fileName,
+      CodeOwnerConfigParser codeOwnerConfigParser,
       CodeOwnerConfig.Key codeOwnerConfigKey) {
+    this.fileName = fileName;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
     this.codeOwnerConfigKey = codeOwnerConfigKey;
   }
@@ -168,36 +173,31 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   @Override
   protected void onLoad() throws IOException, ConfigInvalidException {
     if (revision != null) {
-      loadFileIfItExists(
-          codeOwnerConfigKey.filePathForJgit(FILE_NAME),
-          codeOwnerConfigFileContent ->
-              loadedCodeOwnersConfig =
-                  Optional.of(
-                      codeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfigFileContent)));
+      Optional<String> codeOwnerConfigFileContent =
+          getFileIfItExists(codeOwnerConfigKey.filePathForJgit(fileName));
+      if (codeOwnerConfigFileContent.isPresent()) {
+        loadedCodeOwnersConfig =
+            Optional.of(
+                codeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfigFileContent.get()));
+      }
     }
 
     isLoaded = true;
   }
 
   /**
-   * Loads the file with the given path and invokes the given consumer with the file content.
-   *
-   * <p>No-op if a file with the given path doesn't exist.
-   *
-   * <p>This method allows us to differentiate between a non-existing file ({@code
-   * fileContentConsumer} is not invoked) and an empty file ({@code fileContentConsumer} is invoked
-   * with empty content).
+   * Loads the file with the given path and returns the file content if the file exists.
    *
    * @param filePath the path of the file that should be loaded
-   * @param fileContentConsumer the consumer for the file content Os
+   * @return the content of the file if it exists, otherwise {@link Optional#empty()}.
    */
-  private void loadFileIfItExists(String filePath, Consumer<String> fileContentConsumer)
-      throws IOException {
+  private Optional<String> getFileIfItExists(String filePath) throws IOException {
     try (TreeWalk tw = TreeWalk.forPath(rw.getObjectReader(), filePath, revision.getTree())) {
       if (tw != null) {
-        fileContentConsumer.accept(readUTF8(filePath));
+        return Optional.of(readUTF8(filePath));
       }
     }
+    return Optional.empty();
   }
 
   @Override
@@ -236,7 +236,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
         codeOwnerConfigParser.formatAsString(updatedCodeOwnerConfig);
 
     // Save the new code owner config.
-    saveUTF8(codeOwnerConfigKey.filePathForJgit(FILE_NAME), codeOwnerConfigFileContent);
+    saveUTF8(codeOwnerConfigKey.filePathForJgit(fileName), codeOwnerConfigFileContent);
 
     // If the file content is empty, the update led to a deletion of the code owner config file.
     boolean isDeleted = codeOwnerConfigFileContent.isEmpty();
