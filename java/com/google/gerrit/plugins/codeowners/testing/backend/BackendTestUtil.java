@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.testing.findowners;
+package com.google.gerrit.plugins.codeowners.testing.backend;
 
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.backend.findowners.CodeOwnerConfigFile;
-import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
 import java.util.Optional;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Ref;
@@ -29,13 +29,21 @@ import org.eclipse.jgit.treewalk.TreeWalk;
 import org.eclipse.jgit.util.RawParseUtils;
 
 /** Test utility to read/write find-owners code owner configs directly from/to a repository. */
-public class FindOwnersTestUtil {
+public class BackendTestUtil {
+  public interface Factory {
+    BackendTestUtil create(String fileName, CodeOwnerConfigParser codeOwnerConfigParser);
+  }
+
+  private final String fileName;
   private final GitRepositoryManager repoManager;
-  private final FindOwnersCodeOwnerConfigParser codeOwnerConfigParser;
+  private final CodeOwnerConfigParser codeOwnerConfigParser;
 
   @Inject
-  FindOwnersTestUtil(
-      GitRepositoryManager repoManager, FindOwnersCodeOwnerConfigParser codeOwnerConfigParser) {
+  BackendTestUtil(
+      GitRepositoryManager repoManager,
+      @Assisted String fileName,
+      @Assisted CodeOwnerConfigParser codeOwnerConfigParser) {
+    this.fileName = fileName;
     this.repoManager = repoManager;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
   }
@@ -60,9 +68,7 @@ public class FindOwnersTestUtil {
               .commit()
               .parent(head)
               .message("Add test code owner config")
-              .add(
-                  codeOwnerConfig.key().filePathForJgit(CodeOwnerConfigFile.FILE_NAME),
-                  formattedCodeOwnerConfig));
+              .add(codeOwnerConfig.key().filePathForJgit(fileName), formattedCodeOwnerConfig));
     }
   }
 
@@ -83,7 +89,7 @@ public class FindOwnersTestUtil {
       }
 
       RevCommit commit = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      String filePath = codeOwnerConfigKey.filePathForJgit(CodeOwnerConfigFile.FILE_NAME);
+      String filePath = codeOwnerConfigKey.filePathForJgit(fileName);
       try (TreeWalk tw =
           TreeWalk.forPath(testRepo.getRevWalk().getObjectReader(), filePath, commit.getTree())) {
         if (tw == null) {
