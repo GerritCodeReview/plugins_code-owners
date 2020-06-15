@@ -11,6 +11,7 @@ java_library(
         "//lib:jgit",
         "//lib:jgit-junit",
         "//lib/guice",
+        "//lib/guice:guice-assistedinject",
         "//plugins/code-owners:code-owners__plugin",
     ],
 )
