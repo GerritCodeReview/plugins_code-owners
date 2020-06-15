@@ -34,6 +34,24 @@
       "revId": "3f1fdc13f7abe365a9f3a223ef47e5740d9a0c87",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0cf3296d_88908d08",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackendId.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-15T15:10:04Z",
+      "side": 1,
+      "message": "This worked and it\u0027s nicer now :) \n\nWill upload the new patch set later, when I addressed the comments on the follow-up changes.",
+      "parentUuid": "3d41c1cf_5c38fb92",
+      "revId": "3f1fdc13f7abe365a9f3a223ef47e5740d9a0c87",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
