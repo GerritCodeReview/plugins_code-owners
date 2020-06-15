@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a0526aa0_5813e924",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 15
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-15T15:50:43Z",
+      "side": 1,
+      "message": "yes, I will address this tomorrow",
+      "parentUuid": "de24d0b1_8060f8c0",
+      "range": {
+        "startLine": 66,
+        "startChar": 178,
+        "endLine": 66,
+        "endChar": 209
+      },
+      "revId": "37dd90b281a6f5b8bd76684f7fdcaf7ac30de539",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f5714923_fc0c0b8f",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 15
@@ -36,6 +60,30 @@
       "writtenOn": "2020-06-15T13:27:00Z",
       "side": 1,
       "message": "should we have a test for adding those options directly (without using withOption)?",
+      "range": {
+        "startLine": 67,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 151
+      },
+      "revId": "37dd90b281a6f5b8bd76684f7fdcaf7ac30de539",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ce1f2515_472d8bab",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 15
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-15T15:50:43Z",
+      "side": 1,
+      "message": "yes, I will address this tomorrow",
+      "parentUuid": "f5714923_fc0c0b8f",
       "range": {
         "startLine": 67,
         "startChar": 0,
