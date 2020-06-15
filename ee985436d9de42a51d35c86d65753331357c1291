@@ -16,6 +16,24 @@
       "revId": "ee985436d9de42a51d35c86d65753331357c1291",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94ec1d91_ead57268",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerReferenceInfo.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-15T13:26:26Z",
+      "side": 1,
+      "message": "There are no plans to use this REST endpoint (get code owner config) from the UI. It could be used to implement a code owner config file editor, but implementing this is not planned for now.\n\nThe UI will use the REST endpoint that is implemented at [1] (get code owners) and this REST endpoint does return the account details as AccountInfo.\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/269585",
+      "parentUuid": "76aa5300_54e74aa0",
+      "revId": "ee985436d9de42a51d35c86d65753331357c1291",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
