@@ -34,6 +34,24 @@
       "revId": "903bb4e58a4f9868b5e86aec68a4e5d521f18281",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "2a308953_e00a9d71",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigCreation.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-15T12:56:53Z",
+      "side": 1,
+      "message": "I think we adhere to the Google Java Style Guide which talkes about the summary fragment here [1].\n\n[1] https://google.github.io/styleguide/javaguide.html#s7.2-summary-fragment",
+      "parentUuid": "77f7da27_1265613e",
+      "revId": "903bb4e58a4f9868b5e86aec68a4e5d521f18281",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
