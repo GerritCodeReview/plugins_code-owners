@@ -7,7 +7,7 @@ acceptance_tests(
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
-        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/findowners:testutil",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
         "//plugins/code-owners/javatests/com/google/gerrit/plugins/codeowners/backend:testbases",
     ],
 )
