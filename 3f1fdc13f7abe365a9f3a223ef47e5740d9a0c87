@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "91589c8b_560dc6ee",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackendId.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-15T13:10:43Z",
+      "side": 1,
+      "message": "If you add a \"Class\u003c?\u003e clazz\" member to the enum and reference CodeOwnersBackend.class in FIND_OWNERS you can just loop over the enum in BackendModule and install all bindings.\n\nThat allows you to spare the test and have the same protection against missing bindings.",
+      "revId": "3f1fdc13f7abe365a9f3a223ef47e5740d9a0c87",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
