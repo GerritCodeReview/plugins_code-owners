@@ -19,6 +19,7 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFile;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
 import com.google.gerrit.server.GerritPersonIdent;
@@ -39,7 +40,10 @@ public class FindOwnersBackend implements CodeOwnersBackend {
   /** The ID of this code owner backend. */
   public static final String ID = "find-owners";
 
-  private final CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory;
+  /** The name of the files in which {@link CodeOwnerConfig}s are stored. */
+  static final String CODE_OWNER_CONFIG_FILE_NAME = "OWNERS";
+
+  private final FindOwnersCodeOwnerConfigParser codeOwnerConfigParser;
   private final GitRepositoryManager repoManager;
   private final PersonIdent serverIdent;
   private final MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory;
@@ -47,12 +51,12 @@ public class FindOwnersBackend implements CodeOwnersBackend {
 
   @Inject
   FindOwnersBackend(
-      CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory,
+      FindOwnersCodeOwnerConfigParser codeOwnerConfigParser,
       GitRepositoryManager repoManager,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
       RetryHelper retryHelper) {
-    this.codeOwnerConfigFileFactory = codeOwnerConfigFileFactory;
+    this.codeOwnerConfigParser = codeOwnerConfigParser;
     this.repoManager = repoManager;
     this.serverIdent = serverIdent;
     this.metaDataUpdateInternalFactory = metaDataUpdateInternalFactory;
@@ -61,8 +65,10 @@ public class FindOwnersBackend implements CodeOwnersBackend {
 
   @Override
   public Optional<CodeOwnerConfig> getCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    try {
-      return codeOwnerConfigFileFactory.load(codeOwnerConfigKey).getLoadedCodeOwnerConfig();
+    try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
+      return CodeOwnerConfigFile.load(
+              CODE_OWNER_CONFIG_FILE_NAME, codeOwnerConfigParser, repository, codeOwnerConfigKey)
+          .getLoadedCodeOwnerConfig();
     } catch (IOException | ConfigInvalidException e) {
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
@@ -95,8 +101,11 @@ public class FindOwnersBackend implements CodeOwnersBackend {
       CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       CodeOwnerConfigFile codeOwnerConfigFile =
-          codeOwnerConfigFileFactory
-              .load(repository, codeOwnerConfigKey)
+          CodeOwnerConfigFile.load(
+                  CODE_OWNER_CONFIG_FILE_NAME,
+                  codeOwnerConfigParser,
+                  repository,
+                  codeOwnerConfigKey)
               .setCodeOwnerConfigUpdate(codeOwnerConfigUpdate);
 
       try (MetaDataUpdate metaDataUpdate =
