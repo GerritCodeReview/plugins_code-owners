@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "337738a9_1fd2cd33",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-15T13:19:36Z",
+      "side": 1,
+      "message": "This could use a test where there is no code owner config for /foo/ but the rest is there and we assert that it\u0027s not getting a call for foo.",
+      "revId": "fd30c432deb0095b545dcd7bc4cfc4233a3610e4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
