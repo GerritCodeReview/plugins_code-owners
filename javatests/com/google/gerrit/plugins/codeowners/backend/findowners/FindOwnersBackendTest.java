@@ -26,7 +26,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
-import com.google.gerrit.plugins.codeowners.testing.findowners.FindOwnersTestUtil;
+import com.google.gerrit.plugins.codeowners.testing.backend.BackendTestUtil;
 import com.google.gerrit.server.IdentifiedUser;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Repository;
@@ -36,12 +36,18 @@ import org.junit.Test;
 
 /** Tests for {@link FindOwnersBackend}. */
 public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
-  private FindOwnersTestUtil findOwnersTestUtil;
+  private BackendTestUtil backendTestUtil;
   private FindOwnersBackend findOwnersBackend;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    findOwnersTestUtil = plugin.getSysInjector().getInstance(FindOwnersTestUtil.class);
+    backendTestUtil =
+        plugin
+            .getSysInjector()
+            .getInstance(BackendTestUtil.Factory.class)
+            .create(
+                FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME,
+                plugin.getSysInjector().getInstance(FindOwnersCodeOwnerConfigParser.class));
     findOwnersBackend = plugin.getSysInjector().getInstance(FindOwnersBackend.class);
   }
 
@@ -64,7 +70,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+    backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
         findOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey);
@@ -143,7 +149,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+    backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     try (Repository repo = repoManager.openRepository(project)) {
       // Remember head for later assertions.
@@ -205,7 +211,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+    backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     try (Repository repo = repoManager.openRepository(project)) {
       // Remember head for later assertions.
@@ -251,7 +257,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
-    findOwnersTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+    backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     try (Repository repo = repoManager.openRepository(project)) {
       // Remember head for later assertions.

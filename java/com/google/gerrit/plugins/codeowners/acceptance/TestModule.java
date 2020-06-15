@@ -14,16 +14,17 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance;
 
+import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.plugins.codeowners.Module;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperationsImpl;
-import com.google.inject.AbstractModule;
+import com.google.gerrit.plugins.codeowners.testing.backend.BackendTestUtil;
 
 /**
  * Guice module that makes the extensions of the code-owners plugin and the code owners test API
  * available during the test execution
  */
-class TestModule extends AbstractModule {
+class TestModule extends FactoryModule {
   @Override
   public void configure() {
     install(new Module());
@@ -31,5 +32,7 @@ class TestModule extends AbstractModule {
     // Only add bindings here that are specifically required for tests, in order to keep the Guice
     // setup in tests as realistic as possible by delegating to the original module.
     bind(CodeOwnerConfigOperations.class).to(CodeOwnerConfigOperationsImpl.class);
+
+    factory(BackendTestUtil.Factory.class);
   }
 }
