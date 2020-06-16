@@ -18,16 +18,14 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
-import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
-import com.google.gerrit.server.mail.send.OutgoingEmailValidator;
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Parser and formatter for the syntax that is used to store {@link CodeOwnerConfig}s in {@code
@@ -44,46 +42,38 @@ import com.google.inject.Singleton;
  *   <li>code owner emails: a line can be the email of a code owner
  * </ul>
  *
- * <p>Comment lines, invalid lines and invalid emails are silently ignored.
+ * <p>Comment lines and invalid lines silently ignored.
  *
- * <p>Comments cannot appear as part of syntax lines, but only as separate lines (e.g. using
- * 'foo.bar@example.com # Foo Bar' would be invalid).
+ * <p>Comments can appear as separate lines and as appendix for email lines (e.g. using
+ * 'foo.bar@example.com # Foo Bar' would be a valid email line).
+ *
+ * <p>Most of the code in this class was copied from the {@code
+ * com.googlesource.gerrit.plugins.findowners.Parser} class from the {@code find-owners} plugin. The
+ * original parsing code is used to be as backwards-compatible as possible and to avoid spending
+ * time on reimplementing a parser for a deprecated syntax. We have only done a minimal amount of
+ * adaption so that the parser produces a {@link CodeOwnerConfig} as result, instead of the
+ * abstraction that is used in the {@code find-owners} plugin.
  */
 @Singleton
 @VisibleForTesting
 public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  /**
-   * To validate emails we use the same validator that Gerrit core is using to validate emails for
-   * Gerrit accounts.
-   *
-   * <p>Emails in code owner configurations must be resolveable to Gerrit accounts. This means any
-   * email that is invalid for Gerrit accounts, is also invalid as code owner (if an email cannot be
-   * added to a Gerrit account, it can never be resolved to a Gerrit account and hence it makes no
-   * sense to allow it as code owner).
-   */
-  private final OutgoingEmailValidator emailValidator;
+  private static final String BOL = "^[\\s]*"; // begin-of-line
+  private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
 
-  @Inject
-  FindOwnersCodeOwnerConfigParser(OutgoingEmailValidator emailValidator) {
-    this.emailValidator = emailValidator;
-  }
+  private static final String EMAIL = "([^\\s<>@,]+@[^\\s<>@#,]+)";
+
+  // Simple input lines with 0 or 1 sub-pattern.
+  private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
+  private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
 
   @Override
   public CodeOwnerConfig parse(
       CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
-    CodeOwnerConfig.Builder codeOwnerConfig =
-        CodeOwnerConfig.builder(requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"));
-
-    Streams.stream(Splitter.on('\n').split(Strings.nullToEmpty(codeOwnerConfigAsString)))
-        .map(String::trim)
-        .filter(line -> !isComment(line))
-        .filter(this::isEmail)
-        .distinct()
-        .forEach(codeOwnerConfig::addCodeOwnerEmail);
-
-    return codeOwnerConfig.build();
+    return parseFile(
+        requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"),
+        Strings.nullToEmpty(codeOwnerConfigAsString).split("\\R"));
   }
 
   @Override
@@ -95,15 +85,31 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         .collect(joining("\n"));
   }
 
-  private static boolean isComment(String trimmedLine) {
-    return trimmedLine.startsWith("#");
+  private CodeOwnerConfig parseFile(CodeOwnerConfig.Key codeOwnerConfigKey, String[] lines) {
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder = CodeOwnerConfig.builder(codeOwnerConfigKey);
+    for (String line : lines) {
+      parseLine(codeOwnerConfigBuilder, line);
+    }
+    return codeOwnerConfigBuilder.build();
   }
 
-  private boolean isEmail(String trimmedLine) {
-    if (!emailValidator.isValid(trimmedLine)) {
-      logger.atInfo().log("Skipping line that is not an email: %s", trimmedLine);
-      return false;
+  private void parseLine(CodeOwnerConfig.Builder codeOwnerConfigBuilder, String line) {
+    String email;
+    if (isComment(line)) {
+      // ignore comment lines and empty lines
+    } else if ((email = parseEmail(line)) != null) {
+      codeOwnerConfigBuilder.addCodeOwner(CodeOwnerReference.create(email));
+    } else {
+      logger.atInfo().log("Skipping unknown line: %s", line);
     }
-    return true;
+  }
+
+  private static boolean isComment(String line) {
+    return PAT_COMMENT.matcher(line).matches();
+  }
+
+  private static String parseEmail(String line) {
+    Matcher m = PAT_EMAIL.matcher(line);
+    return m.matches() ? m.group(1).trim() : null;
   }
 }
