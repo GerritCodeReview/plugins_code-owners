@@ -70,6 +70,24 @@
       "revId": "3f1fdc13f7abe365a9f3a223ef47e5740d9a0c87",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b8e6359d_3d90b709",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackendId.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-06-16T14:00:57Z",
+      "side": 1,
+      "message": "Nice!",
+      "parentUuid": "7d03dae6_3c13ef8b",
+      "revId": "3f1fdc13f7abe365a9f3a223ef47e5740d9a0c87",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
