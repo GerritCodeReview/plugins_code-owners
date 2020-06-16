@@ -1,11 +1,13 @@
 {
   "checks": {
     "zuul-check:plugins_code-owners": {
-      "state": "RUNNING",
-      "message": "Jobs have started running",
+      "state": "SUCCESSFUL",
+      "message": "Change passed all voting jobs",
+      "url": "https://ci.gerritcodereview.com/t/gerrit/buildset/5f8049311564484b942cebbba0a66d2b",
       "started": "2020-06-16T07:34:29Z",
+      "finished": "2020-06-16T07:48:08Z",
       "created": "2020-06-16T07:34:30Z",
-      "updated": "2020-06-16T07:34:53Z"
+      "updated": "2020-06-16T07:48:09Z"
     }
   }
 }
