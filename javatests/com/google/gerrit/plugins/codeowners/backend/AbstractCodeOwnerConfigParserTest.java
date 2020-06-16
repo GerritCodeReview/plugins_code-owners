@@ -64,11 +64,6 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
    */
   protected abstract String getCodeOwnerConfig(String... emails);
 
-  /** Returns the expected code owner config string for an empty code owner config. */
-  protected String getEmptyCodeOwnerConfig() {
-    return getCodeOwnerConfig();
-  }
-
   @Test
   public void cannotParseIfCodeOwnerConfigKeyIsNull() throws Exception {
     NullPointerException npe =
@@ -86,17 +81,13 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   @Test
   public void emptyCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        "",
-        codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(),
-        getEmptyCodeOwnerConfig());
+        "", codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty());
   }
 
   @Test
   public void nullCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        null,
-        codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(),
-        getEmptyCodeOwnerConfig());
+        null, codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(), "");
   }
 
   @Test

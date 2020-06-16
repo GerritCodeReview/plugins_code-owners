@@ -33,10 +33,6 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
 
   @Override
   protected String getCodeOwnerConfig(String... emails) {
-    if (emails.length == 0) {
-      return "owners_config {\n}\n";
-    }
-
     StringBuilder b = new StringBuilder();
     b.append("owners_config {\n  owner_sets {\n");
     for (String email : emails) {
