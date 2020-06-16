@@ -28,8 +28,14 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Override
-  protected String getCodeOwnerConfig(String... emails) {
-    return String.join("\n", emails);
+  protected String getCodeOwnerConfig(String email, String... moreEmails) {
+    StringBuilder b = new StringBuilder();
+    b.append(email);
+    if (moreEmails.length > 0) {
+      b.append("\n");
+      b.append(String.join("\n", moreEmails));
+    }
+    return b.toString();
   }
 
   @Test
