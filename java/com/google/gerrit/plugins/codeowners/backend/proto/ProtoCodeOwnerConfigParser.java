@@ -54,21 +54,23 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
+    if (requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().isEmpty()) {
+      return "";
+    }
+
     OwnerMetadataProto.OwnersConfig.Builder ownersConfigProtoBuilder =
         OwnerMetadataProto.OwnersConfig.newBuilder();
-    if (!requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().isEmpty()) {
-      OwnerMetadataProto.OwnerSet.Builder ownersSetProtoBuilder =
-          OwnerMetadataProto.OwnerSet.newBuilder();
-      codeOwnerConfig.codeOwners().stream()
-          .sorted(Comparator.comparing(CodeOwnerReference::email))
-          .forEach(
-              codeOwnerReference ->
-                  ownersSetProtoBuilder.addOwners(
-                      OwnerMetadataProto.Owner.newBuilder()
-                          .setEmail(codeOwnerReference.email())
-                          .build()));
-      ownersConfigProtoBuilder.addOwnerSets(ownersSetProtoBuilder.build()).build();
-    }
+    OwnerMetadataProto.OwnerSet.Builder ownersSetProtoBuilder =
+        OwnerMetadataProto.OwnerSet.newBuilder();
+    codeOwnerConfig.codeOwners().stream()
+        .sorted(Comparator.comparing(CodeOwnerReference::email))
+        .forEach(
+            codeOwnerReference ->
+                ownersSetProtoBuilder.addOwners(
+                    OwnerMetadataProto.Owner.newBuilder()
+                        .setEmail(codeOwnerReference.email())
+                        .build()));
+    ownersConfigProtoBuilder.addOwnerSets(ownersSetProtoBuilder.build()).build();
     return TextFormat.printer()
         .printToString(
             OwnerMetadataProto.OwnerMetadata.newBuilder()
