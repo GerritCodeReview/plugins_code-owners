@@ -56,9 +56,6 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   /** Must return the {@link CodeOwnerConfigParser} class that should be tested. */
   protected abstract Class<? extends CodeOwnerConfigParser> getCodeOwnerConfigParserClass();
 
-  /** Must return the expected code owner config string for an empty code owner config. */
-  protected abstract String getEmptyCodeOwnerConfig();
-
   /**
    * Must return the expected code owner config string for a code owner config with the given
    * emails.
@@ -84,17 +81,13 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   @Test
   public void emptyCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        "",
-        codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(),
-        getEmptyCodeOwnerConfig());
+        "", codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty());
   }
 
   @Test
   public void nullCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        null,
-        codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(),
-        getEmptyCodeOwnerConfig());
+        null, codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(), "");
   }
 
   @Test
