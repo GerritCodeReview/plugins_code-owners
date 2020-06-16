@@ -58,13 +58,13 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
-  public void
-      codeOwnerConfigWithInlineComments_linesWithInlineCommentsAreConsideredAsInvalidAndAreIgnored()
-          throws Exception {
+  public void codeOwnerConfigWithInlineComments() throws Exception {
     assertParseAndFormat(
-        getCodeOwnerConfig(EMAIL_1, "\nfoo.bar@test.com # Foo Bar", EMAIL_2),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2 + " # some comment", EMAIL_3),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
-        getCodeOwnerConfig(EMAIL_1, EMAIL_2));
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 }
