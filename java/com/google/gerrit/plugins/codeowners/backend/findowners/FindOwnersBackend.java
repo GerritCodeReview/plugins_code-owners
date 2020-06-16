@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFile;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
@@ -25,6 +26,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.jgit.lib.PersonIdent;
 
+/**
+ * Backend that supports the syntax in which the {@code find-owners} plugin stores {@link
+ * CodeOwnerConfig}s.
+ *
+ * <p>This syntax is going to be deprecated. This is why for users that start using code owners
+ * newly it's recommended to use another backend, e.g. the {@link ProtoBackend}.
+ *
+ * <p>New features will likely not be supported by this backend.
+ */
 @Singleton
 public class FindOwnersBackend extends AbstractFileBasedCodeOwnersBackend {
   /** The ID of this code owner backend. */
