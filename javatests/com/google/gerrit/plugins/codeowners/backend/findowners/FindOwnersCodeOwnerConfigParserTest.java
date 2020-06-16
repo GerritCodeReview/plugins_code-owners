@@ -28,11 +28,6 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Override
-  protected String getEmptyCodeOwnerConfig() {
-    return "";
-  }
-
-  @Override
   protected String getCodeOwnerConfig(String... emails) {
     StringBuilder b = new StringBuilder();
     for (String email : emails) {
