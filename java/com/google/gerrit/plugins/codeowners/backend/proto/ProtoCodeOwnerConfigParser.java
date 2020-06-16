@@ -62,8 +62,12 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
+    if (requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().isEmpty()) {
+      return "";
+    }
+
     OwnersConfig.Builder ownersConfigProtoBuilder = OwnersConfig.newBuilder();
-    if (!requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().isEmpty()) {
+    if (!codeOwnerConfig.codeOwners().isEmpty()) {
       OwnerSet.Builder ownersSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
       codeOwnerConfig.codeOwners().stream()
           .sorted(Comparator.comparing(CodeOwnerReference::email))
