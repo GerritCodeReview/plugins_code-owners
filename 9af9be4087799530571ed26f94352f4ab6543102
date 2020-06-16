@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ffe81f62_0dfbcd03",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-16T10:19:30Z",
+      "side": 1,
+      "message": "Isn\u0027t it better to allow both absolute and relative?\nIt seems easy enough to implement both.",
+      "range": {
+        "startLine": 52,
+        "startChar": 91,
+        "endLine": 52,
+        "endChar": 99
+      },
+      "revId": "9af9be4087799530571ed26f94352f4ab6543102",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
