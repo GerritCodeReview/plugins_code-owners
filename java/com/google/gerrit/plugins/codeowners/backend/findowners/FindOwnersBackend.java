@@ -24,6 +24,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.eclipse.jgit.lib.PersonIdent;
 
+/**
+ * Backend that supports the syntax in which the {@code find-owners} plugin stores {@link
+ * CodeOwnerConfig}s.
+ *
+ * <p>This syntax is going to be deprecated. This is why for users that start using code owners it's
+ * recommended to use another backend, e.g. {@link
+ * com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend}.
+ *
+ * <p>New features will likely not be supported by this backend.
+ */
 @Singleton
 public class FindOwnersBackend extends AbstractFileBasedCodeOwnersBackend {
   /** The ID of this code owner backend. */
