@@ -63,10 +63,14 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
 
   private static final String EMAIL = "([^\\s<>@,]+@[^\\s<>@#,]+)";
+  private static final String SET_NOPARENT = "set[\\s]+noparent";
 
   // Simple input lines with 0 or 1 sub-pattern.
   private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
   private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
+  private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
+
+  private static final String SET_NOPARENT_LINE = "set noparent";
 
   @Override
   public CodeOwnerConfig parse(
@@ -78,11 +82,22 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) {
-    return requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().stream()
-        .map(CodeOwnerReference::email)
-        .sorted()
-        .distinct()
-        .collect(joining("\n"));
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+
+    StringBuilder b = new StringBuilder();
+    if (codeOwnerConfig.ignoreParentCodeOwners()) {
+      b.append(SET_NOPARENT_LINE);
+      if (!codeOwnerConfig.codeOwners().isEmpty()) {
+        b.append('\n');
+      }
+    }
+    b.append(
+        codeOwnerConfig.codeOwners().stream()
+            .map(CodeOwnerReference::email)
+            .sorted()
+            .distinct()
+            .collect(joining("\n")));
+    return b.toString();
   }
 
   private CodeOwnerConfig parseFile(CodeOwnerConfig.Key codeOwnerConfigKey, String[] lines) {
@@ -95,7 +110,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   private void parseLine(CodeOwnerConfig.Builder codeOwnerConfigBuilder, String line) {
     String email;
-    if (isComment(line)) {
+    if (isNoParent(line)) {
+      codeOwnerConfigBuilder.setIgnoreParentCodeOwners();
+    } else if (isComment(line)) {
       // ignore comment lines and empty lines
     } else if ((email = parseEmail(line)) != null) {
       codeOwnerConfigBuilder.addCodeOwner(CodeOwnerReference.create(email));
@@ -106,6 +123,10 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   private static boolean isComment(String line) {
     return PAT_COMMENT.matcher(line).matches();
+  }
+
+  private static boolean isNoParent(String line) {
+    return PAT_NO_PARENT.matcher(line).matches();
   }
 
   private static String parseEmail(String line) {
