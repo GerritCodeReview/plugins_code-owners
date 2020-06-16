@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
 
+import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
@@ -72,6 +73,15 @@ public class CodeOwnerConfigSubject extends Subject {
    */
   public IterableSubject.UsingCorrespondence<CodeOwnerReference, String> hasCodeOwnersEmailsThat() {
     return hasCodeOwnersThat().comparingElementsUsing(CODE_OWNER_REFERENCE_TO_EMAIL);
+  }
+
+  /**
+   * Returns a subject for the ignore parent code owners flag in the code owner config.
+   *
+   * @return a subject for the ignore parent code owners flag in the code owner config
+   */
+  public BooleanSubject hasIgnoreParentCodeOwnersThat() {
+    return check("ignoreParentCodeOwners()").that(codeOwnerConfig().ignoreParentCodeOwners());
   }
 
   private CodeOwnerConfig codeOwnerConfig() {
