@@ -36,6 +36,12 @@ public abstract class CodeOwnerConfig {
   /** Gets the key of this code owner config. */
   public abstract Key key();
 
+  /**
+   * Gets whether code owners from parent code owner configs (code owner configs in parent folders)
+   * should be ignored.
+   */
+  public abstract boolean ignoreParentCodeOwners();
+
   // TODO(ekempin): add field for included code owner configs
 
   /** Gets the code owners of this code owner config. */
@@ -91,7 +97,7 @@ public abstract class CodeOwnerConfig {
    * @return builder for a code owner config
    */
   public static Builder builder(Key key) {
-    return new AutoValue_CodeOwnerConfig.Builder().setKey(key);
+    return new AutoValue_CodeOwnerConfig.Builder().setKey(key).setIgnoreParentCodeOwners(false);
   }
 
   @AutoValue.Builder
@@ -103,6 +109,26 @@ public abstract class CodeOwnerConfig {
      * @return the Builder instance for chaining calls
      */
     public abstract Builder setKey(Key key);
+
+    /**
+     * Sets whether code owners from parent code owner configs (code owner configs in parent
+     * folders) should be ignored.
+     *
+     * @param ignoreParentCodeOwners whether code owners from parent code owner configs should be
+     *     ignored
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder setIgnoreParentCodeOwners(boolean ignoreParentCodeOwners);
+
+    /**
+     * Sets that code owners from parent code owner configs (code owner configs in parent folders)
+     * should be ignored.
+     *
+     * @return the Builder instance for chaining calls
+     */
+    public Builder setIgnoreParentCodeOwners() {
+      return setIgnoreParentCodeOwners(true);
+    }
 
     /**
      * Sets the code owners of this code owner config.
