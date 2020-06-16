@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 
 /**
  * Enum of all code owner backend IDs.
@@ -25,7 +26,8 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend
  * com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT}.
  */
 public enum CodeOwnersBackendId {
-  FIND_OWNERS(FindOwnersBackend.ID, FindOwnersBackend.class);
+  FIND_OWNERS(FindOwnersBackend.ID, FindOwnersBackend.class),
+  PROTO(ProtoBackend.ID, ProtoBackend.class);
 
   /** The ID under which the code owners backend is registered. */
   private final String backendId;
