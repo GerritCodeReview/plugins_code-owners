@@ -210,6 +210,62 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
   }
 
   @Test
+  public void deleteCodeOwnerConfigInitiatedByServer() throws Exception {
+    testDeleteCodeOwnerConfigInitiatedByServer(null);
+  }
+
+  @Test
+  public void deleteCodeOwnerConfigInitiatedByUser() throws Exception {
+    testDeleteCodeOwnerConfigInitiatedByServer(identifiedUserFactory.create(user.id()));
+  }
+
+  private void testDeleteCodeOwnerConfigInitiatedByServer(@Nullable IdentifiedUser currentUser)
+      throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    CodeOwnerConfig codeOwnerConfigInRepository =
+        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+    backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+
+    try (Repository repo = repoManager.openRepository(project)) {
+      // Remember head for later assertions.
+      RevCommit origHead = getHead(repo, codeOwnerConfigKey.ref());
+
+      // Create the code owner config.
+      Optional<CodeOwnerConfig> codeOwnerConfig =
+          codeOwnersBackend.upsertCodeOwnerConfig(
+              codeOwnerConfigKey,
+              CodeOwnerConfigUpdate.builder()
+                  .setCodeOwnerModification(codeOwners -> ImmutableSet.of())
+                  .build(),
+              currentUser);
+      assertThat(codeOwnerConfig).isEmpty();
+
+      // Check the metadata of the created commit.
+      RevCommit newHead = getHead(repo, codeOwnerConfigKey.ref());
+      assertThat(newHead.getParent(0)).isEqualTo(origHead);
+      assertThat(newHead.getShortMessage()).isEqualTo("Delete code owner config");
+
+      // Check author identity.
+      if (currentUser != null) {
+        assertThat(newHead.getAuthorIdent().getEmailAddress())
+            .isEqualTo(currentUser.getAccount().preferredEmail());
+      } else {
+        assertThat(newHead.getAuthorIdent().getEmailAddress())
+            .isEqualTo(serverIdent.get().getEmailAddress());
+        assertThat(newHead.getCommitterIdent()).isEqualTo(newHead.getAuthorIdent());
+      }
+
+      // Check committer identity.
+      assertThat(newHead.getCommitterIdent().getEmailAddress())
+          .isEqualTo(serverIdent.get().getEmailAddress());
+      assertThat(newHead.getCommitterIdent().getTimeZone())
+          .isEqualTo(newHead.getAuthorIdent().getTimeZone());
+      assertThat(newHead.getCommitterIdent().getWhen())
+          .isEqualTo(newHead.getAuthorIdent().getWhen());
+    }
+  }
+
+  @Test
   public void noOpCodeOwnerConfigUpdate() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
