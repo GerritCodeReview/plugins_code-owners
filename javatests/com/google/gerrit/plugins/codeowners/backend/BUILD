@@ -23,13 +23,18 @@ java_library(
     name = "testbases",
     srcs = glob(["Abstract*.java"]),
     deps = [
+        "//java/com/google/gerrit/common:annotations",
         "//java/com/google/gerrit/entities",
+        "//java/com/google/gerrit/server",
         "//java/com/google/gerrit/testing:gerrit-test-util",
+        "//lib:jgit",
         "//lib:guava",
         "//lib/truth",
+        "//lib/truth:truth-java8-extension",
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
     ],
 )
 

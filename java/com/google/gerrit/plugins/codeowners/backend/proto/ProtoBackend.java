@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.backend.findowners;
+package com.google.gerrit.plugins.codeowners.backend.proto;
 
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -26,21 +26,21 @@ import com.google.inject.Singleton;
 import org.eclipse.jgit.lib.PersonIdent;
 
 @Singleton
-public class FindOwnersBackend extends AbstractFileBasedCodeOwnersBackend {
+public class ProtoBackend extends AbstractFileBasedCodeOwnersBackend {
   /** The ID of this code owner backend. */
-  public static final String ID = "find-owners";
+  public static final String ID = "proto";
 
   /** The name of the files in which {@link CodeOwnerConfig}s are stored. */
-  static final String CODE_OWNER_CONFIG_FILE_NAME = "OWNERS";
+  static final String CODE_OWNER_CONFIG_FILE_NAME = "OWNERS_METADATA";
 
   @Inject
-  FindOwnersBackend(
+  ProtoBackend(
       CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory,
-      FindOwnersCodeOwnerConfigParser codeOwnerConfigParser,
       GitRepositoryManager repoManager,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
-      RetryHelper retryHelper) {
+      RetryHelper retryHelper,
+      ProtoCodeOwnerConfigParser codeOwnerConfigParser) {
     super(
         codeOwnerConfigFileFactory,
         repoManager,
