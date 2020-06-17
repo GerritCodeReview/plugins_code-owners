@@ -65,6 +65,16 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void formatCodeOwnerConfigWithoutCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .setIgnoreParentCodeOwners()
+            .build();
+    CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
+    assertThat(codeOwnerConfigInfo).hasCodeOwnersThat().isNull();
+  }
+
+  @Test
   public void formatCodeOwnerConfigWithIgnoreParentCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
@@ -84,7 +94,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isTrue();
-    assertThat(codeOwnerConfigInfo).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnerConfigInfo).hasCodeOwnersThat().isNull();
   }
 
   @Test
