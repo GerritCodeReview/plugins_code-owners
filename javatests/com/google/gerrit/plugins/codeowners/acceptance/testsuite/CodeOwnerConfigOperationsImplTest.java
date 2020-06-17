@@ -173,6 +173,36 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void codeOwnerConfigCanBeCreatedWithoutSpecifyingIgnoreParentCodeOwners()
+      throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .ignoreParentCodeOwners()
+            .create();
+
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasIgnoreParentCodeOwnersThat()
+        .isTrue();
+  }
+
+  @Test
+  public void specifiedIgnoreParentCodeOwnersIsRespectedForCodeOwnerConfigCreation()
+      throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .ignoreParentCodeOwners()
+            .create();
+
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasIgnoreParentCodeOwnersThat()
+        .isTrue();
+  }
+
+  @Test
   public void codeOwnerConfigCreationRequiresCodeOwners() throws Exception {
     IllegalStateException exception =
         assertThrows(
@@ -217,6 +247,36 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     assertThat(exception)
         .hasMessageThat()
         .contains(String.format("code owner config %s already exists", codeOwnerConfigKey));
+  }
+
+  @Test
+  public void setIgnoreParentCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false, codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .ignoreParentCodeOwners()
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasIgnoreParentCodeOwnersThat()
+        .isTrue();
+  }
+
+  @Test
+  public void unsetIgnoreParentCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            true, codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .ignoreParentCodeOwners(false)
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasIgnoreParentCodeOwnersThat()
+        .isFalse();
   }
 
   @Test
@@ -312,9 +372,17 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   private CodeOwnerConfig createCodeOwnerConfig(CodeOwnerModification codeOwnerModification) {
+    return createCodeOwnerConfig(false, codeOwnerModification);
+  }
+
+  private CodeOwnerConfig createCodeOwnerConfig(
+      boolean ignoreParentCodeOwners, CodeOwnerModification codeOwnerModification) {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfigUpdate codeOwnerConfigUpdate =
-        CodeOwnerConfigUpdate.builder().setCodeOwnerModification(codeOwnerModification).build();
+        CodeOwnerConfigUpdate.builder()
+            .setIgnoreParentCodeOwners(ignoreParentCodeOwners)
+            .setCodeOwnerModification(codeOwnerModification)
+            .build();
     return codeOwnersUpdate
         .get()
         .upsertCodeOwnerConfig(codeOwnerConfigKey, codeOwnerConfigUpdate)
