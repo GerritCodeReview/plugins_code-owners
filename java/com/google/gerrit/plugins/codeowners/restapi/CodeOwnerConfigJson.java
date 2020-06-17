@@ -35,6 +35,7 @@ public final class CodeOwnerConfigJson {
   public static CodeOwnerConfigInfo format(CodeOwnerConfig codeOwnerConfig) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     CodeOwnerConfigInfo info = new CodeOwnerConfigInfo();
+    info.ignoreParentCodeOwners = codeOwnerConfig.ignoreParentCodeOwners() ? true : null;
     info.codeOwners =
         codeOwnerConfig.codeOwners().stream()
             .map(CodeOwnerConfigJson::format)
