@@ -14,10 +14,14 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import org.junit.Test;
 
 /** Tests for {@link FindOwnersCodeOwnerConfigParser}. */
@@ -46,7 +50,10 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     assertParseAndFormat(
         getCodeOwnerConfig(EMAIL_1, "@test.com", "admin@", "admin@test@com", EMAIL_2),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
+            assertThat(codeOwnerConfig)
+                .hasExactlyOneCodeOwnerSetThat()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2));
   }
 
@@ -55,7 +62,10 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     assertParseAndFormat(
         getCodeOwnerConfig(EMAIL_1, "INVALID", "NOT_AN_EMAIL", EMAIL_2),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
+            assertThat(codeOwnerConfig)
+                .hasExactlyOneCodeOwnerSetThat()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2));
   }
 
@@ -65,6 +75,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         getCodeOwnerConfig(EMAIL_1, EMAIL_2 + " # some comment", EMAIL_3),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasExactlyOneCodeOwnerSetThat()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
@@ -76,8 +87,23 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         getCodeOwnerConfig(true, EMAIL_1) + "\nset noparent\nset noparent",
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
-          assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1);
+          assertThat(codeOwnerConfig)
+              .hasExactlyOneCodeOwnerSetThat()
+              .hasCodeOwnersEmailsThat()
+              .containsExactly(EMAIL_1);
         },
         getCodeOwnerConfig(true, EMAIL_1));
+  }
+
+  @Test
+  public void formatCodeOwnerConfigWithMultipleCodeOwnerSets() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(
+                CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/"))
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(EMAIL_1, EMAIL_3))
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(EMAIL_2))
+            .build();
+    assertThat(codeOwnerConfigParser.formatAsString(codeOwnerConfig))
+        .isEqualTo(getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 }

@@ -14,12 +14,14 @@
 
 package com.google.gerrit.plugins.codeowners.backend.proto;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Strings;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.inject.Singleton;
 import com.google.protobuf.TextFormat;
 import java.io.IOException;
@@ -44,12 +46,16 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
     ownersConfig
         .getOwnerSetsList()
         .forEach(
-            ownerSetProto ->
-                ownerSetProto
-                    .getOwnersList()
-                    .forEach(
-                        ownersProto ->
-                            codeOwnerConfigBuilder.addCodeOwnerEmail(ownersProto.getEmail())));
+            ownerSetProto -> {
+              CodeOwnerSet codeOwnerSet =
+                  CodeOwnerSet.create(
+                      ownerSetProto.getOwnersList().stream()
+                          .map(ownerSet -> CodeOwnerReference.create(ownerSet.getEmail()))
+                          .collect(toImmutableSet()));
+              if (!codeOwnerSet.codeOwners().isEmpty()) {
+                codeOwnerConfigBuilder.addCodeOwnerSet(codeOwnerSet);
+              }
+            });
     return codeOwnerConfigBuilder.build();
   }
 
@@ -57,7 +63,7 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     if (codeOwnerConfig.ignoreParentCodeOwners() == false
-        && codeOwnerConfig.codeOwners().isEmpty()) {
+        && codeOwnerConfig.codeOwnerSets().isEmpty()) {
       return "";
     }
 
@@ -67,17 +73,20 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
       ownersConfigProtoBuilder.setIgnoreParentOwners(true);
     }
 
-    OwnerMetadataProto.OwnerSet.Builder ownersSetProtoBuilder =
-        OwnerMetadataProto.OwnerSet.newBuilder();
-    codeOwnerConfig.codeOwners().stream()
-        .sorted(Comparator.comparing(CodeOwnerReference::email))
-        .forEach(
-            codeOwnerReference ->
-                ownersSetProtoBuilder.addOwners(
-                    OwnerMetadataProto.Owner.newBuilder()
-                        .setEmail(codeOwnerReference.email())
-                        .build()));
-    ownersConfigProtoBuilder.addOwnerSets(ownersSetProtoBuilder.build()).build();
+    for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
+      OwnerMetadataProto.OwnerSet.Builder ownerSetProtoBuilder =
+          OwnerMetadataProto.OwnerSet.newBuilder();
+      codeOwnerSet.codeOwners().stream()
+          .sorted(Comparator.comparing(CodeOwnerReference::email))
+          .forEach(
+              codeOwnerReference ->
+                  ownerSetProtoBuilder.addOwners(
+                      OwnerMetadataProto.Owner.newBuilder()
+                          .setEmail(codeOwnerReference.email())
+                          .build()));
+      ownersConfigProtoBuilder.addOwnerSets(ownerSetProtoBuilder.build());
+    }
+
     return TextFormat.printer()
         .printToString(
             OwnerMetadataProto.OwnerMetadata.newBuilder()

@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
 import com.google.gerrit.server.ServerInitiated;
@@ -71,7 +72,8 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
             codeOwnerConfigKey,
             CodeOwnerConfigUpdate.builder()
                 .setIgnoreParentCodeOwners(codeOwnerConfigCreation.ignoreParentCodeOwners())
-                .setCodeOwnerModification(codeOwners -> codeOwnerConfigCreation.codeOwners())
+                .setCodeOwnerSetsModification(
+                    CodeOwnerSetModification.set(codeOwnerConfigCreation.codeOwnerSets()))
                 .build())
         .orElseThrow(
             () ->
@@ -125,7 +127,8 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
                   .setIgnoreParentCodeOwners(codeOwnerConfigUpdate.ignoreParentCodeOwners())
-                  .setCodeOwnerModification(codeOwnerConfigUpdate.codeOwnerModification()::apply)
+                  .setCodeOwnerSetsModification(
+                      codeOwnerConfigUpdate.codeOwnerSetsModification()::apply)
                   .build());
     }
   }

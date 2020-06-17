@@ -11,6 +11,7 @@ java_library(
     deps = [
         "//java/com/google/gerrit/entities",
         "//java/com/google/gerrit/truth",
+        "//lib:guava",
         "//lib/truth",
         "//plugins/code-owners:code-owners__plugin",
     ],
