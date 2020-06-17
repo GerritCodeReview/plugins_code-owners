@@ -72,6 +72,7 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
         .upsertCodeOwnerConfig(
             codeOwnerConfigKey,
             CodeOwnerConfigUpdate.builder()
+                .setIgnoreParentCodeOwners(codeOwnerConfigCreation.ignoreParentCodeOwners())
                 .setCodeOwnerModification(codeOwners -> codeOwnerConfigCreation.codeOwners())
                 .build())
         .orElseThrow(
@@ -125,6 +126,7 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
           .upsertCodeOwnerConfig(
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
+                  .setIgnoreParentCodeOwners(codeOwnerConfigUpdate.ignoreParentCodeOwners())
                   .setCodeOwnerModification(codeOwnerConfigUpdate.codeOwnerModification()::apply)
                   .build());
     }
