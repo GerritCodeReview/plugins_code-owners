@@ -58,6 +58,7 @@ public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
             .project(project)
             .branch(branch)
             .folderPath(path)
+            .ignoreParentCodeOwners()
             .addCodeOwnerEmail(admin.email())
             .create();
 
