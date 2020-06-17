@@ -15,13 +15,11 @@
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.testsuite.ThrowingConsumer;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
 /**
  * Test API to update a code owner config.
@@ -46,8 +44,7 @@ public abstract class TestCodeOwnerConfigUpdate {
    * @return a function which gets the current code owners of the code owner config as input and
    *     outputs the desired resulting code owners
    */
-  public abstract Function<ImmutableSet<CodeOwnerReference>, Set<CodeOwnerReference>>
-      codeOwnerModification();
+  public abstract CodeOwnerSetModification codeOwnerSetsModification();
 
   /**
    * Gets the function that updates the code owner config.
@@ -66,7 +63,7 @@ public abstract class TestCodeOwnerConfigUpdate {
       ThrowingConsumer<TestCodeOwnerConfigUpdate> codeOwnerConfigUpdater) {
     return new AutoValue_TestCodeOwnerConfigUpdate.Builder()
         .codeOwnerConfigUpdater(codeOwnerConfigUpdater)
-        .codeOwnerModification(in -> in);
+        .codeOwnerSetsModification(CodeOwnerSetModification.keep());
   }
 
   /** Builder for a {@link TestCodeOwnerConfigUpdate}. */
@@ -96,82 +93,41 @@ public abstract class TestCodeOwnerConfigUpdate {
      * Sets the code owner modification.
      *
      * @return the Builder instance for chaining calls
-     * @see TestCodeOwnerConfigUpdate#codeOwnerModification()
+     * @see TestCodeOwnerConfigUpdate#codeOwnerSetsModification()
      */
-    abstract Builder codeOwnerModification(
-        Function<ImmutableSet<CodeOwnerReference>, Set<CodeOwnerReference>> codeOwnerModification);
+    abstract Builder codeOwnerSetsModification(CodeOwnerSetModification codeOwnerSetsModification);
 
     /**
      * Gets the code owner modification.
      *
-     * @see TestCodeOwnerConfigUpdate#codeOwnerModification()
+     * @see TestCodeOwnerConfigUpdate#codeOwnerSetsModification()
      */
-    abstract Function<ImmutableSet<CodeOwnerReference>, Set<CodeOwnerReference>>
-        codeOwnerModification();
+    abstract CodeOwnerSetModification codeOwnerSetsModification();
 
     /**
-     * Removes all code owners.
+     * Removes all code owner sets.
      *
      * @return the Builder instance for chaining calls
      */
-    public Builder clearCodeOwners() {
-      return codeOwnerModification(originalCodeOwners -> ImmutableSet.of());
+    public Builder clearCodeOwnerSets() {
+      return codeOwnerSetsModification(CodeOwnerSetModification.clear());
     }
 
     /**
      * Adds a code owner.
      *
-     * @param codeOwner code owner that should be added
+     * @param codeOwnerSet code owner set that should be added
      * @return the Builder instance for chaining calls
      */
-    public Builder addCodeOwner(CodeOwnerReference codeOwner) {
-      Function<ImmutableSet<CodeOwnerReference>, Set<CodeOwnerReference>> previousModification =
-          codeOwnerModification();
-      codeOwnerModification(
-          originalCodeOwners ->
-              Sets.union(
-                  previousModification.apply(originalCodeOwners), ImmutableSet.of(codeOwner)));
+    public Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
+      CodeOwnerSetModification previousModification = codeOwnerSetsModification();
+      codeOwnerSetsModification(
+          originalCodeOwnerSets ->
+              new ImmutableList.Builder<CodeOwnerSet>()
+                  .addAll(previousModification.apply(originalCodeOwnerSets))
+                  .add(codeOwnerSet)
+                  .build());
       return this;
-    }
-
-    /**
-     * Adds a code owner by email.
-     *
-     * @param codeOwnerEmail email of the code owner that should be added
-     * @return the Builder instance for chaining calls
-     */
-    public Builder addCodeOwnerEmail(String codeOwnerEmail) {
-      return addCodeOwner(CodeOwnerReference.create(codeOwnerEmail));
-    }
-
-    /**
-     * Removes a code owner.
-     *
-     * <p>Removing a non-existing code owner is a no-op.
-     *
-     * @param codeOwner code owner that should be removed
-     * @return the Builder instance for chaining calls
-     */
-    public Builder removeCodeOwner(CodeOwnerReference codeOwner) {
-      Function<ImmutableSet<CodeOwnerReference>, Set<CodeOwnerReference>> previousModification =
-          codeOwnerModification();
-      codeOwnerModification(
-          originalCodeOwners ->
-              Sets.difference(
-                  previousModification.apply(originalCodeOwners), ImmutableSet.of(codeOwner)));
-      return this;
-    }
-
-    /**
-     * Removes a code owner by email.
-     *
-     * <p>Removing a non-existing code owner is a no-op.
-     *
-     * @param codeOwnerEmail email of code owner that should be removed
-     * @return the Builder instance for chaining calls
-     */
-    public Builder removeCodeOwnerEmail(String codeOwnerEmail) {
-      return removeCodeOwner(CodeOwnerReference.create(codeOwnerEmail));
     }
 
     /**
