@@ -16,34 +16,17 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
 
+import com.google.common.collect.Iterables;
 import com.google.common.truth.BooleanSubject;
-import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigJson;
-import java.util.Objects;
-import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerConfigInfo}s. */
 public class CodeOwnerConfigInfoSubject extends Subject {
-  /** {@link Correspondence} that maps {@link CodeOwnerReference}s to emails. */
-  private static final Correspondence<CodeOwnerReferenceInfo, String>
-      CODE_OWNER_REFERENCE_INFO_TO_EMAIL =
-          Correspondence.from(
-              (actualCodeOwnerReferenceInfo, expectedEmail) -> {
-                String email =
-                    Optional.ofNullable(actualCodeOwnerReferenceInfo)
-                        .map(codeOwnerReference -> codeOwnerReference.email)
-                        .orElse(null);
-                return Objects.equals(email, expectedEmail);
-              },
-              "has email");
-
   /**
    * Starts fluent chain to do assertions on a {@link CodeOwnerConfigInfo}.
    *
@@ -67,19 +50,17 @@ public class CodeOwnerConfigInfoSubject extends Subject {
    *
    * @return {@link IterableSubject} for the code owners in the {@link CodeOwnerConfigInfo}
    */
-  public IterableSubject hasCodeOwnersThat() {
-    return check("codeOwners()").that(codeOwnerConfigInfo().codeOwners);
+  public IterableSubject hasCodeOwnerSetsThat() {
+    return check("codeOwnerSets()").that(codeOwnerConfigInfo().codeOwnerSets);
   }
 
-  /**
-   * Returns an {@link IterableSubject} for the code owner emails in the {@link
-   * CodeOwnerConfigInfo}.
-   *
-   * @return {@link IterableSubject} for the code owner emails in the {@link CodeOwnerConfigInfo}
-   */
-  public IterableSubject.UsingCorrespondence<CodeOwnerReferenceInfo, String>
-      hasCodeOwnersEmailsThat() {
-    return hasCodeOwnersThat().comparingElementsUsing(CODE_OWNER_REFERENCE_INFO_TO_EMAIL);
+  // TODO; javadoc
+  public CodeOwnerSetInfoSubject hasExactlyOneCodeOwnerSetThat() {
+    // TODO: proper error message
+    return CodeOwnerSetInfoSubject.assertThat(
+        Iterables.getOnlyElement(codeOwnerConfigInfo().codeOwnerSets));
+    // return
+    // check("codeOwnerSets()").that(Iterables.getOnlyElement(codeOwnerConfig().codeOwnerSets()));
   }
 
   /**

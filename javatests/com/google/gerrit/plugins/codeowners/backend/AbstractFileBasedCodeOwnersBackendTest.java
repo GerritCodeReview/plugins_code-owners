@@ -19,8 +19,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.BackendTestUtil;
@@ -82,7 +80,9 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
   public void getCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails((admin.email())))
+            .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
@@ -113,15 +113,15 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
           codeOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
-                  .setCodeOwnerModification(
-                      codeOwners ->
-                          Sets.union(
-                              codeOwners,
-                              ImmutableSet.of(CodeOwnerReference.create(admin.email()))))
+                  .setCodeOwnerSetsModification(
+                      CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(admin.email())))
                   .build(),
               currentUser);
       assertThat(codeOwnerConfig).isPresent();
-      assertThat(codeOwnerConfig.get()).hasCodeOwnersEmailsThat().containsExactly(admin.email());
+      assertThat(codeOwnerConfig.get())
+          .hasExactlyOneCodeOwnerSetThat()
+          .hasCodeOwnersEmailsThat()
+          .containsExactly(admin.email());
 
       // Check the metadata of the created commit.
       RevCommit newHead = getHead(repo, codeOwnerConfigKey.ref());
@@ -161,7 +161,9 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
   private void testUpdateCodeOwnerConfig(@Nullable IdentifiedUser currentUser) throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     try (Repository repo = repoManager.openRepository(project)) {
@@ -173,14 +175,12 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
           codeOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
-                  .setCodeOwnerModification(
-                      codeOwners ->
-                          Sets.union(
-                              codeOwners, ImmutableSet.of(CodeOwnerReference.create(user.email()))))
+                  .setCodeOwnerSetsModification(CodeOwnerSetModification.addToOnlySet(user.email()))
                   .build(),
               currentUser);
       assertThat(codeOwnerConfig).isPresent();
       assertThat(codeOwnerConfig.get())
+          .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
 
@@ -223,7 +223,9 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
       throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     try (Repository repo = repoManager.openRepository(project)) {
@@ -235,7 +237,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
           codeOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
-                  .setCodeOwnerModification(codeOwners -> ImmutableSet.of())
+                  .setCodeOwnerSetsModification(CodeOwnerSetModification.clear())
                   .build(),
               currentUser);
       assertThat(codeOwnerConfig).isEmpty();
@@ -269,7 +271,9 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
   public void noOpCodeOwnerConfigUpdate() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     try (Repository repo = repoManager.openRepository(project)) {
@@ -281,7 +285,10 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
           codeOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey, CodeOwnerConfigUpdate.builder().build(), null);
       assertThat(codeOwnerConfig).isPresent();
-      assertThat(codeOwnerConfig.get()).hasCodeOwnersEmailsThat().containsExactly(admin.email());
+      assertThat(codeOwnerConfig.get())
+          .hasExactlyOneCodeOwnerSetThat()
+          .hasCodeOwnersEmailsThat()
+          .containsExactly(admin.email());
 
       // Check that no commit was created.
       assertThat(getHead(repo, codeOwnerConfigKey.ref())).isEqualTo(origHead);
