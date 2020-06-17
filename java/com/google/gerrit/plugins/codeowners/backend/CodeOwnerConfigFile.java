@@ -18,7 +18,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.git.meta.VersionedMetaData;
 import java.io.IOException;
@@ -224,9 +223,10 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
     codeOwnerConfigUpdate
         .ignoreParentCodeOwners()
         .ifPresent(codeOwnerConfigBuilder::setIgnoreParentCodeOwners);
-    codeOwnerConfigBuilder.setCodeOwners(
-        ImmutableSet.copyOf(
-            codeOwnerConfigUpdate.codeOwnerModification().apply(codeOwnerConfig.codeOwners())));
+    codeOwnerConfigBuilder.setCodeOwnerSets(
+        codeOwnerConfigUpdate
+            .codeOwnerSetsModification()
+            .apply(codeOwnerConfig.codeOwnerSetsAsList()));
     return codeOwnerConfigBuilder.build();
   }
 

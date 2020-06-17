@@ -98,13 +98,13 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   @Test
   public void emptyCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        "", codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty());
+        "", codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().isEmpty());
   }
 
   @Test
   public void nullCodeOwnerConfig() throws Exception {
     assertParseAndFormat(
-        null, codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty(), "");
+        null, codeOwnerConfig -> assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().isEmpty(), "");
   }
 
   @Test
@@ -112,7 +112,11 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
     assertParseAndFormat(
         getCodeOwnerConfig(EMAIL_1),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1));
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1));
   }
 
   @Test
@@ -121,6 +125,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3));
   }
@@ -131,6 +137,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3) + "\n",
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
@@ -142,6 +150,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3).replaceAll("\n", "\r\n"),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
@@ -153,6 +163,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         modifyLines(getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3), line -> line + "\n"),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
@@ -164,6 +176,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         modifyLines(getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3), line -> " \t" + line + " \t"),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
@@ -174,7 +188,11 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
     assertParseAndFormat(
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_1),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2),
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2));
   }
 
@@ -184,6 +202,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         getCodeOwnerConfig(EMAIL_3, EMAIL_2, EMAIL_1),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
@@ -238,6 +258,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
             line -> line + "\n# foo.bar@example.com"),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
@@ -249,7 +271,11 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         getCodeOwnerConfig(EMAIL_1),
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isFalse();
-          assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1);
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .onlyElement()
+              .hasCodeOwnersEmailsThat()
+              .containsExactly(EMAIL_1);
         },
         getCodeOwnerConfig(EMAIL_1));
   }
@@ -260,7 +286,11 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         getCodeOwnerConfig(true, EMAIL_1),
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
-          assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1);
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .onlyElement()
+              .hasCodeOwnersEmailsThat()
+              .containsExactly(EMAIL_1);
         },
         getCodeOwnerConfig(true, EMAIL_1));
   }
@@ -271,7 +301,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
         getCodeOwnerConfig(true),
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
-          assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty();
+          assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().isEmpty();
         },
         getCodeOwnerConfig(true));
   }
