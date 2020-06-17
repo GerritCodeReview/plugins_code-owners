@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.proto;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
@@ -21,6 +22,8 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.protobuf.TextFormat;
 import org.junit.Test;
 
@@ -33,16 +36,28 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
 
   @Override
   protected String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
+    return getCodeOwnerConfig(ignoreParentCodeOwners, CodeOwnerSet.createForEmails(emails));
+  }
+
+  private static String getCodeOwnerConfig(
+      boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets) {
     StringBuilder b = new StringBuilder();
     b.append("owners_config {\n");
     if (ignoreParentCodeOwners) {
       b.append("  ignore_parent_owners: true\n");
     }
-    b.append("  owner_sets {\n");
-    for (String email : emails) {
-      b.append(String.format("    owners {\n      email: \"%s\"\n    }\n", email));
+    for (CodeOwnerSet codeOwnerSet : codeOwnerSets) {
+      if (!codeOwnerSet.codeOwners().isEmpty()) {
+        b.append("  owner_sets {\n");
+        for (CodeOwnerReference codeOwnerReference : codeOwnerSet.codeOwners()) {
+          b.append(
+              String.format(
+                  "    owners {\n      email: \"%s\"\n    }\n", codeOwnerReference.email()));
+        }
+        b.append("  }\n");
+      }
     }
-    b.append("  }\n}\n");
+    b.append("}\n");
     return b.toString();
   }
 
@@ -52,6 +67,7 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
         getCodeOwnerConfig("@test.com", "admin@", EMAIL_1, "admin@test@com", EMAIL_2),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
+                .hasExactlyOneCodeOwnerSetThat()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly("@test.com", "admin@", EMAIL_1, "admin@test@com", EMAIL_2),
         getCodeOwnerConfig("@test.com", "admin@", EMAIL_1, "admin@test@com", EMAIL_2));
@@ -75,7 +91,23 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
             "owners_config {\n  owner_sets {\n    owners {\n      email: \"%s\" # comment\n    }\n  }\n}\n",
             EMAIL_1),
         codeOwnerConfig ->
-            assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1),
+            assertThat(codeOwnerConfig)
+                .hasExactlyOneCodeOwnerSetThat()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1),
         getCodeOwnerConfig(EMAIL_1));
+  }
+
+  @Test
+  public void codeOwnerConfigWithMultipleCodeOwnerSets() throws Exception {
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createForEmails(EMAIL_1, EMAIL_3);
+    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createForEmails(EMAIL_2);
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        codeOwnerConfig ->
+            assertThat(codeOwnerConfig.codeOwnerSets())
+                .containsExactly(codeOwnerSet1, codeOwnerSet2)
+                .inOrder(),
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
   }
 }

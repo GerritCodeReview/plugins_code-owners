@@ -15,15 +15,12 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.BackendTestUtil;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
@@ -86,7 +83,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
     assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get()).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+        .hasCodeOwnerSetsThat()
+        .isEmpty();
   }
 
   @Test
@@ -95,7 +94,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
             .setIgnoreParentCodeOwners()
-            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
             .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
@@ -105,6 +104,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
         .hasIgnoreParentCodeOwnersThat()
         .isTrue();
     assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
   }
@@ -128,10 +128,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
           CodeOwnerConfigUpdate.builder()
               .setIgnoreParentCodeOwners(true)
-              .setCodeOwnerModification(
-                  codeOwners ->
-                      Sets.union(
-                          codeOwners, ImmutableSet.of(CodeOwnerReference.create(admin.email()))))
+              .setCodeOwnerSetsModification(
+                  CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(admin.email())))
               .build());
       codeOwnerConfigFile.commit(metaDataUpdate);
 
@@ -141,6 +139,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .hasIgnoreParentCodeOwnersThat()
           .isTrue();
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+          .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
 
@@ -150,6 +149,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       assertThat(codeOwnerConfigInRepo).isPresent();
       assertThat(codeOwnerConfigInRepo.get()).hasIgnoreParentCodeOwnersThat().isTrue();
       assertThat(codeOwnerConfigInRepo.get())
+          .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
 
@@ -237,9 +237,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       String email = "admin@example.com";
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
           CodeOwnerConfigUpdate.builder()
-              .setCodeOwnerModification(
-                  codeOwners ->
-                      Sets.union(codeOwners, ImmutableSet.of(CodeOwnerReference.create(email))))
+              .setCodeOwnerSetsModification(
+                  CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(email)))
               .build());
       IllegalStateException exception =
           assertThrows(
@@ -263,7 +262,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   public void updateCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     try (Repository repo = repoManager.openRepository(project);
@@ -281,11 +282,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
           CodeOwnerConfigUpdate.builder()
               .setIgnoreParentCodeOwners(true)
-              .setCodeOwnerModification(
-                  codeOwners ->
-                      Sets.union(
-                          codeOwners, ImmutableSet.of(CodeOwnerReference.create(user.email()))))
+              .setCodeOwnerSetsModification(CodeOwnerSetModification.addToOnlySet(user.email()))
               .build());
+
       codeOwnerConfigFile.commit(metaDataUpdate);
 
       // Check that the loaded code owner config was updated.
@@ -294,6 +293,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .hasIgnoreParentCodeOwnersThat()
           .isTrue();
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+          .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
 
@@ -303,6 +303,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       assertThat(codeOwnerConfigInRepo).isPresent();
       assertThat(codeOwnerConfigInRepo.get()).hasIgnoreParentCodeOwnersThat().isTrue();
       assertThat(codeOwnerConfigInRepo.get())
+          .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
 
@@ -315,7 +316,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   public void codeOwnerConfigFileIsNotUpdatedIfUpdateIsANoOp() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     try (Repository repo = repoManager.openRepository(project);
@@ -336,6 +339,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Check that the loaded code owner config didn't change.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+          .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
 
@@ -344,6 +348,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isPresent();
       assertThat(codeOwnerConfigInRepo.get())
+          .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
 
@@ -356,7 +361,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   public void updateCodeOwnerConfigFileSoThatItBecomesEmptyAndIsDeleted() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     try (Repository repo = repoManager.openRepository(project);
@@ -373,7 +380,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Update the code owner config so that it becomes empty.
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
           CodeOwnerConfigUpdate.builder()
-              .setCodeOwnerModification(codeOwners -> ImmutableSet.of())
+              .setCodeOwnerSetsModification(CodeOwnerSetModification.clear())
               .build());
       codeOwnerConfigFile.commit(metaDataUpdate);
 
@@ -405,14 +412,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       try (ByteArrayInputStream byteArrayInputStream =
               new ByteArrayInputStream(Base64.getDecoder().decode(codeOwnerConfigAsString));
           ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
-        boolean ignoreParentCodeOwners = objectInputStream.readBoolean();
-        @SuppressWarnings("unchecked")
-        ImmutableList<String> codeOwnerEmails =
-            (ImmutableList<String>) objectInputStream.readObject();
         return CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .setIgnoreParentCodeOwners(ignoreParentCodeOwners)
-            .setCodeOwners(
-                codeOwnerEmails.stream().map(CodeOwnerReference::create).collect(toImmutableSet()))
+            .setIgnoreParentCodeOwners(readIgnoreParentCodeOwners(objectInputStream))
+            .setCodeOwnerSets(readCodeOwnerSets(objectInputStream))
             .build();
       } catch (ClassNotFoundException e) {
         throw new IOException(e);
@@ -421,22 +423,66 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
     @Override
     public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
-      if (codeOwnerConfig.codeOwners().isEmpty()) {
+      if (codeOwnerConfig.codeOwnerSets().isEmpty()) {
         return "";
       }
 
       try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
           ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
-        objectOutputStream.writeBoolean(codeOwnerConfig.ignoreParentCodeOwners());
-        objectOutputStream.writeObject(
-            codeOwnerConfig.codeOwners().stream()
-                .map(CodeOwnerReference::email)
-                .sorted()
-                .collect(toImmutableList()));
+        writeIgnoreParentCodeOwners(objectOutputStream, codeOwnerConfig);
+        writeCodeOwnerSets(objectOutputStream, codeOwnerConfig);
+
         objectOutputStream.flush();
         byteArrayOutputStream.flush();
         return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
       }
+    }
+
+    private static void writeIgnoreParentCodeOwners(
+        ObjectOutputStream objectOutputStream, CodeOwnerConfig codeOwnerConfig) throws IOException {
+      objectOutputStream.writeBoolean(codeOwnerConfig.ignoreParentCodeOwners());
+    }
+
+    private static boolean readIgnoreParentCodeOwners(ObjectInputStream objectInputStream)
+        throws IOException {
+      return objectInputStream.readBoolean();
+    }
+
+    private static ImmutableList<CodeOwnerSet> readCodeOwnerSets(
+        ObjectInputStream objectInputStream) throws IOException, ClassNotFoundException {
+      int numberOfCodeOwnerSets = objectInputStream.readInt();
+      ImmutableList.Builder<CodeOwnerSet> codeOwnerSetsBuilder = ImmutableList.builder();
+      for (int i = 1; i <= numberOfCodeOwnerSets; i++) {
+        codeOwnerSetsBuilder.add(readCodeOwnerSet(objectInputStream));
+      }
+      return codeOwnerSetsBuilder.build();
+    }
+
+    private static void writeCodeOwnerSets(
+        ObjectOutputStream objectOutputStream, CodeOwnerConfig codeOwnerConfig) throws IOException {
+      objectOutputStream.writeInt(codeOwnerConfig.codeOwnerSets().size());
+      for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
+        writeCodeOwnerSet(objectOutputStream, codeOwnerSet);
+      }
+    }
+
+    private static void writeCodeOwnerSet(
+        ObjectOutputStream objectOutputStream, CodeOwnerSet codeOwnerSet) throws IOException {
+      objectOutputStream.writeObject(
+          codeOwnerSet
+              .codeOwners()
+              .parallelStream()
+              .map(CodeOwnerReference::email)
+              .collect(toImmutableList()));
+    }
+
+    private static CodeOwnerSet readCodeOwnerSet(ObjectInputStream objectInputStream)
+        throws IOException, ClassNotFoundException {
+      CodeOwnerSet.Builder codeOwnerSetBuilder = CodeOwnerSet.builder();
+      @SuppressWarnings("unchecked")
+      ImmutableList<String> emails = (ImmutableList<String>) objectInputStream.readObject();
+      emails.stream().forEach(codeOwnerSetBuilder::addCodeOwnerEmail);
+      return codeOwnerSetBuilder.build();
     }
   }
 }

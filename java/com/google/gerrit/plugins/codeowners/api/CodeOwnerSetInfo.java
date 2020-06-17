@@ -19,43 +19,35 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Representation of a {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig} in the
- * REST API.
+ * Representation of a {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet} in the REST
+ * API.
  *
- * <p>This class determines the JSON format of code owner configs in the REST API.
+ * <p>This class determines the JSON format of code owner sets in the REST API.
  */
-public class CodeOwnerConfigInfo {
-  /**
-   * Whether code owners from parent code owner configs (code owner configs in parent folders)
-   * should be ignored.
-   *
-   * <p>Not set if {@code false}.
-   */
-  public Boolean ignoreParentCodeOwners;
-
+public class CodeOwnerSetInfo {
   /**
    * The code owners of this code owner config.
    *
-   * <p>Not set if there are no code owner sets defined in this code owner config.
+   * <p>Not set if there are no code owners defined in this code owner set.
    */
-  public List<CodeOwnerSetInfo> codeOwnerSets;
+  public List<CodeOwnerReferenceInfo> codeOwners;
 
   @Override
   public int hashCode() {
-    return Objects.hash(codeOwnerSets);
+    return Objects.hash(codeOwners);
   }
 
   @Override
   public boolean equals(Object o) {
-    if (!(o instanceof CodeOwnerConfigInfo)) {
+    if (!(o instanceof CodeOwnerSetInfo)) {
       return false;
     }
-    CodeOwnerConfigInfo other = (CodeOwnerConfigInfo) o;
-    return Objects.equals(codeOwnerSets, other.codeOwnerSets);
+    CodeOwnerSetInfo other = (CodeOwnerSetInfo) o;
+    return Objects.equals(codeOwners, other.codeOwners);
   }
 
   @Override
   public String toString() {
-    return MoreObjects.toStringHelper(this).add("codeOwnerSets", codeOwnerSets).toString();
+    return MoreObjects.toStringHelper(this).add("codeOwners", codeOwners).toString();
   }
 }

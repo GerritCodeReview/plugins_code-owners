@@ -15,9 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.collect.ImmutableSet;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Definition of an update to a {@link CodeOwnerConfig}.
@@ -28,20 +26,6 @@ import java.util.Set;
  */
 @AutoValue
 public abstract class CodeOwnerConfigUpdate {
-  /** Representation of a code owner modification as defined by {@link #apply(ImmutableSet)}. */
-  @FunctionalInterface
-  public interface CodeOwnerModification {
-
-    /**
-     * Applies the modification to the given code owners.
-     *
-     * @param originalCodeOwners current code owners of the code owner config. If used for a code
-     *     owner config creation, this set is empty.
-     * @return the desired resulting code owners (not the diff of the code owners!)
-     */
-    Set<CodeOwnerReference> apply(ImmutableSet<CodeOwnerReference> originalCodeOwners);
-  }
-
   /**
    * Gets the new value for the ignore parent code owners setting. {@link Optional#empty()} if the
    * ignore parent code owners setting should not be modified.
@@ -52,10 +36,10 @@ public abstract class CodeOwnerConfigUpdate {
    * Defines how the code owners of the code owner config should be modified. By default (that is if
    * nothing is specified), the code owners remain unchanged.
    *
-   * @return a {@link CodeOwnerModification} which gets the current code owners of the code owner
-   *     config as input and outputs the desired resulting code owners
+   * @return a {@link CodeOwnerSetModification} which gets the current code owner sets of the code
+   *     owner config as input and outputs the desired resulting code owner sets
    */
-  public abstract CodeOwnerModification codeOwnerModification();
+  public abstract CodeOwnerSetModification codeOwnerSetsModification();
 
   /**
    * Creates a builder for a {@link CodeOwnerConfigUpdate}.
@@ -64,7 +48,7 @@ public abstract class CodeOwnerConfigUpdate {
    */
   public static Builder builder() {
     return new AutoValue_CodeOwnerConfigUpdate.Builder()
-        .setCodeOwnerModification(codeOwners -> codeOwners);
+        .setCodeOwnerSetsModification(codeOwnerSets -> codeOwnerSets);
   }
 
   @AutoValue.Builder
@@ -92,9 +76,10 @@ public abstract class CodeOwnerConfigUpdate {
     /**
      * Sets the code owner modification.
      *
-     * @see #codeOwnerModification()
+     * @see #codeOwnerSetsModification()
      */
-    public abstract Builder setCodeOwnerModification(CodeOwnerModification codeOwnerModification);
+    public abstract Builder setCodeOwnerSetsModification(
+        CodeOwnerSetModification codeOwnerSetsModification);
 
     /**
      * Builds the {@link CodeOwnerConfigUpdate} instance.

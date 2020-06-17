@@ -19,15 +19,14 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations.PerCodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate.CodeOwnerModification;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
 import com.google.gerrit.server.ServerInitiated;
@@ -101,6 +100,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .create();
     assertThat(codeOwnerConfigKey).isEqualTo(CodeOwnerConfig.Key.create(project, "master", "/"));
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
   }
@@ -119,6 +119,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .create();
     assertThat(codeOwnerConfigKey.shortBranchName()).isEqualTo(branchName);
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
   }
@@ -152,6 +153,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .create();
     assertThat(codeOwnerConfigKey).isEqualTo(CodeOwnerConfig.Key.create(project, "master", "/"));
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
   }
@@ -168,6 +170,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .create();
     assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Paths.get(folderPath));
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
   }
@@ -222,6 +225,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .create();
 
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email(), user.email());
   }
@@ -251,9 +255,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   @Test
   public void setIgnoreParentCodeOwners() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerConfig(
-            false, codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(false, admin.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
@@ -266,9 +268,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   @Test
   public void unsetIgnoreParentCodeOwners() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerConfig(
-            true, codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(true, admin.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
@@ -281,64 +281,53 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   @Test
   public void addCodeOwner() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerConfig(
-            codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(admin.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
-        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerSet(CodeOwnerSet.createForEmails(user.email()))
         .update();
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email(), user.email());
   }
 
   @Test
   public void removeCodeOwner() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerConfig(
-            codeOwners ->
-                ImmutableSet.of(
-                    CodeOwnerReference.create(admin.email()),
-                    CodeOwnerReference.create(user.email())));
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(admin.email(), user.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
-        .removeCodeOwnerEmail(user.email())
+        .codeOwnerSetsModification(CodeOwnerSetModification.removeFromOnlySet(user.email()))
         .update();
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
   }
 
   @Test
   public void removeNonExistingCodeOwner() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerConfig(
-            codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(admin.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
-        .removeCodeOwnerEmail(user.email())
+        .codeOwnerSetsModification(CodeOwnerSetModification.removeFromOnlySet(user.email()))
         .update();
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
   }
 
   @Test
-  public void clearCodeOwners() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerConfig(
-            codeOwners ->
-                ImmutableSet.of(
-                    CodeOwnerReference.create(admin.email()),
-                    CodeOwnerReference.create(user.email())));
+  public void clearCodeOwnerSets() throws Exception {
+    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(admin.email(), user.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
-        .clearCodeOwners()
+        .clearCodeOwnerSets()
         .update();
 
     // Removing all code owners leads to a deletion of the code owner config file.
@@ -367,21 +356,25 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   private CodeOwnerConfig createArbitraryCodeOwnerConfig() {
-    return createCodeOwnerConfig(
-        codeOwners -> ImmutableSet.of(CodeOwnerReference.create(admin.email())));
+    return createCodeOwnerConfig(admin.email());
   }
 
-  private CodeOwnerConfig createCodeOwnerConfig(CodeOwnerModification codeOwnerModification) {
-    return createCodeOwnerConfig(false, codeOwnerModification);
+  private CodeOwnerConfig createCodeOwnerConfig(String... emails) {
+    return createCodeOwnerConfig(false, emails);
+  }
+
+  private CodeOwnerConfig createCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
+    return createCodeOwnerConfig(
+        ignoreParentCodeOwners, CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(emails)));
   }
 
   private CodeOwnerConfig createCodeOwnerConfig(
-      boolean ignoreParentCodeOwners, CodeOwnerModification codeOwnerModification) {
+      boolean ignoreParentCodeOwners, CodeOwnerSetModification codeOwnerSetsModification) {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfigUpdate codeOwnerConfigUpdate =
         CodeOwnerConfigUpdate.builder()
             .setIgnoreParentCodeOwners(ignoreParentCodeOwners)
-            .setCodeOwnerModification(codeOwnerModification)
+            .setCodeOwnerSetsModification(codeOwnerSetsModification)
             .build();
     return codeOwnersUpdate
         .get()
