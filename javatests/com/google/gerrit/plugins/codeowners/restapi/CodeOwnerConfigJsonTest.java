@@ -44,20 +44,57 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void formatCodeOwnerConfig() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerEmail(admin.email())
-            .build();
-    CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
-    assertThat(codeOwnerConfigInfo).hasCodeOwnersEmailsThat().containsExactly(admin.email());
-  }
-
-  @Test
   public void cannotFormatNullCodeOwnerConfigInfo() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class, () -> CodeOwnerConfigJson.format((CodeOwnerConfig) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
+  }
+
+  @Test
+  public void formatCodeOwnerConfigWithCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user.email())
+            .build();
+    CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
+    assertThat(codeOwnerConfigInfo)
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void formatCodeOwnerConfigWithIgnoreParentCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .setIgnoreParentCodeOwners()
+            .addCodeOwnerEmail(admin.email())
+            .build();
+    CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
+    assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isTrue();
+    assertThat(codeOwnerConfigInfo).hasCodeOwnersEmailsThat().containsExactly(admin.email());
+  }
+
+  @Test
+  public void formatCodeOwnerConfigWithOnlyIgnoreParentCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .setIgnoreParentCodeOwners()
+            .build();
+    CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
+    assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isTrue();
+    assertThat(codeOwnerConfigInfo).hasCodeOwnersThat().isEmpty();
+  }
+
+  @Test
+  public void formatCodeOwnerConfigWithoutIgnoreParentCodeOwners() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerEmail(admin.email())
+            .build();
+    CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
+    assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isNull();
+    assertThat(codeOwnerConfigInfo).hasCodeOwnersEmailsThat().containsExactly(admin.email());
   }
 }
