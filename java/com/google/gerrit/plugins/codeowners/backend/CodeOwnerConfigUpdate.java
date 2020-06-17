@@ -77,6 +77,16 @@ public abstract class CodeOwnerConfigUpdate {
      *     ignored
      * @return the Builder instance for chaining calls
      */
+    public abstract Builder setIgnoreParentCodeOwners(Optional<Boolean> ignoreParentCodeOwners);
+
+    /**
+     * Sets whether code owners from parent code owner configs (code owner configs in parent
+     * folders) should be ignored.
+     *
+     * @param ignoreParentCodeOwners whether code owners from parent code owner configs should be
+     *     ignored
+     * @return the Builder instance for chaining calls
+     */
     public abstract Builder setIgnoreParentCodeOwners(boolean ignoreParentCodeOwners);
 
     /**
