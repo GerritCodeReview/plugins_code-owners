@@ -14,15 +14,18 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.inject.Singleton;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -88,33 +91,43 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     if (codeOwnerConfig.ignoreParentCodeOwners()) {
       b.append(SET_NOPARENT_LINE);
     }
-    if (!codeOwnerConfig.codeOwners().isEmpty()) {
-      b.append(
-          codeOwnerConfig.codeOwners().stream()
-              .map(CodeOwnerReference::email)
-              .sorted()
-              .distinct()
-              .collect(joining("\n", "", "\n")));
+    ImmutableList<String> emails =
+        codeOwnerConfig.codeOwnerSets().stream()
+            .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+            .map(CodeOwnerReference::email)
+            .sorted()
+            .distinct()
+            .collect(toImmutableList());
+    if (!emails.isEmpty()) {
+      b.append(emails.stream().collect(joining("\n", "", "\n")));
     }
     return b.toString();
   }
 
   private CodeOwnerConfig parseFile(CodeOwnerConfig.Key codeOwnerConfigKey, String[] lines) {
     CodeOwnerConfig.Builder codeOwnerConfigBuilder = CodeOwnerConfig.builder(codeOwnerConfigKey);
+    CodeOwnerSet.Builder codeOwnerSetBuilder = CodeOwnerSet.builder();
     for (String line : lines) {
-      parseLine(codeOwnerConfigBuilder, line);
+      parseLine(codeOwnerConfigBuilder, codeOwnerSetBuilder, line);
+    }
+    CodeOwnerSet codeOwnersSet = codeOwnerSetBuilder.build();
+    if (!codeOwnersSet.codeOwners().isEmpty()) {
+      codeOwnerConfigBuilder.addCodeOwnerSet(codeOwnersSet);
     }
     return codeOwnerConfigBuilder.build();
   }
 
-  private void parseLine(CodeOwnerConfig.Builder codeOwnerConfigBuilder, String line) {
+  private void parseLine(
+      CodeOwnerConfig.Builder codeOwnerConfigBuilder,
+      CodeOwnerSet.Builder codeOwnerSetBuilder,
+      String line) {
     String email;
     if (isNoParent(line)) {
       codeOwnerConfigBuilder.setIgnoreParentCodeOwners();
     } else if (isComment(line)) {
       // ignore comment lines and empty lines
     } else if ((email = parseEmail(line)) != null) {
-      codeOwnerConfigBuilder.addCodeOwner(CodeOwnerReference.create(email));
+      codeOwnerSetBuilder.addCodeOwner(CodeOwnerReference.create(email));
     } else {
       logger.atInfo().log("Skipping unknown line: %s", line);
     }
