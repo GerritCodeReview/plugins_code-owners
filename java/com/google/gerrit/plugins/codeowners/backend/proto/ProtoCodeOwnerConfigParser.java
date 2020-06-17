@@ -47,8 +47,9 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
         CodeOwnerConfig.builder(requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"));
     OwnersMetadataFile ownersMetadataFileProto =
         TextFormat.parse(Strings.nullToEmpty(codeOwnerConfigAsString), OwnersMetadataFile.class);
-    ownersMetadataFileProto
-        .getOwnersConfig()
+    OwnersConfig ownersConfig = ownersMetadataFileProto.getOwnersConfig();
+    codeOwnerConfigBuilder.setIgnoreParentCodeOwners(ownersConfig.getIgnoreParentOwners());
+    ownersConfig
         .getOwnerSetsList()
         .forEach(
             ownerSetProto ->
@@ -62,20 +63,24 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
-    if (requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().isEmpty()) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    if (codeOwnerConfig.ignoreParentCodeOwners() == false
+        && codeOwnerConfig.codeOwners().isEmpty()) {
       return "";
     }
 
     OwnersConfig.Builder ownersConfigProtoBuilder = OwnersConfig.newBuilder();
-    if (!codeOwnerConfig.codeOwners().isEmpty()) {
-      OwnerSet.Builder ownersSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
-      codeOwnerConfig.codeOwners().stream()
-          .sorted(Comparator.comparing(CodeOwnerReference::email))
-          .forEach(
-              codeOwnerReference ->
-                  ownersSetProtoBuilder.addOwners(
-                      Owner.newBuilder().setEmail(codeOwnerReference.email()).build()));
+    if (codeOwnerConfig.ignoreParentCodeOwners()) {
+      ownersConfigProtoBuilder.setIgnoreParentOwners(true);
     }
+
+    OwnerSet.Builder ownersSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
+    codeOwnerConfig.codeOwners().stream()
+        .sorted(Comparator.comparing(CodeOwnerReference::email))
+        .forEach(
+            codeOwnerReference ->
+                ownersSetProtoBuilder.addOwners(
+                    Owner.newBuilder().setEmail(codeOwnerReference.email()).build()));
     return TextFormat.printer()
         .printToString(
             OwnersMetadataFile.newBuilder()
