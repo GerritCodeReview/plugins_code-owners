@@ -31,12 +31,12 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   protected String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
     StringBuilder b = new StringBuilder();
     if (ignoreParentCodeOwners) {
-      b.append("set noparent");
-      if (emails.length > 0) {
-        b.append('\n');
-      }
+      b.append("set noparent\n");
     }
     b.append(String.join("\n", emails));
+    if (emails.length > 0) {
+      b.append('\n');
+    }
     return b.toString();
   }
 

@@ -70,7 +70,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
   private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
 
-  private static final String SET_NOPARENT_LINE = "set noparent";
+  private static final String SET_NOPARENT_LINE = "set noparent\n";
 
   @Override
   public CodeOwnerConfig parse(
@@ -87,16 +87,15 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     StringBuilder b = new StringBuilder();
     if (codeOwnerConfig.ignoreParentCodeOwners()) {
       b.append(SET_NOPARENT_LINE);
-      if (!codeOwnerConfig.codeOwners().isEmpty()) {
-        b.append('\n');
-      }
     }
-    b.append(
-        codeOwnerConfig.codeOwners().stream()
-            .map(CodeOwnerReference::email)
-            .sorted()
-            .distinct()
-            .collect(joining("\n")));
+    if (!codeOwnerConfig.codeOwners().isEmpty()) {
+      b.append(
+          codeOwnerConfig.codeOwners().stream()
+              .map(CodeOwnerReference::email)
+              .sorted()
+              .distinct()
+              .collect(joining("\n", "", "\n")));
+    }
     return b.toString();
   }
 
