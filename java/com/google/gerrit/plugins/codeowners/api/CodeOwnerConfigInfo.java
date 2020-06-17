@@ -33,7 +33,11 @@ public class CodeOwnerConfigInfo {
    */
   public Boolean ignoreParentCodeOwners;
 
-  /** The code owners of this code owner config. */
+  /**
+   * The code owners of this code owner config.
+   *
+   * <p>Not set if there are no code owners defined in this code owner config.
+   */
   public List<CodeOwnerReferenceInfo> codeOwners;
 
   @Override
