@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -23,12 +24,15 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
@@ -36,6 +40,7 @@ import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -51,6 +56,14 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private GroupOperations groupOperations;
+
+  protected CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+
+  @Before
+  public void setup() throws Exception {
+    codeOwnersPluginConfiguration =
+        plugin.getSysInjector().getInstance(CodeOwnersPluginConfiguration.class);
+  }
 
   @Test
   public void getCodeOwnersWhenNoCodeOwnerConfigsExist() throws Exception {
@@ -119,6 +132,59 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
         .containsExactly(user2.id(), user.id(), admin.id())
         .inOrder();
     assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null, null);
+  }
+
+  @Test
+  public void getCodeOwnersWithIgnoreParentCodeOwners() throws Exception {
+    assume()
+        .that(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+        .isInstanceOf(FindOwnersBackend.class);
+
+    TestAccount user2 = accountCreator.user2();
+
+    // Create some code owner configs.
+    // The order below reflects the order in which the code owner configs are evaluated.
+
+    // 1. code owner config that makes "user2" a code owner, inheriting code owners from parent code
+    // owner configs is enabled by default
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // 2. code owner config that makes "user" a code owner, code owners from parent code owner
+    // configs are ignored
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .ignoreParentCodeOwners()
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // 3. code owner config that makes "admin" a code owner, but for this test this code owner
+    // config is ignored, since the 2. code owner config ignores code owners from parent code owner
+    // configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // Assert the code owners for "/foo/bar/baz.md". This evaluates the code owner configs in the
+    // order: 1., 2., 3.
+    // The 3. code owner config is ignored since the 2. code owner config has set
+    // 'ignoreParentCodeOwners=true'. Hence the expected code owners are only the users that are
+    // code owner according to the 1. and 2. code owner config: user2 + user
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user2.id(), user.id()).inOrder();
   }
 
   @Test
