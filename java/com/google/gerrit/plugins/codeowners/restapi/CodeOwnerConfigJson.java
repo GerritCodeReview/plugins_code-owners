@@ -36,10 +36,12 @@ public final class CodeOwnerConfigJson {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     CodeOwnerConfigInfo info = new CodeOwnerConfigInfo();
     info.ignoreParentCodeOwners = codeOwnerConfig.ignoreParentCodeOwners() ? true : null;
-    info.codeOwners =
-        codeOwnerConfig.codeOwners().stream()
-            .map(CodeOwnerConfigJson::format)
-            .collect(toImmutableList());
+    if (!codeOwnerConfig.codeOwners().isEmpty()) {
+      info.codeOwners =
+          codeOwnerConfig.codeOwners().stream()
+              .map(CodeOwnerConfigJson::format)
+              .collect(toImmutableList());
+    }
     return info;
   }
 
