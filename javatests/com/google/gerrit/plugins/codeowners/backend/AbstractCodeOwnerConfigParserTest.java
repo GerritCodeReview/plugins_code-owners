@@ -58,11 +58,28 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
 
   /**
    * Must return the expected code owner config string for a code owner config with the given
-   * emails.
+   * parameters.
    *
    * <p>The order of the emails must be preserved in the code owner config string.
+   *
+   * @param ignoreParentCodeOwners whether code owners from parent code owner configs (code owner
+   *     configs in parent folders) should be ignored
+   * @param emails emails that should be assigned as code owners
+   * @return the expected code owner config string for a code owner config with the given parameters
    */
-  protected abstract String getCodeOwnerConfig(String... emails);
+  protected abstract String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails);
+
+  /**
+   * Returns the expected code owner config string for a code owner config with the given emails as
+   * code owners.
+   *
+   * @param emails emails that should be assigned as code owners
+   * @return the expected code owner config string for a code owner config with the given emails as
+   *     code owners
+   */
+  protected String getCodeOwnerConfig(String... emails) {
+    return getCodeOwnerConfig(false, emails);
+  }
 
   @Test
   public void cannotParseIfCodeOwnerConfigKeyIsNull() throws Exception {
@@ -223,6 +240,39 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+  }
+
+  @Test
+  public void codeOwnerConfigWithoutIgnoreParentCodeOwners() throws Exception {
+    assertParseAndFormat(
+        getCodeOwnerConfig(EMAIL_1),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isFalse();
+          assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1);
+        },
+        getCodeOwnerConfig(EMAIL_1));
+  }
+
+  @Test
+  public void codeOwnerConfigWithIgnoreParentCodeOwners() throws Exception {
+    assertParseAndFormat(
+        getCodeOwnerConfig(true, EMAIL_1),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
+          assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1);
+        },
+        getCodeOwnerConfig(true, EMAIL_1));
+  }
+
+  @Test
+  public void codeOwnerConfigWithOnlyIgnoreParentCodeOwners() throws Exception {
+    assertParseAndFormat(
+        getCodeOwnerConfig(true),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
+          assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty();
+        },
+        getCodeOwnerConfig(true));
   }
 
   private static String modifyLines(

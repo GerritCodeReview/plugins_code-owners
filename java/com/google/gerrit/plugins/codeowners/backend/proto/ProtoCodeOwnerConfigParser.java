@@ -44,8 +44,9 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
     OwnersMetadata.OwnersMetadataFile ownersMetadataFileProto =
         TextFormat.parse(
             Strings.nullToEmpty(codeOwnerConfigAsString), OwnersMetadata.OwnersMetadataFile.class);
-    ownersMetadataFileProto
-        .getOwnersConfig()
+    OwnersMetadata.OwnersConfig ownersConfig = ownersMetadataFileProto.getOwnersConfig();
+    codeOwnerConfigBuilder.setIgnoreParentCodeOwners(ownersConfig.getIgnoreParentOwners());
+    ownersConfig
         .getOwnerSetsList()
         .forEach(
             ownerSetProto ->
@@ -59,12 +60,18 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
-    if (requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().isEmpty()) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    if (codeOwnerConfig.ignoreParentCodeOwners() == false
+        && codeOwnerConfig.codeOwners().isEmpty()) {
       return "";
     }
 
     OwnersMetadata.OwnersConfig.Builder ownersConfigProtoBuilder =
         OwnersMetadata.OwnersConfig.newBuilder();
+    if (codeOwnerConfig.ignoreParentCodeOwners()) {
+      ownersConfigProtoBuilder.setIgnoreParentOwners(true);
+    }
+
     OwnersMetadata.OwnerSet.Builder ownersSetProtoBuilder = OwnersMetadata.OwnerSet.newBuilder();
     codeOwnerConfig.codeOwners().stream()
         .sorted(Comparator.comparing(CodeOwnerReference::email))
