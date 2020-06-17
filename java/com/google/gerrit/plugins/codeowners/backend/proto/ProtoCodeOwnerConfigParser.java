@@ -39,8 +39,9 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
     OwnerMetadataProto.OwnerMetadata ownerMetadataProto =
         TextFormat.parse(
             Strings.nullToEmpty(codeOwnerConfigAsString), OwnerMetadataProto.OwnerMetadata.class);
-    ownerMetadataProto
-        .getOwnersConfig()
+    OwnerMetadataProto.OwnersConfig ownersConfig = ownerMetadataProto.getOwnersConfig();
+    codeOwnerConfigBuilder.setIgnoreParentCodeOwners(ownersConfig.getIgnoreParentOwners());
+    ownersConfig
         .getOwnerSetsList()
         .forEach(
             ownerSetProto ->
@@ -54,12 +55,18 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
-    if (requireNonNull(codeOwnerConfig, "codeOwnerConfig").codeOwners().isEmpty()) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    if (codeOwnerConfig.ignoreParentCodeOwners() == false
+        && codeOwnerConfig.codeOwners().isEmpty()) {
       return "";
     }
 
     OwnerMetadataProto.OwnersConfig.Builder ownersConfigProtoBuilder =
         OwnerMetadataProto.OwnersConfig.newBuilder();
+    if (codeOwnerConfig.ignoreParentCodeOwners()) {
+      ownersConfigProtoBuilder.setIgnoreParentOwners(true);
+    }
+
     OwnerMetadataProto.OwnerSet.Builder ownersSetProtoBuilder =
         OwnerMetadataProto.OwnerSet.newBuilder();
     codeOwnerConfig.codeOwners().stream()
