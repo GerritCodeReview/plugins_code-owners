@@ -220,12 +220,14 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
 
   private static CodeOwnerConfig updateCodeOwnerConfig(
       CodeOwnerConfig codeOwnerConfig, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
-    return codeOwnerConfig
-        .toBuilder()
-        .setCodeOwners(
-            ImmutableSet.copyOf(
-                codeOwnerConfigUpdate.codeOwnerModification().apply(codeOwnerConfig.codeOwners())))
-        .build();
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder = codeOwnerConfig.toBuilder();
+    codeOwnerConfigUpdate
+        .ignoreParentCodeOwners()
+        .ifPresent(codeOwnerConfigBuilder::setIgnoreParentCodeOwners);
+    codeOwnerConfigBuilder.setCodeOwners(
+        ImmutableSet.copyOf(
+            codeOwnerConfigUpdate.codeOwnerModification().apply(codeOwnerConfig.codeOwners())));
+    return codeOwnerConfigBuilder.build();
   }
 
   private void checkLoaded() {
