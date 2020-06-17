@@ -28,11 +28,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Override
-  protected String getCodeOwnerConfig(String... emails) {
-    return String.join("\n", emails);
-  }
-
-  private String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
+  protected String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
     StringBuilder b = new StringBuilder();
     if (ignoreParentCodeOwners) {
       b.append("set noparent");
@@ -40,7 +36,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         b.append('\n');
       }
     }
-    b.append(getCodeOwnerConfig(emails));
+    b.append(String.join("\n", emails));
     return b.toString();
   }
 
@@ -71,39 +67,6 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
-  }
-
-  @Test
-  public void codeOwnerConfigWithoutIgnoreParentCodeOwners() throws Exception {
-    assertParseAndFormat(
-        getCodeOwnerConfig(EMAIL_1),
-        codeOwnerConfig -> {
-          assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isFalse();
-          assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1);
-        },
-        getCodeOwnerConfig(EMAIL_1));
-  }
-
-  @Test
-  public void codeOwnerConfigWithIgnoreParentCodeOwners() throws Exception {
-    assertParseAndFormat(
-        getCodeOwnerConfig(true, EMAIL_1),
-        codeOwnerConfig -> {
-          assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
-          assertThat(codeOwnerConfig).hasCodeOwnersEmailsThat().containsExactly(EMAIL_1);
-        },
-        getCodeOwnerConfig(true, EMAIL_1));
-  }
-
-  @Test
-  public void codeOwnerConfigWithOnlyIgnoreParentCodeOwners() throws Exception {
-    assertParseAndFormat(
-        getCodeOwnerConfig(true),
-        codeOwnerConfig -> {
-          assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
-          assertThat(codeOwnerConfig).hasCodeOwnersThat().isEmpty();
-        },
-        getCodeOwnerConfig(true));
   }
 
   @Test
