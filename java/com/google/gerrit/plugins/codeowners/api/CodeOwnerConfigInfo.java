@@ -25,6 +25,14 @@ import java.util.Objects;
  * <p>This class determines the JSON format of code owner configs in the REST API.
  */
 public class CodeOwnerConfigInfo {
+  /**
+   * Whether code owners from parent code owner configs (code owner configs in parent folders)
+   * should be ignored.
+   *
+   * <p>Not set if {@code false}.
+   */
+  public Boolean ignoreParentCodeOwners;
+
   /** The code owners of this code owner config. */
   public List<CodeOwnerReferenceInfo> codeOwners;
 
