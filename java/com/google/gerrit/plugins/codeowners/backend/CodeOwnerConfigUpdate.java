@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -42,6 +43,12 @@ public abstract class CodeOwnerConfigUpdate {
   }
 
   /**
+   * Gets the new value for the ignore parent code owners setting. {@link Optional#empty()} if the
+   * ignore parent code owners setting should not be modified.
+   */
+  public abstract Optional<Boolean> ignoreParentCodeOwners();
+
+  /**
    * Defines how the code owners of the code owner config should be modified. By default (that is if
    * nothing is specified), the code owners remain unchanged.
    *
@@ -62,6 +69,16 @@ public abstract class CodeOwnerConfigUpdate {
 
   @AutoValue.Builder
   public abstract static class Builder {
+    /**
+     * Sets whether code owners from parent code owner configs (code owner configs in parent
+     * folders) should be ignored.
+     *
+     * @param ignoreParentCodeOwners whether code owners from parent code owner configs should be
+     *     ignored
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder setIgnoreParentCodeOwners(boolean ignoreParentCodeOwners);
+
     /**
      * Sets the code owner modification.
      *
