@@ -26,10 +26,13 @@ message OwnerMetadata {
 }
 
 // Owner configuration for a folder in a branch.
-// Next ID: 2
+// Next ID: 3
 message OwnersConfig {
+  // Whether the code owner configuration of the parent folder should be ignored.
+  optional bool ignore_parent_owners = 1 [default=false];
+
   // Definitions of code owners for different sets of paths.
-  repeated OwnerSet owner_sets = 1;
+  repeated OwnerSet owner_sets = 2;
 }
 
 // Definition of a set of owners.
