@@ -17,12 +17,14 @@ package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.testsuite.ThrowingFunction;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -74,6 +76,15 @@ public abstract class TestCodeOwnerConfigCreation {
    * @return the code owners that should be set in the newly created code owner config
    */
   public abstract ImmutableSet<CodeOwnerReference> codeOwners();
+
+  /**
+   * Gets the code owner sets that should be set in the newly created code owner config.
+   *
+   * @return the code owner sets that should be set in the newly created code owner config
+   */
+  public ImmutableList<CodeOwnerSet> codeOwnerSets() {
+    return ImmutableList.of(CodeOwnerSet.create(codeOwners()));
+  }
 
   /**
    * Returns the key for the code owner config that should be created.

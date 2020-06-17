@@ -15,14 +15,20 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerSetInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import java.util.Optional;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigJson}. */
@@ -44,6 +50,27 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void formatCodeOwnerSet() throws Exception {
+    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createForEmails(admin.email());
+    Optional<CodeOwnerSetInfo> codeOwnerSetInfo = CodeOwnerConfigJson.format(codeOwnerSet);
+    assertThat(codeOwnerSetInfo).isPresent();
+    assertThat(codeOwnerSetInfo.get()).hasCodeOwnersEmailsThat().containsExactly(admin.email());
+  }
+
+  @Test
+  public void formatEmptyCodeOwnerSet() throws Exception {
+    assertThat(CodeOwnerConfigJson.format(CodeOwnerSet.create(ImmutableSet.of()))).isEmpty();
+  }
+
+  @Test
+  public void cannotFormatNullCodeOwnerSet() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> CodeOwnerConfigJson.format((CodeOwnerSet) null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerSet");
+  }
+
+  @Test
   public void cannotFormatNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
@@ -52,26 +79,26 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void formatCodeOwnerConfigWithCodeOwners() throws Exception {
+  public void formatCodeOwnerConfigWithCodeOwnerSet() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerEmail(admin.email())
-            .addCodeOwnerEmail(user.email())
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email(), user.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo)
+        .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email(), user.email());
   }
 
   @Test
-  public void formatCodeOwnerConfigWithoutCodeOwners() throws Exception {
+  public void formatCodeOwnerConfigWithoutCodeOwnerSet() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
             .setIgnoreParentCodeOwners()
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
-    assertThat(codeOwnerConfigInfo).hasCodeOwnersThat().isNull();
+    assertThat(codeOwnerConfigInfo).hasCodeOwnerSetsThat().isNull();
   }
 
   @Test
@@ -79,11 +106,14 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
             .setIgnoreParentCodeOwners()
-            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isTrue();
-    assertThat(codeOwnerConfigInfo).hasCodeOwnersEmailsThat().containsExactly(admin.email());
+    assertThat(codeOwnerConfigInfo)
+        .hasExactlyOneCodeOwnerSetThat()
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
   }
 
   @Test
@@ -94,17 +124,20 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isTrue();
-    assertThat(codeOwnerConfigInfo).hasCodeOwnersThat().isNull();
+    assertThat(codeOwnerConfigInfo).hasCodeOwnerSetsThat().isNull();
   }
 
   @Test
   public void formatCodeOwnerConfigWithoutIgnoreParentCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isNull();
-    assertThat(codeOwnerConfigInfo).hasCodeOwnersEmailsThat().containsExactly(admin.email());
+    assertThat(codeOwnerConfigInfo)
+        .hasExactlyOneCodeOwnerSetThat()
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
   }
 }

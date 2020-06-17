@@ -18,10 +18,14 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerSetInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import java.util.Optional;
 
 /** Collection of routines to populate {@link CodeOwnerConfigInfo}. */
 public final class CodeOwnerConfigJson {
@@ -36,13 +40,32 @@ public final class CodeOwnerConfigJson {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     CodeOwnerConfigInfo info = new CodeOwnerConfigInfo();
     info.ignoreParentCodeOwners = codeOwnerConfig.ignoreParentCodeOwners() ? true : null;
-    if (!codeOwnerConfig.codeOwners().isEmpty()) {
-      info.codeOwners =
-          codeOwnerConfig.codeOwners().stream()
-              .map(CodeOwnerConfigJson::format)
-              .collect(toImmutableList());
-    }
+
+    ImmutableList<CodeOwnerSetInfo> codeOwnerSetInfos =
+        codeOwnerConfig.codeOwnerSets().stream()
+            .map(CodeOwnerConfigJson::format)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(toImmutableList());
+    info.codeOwnerSets = !codeOwnerSetInfos.isEmpty() ? codeOwnerSetInfos : null;
+
     return info;
+  }
+
+  @VisibleForTesting
+  static Optional<CodeOwnerSetInfo> format(CodeOwnerSet codeOwnerSet) {
+    requireNonNull(codeOwnerSet, "codeOwnerSet");
+
+    if (codeOwnerSet.codeOwners().isEmpty()) {
+      return Optional.empty();
+    }
+
+    CodeOwnerSetInfo codeOwnerSetInfo = new CodeOwnerSetInfo();
+    codeOwnerSetInfo.codeOwners =
+        codeOwnerSet.codeOwners().stream()
+            .map(CodeOwnerConfigJson::format)
+            .collect(toImmutableList());
+    return Optional.of(codeOwnerSetInfo);
   }
 
   /**

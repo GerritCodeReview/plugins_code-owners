@@ -48,7 +48,9 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
   public void codeOwnerConfigIsRetrievedFromConfiguredBackend() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig expectedCodeOwnersConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
     CodeOwnersBackend codeOwnersBackendMock = mock(CodeOwnersBackend.class);
     when(codeOwnersBackendMock.getCodeOwnerConfig(codeOwnerConfigKey))
         .thenReturn(Optional.of(expectedCodeOwnersConfig));
