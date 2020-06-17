@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.gerrit.acceptance.testsuite.ThrowingConsumer;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -32,6 +33,12 @@ import java.util.function.Function;
  */
 @AutoValue
 public abstract class TestCodeOwnerConfigUpdate {
+  /**
+   * Gets the new value for the ignore parent code owners setting. {@link Optional#empty()} if the
+   * ignore parent code owners setting should not be modified.
+   */
+  public abstract Optional<Boolean> ignoreParentCodeOwners();
+
   /**
    * Defines how the code owners of the code owner config should be modified. By default (that is if
    * nothing is specified), the code owners remain unchanged.
@@ -65,6 +72,26 @@ public abstract class TestCodeOwnerConfigUpdate {
   /** Builder for a {@link TestCodeOwnerConfigUpdate}. */
   @AutoValue.Builder
   public abstract static class Builder {
+    /**
+     * Sets whether code owners from parent code owner configs (code owner configs in parent
+     * folders) should be ignored.
+     *
+     * @param ignoreParentCodeOwners whether code owners from parent code owner configs should be
+     *     ignored
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder ignoreParentCodeOwners(boolean ignoreParentCodeOwners);
+
+    /**
+     * Sets that code owners from parent code owner configs (code owner configs in parent folders)
+     * should be ignored.
+     *
+     * @return the Builder instance for chaining calls
+     */
+    public Builder ignoreParentCodeOwners() {
+      return ignoreParentCodeOwners(true);
+    }
+
     /**
      * Sets the code owner modification.
      *

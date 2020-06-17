@@ -63,6 +63,12 @@ public abstract class TestCodeOwnerConfigCreation {
   public abstract Optional<Path> folderPath();
 
   /**
+   * Gets whether code owners from parent code owner configs (code owner configs in parent folders)
+   * should be ignored.
+   */
+  public abstract boolean ignoreParentCodeOwners();
+
+  /**
    * Gets the code owners that should be set in the newly created code owner config.
    *
    * @return the code owners that should be set in the newly created code owner config
@@ -94,7 +100,7 @@ public abstract class TestCodeOwnerConfigCreation {
 
   /** Returns whether the code owner config would be empty. */
   public boolean isEmpty() {
-    return codeOwners().isEmpty();
+    return ignoreParentCodeOwners() == false && codeOwners().isEmpty();
   }
 
   /**
@@ -114,6 +120,7 @@ public abstract class TestCodeOwnerConfigCreation {
   public static Builder builder(
       ThrowingFunction<TestCodeOwnerConfigCreation, CodeOwnerConfig.Key> codeOwnerConfigCreator) {
     return new AutoValue_TestCodeOwnerConfigCreation.Builder()
+        .ignoreParentCodeOwners(false)
         .codeOwnerConfigCreator(codeOwnerConfigCreator);
   }
 
@@ -160,6 +167,26 @@ public abstract class TestCodeOwnerConfigCreation {
      */
     public Builder folderPath(String folderPath) {
       return folderPath(Paths.get(folderPath));
+    }
+
+    /**
+     * Sets whether code owners from parent code owner configs (code owner configs in parent
+     * folders) should be ignored.
+     *
+     * @param ignoreParentCodeOwners whether code owners from parent code owner configs should be
+     *     ignored
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder ignoreParentCodeOwners(boolean ignoreParentCodeOwners);
+
+    /**
+     * Sets that code owners from parent code owner configs (code owner configs in parent folders)
+     * should be ignored.
+     *
+     * @return the Builder instance for chaining calls
+     */
+    public Builder ignoreParentCodeOwners() {
+      return ignoreParentCodeOwners(true);
     }
 
     /**
