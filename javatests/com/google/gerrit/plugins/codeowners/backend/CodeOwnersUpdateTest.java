@@ -17,8 +17,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -78,10 +76,8 @@ public class CodeOwnersUpdateTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfigUpdate codeOwnerConfigUpdate =
         CodeOwnerConfigUpdate.builder()
-            .setCodeOwnerModification(
-                codeOwners ->
-                    Sets.union(
-                        codeOwners, ImmutableSet.of(CodeOwnerReference.create(admin.email()))))
+            .setCodeOwnerSetsModification(
+                CodeOwnerSetModification.append(CodeOwnerSet.createForEmails(admin.email())))
             .build();
     CodeOwnersBackend codeOwnersBackendMock = mock(CodeOwnersBackend.class);
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnersBackendMock)) {
