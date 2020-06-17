@@ -125,7 +125,7 @@ for a path.
 | Field Name  |          | Description |
 | ----------- | -------- | ----------- |
 | `ignore_parent_code_owners` | optional, not set if `false` | Whether code owners from parent code owner configs (code owner configs in parent folders) should be ignored.
-| `code_owners` || The list of code owners as [CodeOwnerReferenceInfo](#code-owner-reference-info) entities.
+| `code_owners` | optional | The list of code owners as [CodeOwnerReferenceInfo](#code-owner-reference-info) entities.
 
 ---
 
