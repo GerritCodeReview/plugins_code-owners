@@ -207,4 +207,63 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
   }
+
+  @Test
+  public void visitorIsNotInvokedForParentCodeOwnerConfigsIfParentCodeOwnersAreIgnored()
+      throws Exception {
+    String branch = "master";
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branch)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branch)
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    CodeOwnerConfig.Key fooBarCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/bar/")
+            .ignoreParentCodeOwners()
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key fooBarBazCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/bar/baz")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfigVisitor visitor = mock(CodeOwnerConfigVisitor.class);
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    codeOwnerConfigHierarchy.visit(
+        BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz/README.md"), visitor);
+
+    // Verify that we received the callbacks in the right order, starting from the folder of the
+    // given path up to the root folder. There is no callback for the '/' and '/foo/' folders since
+    // the code owner config for the '/foo/bar/' folder defines that parent code owners should be
+    // ignored.
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarBazCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
 }

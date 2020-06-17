@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
@@ -25,17 +26,21 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
 import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -51,6 +56,14 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private GroupOperations groupOperations;
+
+  protected CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+
+  @Before
+  public void setup() throws Exception {
+    codeOwnersPluginConfiguration =
+        plugin.getSysInjector().getInstance(CodeOwnersPluginConfiguration.class);
+  }
 
   @Test
   public void getCodeOwnersWhenNoCodeOwnerConfigsExist() throws Exception {
@@ -119,6 +132,44 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
         .containsExactly(user2.id(), user.id(), admin.id())
         .inOrder();
     assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null, null);
+  }
+
+  @Test
+  public void getCodeOwnersWithIgnoreParentCodeOwners() throws Exception {
+    assume()
+        .that(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+        .isInstanceOf(FindOwnersBackend.class);
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .ignoreParentCodeOwners()
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user2.id(), user.id()).inOrder();
   }
 
   @Test
