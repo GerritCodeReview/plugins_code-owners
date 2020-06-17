@@ -68,7 +68,7 @@ public class CodeOwnerConfigHierarchy {
           codeOwners.get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder));
       if (codeOwnerConfig.isPresent()) {
         boolean visitFurtherCodeOwnerConfigs = codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
-        if (!visitFurtherCodeOwnerConfigs) {
+        if (!visitFurtherCodeOwnerConfigs || codeOwnerConfig.get().ignoreParentCodeOwners()) {
           return;
         }
       }
