@@ -28,13 +28,15 @@ Gets a code owner config for a path in a branch.
 
   )]}'
   {
-    "code_owners": [
-      {
-        "email": "jane.roe@example.com"
-      },
-      {
-        "email": "john.doe@example.com"
-      }
+    "code_sets": [
+      "code_owners" [
+        {
+          "email": "jane.roe@example.com"
+        },
+        {
+          "email": "john.doe@example.com"
+        }
+      ]
     ]
   }
 ```
@@ -125,7 +127,7 @@ for a path.
 | Field Name  |          | Description |
 | ----------- | -------- | ----------- |
 | `ignore_parent_code_owners` | optional, not set if `false` | Whether code owners from parent code owner configs (code owner configs in parent folders) should be ignored.
-| `code_owners` | optional | The list of code owners as [CodeOwnerReferenceInfo](#code-owner-reference-info) entities.
+| `code_owner_sets` | optional | A list of code owner sets as [CodeOwnerSetInfo](#code-owner-set-info) entities.
 
 ---
 
@@ -148,6 +150,13 @@ reference in a code owner config.
 | `email`    | The email of the code owner.
 
 ---
+
+### <a id="code-owner-set-info"> CodeOwnerSetInfo
+The `CodeOwnerSetInfo` entity defines a set of code owners.
+
+| Field Name    |          | Description |
+| ------------- | -------- | ----------- |
+| `code_owners` | optional | The list of code owners as [CodeOwnerReferenceInfo](#code-owner-reference-info) entities.
 
 Part of [Gerrit Code Review](../../../Documentation/index.html)
 

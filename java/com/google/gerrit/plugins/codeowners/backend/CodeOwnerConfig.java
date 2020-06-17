@@ -15,10 +15,12 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -44,10 +46,12 @@ public abstract class CodeOwnerConfig {
 
   // TODO(ekempin): add field for included code owner configs
 
-  /** Gets the code owners of this code owner config. */
-  public abstract ImmutableSet<CodeOwnerReference> codeOwners();
-
-  // TODO(ekempin): add field for per-file code owners
+  /**
+   * Gets the code owner sets of this code owner config.
+   *
+   * <p>A code owner set defines a set of code owners for a set of path expressions.
+   */
+  public abstract ImmutableList<CodeOwnerSet> codeOwnerSets();
 
   /**
    * Computes the local code owners for the given path.
@@ -63,12 +67,11 @@ public abstract class CodeOwnerConfig {
   public ImmutableSet<CodeOwnerReference> localCodeOwners(Path path) {
     checkState(requireNonNull(path, "path").isAbsolute(), "path %s must be absolute", path);
 
-    @SuppressWarnings("unused")
     Path relativePath = relativize(path);
-
-    // TODO(ekempin): Check for matching per-file code owner definitions once we support per-file
-    // code owner definitions
-    return codeOwners();
+    return codeOwnerSets().stream()
+        .filter(codeOwnerSet -> codeOwnerSet.matches(relativePath))
+        .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+        .collect(toImmutableSet());
   }
 
   /**
@@ -131,34 +134,24 @@ public abstract class CodeOwnerConfig {
     }
 
     /**
-     * Sets the code owners of this code owner config.
+     * Sets the code owner sets of this code owner config.
      *
-     * @param codeOwners the code owners of this code owner config
+     * @param codeOwnerSets the code owner sets of this code owner config
      * @return the Builder instance for chaining calls
      */
-    public abstract Builder setCodeOwners(ImmutableSet<CodeOwnerReference> codeOwners);
+    public abstract Builder setCodeOwnerSets(ImmutableList<CodeOwnerSet> codeOwnerSets);
 
-    /** Gets a builder to add code owner references. */
-    abstract ImmutableSet.Builder<CodeOwnerReference> codeOwnersBuilder();
-
-    /**
-     * Adds a code owner for the given email.
-     *
-     * @param email email of the code owner
-     * @return the Builder instance for chaining calls
-     */
-    public Builder addCodeOwnerEmail(String email) {
-      return addCodeOwner(CodeOwnerReference.create(requireNonNull(email, "codeOwnerEmail")));
-    }
+    /** Gets a builder to add code owner sets. */
+    abstract ImmutableList.Builder<CodeOwnerSet> codeOwnerSetsBuilder();
 
     /**
-     * Adds a code owner.
+     * Adds a code owner set.
      *
-     * @param codeOwnerReference reference to the code owner
+     * @param codeOwnerSet the code owner set
      * @return the Builder instance for chaining calls
      */
-    public Builder addCodeOwner(CodeOwnerReference codeOwnerReference) {
-      codeOwnersBuilder().add(requireNonNull(codeOwnerReference, "codeOwnerReference"));
+    public Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
+      codeOwnerSetsBuilder().add(requireNonNull(codeOwnerSet, "codeOwnerSet"));
       return this;
     }
 
