@@ -84,11 +84,17 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   public void loadCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey).addCodeOwnerEmail(admin.email()).build();
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .setIgnoreParentCodeOwners()
+            .addCodeOwnerEmail(admin.email())
+            .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
     assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
+    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+        .hasIgnoreParentCodeOwnersThat()
+        .isTrue();
     assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
@@ -112,6 +118,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Create the code owner config.
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
           CodeOwnerConfigUpdate.builder()
+              .setIgnoreParentCodeOwners(true)
               .setCodeOwnerModification(
                   codeOwners ->
                       Sets.union(
@@ -122,6 +129,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Check that the loaded code owner config was updated.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+          .hasIgnoreParentCodeOwnersThat()
+          .isTrue();
+      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
 
@@ -129,6 +139,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           testCodeOwnerConfigStorage.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isPresent();
+      assertThat(codeOwnerConfigInRepo.get()).hasIgnoreParentCodeOwnersThat().isTrue();
       assertThat(codeOwnerConfigInRepo.get())
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
@@ -260,6 +271,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Update the code owner config.
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
           CodeOwnerConfigUpdate.builder()
+              .setIgnoreParentCodeOwners(true)
               .setCodeOwnerModification(
                   codeOwners ->
                       Sets.union(
@@ -270,6 +282,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Check that the loaded code owner config was updated.
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+          .hasIgnoreParentCodeOwnersThat()
+          .isTrue();
+      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
 
@@ -277,6 +292,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           testCodeOwnerConfigStorage.readCodeOwnerConfig(codeOwnerConfigKey);
       assertThat(codeOwnerConfigInRepo).isPresent();
+      assertThat(codeOwnerConfigInRepo.get()).hasIgnoreParentCodeOwnersThat().isTrue();
       assertThat(codeOwnerConfigInRepo.get())
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
