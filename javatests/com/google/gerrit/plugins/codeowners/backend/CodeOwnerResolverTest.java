@@ -164,8 +164,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveLocalCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerEmail(admin.email())
-            .addCodeOwnerEmail(user.email())
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email(), user.email()))
             .build();
     assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .hasAccountIdsThat()
@@ -176,8 +175,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveLocalCodeOwnersNonResolvableCodeOwnersAreFilteredOut() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerEmail(admin.email())
-            .addCodeOwnerEmail("non-existing@test.com")
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email(), "non-existing@test.com"))
             .build();
     assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .hasAccountIdsThat()
@@ -197,7 +195,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void cannotResolveLocalCodeOwnersForNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
             .build();
     NullPointerException npe =
         assertThrows(
