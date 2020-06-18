@@ -52,6 +52,24 @@
       "revId": "6939198ae89208190f4a071278e3d4d9eea9643e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "019c56dd_8645de89",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1011123
+      },
+      "writtenOn": "2020-06-18T12:13:49Z",
+      "side": 1,
+      "message": "Yes, that\u0027s what I meant. Usually I include the entire message that error prone emitted, including the link to the website with information about the warning.",
+      "parentUuid": "910782b4_1fcfc98b",
+      "revId": "6939198ae89208190f4a071278e3d4d9eea9643e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
