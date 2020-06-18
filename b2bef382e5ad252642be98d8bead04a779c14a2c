@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "8ed097ae_9798490f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-18T11:37:13Z",
+      "side": 1,
+      "message": "sure.\nAlthough, is it possible to rather make all values be between 0.0-1.0?\nThis way you won\u0027t need to divide bestValue by maxValue, and I think it will be more consistent this way.",
+      "parentUuid": "87e0727e_570c7c60",
+      "range": {
+        "startLine": 39,
+        "startChar": 51,
+        "endLine": 39,
+        "endChar": 58
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a374c55f_10d078d4",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
         "patchSetId": 14
@@ -93,6 +117,30 @@
       "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a2743b00_3ee9bbde",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-18T11:37:13Z",
+      "side": 1,
+      "message": "Ack\nNot that big of deal imo, just wanted to make sure you considered it.",
+      "parentUuid": "dc4ac137_b3b3f205",
+      "range": {
+        "startLine": 39,
+        "startChar": 14,
+        "endLine": 39,
+        "endChar": 47
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
