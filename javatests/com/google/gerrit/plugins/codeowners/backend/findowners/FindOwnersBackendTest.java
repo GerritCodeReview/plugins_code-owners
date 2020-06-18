@@ -124,8 +124,8 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
           .isEqualTo(serverIdent.get().getEmailAddress());
       assertThat(newHead.getCommitterIdent().getTimeZone())
           .isEqualTo(newHead.getAuthorIdent().getTimeZone());
-      assertThat(newHead.getCommitterIdent().getWhen())
-          .isEqualTo(newHead.getAuthorIdent().getWhen());
+      assertThat(newHead.getCommitterIdent().getWhen().getTime())
+          .isEqualTo(newHead.getAuthorIdent().getWhen().getTime());
     }
   }
 
@@ -185,8 +185,8 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
           .isEqualTo(serverIdent.get().getEmailAddress());
       assertThat(newHead.getCommitterIdent().getTimeZone())
           .isEqualTo(newHead.getAuthorIdent().getTimeZone());
-      assertThat(newHead.getCommitterIdent().getWhen())
-          .isEqualTo(newHead.getAuthorIdent().getWhen());
+      assertThat(newHead.getCommitterIdent().getWhen().getTime())
+          .isEqualTo(newHead.getAuthorIdent().getWhen().getTime());
     }
   }
 
@@ -241,8 +241,8 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
           .isEqualTo(serverIdent.get().getEmailAddress());
       assertThat(newHead.getCommitterIdent().getTimeZone())
           .isEqualTo(newHead.getAuthorIdent().getTimeZone());
-      assertThat(newHead.getCommitterIdent().getWhen())
-          .isEqualTo(newHead.getAuthorIdent().getWhen());
+      assertThat(newHead.getCommitterIdent().getWhen().getTime())
+          .isEqualTo(newHead.getAuthorIdent().getWhen().getTime());
     }
   }
 
