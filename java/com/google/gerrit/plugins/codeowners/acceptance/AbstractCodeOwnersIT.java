@@ -16,14 +16,14 @@ package com.google.gerrit.plugins.codeowners.acceptance;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackendId;
 import com.google.gerrit.testing.ConfigSuite;
-import java.util.Map;
-import java.util.stream.Stream;
+import java.util.Arrays;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 
@@ -53,8 +53,8 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
    * are tested.
    */
   @ConfigSuite.Configs
-  public static Map<String, Config> againstCodeOwnerBackends() {
-    return Stream.of(CodeOwnersBackendId.values())
+  public static ImmutableMap<String, Config> againstCodeOwnerBackends() {
+    return Arrays.stream(CodeOwnersBackendId.values())
         .collect(
             toImmutableMap(
                 CodeOwnersBackendId::getBackendId,
