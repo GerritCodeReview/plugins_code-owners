@@ -22,13 +22,14 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfig}. */
-public class CodeOwnerConfigTest {
+public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void createKey() throws Exception {
     Project.NameKey project = Project.nameKey("project");
