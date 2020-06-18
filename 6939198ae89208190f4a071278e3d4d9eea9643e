@@ -70,6 +70,24 @@
       "revId": "6939198ae89208190f4a071278e3d4d9eea9643e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3d4993db_7cab9854",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-18T12:18:24Z",
+      "side": 1,
+      "message": "It only gives me an internal link, so I omitted it.",
+      "parentUuid": "019c56dd_8645de89",
+      "revId": "6939198ae89208190f4a071278e3d4d9eea9643e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
