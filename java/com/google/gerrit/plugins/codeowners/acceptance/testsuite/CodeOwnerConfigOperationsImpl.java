@@ -16,9 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation.Builder;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig.Key;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
@@ -45,12 +43,12 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
   }
 
   @Override
-  public PerCodeOwnerConfigOperations codeOwnerConfig(Key codeOwnerConfigKey) {
+  public PerCodeOwnerConfigOperations codeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey) {
     return new PerCodeOwnerConfigOperationsImpl(codeOwnerConfigKey);
   }
 
   @Override
-  public Builder newCodeOwnerConfig() {
+  public TestCodeOwnerConfigCreation.Builder newCodeOwnerConfig() {
     return TestCodeOwnerConfigCreation.builder(this::createNewCodeOwnerConfig);
   }
 
