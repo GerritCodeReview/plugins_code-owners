@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "87e0727e_570c7c60",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-18T11:31:14Z",
+      "side": 1,
+      "message": "\u003e I\u0027m confused: you mentioned scoring has to be between 0.0 - 1.0.\n\nThe final scoring which is computed by the scoring(CodeOwner) method is between 0.0-1.0, this is also where this is documented. The values here are the raw non-scaled values (not between 0.0 - 1.0). I can extend the javadoc here to make it clearer that these are the raw non-scaled values. Would that resolve your confusion?",
+      "parentUuid": "b77c3c5b_5d32ba67",
+      "range": {
+        "startLine": 39,
+        "startChar": 51,
+        "endLine": 39,
+        "endChar": 58
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a374c55f_10d078d4",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
         "patchSetId": 14
@@ -36,6 +60,30 @@
       "writtenOn": "2020-06-18T11:18:16Z",
       "side": 1,
       "message": "Does it make sense to allow this? Maybe override the previous/worse value?",
+      "range": {
+        "startLine": 39,
+        "startChar": 14,
+        "endLine": 39,
+        "endChar": 47
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dc4ac137_b3b3f205",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-18T11:31:14Z",
+      "side": 1,
+      "message": "I considered this, but it\u0027s harder to implement, because we have a builder that collects the values and the builder cannot easily read the previous value to check if it was worse. I could try changing this, but not sure if the code will be nicer.",
+      "parentUuid": "a374c55f_10d078d4",
       "range": {
         "startLine": 39,
         "startChar": 14,
