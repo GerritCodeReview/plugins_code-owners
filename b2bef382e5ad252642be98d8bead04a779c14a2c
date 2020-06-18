@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b77c3c5b_5d32ba67",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-18T11:18:16Z",
+      "side": 1,
+      "message": "I\u0027m confused: you mentioned scoring has to be between 0.0 - 1.0.\nOn the other hand, in the tests I see scores such as 20 and 50.\nCan we somehow make this less confusing by only using one type of scale?",
+      "range": {
+        "startLine": 39,
+        "startChar": 51,
+        "endLine": 39,
+        "endChar": 58
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a374c55f_10d078d4",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-18T11:18:16Z",
+      "side": 1,
+      "message": "Does it make sense to allow this? Maybe override the previous/worse value?",
+      "range": {
+        "startLine": 39,
+        "startChar": 14,
+        "endLine": 39,
+        "endChar": 47
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
