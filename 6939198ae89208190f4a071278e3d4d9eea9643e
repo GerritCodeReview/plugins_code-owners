@@ -16,6 +16,24 @@
       "revId": "6939198ae89208190f4a071278e3d4d9eea9643e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bd58495_d8b3e4ca",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-18T12:04:07Z",
+      "side": 1,
+      "message": "\"Date does not have well-defined equals behavior.\" was the warning.",
+      "parentUuid": "b8e4f4d0_755608d0",
+      "revId": "6939198ae89208190f4a071278e3d4d9eea9643e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
