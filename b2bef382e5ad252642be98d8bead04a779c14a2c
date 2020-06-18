@@ -121,6 +121,30 @@
     },
     {
       "key": {
+        "uuid": "6aefe894_051a3b73",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-18T12:34:55Z",
+      "side": 1,
+      "message": "I guess it\u0027s something that I can add to the commit message.",
+      "parentUuid": "cc3a49df_b1e760a0",
+      "range": {
+        "startLine": 39,
+        "startChar": 51,
+        "endLine": 39,
+        "endChar": 58
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a374c55f_10d078d4",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
         "patchSetId": 14
