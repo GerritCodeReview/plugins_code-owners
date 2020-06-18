@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "24556c66_965d9429",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-18T12:27:52Z",
+      "side": 1,
+      "message": "\u003e Although, is it possible to rather make all values be between 0.0-1.0?\n\nYes, this would be possible and I actually thought about this.\nI didn\u0027t do this because I want to keep all details, so that I can easily return them to the frontend if needed. We don\u0027t know yet, if scores should be shown in the UI, but this topic is brought up and discussed frequently and I believe it\u0027s likely we want to do something in this direction. E.g. I could imagine that the UI wants to show that the distance for the one code owner is 3 folders and for the other code owner it is 5 folders. Then we will need to have the unscaled values.\n\n\u003e This way you won\u0027t need to divide bestValue by maxValue, and I think it will be more consistent this way.\n\nBut then I need to do value / maxValue right when the value is added, so it doesn\u0027t avoid doing this operation.",
+      "parentUuid": "8ed097ae_9798490f",
+      "range": {
+        "startLine": 39,
+        "startChar": 51,
+        "endLine": 39,
+        "endChar": 58
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "a374c55f_10d078d4",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
         "patchSetId": 14
@@ -132,6 +156,30 @@
       "side": 1,
       "message": "Ack\nNot that big of deal imo, just wanted to make sure you considered it.",
       "parentUuid": "dc4ac137_b3b3f205",
+      "range": {
+        "startLine": 39,
+        "startChar": 14,
+        "endLine": 39,
+        "endChar": 47
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ed73b62a_83c73a5d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-18T12:27:52Z",
+      "side": 1,
+      "message": "I can still give it a try, and see how it looks in the end.",
+      "parentUuid": "a2743b00_3ee9bbde",
       "range": {
         "startLine": 39,
         "startChar": 14,
