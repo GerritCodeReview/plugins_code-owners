@@ -126,7 +126,7 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void codeOwnerConfigWithInvalidEmails_InvalidEmailsAreIgnored() throws Exception {
+  public void codeOwnerConfigWithInvalidEmails_invalidEmailsAreIgnored() throws Exception {
     assertParseAndFormat(
         String.format("%s\n@test.com\nadmin@\nadmin@test@com\n%s", EMAIL_1, EMAIL_2),
         codeOwnerConfig ->
@@ -135,7 +135,7 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void codeOwnerConfigWithInvalidLines_InvalidLinesAreIgnored() throws Exception {
+  public void codeOwnerConfigWithInvalidLines_invalidLinesAreIgnored() throws Exception {
     assertParseAndFormat(
         String.format("%s\nINVALID\nNOT_AN_EMAIL\n%s", EMAIL_1, EMAIL_2),
         codeOwnerConfig ->
@@ -144,7 +144,7 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void codeOwnerConfigWithCommentLines_CommentLinesAreIgnored() throws Exception {
+  public void codeOwnerConfigWithCommentLines_commentLinesAreIgnored() throws Exception {
     assertParseAndFormat(
         String.format("# a@test.com\n%s\n # b@test.com\n%s\n#c@test.com", EMAIL_1, EMAIL_2),
         codeOwnerConfig ->
@@ -154,7 +154,7 @@ public class CodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
 
   @Test
   public void
-      codeOwnerConfigWithInlineComments_LinesWithInlineCommentsAreConsideredAsInvalidAndAreIgnored()
+      codeOwnerConfigWithInlineComments_linesWithInlineCommentsAreConsideredAsInvalidAndAreIgnored()
           throws Exception {
     assertParseAndFormat(
         String.format("foo.bar@test.com # Foo Bar\n%s\n%s", EMAIL_1, EMAIL_2),
