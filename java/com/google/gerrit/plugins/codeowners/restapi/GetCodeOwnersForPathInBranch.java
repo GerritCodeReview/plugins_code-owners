@@ -219,10 +219,9 @@ public class GetCodeOwnersForPathInBranch
   private static ImmutableList<CodeOwner> sortCodeOwners(
       CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
     ImmutableList<CodeOwner> randomlyOrderedCodeOwners = randomizeOrder(codeOwners);
-    return codeOwners.stream()
-        .sorted(
-            distanceScoring.comparingByScoring().thenComparing(randomlyOrderedCodeOwners::indexOf))
-        .collect(toImmutableList());
+    return ImmutableList.sortedCopyOf(
+        distanceScoring.comparingByScoring().thenComparing(randomlyOrderedCodeOwners::indexOf),
+        codeOwners);
   }
 
   /**
