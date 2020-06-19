@@ -55,6 +55,9 @@ public class CodeOwnersUpdate {
     CodeOwnersUpdate createWithServerIdent();
   }
 
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final Optional<IdentifiedUser> currentUser;
+
   @AssistedInject
   CodeOwnersUpdate(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
@@ -66,9 +69,6 @@ public class CodeOwnersUpdate {
   CodeOwnersUpdate(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
     this(codeOwnersPluginConfiguration, Optional.empty());
   }
-
-  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private final Optional<IdentifiedUser> currentUser;
 
   private CodeOwnersUpdate(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
