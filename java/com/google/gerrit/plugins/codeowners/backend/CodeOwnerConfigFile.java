@@ -255,7 +255,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
     return true;
   }
 
-  private CodeOwnerConfig updateCodeOwnerConfig(
+  private static CodeOwnerConfig updateCodeOwnerConfig(
       CodeOwnerConfig codeOwnerConfig, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     CodeOwnerConfig.Builder codeOwnerConfigBuilder = codeOwnerConfig.toBuilder();
     codeOwnerConfigUpdate
