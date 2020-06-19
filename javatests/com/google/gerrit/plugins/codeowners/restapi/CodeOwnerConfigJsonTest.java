@@ -35,7 +35,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotFormatNullCodeOwnerReferenceInfo() throws Exception {
+  public void cannotFormatNullCodeOwnerReference() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
@@ -44,7 +44,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotFormatNullCodeOwnerConfigInfo() throws Exception {
+  public void cannotFormatNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class, () -> CodeOwnerConfigJson.format((CodeOwnerConfig) null));
