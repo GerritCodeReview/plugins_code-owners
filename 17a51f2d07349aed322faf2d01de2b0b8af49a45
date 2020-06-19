@@ -1,0 +1,11 @@
+{
+  "checks": {
+    "zuul-check:plugins_code-owners": {
+      "state": "SCHEDULED",
+      "message": "Change has been enqueued in check",
+      "started": "2020-06-19T12:58:03Z",
+      "created": "2020-06-19T12:58:03Z",
+      "updated": "2020-06-19T12:58:03Z"
+    }
+  }
+}
