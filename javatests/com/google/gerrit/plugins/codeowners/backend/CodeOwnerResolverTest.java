@@ -35,7 +35,7 @@ import org.junit.Test;
 
 /** Tests for {@link CodeOwnerResolver}. */
 public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
-  @Inject private @ServerInitiated Provider<AccountsUpdate> accountsUpdate;
+  @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
 
   private CodeOwnerResolver codeOwnerResolver;
