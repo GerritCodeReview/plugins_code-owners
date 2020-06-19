@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "365fc2bd_f6062318",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwners.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 84,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-19T16:57:04Z",
+      "side": 1,
+      "message": "What about changing the signature to: withOptions(ListAccountsOption option, ListAccountsOption... furtherOptions)? Thus, we wouldn\u0027t need the withOption() method anymore and also wouldn\u0027t have callers which don\u0027t specify any options at all.",
+      "range": {
+        "startLine": 84,
+        "startChar": 24,
+        "endLine": 84,
+        "endChar": 66
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3a9d9c7e_ccb77c35",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwners.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-19T16:57:04Z",
+      "side": 1,
+      "message": "Could we switch to an ImmutableSet here so that callers can\u0027t modify the internally acquired set?",
+      "range": {
+        "startLine": 90,
+        "startChar": 11,
+        "endLine": 90,
+        "endChar": 14
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9b1ed55_ac9c241b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnersInBranchImpl.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-19T16:57:04Z",
+      "side": 1,
+      "message": "An object passing itself around is typically a code smell. In this case, wouldn\u0027t it be also possible to pass along the set of options?",
+      "range": {
+        "startLine": 55,
+        "startChar": 53,
+        "endLine": 55,
+        "endChar": 57
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2a552794_3b410549",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-19T16:57:04Z",
+      "side": 1,
+      "message": "If we need to add secondary emails in various locations for code owners, we should consider to adjust the account test API to also support adding secondary emails. Thus, we wouldn\u0027t need to deal with internal details like AccountsUpdate.",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 156,
+        "endChar": 91
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "965f0b83_2af4643f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-19T16:57:04Z",
+      "side": 1,
+      "message": "Should this be withOptions() so that also the second method is tested?",
+      "range": {
+        "startLine": 230,
+        "startChar": 13,
+        "endLine": 230,
+        "endChar": 23
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1a54360a_cc8fd12a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnersForPathInBranchRestIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-19T16:57:04Z",
+      "side": 1,
+      "message": "Can\u0027t we generalize the ListOption#toHex method similarly as the ListOption#fromBits method so that we don\u0027t have to duplicate it here?",
+      "range": {
+        "startLine": 168,
+        "startChar": 24,
+        "endLine": 168,
+        "endChar": 29
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
