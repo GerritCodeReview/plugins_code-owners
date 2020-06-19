@@ -149,7 +149,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
       // Remember head for later assertions.
       RevCommit origHead = getHead(repo, codeOwnerConfigKey.ref());
 
-      // Create the code owner config.
+      // Update the code owner config.
       Optional<CodeOwnerConfig> codeOwnerConfig =
           findOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
@@ -211,7 +211,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
       // Remember head for later assertions.
       RevCommit origHead = getHead(repo, codeOwnerConfigKey.ref());
 
-      // Create the code owner config.
+      // Update the code owner config.
       Optional<CodeOwnerConfig> codeOwnerConfig =
           findOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
@@ -257,7 +257,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
       // Remember head for later assertions.
       RevCommit origHead = getHead(repo, codeOwnerConfigKey.ref());
 
-      // Create the code owner config.
+      // Update the code owner config.
       Optional<CodeOwnerConfig> codeOwnerConfig =
           findOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey, CodeOwnerConfigUpdate.builder().build(), null);
@@ -275,7 +275,7 @@ public class FindOwnersBackendTest extends AbstractCodeOwnersTest {
         CodeOwnerConfig.Key.create(project, "non-existing", "/");
 
     try (Repository repo = repoManager.openRepository(project)) {
-      // Create the code owner config.
+      // Update the code owner config.
       IllegalStateException exception =
           assertThrows(
               IllegalStateException.class,
