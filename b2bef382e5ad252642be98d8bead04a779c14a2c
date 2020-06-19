@@ -145,6 +145,30 @@
     },
     {
       "key": {
+        "uuid": "5f21c7b4_23687f1e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-19T09:42:39Z",
+      "side": 1,
+      "message": "I add this explaination to the javadoc of this field now.\n\nDone.",
+      "parentUuid": "6aefe894_051a3b73",
+      "range": {
+        "startLine": 39,
+        "startChar": 51,
+        "endLine": 39,
+        "endChar": 58
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a374c55f_10d078d4",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
         "patchSetId": 14
@@ -228,6 +252,30 @@
       "side": 1,
       "message": "I can still give it a try, and see how it looks in the end.",
       "parentUuid": "a2743b00_3ee9bbde",
+      "range": {
+        "startLine": 39,
+        "startChar": 14,
+        "endLine": 39,
+        "endChar": 47
+      },
+      "revId": "b2bef382e5ad252642be98d8bead04a779c14a2c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d0ab0108_9fbbeb2a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-19T09:42:39Z",
+      "side": 1,
+      "message": "I tried this out, but I wasn\u0027t able to get this implemented nicely. I added the reasoning for storing multiple values per code owner to the javadoc of the values field in CodeOwnerScoring, as it\u0027s likely that other people have the same question.",
+      "parentUuid": "ed73b62a_83c73a5d",
       "range": {
         "startLine": 39,
         "startChar": 14,
