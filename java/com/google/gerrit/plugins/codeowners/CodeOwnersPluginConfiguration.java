@@ -176,7 +176,7 @@ public class CodeOwnersPluginConfiguration {
     } catch (NoSuchProjectException e) {
       throw new IllegalStateException(
           String.format(
-              "cannot get code-owners plugin config for non-existing project %s", project),
+              "cannot get %s plugin config for non-existing project %s", pluginName, project),
           e);
     }
   }
