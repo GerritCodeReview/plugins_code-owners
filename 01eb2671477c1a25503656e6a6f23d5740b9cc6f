@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2d2aea2_c5f6695d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-22T15:24:37Z",
+      "side": 1,
+      "message": "Typo: why",
+      "range": {
+        "startLine": 11,
+        "startChar": 35,
+        "endLine": 11,
+        "endChar": 38
+      },
+      "revId": "01eb2671477c1a25503656e6a6f23d5740b9cc6f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c94aeec6_b2f44604",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-22T15:24:37Z",
+      "side": 1,
+      "message": "Will this method stay indefinitely as package-private and @VisibleForTesting? I would be fine having a todo comment here for the time being but when there is an actual implementation depending on the path, I would adjust the tests and make this method private.\n\nOne of the tests (check for null) won\u0027t ever be possible in actual production code with this change. The requireNonNull(..) check below will actually be dead code from now on.",
+      "range": {
+        "startLine": 75,
+        "startChar": 2,
+        "endLine": 76,
+        "endChar": 30
+      },
+      "revId": "01eb2671477c1a25503656e6a6f23d5740b9cc6f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
