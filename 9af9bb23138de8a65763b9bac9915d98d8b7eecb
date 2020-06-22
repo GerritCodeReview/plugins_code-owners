@@ -305,6 +305,30 @@
       "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "496ace4c_8de2b875",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnersForPathInBranchRestIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-22T13:03:36Z",
+      "side": 1,
+      "message": "Great. Thanks.",
+      "parentUuid": "a17aa5f8_ec18e7b5",
+      "range": {
+        "startLine": 168,
+        "startChar": 24,
+        "endLine": 168,
+        "endChar": 29
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
