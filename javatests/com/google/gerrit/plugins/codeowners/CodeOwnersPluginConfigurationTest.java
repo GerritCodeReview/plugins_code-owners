@@ -70,7 +70,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
-            "cannot code-owners plugin config for non-existing project non-existing-project");
+            "cannot get code-owners plugin config for non-existing project non-existing-project");
   }
 
   @Test
