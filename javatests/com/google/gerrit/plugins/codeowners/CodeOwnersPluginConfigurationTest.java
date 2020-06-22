@@ -30,6 +30,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
@@ -294,6 +295,11 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         CodeOwnerConfigUpdate codeOwnerConfigUpdate,
         @Nullable IdentifiedUser currentUser) {
       throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public PathExpressionMatcher getPathExpressionMatcher() {
+      return PathExpressionMatcher.notSupportedBy(ID);
     }
   }
 }

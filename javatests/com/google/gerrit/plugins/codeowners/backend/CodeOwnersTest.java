@@ -49,7 +49,7 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig expectedCodeOwnersConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnersBackend codeOwnersBackendMock = mock(CodeOwnersBackend.class);
     when(codeOwnersBackendMock.getCodeOwnerConfig(codeOwnerConfigKey))
