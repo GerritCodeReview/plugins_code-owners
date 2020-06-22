@@ -77,7 +77,8 @@ public class CodeOwnersUpdateTest extends AbstractCodeOwnersTest {
     CodeOwnerConfigUpdate codeOwnerConfigUpdate =
         CodeOwnerConfigUpdate.builder()
             .setCodeOwnerSetsModification(
-                CodeOwnerSetModification.append(CodeOwnerSet.createForEmails(admin.email())))
+                CodeOwnerSetModification.append(
+                    CodeOwnerSet.createWithoutPathExpressions(admin.email())))
             .build();
     CodeOwnersBackend codeOwnersBackendMock = mock(CodeOwnersBackend.class);
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnersBackendMock)) {

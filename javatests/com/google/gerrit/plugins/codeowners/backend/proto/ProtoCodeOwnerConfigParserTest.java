@@ -36,7 +36,8 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
 
   @Override
   protected String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
-    return getCodeOwnerConfig(ignoreParentCodeOwners, CodeOwnerSet.createForEmails(emails));
+    return getCodeOwnerConfig(
+        ignoreParentCodeOwners, CodeOwnerSet.createWithoutPathExpressions(emails));
   }
 
   private static String getCodeOwnerConfig(
@@ -100,8 +101,8 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
 
   @Test
   public void codeOwnerConfigWithMultipleCodeOwnerSets() throws Exception {
-    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createForEmails(EMAIL_1, EMAIL_3);
-    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createForEmails(EMAIL_2);
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
+    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_2);
     assertParseAndFormat(
         getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
         codeOwnerConfig ->

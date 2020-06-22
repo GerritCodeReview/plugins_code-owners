@@ -83,7 +83,7 @@ public abstract class TestCodeOwnerConfigCreation {
    * @return the code owner sets that should be set in the newly created code owner config
    */
   public ImmutableList<CodeOwnerSet> codeOwnerSets() {
-    return ImmutableList.of(CodeOwnerSet.create(codeOwners()));
+    return ImmutableList.of(CodeOwnerSet.createWithoutPathExpressions(codeOwners()));
   }
 
   /**

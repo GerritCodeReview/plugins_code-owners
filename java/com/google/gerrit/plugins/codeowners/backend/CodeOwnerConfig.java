@@ -14,14 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import java.nio.file.Path;
@@ -54,34 +50,12 @@ public abstract class CodeOwnerConfig {
   public abstract ImmutableList<CodeOwnerSet> codeOwnerSets();
 
   /**
-   * Computes the local code owners for the given path.
-   *
-   * <p>This method computes the <strong>local</strong> code owners which means that only code
-   * owners that are directly mentioned in this code owner config are considered. Code owners in
-   * inherited and included code owner configs are not considered.
-   *
-   * @param path path for which the local code owners should be returned; the path must be absolute;
-   *     can be the path of a file or folder; the path may or may not exist
-   * @return the local code owners for the given path
-   */
-  public ImmutableSet<CodeOwnerReference> localCodeOwners(Path path) {
-    checkState(requireNonNull(path, "path").isAbsolute(), "path %s must be absolute", path);
-
-    Path relativePath = relativize(path);
-    return codeOwnerSets().stream()
-        .filter(codeOwnerSet -> codeOwnerSet.matches(relativePath))
-        .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
-        .collect(toImmutableSet());
-  }
-
-  /**
    * Relativizes the given path in relation to the folder path of this code owner config.
    *
    * @param path the path that should be relativized
    * @return the relativized path of the given path in relation to the folder path of this code
    *     owner config
    */
-  @VisibleForTesting
   Path relativize(Path path) {
     return key().folderPath().relativize(requireNonNull(path, "path"));
   }
