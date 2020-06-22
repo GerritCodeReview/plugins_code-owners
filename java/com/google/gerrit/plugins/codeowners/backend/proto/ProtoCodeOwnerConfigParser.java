@@ -48,7 +48,7 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
         .forEach(
             ownerSetProto -> {
               CodeOwnerSet codeOwnerSet =
-                  CodeOwnerSet.create(
+                  CodeOwnerSet.createWithoutPathExpressions(
                       ownerSetProto.getOwnersList().stream()
                           .map(ownerSet -> CodeOwnerReference.create(ownerSet.getEmail()))
                           .collect(toImmutableSet()));

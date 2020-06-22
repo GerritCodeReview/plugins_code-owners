@@ -14,13 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
-import java.nio.file.Path;
 import java.util.stream.Stream;
 
 /**
@@ -39,28 +37,11 @@ import java.util.stream.Stream;
  */
 @AutoValue
 public abstract class CodeOwnerSet {
-  // TODO(ekempin): add field for a set of path expressions (relative to the folder of the code
-  // owner config)
+  /** Path expressions that match the files that are owned by the {@link #codeOwners()}. */
+  public abstract ImmutableSet<String> pathExpressions();
 
   /** Gets the code owners of this code owner set. */
   public abstract ImmutableSet<CodeOwnerReference> codeOwners();
-
-  /**
-   * Whether this owner set matches the given path.
-   *
-   * <p>A path matches the owner set, if any of its path expressions matches the path.
-   *
-   * @param path path for which it should be checked whether it matches this owner set; the path
-   *     must be relative to the path in which the {@link CodeOwnerConfig} that contains this code
-   *     owner set is stored; can be the path of a file or folder; the path may or may not exist
-   * @return whether this owner set matches the given path
-   */
-  boolean matches(Path path) {
-    checkState(!requireNonNull(path, "path").isAbsolute(), "path %s must be relative", path);
-
-    // TODO(ekempin): Check if any of the path expressions match, once we have path expressions.
-    return true;
-  }
 
   /**
    * Creates a builder form this code owner set.
@@ -71,21 +52,65 @@ public abstract class CodeOwnerSet {
 
   /** Creates a builder for a {@link CodeOwnerSet}. */
   public static CodeOwnerSet.Builder builder() {
-    return new AutoValue_CodeOwnerSet.Builder();
+    return new AutoValue_CodeOwnerSet.Builder().setPathExpressions(ImmutableSet.of());
   }
 
-  /** Creates a {@link CodeOwnerSet} instance for the given set of code owners. */
-  public static CodeOwnerSet create(ImmutableSet<CodeOwnerReference> codeOwners) {
+  /**
+   * Creates a {@link CodeOwnerSet} instance without path expressions.
+   *
+   * @param codeOwners the code owners of the code owner set
+   */
+  public static CodeOwnerSet createWithoutPathExpressions(
+      ImmutableSet<CodeOwnerReference> codeOwners) {
+    return create(ImmutableSet.of(), codeOwners);
+  }
+
+  /**
+   * Creates a {@link CodeOwnerSet} instance.
+   *
+   * @param pathExpressions the path expressions of the code owner set
+   * @param codeOwners the code owners of the code owner set
+   */
+  public static CodeOwnerSet create(
+      ImmutableSet<String> pathExpressions, ImmutableSet<CodeOwnerReference> codeOwners) {
     return builder().setCodeOwners(codeOwners).build();
   }
 
-  /** Creates a {@link CodeOwnerSet} instance for the given emails. */
-  public static CodeOwnerSet createForEmails(String... emails) {
-    return create(Stream.of(emails).map(CodeOwnerReference::create).collect(toImmutableSet()));
+  /**
+   * Creates a {@link CodeOwnerSet} instance without path expressions.
+   *
+   * @param emails the emails of the code owners
+   */
+  public static CodeOwnerSet createWithoutPathExpressions(String... emails) {
+    return create(
+        ImmutableSet.of(),
+        Stream.of(emails).map(CodeOwnerReference::create).collect(toImmutableSet()));
   }
 
   @AutoValue.Builder
   public abstract static class Builder {
+    /**
+     * Sets the path expressions that match the files that are owned by the code owners.
+     *
+     * @param pathExpressions the path expressions
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder setPathExpressions(ImmutableSet<String> pathExpressions);
+
+    /** Gets a builder to add path expressions. */
+    abstract ImmutableSet.Builder<String> pathExpressionsBuilder();
+
+    /**
+     * Adds a path expression.
+     *
+     * @param pathExpression path expression that should be added
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addPathExpression(String pathExpression) {
+      pathExpressionsBuilder().add(requireNonNull(pathExpression, "pathExpression"));
+      return this;
+    }
+
     /**
      * Sets the code owners of this code owner set.
      *
