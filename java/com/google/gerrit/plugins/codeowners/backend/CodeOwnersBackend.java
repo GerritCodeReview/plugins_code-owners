@@ -54,4 +54,7 @@ public interface CodeOwnersBackend {
       CodeOwnerConfig.Key codeOwnerConfigKey,
       CodeOwnerConfigUpdate codeOwnerConfigUpdate,
       @Nullable IdentifiedUser currentUser);
+
+  /** Gets that {@link PathExpressionMatcher} that should be used to match path expressions. */
+  PathExpressionMatcher getPathExpressionMatcher();
 }
