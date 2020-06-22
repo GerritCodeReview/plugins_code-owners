@@ -16,6 +16,8 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackendId;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
@@ -56,5 +58,10 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnersBackend {
         retryHelper,
         CODE_OWNER_CONFIG_FILE_NAME,
         codeOwnerConfigParser);
+  }
+
+  @Override
+  public PathExpressionMatcher getPathExpressionMatcher() {
+    return PathExpressionMatcher.notSupportedBy(CodeOwnersBackendId.FIND_OWNERS);
   }
 }
