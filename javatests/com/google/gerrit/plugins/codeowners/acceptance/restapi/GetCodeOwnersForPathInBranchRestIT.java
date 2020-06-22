@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.extensions.client.ListAccountsOption;
+import com.google.gerrit.extensions.client.ListOption;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
@@ -124,7 +125,8 @@ public class GetCodeOwnersForPathInBranchRestIT extends AbstractCodeOwnersIT {
                 IdString.fromDecoded(project.get()),
                 IdString.fromDecoded("master"),
                 IdString.fromDecoded("/foo/bar/baz.md"),
-                toHex(ImmutableSet.of(ListAccountsOption.DETAILS, ListAccountsOption.ALL_EMAILS))));
+                ListOption.toHex(
+                    ImmutableSet.of(ListAccountsOption.DETAILS, ListAccountsOption.ALL_EMAILS))));
     r.assertOK();
     List<CodeOwnerInfo> codeOwnerInfos =
         newGson().fromJson(r.getReader(), new TypeToken<List<CodeOwnerInfo>>() {}.getType());
@@ -163,18 +165,5 @@ public class GetCodeOwnersForPathInBranchRestIT extends AbstractCodeOwnersIT {
     r.assertBadRequest();
     assertThat(r.getEntityContent())
         .isEqualTo(String.format("\"%s\" is not a valid value for \"-O\"", unknownHexOption));
-  }
-
-  // TODO (ekempin): Generalize the
-  // com.google.gerrit.extensions.client.ListOption#toHex(Set<ListChangesOption>) in Gerrit core
-  // to be able to work with all kind of options. Once this is done, use the toHex method from
-  // Gerrit core and remove this method.
-  private static String toHex(ImmutableSet<ListAccountsOption> options) {
-    int v = 0;
-    for (ListAccountsOption option : options) {
-      v |= 1 << option.getValue();
-    }
-
-    return Integer.toHexString(v);
   }
 }
