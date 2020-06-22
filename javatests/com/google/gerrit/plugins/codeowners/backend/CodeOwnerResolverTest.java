@@ -156,7 +156,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveLocalCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email(), user.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .hasAccountIdsThat()
@@ -167,7 +167,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveLocalCodeOwnersNonResolvableCodeOwnersAreFilteredOut() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email(), "non-existing@test.com"))
+            .addCodeOwnerSet(
+                CodeOwnerSet.createWithoutPathExpressions(admin.email(), "non-existing@test.com"))
             .build();
     assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .hasAccountIdsThat()
@@ -187,7 +188,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void cannotResolveLocalCodeOwnersForNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     NullPointerException npe =
         assertThrows(
@@ -201,7 +202,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     String relativePath = "foo/bar.md";
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     IllegalStateException npe =
         assertThrows(

@@ -51,7 +51,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void formatCodeOwnerSet() throws Exception {
-    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createForEmails(admin.email());
+    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(admin.email());
     Optional<CodeOwnerSetInfo> codeOwnerSetInfo = CodeOwnerConfigJson.format(codeOwnerSet);
     assertThat(codeOwnerSetInfo).isPresent();
     assertThat(codeOwnerSetInfo.get()).hasCodeOwnersEmailsThat().containsExactly(admin.email());
@@ -59,7 +59,10 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void formatEmptyCodeOwnerSet() throws Exception {
-    assertThat(CodeOwnerConfigJson.format(CodeOwnerSet.create(ImmutableSet.of()))).isEmpty();
+    assertThat(
+            CodeOwnerConfigJson.format(
+                CodeOwnerSet.createWithoutPathExpressions(ImmutableSet.of())))
+        .isEmpty();
   }
 
   @Test
@@ -82,7 +85,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   public void formatCodeOwnerConfigWithCodeOwnerSet() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email(), user.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo)
@@ -106,7 +109,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
             .setIgnoreParentCodeOwners()
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isTrue();
@@ -131,7 +134,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   public void formatCodeOwnerConfigWithoutIgnoreParentCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo).hasIgnoreParentCodeOwnersThat().isNull();

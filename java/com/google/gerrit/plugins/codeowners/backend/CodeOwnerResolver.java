@@ -48,6 +48,7 @@ public class CodeOwnerResolver {
   private final ExternalIds externalIds;
   private final AccountCache accountCache;
   private final AccountControl.Factory accountControlFactory;
+  private final LocalCodeOwners localCodeOwners;
 
   @Inject
   CodeOwnerResolver(
@@ -55,12 +56,14 @@ public class CodeOwnerResolver {
       Provider<CurrentUser> currentUser,
       ExternalIds externalIds,
       AccountCache accountCache,
-      AccountControl.Factory accountControlFactory) {
+      AccountControl.Factory accountControlFactory,
+      LocalCodeOwners localCodeOwners) {
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
     this.externalIds = externalIds;
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
+    this.localCodeOwners = localCodeOwners;
   }
 
   /**
@@ -81,7 +84,7 @@ public class CodeOwnerResolver {
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
-    return codeOwnerConfig.localCodeOwners(absolutePath).stream()
+    return localCodeOwners.get(codeOwnerConfig, absolutePath).stream()
         .map(this::resolve)
         .filter(Optional::isPresent)
         .map(Optional::get)
