@@ -88,6 +88,15 @@ public class CodeOwnerSetSubject extends Subject {
     return hasCodeOwnersThat().comparingElementsUsing(CODE_OWNER_REFERENCE_TO_EMAIL);
   }
 
+  /**
+   * Returns an {@link IterableSubject} for the path expressions in the code owner set.
+   *
+   * @return {@link IterableSubject} for the path expressions in the code owner set
+   */
+  public IterableSubject hasPathExpressionsThat() {
+    return check("pathExpressions()").that(codeOwnerSet().pathExpressions());
+  }
+
   private CodeOwnerSet codeOwnerSet() {
     isNotNull();
     return codeOwnerSet;
