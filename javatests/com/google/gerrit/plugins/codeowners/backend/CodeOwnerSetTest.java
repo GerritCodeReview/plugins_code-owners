@@ -18,7 +18,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import java.nio.file.Paths;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerSet}. */
@@ -81,24 +80,31 @@ public class CodeOwnerSetTest {
   }
 
   @Test
-  public void cannotMatchNullPath() throws Exception {
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () -> CodeOwnerSet.createForEmails("foo.bar@test.com").matches(null));
-    assertThat(npe).hasMessageThat().isEqualTo("path");
+  public void addPathExpressions() throws Exception {
+    String pathExpression1 = "*.md";
+    String pathExpression2 = "config/*";
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.builder()
+            .addPathExpression(pathExpression1)
+            .addPathExpression(pathExpression2)
+            .build();
+    assertThat(codeOwnerSet)
+        .hasPathExpressionsThat()
+        .containsExactly(pathExpression1, pathExpression2);
   }
 
   @Test
-  public void cannotMatchNullAbsolutePath() throws Exception {
-    String absolutePath = "/foo/bar/baz.md";
-    IllegalStateException exception =
+  public void addDuplicatePathExpressions() throws Exception {
+    String pathExpression = "*.md";
+    CodeOwnerSet codeOwnerSet = CodeOwnerSet.builder().addPathExpression(pathExpression).build();
+    assertThat(codeOwnerSet).hasPathExpressionsThat().containsExactly(pathExpression);
+  }
+
+  @Test
+  public void cannotAddNullAsPathExpression() throws Exception {
+    NullPointerException npe =
         assertThrows(
-            IllegalStateException.class,
-            () ->
-                CodeOwnerSet.createForEmails("foo.bar@test.com").matches(Paths.get(absolutePath)));
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(String.format("path %s must be relative", absolutePath));
+            NullPointerException.class, () -> CodeOwnerSet.builder().addPathExpression(null));
+    assertThat(npe).hasMessageThat().isEqualTo("pathExpression");
   }
 }

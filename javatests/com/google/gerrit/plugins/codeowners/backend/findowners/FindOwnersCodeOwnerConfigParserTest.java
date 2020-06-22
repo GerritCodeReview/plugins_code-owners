@@ -100,8 +100,8 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(
                 CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(EMAIL_1, EMAIL_3))
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(EMAIL_2))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(EMAIL_2))
             .build();
     assertThat(codeOwnerConfigParser.formatAsString(codeOwnerConfig))
         .isEqualTo(getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));

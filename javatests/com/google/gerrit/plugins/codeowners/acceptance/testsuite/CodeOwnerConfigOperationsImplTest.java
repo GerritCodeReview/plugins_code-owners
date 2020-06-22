@@ -285,7 +285,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
-        .addCodeOwnerSet(CodeOwnerSet.createForEmails(user.email()))
+        .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(user.email()))
         .update();
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
         .hasExactlyOneCodeOwnerSetThat()
@@ -365,7 +365,8 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfig createCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
     return createCodeOwnerConfig(
-        ignoreParentCodeOwners, CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(emails)));
+        ignoreParentCodeOwners,
+        CodeOwnerSetModification.set(CodeOwnerSet.createWithoutPathExpressions(emails)));
   }
 
   private CodeOwnerConfig createCodeOwnerConfig(
