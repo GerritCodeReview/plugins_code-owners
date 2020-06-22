@@ -29,8 +29,8 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
   public void keep() throws Exception {
     ImmutableList<CodeOwnerSet> codeOwnerSets =
         ImmutableList.of(
-            CodeOwnerSet.createForEmails(admin.email()),
-            CodeOwnerSet.createForEmails(user.email()));
+            CodeOwnerSet.createWithoutPathExpressions(admin.email()),
+            CodeOwnerSet.createWithoutPathExpressions(user.email()));
     assertThat(CodeOwnerSetModification.keep().apply(codeOwnerSets)).isEqualTo(codeOwnerSets);
   }
 
@@ -40,15 +40,15 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
             CodeOwnerSetModification.clear()
                 .apply(
                     ImmutableList.of(
-                        CodeOwnerSet.createForEmails(admin.email()),
-                        CodeOwnerSet.createForEmails(user.email()))))
+                        CodeOwnerSet.createWithoutPathExpressions(admin.email()),
+                        CodeOwnerSet.createWithoutPathExpressions(user.email()))))
         .isEmpty();
   }
 
   @Test
   public void append() throws Exception {
-    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createForEmails(admin.email());
-    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createForEmails(user.email());
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(admin.email());
+    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(user.email());
     assertThat(
             CodeOwnerSetModification.append(codeOwnerSet2).apply(ImmutableList.of(codeOwnerSet1)))
         .containsExactly(codeOwnerSet1, codeOwnerSet2)
@@ -57,17 +57,17 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void setOne() throws Exception {
-    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createForEmails(admin.email());
-    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createForEmails(user.email());
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(admin.email());
+    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(user.email());
     assertThat(CodeOwnerSetModification.set(codeOwnerSet2).apply(ImmutableList.of(codeOwnerSet1)))
         .containsExactly(codeOwnerSet2);
   }
 
   @Test
   public void setList() throws Exception {
-    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createForEmails(admin.email());
-    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createForEmails(user.email());
-    CodeOwnerSet codeOwnerSet3 = CodeOwnerSet.createForEmails("user2@test.com");
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(admin.email());
+    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(user.email());
+    CodeOwnerSet codeOwnerSet3 = CodeOwnerSet.createWithoutPathExpressions("user2@test.com");
     assertThat(
             CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet2, codeOwnerSet3))
                 .apply(ImmutableList.of(codeOwnerSet1)))
@@ -79,8 +79,8 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
   public void addToOnlySet() throws Exception {
     assertThat(
             CodeOwnerSetModification.addToOnlySet(CodeOwnerReference.create(user.email()))
-                .apply(ImmutableList.of(CodeOwnerSet.createForEmails(admin.email()))))
-        .containsExactly(CodeOwnerSet.createForEmails(admin.email(), user.email()));
+                .apply(ImmutableList.of(CodeOwnerSet.createWithoutPathExpressions(admin.email()))))
+        .containsExactly(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()));
   }
 
   @Test
@@ -100,16 +100,16 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
             CodeOwnerSetModification.addToOnlySet(CodeOwnerReference.create(user.email()))
                 .apply(
                     ImmutableList.of(
-                        CodeOwnerSet.createForEmails(admin.email()),
-                        CodeOwnerSet.createForEmails(user.email()))));
+                        CodeOwnerSet.createWithoutPathExpressions(admin.email()),
+                        CodeOwnerSet.createWithoutPathExpressions(user.email()))));
   }
 
   @Test
   public void addToOnlySetByEmail() throws Exception {
     assertThat(
             CodeOwnerSetModification.addToOnlySet(user.email())
-                .apply(ImmutableList.of(CodeOwnerSet.createForEmails(admin.email()))))
-        .containsExactly(CodeOwnerSet.createForEmails(admin.email(), user.email()));
+                .apply(ImmutableList.of(CodeOwnerSet.createWithoutPathExpressions(admin.email()))))
+        .containsExactly(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()));
   }
 
   @Test
@@ -127,13 +127,13 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
             CodeOwnerSetModification.addToOnlySet(user.email())
                 .apply(
                     ImmutableList.of(
-                        CodeOwnerSet.createForEmails(admin.email()),
-                        CodeOwnerSet.createForEmails(user.email()))));
+                        CodeOwnerSet.createWithoutPathExpressions(admin.email()),
+                        CodeOwnerSet.createWithoutPathExpressions(user.email()))));
   }
 
   @Test
   public void addToCodeOwnerSet() throws Exception {
-    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createForEmails(admin.email());
+    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(admin.email());
     assertThat(
             CodeOwnerSetModification.addToCodeOwnerSet(
                 codeOwnerSet, CodeOwnerReference.create(user.email())))
@@ -143,7 +143,7 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void addToCodeOwnerSetThatAlreadyContainsTheCodeOwner() throws Exception {
-    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createForEmails(admin.email());
+    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(admin.email());
     assertThat(
             CodeOwnerSetModification.addToCodeOwnerSet(
                 codeOwnerSet, CodeOwnerReference.create(admin.email())))
@@ -155,8 +155,10 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
   public void removeFromOnlySet() throws Exception {
     assertThat(
             CodeOwnerSetModification.removeFromOnlySet(CodeOwnerReference.create(user.email()))
-                .apply(ImmutableList.of(CodeOwnerSet.createForEmails(admin.email(), user.email()))))
-        .containsExactly(CodeOwnerSet.createForEmails(admin.email()));
+                .apply(
+                    ImmutableList.of(
+                        CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))))
+        .containsExactly(CodeOwnerSet.createWithoutPathExpressions(admin.email()));
   }
 
   @Test
@@ -176,16 +178,18 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
             CodeOwnerSetModification.removeFromOnlySet(CodeOwnerReference.create(user.email()))
                 .apply(
                     ImmutableList.of(
-                        CodeOwnerSet.createForEmails(admin.email()),
-                        CodeOwnerSet.createForEmails(user.email()))));
+                        CodeOwnerSet.createWithoutPathExpressions(admin.email()),
+                        CodeOwnerSet.createWithoutPathExpressions(user.email()))));
   }
 
   @Test
   public void removeFromOnlySetByEmail() throws Exception {
     assertThat(
             CodeOwnerSetModification.removeFromOnlySet(user.email())
-                .apply(ImmutableList.of(CodeOwnerSet.createForEmails(admin.email(), user.email()))))
-        .containsExactly(CodeOwnerSet.createForEmails(admin.email()));
+                .apply(
+                    ImmutableList.of(
+                        CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))))
+        .containsExactly(CodeOwnerSet.createWithoutPathExpressions(admin.email()));
   }
 
   @Test
@@ -203,13 +207,14 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
             CodeOwnerSetModification.removeFromOnlySet(user.email())
                 .apply(
                     ImmutableList.of(
-                        CodeOwnerSet.createForEmails(admin.email()),
-                        CodeOwnerSet.createForEmails(user.email()))));
+                        CodeOwnerSet.createWithoutPathExpressions(admin.email()),
+                        CodeOwnerSet.createWithoutPathExpressions(user.email()))));
   }
 
   @Test
   public void removeFromCodeOwnerSet() throws Exception {
-    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createForEmails(admin.email(), user.email());
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email());
     assertThat(
             CodeOwnerSetModification.removeFromCodeOwnerSet(
                 codeOwnerSet, CodeOwnerReference.create(user.email())))
@@ -219,7 +224,7 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void removeFromCodeOwnerSetThatDoesntTheCodeOwner() throws Exception {
-    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createForEmails(admin.email());
+    CodeOwnerSet codeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(admin.email());
     assertThat(
             CodeOwnerSetModification.removeFromCodeOwnerSet(
                 codeOwnerSet, CodeOwnerReference.create(user.email())))
