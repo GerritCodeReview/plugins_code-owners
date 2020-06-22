@@ -281,6 +281,30 @@
       "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a17aa5f8_ec18e7b5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnersForPathInBranchRestIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-22T12:51:40Z",
+      "side": 1,
+      "message": "Here is the Gerrit core change for this: https://gerrit-review.googlesource.com/c/gerrit/+/272667",
+      "parentUuid": "fd4274ae_fa232619",
+      "range": {
+        "startLine": 168,
+        "startChar": 24,
+        "endLine": 168,
+        "endChar": 29
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
