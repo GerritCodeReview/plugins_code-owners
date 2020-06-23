@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "44a3bf02_2a5b65ce",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T10:23:36Z",
+      "side": 1,
+      "message": "FYI: Even though IterableSubject is extendable and we have also extended it for ListSubject, I don\u0027t think that the Truth team envisioned that IterableSubject should be extended for every custom subject type. Guessing your intentions with creating this class and guessing how the Truth team meant Correspondences to be used, I think you would want to just have a container class which defines the Correspondences with constants (and possible static methods for nicer names).\n\nI saw that a previous reviewer accepted this approach of introducing xxxIterableSubjects. Hence, I won\u0027t push for an adjustment in this part of the code base. Just please don\u0027t use the exact same approach in other parts of Gerrit.",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4491ebdf_db258d97",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T10:23:36Z",
+      "side": 1,
+      "message": "We could use a Correspondence#transforming here and thus wouldn\u0027t need line 47. In general, I\u0027m seeing the pattern in several subject implementations of this code area which allows to map null values within Correspondences. I\u0027m wondering if we shouldn\u0027t introduce a Correspondence implementation, which is based on Correspondence#transforming and adds the null behavior. As input, it would just get a method reference and a string for the failure description. Afterwards, we could would just have one line here and in the other subjects.",
+      "range": {
+        "startLine": 43,
+        "startChar": 6,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
