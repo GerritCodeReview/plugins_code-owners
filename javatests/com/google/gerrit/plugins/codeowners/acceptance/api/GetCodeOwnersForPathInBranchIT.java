@@ -22,6 +22,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
@@ -29,11 +30,7 @@ import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
-import com.google.gerrit.server.ServerInitiated;
-import com.google.gerrit.server.account.AccountsUpdate;
-import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import java.util.List;
 import org.junit.Test;
 
@@ -47,8 +44,8 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnersForPathInBranchRestIT}.
  */
 public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
-  @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private RequestScopeOperations requestScopeOperations;
+  @Inject private AccountOperations accountOperations;
   @Inject private GroupOperations groupOperations;
 
   @Test
@@ -187,12 +184,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
 
     // add secondary email to admin account
     String secondaryEmail = "admin@foo.bar";
-    accountsUpdate
-        .get()
-        .update(
-            "Add secondary email to admin test account",
-            admin.id(),
-            (a, u) -> u.addExternalId(ExternalId.createEmail(admin.id(), secondaryEmail)));
+    accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
     // Make the request with the admin user that has the 'Modify Account' global capability.
     List<CodeOwnerInfo> codeOwnerInfos =
@@ -220,12 +212,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
 
     // add secondary email to admin account
     String secondaryEmail = "admin@foo.bar";
-    accountsUpdate
-        .get()
-        .update(
-            "Add secondary email to admin test account",
-            admin.id(),
-            (a, u) -> u.addExternalId(ExternalId.createEmail(admin.id(), secondaryEmail)));
+    accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
     // Make the request with a user that doesn't have the 'Modify Account' global capability.
     requestScopeOperations.setApiUser(user.id());
@@ -254,12 +241,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
 
     // add secondary email to admin account
     String secondaryEmail = "admin@foo.bar";
-    accountsUpdate
-        .get()
-        .update(
-            "Add secondary email to admin test account",
-            admin.id(),
-            (a, u) -> u.addExternalId(ExternalId.createEmail(admin.id(), secondaryEmail)));
+    accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
     // Make the request with the admin user that has the 'Modify Account' global capability.
     List<CodeOwnerInfo> codeOwnerInfos =
@@ -351,12 +333,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
   public void getCodeOwnersReferencedBySecondaryEmails() throws Exception {
     // add secondary email to user account
     String secondaryEmail = "user@foo.bar";
-    accountsUpdate
-        .get()
-        .update(
-            "Add secondary email to user test account",
-            user.id(),
-            (a, u) -> u.addExternalId(ExternalId.createEmail(user.id(), secondaryEmail)));
+    accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
     // create a code owner config
     codeOwnerConfigOperations
