@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a9c63676_967dadf1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-23T16:14:47Z",
+      "side": 1,
+      "message": "I think this class requires a bit more documentation on what is supported (e.g, invalid lines, etc)",
+      "range": {
+        "startLine": 33,
+        "startChar": 6,
+        "endLine": 33,
+        "endChar": 32
+      },
+      "revId": "ea5f3e392cb6c14d1a60a0f08ebf082c868403cc",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "11908e2c_4c4718b9",
+        "filename": "proto/owner_metadata_proto.proto",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-23T16:14:47Z",
+      "side": 1,
+      "message": "is this necessary? (Maybe just use OwnersConfig directly?)",
+      "range": {
+        "startLine": 24,
+        "startChar": 8,
+        "endLine": 24,
+        "endChar": 21
+      },
+      "revId": "ea5f3e392cb6c14d1a60a0f08ebf082c868403cc",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
