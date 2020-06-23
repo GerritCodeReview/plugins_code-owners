@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d89c64fa_e5c26c6d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerJson.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-23T15:30:51Z",
+      "side": 1,
+      "message": "Is this a good behavior to only set this on the last code owner? Why not set it to true for all of them?",
+      "range": {
+        "startLine": 79,
+        "startChar": 4,
+        "endLine": 79,
+        "endChar": 21
+      },
+      "revId": "978c8574fe72bc58d9f3b134a8594f0c1f2c559d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
