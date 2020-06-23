@@ -214,6 +214,30 @@
     },
     {
       "key": {
+        "uuid": "ad55aebd_76edd68c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T10:02:27Z",
+      "side": 1,
+      "message": "Thanks a lot for creating those changes. I think it\u0027s better to have them even if we don\u0027t have tests for that test API.",
+      "parentUuid": "7a364af9_3907b3ff",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 156,
+        "endChar": 91
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "965f0b83_2af4643f",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
         "patchSetId": 20
