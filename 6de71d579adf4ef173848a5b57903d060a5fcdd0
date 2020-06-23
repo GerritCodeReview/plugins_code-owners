@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e580b70c_f37a6b4b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-23T13:33:19Z",
+      "side": 1,
+      "message": "Thanks, I agree that this approach doesn\u0027t scale well and I\u0027m happy to learn more and find a better solution.\n\nFor the time being, I see it as an acceptable overhead for being able to write readable tests.\n\nCodeOwnerIterableSubject as I have it now allows me to write:\n\n  assertThat(codeOwners))\n        .hasAccountIdsThat()\n        .containsExactly(admin.id(), user.id());\n\nIf I would only have a static Correspondence the assertion would need to look like this:\n\n  assertThat(codeOwners))\n    .comparingElementsUsing(CodeOwnerCorrespondences.CODE_OWNER_TO_ACCOUNT_ID)\n    .containsExactly(admin.id(), user.id());\n\nwhich I find less readable.\n\nDo I understand correctly that you propose to have a static method like\n\n  static UsingCorrespondence\u003cCodeOwner, Account.Id\u003e assertAccountIdsOf(Iterable\u003cCodeOwner\u003e codeOwners) {\n    return assertThat(codeOwnerSet))\n             .comparingElementsUsing(CodeOwnerCorrespondences.CODE_OWNER_TO_ACCOUNT_ID);\n  }\n\nand then have \n\n  assertAccountIdsOf(codeOwners).containsExactly(admin.id(), user.id());\n\n?\n\nOr did you mean something else?\n\nIn any case, since there is already a long open series on top of this change and I\u0027m afraid this change would cause rebase churn, I would rather go with the current approach for now. But I\u0027m fine with addressing this on top of the series.",
+      "parentUuid": "44a3bf02_2a5b65ce",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "4491ebdf_db258d97",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
         "patchSetId": 18
@@ -36,6 +60,30 @@
       "writtenOn": "2020-06-23T10:23:36Z",
       "side": 1,
       "message": "We could use a Correspondence#transforming here and thus wouldn\u0027t need line 47. In general, I\u0027m seeing the pattern in several subject implementations of this code area which allows to map null values within Correspondences. I\u0027m wondering if we shouldn\u0027t introduce a Correspondence implementation, which is based on Correspondence#transforming and adds the null behavior. As input, it would just get a method reference and a string for the failure description. Afterwards, we could would just have one line here and in the other subjects.",
+      "range": {
+        "startLine": 43,
+        "startChar": 6,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "87983571_887b8914",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-23T13:33:19Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. I assume this is something that should be done in Gerrit core since we use the same pattern there too. I can follow-up on this and adapt the code here (in a follow-up change) once we have that class in Gerrit core available.",
+      "parentUuid": "4491ebdf_db258d97",
       "range": {
         "startLine": 43,
         "startChar": 6,
