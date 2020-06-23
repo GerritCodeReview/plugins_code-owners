@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "f64cda03_26ef6b45",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-23T14:59:27Z",
+      "side": 1,
+      "message": "OK, if this makes us compliant with how Truth intends this to be done, then we should probably do this. Your second version looks quite OK to me. I will give it a try :)",
+      "parentUuid": "0818ce65_d020f98d",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4491ebdf_db258d97",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
         "patchSetId": 18
@@ -132,6 +156,30 @@
       "side": 1,
       "message": "Yeah, I wasn\u0027t aware that core Gerrit also used the same pattern. I agree that we should add it to core Gerrit then.",
       "parentUuid": "87983571_887b8914",
+      "range": {
+        "startLine": 43,
+        "startChar": 6,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a91a53d9_d10f7356",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-23T14:59:27Z",
+      "side": 1,
+      "message": "OK, I try to find some time to add this in Gerrit core.",
+      "parentUuid": "f7b96ddc_22dd5b8a",
       "range": {
         "startLine": 43,
         "startChar": 6,
