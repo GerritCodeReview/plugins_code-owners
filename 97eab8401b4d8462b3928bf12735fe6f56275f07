@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "31affc2d_59aef92a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:36:54Z",
+      "side": 1,
+      "message": "Typo: with",
+      "range": {
+        "startLine": 14,
+        "startChar": 17,
+        "endLine": 14,
+        "endChar": 22
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0feb92b_193b50f6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:36:54Z",
+      "side": 1,
+      "message": "I would leave this out.",
+      "range": {
+        "startLine": 16,
+        "startChar": 54,
+        "endLine": 17,
+        "endChar": 29
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f24df0a0_7a6b23ae",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:36:54Z",
+      "side": 1,
+      "message": "As we generate this list anyway, can\u0027t we directly use it in line 165 and could then spare the thenComparing(randomlyOrderedCodeOwners::indexOf)? I think it would be easier to understand and wouldn\u0027t make a notable difference regarding performance.",
+      "range": {
+        "startLine": 164,
+        "startChar": 4,
+        "endLine": 164,
+        "endChar": 54
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3250879e_7fcddbd5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:36:54Z",
+      "side": 1,
+      "message": "What do you think about directly returning a Stream\u003cCodeOwner\u003e here? Thus, we could avoid the copy for the ImmutableList and directly use it in line 165. A stream would generally give callers the flexibility to decide on the resulting \u0027format\u0027.",
+      "range": {
+        "startLine": 177,
+        "startChar": 17,
+        "endLine": 177,
+        "endChar": 41
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1903f51b_ef07f440",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:36:54Z",
+      "side": 1,
+      "message": "Nit: Could be abbreviated to \"new ArrayList\u003c\u003e(codeOwners)\".",
+      "range": {
+        "startLine": 178,
+        "startChar": 48,
+        "endLine": 179,
+        "endChar": 49
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c8274d50_2e1b7420",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:36:54Z",
+      "side": 1,
+      "message": "Typo: in",
+      "range": {
+        "startLine": 382,
+        "startChar": 74,
+        "endLine": 382,
+        "endChar": 76
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f07f17e7_f14d51f2",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:36:54Z",
+      "side": 1,
+      "message": "FYI: You could achieve the same by using a ListSubject and asserting on element(0). If that element doesn\u0027t exist, you\u0027d get a nice failure message.",
+      "range": {
+        "startLine": 384,
+        "startChar": 4,
+        "endLine": 384,
+        "endChar": 56
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
