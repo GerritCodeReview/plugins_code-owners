@@ -262,6 +262,30 @@
     },
     {
       "key": {
+        "uuid": "7a94ecce_18249b10",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-23T10:37:13Z",
+      "side": 1,
+      "message": "For future reference, here is the change that adapts the tests to make use of the new test API methods:\n\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/272823",
+      "parentUuid": "d12f39ca_1dbb2aaa",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 156,
+        "endChar": 91
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "965f0b83_2af4643f",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
         "patchSetId": 20
