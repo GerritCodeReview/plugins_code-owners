@@ -1,0 +1,320 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df7368b7_cadb02a0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 18
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Thanks for the many explanations in this commit message. Very helpful to me.",
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a445183_b6ab054c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 18
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Typo: duplicate \u0027the\u0027 -\u003e omit.",
+      "range": {
+        "startLine": 15,
+        "startChar": 41,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5d8f1e8_680087a4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 18
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Typo: is",
+      "range": {
+        "startLine": 38,
+        "startChar": 40,
+        "endLine": 38,
+        "endChar": 42
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "29558a7f_6058eebd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Typo: if \u0027it\u0027 is referring to user Y, we should rather write \"they have\" here.",
+      "range": {
+        "startLine": 36,
+        "startChar": 77,
+        "endLine": 36,
+        "endChar": 83
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5f0edf1_b35919f3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "I like that we\u0027re using an enum here and not a boolean value. It\u0027s much more expressive and readable. :-)",
+      "range": {
+        "startLine": 47,
+        "startChar": 10,
+        "endLine": 47,
+        "endChar": 19
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4512d95b_d3df40dc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "FYI: Sounds good to me as well. I don\u0027t see much benefits in filtering to the best values earlier and as you write here, the code would become much more complex.",
+      "range": {
+        "startLine": 56,
+        "startChar": 5,
+        "endLine": 57,
+        "endChar": 27
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "51af50f6_75394e34",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Nit: This method is currently not used outside of this class (except in a unit test) and according to the method description also shouldn\u0027t be spread a lot in code. Could we reduce the visibility to package-private?",
+      "range": {
+        "startLine": 65,
+        "startChar": 2,
+        "endLine": 65,
+        "endChar": 8
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c95bd23d_84f2685e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "I think it would be helpful if this Javadoc description mentioned that the resulting scoring considered the Score.Kind but was normalized to the 0 (low) - 1 (high) range.",
+      "range": {
+        "startLine": 68,
+        "startChar": 5,
+        "endLine": 70,
+        "endChar": 75
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "806f58e9_0422e30a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "It\u0027s a bit strange to have such checks at the end of a method especially as they don\u0027t really depend on any input parameters of the method. Would it be possible to add other checks earlier (e.g. where the max value or the other values are set) so that we don\u0027t even end up in such a state?",
+      "range": {
+        "startLine": 86,
+        "startChar": 4,
+        "endLine": 87,
+        "endChar": 69
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eaa99eb6_01a465aa",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Just for posterity: I briefly considered whether we should add @Memoized to the scoring() method as it might be called multiple times for the same codeOwner as part of this comparator. I concluded that the scoring() method doesn\u0027t seem expensive enough compared to the additional memory overhead and synchronization/locking for thread-safety which comes from the @Memoized-AutoValue implementation. Before we introduce that micro-optimization, we would need to look into real numbers.",
+      "range": {
+        "startLine": 119,
+        "startChar": 16,
+        "endLine": 119,
+        "endChar": 34
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "15cbf86e_3c62414d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Would it hurt to simply assume the lowest possible scoring value (-\u003e 0) or even something below (-\u003e -1) if no scoring is available? Seeing this exception in the comparator implementation makes me a bit worried that we might overlook it in the future as it\u0027s not mentioned in the Javadoc description and comparator implementations typically don\u0027t throw exceptions for the inputs they accept.\n\nIf there is no other code (in future changes) which depends on the scoring method, we could also directly adjust the scoring method to not even return an Optional but the lowest possible scoring value for code owners without a score.",
+      "range": {
+        "startLine": 120,
+        "startChar": 20,
+        "endLine": 124,
+        "endChar": 97
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9e5c412b_d227c722",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Typo: Add",
+      "range": {
+        "startLine": 31,
+        "startChar": 20,
+        "endLine": 31,
+        "endChar": 22
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d43fdc8_eff123d0",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Optional: Could be abbreviated to OptionalSubject#value.",
+      "range": {
+        "startLine": 78,
+        "startChar": 4,
+        "endLine": 79,
+        "endChar": 30
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06f6a1ad_ae85fcca",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T13:25:53Z",
+      "side": 1,
+      "message": "Optional: Here and below, this could be abbreviated to codeOwners.sort(comparator).",
+      "range": {
+        "startLine": 110,
+        "startChar": 4,
+        "endLine": 110,
+        "endChar": 45
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
