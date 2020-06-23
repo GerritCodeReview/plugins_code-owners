@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
@@ -70,13 +71,17 @@ public class CodeOwnerResolver {
    *
    * @param codeOwnerConfig the code owner config for which the local owners for the given path
    *     should be resolved
-   * @param path the path for which the local owners for the given path should be resolved
+   * @param absolutePath path for which the local code owners should be returned; the path must be
+   *     absolute; can be the path of a file or folder; the path may or may not exist
    * @return the resolved code owners
    */
   public ImmutableSet<CodeOwner> resolveLocalCodeOwners(
-      CodeOwnerConfig codeOwnerConfig, Path path) {
-    return requireNonNull(codeOwnerConfig, "codeOwnerConfig")
-        .localCodeOwners(requireNonNull(path, "path")).stream()
+      CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    requireNonNull(absolutePath, "absolutePath");
+    checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
+
+    return codeOwnerConfig.localCodeOwners(absolutePath).stream()
         .map(this::resolve)
         .filter(Optional::isPresent)
         .map(Optional::get)
