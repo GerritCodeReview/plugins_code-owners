@@ -117,6 +117,30 @@
       "revId": "01eb2671477c1a25503656e6a6f23d5740b9cc6f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8d72597_5dbdadf0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-23T12:57:20Z",
+      "side": 1,
+      "message": "I\u0027ve uploaded that change now [1].\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/272894",
+      "parentUuid": "13b775c8_f9105dec",
+      "range": {
+        "startLine": 75,
+        "startChar": 2,
+        "endLine": 76,
+        "endChar": 30
+      },
+      "revId": "01eb2671477c1a25503656e6a6f23d5740b9cc6f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
