@@ -93,6 +93,30 @@
       "revId": "01eb2671477c1a25503656e6a6f23d5740b9cc6f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "13b775c8_f9105dec",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 76,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T10:29:50Z",
+      "side": 1,
+      "message": "Okay. Let\u0027s keep it here until that other change comes around.",
+      "parentUuid": "29a66b5f_01235ca9",
+      "range": {
+        "startLine": 75,
+        "startChar": 2,
+        "endLine": 76,
+        "endChar": 30
+      },
+      "revId": "01eb2671477c1a25503656e6a6f23d5740b9cc6f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
