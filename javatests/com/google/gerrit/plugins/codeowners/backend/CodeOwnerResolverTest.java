@@ -21,6 +21,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -41,6 +42,7 @@ import org.junit.Test;
 public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
+  @Inject private AccountOperations accountOperations;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
 
   private CodeOwnerResolver codeOwnerResolver;
@@ -116,12 +118,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveCodeOwnerReferenceForSecondaryEmail() throws Exception {
     // add secondary email to user account
     String secondaryEmail = "user@foo.bar";
-    accountsUpdate
-        .get()
-        .update(
-            "Add secondary email to user test account",
-            user.id(),
-            (a, u) -> u.addExternalId(ExternalId.createEmail(user.id(), secondaryEmail)));
+    accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
     // admin has the "Modify Account" global capability and hence can see the secondary email of the
     // user account.
@@ -139,12 +136,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveCodeOwnerReferenceForNonVisibleSecondaryEmail() throws Exception {
     // add secondary email to admin account
     String secondaryEmail = "admin@foo.bar";
-    accountsUpdate
-        .get()
-        .update(
-            "Add secondary email to admin test account",
-            admin.id(),
-            (a, u) -> u.addExternalId(ExternalId.createEmail(admin.id(), secondaryEmail)));
+    accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
     // user doesn't have the "Modify Account" global capability and hence cannot see the secondary
     // email of the admin account.
