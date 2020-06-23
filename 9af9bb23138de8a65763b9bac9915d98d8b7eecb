@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "7a364af9_3907b3ff",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-23T08:26:09Z",
+      "side": 1,
+      "message": "I started implementing this and I have a working version [1].\nHowever we don\u0027t have any test coverage for the account test API, so there are no tests for the new code and I\u0027m not sure it handles all corner-cases (last change in the series). I wouldn\u0027t like to spend much more time on this at this point, since it took already more time than I wanted to spend on it. So if we need more work on this (like tests) I would rather not continue with this for now.\n\n[1] https://gerrit-review.googlesource.com/c/gerrit/+/272820",
+      "parentUuid": "a500cd38_91ee9a5c",
+      "range": {
+        "startLine": 151,
+        "startChar": 4,
+        "endLine": 156,
+        "endChar": 91
+      },
+      "revId": "9af9bb23138de8a65763b9bac9915d98d8b7eecb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "965f0b83_2af4643f",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
         "patchSetId": 20
