@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "0818ce65_d020f98d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:54:07Z",
+      "side": 1,
+      "message": "I meant using something like\n\n  assertThat(codeOwners)\n      .comparingElementsUsing(HAS_ACCOUNT_ID)\n      .containsExactly(admin.id(), user.id());\n\nor something like\n\n  assertThat(codeOwners)\n      .comparingElementsUsing(hasAccountId())\n      .containsExactly(admin.id(), user.id());\n\nwhich would be enabled by a static import of HAS_ACCOUNT_ID / hasAccountId(). I agree that it\u0027s a bit less readable than assertThat(codeOwners)).hasAccountIdsThat() but it seems to be the solution the Truth team has settled upon. If you prefer the custom subjects for the plugin, we can also keep them in the future.\n\nI know the merge/rebase pain very well myself and understand your point. Let\u0027s stick with the current approach for the rest of this series.",
+      "parentUuid": "e580b70c_f37a6b4b",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4491ebdf_db258d97",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
         "patchSetId": 18
@@ -93,6 +117,30 @@
       "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7b96ddc_22dd5b8a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-23T14:54:07Z",
+      "side": 1,
+      "message": "Yeah, I wasn\u0027t aware that core Gerrit also used the same pattern. I agree that we should add it to core Gerrit then.",
+      "parentUuid": "87983571_887b8914",
+      "range": {
+        "startLine": 43,
+        "startChar": 6,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
