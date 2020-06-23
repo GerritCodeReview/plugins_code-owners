@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2480183e_ab3f3931",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 478,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-23T15:37:10Z",
+      "side": 1,
+      "message": "Will an integration test using both start and limit make sense?\nBased on the code it might be kind of redundant, so up to you.",
+      "range": {
+        "startLine": 478,
+        "startChar": 3,
+        "endLine": 478,
+        "endChar": 7
+      },
+      "revId": "adb463a5c2e52e1bc616426645ac506a5d392ab8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "60be584c_3b898a9e",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 12
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-23T15:37:10Z",
+      "side": 1,
+      "message": "It would be nice to give more details on which code owners are skipped. Link to how they are ordered (based on scoring?)?",
+      "range": {
+        "startLine": 73,
+        "startChar": 27,
+        "endLine": 73,
+        "endChar": 71
+      },
+      "revId": "adb463a5c2e52e1bc616426645ac506a5d392ab8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
