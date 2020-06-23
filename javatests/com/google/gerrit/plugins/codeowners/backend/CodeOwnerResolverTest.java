@@ -193,6 +193,23 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () -> codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, null));
-    assertThat(npe).hasMessageThat().isEqualTo("path");
+    assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
+  }
+
+  @Test
+  public void cannotResolveLocalCodeOwnersForRelativePath() throws Exception {
+    String relativePath = "foo/bar.md";
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .build();
+    IllegalStateException npe =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get(relativePath)));
+    assertThat(npe)
+        .hasMessageThat()
+        .isEqualTo(String.format("path %s must be absolute", relativePath));
   }
 }
