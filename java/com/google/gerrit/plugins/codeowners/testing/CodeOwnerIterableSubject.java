@@ -30,8 +30,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
-import java.util.Objects;
-import java.util.Optional;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 
 /** {@link IterableSubject} for doing assertions on an {@link Iterable} of {@link CodeOwner}s. */
 public class CodeOwnerIterableSubject extends IterableSubject {
@@ -40,13 +39,7 @@ public class CodeOwnerIterableSubject extends IterableSubject {
    * com.google.gerrit.entities.Account.Id}s.
    */
   private static final Correspondence<CodeOwner, Account.Id> CODE_OWNER_TO_ACCOUNT_ID =
-      Correspondence.from(
-          (actualCodeOwner, expectedAccountId) -> {
-            Account.Id accountId =
-                Optional.ofNullable(actualCodeOwner).map(CodeOwner::accountId).orElse(null);
-            return Objects.equals(accountId, expectedAccountId);
-          },
-          "has account ID");
+      NullAwareCorrespondence.transforming(CodeOwner::accountId, "has account ID");
 
   /**
    * Starts fluent chain to do assertions on an {@link Iterable} of {@link CodeOwner}s.
