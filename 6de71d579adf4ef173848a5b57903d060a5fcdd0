@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "a6793877_efdbdc19",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T12:35:32Z",
+      "side": 1,
+      "message": "Done in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/273038",
+      "parentUuid": "f64cda03_26ef6b45",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 37
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4491ebdf_db258d97",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
         "patchSetId": 18
@@ -204,6 +228,30 @@
       "side": 1,
       "message": "Done in https://gerrit-review.googlesource.com/c/gerrit/+/272929",
       "parentUuid": "a91a53d9_d10f7356",
+      "range": {
+        "startLine": 43,
+        "startChar": 6,
+        "endLine": 43,
+        "endChar": 25
+      },
+      "revId": "6de71d579adf4ef173848a5b57903d060a5fcdd0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "6b5ebc7e_f65ba306",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerIterableSubject.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T12:35:32Z",
+      "side": 1,
+      "message": "and https://gerrit-review.googlesource.com/c/plugins/code-owners/+/273035",
+      "parentUuid": "a50e97ea_558dcfb8",
       "range": {
         "startLine": 43,
         "startChar": 6,
