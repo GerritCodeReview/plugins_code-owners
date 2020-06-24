@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bae0125f_4a4b3584",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-24T10:42:17Z",
+      "side": 1,
+      "message": "Nit: Should be double.",
+      "range": {
+        "startLine": 81,
+        "startChar": 9,
+        "endLine": 81,
+        "endChar": 15
+      },
+      "revId": "334efdee00b91c98c199028ecff30b31e39c3b5c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dd36f8a3_f000ae9a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-24T10:42:17Z",
+      "side": 1,
+      "message": "Nit: Unnecessary now.",
+      "range": {
+        "startLine": 120,
+        "startChar": 22,
+        "endLine": 120,
+        "endChar": 33
+      },
+      "revId": "334efdee00b91c98c199028ecff30b31e39c3b5c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5d8c885b_784c926c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 98,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-24T10:42:17Z",
+      "side": 1,
+      "message": "Nit: Should be double.",
+      "range": {
+        "startLine": 98,
+        "startChar": 4,
+        "endLine": 98,
+        "endChar": 10
+      },
+      "revId": "334efdee00b91c98c199028ecff30b31e39c3b5c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "85085aad_5bf09a0b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 19
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-24T10:42:17Z",
+      "side": 1,
+      "message": "Sorry, I just noticed this aspect right now: Asserting for exact equality on doubles is discouraged when the value comes from an arithmetic calculation, which I think we do for the scoring. We\u0027d need to specify a (small) tolerance to avoid flaky tests.\n\nFor the 0.0 assertion below, we could keep the current code as the value is defined to be 0.0 for an unscored code owner. (Or switch to the isZero() assertion if we also want to accept -0.0.)",
+      "range": {
+        "startLine": 99,
+        "startChar": 24,
+        "endLine": 99,
+        "endChar": 33
+      },
+      "revId": "334efdee00b91c98c199028ecff30b31e39c3b5c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
