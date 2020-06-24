@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "1d3bfead_8ce7e7d2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "31affc2d_59aef92a",
+      "range": {
+        "startLine": 14,
+        "startChar": 17,
+        "endLine": 14,
+        "endChar": 22
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e0feb92b_193b50f6",
         "filename": "/COMMIT_MSG",
         "patchSetId": 15
@@ -45,6 +69,30 @@
       "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "939ce255_01597215",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e0feb92b_193b50f6",
+      "range": {
+        "startLine": 16,
+        "startChar": 54,
+        "endLine": 17,
+        "endChar": 29
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "13760050_a462ef75",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f24df0a0_7a6b23ae",
+      "range": {
+        "startLine": 164,
+        "startChar": 4,
+        "endLine": 164,
+        "endChar": 54
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3250879e_7fcddbd5",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
         "patchSetId": 15
@@ -91,6 +163,30 @@
       "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7cfa152_cd276f35",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:38:57Z",
+      "side": 1,
+      "message": "Good idea. Thanks for the suggestion.\n\nDone.",
+      "parentUuid": "3250879e_7fcddbd5",
+      "range": {
+        "startLine": 177,
+        "startChar": 17,
+        "endLine": 177,
+        "endChar": 41
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "22aa76f9_41dac471",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 179,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1903f51b_ef07f440",
+      "range": {
+        "startLine": 178,
+        "startChar": 48,
+        "endLine": 179,
+        "endChar": 49
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c8274d50_2e1b7420",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
         "patchSetId": 15
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "d667c2d7_e2abbff3",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 382,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:38:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8274d50_2e1b7420",
+      "range": {
+        "startLine": 382,
+        "startChar": 74,
+        "endLine": 382,
+        "endChar": 76
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f07f17e7_f14d51f2",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
         "patchSetId": 15
@@ -160,6 +304,30 @@
       "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c4828a13_951a8f0a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:38:57Z",
+      "side": 1,
+      "message": "Nice. Done.",
+      "parentUuid": "f07f17e7_f14d51f2",
+      "range": {
+        "startLine": 384,
+        "startChar": 4,
+        "endLine": 384,
+        "endChar": 56
+      },
+      "revId": "97eab8401b4d8462b3928bf12735fe6f56275f07",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
