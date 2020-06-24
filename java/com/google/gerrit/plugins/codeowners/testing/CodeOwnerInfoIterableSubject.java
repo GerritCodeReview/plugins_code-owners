@@ -30,8 +30,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
-import java.util.Objects;
-import java.util.Optional;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 
 /**
  * {@link IterableSubject} for doing assertions on an {@link Iterable} of {@link CodeOwnerInfo}s.
@@ -42,27 +41,13 @@ public class CodeOwnerInfoIterableSubject extends IterableSubject {
    * com.google.gerrit.entities.Account.Id}s.
    */
   private static final Correspondence<CodeOwnerInfo, Account.Id> CODE_OWNER_INFO_TO_ACCOUNT_ID =
-      Correspondence.from(
-          (actualCodeOwnerInfo, expectedAccountId) -> {
-            Account.Id accountId =
-                Optional.ofNullable(actualCodeOwnerInfo)
-                    .map(codeOwnerInfo -> Account.id(codeOwnerInfo.account._accountId))
-                    .orElse(null);
-            return Objects.equals(accountId, expectedAccountId);
-          },
-          "has account ID");
+      NullAwareCorrespondence.transforming(
+          codeOwnerInfo -> Account.id(codeOwnerInfo.account._accountId), "has account ID");
 
   /** {@link Correspondence} that maps {@link CodeOwnerInfo}s to account names. */
   private static final Correspondence<CodeOwnerInfo, String> CODE_OWNER_INFO_TO_ACCOUNT_NAME =
-      Correspondence.from(
-          (actualCodeOwnerInfo, expectedAccountName) -> {
-            String accountName =
-                Optional.ofNullable(actualCodeOwnerInfo)
-                    .map(codeOwnerInfo -> codeOwnerInfo.account.name)
-                    .orElse(null);
-            return Objects.equals(accountName, expectedAccountName);
-          },
-          "has account name");
+      NullAwareCorrespondence.transforming(
+          codeOwnerInfo -> codeOwnerInfo.account.name, "has account name");
 
   /**
    * Starts fluent chain to do assertions on an {@link Iterable} of {@link CodeOwnerInfo}s.
