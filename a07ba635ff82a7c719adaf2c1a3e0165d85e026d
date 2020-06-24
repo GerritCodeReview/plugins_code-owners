@@ -3,7 +3,7 @@
     "zuul-check:plugins_code-owners": {
       "state": "NOT_STARTED",
       "created": "2020-06-24T11:51:40Z",
-      "updated": "2020-06-24T12:53:37Z"
+      "updated": "2020-06-24T12:53:40Z"
     }
   }
 }
