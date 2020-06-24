@@ -14,8 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.common.truth.Truth8.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThatOptional;
 
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
@@ -35,7 +34,7 @@ import org.junit.Test;
 public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
   @Test
   public void getNonExistingCodeOwnerConfig() throws Exception {
-    assertThat(codeOwnerConfigsApiFactory.branch(project, "master").get("/")).isEmpty();
+    assertThatOptional(codeOwnerConfigsApiFactory.branch(project, "master").get("/")).isEmpty();
   }
 
   @Test
@@ -64,8 +63,8 @@ public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
 
     Optional<CodeOwnerConfigInfo> codeOwnerConfigInfo =
         codeOwnerConfigsApiFactory.branch(project, branch).get(path);
-    assertThat(codeOwnerConfigInfo).isPresent();
-    assertThat(codeOwnerConfigInfo.get())
+    assertThatOptional(codeOwnerConfigInfo)
+        .value()
         .correspondsTo(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
   }
 }
