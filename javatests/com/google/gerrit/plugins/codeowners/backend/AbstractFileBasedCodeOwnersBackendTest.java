@@ -15,8 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.common.Nullable;
@@ -66,14 +65,14 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
   public void getNonExistingCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/non-existing/");
-    assertThat(codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+    assertThatOptional(codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
   }
 
   @Test
   public void getCodeOwnerConfigFromNonExistingBranch() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "non-existing", "/");
-    assertThat(codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+    assertThatOptional(codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
   }
 
   @Test
@@ -87,8 +86,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
         codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey);
-    assertThat(codeOwnerConfig).isPresent();
-    assertThat(codeOwnerConfig.get()).isEqualTo(codeOwnerConfigInRepository);
+    assertThatOptional(codeOwnerConfig).value().isEqualTo(codeOwnerConfigInRepository);
   }
 
   @Test
@@ -118,8 +116,8 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
                           CodeOwnerSet.createWithoutPathExpressions(admin.email())))
                   .build(),
               currentUser);
-      assertThat(codeOwnerConfig).isPresent();
-      assertThat(codeOwnerConfig.get())
+      assertThatOptional(codeOwnerConfig)
+          .value()
           .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
@@ -179,8 +177,8 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
                   .setCodeOwnerSetsModification(CodeOwnerSetModification.addToOnlySet(user.email()))
                   .build(),
               currentUser);
-      assertThat(codeOwnerConfig).isPresent();
-      assertThat(codeOwnerConfig.get())
+      assertThatOptional(codeOwnerConfig)
+          .value()
           .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
@@ -241,7 +239,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
                   .setCodeOwnerSetsModification(CodeOwnerSetModification.clear())
                   .build(),
               currentUser);
-      assertThat(codeOwnerConfig).isEmpty();
+      assertThatOptional(codeOwnerConfig).isEmpty();
 
       // Check the metadata of the created commit.
       RevCommit newHead = getHead(repo, codeOwnerConfigKey.ref());
@@ -285,8 +283,8 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
       Optional<CodeOwnerConfig> codeOwnerConfig =
           codeOwnersBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey, CodeOwnerConfigUpdate.builder().build(), null);
-      assertThat(codeOwnerConfig).isPresent();
-      assertThat(codeOwnerConfig.get())
+      assertThatOptional(codeOwnerConfig)
+          .value()
           .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
