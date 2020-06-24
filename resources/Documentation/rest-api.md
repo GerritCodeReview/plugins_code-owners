@@ -71,7 +71,7 @@ The following request parameters can be specified:
 | ----------- | -------- | ----------- |
 | `o`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) that controls which fields in the returned accounts should be populated. Can be specified multiple times. If not given, only the `_account_id` field for the account ID is populated.
 | `O`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
-| `limit`|`n` | optional | Limit defining how many code owners should be returned at most. By default 10. Setting the limit to `0` which means unlimited is not allowed.
+| `limit`\|`n` | optional | Limit defining how many code owners should be returned at most. By default 10. Setting the limit to `0` which means unlimited is not allowed.
 
 As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
 The returned code owners are sorted by an internal score that expresses how good
