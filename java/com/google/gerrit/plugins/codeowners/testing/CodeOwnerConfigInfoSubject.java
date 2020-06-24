@@ -24,17 +24,35 @@ import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigJson;
+import com.google.gerrit.truth.OptionalSubject;
+import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerConfigInfo}s. */
 public class CodeOwnerConfigInfoSubject extends Subject {
   /**
    * Starts fluent chain to do assertions on a {@link CodeOwnerConfigInfo}.
    *
-   * @param codeOwnerConfigInfo the code owner config on which assertions should be done
+   * @param codeOwnerConfigInfo the {@link CodeOwnerConfigInfo} on which assertions should be done
    * @return the created {@link CodeOwnerConfigInfoSubject}
    */
   public static CodeOwnerConfigInfoSubject assertThat(CodeOwnerConfigInfo codeOwnerConfigInfo) {
     return assertAbout(CodeOwnerConfigInfoSubject::new).that(codeOwnerConfigInfo);
+  }
+
+  /**
+   * Starts fluent chain to do assertions on an {@link Optional} {@link CodeOwnerConfigInfo}.
+   *
+   * @param codeOwnerConfigInfo the {@link CodeOwnerConfigInfo} {@link Optional} on which assertions
+   *     should be done
+   * @return the created {@link OptionalSubject}
+   */
+  public static OptionalSubject<CodeOwnerConfigInfoSubject, CodeOwnerConfigInfo> assertThatOptional(
+      Optional<CodeOwnerConfigInfo> codeOwnerConfigInfo) {
+    return OptionalSubject.assertThat(codeOwnerConfigInfo, codeOwnerConfigInfos());
+  }
+
+  private static Factory<CodeOwnerConfigInfoSubject, CodeOwnerConfigInfo> codeOwnerConfigInfos() {
+    return CodeOwnerConfigInfoSubject::new;
   }
 
   private final CodeOwnerConfigInfo codeOwnerConfigInfo;
