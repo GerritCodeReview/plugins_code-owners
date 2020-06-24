@@ -42,6 +42,30 @@
     },
     {
       "key": {
+        "uuid": "7948eae8_9bf10353",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 18
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5a445183_b6ab054c",
+      "range": {
+        "startLine": 15,
+        "startChar": 41,
+        "endLine": 15,
+        "endChar": 44
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5d8f1e8_680087a4",
         "filename": "/COMMIT_MSG",
         "patchSetId": 18
@@ -65,6 +89,30 @@
     },
     {
       "key": {
+        "uuid": "dfbb9eaa_40426574",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 18
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5d8f1e8_680087a4",
+      "range": {
+        "startLine": 38,
+        "startChar": 40,
+        "endLine": 38,
+        "endChar": 42
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "29558a7f_6058eebd",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
         "patchSetId": 18
@@ -85,6 +133,30 @@
       "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "957f9f4e_5b3e3ced",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Right. Thanks for pointing out.\n\nDone.",
+      "parentUuid": "29558a7f_6058eebd",
+      "range": {
+        "startLine": 36,
+        "startChar": 77,
+        "endLine": 36,
+        "endChar": 83
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -157,6 +229,30 @@
     },
     {
       "key": {
+        "uuid": "932b3b74_cc9e5de6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Yes, this shouldn\u0027t be public.\n\nDone.",
+      "parentUuid": "51af50f6_75394e34",
+      "range": {
+        "startLine": 65,
+        "startChar": 2,
+        "endLine": 65,
+        "endChar": 8
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c95bd23d_84f2685e",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
         "patchSetId": 18
@@ -177,6 +273,30 @@
       "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0d7040f8_094fff74",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c95bd23d_84f2685e",
+      "range": {
+        "startLine": 68,
+        "startChar": 5,
+        "endLine": 70,
+        "endChar": 75
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -203,6 +323,30 @@
     },
     {
       "key": {
+        "uuid": "c84d509e_e4b33716",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Good idea. Done.",
+      "parentUuid": "806f58e9_0422e30a",
+      "range": {
+        "startLine": 86,
+        "startChar": 4,
+        "endLine": 87,
+        "endChar": 69
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "eaa99eb6_01a465aa",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
         "patchSetId": 18
@@ -214,6 +358,30 @@
       "writtenOn": "2020-06-23T13:25:53Z",
       "side": 1,
       "message": "Just for posterity: I briefly considered whether we should add @Memoized to the scoring() method as it might be called multiple times for the same codeOwner as part of this comparator. I concluded that the scoring() method doesn\u0027t seem expensive enough compared to the additional memory overhead and synchronization/locking for thread-safety which comes from the @Memoized-AutoValue implementation. Before we introduce that micro-optimization, we would need to look into real numbers.",
+      "range": {
+        "startLine": 119,
+        "startChar": 16,
+        "endLine": 119,
+        "endChar": 34
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ea2040be_8a4dc709",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "I actually wanted to use @Memoized on the scoring method, but @Memoized can only be used on methods that don\u0027t have any parameter [1], so it didn\u0027t work on the scoring method as it takes the code owner as input. Then I came to the same conclusion that caching the results of this computation is not really worth any extra effort for now.\n\n[1] https://github.com/google/auto/blob/master/value/src/main/java/com/google/auto/value/extension/memoized/Memoized.java#L30",
+      "parentUuid": "eaa99eb6_01a465aa",
       "range": {
         "startLine": 119,
         "startChar": 16,
@@ -249,6 +417,30 @@
     },
     {
       "key": {
+        "uuid": "6e80eea5_083f2ee4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoring.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "\u003e Would it hurt to simply assume the lowest possible scoring value (-\u003e 0) or even something below (-\u003e -1)\n\u003e if no scoring is available?\n\nNo. I agree this is better and simplifies the code. Done.\n\n\u003e If there is no other code (in future changes) which depends on the scoring method,\n\u003e we could also directly adjust the scoring method to not even return an Optional but\n\u003e the lowest possible scoring value for code owners without a score.\n\nMake sense. Done.",
+      "parentUuid": "15cbf86e_3c62414d",
+      "range": {
+        "startLine": 120,
+        "startChar": 20,
+        "endLine": 124,
+        "endChar": 97
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9e5c412b_d227c722",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
         "patchSetId": 18
@@ -269,6 +461,30 @@
       "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7817ced_86a4679b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e5c412b_d227c722",
+      "range": {
+        "startLine": 31,
+        "startChar": 20,
+        "endLine": 31,
+        "endChar": 22
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -295,6 +511,30 @@
     },
     {
       "key": {
+        "uuid": "1c88aba3_c4417e49",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "No longer applicable.",
+      "parentUuid": "5d43fdc8_eff123d0",
+      "range": {
+        "startLine": 78,
+        "startChar": 4,
+        "endLine": 79,
+        "endChar": 30
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "06f6a1ad_ae85fcca",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
         "patchSetId": 18
@@ -306,6 +546,30 @@
       "writtenOn": "2020-06-23T13:25:53Z",
       "side": 1,
       "message": "Optional: Here and below, this could be abbreviated to codeOwners.sort(comparator).",
+      "range": {
+        "startLine": 110,
+        "startChar": 4,
+        "endLine": 110,
+        "endChar": 45
+      },
+      "revId": "7fe40e14f15b948cb6471812fbb5270d3aab10d5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "af47b6f3_5906fad3",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringTest.java",
+        "patchSetId": 18
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T08:20:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "06f6a1ad_ae85fcca",
       "range": {
         "startLine": 110,
         "startChar": 4,
