@@ -45,6 +45,30 @@
       "revId": "adb463a5c2e52e1bc616426645ac506a5d392ab8",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5c8cbdf_144162a2",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 12
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T09:24:05Z",
+      "side": 1,
+      "message": "Thanks for asking about this. This made me realise that this whole change is actually not working. The intention was to support paging through results, but paging doesn\u0027t work if the order in which the results are returned is not deterministic. Since the random ordering will be different for each call, the next page may show results which have already been shown on the previous page, and some results may not show up on any of the pages.\n\nNot sure how to solve this. Since supporting the \u0027start\u0027 parameter is not required for the initial version of the code owners plugin, I will simply abandon this change for now.",
+      "parentUuid": "60be584c_3b898a9e",
+      "range": {
+        "startLine": 73,
+        "startChar": 27,
+        "endLine": 73,
+        "endChar": 71
+      },
+      "revId": "adb463a5c2e52e1bc616426645ac506a5d392ab8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
