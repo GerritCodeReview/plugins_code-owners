@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "63909b5c_1d4d2588",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T13:21:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9c63676_967dadf1",
+      "range": {
+        "startLine": 33,
+        "startChar": 6,
+        "endLine": 33,
+        "endChar": 32
+      },
+      "revId": "ea5f3e392cb6c14d1a60a0f08ebf082c868403cc",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "11908e2c_4c4718b9",
         "filename": "proto/owner_metadata_proto.proto",
         "patchSetId": 12
@@ -45,6 +69,30 @@
       "revId": "ea5f3e392cb6c14d1a60a0f08ebf082c868403cc",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eff34900_98f8a14e",
+        "filename": "proto/owner_metadata_proto.proto",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T13:21:20Z",
+      "side": 1,
+      "message": "We need this message to be compatible with the owners format that will be used in Piper.\n\nIf we would omit this message and use OwnersConfig directly the file contents would be:\n\n\"owner_set {\n  ...\n},\nowner_set {\n  ...\n}\"\n\nrather than\n\n\"owners_config {\n  owner_set {\n    ...\n  },\n  owner_set {\n    ...\n  }\n}\"\n\nwhat we need the file contents to be.",
+      "parentUuid": "11908e2c_4c4718b9",
+      "range": {
+        "startLine": 24,
+        "startChar": 8,
+        "endLine": 24,
+        "endChar": 21
+      },
+      "revId": "ea5f3e392cb6c14d1a60a0f08ebf082c868403cc",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
