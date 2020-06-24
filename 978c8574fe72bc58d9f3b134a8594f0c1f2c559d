@@ -22,6 +22,30 @@
       "revId": "978c8574fe72bc58d9f3b134a8594f0c1f2c559d",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05ee51f1_a9b1fa72",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerJson.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-24T09:04:09Z",
+      "side": 1,
+      "message": "I think it\u0027s good because it minimises the amount of data that is transferred to the client. Setting it on all code owners would mean that this info is redundantly returned once for each code owner.\n\nI agree that there are probably better approaches to return this info, e.g. return a ListResult JSON entity that contains a list of results (CodeOwnerInfos) and that has a separate \"moreResults\" field, so that this info is not stored as part of CodeOwnerInfo at all. However I prefer to stay consistent with how this is handled in Gerrit core. Gerrit core has \"_moreChanges\" in ChangeInfo, \"_moreAccounts\" in AccountInfo and \"_moreGroups\" in GroupInfo and these fields are always only populated for the last returned list entry. So I think we should do the same here.",
+      "parentUuid": "d89c64fa_e5c26c6d",
+      "range": {
+        "startLine": 79,
+        "startChar": 4,
+        "endLine": 79,
+        "endChar": 21
+      },
+      "revId": "978c8574fe72bc58d9f3b134a8594f0c1f2c559d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
