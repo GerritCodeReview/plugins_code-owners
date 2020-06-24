@@ -23,23 +23,15 @@ import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerSetInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
-import java.util.Objects;
-import java.util.Optional;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerSetInfo}s. */
 public class CodeOwnerSetInfoSubject extends Subject {
   /** {@link Correspondence} that maps {@link CodeOwnerReference}s to emails. */
   private static final Correspondence<CodeOwnerReferenceInfo, String>
       CODE_OWNER_REFERENCE_INFO_TO_EMAIL =
-          Correspondence.from(
-              (actualCodeOwnerReferenceInfo, expectedEmail) -> {
-                String email =
-                    Optional.ofNullable(actualCodeOwnerReferenceInfo)
-                        .map(codeOwnerReference -> codeOwnerReference.email)
-                        .orElse(null);
-                return Objects.equals(email, expectedEmail);
-              },
-              "has email");
+          NullAwareCorrespondence.transforming(
+              codeOwnerReference -> codeOwnerReference.email, "has email");
 
   /**
    * Starts fluent chain to do assertions on a {@link CodeOwnerSetInfo}.
