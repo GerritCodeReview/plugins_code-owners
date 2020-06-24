@@ -15,7 +15,8 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -57,8 +58,11 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID))
             .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())));
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id(), user.id()).inOrder();
-    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null);
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id())
+        .inOrder();
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountName()).containsExactly(null, null);
   }
 
   @Test
@@ -67,9 +71,12 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
         codeOwnerJsonFactory
             .create(EnumSet.of(FillOptions.ID, FillOptions.NAME))
             .format(ImmutableList.of(CodeOwner.create(admin.id()), CodeOwner.create(user.id())));
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id(), user.id()).inOrder();
     assertThat(codeOwnerInfos)
-        .hasAccountNamesThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id())
+        .inOrder();
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountName())
         .containsExactly(admin.fullName(), user.fullName())
         .inOrder();
   }

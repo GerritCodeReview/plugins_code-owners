@@ -15,8 +15,9 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.TestAccount;
@@ -112,10 +113,12 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .query()
             .get(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md");
     assertThat(codeOwnerInfos)
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user.id(), admin.id())
         .inOrder();
-    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(null, null, null);
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountName())
+        .containsExactly(null, null, null);
   }
 
   @Test
@@ -164,7 +167,10 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // code owner according to the 1. and 2. code owner config: user2 + user
     List<CodeOwnerInfo> codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md");
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user2.id(), user.id()).inOrder();
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id(), user.id())
+        .inOrder();
   }
 
   @Test
@@ -183,8 +189,10 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .query()
             .withOptions(ListAccountsOption.DETAILS)
             .get("/foo/bar/baz.md");
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
-    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(admin.fullName());
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountName())
+        .containsExactly(admin.fullName());
   }
 
   @Test
@@ -209,7 +217,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .query()
             .withOptions(ListAccountsOption.ALL_EMAILS)
             .get("/foo/bar/baz.md");
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
     assertThatList(codeOwnerInfos)
         .onlyElement()
         .hasSecondaryEmailsThat()
@@ -268,8 +276,10 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
             .query()
             .withOptions(ListAccountsOption.DETAILS, ListAccountsOption.ALL_EMAILS)
             .get("/foo/bar/baz.md");
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
-    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(admin.fullName());
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountName())
+        .containsExactly(admin.fullName());
     assertThatList(codeOwnerInfos)
         .onlyElement()
         .hasSecondaryEmailsThat()
@@ -334,7 +344,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
 
     // Make the request as admin who can see all accounts.
     assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id(), user3.id());
 
     // Make the request as user2. This user only shares a group with user3. Since
@@ -345,7 +355,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     // We expect only user2 and user3 as code owner (user and admin should be filtered
     // out because user2 cannot see their accounts).
     assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user3.id());
   }
 
@@ -366,13 +376,13 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
 
     // admin has the "Modify Account" global capability and hence can see secondary emails
     assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
 
     // user can see the own secondary email
     requestScopeOperations.setApiUser(user.id());
     assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
 
     // user2 doesn't have the 'Modify Account' global capability and hence cannot see the secondary
@@ -407,7 +417,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
     List<CodeOwnerInfo> codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar.md");
     assertThat(codeOwnerInfos)
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id());
 
     // The first code owner in the result should be user as user has the best distance score.
@@ -471,12 +481,14 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
 
     codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().withLimit(2).get("/foo/bar/baz.md");
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(user.id(), user2.id());
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id());
 
     codeOwnerInfos =
         codeOwnersApiFactory.branch(project, "master").query().withLimit(3).get("/foo/bar/baz.md");
     assertThat(codeOwnerInfos)
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id());
   }
 
