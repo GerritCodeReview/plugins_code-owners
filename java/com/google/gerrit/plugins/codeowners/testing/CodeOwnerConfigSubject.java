@@ -22,6 +22,8 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.truth.OptionalSubject;
+import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerConfig}s. */
 public class CodeOwnerConfigSubject extends Subject {
@@ -33,6 +35,22 @@ public class CodeOwnerConfigSubject extends Subject {
    */
   public static CodeOwnerConfigSubject assertThat(CodeOwnerConfig codeOwnerConfig) {
     return assertAbout(CodeOwnerConfigSubject::new).that(codeOwnerConfig);
+  }
+
+  /**
+   * Starts fluent chain to do assertions on an {@link Optional} {@link CodeOwnerConfig}.
+   *
+   * @param codeOwnerConfig the code owner config {@link Optional} on which assertions should be
+   *     done
+   * @return the created {@link OptionalSubject}
+   */
+  public static OptionalSubject<CodeOwnerConfigSubject, CodeOwnerConfig> assertThatOptional(
+      Optional<CodeOwnerConfig> codeOwnerConfig) {
+    return OptionalSubject.assertThat(codeOwnerConfig, codeOwnerConfigs());
+  }
+
+  private static Factory<CodeOwnerConfigSubject, CodeOwnerConfig> codeOwnerConfigs() {
+    return CodeOwnerConfigSubject::new;
   }
 
   private final CodeOwnerConfig codeOwnerConfig;
