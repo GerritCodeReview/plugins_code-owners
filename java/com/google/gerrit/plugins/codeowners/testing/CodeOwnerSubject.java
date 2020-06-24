@@ -17,15 +17,25 @@ package com.google.gerrit.plugins.codeowners.testing;
 import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.ComparableSubject;
+import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link CodeOwner}s. */
 public class CodeOwnerSubject extends Subject {
+  /**
+   * Constructs a {@link Correspondence} that maps {@link CodeOwner}s to {@link
+   * com.google.gerrit.entities.Account.Id}s.
+   */
+  public static final Correspondence<CodeOwner, Account.Id> hasAccountId() {
+    return NullAwareCorrespondence.transforming(CodeOwner::accountId, "has account ID");
+  }
+
   /**
    * Starts fluent chain to do assertions on a {@link CodeOwner}.
    *
