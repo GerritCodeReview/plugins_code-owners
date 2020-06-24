@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "78a051cd_540a6df9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-24T16:20:14Z",
+      "side": 1,
+      "message": "As long as we don\u0027t have pagination, I don\u0027t think we need this indication. In general, I currently don\u0027t see a use case for the frontend for this. Hence, this would be an unused parameter for which we execute and maintain code unnecessarily. Could we abandon this change until we really need this parameter?",
+      "range": {
+        "startLine": 7,
+        "startChar": 30,
+        "endLine": 7,
+        "endChar": 72
+      },
+      "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
