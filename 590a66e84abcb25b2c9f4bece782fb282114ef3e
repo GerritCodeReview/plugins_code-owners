@@ -1,11 +1,9 @@
 {
   "checks": {
     "zuul-check:plugins_code-owners": {
-      "state": "RUNNING",
-      "message": "Jobs have started running",
-      "started": "2020-06-24T13:21:40Z",
+      "state": "NOT_STARTED",
       "created": "2020-06-24T13:21:40Z",
-      "updated": "2020-06-24T13:28:30Z"
+      "updated": "2020-06-24T13:40:28Z"
     }
   }
 }
