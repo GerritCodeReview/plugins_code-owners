@@ -16,8 +16,8 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -64,7 +64,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/non-existing/");
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
   }
 
   @Test
@@ -72,7 +72,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "non-existing", "/");
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
   }
 
   @Test
@@ -82,8 +82,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+        .value()
         .hasCodeOwnerSetsThat()
         .isEmpty();
   }
@@ -99,8 +99,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     backendTestUtil.writeCodeOwnerConfig(codeOwnerConfig);
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+        .value()
         .hasIgnoreParentCodeOwnersThat()
         .isTrue();
     assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
@@ -118,8 +118,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
 
       // Check that the code owner config doesn't exist yet.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Remember head so that we can check that the branch is changed.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -135,8 +135,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.commit(metaDataUpdate);
 
       // Check that the loaded code owner config was updated.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+          .value()
           .hasIgnoreParentCodeOwnersThat()
           .isTrue();
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
@@ -147,9 +147,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Check that the code owner config was created in the repository.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
-      assertThat(codeOwnerConfigInRepo).isPresent();
-      assertThat(codeOwnerConfigInRepo.get()).hasIgnoreParentCodeOwnersThat().isTrue();
-      assertThat(codeOwnerConfigInRepo.get())
+      assertThatOptional(codeOwnerConfigInRepo).value().hasIgnoreParentCodeOwnersThat().isTrue();
+      assertThatOptional(codeOwnerConfigInRepo)
+          .value()
           .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
@@ -168,8 +168,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
 
       // Check that the code owner config doesn't exist yet.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Remember head so that we can check that the branch doesn't change.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -178,12 +178,12 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.commit(metaDataUpdate);
 
       // Check that the loaded code owner config was not created.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that no code owner config was created in the repository.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
-      assertThat(codeOwnerConfigInRepo).isEmpty();
+      assertThatOptional(codeOwnerConfigInRepo).isEmpty();
 
       // Check that the branch didn't change.
       assertThat(head).isEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
@@ -199,8 +199,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
 
       // Check that the code owner config doesn't exist yet.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Remember head so that we can check that the branch doesn't change.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -210,12 +210,12 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.commit(metaDataUpdate);
 
       // Check that the loaded code owner config was not created.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that no code owner config was created in the repository.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
-      assertThat(codeOwnerConfigInRepo).isEmpty();
+      assertThatOptional(codeOwnerConfigInRepo).isEmpty();
 
       // Check that the branch didn't change.
       assertThat(head).isEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
@@ -231,8 +231,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
 
       // Check that the code owner config doesn't exist yet.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Create the code owner config.
       String email = "admin@example.com";
@@ -249,10 +249,10 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .isEqualTo(String.format("branch %s does not exist", codeOwnerConfigKey.ref()));
 
       // Check that the loaded code owner config is still empty.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that the code owner config was not created in the repository.
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Check that the branch was not created.
       assertThat(repo.exactRef(codeOwnerConfigKey.ref())).isNull();
@@ -273,8 +273,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
 
       // Check that the code owner config exists.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
 
       // Remember head so that we can check that the branch is changed.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -289,8 +289,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.commit(metaDataUpdate);
 
       // Check that the loaded code owner config was updated.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+          .value()
           .hasIgnoreParentCodeOwnersThat()
           .isTrue();
       assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
@@ -301,9 +301,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Check that the code owner config was updated in the repository.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
-      assertThat(codeOwnerConfigInRepo).isPresent();
-      assertThat(codeOwnerConfigInRepo.get()).hasIgnoreParentCodeOwnersThat().isTrue();
-      assertThat(codeOwnerConfigInRepo.get())
+      assertThatOptional(codeOwnerConfigInRepo).value().hasIgnoreParentCodeOwnersThat().isTrue();
+      assertThatOptional(codeOwnerConfigInRepo)
+          .value()
           .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
@@ -327,8 +327,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
 
       // Check that the code owner config exists.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
 
       // Remember head so that we can check that the branch doesn't change.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -338,8 +338,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.commit(metaDataUpdate);
 
       // Check that the loaded code owner config didn't change.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+          .value()
           .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
@@ -347,8 +347,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       // Check that the code owner config in the repository didn't change.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey);
-      assertThat(codeOwnerConfigInRepo).isPresent();
-      assertThat(codeOwnerConfigInRepo.get())
+      assertThatOptional(codeOwnerConfigInRepo)
+          .value()
           .hasExactlyOneCodeOwnerSetThat()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
@@ -372,8 +372,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
 
       // Check that the code owner config exists.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isPresent();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isPresent();
 
       // Remember head so that we can check that the branch is changed.
       RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
@@ -386,10 +386,10 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.commit(metaDataUpdate);
 
       // Check that the loaded code owner config was unset.
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
 
       // Check that the code owner config was deleted in the repository.
-      assertThat(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+      assertThatOptional(backendTestUtil.readCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
 
       // Check that the branch was changed.
       assertThat(head).isNotEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
