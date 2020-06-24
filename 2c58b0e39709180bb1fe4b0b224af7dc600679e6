@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0ac67c0f_1a7d73e6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-24T16:02:47Z",
+      "side": 1,
+      "message": "The code within the apply() and the visit() methods is growing more and more. We should extract methods at some point and group logically similar things. Looking at the commit summary lines of this chain of changes, this change seems to be the last one touching this file (if we abandon the change about the _more parameter). Would it now make sense to improve the method structure? Or do you have more functionality planned for this class planned right now?",
+      "revId": "2c58b0e39709180bb1fe4b0b224af7dc600679e6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
