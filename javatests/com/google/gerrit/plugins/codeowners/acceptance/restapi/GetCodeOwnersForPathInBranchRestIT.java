@@ -15,7 +15,8 @@
 package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoIterableSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -84,8 +85,10 @@ public class GetCodeOwnersForPathInBranchRestIT extends AbstractCodeOwnersIT {
     r.assertOK();
     List<CodeOwnerInfo> codeOwnerInfos =
         newGson().fromJson(r.getReader(), new TypeToken<List<CodeOwnerInfo>>() {}.getType());
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
-    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(admin.fullName());
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountName())
+        .containsExactly(admin.fullName());
     assertThat(Iterables.getOnlyElement(codeOwnerInfos).account.secondaryEmails)
         .containsExactly(secondaryEmail);
   }
@@ -117,8 +120,10 @@ public class GetCodeOwnersForPathInBranchRestIT extends AbstractCodeOwnersIT {
     r.assertOK();
     List<CodeOwnerInfo> codeOwnerInfos =
         newGson().fromJson(r.getReader(), new TypeToken<List<CodeOwnerInfo>>() {}.getType());
-    assertThat(codeOwnerInfos).hasAccountIdsThat().containsExactly(admin.id());
-    assertThat(codeOwnerInfos).hasAccountNamesThat().containsExactly(admin.fullName());
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountName())
+        .containsExactly(admin.fullName());
     assertThat(Iterables.getOnlyElement(codeOwnerInfos).account.secondaryEmails)
         .containsExactly(secondaryEmail);
   }

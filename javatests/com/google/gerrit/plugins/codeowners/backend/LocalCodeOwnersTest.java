@@ -15,10 +15,11 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.hasEmail;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +30,6 @@ import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Key;
 import com.google.inject.util.Providers;
@@ -94,7 +94,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
-        .comparingElementsUsing(CodeOwnerSetSubject.CODE_OWNER_REFERENCE_TO_EMAIL)
+        .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
 
@@ -128,7 +128,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(nonMatchingCodeOwnerSet)
               .build();
       assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
-          .comparingElementsUsing(CodeOwnerSetSubject.CODE_OWNER_REFERENCE_TO_EMAIL)
+          .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
   }
