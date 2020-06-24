@@ -28,10 +28,10 @@ import com.google.gerrit.truth.NullAwareCorrespondence;
 /** {@link Subject} for doing assertions on {@link CodeOwnerSetInfo}s. */
 public class CodeOwnerSetInfoSubject extends Subject {
   /** {@link Correspondence} that maps {@link CodeOwnerReference}s to emails. */
-  private static final Correspondence<CodeOwnerReferenceInfo, String>
-      CODE_OWNER_REFERENCE_INFO_TO_EMAIL =
-          NullAwareCorrespondence.transforming(
-              codeOwnerReference -> codeOwnerReference.email, "has email");
+  private static final Correspondence<CodeOwnerReferenceInfo, String> hasEmail() {
+    return NullAwareCorrespondence.transforming(
+        codeOwnerReference -> codeOwnerReference.email, "has email");
+  }
 
   /**
    * Starts fluent chain to do assertions on a {@link CodeOwnerSetInfo}.
@@ -66,7 +66,7 @@ public class CodeOwnerSetInfoSubject extends Subject {
    */
   public IterableSubject.UsingCorrespondence<CodeOwnerReferenceInfo, String>
       hasCodeOwnersEmailsThat() {
-    return hasCodeOwnersThat().comparingElementsUsing(CODE_OWNER_REFERENCE_INFO_TO_EMAIL);
+    return hasCodeOwnersThat().comparingElementsUsing(hasEmail());
   }
 
   private CodeOwnerSetInfo codeOwnerSetInfo() {
