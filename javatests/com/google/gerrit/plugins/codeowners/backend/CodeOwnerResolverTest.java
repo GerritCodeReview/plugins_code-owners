@@ -15,8 +15,8 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerIterableSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.hasAccountId;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.TestAccount;
@@ -159,7 +159,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id());
   }
 
@@ -171,7 +171,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                 CodeOwnerSet.createWithoutPathExpressions(admin.email(), "non-existing@test.com"))
             .build();
     assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
-        .hasAccountIdsThat()
+        .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id());
   }
 
