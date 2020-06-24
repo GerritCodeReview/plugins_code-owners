@@ -15,7 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,8 +56,7 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
         .thenReturn(Optional.of(expectedCodeOwnersConfig));
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnersBackendMock)) {
       Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey);
-      assertThat(codeOwnerConfig).isPresent();
-      assertThat(codeOwnerConfig.get()).isEqualTo(expectedCodeOwnersConfig);
+      assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
       verify(codeOwnersBackendMock).getCodeOwnerConfig(codeOwnerConfigKey);
     }
   }
