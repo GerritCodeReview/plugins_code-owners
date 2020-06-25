@@ -70,6 +70,30 @@
       "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4319f491_197e60db",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-06-25T10:36:24Z",
+      "side": 1,
+      "message": "\u003e AFAIK the frontend plans to show a limited number of code owners for each file with an icon telling the user whether there are more code owners. The user then should have the possibility to expand the list.\n\nthat\u0027s also what I thought from the ux discussion, not sure if that has changed or not with the study sessions.\n\n\u003e The frontend could also implement this without this change, e.g. by always fetching one result more than needed, so I would be also fine with dropping this change.\n\nsince we are grouping files base on set of owners, and I assume its the complete list of the owners, so for now, I am fetching all owners (no limit) before the grouping. So yes, this parameter probably won\u0027t be used in current designs",
+      "parentUuid": "ef01e2c2_7445d479",
+      "range": {
+        "startLine": 7,
+        "startChar": 30,
+        "endLine": 7,
+        "endChar": 72
+      },
+      "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
