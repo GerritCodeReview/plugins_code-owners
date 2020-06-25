@@ -190,6 +190,30 @@
     },
     {
       "key": {
+        "uuid": "08b2fc3d_ba3d6c21",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T11:41:16Z",
+      "side": 1,
+      "message": "Done in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/273156",
+      "parentUuid": "748f3e8e_900c7813",
+      "range": {
+        "startLine": 34,
+        "startChar": 13,
+        "endLine": 34,
+        "endChar": 41
+      },
+      "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "304fec04_dce6a6a9",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 16
