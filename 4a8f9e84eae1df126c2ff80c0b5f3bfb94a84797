@@ -22,6 +22,30 @@
       "revId": "4a8f9e84eae1df126c2ff80c0b5f3bfb94a84797",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aea74382_9599fbc5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T11:38:43Z",
+      "side": 0,
+      "message": "The new implementation doesn\u0027t really differentiate between invalid lines and invalid emails, an invalid email is just is an invalid line, hence it doesn\u0027t need to be mentioned explicitly.\n\nThe old implementation had the case where there was an email with a valid email format, but which was still considered as invalid (email address that has a top level domain that is not allowed by Gerrit\u0027s configuration), hence this case was explicitly mentioned, but this check is no longer performed.",
+      "parentUuid": "ae27dc08_aa9d99b4",
+      "range": {
+        "startLine": 47,
+        "startChar": 47,
+        "endLine": 47,
+        "endChar": 74
+      },
+      "revId": "4a8f9e84eae1df126c2ff80c0b5f3bfb94a84797",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
