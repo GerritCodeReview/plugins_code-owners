@@ -22,6 +22,30 @@
       "revId": "4c2f76e17bb1f233bcc0810a8c0b7e7219f1e556",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d10904ee_6bf2807a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T11:26:33Z",
+      "side": 1,
+      "message": "There are 3 owner configs which are evaluated in this order:\n1. /foo/bar/: user2, ignoreParentCodeOwners \u003d false (by default)\n2. /foo/: user, ignoreParentCodeOwners \u003d true\n3. /: admin, ignoreParentCodeOwners \u003d false (by default)\n\nuser2 is owner due to 1.\n2. is the parent of 1. but 1. has ignoreParentCodeOwners \u003d false which means that the parent should be considered.\nuser is owner due to 2.\n3. is the parent of 2. but 2. has ignoreParentCodeOwners \u003d true, hence 3. is ignored\n\nThe inheritance chain only gets interrupted as soon as we see the first ignoreParentCodeOwners \u003d true.\n\nIt\u0027s not like this that 1. inherits the ignoreParentCodeOwners \u003d true setting from its parent aka 2.",
+      "parentUuid": "a20178d4_5651b733",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 100
+      },
+      "revId": "4c2f76e17bb1f233bcc0810a8c0b7e7219f1e556",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
