@@ -93,6 +93,30 @@
       "revId": "30387a4068f686c11a64342886b740577579de8b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "42cc8dc7_d447fd6d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersBackend.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T10:10:27Z",
+      "side": 1,
+      "message": "s/feature release/future release",
+      "parentUuid": "635d1105_d23c54a2",
+      "range": {
+        "startLine": 33,
+        "startChar": 33,
+        "endLine": 33,
+        "endChar": 43
+      },
+      "revId": "30387a4068f686c11a64342886b740577579de8b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
