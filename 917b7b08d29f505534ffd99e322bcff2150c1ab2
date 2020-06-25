@@ -22,6 +22,30 @@
       "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0adf874_71673d37",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T07:45:56Z",
+      "side": 1,
+      "message": "AFAIK the frontend plans to show a limited number of code owners for each file with an icon telling the user whether there are more code owners. The user then should have the possibility to expand the list.\n\nTo know whether there are more results, this change can be useful in this scenario. To show the expanded list of code owners the frontend could simply refetch the complete list of code owners without specifying a limit (while we have no paging).\n\nThe frontend could also implement this without this change, e.g. by always fetching one result more than needed, so I would be also fine with dropping this change.\n\nLet\u0027s asked the frontend team, what they think? Tao WDYT?",
+      "parentUuid": "78a051cd_540a6df9",
+      "range": {
+        "startLine": 7,
+        "startChar": 30,
+        "endLine": 7,
+        "endChar": 72
+      },
+      "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
