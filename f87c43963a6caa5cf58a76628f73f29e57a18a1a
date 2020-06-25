@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9ef980bd_2a1c9196",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T09:40:07Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "2b204999_03ac5b23",
+      "range": {
+        "startLine": 151,
+        "startChar": 16,
+        "endLine": 151,
+        "endChar": 36
+      },
+      "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3506aa84_93531e66",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
         "patchSetId": 16
@@ -45,6 +69,30 @@
       "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f7a15796_112a13a7",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T09:40:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3506aa84_93531e66",
+      "range": {
+        "startLine": 417,
+        "startChar": 4,
+        "endLine": 417,
+        "endChar": 56
+      },
+      "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "f0bcebb3_778c2749",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 418,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T09:40:07Z",
+      "side": 1,
+      "message": "Thanks! I was looking for such a method, but didn\u0027t find it.\nThis is much nicer.\n\nDone",
+      "parentUuid": "93291d65_4e5d0aa3",
+      "range": {
+        "startLine": 418,
+        "startChar": 8,
+        "endLine": 418,
+        "endChar": 66
+      },
+      "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "97181864_b3e0f3d5",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
         "patchSetId": 16
@@ -82,6 +154,30 @@
       "writtenOn": "2020-06-24T15:32:52Z",
       "side": 1,
       "message": "Unrelated to this change: We should use the MockitoRule which does some additional sanity tests around stubbing and Mockito usage. The mocks can also be created with an annotation. That\u0027s the code I\u0027m thinking of:\n\n  @Rule\n  public final MockitoRule mockito \u003d MockitoJUnit.rule();\n\n  @Mock\n  private CodeOwnerConfigVisitor visitor;\n\nand we should also consider whether we want the use the strictness mode as the Javadoc suggests (e.g. MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);).\n\nAs this aspect is unrelated, I don\u0027t think we should fix it within this change. Would you mind creating a follow-up change for it?",
+      "range": {
+        "startLine": 34,
+        "startChar": 13,
+        "endLine": 34,
+        "endChar": 41
+      },
+      "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "748f3e8e_900c7813",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T09:40:07Z",
+      "side": 1,
+      "message": "Thanks, that\u0027s a good suggestion. Will follow-up on this with a separate change.",
+      "parentUuid": "97181864_b3e0f3d5",
       "range": {
         "startLine": 34,
         "startChar": 13,
@@ -114,6 +210,30 @@
       "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eacc4b90_29c98b6e",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 16
+      },
+      "lineNbr": 72,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T09:40:07Z",
+      "side": 1,
+      "message": "Thanks for suggesting. Makes sense to me.\n\nDone.",
+      "parentUuid": "304fec04_dce6a6a9",
+      "range": {
+        "startLine": 72,
+        "startChar": 91,
+        "endLine": 72,
+        "endChar": 127
+      },
+      "revId": "f87c43963a6caa5cf58a76628f73f29e57a18a1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
