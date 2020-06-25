@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a20178d4_5651b733",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-06-25T11:12:56Z",
+      "side": 1,
+      "message": "Maybe I don\u0027t properly understand this ignoreParentCodeOwners, but shouldn\u0027t \"user\" also be ignored?\nAdmin is code owner in \"/\" and user in \"/foo\". If admin is ignored, why user is not?",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 100
+      },
+      "revId": "4c2f76e17bb1f233bcc0810a8c0b7e7219f1e556",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
