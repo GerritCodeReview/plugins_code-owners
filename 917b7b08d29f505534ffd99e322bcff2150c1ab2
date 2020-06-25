@@ -94,6 +94,30 @@
       "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "773b6eea_29b73d6a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T10:41:17Z",
+      "side": 1,
+      "message": "\u003e since we are grouping files base on set of owners, and I assume its the complete list of the owners,\n\u003e so for now, I am fetching all owners (no limit) before the grouping.\n\nYou will be forced to set a limit, but you can set a high limit (see discussion at [1]).\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/270989/16..19/resources/Documentation/rest-api.md\n\n\u003e So yes, this parameter probably won\u0027t be used in current designs\n\nOK, then I would rather drop this change for now.",
+      "parentUuid": "4319f491_197e60db",
+      "range": {
+        "startLine": 7,
+        "startChar": 30,
+        "endLine": 7,
+        "endChar": 72
+      },
+      "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
