@@ -22,6 +22,30 @@
       "revId": "0959eb64d9bbd947b914fd28bc2d650f2a710ad2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8106eee_bed34ced",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerInfo.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T10:37:54Z",
+      "side": 1,
+      "message": "I used \"_\" as prefix here to be consistent with the corresponding fields in Gerrit core (\"_moreChanges\" in ChangeInfo, \"_moreAccounts\" in AccountInfo and \"_moreGroups\" in GroupInfo). Gerrit core originally used the `_` to indicate fields which will be changed/dropped in the future to let callers know that they should not depend on them. But well this didn\u0027t work...\n\nSo actually this should be \"moreCodeOwners\" and is \"_moreCodeOwners\" only for consistency. I don\u0027t mind to drop \"_\" if you think this is better.",
+      "parentUuid": "bf0c14fc_b0b3b2af",
+      "range": {
+        "startLine": 38,
+        "startChar": 17,
+        "endLine": 38,
+        "endChar": 32
+      },
+      "revId": "0959eb64d9bbd947b914fd28bc2d650f2a710ad2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
