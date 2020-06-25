@@ -46,6 +46,30 @@
       "revId": "0959eb64d9bbd947b914fd28bc2d650f2a710ad2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "05768a7f_cfe2c998",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerInfo.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-06-25T10:40:13Z",
+      "side": 1,
+      "message": "lol I see. Ya in `js/ts` we normally use `_` to indicate private field, and there actually some linters will throw warning if you have `_` prefix :) especially for typescript since they now have the `private` keyword\n\nlets wait for the decision on whether this is needed or not first :) I have pinged Delphine to provide some input",
+      "parentUuid": "d8106eee_bed34ced",
+      "range": {
+        "startLine": 38,
+        "startChar": 17,
+        "endLine": 38,
+        "endChar": 32
+      },
+      "revId": "0959eb64d9bbd947b914fd28bc2d650f2a710ad2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
