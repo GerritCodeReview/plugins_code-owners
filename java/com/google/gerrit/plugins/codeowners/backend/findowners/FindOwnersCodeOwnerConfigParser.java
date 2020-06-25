@@ -60,89 +60,105 @@ import java.util.regex.Pattern;
 @Singleton
 @VisibleForTesting
 public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
-  private static final String BOL = "^[\\s]*"; // begin-of-line
-  private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
-
-  private static final String EMAIL = "([^\\s<>@,]+@[^\\s<>@#,]+)";
-  private static final String SET_NOPARENT = "set[\\s]+noparent";
-
-  // Simple input lines with 0 or 1 sub-pattern.
-  private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
-  private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
-  private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
-
-  private static final String SET_NOPARENT_LINE = "set noparent\n";
-
   @Override
   public CodeOwnerConfig parse(
       CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
-    return parseFile(
+    return Parser.parse(
         requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"),
-        Strings.nullToEmpty(codeOwnerConfigAsString).split("\\R"));
+        Strings.nullToEmpty(codeOwnerConfigAsString));
   }
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) {
-    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
-
-    StringBuilder b = new StringBuilder();
-    if (codeOwnerConfig.ignoreParentCodeOwners()) {
-      b.append(SET_NOPARENT_LINE);
-    }
-    ImmutableList<String> emails =
-        codeOwnerConfig.codeOwnerSets().stream()
-            .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
-            .map(CodeOwnerReference::email)
-            .sorted()
-            .distinct()
-            .collect(toImmutableList());
-    if (!emails.isEmpty()) {
-      b.append(emails.stream().collect(joining("\n", "", "\n")));
-    }
-    return b.toString();
+    return Formatter.formatAsString(requireNonNull(codeOwnerConfig, "codeOwnerConfig"));
   }
 
-  private CodeOwnerConfig parseFile(CodeOwnerConfig.Key codeOwnerConfigKey, String[] lines) {
-    CodeOwnerConfig.Builder codeOwnerConfigBuilder = CodeOwnerConfig.builder(codeOwnerConfigKey);
-    CodeOwnerSet.Builder codeOwnerSetBuilder = CodeOwnerSet.builder();
-    for (String line : lines) {
-      parseLine(codeOwnerConfigBuilder, codeOwnerSetBuilder, line);
+  private static class Parser {
+    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+    private static final String BOL = "^[\\s]*"; // begin-of-line
+    private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
+
+    private static final String EMAIL = "([^\\s<>@,]+@[^\\s<>@#,]+)";
+    private static final String SET_NOPARENT = "set[\\s]+noparent";
+
+    // Simple input lines with 0 or 1 sub-pattern.
+    private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
+    private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
+    private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
+
+    static CodeOwnerConfig parse(
+        CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
+      CodeOwnerConfig.Builder codeOwnerConfigBuilder = CodeOwnerConfig.builder(codeOwnerConfigKey);
+      CodeOwnerSet.Builder codeOwnerSetBuilder = CodeOwnerSet.builder();
+
+      for (String line : codeOwnerConfigAsString.split("\\R")) {
+        parseLine(codeOwnerConfigBuilder, codeOwnerSetBuilder, line);
+      }
+
+      CodeOwnerSet codeOwnersSet = codeOwnerSetBuilder.build();
+      if (!codeOwnersSet.codeOwners().isEmpty()) {
+        codeOwnerConfigBuilder.addCodeOwnerSet(codeOwnersSet);
+      }
+      return codeOwnerConfigBuilder.build();
     }
-    CodeOwnerSet codeOwnersSet = codeOwnerSetBuilder.build();
-    if (!codeOwnersSet.codeOwners().isEmpty()) {
-      codeOwnerConfigBuilder.addCodeOwnerSet(codeOwnersSet);
+
+    private static void parseLine(
+        CodeOwnerConfig.Builder codeOwnerConfigBuilder,
+        CodeOwnerSet.Builder codeOwnerSetBuilder,
+        String line) {
+      String email;
+      if (isNoParent(line)) {
+        codeOwnerConfigBuilder.setIgnoreParentCodeOwners();
+      } else if (isComment(line)) {
+        // ignore comment lines and empty lines
+      } else if ((email = parseEmail(line)) != null) {
+        codeOwnerSetBuilder.addCodeOwner(CodeOwnerReference.create(email));
+      } else {
+        logger.atInfo().log("Skipping unknown line: %s", line);
+      }
     }
-    return codeOwnerConfigBuilder.build();
-  }
 
-  private void parseLine(
-      CodeOwnerConfig.Builder codeOwnerConfigBuilder,
-      CodeOwnerSet.Builder codeOwnerSetBuilder,
-      String line) {
-    String email;
-    if (isNoParent(line)) {
-      codeOwnerConfigBuilder.setIgnoreParentCodeOwners();
-    } else if (isComment(line)) {
-      // ignore comment lines and empty lines
-    } else if ((email = parseEmail(line)) != null) {
-      codeOwnerSetBuilder.addCodeOwner(CodeOwnerReference.create(email));
-    } else {
-      logger.atInfo().log("Skipping unknown line: %s", line);
+    private static boolean isComment(String line) {
+      return PAT_COMMENT.matcher(line).matches();
+    }
+
+    private static boolean isNoParent(String line) {
+      return PAT_NO_PARENT.matcher(line).matches();
+    }
+
+    private static String parseEmail(String line) {
+      Matcher m = PAT_EMAIL.matcher(line);
+      return m.matches() ? m.group(1).trim() : null;
     }
   }
 
-  private static boolean isComment(String line) {
-    return PAT_COMMENT.matcher(line).matches();
-  }
+  private static class Formatter {
+    private static final String SET_NOPARENT_LINE = "set noparent\n";
 
-  private static boolean isNoParent(String line) {
-    return PAT_NO_PARENT.matcher(line).matches();
-  }
+    static String formatAsString(CodeOwnerConfig codeOwnerConfig) {
+      return new StringBuilder()
+          .append(formatIgnoreParentCodeOwners(codeOwnerConfig))
+          .append(formatGlobalOwners(codeOwnerConfig))
+          .toString();
+    }
 
-  private static String parseEmail(String line) {
-    Matcher m = PAT_EMAIL.matcher(line);
-    return m.matches() ? m.group(1).trim() : null;
+    private static String formatIgnoreParentCodeOwners(CodeOwnerConfig codeOwnerConfig) {
+      return codeOwnerConfig.ignoreParentCodeOwners() ? SET_NOPARENT_LINE : "";
+    }
+
+    private static String formatGlobalOwners(CodeOwnerConfig codeOwnerConfig) {
+      ImmutableList<String> emails =
+          codeOwnerConfig.codeOwnerSets().stream()
+              .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+              .map(CodeOwnerReference::email)
+              .sorted()
+              .distinct()
+              .collect(toImmutableList());
+      if (emails.isEmpty()) {
+        return "";
+      }
+      return (emails.stream().collect(joining("\n", "", "\n")));
+    }
   }
 }
