@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bf0c14fc_b0b3b2af",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerInfo.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-06-25T10:32:25Z",
+      "side": 1,
+      "message": "just curious, why we have `_` for public fields ?",
+      "range": {
+        "startLine": 38,
+        "startChar": 17,
+        "endLine": 38,
+        "endChar": 32
+      },
+      "revId": "0959eb64d9bbd947b914fd28bc2d650f2a710ad2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
