@@ -22,6 +22,30 @@
       "revId": "17032f132661058884575f801af07905513c7db2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bfc68b89_72aca0ac",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T11:52:16Z",
+      "side": 1,
+      "message": "When writing this change, I actually thought about this.\n\nThe ignoreParentCodeOwners \u003d true and ignoreParentCodeOwners \u003d false cases are both covered by in the parser tests. What we want to test on this level is only whether the ignoreParentCodeOwners setting is forwarded to the parser. We could have separate tests to check that both true and false are correctly forwarded, but I think it\u0027s not worth the effort.",
+      "parentUuid": "5a5c000a_b513f27a",
+      "range": {
+        "startLine": 130,
+        "startChar": 15,
+        "endLine": 130,
+        "endChar": 40
+      },
+      "revId": "17032f132661058884575f801af07905513c7db2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
