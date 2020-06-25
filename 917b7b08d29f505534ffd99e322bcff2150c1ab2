@@ -46,6 +46,30 @@
       "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ef01e2c2_7445d479",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 15
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-25T09:58:53Z",
+      "side": 1,
+      "message": "I\u0027ve extracted this change from the series, so that we can proceed with the series while this question is still open.",
+      "parentUuid": "e0adf874_71673d37",
+      "range": {
+        "startLine": 7,
+        "startChar": 30,
+        "endLine": 7,
+        "endChar": 72
+      },
+      "revId": "917b7b08d29f505534ffd99e322bcff2150c1ab2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
