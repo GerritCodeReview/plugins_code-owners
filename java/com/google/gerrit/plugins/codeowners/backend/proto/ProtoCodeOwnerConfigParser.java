@@ -14,10 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.backend.proto;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
@@ -45,55 +47,80 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
   @Override
   public CodeOwnerConfig parse(
       CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) throws IOException {
-    CodeOwnerConfig.Builder codeOwnerConfigBuilder =
-        CodeOwnerConfig.builder(requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"));
-    OwnersMetadataFile ownersMetadataFileProto =
-        TextFormat.parse(Strings.nullToEmpty(codeOwnerConfigAsString), OwnersMetadataFile.class);
-    OwnersConfig ownersConfig = ownersMetadataFileProto.getOwnersConfig();
-    codeOwnerConfigBuilder.setIgnoreParentCodeOwners(ownersConfig.getIgnoreParentOwners());
-    ownersConfig
-        .getOwnerSetsList()
-        .forEach(
-            ownerSetProto -> {
-              CodeOwnerSet codeOwnerSet =
-                  CodeOwnerSet.createWithoutPathExpressions(
-                      ownerSetProto.getOwnersList().stream()
-                          .map(ownerSet -> CodeOwnerReference.create(ownerSet.getEmail()))
-                          .collect(toImmutableSet()));
-              if (!codeOwnerSet.codeOwners().isEmpty()) {
-                codeOwnerConfigBuilder.addCodeOwnerSet(codeOwnerSet);
-              }
-            });
-    return codeOwnerConfigBuilder.build();
+    return Parser.parse(
+        requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"),
+        Strings.nullToEmpty(codeOwnerConfigAsString));
   }
 
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
-    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
-    if (codeOwnerConfig.ignoreParentCodeOwners() == false
-        && codeOwnerConfig.codeOwnerSets().isEmpty()) {
-      return "";
+    return Formatter.formatAsString(requireNonNull(codeOwnerConfig, "codeOwnerConfig"));
+  }
+
+  private static class Parser {
+    static CodeOwnerConfig parse(
+        CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) throws IOException {
+      OwnersConfig ownersConfig = parseProto(codeOwnerConfigAsString);
+      return CodeOwnerConfig.builder(codeOwnerConfigKey)
+          .setIgnoreParentCodeOwners(ownersConfig.getIgnoreParentOwners())
+          .setCodeOwnerSets(getCodeOwnerSets(ownersConfig))
+          .build();
     }
 
-    OwnersConfig.Builder ownersConfigProtoBuilder = OwnersConfig.newBuilder();
-    if (codeOwnerConfig.ignoreParentCodeOwners()) {
-      ownersConfigProtoBuilder.setIgnoreParentOwners(true);
+    private static OwnersConfig parseProto(String codeOwnerConfigAsString) throws IOException {
+      return TextFormat.parse(codeOwnerConfigAsString, OwnersMetadataFile.class).getOwnersConfig();
     }
 
-    for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
-      OwnerSet.Builder ownerSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
-      codeOwnerSet.codeOwners().stream()
-          .sorted(Comparator.comparing(CodeOwnerReference::email))
-          .forEach(
-              codeOwnerReference ->
-                  ownerSetProtoBuilder.addOwners(
-                      Owner.newBuilder().setEmail(codeOwnerReference.email()).build()));
+    private static ImmutableList<CodeOwnerSet> getCodeOwnerSets(OwnersConfig ownersConfig) {
+      return ownersConfig.getOwnerSetsList().stream()
+          .map(
+              ownerSetProto ->
+                  CodeOwnerSet.createWithoutPathExpressions(
+                      ownerSetProto.getOwnersList().stream()
+                          .map(ownerSet -> CodeOwnerReference.create(ownerSet.getEmail()))
+                          .collect(toImmutableSet())))
+          .filter(codeOwnerSet -> !codeOwnerSet.codeOwners().isEmpty())
+          .collect(toImmutableList());
+    }
+  }
+
+  private static class Formatter {
+    static String formatAsString(CodeOwnerConfig codeOwnerConfig) {
+      if (codeOwnerConfig.ignoreParentCodeOwners() == false
+          && codeOwnerConfig.codeOwnerSets().isEmpty()) {
+        return "";
+      }
+
+      OwnersConfig.Builder ownersConfigProtoBuilder = OwnersConfig.newBuilder();
+      setIgnoreParentCodeOwners(ownersConfigProtoBuilder, codeOwnerConfig);
+      setCodeOwnerSets(ownersConfigProtoBuilder, codeOwnerConfig);
+      return formatAsTextProto(ownersConfigProtoBuilder.build());
     }
 
-    return TextFormat.printer()
-        .printToString(
-            OwnersMetadataFile.newBuilder()
-                .setOwnersConfig(ownersConfigProtoBuilder.build())
-                .build());
+    private static void setIgnoreParentCodeOwners(
+        OwnersConfig.Builder ownersConfigProtoBuilder, CodeOwnerConfig codeOwnerConfig) {
+      if (codeOwnerConfig.ignoreParentCodeOwners()) {
+        ownersConfigProtoBuilder.setIgnoreParentOwners(true);
+      }
+    }
+
+    private static void setCodeOwnerSets(
+        OwnersConfig.Builder ownersConfigProtoBuilder, CodeOwnerConfig codeOwnerConfig) {
+      for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
+        OwnerSet.Builder ownerSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
+        codeOwnerSet.codeOwners().stream()
+            .sorted(Comparator.comparing(CodeOwnerReference::email))
+            .forEach(
+                codeOwnerReference ->
+                    ownerSetProtoBuilder.addOwners(
+                        Owner.newBuilder().setEmail(codeOwnerReference.email()).build()));
+      }
+    }
+
+    private static String formatAsTextProto(OwnersConfig ownersConfigProto) {
+      return TextFormat.printer()
+          .printToString(
+              OwnersMetadataFile.newBuilder().setOwnersConfig(ownersConfigProto).build());
+    }
   }
 }
