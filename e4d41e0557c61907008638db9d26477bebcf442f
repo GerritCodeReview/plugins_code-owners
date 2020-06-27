@@ -16,6 +16,23 @@
       "revId": "e4d41e0557c61907008638db9d26477bebcf442f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "522cf795_81dc5d07",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
+      },
+      "writtenOn": "2020-06-27T15:11:34Z",
+      "side": 1,
+      "message": "CI works and verification works too.",
+      "revId": "e4d41e0557c61907008638db9d26477bebcf442f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
