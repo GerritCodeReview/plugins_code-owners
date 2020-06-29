@@ -73,7 +73,7 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
             CodeOwnerConfigUpdate.builder()
                 .setIgnoreParentCodeOwners(codeOwnerConfigCreation.ignoreParentCodeOwners())
                 .setCodeOwnerSetsModification(
-                    CodeOwnerSetModification.set(codeOwnerConfigCreation.codeOwnerSets()))
+                    CodeOwnerSetModification.set(codeOwnerConfigCreation.computeCodeOwnerSets()))
                 .build())
         .orElseThrow(
             () ->
