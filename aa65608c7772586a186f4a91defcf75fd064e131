@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1fcbdf30_74b903cf",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T15:20:01Z",
+      "side": 1,
+      "message": "Thanks for reducing the line size of this method. I\u0027m not convinced of the result, though. We only saved a few lines with the disadvantages that computeDistanceScorings() uses distanceScoring as output parameter and that isLimitReached() does an additional copy of the set. We could try to smooth over these aspects but I guess I had rather been thinking of a structural change. Two examples:\n\nFor instance, we could first gather the code owners along with the file path in a Multimap and apply the distance computation after the visitor iteration is complete. That would result in smaller logical units we could potentially extract to methods.\n\nAnother solution I had been thinking of was the introduction of a new type which keeps internally track of all the code owners and their path or distance. That type could have dedicated methods to extract the details we need in the end (scoring + set of code owners; or even directly just the sorted and limited list of code owners). With this version, we could even extract the whole visitor part to another method which just returns the new type which is then passed to the json formatting.\n\nIf you don\u0027t want to apply such structural changes right now, I would be more in favor of inlining the new methods.",
+      "range": {
+        "startLine": 131,
+        "startChar": 10,
+        "endLine": 133,
+        "endChar": 66
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "89ff68b7_27b418f2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T15:20:01Z",
+      "side": 1,
+      "message": "Should we drop this todo as we also dropped the corresponding change? Or do you want to keep it as a reminder?",
+      "range": {
+        "startLine": 136,
+        "startChar": 4,
+        "endLine": 137,
+        "endChar": 58
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7045d529_ed2728a4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T15:20:01Z",
+      "side": 1,
+      "message": "Do we use 0 as synonym for other unlimited queries within Gerrit? I know that 0 means unlimited cache size in Gerrit (which is a different domain) but I thought that we had the no-limit parameter for actual queries. If we don\u0027t use 0 as a standard way for expressing unlimited for queries in Gerrit, I would rather treat 0 just like any negative value here (-\u003e simply say that a non-negative limit is not allowed).",
+      "range": {
+        "startLine": 160,
+        "startChar": 70,
+        "endLine": 160,
+        "endChar": 81
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8c9df179_1fb19129",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T15:20:01Z",
+      "side": 1,
+      "message": "Nit: This whole method could just be\n\n  return codeOwners.size() \u003e\u003d limit;",
+      "range": {
+        "startLine": 174,
+        "startChar": 18,
+        "endLine": 174,
+        "endChar": 32
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f097978_3aa414a9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T15:20:01Z",
+      "side": 1,
+      "message": "test.com is a real domain and shouldn\u0027t be used for email addresses in tests. Can you please switch to example.com, which is a domain reserved for use in documentation and tests?",
+      "range": {
+        "startLine": 405,
+        "startChar": 57,
+        "endLine": 405,
+        "endChar": 65
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
