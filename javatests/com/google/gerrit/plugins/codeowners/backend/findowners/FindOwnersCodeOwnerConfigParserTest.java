@@ -14,14 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
-import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
+import static java.util.stream.Collectors.joining;
 
-import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import java.util.Arrays;
 import org.junit.Test;
 
 /** Tests for {@link FindOwnersCodeOwnerConfigParser}. */
@@ -33,14 +34,43 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
   @Override
   protected String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
+    return getCodeOwnerConfig(
+        ignoreParentCodeOwners, CodeOwnerSet.createWithoutPathExpressions(emails));
+  }
+
+  private String getCodeOwnerConfig(boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets) {
     StringBuilder b = new StringBuilder();
     if (ignoreParentCodeOwners) {
       b.append("set noparent\n");
     }
-    b.append(String.join("\n", emails));
-    if (emails.length > 0) {
-      b.append('\n');
+
+    // global code owners
+    for (String email :
+        Arrays.stream(codeOwnerSets)
+            .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
+            .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+            .map(CodeOwnerReference::email)
+            .sorted()
+            .distinct()
+            .collect(toImmutableList())) {
+      b.append(email).append('\n');
     }
+
+    // per-file code owners
+    for (CodeOwnerSet codeOwnerSet :
+        Arrays.stream(codeOwnerSets)
+            .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
+            .collect(toImmutableList())) {
+      b.append(
+          String.format(
+              "per-file %s=%s\n",
+              codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
+              codeOwnerSet.codeOwners().stream()
+                  .map(CodeOwnerReference::email)
+                  .sorted()
+                  .collect(joining(","))));
+    }
+
     return b.toString();
   }
 
@@ -107,14 +137,115 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
-  public void formatCodeOwnerConfigWithMultipleCodeOwnerSets() throws Exception {
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(
-                CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/"))
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3))
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(EMAIL_2))
+  public void setCodeOwnerSets() throws Exception {
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(EMAIL_2).build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(codeOwnerSet1, codeOwnerSet2)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
+  }
+
+  @Test
+  public void codeOwnerSetWithGlobalCodeOwnersIsReturnedFirst() throws Exception {
+    CodeOwnerSet perFileCodeOwnerSet =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(EMAIL_2).build();
+    CodeOwnerSet globalCodeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, perFileCodeOwnerSet, globalCodeOwnerSet),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(globalCodeOwnerSet, perFileCodeOwnerSet)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, globalCodeOwnerSet, perFileCodeOwnerSet));
+  }
+
+  @Test
+  public void setMultipleCodeOwnerSetsWithoutPathExpressions() throws Exception {
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
+    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_2);
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasExactlyOneCodeOwnerSetThat()
+              .hasCodeOwnersEmailsThat()
+              .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3);
+        },
+        // The code owner sets without path expressions are merged into one code owner set.
+        getCodeOwnerConfig(
+            false, CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_2, EMAIL_3)));
+  }
+
+  @Test
+  public void setMultipleCodeOwnerSetsWithPathExpressions() throws Exception {
+    CodeOwnerSet codeOwnerSet1 =
+        CodeOwnerSet.builder()
+            .addPathExpression("bar")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_3)
             .build();
-    assertThat(codeOwnerConfigParser.formatAsString(codeOwnerConfig))
-        .isEqualTo(getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("bar").addCodeOwnerEmail(EMAIL_2).build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(codeOwnerSet1, codeOwnerSet2)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
+  }
+
+  @Test
+  public void setDuplicateCodeOwnerSets() throws Exception {
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.builder()
+            .addPathExpression("bar")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_3)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet, codeOwnerSet),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(codeOwnerSet, codeOwnerSet)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, codeOwnerSet, codeOwnerSet));
+  }
+
+  @Test
+  public void codeOwnerSetWithoutCodeOwnersIsFilteredOut() throws Exception {
+    CodeOwnerSet validCodeOwnerSet =
+        CodeOwnerSet.builder()
+            .addPathExpression("bar")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_3)
+            .build();
+    CodeOwnerSet codeOwnerSetWithoutCodeOwners =
+        CodeOwnerSet.builder().addPathExpression("baz").build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, validCodeOwnerSet, codeOwnerSetWithoutCodeOwners),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(validCodeOwnerSet)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, validCodeOwnerSet));
   }
 }
