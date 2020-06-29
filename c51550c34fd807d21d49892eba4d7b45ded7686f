@@ -1,0 +1,326 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9e86b89a_9cc7d5f9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Nit: Mixing \"easier\" with the other adjectives sounds strange to me. Did you mean \"easier to extend, read and maintain\"? Or maybe \"easily extensible, readable and maintainable\" though the other variant would make more sense to me?",
+      "range": {
+        "startLine": 10,
+        "startChar": 27,
+        "endLine": 10,
+        "endChar": 71
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ac14781_27262b13",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Typo: owner",
+      "range": {
+        "startLine": 27,
+        "startChar": 39,
+        "endLine": 27,
+        "endChar": 45
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6f9aff7d_41ae6943",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Here and in other files: If we don\u0027t need specific functionality from this implementation, I would stay with the interface as type for the field (and just use the implementation type for the constructor injection).",
+      "range": {
+        "startLine": 57,
+        "startChar": 18,
+        "endLine": 57,
+        "endChar": 49
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "de1384bf_12c9b49f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Nit: Adding a static import for this inner class would help with readability.",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 37
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "af8fd363_bc5bab61",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Isn\u0027t this build unnecessary? By the way, we wouldn\u0027t need this whole line if the OwnerSet.Builder was created via ownersConfigProtoBuilder.addOwnerSetsBuilder().",
+      "range": {
+        "startLine": 74,
+        "startChar": 74,
+        "endLine": 74,
+        "endChar": 82
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8408e392_57252315",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "We should rather use Function from java.util.",
+      "range": {
+        "startLine": 22,
+        "startChar": 7,
+        "endLine": 22,
+        "endChar": 38
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e256329c_6f2e5e87",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Does this really need to be an integration test (which is much heavier than a unit test)? The constructor parameter to FindOwnersCodeOwnerConfigParser could easily be faked or mocked.",
+      "range": {
+        "startLine": 37,
+        "startChar": 56,
+        "endLine": 37,
+        "endChar": 86
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b7aa9141_b0f929f6",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Either this method can be called without any emails or we should not allow it to be called in that way. In the first situation, we\u0027d need to adjust ProtoCodeOwnerConfigParserTest as it currently produces a wrong string for no emails. If we do so, we can also delegate getEmptyCodeOwnerConfig() to getCodeOwnerConfig() and wouldn\u0027t need to implement it in sub-classes.\nIf you don\u0027t intend getCodeOwnerConfig() to be called without any emails, we should use the pattern of getCodeOwnerConfig(String firstEmail, String... otherEmails) to disallow calling it incorrectly.",
+      "range": {
+        "startLine": 68,
+        "startChar": 28,
+        "endLine": 68,
+        "endChar": 64
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c6bbac4c_85872934",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Nit: It\u0027s a bit strange to have this test after the assertParseAndFormat() method instead of before as all other tests.",
+      "range": {
+        "startLine": 223,
+        "startChar": 2,
+        "endLine": 224,
+        "endChar": 70
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "17ad6cd1_c649b156",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Nit: Could be replaced with\n\n  Streams.stream(Splitter.on(\u0027\\n\u0027).split(codeOwnerConfigAsString))\n\nStreams is from Guava.",
+      "range": {
+        "startLine": 237,
+        "startChar": 11,
+        "endLine": 238,
+        "endChar": 82
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0b7fd9bb_31bd4c3c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Nit: Could just be lineModifier.",
+      "range": {
+        "startLine": 239,
+        "startChar": 13,
+        "endLine": 239,
+        "endChar": 32
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0383ef3e_8671736c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Nit: Could be replaced with\n\n  String.join(\"\\n\", emails);",
+      "range": {
+        "startLine": 37,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d1672d79_8c08c2c5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Here and in other tests: As explained in a comment on the parent change, please use example.com instead.",
+      "range": {
+        "startLine": 53,
+        "startChar": 29,
+        "endLine": 53,
+        "endChar": 37
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ec546f22_a92c43ed",
+        "filename": "proto/owners_metadata.proto",
+        "patchSetId": 17
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-29T17:21:32Z",
+      "side": 1,
+      "message": "Is there a reason to use proto2 instead of proto3?",
+      "range": {
+        "startLine": 15,
+        "startChar": 10,
+        "endLine": 15,
+        "endChar": 16
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
