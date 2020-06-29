@@ -70,6 +70,30 @@
       "revId": "4c2f76e17bb1f233bcc0810a8c0b7e7219f1e556",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4f77cfc9_942d5ebf",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-29T09:00:16Z",
+      "side": 1,
+      "message": "I\u0027ve added comments to this test now to make this clearer.",
+      "parentUuid": "f6461d71_3bb045ab",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 100
+      },
+      "revId": "4c2f76e17bb1f233bcc0810a8c0b7e7219f1e556",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
