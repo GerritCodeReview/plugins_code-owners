@@ -15,20 +15,26 @@
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Parser and formatter for the syntax that is used to store {@link CodeOwnerConfig}s in {@code
@@ -76,10 +82,14 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   private static class Parser {
     private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+    private static final String COMMA = "[\\s]*,[\\s]*";
+
     private static final String BOL = "^[\\s]*"; // begin-of-line
     private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
+    private static final String GLOB = "[^\\s,=]+"; // a file glob
 
     private static final String EMAIL = "([^\\s<>@,]+@[^\\s<>@#,]+)";
+    private static final String EMAIL_LIST = "(" + EMAIL + "(" + COMMA + EMAIL + ")*)";
     private static final String SET_NOPARENT = "set[\\s]+noparent";
 
     // Simple input lines with 0 or 1 sub-pattern.
@@ -87,36 +97,74 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
 
+    private static final Pattern PAT_PER_FILE_OWNERS = Pattern.compile("^(" + EMAIL_LIST + ")$");
+    private static final Pattern PAT_GLOBS =
+        Pattern.compile("^(" + GLOB + "(" + COMMA + GLOB + ")*)$");
+
+    // PAT_PER_FILE matches a line to two groups: (1) globs, (2) emails
+    // Trimmed 1st group should match PAT_GLOBS;
+    // trimmed 2nd group should match PAT_PER_FILE_OWNERS.
+    private static final Pattern PAT_PER_FILE =
+        Pattern.compile(BOL + "per-file[\\s]+([^=#]+)=[\\s]*([^#]+)" + EOL);
+
     static CodeOwnerConfig parse(
         CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
       CodeOwnerConfig.Builder codeOwnerConfigBuilder = CodeOwnerConfig.builder(codeOwnerConfigKey);
-      CodeOwnerSet.Builder codeOwnerSetBuilder = CodeOwnerSet.builder();
+      CodeOwnerSet.Builder globalCodeOwnerSetBuilder = CodeOwnerSet.builder();
+      List<CodeOwnerSet> perFileCodeOwnerSet = new ArrayList<>();
 
       for (String line : codeOwnerConfigAsString.split("\\R")) {
-        parseLine(codeOwnerConfigBuilder, codeOwnerSetBuilder, line);
+        parseLine(codeOwnerConfigBuilder, globalCodeOwnerSetBuilder, perFileCodeOwnerSet, line);
       }
 
-      CodeOwnerSet codeOwnersSet = codeOwnerSetBuilder.build();
-      if (!codeOwnersSet.codeOwners().isEmpty()) {
-        codeOwnerConfigBuilder.addCodeOwnerSet(codeOwnersSet);
+      // Make the code owners sets with the global code owners the first one in the list.
+      CodeOwnerSet globalCodeOwnersSet = globalCodeOwnerSetBuilder.build();
+      if (!globalCodeOwnersSet.codeOwners().isEmpty()) {
+        codeOwnerConfigBuilder.addCodeOwnerSet(globalCodeOwnersSet);
       }
+      perFileCodeOwnerSet.forEach(codeOwnerConfigBuilder::addCodeOwnerSet);
+
       return codeOwnerConfigBuilder.build();
     }
 
     private static void parseLine(
         CodeOwnerConfig.Builder codeOwnerConfigBuilder,
-        CodeOwnerSet.Builder codeOwnerSetBuilder,
+        CodeOwnerSet.Builder globalCodeOwnerSetBuilder,
+        List<CodeOwnerSet> perFileCodeOwnerSets,
         String line) {
       String email;
+      CodeOwnerSet codeOwnerSet;
       if (isNoParent(line)) {
         codeOwnerConfigBuilder.setIgnoreParentCodeOwners();
       } else if (isComment(line)) {
         // ignore comment lines and empty lines
       } else if ((email = parseEmail(line)) != null) {
-        codeOwnerSetBuilder.addCodeOwner(CodeOwnerReference.create(email));
+        globalCodeOwnerSetBuilder.addCodeOwner(CodeOwnerReference.create(email));
+      } else if ((codeOwnerSet = parsePerFile(line)) != null) {
+        perFileCodeOwnerSets.add(codeOwnerSet);
       } else {
         logger.atInfo().log("Skipping unknown line: %s", line);
       }
+    }
+
+    private static CodeOwnerSet parsePerFile(String line) {
+      Matcher m = PAT_PER_FILE.matcher(line);
+      if (!m.matches()
+          || !isGlobs(m.group(1).trim())
+          || !PAT_PER_FILE_OWNERS.matcher(m.group(2).trim()).matches()) {
+        return null;
+      }
+
+      String[] globsAndOwners =
+          new String[] {removeExtraSpaces(m.group(1)), removeExtraSpaces(m.group(2))};
+      String[] dirGlobs = globsAndOwners[0].split(COMMA, -1);
+      String directive = globsAndOwners[1];
+      List<String> ownerEmails = Arrays.asList(directive.split(COMMA, -1));
+      return CodeOwnerSet.builder()
+          .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
+          .setCodeOwners(
+              ownerEmails.stream().map(CodeOwnerReference::create).collect(toImmutableSet()))
+          .build();
     }
 
     private static boolean isComment(String line) {
@@ -131,15 +179,28 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       Matcher m = PAT_EMAIL.matcher(line);
       return m.matches() ? m.group(1).trim() : null;
     }
+
+    private static boolean isGlobs(String line) {
+      return PAT_GLOBS.matcher(line).matches();
+    }
+
+    private static String removeExtraSpaces(String s) {
+      return s.trim().replaceAll("[\\s]+", " ").replaceAll("[\\s]*:[\\s]*", ":");
+    }
   }
 
   private static class Formatter {
     private static final String SET_NOPARENT_LINE = "set noparent\n";
 
+    // String format for a "per-file" line. The first placeholder is for the comma-separated list of
+    // path expressions, the second placeholder is for the comma-separated list of emails.
+    private static final String PER_FILE_LINE_FORMAT = "per-file %s=%s\n";
+
     static String formatAsString(CodeOwnerConfig codeOwnerConfig) {
       return new StringBuilder()
           .append(formatIgnoreParentCodeOwners(codeOwnerConfig))
           .append(formatGlobalCodeOwners(codeOwnerConfig))
+          .append(formatPerFileCodeOwners(codeOwnerConfig))
           .toString();
     }
 
@@ -150,6 +211,10 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static String formatGlobalCodeOwners(CodeOwnerConfig codeOwnerConfig) {
       ImmutableList<String> emails =
           codeOwnerConfig.codeOwnerSets().stream()
+              // Filter out code owner sets with path expressions. If path expressions are present
+              // the code owner set defines per-file code owners and is handled in
+              // formatPerFileCodeOwners(CodeOwnerConfig).
+              .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
               .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
               .map(CodeOwnerReference::email)
               .sorted()
@@ -159,6 +224,40 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         return "";
       }
       return (emails.stream().collect(joining("\n", "", "\n")));
+    }
+
+    private static String formatPerFileCodeOwners(CodeOwnerConfig codeOwnerConfig) {
+      StringBuilder b = new StringBuilder();
+      codeOwnerConfig.codeOwnerSets().stream()
+          // Filter out code owner sets without path expressions. If path expressions are absent the
+          // code owner set defines global code owners and is handled in
+          // formatGlobalCodeOwners(CodeOwnerConfig).
+          .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
+          // Filter out code owner sets without code owners. The OWNERS syntax doesn't support
+          // per-file expressions without code owners and if they were possible they would have no
+          // effect.
+          .filter(codeOwnerSet -> !codeOwnerSet.codeOwners().isEmpty())
+          .map(
+              codeOwnerSet ->
+                  String.format(
+                      PER_FILE_LINE_FORMAT,
+                      formatValuesAsList(codeOwnerSet.pathExpressions()),
+                      formatCodeOwnerReferencesAsList(codeOwnerSet.codeOwners())))
+          .forEach(b::append);
+      return b.toString();
+    }
+
+    private static String formatCodeOwnerReferencesAsList(
+        ImmutableSet<CodeOwnerReference> codeOwnerReferences) {
+      return formatValuesAsList(codeOwnerReferences.stream().map(CodeOwnerReference::email));
+    }
+
+    private static String formatValuesAsList(ImmutableSet<String> values) {
+      return formatValuesAsList(values.stream());
+    }
+
+    private static String formatValuesAsList(Stream<String> stream) {
+      return stream.sorted().distinct().collect(joining(","));
     }
   }
 }
