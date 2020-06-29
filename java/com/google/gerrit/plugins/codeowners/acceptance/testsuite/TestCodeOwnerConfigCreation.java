@@ -71,19 +71,40 @@ public abstract class TestCodeOwnerConfigCreation {
   public abstract boolean ignoreParentCodeOwners();
 
   /**
-   * Gets the code owners that should be set in the newly created code owner config.
+   * Gets the global code owners (without path expression) that should be set in the newly created
+   * code owner config.
    *
-   * @return the code owners that should be set in the newly created code owner config
+   * @return the global code owners that should be set in the newly created code owner config
    */
-  public abstract ImmutableSet<CodeOwnerReference> codeOwners();
+  public abstract ImmutableSet<CodeOwnerReference> globalCodeOwners();
+
+  /**
+   * Gets the code owner sets that have been set for the new code owner config.
+   *
+   * <p>Doesn't include the code owner set for the global code owners that are defined by {@link
+   * #globalCodeOwners()}. Use {@link #computeCodeOwnerSets()} to get the code owner set for the
+   * global code owners included.
+   *
+   * @return the code owner sets that have been set for the new code owner config
+   */
+  abstract ImmutableList<CodeOwnerSet> codeOwnerSets();
 
   /**
    * Gets the code owner sets that should be set in the newly created code owner config.
    *
+   * <p>Includes the global code owners that are defined by {@link #globalCodeOwners()}.
+   *
    * @return the code owner sets that should be set in the newly created code owner config
    */
-  public ImmutableList<CodeOwnerSet> codeOwnerSets() {
-    return ImmutableList.of(CodeOwnerSet.createWithoutPathExpressions(codeOwners()));
+  public ImmutableList<CodeOwnerSet> computeCodeOwnerSets() {
+    if (globalCodeOwners().isEmpty()) {
+      return codeOwnerSets();
+    }
+
+    return ImmutableList.<CodeOwnerSet>builder()
+        .add(CodeOwnerSet.createWithoutPathExpressions(globalCodeOwners()))
+        .addAll(codeOwnerSets())
+        .build();
   }
 
   /**
@@ -111,7 +132,7 @@ public abstract class TestCodeOwnerConfigCreation {
 
   /** Returns whether the code owner config would be empty. */
   public boolean isEmpty() {
-    return ignoreParentCodeOwners() == false && codeOwners().isEmpty();
+    return ignoreParentCodeOwners() == false && computeCodeOwnerSets().isEmpty();
   }
 
   /**
@@ -201,14 +222,14 @@ public abstract class TestCodeOwnerConfigCreation {
     }
 
     /**
-     * Gets a builder to add code owner references.
+     * Gets a builder to add global code owners
      *
-     * @return builder to add code owner references
+     * @return builder to add global code owners
      */
-    abstract ImmutableSet.Builder<CodeOwnerReference> codeOwnersBuilder();
+    abstract ImmutableSet.Builder<CodeOwnerReference> globalCodeOwnersBuilder();
 
     /**
-     * Adds a code owner for the given email.
+     * Adds a global code owner for the given email.
      *
      * @param codeOwnerEmail email of the code owner
      * @return the Builder instance for chaining calls
@@ -219,13 +240,31 @@ public abstract class TestCodeOwnerConfigCreation {
     }
 
     /**
-     * Adds a code owner.
+     * Adds a global code owner.
      *
      * @param codeOwnerReference reference to the code owner
      * @return the Builder instance for chaining calls
      */
     Builder addCodeOwner(CodeOwnerReference codeOwnerReference) {
-      codeOwnersBuilder().add(requireNonNull(codeOwnerReference, "codeOwnerReference"));
+      globalCodeOwnersBuilder().add(requireNonNull(codeOwnerReference, "codeOwnerReference"));
+      return this;
+    }
+
+    /**
+     * Gets a builder to add code owner sets.
+     *
+     * @return builder to add code owner sets
+     */
+    abstract ImmutableList.Builder<CodeOwnerSet> codeOwnerSetsBuilder();
+
+    /**
+     * Adds a code owner set.
+     *
+     * @param codeOwnerSet code owner set that should be added
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
+      codeOwnerSetsBuilder().add(requireNonNull(codeOwnerSet, "codeOwnerSet"));
       return this;
     }
 
