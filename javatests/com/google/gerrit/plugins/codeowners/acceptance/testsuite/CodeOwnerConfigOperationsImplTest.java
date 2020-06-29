@@ -212,15 +212,6 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void codeOwnerConfigCreationRequiresCodeOwners() throws Exception {
-    IllegalStateException exception =
-        assertThrows(
-            IllegalStateException.class,
-            () -> codeOwnerConfigOperations.newCodeOwnerConfig().project(project).create());
-    assertThat(exception).hasMessageThat().contains("code owner config must not be empty");
-  }
-
-  @Test
   public void specifiedCodeOwnersAreRespectedForCodeOwnerConfigCreation() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
@@ -235,6 +226,40 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .onlyElement()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void specifiedCodeOwnerSetsAreRespectedForCodeOwnerConfigCreation() throws Exception {
+    CodeOwnerSet codeOwnerSet1 =
+        CodeOwnerSet.builder()
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user.email())
+            .build();
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("bar").addCodeOwnerEmail(admin.email()).build();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .addCodeOwnerSet(codeOwnerSet1)
+            .addCodeOwnerSet(codeOwnerSet2)
+            .create();
+
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasCodeOwnerSetsThat()
+        .containsExactly(codeOwnerSet1, codeOwnerSet2)
+        .inOrder();
+  }
+
+  @Test
+  public void cannotCreateEmptyCodeOwnerConfig() throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigOperations.newCodeOwnerConfig().project(project).create());
+    assertThat(exception).hasMessageThat().contains("code owner config must not be empty");
   }
 
   @Test
