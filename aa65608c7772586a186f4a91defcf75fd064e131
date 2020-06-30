@@ -191,6 +191,30 @@
     },
     {
       "key": {
+        "uuid": "5e99bb29_cc9f0faa",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:07:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54f32c9c_c6e8b621",
+      "range": {
+        "startLine": 160,
+        "startChar": 70,
+        "endLine": 160,
+        "endChar": 81
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8c9df179_1fb19129",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
         "patchSetId": 20
