@@ -143,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "94d937d4_4e2a8717",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-30T13:43:34Z",
+      "side": 1,
+      "message": "I see. Let\u0027s wait for that other change then.",
+      "parentUuid": "c5b01c19_39d3cd2e",
+      "range": {
+        "startLine": 57,
+        "startChar": 18,
+        "endLine": 57,
+        "endChar": 49
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "de1384bf_12c9b49f",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
         "patchSetId": 17
@@ -328,6 +352,30 @@
       "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "756ecdd6_3f5e0771",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-06-30T13:43:34Z",
+      "side": 1,
+      "message": "Oh, I would imagine that the issue about the missing @RunWith annotation is solvable but let\u0027s keep it separate from this change. Thanks for the additional details.",
+      "parentUuid": "9790d435_7b2f22fc",
+      "range": {
+        "startLine": 37,
+        "startChar": 56,
+        "endLine": 37,
+        "endChar": 86
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
