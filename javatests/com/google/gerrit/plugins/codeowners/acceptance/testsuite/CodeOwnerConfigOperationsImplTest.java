@@ -19,6 +19,8 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -290,7 +292,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
-        .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(user.email()))
+        .codeOwnerSetsModification(CodeOwnerSetModification.addToOnlySet(user.email()))
         .update();
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
         .hasCodeOwnerSetsThat()
@@ -315,6 +317,59 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void clearCodeOwners_emptyCodeOwnerSetIsDropped() throws Exception {
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build();
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(user.email()).build();
+
+    // Create a code owner config that contains 2 code owner sets.
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false, CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet1, codeOwnerSet2)));
+
+    // Remove all code owners from the code owner set that doesn't have path expressions so that it
+    // becomes empty.
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .codeOwnerSetsModification(
+            originalCodeOwnerSets ->
+                ImmutableList.of(
+                    codeOwnerSet1.toBuilder().setCodeOwners(ImmutableSet.of()).build(),
+                    codeOwnerSet2))
+        .update();
+
+    // By removing all code owners from codeOwnerSet1 it became empty, and hence it was dropped.
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasCodeOwnerSetsThat()
+        .containsExactly(codeOwnerSet2);
+  }
+
+  @Test
+  public void clearCodeOwners_emptyCodeOwnerConfigIsDeleted() throws Exception {
+    CodeOwnerSet codeOwnerSet = CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build();
+
+    // Create a code owner config that contains only a single code owner set.
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(false, CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet)));
+
+    // Remove all code owners so that the code owner set becomes empty.
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .codeOwnerSetsModification(
+            originalCodeOwnerSets ->
+                ImmutableList.of(codeOwnerSet.toBuilder().setCodeOwners(ImmutableSet.of()).build()))
+        .update();
+
+    // Removing all code owners from the code owner sets made the code owner set empty so that it
+    // was dropped.
+    // Since this made the code owner config empty it caused a deletion of the code owner config
+    // file.
+    assertThat(codeOwners.get(codeOwnerConfig.key())).isEmpty();
+  }
+
+  @Test
   public void removeNonExistingCodeOwner() throws Exception {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(admin.email());
     codeOwnerConfigOperations
@@ -330,6 +385,44 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void addCodeOwnerSet() throws Exception {
+    CodeOwnerSet oldCodeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(admin.email());
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false, CodeOwnerSetModification.set(ImmutableList.of(oldCodeOwnerSet)));
+    CodeOwnerSet newCodeOwnerSet =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(user.email()).build();
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .addCodeOwnerSet(newCodeOwnerSet)
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasCodeOwnerSetsThat()
+        .containsExactly(oldCodeOwnerSet, newCodeOwnerSet)
+        .inOrder();
+  }
+
+  @Test
+  public void removeCodeOwnerSet() throws Exception {
+    CodeOwnerSet codeOwnerSet1 =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(admin.email()).build();
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("bar").addCodeOwnerEmail(user.email()).build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false, CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet1, codeOwnerSet2)));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .codeOwnerSetsModification(CodeOwnerSetModification.remove(codeOwnerSet1))
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasCodeOwnerSetsThat()
+        .containsExactly(codeOwnerSet2);
+  }
+
+  @Test
   public void clearCodeOwnerSets() throws Exception {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(admin.email(), user.email());
     codeOwnerConfigOperations
@@ -338,7 +431,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .clearCodeOwnerSets()
         .update();
 
-    // Removing all code owners leads to a deletion of the code owner config file.
+    // Removing all code owner sets leads to a deletion of the code owner config file.
     assertThat(codeOwners.get(codeOwnerConfig.key())).isEmpty();
   }
 
