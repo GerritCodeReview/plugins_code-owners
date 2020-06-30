@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -133,6 +135,21 @@ public interface CodeOwnerSetModification {
     }
 
     return codeOwnerSet.toBuilder().addCodeOwner(codeOwnerReference).build();
+  }
+
+  /**
+   * Create a {@link CodeOwnerSetModification} instance that removes the given {@link CodeOwnerSet}.
+   *
+   * <p>No-op if the given code owner set doesn't exist.
+   *
+   * @param codeOwnerSetToRemove the code owner set that should be removed
+   * @return the created {@link CodeOwnerSetModification} instance
+   */
+  public static CodeOwnerSetModification remove(CodeOwnerSet codeOwnerSetToRemove) {
+    return originalCodeOwnerSets ->
+        originalCodeOwnerSets.stream()
+            .filter(codeOwnerSet -> !codeOwnerSet.equals(codeOwnerSetToRemove))
+            .collect(toImmutableList());
   }
 
   /**
