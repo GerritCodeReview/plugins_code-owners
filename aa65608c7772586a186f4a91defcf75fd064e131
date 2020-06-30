@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c06414b1_db917c45",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 133,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T07:59:32Z",
+      "side": 1,
+      "message": "Thanks for the suggestion! This sounds like a good idea to me that I would like to try out, but I feel this goes beyond the scope of this change (add limit parameter), so I would rather do this as a separate change. This is why for now I\u0027ve only inlined the methods.\n\nI will pick up this suggestion a bit later. I think it can help with addressing something else that came up in the meantime. It seems the frontend would maybe like to know which code owner config files made the user a code owner. This means we would need to keep the code owner to code owner config file paths mapping somehow.",
+      "parentUuid": "1fcbdf30_74b903cf",
+      "range": {
+        "startLine": 131,
+        "startChar": 10,
+        "endLine": 133,
+        "endChar": 66
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "89ff68b7_27b418f2",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
         "patchSetId": 20
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "de40956a_86ae613c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T07:59:32Z",
+      "side": 1,
+      "message": "I thinks it\u0027s fine to drop it.\n\nDone.",
+      "parentUuid": "89ff68b7_27b418f2",
+      "range": {
+        "startLine": 136,
+        "startChar": 4,
+        "endLine": 137,
+        "endChar": 58
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "7045d529_ed2728a4",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
         "patchSetId": 20
@@ -59,6 +107,30 @@
       "writtenOn": "2020-06-29T15:20:01Z",
       "side": 1,
       "message": "Do we use 0 as synonym for other unlimited queries within Gerrit? I know that 0 means unlimited cache size in Gerrit (which is a different domain) but I thought that we had the no-limit parameter for actual queries. If we don\u0027t use 0 as a standard way for expressing unlimited for queries in Gerrit, I would rather treat 0 just like any negative value here (-\u003e simply say that a non-negative limit is not allowed).",
+      "range": {
+        "startLine": 160,
+        "startChar": 70,
+        "endLine": 160,
+        "endChar": 81
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "914827a0_73d700fc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T07:59:32Z",
+      "side": 1,
+      "message": "I think the other query REST endpoints treat \u00270\u0027 mostly as unlimited (but it\u0027s not explicitly documented):\n\n1. QueryChanges:\n   * \u00270\u0027 as limit is allowed and is just passed into queryProcessor.setUserProvidedLimit(int) [1]\n   * if userProvidedLimit is \u00270\u0027 it is not having any effect, means the query is unlimited [2]\n\n2. QueryGroups:\n   * \u00270\u0027 as limit is allowed, if limit is \u00270\u0027 we skip calling queryProcessor.setUserProvidedLimit(int) [3]\n\n3, QueryAccounts:\n   * \u00270\u0027 as limit is allowed and is converted into max results [4]\n\nThe \"no-limit\" parameter only exists for QueryChanges and it\u0027s overriding the max limit that was allowed to you by the \"Batch changes limit\" global capability [5]. I still think this is bad and this functionality should not exist. At [5] it also says that \"0 means no limit\".\n\nThis made me think that users would expect \u00270\u0027 to be treated as unlimited, but I would be also fine with rejecting \u00270\u0027 with saying that a non-negative limit is not allowed.\n\nGiven this info, just let me know what you prefer.\n\n[1] https://source.corp.google.com/piper///depot/google3/third_party/java_src/gerritcodereview/gerrit/java/com/google/gerrit/server/restapi/change/QueryChanges.java;rcl\u003d291916368;l\u003d147\n[2] https://source.corp.google.com/piper///depot/google3/third_party/java_src/gerritcodereview/gerrit/java/com/google/gerrit/index/query/QueryProcessor.java;rcl\u003d318739505;l\u003d364\n[3] https://source.corp.google.com/piper///depot/google3/third_party/java_src/gerritcodereview/gerrit/java/com/google/gerrit/server/restapi/group/QueryGroups.java;rcl\u003d281426269;l\u003d114\n[4] https://source.corp.google.com/piper///depot/google3/third_party/java_src/gerritcodereview/gerrit/java/com/google/gerrit/server/restapi/account/QueryAccounts.java;rcl\u003d289402077;l\u003d97\n[5] https://gerrit-review.googlesource.com/Documentation/access-control.html#capability_batchChangesLimit",
+      "parentUuid": "7045d529_ed2728a4",
       "range": {
         "startLine": 160,
         "startChar": 70,
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "1a5e42bd_bfa9f821",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInBranch.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T07:59:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8c9df179_1fb19129",
+      "range": {
+        "startLine": 174,
+        "startChar": 18,
+        "endLine": 174,
+        "endChar": 32
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9f097978_3aa414a9",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
         "patchSetId": 20
@@ -114,6 +210,30 @@
       "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cdd17aee_a8841e0a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T07:59:32Z",
+      "side": 1,
+      "message": "Done.\n\nWill also check later if it\u0027s used in any other tests, and do a separate change to fix those if there are any further occurrences.",
+      "parentUuid": "9f097978_3aa414a9",
+      "range": {
+        "startLine": 405,
+        "startChar": 57,
+        "endLine": 405,
+        "endChar": 65
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
