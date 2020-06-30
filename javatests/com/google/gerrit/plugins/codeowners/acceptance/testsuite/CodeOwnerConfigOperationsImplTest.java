@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -285,7 +286,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
-        .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(user.email()))
+        .codeOwnerSetsModification(CodeOwnerSetModification.addToOnlySet(user.email()))
         .update();
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
         .hasExactlyOneCodeOwnerSetThat()
@@ -319,6 +320,44 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .hasExactlyOneCodeOwnerSetThat()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
+  }
+
+  @Test
+  public void addCodeOwnerSet() throws Exception {
+    CodeOwnerSet oldCodeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(admin.email());
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false, CodeOwnerSetModification.set(ImmutableList.of(oldCodeOwnerSet)));
+    CodeOwnerSet newCodeOwnerSet =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(user.email()).build();
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .addCodeOwnerSet(newCodeOwnerSet)
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasCodeOwnerSetsThat()
+        .containsExactly(oldCodeOwnerSet, newCodeOwnerSet)
+        .inOrder();
+  }
+
+  @Test
+  public void removeCodeOwnerSet() throws Exception {
+    CodeOwnerSet codeOwnerSet1 =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(admin.email()).build();
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("bar").addCodeOwnerEmail(user.email()).build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false, CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet1, codeOwnerSet2)));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .codeOwnerSetsModification(CodeOwnerSetModification.remove(codeOwnerSet1))
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasCodeOwnerSetsThat()
+        .containsExactly(codeOwnerSet2);
   }
 
   @Test

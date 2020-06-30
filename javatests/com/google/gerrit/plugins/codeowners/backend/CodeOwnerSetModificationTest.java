@@ -152,6 +152,16 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void remove() throws Exception {
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(admin.email());
+    CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(user.email());
+    assertThat(
+            CodeOwnerSetModification.remove(codeOwnerSet2)
+                .apply(ImmutableList.of(codeOwnerSet1, codeOwnerSet2)))
+        .containsExactly(codeOwnerSet1);
+  }
+
+  @Test
   public void removeFromOnlySet() throws Exception {
     assertThat(
             CodeOwnerSetModification.removeFromOnlySet(CodeOwnerReference.create(user.email()))
