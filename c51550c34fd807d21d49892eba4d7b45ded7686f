@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5d442ac1_4fc26e56",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9e86b89a_9cc7d5f9",
+      "range": {
+        "startLine": 10,
+        "startChar": 27,
+        "endLine": 10,
+        "endChar": 71
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1ac14781_27262b13",
         "filename": "/COMMIT_MSG",
         "patchSetId": 17
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "17b72b37_d1efb617",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1ac14781_27262b13",
+      "range": {
+        "startLine": 27,
+        "startChar": 39,
+        "endLine": 27,
+        "endChar": 45
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6f9aff7d_41ae6943",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
         "patchSetId": 17
@@ -59,6 +107,30 @@
       "writtenOn": "2020-06-29T17:21:32Z",
       "side": 1,
       "message": "Here and in other files: If we don\u0027t need specific functionality from this implementation, I would stay with the interface as type for the field (and just use the implementation type for the constructor injection).",
+      "range": {
+        "startLine": 57,
+        "startChar": 18,
+        "endLine": 57,
+        "endChar": 49
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5b01c19_39d3cd2e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/CodeOwnerConfigFile.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "This is already done by the follow-up change:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/271696\n\nIf we change it now we also need to handle the exceptions that are thrown by the interface, but not by the FindOwnersCodeOwnerConfigParser implementation.",
+      "parentUuid": "6f9aff7d_41ae6943",
       "range": {
         "startLine": 57,
         "startChar": 18,
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "e1143892_c5e9de92",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "I actually liked the explicit prefix, since it makes it obvious which types are generated classes representing the proto. But I don\u0027t mind much.\n\nDone.",
+      "parentUuid": "de1384bf_12c9b49f",
+      "range": {
+        "startLine": 44,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 37
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "af8fd363_bc5bab61",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
         "patchSetId": 17
@@ -114,6 +210,30 @@
       "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c44a3689_a7d4de33",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Nice. I wasn\u0027t aware of this method.\n\nAnd yes, the build() was too much :)",
+      "parentUuid": "af8fd363_bc5bab61",
+      "range": {
+        "startLine": 74,
+        "startChar": 74,
+        "endLine": 74,
+        "endChar": 82
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -140,6 +260,30 @@
     },
     {
       "key": {
+        "uuid": "4efa626f_86934e01",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Oh yes.\n\nDone.",
+      "parentUuid": "8408e392_57252315",
+      "range": {
+        "startLine": 22,
+        "startChar": 7,
+        "endLine": 22,
+        "endChar": 38
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e256329c_6f2e5e87",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
         "patchSetId": 17
@@ -151,6 +295,30 @@
       "writtenOn": "2020-06-29T17:21:32Z",
       "side": 1,
       "message": "Does this really need to be an integration test (which is much heavier than a unit test)? The constructor parameter to FindOwnersCodeOwnerConfigParser could easily be faked or mocked.",
+      "range": {
+        "startLine": 37,
+        "startChar": 56,
+        "endLine": 37,
+        "endChar": 86
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9790d435_7b2f22fc",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "The constructor parameter is going away soon [1], so I would rather not spend time on mocking it now.\n\nAlso there is an unsolved issue with running non-integration tests internally. If a test class doesn\u0027t extend any of the base test classes the test fails internally blocking the import of this code (it complains about a missing @RunWith annotation, also see [2]). I didn\u0027t have time to look further into this yet. Hence I would prefer to keep all tests as integration tests for now.\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/271836\n[2] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/272233",
+      "parentUuid": "e256329c_6f2e5e87",
       "range": {
         "startLine": 37,
         "startChar": 56,
@@ -186,6 +354,30 @@
     },
     {
       "key": {
+        "uuid": "21b05cdc_82c5220a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "b7aa9141_b0f929f6",
+      "range": {
+        "startLine": 68,
+        "startChar": 28,
+        "endLine": 68,
+        "endChar": 64
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c6bbac4c_85872934",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
         "patchSetId": 17
@@ -206,6 +398,30 @@
       "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a33555d1_f626d669",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "ups, this wasn\u0027t intenden.\n\nDone.",
+      "parentUuid": "c6bbac4c_85872934",
+      "range": {
+        "startLine": 223,
+        "startChar": 2,
+        "endLine": 224,
+        "endChar": 70
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -232,6 +448,30 @@
     },
     {
       "key": {
+        "uuid": "ab5cc7fe_098413f1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Nice.\n\nDone",
+      "parentUuid": "17ad6cd1_c649b156",
+      "range": {
+        "startLine": 237,
+        "startChar": 11,
+        "endLine": 238,
+        "endChar": 82
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0b7fd9bb_31bd4c3c",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
         "patchSetId": 17
@@ -252,6 +492,30 @@
       "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d0aba09_95bfc777",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0b7fd9bb_31bd4c3c",
+      "range": {
+        "startLine": 239,
+        "startChar": 13,
+        "endLine": 239,
+        "endChar": 32
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -278,6 +542,30 @@
     },
     {
       "key": {
+        "uuid": "dc0c9d4a_54f27cde",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Nice.\n\nDone.",
+      "parentUuid": "0383ef3e_8671736c",
+      "range": {
+        "startLine": 37,
+        "startChar": 4,
+        "endLine": 44,
+        "endChar": 24
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d1672d79_8c08c2c5",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParserTest.java",
         "patchSetId": 17
@@ -301,6 +589,30 @@
     },
     {
       "key": {
+        "uuid": "5b5f2000_946a217b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParserTest.java",
+        "patchSetId": 17
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1672d79_8c08c2c5",
+      "range": {
+        "startLine": 53,
+        "startChar": 29,
+        "endLine": 53,
+        "endChar": 37
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ec546f22_a92c43ed",
         "filename": "proto/owners_metadata.proto",
         "patchSetId": 17
@@ -321,6 +633,30 @@
       "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5a07ac9_794f2fc9",
+        "filename": "proto/owners_metadata.proto",
+        "patchSetId": 17
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-06-30T09:53:24Z",
+      "side": 1,
+      "message": "Comment removed by: Edwin Kempin; Reason: exposed internal link",
+      "parentUuid": "ec546f22_a92c43ed",
+      "range": {
+        "startLine": 15,
+        "startChar": 10,
+        "endLine": 15,
+        "endChar": 16
+      },
+      "revId": "c51550c34fd807d21d49892eba4d7b45ded7686f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
