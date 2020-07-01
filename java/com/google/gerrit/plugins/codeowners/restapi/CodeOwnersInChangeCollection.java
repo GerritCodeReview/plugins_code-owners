@@ -21,8 +21,13 @@ import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestView;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInChangeCollection.PathResource;
 import com.google.gerrit.server.change.RevisionResource;
+import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.project.FileResource;
+import com.google.gerrit.server.project.ProjectCache;
+import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -37,10 +42,17 @@ import java.nio.file.Path;
 public class CodeOwnersInChangeCollection
     implements ChildCollection<RevisionResource, PathResource> {
   private final DynamicMap<RestView<PathResource>> views;
+  private final GitRepositoryManager repoManager;
+  private final ProjectCache projectCache;
 
   @Inject
-  CodeOwnersInChangeCollection(DynamicMap<RestView<PathResource>> views) {
+  CodeOwnersInChangeCollection(
+      DynamicMap<RestView<PathResource>> views,
+      GitRepositoryManager repoManager,
+      ProjectCache projectCache) {
     this.views = views;
+    this.repoManager = repoManager;
+    this.projectCache = projectCache;
   }
 
   @Override
@@ -52,8 +64,38 @@ public class CodeOwnersInChangeCollection
   @Override
   public PathResource parse(RevisionResource revisionResource, IdString id)
       throws RestApiException, IOException {
-    // TODO(ekempin): Check that the path exists in the revision.
-    return PathResource.parse(revisionResource, id);
+    // Check if the file exists in the revision only after creating the path resource. This way we
+    // get a more specific error response for invalid paths ('400 Bad Request' instead of a '404 Not
+    // Found').
+    PathResource pathResource = PathResource.parse(revisionResource, id);
+    checkThatFileExists(revisionResource, pathResource, id);
+    return pathResource;
+  }
+
+  private void checkThatFileExists(
+      RevisionResource revisionResource, PathResource pathResource, IdString id)
+      throws RestApiException, IOException {
+    ProjectState projectState =
+        projectCache
+            .get(revisionResource.getProject())
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        String.format("project %s not found", revisionResource.getProject())));
+    try {
+      // TODO(ekempin): Also accept requests for the old paths of files that have been renamed or
+      // deleted. When a file is renamed/deleted we require code owner approval on the old path,
+      // hence it should be possible to list the code owners for these old paths.
+      FileResource.create(
+          repoManager,
+          projectState,
+          revisionResource.getPatchSet().commitId(),
+          JgitPath.of(pathResource.getPath()).get());
+    } catch (ResourceNotFoundException e) {
+      // Make sure that the exception is thrown with the path we got as input and not the Jgit
+      // version of the path which always has no leading '/'.
+      throw new ResourceNotFoundException(id);
+    }
   }
 
   @Override
