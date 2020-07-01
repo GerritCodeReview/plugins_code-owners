@@ -60,8 +60,6 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
    * Must return the expected code owner config string for a code owner config with the given
    * parameters.
    *
-   * <p>The order of the emails must be preserved in the code owner config string.
-   *
    * @param ignoreParentCodeOwners whether code owners from parent code owner configs (code owner
    *     configs in parent folders) should be ignored
    * @param emails emails that should be assigned as code owners
@@ -187,18 +185,6 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2));
-  }
-
-  @Test
-  public void codeOwnerConfigWithNonSortedEmails() throws Exception {
-    assertParseAndFormat(
-        getCodeOwnerConfig(EMAIL_3, EMAIL_2, EMAIL_1),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig)
-                .hasExactlyOneCodeOwnerSetThat()
-                .hasCodeOwnersEmailsThat()
-                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
-        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
   }
 
   /**
