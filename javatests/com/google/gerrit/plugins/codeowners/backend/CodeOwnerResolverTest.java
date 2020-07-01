@@ -61,7 +61,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
   @Test
   public void resolveCodeOwnerReferenceForNonExistingEmail() throws Exception {
-    assertThat(codeOwnerResolver.resolve(CodeOwnerReference.create("non-existing@test.com")))
+    assertThat(codeOwnerResolver.resolve(CodeOwnerReference.create("non-existing@example.com")))
         .isEmpty();
   }
 
@@ -90,7 +90,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void resolveCodeOwnerReferenceForOrphanedEmail() throws Exception {
     // Create an external ID with an email for a non-existing account.
-    String email = "foo.bar@test.com";
+    String email = "foo.bar@example.com";
     try (Repository allUsersRepo = repoManager.openRepository(allUsers);
         MetaDataUpdate md = metaDataUpdateFactory.create(allUsers)) {
       ExternalIdNotes extIdNotes = externalIdNotesFactory.load(allUsersRepo);
@@ -168,7 +168,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
             .addCodeOwnerSet(
-                CodeOwnerSet.createWithoutPathExpressions(admin.email(), "non-existing@test.com"))
+                CodeOwnerSet.createWithoutPathExpressions(
+                    admin.email(), "non-existing@example.com"))
             .build();
     assertThat(codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .comparingElementsUsing(hasAccountId())
