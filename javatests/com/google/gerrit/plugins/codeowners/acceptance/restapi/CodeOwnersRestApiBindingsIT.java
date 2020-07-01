@@ -67,13 +67,14 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
 
   @Test
   public void changeCodeOwnersEndpoints() throws Exception {
-    String changeId = createChange().getChangeId();
+    String filePath = "foo/bar.baz";
+    String changeId = createChange("Test Change", filePath, "file content").getChangeId();
     RestApiCallHelper.execute(
         adminRestSession,
         CHANGE_CODE_OWNERS_ENDPOINTS,
         urlEncode(changeId),
         urlEncode("current"),
-        urlEncode("foo/bar.baz"));
+        urlEncode(filePath));
   }
 
   private static String urlEncode(String decoded) {

@@ -14,8 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.common.truth.Truth.assertWithMessage;
+import static java.util.stream.Collectors.toMap;
+
+import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
+import java.util.List;
 import org.junit.Before;
 
 /**
@@ -32,11 +39,35 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
 
   @Before
   public void createTestChange() throws Exception {
-    changeId = createChange().getChangeId();
+    // Create a change that contains files for all paths that are used in the tests. This is
+    // necessary since CodeOwnersInChangeCollection rejects requests for paths that are not present
+    // in the change.
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "test change",
+            TEST_PATHS.stream()
+                .collect(
+                    toMap(
+                        path -> JgitPath.of(path).get(),
+                        path -> String.format("content of %s", path))));
+    PushOneCommit.Result result = push.to("refs/for/master");
+    result.assertOkStatus();
+    changeId = result.getChangeId();
   }
 
   @Override
   protected CodeOwners getCodeOwnersApi() throws RestApiException {
     return codeOwnersApiFactory.change(changeId, "current");
+  }
+
+  @Override
+  protected List<CodeOwnerInfo> queryCodeOwners(CodeOwners.QueryRequest queryRequest, String path)
+      throws RestApiException {
+    assertWithMessage("test path %s was not registered", path)
+        .that(gApi.changes().id(changeId).current().files())
+        .containsKey(JgitPath.of(path).get());
+    return super.queryCodeOwners(queryRequest, path);
   }
 }
