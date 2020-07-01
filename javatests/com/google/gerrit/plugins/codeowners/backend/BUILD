@@ -11,6 +11,7 @@ acceptance_tests(
         exclude = ["Abstract*.java"],),
     group = "backend",
     deps = [
+        ":testbases",
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
