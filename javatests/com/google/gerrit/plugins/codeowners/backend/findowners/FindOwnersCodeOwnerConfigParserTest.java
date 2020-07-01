@@ -81,6 +81,18 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
+  public void codeOwnerConfigWithNonSortedEmails() throws Exception {
+    assertParseAndFormat(
+        String.join("\n", EMAIL_3, EMAIL_2, EMAIL_1) + "\n",
+        codeOwnerConfig ->
+            assertThat(codeOwnerConfig)
+                .hasExactlyOneCodeOwnerSetThat()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+  }
+
+  @Test
   public void setNoParentCanBeSetMultipleTimes() throws Exception {
     assertParseAndFormat(
         getCodeOwnerConfig(true, EMAIL_1) + "\nset noparent\nset noparent",
