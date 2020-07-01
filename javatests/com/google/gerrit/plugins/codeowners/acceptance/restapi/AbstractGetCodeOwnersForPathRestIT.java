@@ -38,6 +38,12 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.restapi.AbstractGetCodeOwnersForPath}.
  */
 public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwnersIT {
+  /**
+   * File path that is used by the tests. Subclasses can use create this file in the test setup in
+   * case they test functionality that requires the file to exist.
+   */
+  protected static final String TEST_PATH = "/foo/bar/baz.md";
+
   @Inject private AccountOperations accountOperations;
 
   private String getUrl(String path, String... parameters) {
@@ -82,7 +88,7 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
     RestResponse r =
         adminRestSession.get(
             getUrl(
-                "/foo/bar/baz.md",
+                TEST_PATH,
                 "o=" + ListAccountsOption.DETAILS.name(),
                 "o=" + ListAccountsOption.ALL_EMAILS.name()));
     r.assertOK();
@@ -114,7 +120,7 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
     RestResponse r =
         adminRestSession.get(
             getUrl(
-                "/foo/bar/baz.md",
+                TEST_PATH,
                 "O="
                     + ListOption.toHex(
                         ImmutableSet.of(
@@ -132,7 +138,7 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
 
   @Test
   public void cannotGetCodeOwnersWithUnknownAccountOption() throws Exception {
-    RestResponse r = adminRestSession.get(getUrl("/foo/bar/baz.md", "o=unknown-option"));
+    RestResponse r = adminRestSession.get(getUrl(TEST_PATH, "o=unknown-option"));
     r.assertBadRequest();
     assertThat(r.getEntityContent())
         .isEqualTo("\"unknown_option\" is not a valid value for \"-o\"");
@@ -141,7 +147,7 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
   @Test
   public void cannotGetCodeOwnersWithUnknownHexAccountOption() throws Exception {
     String unknownHexOption = Integer.toHexString(100);
-    RestResponse r = adminRestSession.get(getUrl("/foo/bar/baz.md", "O=" + unknownHexOption));
+    RestResponse r = adminRestSession.get(getUrl(TEST_PATH, "O=" + unknownHexOption));
     r.assertBadRequest();
     assertThat(r.getEntityContent())
         .isEqualTo(String.format("\"%s\" is not a valid value for \"-O\"", unknownHexOption));

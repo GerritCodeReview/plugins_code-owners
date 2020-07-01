@@ -26,6 +26,7 @@ java_library(
     deps = [
         "//java/com/google/gerrit/acceptance:framework-lib",
         "//java/com/google/gerrit/extensions:api",
+        "//lib:guava",
         "//lib/guice",
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",

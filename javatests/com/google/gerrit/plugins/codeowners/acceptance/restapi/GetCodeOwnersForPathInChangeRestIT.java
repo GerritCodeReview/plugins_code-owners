@@ -14,8 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 
+import static com.google.common.truth.Truth.assertThat;
+
+import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.extensions.restapi.IdString;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Acceptance test for the {@link
@@ -32,7 +37,10 @@ public class GetCodeOwnersForPathInChangeRestIT extends AbstractGetCodeOwnersFor
 
   @Before
   public void createTestChange() throws Exception {
-    changeId = createChange().getChangeId();
+    // Create a change that contains the file that is used in the tests. This is necessary since
+    // CodeOwnersInChangeCollection rejects requests for paths that are not present in the change.
+    changeId =
+        createChange("Test Change", JgitPath.of(TEST_PATH).get(), "some content").getChangeId();
   }
 
   @Override
@@ -42,5 +50,14 @@ public class GetCodeOwnersForPathInChangeRestIT extends AbstractGetCodeOwnersFor
         IdString.fromDecoded(changeId),
         IdString.fromDecoded("current"),
         IdString.fromDecoded(path));
+  }
+
+  @Test
+  public void cannotGetCodeOwnersForNonExistingPath() throws Exception {
+    String nonExistingPath = "/some/non/existing/path";
+    RestResponse r = adminRestSession.get(getUrl(nonExistingPath));
+
+    r.assertNotFound();
+    assertThat(r.getEntityContent()).contains(String.format("Not found: %s", nonExistingPath));
   }
 }
