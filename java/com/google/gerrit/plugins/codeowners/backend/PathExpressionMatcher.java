@@ -20,36 +20,36 @@ import java.nio.file.Path;
 /**
  * Matcher that checks for a given path expression if it matches a given path.
  *
- * <p>This interface allows {@link CodeOwnersBackend}s to support different kinds of path
- * expressions (e.g. globs or regular expressions).
+ * <p>This interface allows {@link CodeOwnerBackend}s to support different kinds of path expressions
+ * (e.g. globs or regular expressions).
  */
 public interface PathExpressionMatcher {
   /**
-   * Creates a {@link PathExpressionMatcher} for a {@link CodeOwnersBackend} that doesn't support
+   * Creates a {@link PathExpressionMatcher} for a {@link CodeOwnerBackend} that doesn't support
    * path expressions.
    *
    * <p>If the {@link PathExpressionMatcher} is invoked an {@link IllegalStateException} is thrown
-   * saying that the {@link CodeOwnersBackend} doesn't support path expressions.
+   * saying that the {@link CodeOwnerBackend} doesn't support path expressions.
    *
-   * @param backendId ID of the {@link CodeOwnersBackend} for which the created {@link
+   * @param backendId ID of the {@link CodeOwnerBackend} for which the created {@link
    *     PathExpressionMatcher} will be used
    * @return the created {@link PathExpressionMatcher}
    */
-  static PathExpressionMatcher notSupportedBy(CodeOwnersBackendId backendId) {
+  static PathExpressionMatcher notSupportedBy(CodeOwnerBackendId backendId) {
     return notSupportedBy(backendId.getBackendId());
   }
 
   /**
-   * Creates a {@link PathExpressionMatcher} for a {@link CodeOwnersBackend} that doesn't support
+   * Creates a {@link PathExpressionMatcher} for a {@link CodeOwnerBackend} that doesn't support
    * path expressions.
    *
    * <p>If the {@link PathExpressionMatcher} is invoked an {@link UnsupportedOperationException} is
-   * thrown saying that the {@link CodeOwnersBackend} doesn't support path expressions.
+   * thrown saying that the {@link CodeOwnerBackend} doesn't support path expressions.
    *
    * <p>Use this method only from tests. Non-test code should use {@link
-   * #notSupportedBy(CodeOwnersBackendId)}.
+   * #notSupportedBy(CodeOwnerBackendId)}.
    *
-   * @param backendId ID of the {@link CodeOwnersBackend} for which the created {@link
+   * @param backendId ID of the {@link CodeOwnerBackend} for which the created {@link
    *     PathExpressionMatcher} will be used
    * @return the created {@link PathExpressionMatcher}
    */

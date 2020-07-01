@@ -29,13 +29,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Base class for testing {@link AbstractFileBasedCodeOwnersBackend}s.
+ * Base class for testing {@link AbstractFileBasedCodeOwnerBackend}s.
  *
  * <p>Implements the tests that are common for all backends once instead of once per backend.
  */
-public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCodeOwnersTest {
-  protected TestCodeOwnerConfigStorage testCodeOwnerConfigStorage;
-  protected CodeOwnersBackend codeOwnersBackend;
+public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCodeOwnersTest {
+	protected TestCodeOwnerConfigStorage testCodeOwnerConfigStorage;
+  protected CodeOwnerBackend codeOwnerBackend;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
@@ -44,13 +44,13 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
             .getSysInjector()
             .getInstance(TestCodeOwnerConfigStorage.Factory.class)
             .create(getFileName(), plugin.getSysInjector().getInstance(getParserClass()));
-    codeOwnersBackend = plugin.getSysInjector().getInstance(getBackendClass());
+    codeOwnerBackend = plugin.getSysInjector().getInstance(getBackendClass());
   }
 
   /**
-   * Must return the class of the {@link AbstractFileBasedCodeOwnersBackend} that should be tested.
+   * Must return the class of the {@link AbstractFileBasedCodeOwnerBackend} that should be tested.
    */
-  protected abstract Class<? extends AbstractFileBasedCodeOwnersBackend> getBackendClass();
+  protected abstract Class<? extends AbstractFileBasedCodeOwnerBackend> getBackendClass();
 
   /** Must return the name of the files in which {@link CodeOwnerConfig}s are stored. */
   protected abstract String getFileName();
@@ -65,14 +65,14 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
   public void getNonExistingCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/non-existing/");
-    assertThatOptional(codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
   }
 
   @Test
   public void getCodeOwnerConfigFromNonExistingBranch() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "non-existing", "/");
-    assertThatOptional(codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
   }
 
   @Test
@@ -85,7 +85,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
-        codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey);
+        codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey);
     assertThatOptional(codeOwnerConfig).value().isEqualTo(codeOwnerConfigInRepository);
   }
 
@@ -108,7 +108,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
 
       // Create the code owner config.
       Optional<CodeOwnerConfig> codeOwnerConfig =
-          codeOwnersBackend.upsertCodeOwnerConfig(
+          codeOwnerBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
                   .setCodeOwnerSetsModification(
@@ -171,7 +171,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
 
       // Update the code owner config.
       Optional<CodeOwnerConfig> codeOwnerConfig =
-          codeOwnersBackend.upsertCodeOwnerConfig(
+          codeOwnerBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
                   .setCodeOwnerSetsModification(CodeOwnerSetModification.addToOnlySet(user.email()))
@@ -233,7 +233,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
 
       // Update the code owner config.
       Optional<CodeOwnerConfig> codeOwnerConfig =
-          codeOwnersBackend.upsertCodeOwnerConfig(
+          codeOwnerBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
                   .setCodeOwnerSetsModification(CodeOwnerSetModification.clear())
@@ -281,7 +281,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
 
       // Update the code owner config.
       Optional<CodeOwnerConfig> codeOwnerConfig =
-          codeOwnersBackend.upsertCodeOwnerConfig(
+          codeOwnerBackend.upsertCodeOwnerConfig(
               codeOwnerConfigKey, CodeOwnerConfigUpdate.builder().build(), null);
       assertThatOptional(codeOwnerConfig)
           .value()
@@ -305,7 +305,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
           assertThrows(
               IllegalStateException.class,
               () ->
-                  codeOwnersBackend.upsertCodeOwnerConfig(
+                  codeOwnerBackend.upsertCodeOwnerConfig(
                       codeOwnerConfigKey, CodeOwnerConfigUpdate.builder().build(), null));
       assertThat(exception)
           .hasMessageThat()

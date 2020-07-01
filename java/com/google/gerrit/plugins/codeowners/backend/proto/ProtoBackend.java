@@ -14,7 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.proto;
 
-import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.server.GerritPersonIdent;
@@ -27,7 +27,7 @@ import org.eclipse.jgit.lib.PersonIdent;
 
 /** Backend that supports a proto syntax for storing {@link CodeOwnerConfig}s. */
 @Singleton
-public class ProtoBackend extends AbstractFileBasedCodeOwnersBackend {
+public class ProtoBackend extends AbstractFileBasedCodeOwnerBackend {
   /** The ID of this code owner backend. */
   public static final String ID = "proto";
 

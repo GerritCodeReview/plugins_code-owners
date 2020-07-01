@@ -16,16 +16,16 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackendTest;
+import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackendTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import org.junit.Test;
 
 /** Tests for {@link FindOwnersBackend}. */
-public class FindOwnersBackendTest extends AbstractFileBasedCodeOwnersBackendTest {
+public class FindOwnersBackendTest extends AbstractFileBasedCodeOwnerBackendTest {
   @Override
-  protected Class<? extends AbstractFileBasedCodeOwnersBackend> getBackendClass() {
+  protected Class<? extends AbstractFileBasedCodeOwnerBackend> getBackendClass() {
     return FindOwnersBackend.class;
   }
 
@@ -41,6 +41,6 @@ public class FindOwnersBackendTest extends AbstractFileBasedCodeOwnersBackendTes
 
   @Test
   public void getPathExpressionMatcher() throws Exception {
-    assertThat(codeOwnersBackend.getPathExpressionMatcher()).isInstanceOf(GlobMatcher.class);
+    assertThat(codeOwnerBackend.getPathExpressionMatcher()).isInstanceOf(GlobMatcher.class);
   }
 }

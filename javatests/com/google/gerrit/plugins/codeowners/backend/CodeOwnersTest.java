@@ -34,13 +34,13 @@ import org.junit.Test;
 /** Tests for {@link CodeOwners}. */
 public class CodeOwnersTest extends AbstractCodeOwnersTest {
   private CodeOwners codeOwners;
-  private DynamicMap<CodeOwnersBackend> codeOwnersBackends;
+  private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwners = plugin.getSysInjector().getInstance(CodeOwners.class);
-    codeOwnersBackends =
-        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnersBackend>>() {});
+    codeOwnerBackends =
+        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
@@ -51,20 +51,20 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
         CodeOwnerConfig.builder(codeOwnerConfigKey)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
-    CodeOwnersBackend codeOwnersBackendMock = mock(CodeOwnersBackend.class);
-    when(codeOwnersBackendMock.getCodeOwnerConfig(codeOwnerConfigKey))
+    CodeOwnerBackend codeOwnerBackendMock = mock(CodeOwnerBackend.class);
+    when(codeOwnerBackendMock.getCodeOwnerConfig(codeOwnerConfigKey))
         .thenReturn(Optional.of(expectedCodeOwnersConfig));
-    try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnersBackendMock)) {
+    try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnerBackendMock)) {
       Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey);
       assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
-      verify(codeOwnersBackendMock).getCodeOwnerConfig(codeOwnerConfigKey);
+      verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey);
     }
   }
 
-  private AutoCloseable registerTestBackend(String id, CodeOwnersBackend codeOwnersBackend) {
+  private AutoCloseable registerTestBackend(String id, CodeOwnerBackend codeOwnerBackend) {
     RegistrationHandle registrationHandle =
-        ((PrivateInternals_DynamicMapImpl<CodeOwnersBackend>) codeOwnersBackends)
-            .put("gerrit", id, Providers.of(codeOwnersBackend));
+        ((PrivateInternals_DynamicMapImpl<CodeOwnerBackend>) codeOwnerBackends)
+            .put("gerrit", id, Providers.of(codeOwnerBackend));
     return () -> registrationHandle.remove();
   }
 }
