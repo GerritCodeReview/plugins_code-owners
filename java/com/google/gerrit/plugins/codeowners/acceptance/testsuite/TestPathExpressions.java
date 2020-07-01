@@ -18,6 +18,7 @@ import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.backend.proto.Google3PathExpressionMatcher;
 import com.google.inject.Inject;
 
 /**
@@ -46,7 +47,8 @@ public class TestPathExpressions {
   public String matchFileTypeInCurrentFolder(String fileType) {
     PathExpressionMatcher pathExpressionMatcher =
         codeOwnersPluginConfiguration.getDefaultBackend().getPathExpressionMatcher();
-    if (pathExpressionMatcher instanceof GlobMatcher) {
+    if (pathExpressionMatcher instanceof GlobMatcher
+        || pathExpressionMatcher instanceof Google3PathExpressionMatcher) {
       return "*." + fileType;
     }
     throw new IllegalStateException(
