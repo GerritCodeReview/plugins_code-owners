@@ -67,7 +67,7 @@ public class CodeOwnerSetModificationTest extends AbstractCodeOwnersTest {
   public void setList() throws Exception {
     CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(admin.email());
     CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(user.email());
-    CodeOwnerSet codeOwnerSet3 = CodeOwnerSet.createWithoutPathExpressions("user2@test.com");
+    CodeOwnerSet codeOwnerSet3 = CodeOwnerSet.createWithoutPathExpressions("user2@example.com");
     assertThat(
             CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet2, codeOwnerSet3))
                 .apply(ImmutableList.of(codeOwnerSet1)))
