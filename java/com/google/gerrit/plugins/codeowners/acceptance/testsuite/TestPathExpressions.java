@@ -15,7 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.proto.Google3PathExpressionMatcher;
@@ -25,11 +25,11 @@ import com.google.inject.Inject;
  * Class to create path expressions in integration tests.
  *
  * <p>How a path expression should be formatted depends on the {@link PathExpressionMatcher} that is
- * used by the {@link CodeOwnersBackend}. E.g. if files of a certain file type should be matched in
+ * used by the {@link CodeOwnerBackend}. E.g. if files of a certain file type should be matched in
  * the current folder, as Java NIO glob the path expression would be written as {@code *.md} while
  * as regular expression it would be written as {@code ^[^/]*\.md}. By using this class tests can
  * avoid hard-coding a concrete path expression syntax so that they work against all {@link
- * CodeOwnersBackend}s.
+ * CodeOwnerBackend}s.
  */
 public class TestPathExpressions {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;

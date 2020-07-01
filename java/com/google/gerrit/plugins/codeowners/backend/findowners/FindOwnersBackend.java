@@ -14,7 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
-import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
@@ -37,7 +37,7 @@ import org.eclipse.jgit.lib.PersonIdent;
  * <p>New features will likely not be supported by this backend.
  */
 @Singleton
-public class FindOwnersBackend extends AbstractFileBasedCodeOwnersBackend {
+public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
   /** The ID of this code owner backend. */
   public static final String ID = "find-owners";
 

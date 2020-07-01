@@ -27,9 +27,9 @@ import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.server.IdentifiedUser;
@@ -50,14 +50,14 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Inject private ProjectOperations projectOperations;
 
   private CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private DynamicMap<CodeOwnersBackend> codeOwnersBackends;
+  private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnersPluginConfiguration =
         plugin.getSysInjector().getInstance(CodeOwnersPluginConfiguration.class);
-    codeOwnersBackends =
-        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnersBackend>>() {});
+    codeOwnerBackends =
+        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
@@ -88,11 +88,11 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnersBackend.ID)
+  @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
   public void getConfiguredDefaultBackend() throws Exception {
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-          .isInstanceOf(TestCodeOwnersBackend.class);
+          .isInstanceOf(TestCodeOwnerBackend.class);
     }
   }
 
@@ -113,45 +113,45 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getBackendConfiguredOnProjectLevel() throws Exception {
-    configureBackend(project, TestCodeOwnersBackend.ID);
+    configureBackend(project, TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-          .isInstanceOf(TestCodeOwnersBackend.class);
+          .isInstanceOf(TestCodeOwnerBackend.class);
     }
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = FindOwnersBackend.ID)
   public void backendConfiguredOnProjectLevelOverridesDefaultBackend() throws Exception {
-    configureBackend(project, TestCodeOwnersBackend.ID);
+    configureBackend(project, TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-          .isInstanceOf(TestCodeOwnersBackend.class);
+          .isInstanceOf(TestCodeOwnerBackend.class);
     }
   }
 
   @Test
   public void backendIsInheritedFromParentProject() throws Exception {
-    configureBackend(allProjects, TestCodeOwnersBackend.ID);
+    configureBackend(allProjects, TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-          .isInstanceOf(TestCodeOwnersBackend.class);
+          .isInstanceOf(TestCodeOwnerBackend.class);
     }
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = FindOwnersBackend.ID)
   public void inheritedBackendOverridesDefaultBackend() throws Exception {
-    configureBackend(allProjects, TestCodeOwnersBackend.ID);
+    configureBackend(allProjects, TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-          .isInstanceOf(TestCodeOwnersBackend.class);
+          .isInstanceOf(TestCodeOwnerBackend.class);
     }
   }
 
   @Test
   public void projectLevelBackendOverridesInheritedBackend() throws Exception {
-    configureBackend(allProjects, TestCodeOwnersBackend.ID);
+    configureBackend(allProjects, TestCodeOwnerBackend.ID);
     configureBackend(project, FindOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
@@ -177,7 +177,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   public void projectLevelBackendForOtherProjectHasNoEffect() throws Exception {
     Project.NameKey otherProject = projectOperations.newProject().create();
-    configureBackend(otherProject, TestCodeOwnersBackend.ID);
+    configureBackend(otherProject, TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(FindOwnersBackend.class);
@@ -186,26 +186,26 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getBackendConfiguredOnBranchLevel() throws Exception {
-    configureBackend(project, "refs/heads/master", TestCodeOwnersBackend.ID);
+    configureBackend(project, "refs/heads/master", TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-          .isInstanceOf(TestCodeOwnersBackend.class);
+          .isInstanceOf(TestCodeOwnerBackend.class);
     }
   }
 
   @Test
   public void getBackendConfiguredOnBranchLevelShortName() throws Exception {
-    configureBackend(project, "master", TestCodeOwnersBackend.ID);
+    configureBackend(project, "master", TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-          .isInstanceOf(TestCodeOwnersBackend.class);
+          .isInstanceOf(TestCodeOwnerBackend.class);
     }
   }
 
   @Test
   public void branchLevelBackendOnFullNameTakesPrecedenceOverBranchLevelBackendOnShortName()
       throws Exception {
-    configureBackend(project, "master", TestCodeOwnersBackend.ID);
+    configureBackend(project, "master", TestCodeOwnerBackend.ID);
     configureBackend(project, "refs/heads/master", FindOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
@@ -215,7 +215,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void branchLevelBackendOverridesProjectLevelBackend() throws Exception {
-    configureBackend(project, TestCodeOwnersBackend.ID);
+    configureBackend(project, TestCodeOwnerBackend.ID);
     configureBackend(project, "master", FindOwnersBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
@@ -240,7 +240,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void branchLevelBackendForOtherBranchHasNoEffect() throws Exception {
-    configureBackend(project, "foo", TestCodeOwnersBackend.ID);
+    configureBackend(project, "foo", TestCodeOwnerBackend.ID);
     try (AutoCloseable registration = registerTestBackend()) {
       assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
           .isInstanceOf(FindOwnersBackend.class);
@@ -268,7 +268,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
           testRepo
               .commit()
               .parent(head)
-              .message("Configure code owners backend")
+              .message("Configure code owner backend")
               .add("code-owners.config", codeOwnersConfig.toText()));
     }
     projectCache.evict(project);
@@ -276,12 +276,12 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   private AutoCloseable registerTestBackend() {
     RegistrationHandle registrationHandle =
-        ((PrivateInternals_DynamicMapImpl<CodeOwnersBackend>) codeOwnersBackends)
-            .put("gerrit", TestCodeOwnersBackend.ID, Providers.of(new TestCodeOwnersBackend()));
+        ((PrivateInternals_DynamicMapImpl<CodeOwnerBackend>) codeOwnerBackends)
+            .put("gerrit", TestCodeOwnerBackend.ID, Providers.of(new TestCodeOwnerBackend()));
     return () -> registrationHandle.remove();
   }
 
-  private static class TestCodeOwnersBackend implements CodeOwnersBackend {
+  private static class TestCodeOwnerBackend implements CodeOwnerBackend {
     static final String ID = "test-backend";
 
     @Override
