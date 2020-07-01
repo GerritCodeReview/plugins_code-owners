@@ -306,6 +306,30 @@
       "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "14d48942_43c61871",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 20
+      },
+      "lineNbr": 405,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-01T12:03:33Z",
+      "side": 1,
+      "message": "Done in:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/273860",
+      "parentUuid": "cdd17aee_a8841e0a",
+      "range": {
+        "startLine": 405,
+        "startChar": 57,
+        "endLine": 405,
+        "endChar": 65
+      },
+      "revId": "aa65608c7772586a186f4a91defcf75fd064e131",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
