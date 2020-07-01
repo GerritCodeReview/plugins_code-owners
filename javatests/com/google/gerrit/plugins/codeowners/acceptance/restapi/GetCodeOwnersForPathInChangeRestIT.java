@@ -15,24 +15,32 @@
 package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 
 import com.google.gerrit.extensions.restapi.IdString;
+import org.junit.Before;
 
 /**
  * Acceptance test for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint. that
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange} REST endpoint. that
  * require using via REST.
  *
  * <p>Acceptance test for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint that can
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange} REST endpoint that can
  * use the Java API are implemented in {@link
- * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnersForPathInBranchIT}.
+ * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnersForPathInChangeIT}.
  */
-public class GetCodeOwnersForPathInBranchRestIT extends AbstractGetCodeOwnersForPathRestIT {
+public class GetCodeOwnersForPathInChangeRestIT extends AbstractGetCodeOwnersForPathRestIT {
+  private String changeId;
+
+  @Before
+  public void createTestChange() throws Exception {
+    changeId = createChange().getChangeId();
+  }
+
   @Override
   protected String getUrl(String path) {
     return String.format(
-        "/projects/%s/branches/%s/code_owners/%s",
-        IdString.fromDecoded(project.get()),
-        IdString.fromDecoded("master"),
+        "/changes/%s/revisions/%s/code_owners/%s",
+        IdString.fromDecoded(changeId),
+        IdString.fromDecoded("current"),
         IdString.fromDecoded(path));
   }
 }

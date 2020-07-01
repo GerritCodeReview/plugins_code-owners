@@ -18,19 +18,22 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestResource;
+import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.project.BranchResource;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 /**
- * Abstract REST resource that represents a path in a REST collection under a branch.
+ * Abstract REST resource that represents a path in a REST collection under a branch or revision in
+ * a change.
  *
- * <p>We have several REST collections under a branch that have paths as members (see {@link
- * CodeOwnerConfigsInBranchCollection} and {@link CodeOwnersInBranchCollection}). Due to the REST
- * framework the resources in each REST collection must be represented by an own class. To avoid
- * code duplication for the path resources in these different REST collection we have this abstract
- * REST resource for a path that can be extended for each of these REST collections.
+ * <p>We have several REST collections under a branch or revision in a change that have paths as
+ * members (see {@link CodeOwnerConfigsInBranchCollection}, {@link CodeOwnersInBranchCollection} and
+ * {@link CodeOwnersInChangeCollection}). Due to the REST framework the resources in each REST
+ * collection must be represented by an own class. To avoid code duplication for the path resources
+ * in these different REST collection we have this abstract REST resource for a path that can be
+ * extended for each of these REST collections.
  */
 abstract class AbstractPathResource implements RestResource {
   protected static Path parsePath(IdString id) throws BadRequestException {
@@ -48,11 +51,16 @@ abstract class AbstractPathResource implements RestResource {
     return path;
   }
 
-  private final BranchResource branchResource;
+  private final BranchNameKey branchNameKey;
   private final Path path;
 
   protected AbstractPathResource(BranchResource branchResource, Path path) {
-    this.branchResource = branchResource;
+    this.branchNameKey = branchResource.getBranchKey();
+    this.path = path;
+  }
+
+  protected AbstractPathResource(RevisionResource revisionResource, Path path) {
+    this.branchNameKey = revisionResource.getChange().getDest();
     this.path = path;
   }
 
@@ -62,7 +70,7 @@ abstract class AbstractPathResource implements RestResource {
    * @return the branch of this path resource
    */
   public BranchNameKey getBranch() {
-    return branchResource.getBranchKey();
+    return branchNameKey;
   }
 
   /**

@@ -21,8 +21,12 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.TopLevelResource;
+import com.google.gerrit.server.change.ChangeResource;
+import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.project.ProjectResource;
+import com.google.gerrit.server.restapi.change.ChangesCollection;
+import com.google.gerrit.server.restapi.change.Revisions;
 import com.google.gerrit.server.restapi.project.BranchesCollection;
 import com.google.gerrit.server.restapi.project.ProjectsCollection;
 import com.google.inject.Inject;
@@ -36,17 +40,26 @@ import com.google.inject.Singleton;
 @Singleton
 public class CodeOwnersFactory {
   private final CodeOwnersInBranchImpl.Factory codeOwnersInBranchFactory;
+  private final CodeOwnersInChangeImpl.Factory codeOwnersInChangeFactory;
   private final ProjectsCollection projectsCollection;
   private final BranchesCollection branchesCollection;
+  private final ChangesCollection changesCollection;
+  private final Revisions revisions;
 
   @Inject
   CodeOwnersFactory(
       CodeOwnersInBranchImpl.Factory codeOwnersInBranchFactory,
+      CodeOwnersInChangeImpl.Factory codeOwnersInChangeFactory,
       ProjectsCollection projectsCollection,
-      BranchesCollection branchesCollection) {
+      BranchesCollection branchesCollection,
+      ChangesCollection changesCollection,
+      Revisions revisions) {
     this.codeOwnersInBranchFactory = codeOwnersInBranchFactory;
+    this.codeOwnersInChangeFactory = codeOwnersInChangeFactory;
     this.projectsCollection = projectsCollection;
     this.branchesCollection = branchesCollection;
+    this.changesCollection = changesCollection;
+    this.revisions = revisions;
   }
 
   /**
@@ -72,6 +85,18 @@ public class CodeOwnersFactory {
   }
 
   /**
+   * Returns the {@link CodeOwners} API for the given revision.
+   *
+   * @param changeId the ID of the change that contains the revision
+   * @param revisionId the ID of the revision for which the {@link CodeOwners} API should be
+   *     returned
+   * @return the {@link CodeOwners} API for the given revision
+   */
+  public CodeOwners change(String changeId, String revisionId) throws RestApiException {
+    return codeOwnersInChangeFactory.create(getRevisionResource(changeId, revisionId));
+  }
+
+  /**
    * Creates a {@link BranchResource} for the given branch.
    *
    * @param branchNameKey the branch for which a {@link BranchResource} should be created
@@ -86,6 +111,24 @@ public class CodeOwnersFactory {
           projectResource, IdString.fromDecoded(branchNameKey.branch()));
     } catch (Exception e) {
       throw asRestApiException("Cannot retrieve branch", e);
+    }
+  }
+
+  /**
+   * Creates a {@link RevisionResource} for the given revision.
+   *
+   * @param changeId ID of the change that contains the revision
+   * @param revisionId ID of the revision for which a {@link RevisionResource} should be created
+   * @return the {@link RevisionResource} for the given revision
+   */
+  private RevisionResource getRevisionResource(String changeId, String revisionId)
+      throws RestApiException {
+    try {
+      ChangeResource changeResource =
+          changesCollection.parse(TopLevelResource.INSTANCE, IdString.fromDecoded(changeId));
+      return revisions.parse(changeResource, IdString.fromDecoded(revisionId));
+    } catch (Exception e) {
+      throw asRestApiException("Cannot retrieve revision", e);
     }
   }
 }

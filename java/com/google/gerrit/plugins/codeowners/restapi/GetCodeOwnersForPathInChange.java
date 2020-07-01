@@ -26,17 +26,17 @@ import com.google.inject.Inject;
 import java.util.List;
 
 /**
- * REST endpoint that gets the code owners for an arbitrary path in a branch.
+ * REST endpoint that gets the code owners for an arbitrary path in a revision of a change.
  *
  * <p>This REST endpoint handles {@code GET
- * /projects/<project-name>/branches/<branch-name>/code_owners/<path>} requests.
+ * /changes/<change-id>/revisions/<revision-id>/code_owners/<path>} requests.
  *
- * <p>The path may or may not exist in the branch.
+ * <p>The path may or may not exist in the revision of the change.
  */
-public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
-    implements RestReadView<CodeOwnersInBranchCollection.PathResource> {
+public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
+    implements RestReadView<CodeOwnersInChangeCollection.PathResource> {
   @Inject
-  GetCodeOwnersForPathInBranch(
+  GetCodeOwnersForPathInChange(
       PermissionBackend permissionBackend,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
@@ -45,7 +45,7 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
   }
 
   @Override
-  public Response<List<CodeOwnerInfo>> apply(CodeOwnersInBranchCollection.PathResource rsrc)
+  public Response<List<CodeOwnerInfo>> apply(CodeOwnersInChangeCollection.PathResource rsrc)
       throws RestApiException, PermissionBackendException {
     return super.applyImpl(rsrc);
   }
