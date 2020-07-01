@@ -64,8 +64,7 @@ public class CodeOwnersInBranchCollection implements ChildCollection<BranchResou
    */
   public static class PathResource extends AbstractPathResource {
     /**
-     * The resource kind of the members in the {@link CodeOwnerConfigsInBranchCollection} REST
-     * collection.
+     * The resource kind of the members in the {@link CodeOwnersInBranchCollection} REST collection.
      */
     static final TypeLiteral<RestView<PathResource>> PATH_KIND =
         new TypeLiteral<RestView<PathResource>>() {};
