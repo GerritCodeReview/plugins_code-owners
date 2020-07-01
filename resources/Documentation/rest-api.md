@@ -46,7 +46,7 @@ If the path does not exist or if no code owner config exists for the path
 
 ## <a id="branch-endpoints"> Branch Endpoints
 
-### <a id="list-code-owners"> List Code Owners
+### <a id="list-code-owners-for-path-in-branch"> List Code Owners for path in branch
 _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners/[\{path\}](#path)'_
 
 Lists the accounts that are code owners of a file or folder in a branch.
@@ -106,6 +106,17 @@ order is random.
     }
   ]
 ```
+
+### <a id="list-code-owners-for-path-in-change"> List Code Owners for path in change
+_'GET /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners/[\{path\}](#path)'_
+
+Lists the accounts that are code owners of a file in a change revision.
+
+The code owners are computed from the owner configuration at the tip of the
+change's destination branch.
+
+This REST endpoint has the exact same request and response format as the
+[REST endpoint to list code owners for a path in a branch](#list-code-owners-for-path-in-branch).
 
 ## <a id="ids"> IDs
 
