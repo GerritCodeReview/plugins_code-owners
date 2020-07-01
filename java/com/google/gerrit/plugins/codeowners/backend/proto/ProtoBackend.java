@@ -16,7 +16,6 @@ package com.google.gerrit.plugins.codeowners.backend.proto;
 
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackendId;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -53,6 +52,6 @@ public class ProtoBackend extends AbstractFileBasedCodeOwnersBackend {
 
   @Override
   public PathExpressionMatcher getPathExpressionMatcher() {
-    return PathExpressionMatcher.notSupportedBy(CodeOwnersBackendId.PROTO);
+    return Google3PathExpressionMatcher.INSTANCE;
   }
 }

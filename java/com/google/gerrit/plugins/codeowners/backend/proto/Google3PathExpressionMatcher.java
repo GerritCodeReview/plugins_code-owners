@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.proto;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import java.nio.file.Path;
@@ -22,7 +23,8 @@ import java.nio.file.Path;
  * Matcher that checks for a given path expression as Google3 path expression if it matches a given
  * path.
  */
-class Google3PathExpressionMatcher implements PathExpressionMatcher {
+@VisibleForTesting
+public class Google3PathExpressionMatcher implements PathExpressionMatcher {
   /** Singleton instance. */
   public static Google3PathExpressionMatcher INSTANCE = new Google3PathExpressionMatcher();
 
