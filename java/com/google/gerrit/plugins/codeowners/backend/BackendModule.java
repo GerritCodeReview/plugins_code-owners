@@ -28,15 +28,15 @@ public class BackendModule extends FactoryModule {
   protected void configure() {
     factory(CodeOwnersUpdate.Factory.class);
 
-    DynamicMap.mapOf(binder(), CodeOwnersBackend.class);
+    DynamicMap.mapOf(binder(), CodeOwnerBackend.class);
 
-    // Register all code owners backends.
-    // New code owners backends should be added to CodeOwnersBackendId so that they get registered
-    // by the following code (do not add code to bind new code owners backends individually here).
-    for (CodeOwnersBackendId codeOwnersBackendId : CodeOwnersBackendId.values()) {
-      bind(CodeOwnersBackend.class)
-          .annotatedWith(Exports.named(codeOwnersBackendId.getBackendId()))
-          .to(codeOwnersBackendId.getCodeOwnersBackendClass());
+    // Register all code owner backends.
+    // New code owner backends should be added to CodeOwnerBackendId so that they get registered
+    // by the following code (do not add code to bind new code owner backends individually here).
+    for (CodeOwnerBackendId codeOwnerBackendId : CodeOwnerBackendId.values()) {
+      bind(CodeOwnerBackend.class)
+          .annotatedWith(Exports.named(codeOwnerBackendId.getBackendId()))
+          .to(codeOwnerBackendId.getCodeOwnerBackendClass());
     }
   }
 

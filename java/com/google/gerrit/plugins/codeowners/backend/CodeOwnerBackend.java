@@ -23,9 +23,9 @@ import java.util.Optional;
  *
  * <p>Allows to implement different syntaxes and storages for code owner configurations.
  *
- * <p>New code owners backend implementations must be added to {@link CodeOwnersBackendId}.
+ * <p>New code owner backend implementations must be added to {@link CodeOwnerBackendId}.
  */
-public interface CodeOwnersBackend {
+public interface CodeOwnerBackend {
   /**
    * Gets the code owner config for the given key if it exists.
    *

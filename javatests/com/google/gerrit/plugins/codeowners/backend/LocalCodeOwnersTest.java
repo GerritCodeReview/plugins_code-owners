@@ -42,13 +42,13 @@ import org.junit.Test;
 /** Tests for {@link LocalCodeOwners}. */
 public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   private LocalCodeOwners localCodeOwners;
-  private DynamicMap<CodeOwnersBackend> codeOwnersBackends;
+  private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     localCodeOwners = plugin.getSysInjector().getInstance(LocalCodeOwners.class);
-    codeOwnersBackends =
-        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnersBackend>>() {});
+    codeOwnerBackends =
+        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
@@ -99,7 +99,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnersBackend.ID)
+  @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
   public void getLocalCodeOwnersReturnsCodeOwnersFromMatchingCodeOwnerSets() throws Exception {
     PathExpressionMatcher pathExpressionMatcher = mock(PathExpressionMatcher.class);
 
@@ -134,11 +134,11 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnersBackend.ID)
+  @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
   public void cannotGetLocalCodeOwnersIfPathExpressionAreSetAndBackendDoesntSupportPathExpressions()
       throws Exception {
     try (AutoCloseable registration =
-        registerTestBackend(PathExpressionMatcher.notSupportedBy(TestCodeOwnersBackend.ID))) {
+        registerTestBackend(PathExpressionMatcher.notSupportedBy(TestCodeOwnerBackend.ID))) {
       CodeOwnerConfig codeOwnerConfig =
           createCodeOwnerBuilder()
               .addCodeOwnerSet(
@@ -155,7 +155,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
           .hasMessageThat()
           .isEqualTo(
               String.format(
-                  "path expressions not supported by %s backend", TestCodeOwnersBackend.ID));
+                  "path expressions not supported by %s backend", TestCodeOwnerBackend.ID));
     }
   }
 
@@ -279,20 +279,20 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
 
   private AutoCloseable registerTestBackend(PathExpressionMatcher pathExpressionMatcher) {
     RegistrationHandle registrationHandle =
-        ((PrivateInternals_DynamicMapImpl<CodeOwnersBackend>) codeOwnersBackends)
+        ((PrivateInternals_DynamicMapImpl<CodeOwnerBackend>) codeOwnerBackends)
             .put(
                 "gerrit",
-                TestCodeOwnersBackend.ID,
-                Providers.of(new TestCodeOwnersBackend(pathExpressionMatcher)));
+                TestCodeOwnerBackend.ID,
+                Providers.of(new TestCodeOwnerBackend(pathExpressionMatcher)));
     return () -> registrationHandle.remove();
   }
 
-  private static class TestCodeOwnersBackend implements CodeOwnersBackend {
+  private static class TestCodeOwnerBackend implements CodeOwnerBackend {
     static final String ID = "test-backend";
 
     private final PathExpressionMatcher pathExpressionMatcher;
 
-    TestCodeOwnersBackend(PathExpressionMatcher pathExpressionMatcher) {
+    TestCodeOwnerBackend(PathExpressionMatcher pathExpressionMatcher) {
       this.pathExpressionMatcher = pathExpressionMatcher;
     }
 
