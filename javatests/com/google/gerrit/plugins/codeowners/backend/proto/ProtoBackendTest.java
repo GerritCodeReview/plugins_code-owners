@@ -2,15 +2,15 @@ package com.google.gerrit.plugins.codeowners.backend.proto;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackendTest;
+import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackendTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import org.junit.Test;
 
 /** Tests for {@link ProtoBackend}. */
-public class ProtoBackendTest extends AbstractFileBasedCodeOwnersBackendTest {
+public class ProtoBackendTest extends AbstractFileBasedCodeOwnerBackendTest {
   @Override
-  protected Class<? extends AbstractFileBasedCodeOwnersBackend> getBackendClass() {
+  protected Class<? extends AbstractFileBasedCodeOwnerBackend> getBackendClass() {
     return ProtoBackend.class;
   }
 
@@ -26,7 +26,7 @@ public class ProtoBackendTest extends AbstractFileBasedCodeOwnersBackendTest {
 
   @Test
   public void getPathExpressionMatcher() throws Exception {
-    assertThat(codeOwnersBackend.getPathExpressionMatcher())
+    assertThat(codeOwnerBackend.getPathExpressionMatcher())
         .isInstanceOf(Google3PathExpressionMatcher.class);
   }
 }

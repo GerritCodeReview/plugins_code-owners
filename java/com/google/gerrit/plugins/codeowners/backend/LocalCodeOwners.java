@@ -69,8 +69,8 @@ class LocalCodeOwners {
   /**
    * Gets the {@link PathExpressionMatcher} that should be used for the specified code owner config.
    *
-   * <p>Checks which {@link CodeOwnersBackend} is responsible for the specified code owner config
-   * and retrieves the {@link PathExpressionMatcher} from it.
+   * <p>Checks which {@link CodeOwnerBackend} is responsible for the specified code owner config and
+   * retrieves the {@link PathExpressionMatcher} from it.
    *
    * @param codeOwnerConfigKey the key of the code owner config for which the path expression
    *     matcher should be returned
@@ -78,9 +78,9 @@ class LocalCodeOwners {
    *     config
    */
   private PathExpressionMatcher getMatcher(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    CodeOwnersBackend codeOwnersBackend =
+    CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
-    return codeOwnersBackend.getPathExpressionMatcher();
+    return codeOwnerBackend.getPathExpressionMatcher();
   }
 
   /**

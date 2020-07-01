@@ -23,10 +23,10 @@ import java.util.Optional;
  * API to read code owner configurations.
  *
  * <p>All calls which read code owners from code owner configurations are gathered here. Other
- * classes should always use this class instead of accessing {@link CodeOwnersBackend} directly.
+ * classes should always use this class instead of accessing {@link CodeOwnerBackend} directly.
  *
- * <p>Read logic that is common for all {@link CodeOwnersBackend}s is implemented in this class so
- * that we avoid code repetition in the code owners backends.
+ * <p>Read logic that is common for all {@link CodeOwnerBackend}s is implemented in this class so
+ * that we avoid code repetition in the code owner backends.
  */
 @Singleton
 public class CodeOwners {
@@ -45,8 +45,8 @@ public class CodeOwners {
    *     Optional#empty()}
    */
   public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    CodeOwnersBackend codeOwnersBackend =
+    CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
-    return codeOwnersBackend.getCodeOwnerConfig(codeOwnerConfigKey);
+    return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey);
   }
 }
