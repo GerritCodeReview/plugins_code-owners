@@ -102,6 +102,30 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
   }
 
   @Test
+  public void codeOwnerConfigWithNonSortedEmails() throws Exception {
+    String codeOwnerConfigWithNonSortedEmails =
+        new StringBuilder()
+            .append("owners_config {\n")
+            .append("  owner_sets {\n")
+            .append(String.format("    owners {\n      email: \"%s\"\n    }\n", EMAIL_3))
+            .append(String.format("    owners {\n      email: \"%s\"\n    }\n", EMAIL_2))
+            .append(String.format("    owners {\n      email: \"%s\"\n    }\n", EMAIL_1))
+            .append("  }\n")
+            .append("}\n")
+            .toString();
+
+    assertParseAndFormat(
+        codeOwnerConfigWithNonSortedEmails,
+        codeOwnerConfig ->
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+  }
+
+  @Test
   public void codeOwnerConfigWithMultipleCodeOwnerSets() throws Exception {
     CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
     CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_2);
