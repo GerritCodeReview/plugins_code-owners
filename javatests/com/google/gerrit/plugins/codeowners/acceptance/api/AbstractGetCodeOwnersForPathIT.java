@@ -20,6 +20,7 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
@@ -46,6 +47,14 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.restapi.AbstractGetCodeOwnersForPath}.
  */
 public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersIT {
+  /**
+   * List of all file paths that are used by the tests. Subclasses can use this list to create these
+   * files in the test setup in case they test functionality that requires the files to exist.
+   */
+  protected static final ImmutableList<String> TEST_PATHS =
+      ImmutableList.of(
+          "/foo/bar.md", "/foo/bar/baz.md", "/foo/bar/config.txt", "/foo/bar/main.config");
+
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private AccountOperations accountOperations;
   @Inject private GroupOperations groupOperations;
@@ -60,9 +69,18 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   /** Must return the {@link CodeOwners} API against which the tests should be run. */
   protected abstract CodeOwners getCodeOwnersApi() throws RestApiException;
 
+  protected List<CodeOwnerInfo> queryCodeOwners(String path) throws RestApiException {
+    return queryCodeOwners(getCodeOwnersApi().query(), path);
+  }
+
+  protected List<CodeOwnerInfo> queryCodeOwners(CodeOwners.QueryRequest queryRequest, String path)
+      throws RestApiException {
+    return queryRequest.get(path);
+  }
+
   @Test
   public void getCodeOwnersWhenNoCodeOwnerConfigsExist() throws Exception {
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md")).isEmpty();
+    assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
   }
 
   @Test
@@ -75,7 +93,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addCodeOwnerEmail(admin.email())
         .addCodeOwnerEmail(user.email())
         .create();
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md")).isEmpty();
+    assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
   }
 
   @Test
@@ -116,7 +134,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .create();
 
     List<CodeOwnerInfo> codeOwnerInfos =
-        getCodeOwnersApi().query().get(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md");
+        queryCodeOwners(useAbsolutePath ? "/foo/bar/baz.md" : "foo/bar/baz.md");
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user.id(), admin.id())
@@ -170,7 +188,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     // The 3. code owner config is ignored since the 2. code owner config has set
     // 'ignoreParentCodeOwners=true'. Hence the expected code owners are only the users that are
     // code owner according to the 1. and 2. code owner config: user2 + user
-    List<CodeOwnerInfo> codeOwnerInfos = getCodeOwnersApi().query().get("/foo/bar/baz.md");
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user.id())
@@ -196,13 +214,13 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
                 .build())
         .create();
 
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/config.txt"))
+    assertThat(queryCodeOwners("/foo/bar/config.txt"))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id());
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md"))
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/main.config")).isEmpty();
+    assertThat(queryCodeOwners("/foo/bar/main.config")).isEmpty();
   }
 
   @Test
@@ -216,7 +234,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .create();
 
     List<CodeOwnerInfo> codeOwnerInfos =
-        getCodeOwnersApi().query().withOptions(ListAccountsOption.DETAILS).get("/foo/bar/baz.md");
+        queryCodeOwners(
+            getCodeOwnersApi().query().withOptions(ListAccountsOption.DETAILS), "/foo/bar/baz.md");
     assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountName())
@@ -240,10 +259,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // Make the request with the admin user that has the 'Modify Account' global capability.
     List<CodeOwnerInfo> codeOwnerInfos =
-        getCodeOwnersApi()
-            .query()
-            .withOptions(ListAccountsOption.ALL_EMAILS)
-            .get("/foo/bar/baz.md");
+        queryCodeOwners(
+            getCodeOwnersApi().query().withOptions(ListAccountsOption.ALL_EMAILS),
+            "/foo/bar/baz.md");
     assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
     assertThatList(codeOwnerInfos)
         .onlyElement()
@@ -274,10 +292,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         assertThrows(
             AuthException.class,
             () ->
-                getCodeOwnersApi()
-                    .query()
-                    .withOptions(ListAccountsOption.ALL_EMAILS)
-                    .get("/foo/bar/baz.md"));
+                queryCodeOwners(
+                    getCodeOwnersApi().query().withOptions(ListAccountsOption.ALL_EMAILS),
+                    "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("modify account not permitted");
   }
 
@@ -297,10 +314,11 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // Make the request with the admin user that has the 'Modify Account' global capability.
     List<CodeOwnerInfo> codeOwnerInfos =
-        getCodeOwnersApi()
-            .query()
-            .withOptions(ListAccountsOption.DETAILS, ListAccountsOption.ALL_EMAILS)
-            .get("/foo/bar/baz.md");
+        queryCodeOwners(
+            getCodeOwnersApi()
+                .query()
+                .withOptions(ListAccountsOption.DETAILS, ListAccountsOption.ALL_EMAILS),
+            "/foo/bar/baz.md");
     assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountName())
@@ -366,7 +384,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .create();
 
     // Make the request as admin who can see all accounts.
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md"))
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id(), user3.id());
 
@@ -377,7 +395,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // We expect only user2 and user3 as code owner (user and admin should be filtered
     // out because user2 cannot see their accounts).
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md"))
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user3.id());
   }
@@ -398,13 +416,13 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .create();
 
     // admin has the "Modify Account" global capability and hence can see secondary emails
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md"))
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
 
     // user can see the own secondary email
     requestScopeOperations.setApiUser(user.id());
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md"))
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
 
@@ -412,7 +430,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     // email
     TestAccount user2 = accountCreator.user2();
     requestScopeOperations.setApiUser(user2.id());
-    assertThat(getCodeOwnersApi().query().get("/foo/bar/baz.md")).isEmpty();
+    assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
   }
 
   @Test
@@ -436,7 +454,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addCodeOwnerEmail(user.email())
         .create();
 
-    List<CodeOwnerInfo> codeOwnerInfos = getCodeOwnersApi().query().get("/foo/bar.md");
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar.md");
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id());
@@ -465,7 +483,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     codeOwnerConfigCreation.create();
 
     // Assert that the result is limited by the default limit.
-    List<CodeOwnerInfo> codeOwnerInfos = getCodeOwnersApi().query().get("/foo/bar.md");
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar.md");
     assertThat(codeOwnerInfos).hasSize(GetCodeOwnersForPathInBranch.DEFAULT_LIMIT);
   }
 
@@ -493,13 +511,13 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // get code owners with different limits
     List<CodeOwnerInfo> codeOwnerInfos =
-        getCodeOwnersApi().query().withLimit(1).get("/foo/bar/baz.md");
+        queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
     assertThat(codeOwnerInfos).hasSize(1);
     // the first 2 code owners have the same scoring, so their order is random and we don't know
     // which of them we get when the limit is 1
     assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isAnyOf(user.id(), user2.id());
 
-    codeOwnerInfos = getCodeOwnersApi().query().withLimit(2).get("/foo/bar/baz.md");
+    codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id(), user2.id());
@@ -515,7 +533,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     BadRequestException exception =
         assertThrows(
             BadRequestException.class,
-            () -> getCodeOwnersApi().query().withLimit(0).get("/foo/bar/baz.md"));
+            () -> queryCodeOwners(getCodeOwnersApi().query().withLimit(0), "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
   }
 
@@ -524,7 +542,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     BadRequestException exception =
         assertThrows(
             BadRequestException.class,
-            () -> getCodeOwnersApi().query().withLimit(-1).get("/foo/bar/baz.md"));
+            () -> queryCodeOwners(getCodeOwnersApi().query().withLimit(-1), "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
   }
 }
