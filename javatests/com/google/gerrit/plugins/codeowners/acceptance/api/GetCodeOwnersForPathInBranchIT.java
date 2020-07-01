@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
@@ -25,15 +26,21 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.inject.Inject;
 import java.util.List;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -49,6 +56,16 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private AccountOperations accountOperations;
   @Inject private GroupOperations groupOperations;
+
+  private CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private TestPathExpressions testPathExpressions;
+
+  @Before
+  public void setup() throws Exception {
+    codeOwnersPluginConfiguration =
+        plugin.getSysInjector().getInstance(CodeOwnersPluginConfiguration.class);
+    testPathExpressions = plugin.getSysInjector().getInstance(TestPathExpressions.class);
+  }
 
   @Test
   public void getCodeOwnersWhenNoCodeOwnerConfigsExist() throws Exception {
@@ -171,6 +188,39 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractCodeOwnersIT {
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user.id())
         .inOrder();
+  }
+
+  @Test
+  public void getPerFileCodeOwners() throws Exception {
+    assume()
+        .that(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+        .isInstanceOf(FindOwnersBackend.class);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileTypeInCurrentFolder("txt"))
+                .addCodeOwnerEmail(admin.email())
+                .build())
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileTypeInCurrentFolder("md"))
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/config.txt"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id());
+    assertThat(codeOwnersApiFactory.branch(project, "master").query().get("/foo/bar/main.config"))
+        .isEmpty();
   }
 
   @Test
