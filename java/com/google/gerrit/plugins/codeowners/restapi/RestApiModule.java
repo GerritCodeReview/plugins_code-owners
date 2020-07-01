@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.gerrit.server.change.RevisionResource.REVISION_KIND;
 import static com.google.gerrit.server.project.BranchResource.BRANCH_KIND;
 
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -31,5 +32,9 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
     DynamicMap.mapOf(binder(), CodeOwnersInBranchCollection.PathResource.PATH_KIND);
     child(BRANCH_KIND, "code_owners").to(CodeOwnersInBranchCollection.class);
     get(CodeOwnersInBranchCollection.PathResource.PATH_KIND).to(GetCodeOwnersForPathInBranch.class);
+
+    DynamicMap.mapOf(binder(), CodeOwnersInChangeCollection.PathResource.PATH_KIND);
+    child(REVISION_KIND, "code_owners").to(CodeOwnersInChangeCollection.class);
+    get(CodeOwnersInChangeCollection.PathResource.PATH_KIND).to(GetCodeOwnersForPathInChange.class);
   }
 }
