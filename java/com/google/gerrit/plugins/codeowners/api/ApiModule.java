@@ -22,5 +22,6 @@ public class ApiModule extends FactoryModule {
   protected void configure() {
     factory(CodeOwnerConfigsInBranchImpl.Factory.class);
     factory(CodeOwnersInBranchImpl.Factory.class);
+    factory(CodeOwnersInChangeImpl.Factory.class);
   }
 }
