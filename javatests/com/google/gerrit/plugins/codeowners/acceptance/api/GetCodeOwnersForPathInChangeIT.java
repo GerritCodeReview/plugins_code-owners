@@ -16,19 +16,27 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
+import org.junit.Before;
 
 /**
  * Acceptance test for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint.
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange} REST endpoint.
  *
  * <p>Further tests for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch} REST endpoint that
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange} REST endpoint that
  * require using the REST API are implemented in {@link
- * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnersForPathInBranchRestIT}.
+ * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnersForPathInChangeRestIT}.
  */
-public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPathIT {
+public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPathIT {
+  private String changeId;
+
+  @Before
+  public void createTestChange() throws Exception {
+    changeId = createChange().getChangeId();
+  }
+
   @Override
   protected CodeOwners getCodeOwnersApi() throws RestApiException {
-    return codeOwnersApiFactory.branch(project, "master");
+    return codeOwnersApiFactory.change(changeId, "current");
   }
 }
