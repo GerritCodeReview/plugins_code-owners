@@ -152,7 +152,8 @@ public class CodeOwnersPluginConfiguration {
                             backendName, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND))));
   }
 
-  private CodeOwnersBackend getDefaultBackend() {
+  @VisibleForTesting
+  public CodeOwnersBackend getDefaultBackend() {
     return lookupBackend(defaultBackendName)
         .orElseThrow(
             () ->
