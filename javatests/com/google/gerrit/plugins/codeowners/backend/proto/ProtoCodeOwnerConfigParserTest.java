@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend.proto;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static java.util.Objects.requireNonNull;
 
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
@@ -25,6 +26,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.protobuf.TextFormat;
+import java.util.Arrays;
 import org.junit.Test;
 
 /** Tests for {@link ProtoCodeOwnerConfigParser}. */
@@ -102,6 +104,19 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
   }
 
   @Test
+  public void codeOwnerConfigWithNonSortedEmails() throws Exception {
+    assertParseAndFormat(
+        getCodeOwnerConfigWithGivenEmailOrder(EMAIL_3, EMAIL_2, EMAIL_1),
+        codeOwnerConfig ->
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+  }
+
+  @Test
   public void codeOwnerConfigWithMultipleCodeOwnerSets() throws Exception {
     CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
     CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_2);
@@ -112,5 +127,26 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
                 .containsExactly(codeOwnerSet1, codeOwnerSet2)
                 .inOrder(),
         getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
+  }
+
+  /**
+   * Gets a code owner config that contains the given emails as code owners in the order in which
+   * the emails are provided.
+   *
+   * @param firstEmail the email of the first code owner
+   * @param moreEmails the emails of further code owners
+   */
+  private String getCodeOwnerConfigWithGivenEmailOrder(String firstEmail, String... moreEmails) {
+    requireNonNull(firstEmail, "firstEmail");
+    StringBuilder b =
+        new StringBuilder()
+            .append("owners_config {\n")
+            .append("  owner_sets {\n")
+            .append(String.format("    owners {\n      email: \"%s\"\n    }\n", firstEmail));
+    Arrays.stream(moreEmails)
+        .forEach(
+            email -> b.append(String.format("    owners {\n      email: \"%s\"\n    }\n", email)));
+    b.append("  }\n").append("}\n");
+    return b.toString();
   }
 }
