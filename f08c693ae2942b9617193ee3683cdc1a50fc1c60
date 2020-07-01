@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "98622a05_26907ff4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-01T15:48:46Z",
+      "side": 1,
+      "message": "Typo: it",
+      "range": {
+        "startLine": 24,
+        "startChar": 43,
+        "endLine": 24,
+        "endChar": 45
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8706140c_36e2b34c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFile.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-01T15:48:46Z",
+      "side": 1,
+      "message": "Now that this factory only contains the GitRepositoryManager for opening the repository, we don\u0027t actually need it anymore. The only calls of the load() method without the repository could easily be transformed. CodeOwnerConfigFile could then just have a static method for creation.",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 12
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d36d0c5_833d5a14",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/backend/BackendTestUtil.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-01T15:48:46Z",
+      "side": 1,
+      "message": "Could we use a class name which does not end in \"Util\"? The focus of this test helper class is very narrow and I\u0027m sure that we could find a more focused name.",
+      "range": {
+        "startLine": 32,
+        "startChar": 13,
+        "endLine": 32,
+        "endChar": 28
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2414089e_ac897557",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-01T15:48:46Z",
+      "side": 1,
+      "message": "Interesting choice to use Java serialization for a test format. Did you also consider using gson or a simple, own format? (I\u0027m asking as I see that this implementation gets more complicated/extended by the end of the current chain of changes.)",
+      "range": {
+        "startLine": 381,
+        "startChar": 23,
+        "endLine": 381,
+        "endChar": 48
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
