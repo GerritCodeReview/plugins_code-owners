@@ -1,0 +1,211 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bee048af_58544faa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "There is one caveat I see with the current implementation. If a CodeOwnerBackend chooses to not support path expressions but users specify them in the code owner config file (let\u0027s assume that we have a weird state in which the config file format supports path expressions), Gerrit will throw an exception only during runtime. Would it be an option to simply ignore the path expressions (-\u003e code owners apply to all files) in such a case or to ignore the corresponding code owner sets (-\u003e code owners are ignored) instead of throwing an exception? Of course, this wouldn\u0027t help to directly point to inconsistencies but I think we should use a different, non-server-error-producing mechanism to catch inconsistencies.",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f8bed069_c4e79651",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "I would have expected that the supported pattern types also depend on the file system or other factors. Are there any plans to make the PathExpressionMatcher configurable per CodeOwnersBackend?",
+      "range": {
+        "startLine": 32,
+        "startChar": 18,
+        "endLine": 33,
+        "endChar": 61
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "19ee30dc_21e6b0f4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSet.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "Shouldn\u0027t this parameter be set on the builder?",
+      "range": {
+        "startLine": 75,
+        "startChar": 27,
+        "endLine": 75,
+        "endChar": 42
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6648957_6d976d03",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackend.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "Typo: the",
+      "range": {
+        "startLine": 58,
+        "startChar": 11,
+        "endLine": 58,
+        "endChar": 15
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a70c3e77_c4d66cd7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/LocalCodeOwners.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "I don\u0027t know if this is an expensive operation (or might turn into one in the future) but I would look up the matcher outside of the stream so that we only do the lookup once.",
+      "range": {
+        "startLine": 64,
+        "startChar": 64,
+        "endLine": 64,
+        "endChar": 97
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "006a02a9_97b35f59",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressionMatcher.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "Is the idea that every PathExpressionMatcher also needs to implement (and test) the logic to match non-regexes? Or might there even be some PathExpressionMatchers in the future which don\u0027t accept non-regexes?\n\n(This shouldn\u0027t necessarily be a trigger to change anything in the code as I guess identifying non-regexes reliably might involve more code than the current approach.)",
+      "range": {
+        "startLine": 26,
+        "startChar": 17,
+        "endLine": 26,
+        "endChar": 38
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8b4b3fcd_9cc2dafc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressionMatcher.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "UnsupportedOperationException?",
+      "range": {
+        "startLine": 31,
+        "startChar": 66,
+        "endLine": 31,
+        "endChar": 87
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f89e062f_963316ab",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSetTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "Wouldn\u0027t this part here need to be repeated to get a \"DuplicatePathExpression\" as the test name says?",
+      "range": {
+        "startLine": 99,
+        "startChar": 54,
+        "endLine": 99,
+        "endChar": 88
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "74fdb522_171c6238",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/LocalCodeOwnersTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:40:31Z",
+      "side": 1,
+      "message": "Is there a test which ensures that the code owners from all matching code owner sets are returned and not just the ones from the first matching set? (I think the easiest would be to extend this test by a third code owner set.)",
+      "range": {
+        "startLine": 103,
+        "startChar": 14,
+        "endLine": 103,
+        "endChar": 74
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
