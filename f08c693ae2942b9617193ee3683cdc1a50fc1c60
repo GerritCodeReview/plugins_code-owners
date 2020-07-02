@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d8e27ef7_6cc27fba",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-02T07:27:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98622a05_26907ff4",
+      "range": {
+        "startLine": 24,
+        "startChar": 43,
+        "endLine": 24,
+        "endChar": 45
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8706140c_36e2b34c",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFile.java",
         "patchSetId": 13
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "371d8154_022dc400",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFile.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-02T07:27:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8706140c_36e2b34c",
+      "range": {
+        "startLine": 50,
+        "startChar": 4,
+        "endLine": 50,
+        "endChar": 12
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4d36d0c5_833d5a14",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/backend/BackendTestUtil.java",
         "patchSetId": 13
@@ -68,6 +116,30 @@
       "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "95185d91_659ef5a2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/backend/BackendTestUtil.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-02T07:27:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4d36d0c5_833d5a14",
+      "range": {
+        "startLine": 32,
+        "startChar": 13,
+        "endLine": 32,
+        "endChar": 28
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -115,6 +187,30 @@
       "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b6da1b7_03693e25",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-02T07:27:25Z",
+      "side": 1,
+      "message": "Thanks, this second suggestion is very good and simplifies the code here a lot!\n\nInitially I thought that using Java serialization would be straight-forward, but then the problem was that CodeOwnerConfig didn\u0027t implement Serializable and I didn\u0027t want to add it just for this test, which made it more complicating going forward (and I kind of regretted that idea later in this series).",
+      "parentUuid": "9cf9d1db_ad544e05",
+      "range": {
+        "startLine": 381,
+        "startChar": 23,
+        "endLine": 381,
+        "endChar": 48
+      },
+      "revId": "f08c693ae2942b9617193ee3683cdc1a50fc1c60",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
