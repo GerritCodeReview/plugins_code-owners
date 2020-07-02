@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "bfd70555_7bc8805e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigJsonTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T19:54:41Z",
+      "side": 1,
+      "message": "Nit: That\u0027s not relevant for this test, is it?",
+      "range": {
+        "startLine": 71,
+        "startChar": 12,
+        "endLine": 71,
+        "endChar": 40
+      },
+      "revId": "859e14d3c01aedff4271258b50041a739a1aea52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
