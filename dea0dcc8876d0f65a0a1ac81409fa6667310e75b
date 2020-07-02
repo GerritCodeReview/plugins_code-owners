@@ -39,6 +39,30 @@
       "revId": "dea0dcc8876d0f65a0a1ac81409fa6667310e75b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8e1e6a27_b510a849",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-02T08:27:08Z",
+      "side": 1,
+      "message": "Thanks. That\u0027s better.\n\nDone",
+      "parentUuid": "80346167_b2b8b8ec",
+      "range": {
+        "startLine": 384,
+        "startChar": 38,
+        "endLine": 384,
+        "endChar": 67
+      },
+      "revId": "dea0dcc8876d0f65a0a1ac81409fa6667310e75b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
