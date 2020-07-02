@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "76aead1f_b7e6b663",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T07:47:23Z",
+      "side": 1,
+      "message": "Just a smaller nit. I\u0027m giving +2 so that you can decide whether you want to submit or adjust the nit.",
+      "revId": "dea0dcc8876d0f65a0a1ac81409fa6667310e75b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80346167_b2b8b8ec",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 384,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-02T07:47:23Z",
+      "side": 1,
+      "message": "Nit: If you want to cover the whole path of writing to the repository and reading from it again, we\u0027d need to use codeOwnerConfigAsString here and use codeOwnerConfig.toString() as map key.",
+      "range": {
+        "startLine": 384,
+        "startChar": 38,
+        "endLine": 384,
+        "endChar": 67
+      },
+      "revId": "dea0dcc8876d0f65a0a1ac81409fa6667310e75b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
