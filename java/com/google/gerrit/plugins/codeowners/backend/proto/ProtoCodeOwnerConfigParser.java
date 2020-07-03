@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
@@ -75,10 +76,14 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
       return ownersConfig.getOwnerSetsList().stream()
           .map(
               ownerSetProto ->
-                  CodeOwnerSet.createWithoutPathExpressions(
-                      ownerSetProto.getOwnersList().stream()
-                          .map(ownerSet -> CodeOwnerReference.create(ownerSet.getEmail()))
-                          .collect(toImmutableSet())))
+                  CodeOwnerSet.builder()
+                      .setPathExpressions(
+                          ImmutableSet.copyOf(ownerSetProto.getPathExpressionsList()))
+                      .setCodeOwners(
+                          ownerSetProto.getOwnersList().stream()
+                              .map(ownerSet -> CodeOwnerReference.create(ownerSet.getEmail()))
+                              .collect(toImmutableSet()))
+                      .build())
           .filter(codeOwnerSet -> !codeOwnerSet.codeOwners().isEmpty())
           .collect(toImmutableList());
     }
@@ -108,6 +113,7 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
         OwnersConfig.Builder ownersConfigProtoBuilder, CodeOwnerConfig codeOwnerConfig) {
       for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
         OwnerSet.Builder ownerSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
+        ownerSetProtoBuilder.addAllPathExpressions(codeOwnerSet.pathExpressions());
         codeOwnerSet.codeOwners().stream()
             .sorted(Comparator.comparing(CodeOwnerReference::email))
             .forEach(

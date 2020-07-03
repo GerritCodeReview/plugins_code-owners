@@ -36,10 +36,14 @@ message OwnersConfig {
 }
 
 // Definition of a set of owners.
-// Next ID: 2
+// Next ID: 3
 message OwnerSet {
+  // The per-file equivalent. Ownership is restricted when any paths are
+  // present. The path expressions must be Google3 path expressions.
+  repeated string path_expressions = 1;
+
   // Users that should be code owners.
-  repeated Owner owners = 1;
+  repeated Owner owners = 2;
 }
 
 // Definitions of an owner or group of owners.
