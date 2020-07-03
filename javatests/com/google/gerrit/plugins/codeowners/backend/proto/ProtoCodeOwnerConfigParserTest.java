@@ -35,12 +35,7 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
   }
 
   @Override
-  protected String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
-    return getCodeOwnerConfig(
-        ignoreParentCodeOwners, CodeOwnerSet.createWithoutPathExpressions(emails));
-  }
-
-  private static String getCodeOwnerConfig(
+  protected String getCodeOwnerConfig(
       boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets) {
     StringBuilder b = new StringBuilder();
     b.append("owners_config {\n");
@@ -50,6 +45,9 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
     for (CodeOwnerSet codeOwnerSet : codeOwnerSets) {
       if (!codeOwnerSet.codeOwners().isEmpty()) {
         b.append("  owner_sets {\n");
+        for (String pathExpression : codeOwnerSet.pathExpressions()) {
+          b.append(String.format("    path_expressions: \"%s\"\n", pathExpression));
+        }
         for (CodeOwnerReference codeOwnerReference : codeOwnerSet.codeOwners()) {
           b.append(
               String.format(
@@ -126,7 +124,7 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
   }
 
   @Test
-  public void codeOwnerConfigWithMultipleCodeOwnerSets() throws Exception {
+  public void setMultipleCodeOwnerSetsWithoutPathExpressions() throws Exception {
     CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
     CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_2);
     assertParseAndFormat(
