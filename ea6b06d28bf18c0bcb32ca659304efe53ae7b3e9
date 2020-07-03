@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "65cd05d3_170278d2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T09:56:53Z",
+      "side": 1,
+      "message": "\u003e An alternative suggestion: We could adjust the CodeOwnersBackend#getPathExpressionMatcher method to return\n\u003e Optional\u003cPathExpressionMatcher\u003e. Thus, we would support a) by default and have the handling of this case\n\u003e in the core code owner implementation.\n\nI like this proposal. Thanks for the suggestion.",
+      "parentUuid": "6ffd2f5c_e79971f1",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f8bed069_c4e79651",
         "filename": "/COMMIT_MSG",
         "patchSetId": 12
@@ -132,6 +156,30 @@
       "side": 1,
       "message": "I could imagine that when we add this configurability, we would choose a different structure than returning one PathExpressionMatcher from a CodeOwnersBackend (e.g. have it separate and loaded according to configuration and the CodeOwnersBackend would only indicate which modes it supports including a default/fallback). If we would have implemented the configurability soon, I would have prefered to directly discuss such a different structure. As you said that this isn\u0027t around the corner, let\u0027s keep the current structure which supports the current use case until we see that we need a different one.",
       "parentUuid": "64b276b3_fe7a5a6a",
+      "range": {
+        "startLine": 32,
+        "startChar": 18,
+        "endLine": 33,
+        "endChar": 61
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ad7f114f_b66bf6d6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T09:56:53Z",
+      "side": 1,
+      "message": "Yeah, let\u0027s worry about this later. I think changing this later shouldn\u0027t be too difficult.",
+      "parentUuid": "66e9f58f_3f30de84",
       "range": {
         "startLine": 32,
         "startChar": 18,
@@ -296,6 +344,30 @@
       "side": 1,
       "message": "Well, I don\u0027t have a problem, I just wasn\u0027t sure about the exact perspective/interpretation of what a path expression is considered to be. For instance, let\u0027s say we have \"my_subfolder\" and \"*.txt\" as path expressions. I would have assumed that when we evaluate local code owners for \"my_subfolder\", we always consider the \"my_subfolder\" expression as matching no matter which regex/wildcard implementation will be used. However, the interpretation of the \"*.txt\" pattern would be left to the concrete regex/wildcard interpreter.\n\nI also see the different perspective which interprets \"my_subfolder\" as an expression too for which the concrete interpreter needs to decide whether it\u0027s matching. I guess most existing regex/wildcard interpreter implementations also work for plain relative file/folder paths. It\u0027s still an aspect we\u0027d need to test for every PathExpressionMatcher implementation. On the bright side, it also gives us additional flexibility and doesn\u0027t require additional code outside of the PathExpressionMatchers.\n\nBoth perspectives/approaches are fine for me. If we stay with the latter (which seems to be the currently used one), could we maybe add a note to the Javadoc description of PathExpressionMatcher that path expressions can also be plain file/folder paths and that they need to be covered by the matcher as well?",
       "parentUuid": "0c32201e_9e307e57",
+      "range": {
+        "startLine": 26,
+        "startChar": 17,
+        "endLine": 26,
+        "endChar": 38
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1f10a57e_152d5a52",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressionMatcher.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T09:56:53Z",
+      "side": 1,
+      "message": "Thanks for explaining. Yeah, the current approach is to always ask the PathExpressionMatcher if there is a path expression, even if the path expression doesn\u0027t use any wildcard and is just a normal folder/file name. I would stay with this approach for now, and update the javadoc as you suggest.",
+      "parentUuid": "add9ea7f_e0823bff",
       "range": {
         "startLine": 26,
         "startChar": 17,
