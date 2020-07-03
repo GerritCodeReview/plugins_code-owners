@@ -34,7 +34,7 @@ public class CodeOwnerSetInfo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(codeOwners);
+    return Objects.hashCode(codeOwners);
   }
 
   @Override
