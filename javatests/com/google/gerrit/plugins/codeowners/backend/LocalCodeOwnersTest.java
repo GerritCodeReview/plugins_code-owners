@@ -277,7 +277,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
                 "gerrit",
                 TestCodeOwnerBackend.ID,
                 Providers.of(new TestCodeOwnerBackend(pathExpressionMatcher)));
-    return () -> registrationHandle.remove();
+    return registrationHandle::remove;
   }
 
   private static class TestCodeOwnerBackend implements CodeOwnerBackend {
