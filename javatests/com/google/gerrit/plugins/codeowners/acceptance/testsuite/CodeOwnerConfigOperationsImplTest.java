@@ -34,7 +34,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
 import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,8 +55,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     codeOwnersUpdate =
         plugin
             .getSysInjector()
-            .getInstance(
-                Key.get(new TypeLiteral<Provider<CodeOwnersUpdate>>() {}, ServerInitiated.class));
+            .getInstance(new Key<Provider<CodeOwnersUpdate>>(ServerInitiated.class) {});
   }
 
   @Test
