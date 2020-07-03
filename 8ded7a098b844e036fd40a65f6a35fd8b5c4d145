@@ -22,6 +22,30 @@
       "revId": "8ded7a098b844e036fd40a65f6a35fd8b5c4d145",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "332aeb0a_1f35d76e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 182,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T14:22:17Z",
+      "side": 1,
+      "message": "Yes.\n\nWe need to set s code owner, because otherwise the config would be empty, and hence not created.\n\nDone.",
+      "parentUuid": "5c70fde9_1b53b78d",
+      "range": {
+        "startLine": 182,
+        "startChar": 13,
+        "endLine": 182,
+        "endChar": 37
+      },
+      "revId": "8ded7a098b844e036fd40a65f6a35fd8b5c4d145",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
