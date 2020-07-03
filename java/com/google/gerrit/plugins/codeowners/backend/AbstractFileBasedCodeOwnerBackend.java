@@ -31,13 +31,13 @@ import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 
 /**
- * Base class for all {@link CodeOwnersBackend}'s that store {@link CodeOwnerConfig}'s in files
+ * Base class for all {@link CodeOwnerBackend}'s that store {@link CodeOwnerConfig}'s in files
  * inside the corresponding folders in the source branch.
  *
  * <p>E.g. the code owner configuration for folder {@code /foo/bar} folder of the {@code master}
  * branch is stored as a file in the {@code /foo/bar} folder of the {@code master}
  */
-public abstract class AbstractFileBasedCodeOwnersBackend implements CodeOwnersBackend {
+public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBackend {
   private final GitRepositoryManager repoManager;
   private final PersonIdent serverIdent;
   private final MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory;
@@ -45,7 +45,7 @@ public abstract class AbstractFileBasedCodeOwnersBackend implements CodeOwnersBa
   private final String fileName;
   private final CodeOwnerConfigParser codeOwnerConfigParser;
 
-  protected AbstractFileBasedCodeOwnersBackend(
+  protected AbstractFileBasedCodeOwnerBackend(
       GitRepositoryManager repoManager,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,

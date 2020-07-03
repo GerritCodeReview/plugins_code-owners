@@ -69,10 +69,10 @@ class LocalCodeOwners {
   /**
    * Gets the {@link PathExpressionMatcher} that should be used for the specified code owner config.
    *
-   * <p>Checks which {@link CodeOwnersBackend} is responsible for the specified code owner config
-   * and retrieves the {@link PathExpressionMatcher} from it.
+   * <p>Checks which {@link CodeOwnerBackend} is responsible for the specified code owner config and
+   * retrieves the {@link PathExpressionMatcher} from it.
    *
-   * <p>If the {@link CodeOwnersBackend} doesn't support path expressions and doesn't provide a
+   * <p>If the {@link CodeOwnerBackend} doesn't support path expressions and doesn't provide a
    * {@link PathExpressionMatcher} a {@link PathExpressionMatcher} that never matches is returned.
    * This way {@link CodeOwnerSet}s that have path expressions are ignored and will not have any
    * effect.
@@ -83,9 +83,9 @@ class LocalCodeOwners {
    *     config
    */
   private PathExpressionMatcher getMatcher(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    CodeOwnersBackend codeOwnersBackend =
+    CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
-    return codeOwnersBackend
+    return codeOwnerBackend
         .getPathExpressionMatcher()
         .orElse((pathExpression, relativePath) -> false);
   }
