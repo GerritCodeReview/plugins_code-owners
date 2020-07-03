@@ -32,7 +32,7 @@ import org.junit.Test;
  * that can use the Java API are implemented in {@link
  * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnerConfigForPathInBranchIT}.
  *
- * <p>The tests in this class do not depend on the used code owners backend, hence we do not need to
+ * <p>The tests in this class do not depend on the used code owner backend, hence we do not need to
  * extend {@link AbstractCodeOwnersIT}.
  */
 public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersTest {
