@@ -333,6 +333,30 @@
     },
     {
       "key": {
+        "uuid": "a2d688a5_17725e17",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-03T12:23:23Z",
+      "side": 1,
+      "message": "Good idea. Thanks also for the helpful Javadoc explanations.",
+      "parentUuid": "c24e578d_85c69cef",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 28
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9db07d1e_844c9e87",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 13
