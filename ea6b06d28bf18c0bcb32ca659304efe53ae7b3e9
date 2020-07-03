@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "08120053_c68fc03b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "65cd05d3_170278d2",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f8bed069_c4e79651",
         "filename": "/COMMIT_MSG",
         "patchSetId": 12
@@ -239,6 +263,30 @@
     },
     {
       "key": {
+        "uuid": "00f2db64_3215cc2b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSet.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "I remove this method since it\u0027s not used.",
+      "parentUuid": "d05cc839_497930d5",
+      "range": {
+        "startLine": 75,
+        "startChar": 27,
+        "endLine": 75,
+        "endChar": 42
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6648957_6d976d03",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackend.java",
         "patchSetId": 12
@@ -262,6 +310,30 @@
     },
     {
       "key": {
+        "uuid": "0e10297e_c3386af2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersBackend.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f6648957_6d976d03",
+      "range": {
+        "startLine": 58,
+        "startChar": 11,
+        "endLine": 58,
+        "endChar": 15
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a70c3e77_c4d66cd7",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/LocalCodeOwners.java",
         "patchSetId": 12
@@ -282,6 +354,30 @@
       "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5057e673_e59ecb75",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/LocalCodeOwners.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a70c3e77_c4d66cd7",
+      "range": {
+        "startLine": 64,
+        "startChar": 64,
+        "endLine": 64,
+        "endChar": 97
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -380,6 +476,30 @@
     },
     {
       "key": {
+        "uuid": "9735814f_1a717598",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressionMatcher.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1f10a57e_152d5a52",
+      "range": {
+        "startLine": 26,
+        "startChar": 17,
+        "endLine": 26,
+        "endChar": 38
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8b4b3fcd_9cc2dafc",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressionMatcher.java",
         "patchSetId": 12
@@ -400,6 +520,30 @@
       "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "db18713f_b3e342d8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressionMatcher.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "No longer applicable.",
+      "parentUuid": "8b4b3fcd_9cc2dafc",
+      "range": {
+        "startLine": 31,
+        "startChar": 66,
+        "endLine": 31,
+        "endChar": 87
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -426,6 +570,30 @@
     },
     {
       "key": {
+        "uuid": "f5e3e35f_8b3a65b1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSetTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "Yes, this was an oversight.\n\nDone.",
+      "parentUuid": "f89e062f_963316ab",
+      "range": {
+        "startLine": 99,
+        "startChar": 54,
+        "endLine": 99,
+        "endChar": 88
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74fdb522_171c6238",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/LocalCodeOwnersTest.java",
         "patchSetId": 12
@@ -446,6 +614,30 @@
       "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53b01ce5_51c13f53",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/LocalCodeOwnersTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T12:30:07Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "74fdb522_171c6238",
+      "range": {
+        "startLine": 103,
+        "startChar": 14,
+        "endLine": 103,
+        "endChar": 74
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
