@@ -29,7 +29,6 @@ import com.google.gerrit.server.UserInitiated;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import com.google.inject.TypeLiteral;
 import com.google.inject.util.Providers;
 import org.junit.Before;
 import org.junit.Test;
@@ -47,13 +46,11 @@ public class CodeOwnersUpdateTest extends AbstractCodeOwnersTest {
     userInitiatedCodeOwnersUpdate =
         plugin
             .getSysInjector()
-            .getInstance(
-                Key.get(new TypeLiteral<Provider<CodeOwnersUpdate>>() {}, UserInitiated.class));
+            .getInstance(new Key<Provider<CodeOwnersUpdate>>(UserInitiated.class) {});
     serverInitiatedCodeOwnersUpdate =
         plugin
             .getSysInjector()
-            .getInstance(
-                Key.get(new TypeLiteral<Provider<CodeOwnersUpdate>>() {}, ServerInitiated.class));
+            .getInstance(new Key<Provider<CodeOwnersUpdate>>(ServerInitiated.class) {});
     codeOwnerBackends =
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
