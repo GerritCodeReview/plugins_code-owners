@@ -19,8 +19,8 @@ import java.nio.file.Path;
 /**
  * Matcher that checks for a given path expression if it matches a given path.
  *
- * <p>This interface allows {@link CodeOwnersBackend}s to support different kinds of path
- * expressions (e.g. globs or regular expressions).
+ * <p>This interface allows {@link CodeOwnerBackend}s to support different kinds of path expressions
+ * (e.g. globs or regular expressions).
  */
 public interface PathExpressionMatcher {
   /**

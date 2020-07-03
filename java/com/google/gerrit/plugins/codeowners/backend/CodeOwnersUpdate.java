@@ -24,10 +24,10 @@ import java.util.Optional;
  * API to write code owner configurations.
  *
  * <p>All calls which write code owners to code owner configurations are gathered here. Other
- * classes should always use this class instead of accessing code owners backends directly.
+ * classes should always use this class instead of accessing code owner backends directly.
  *
- * <p>Write logic that is common for all {@link CodeOwnersBackend}s is implemented in this class so
- * that we avoid code repetition in the code owners backends.
+ * <p>Write logic that is common for all {@link CodeOwnerBackend}s is implemented in this class so
+ * that we avoid code repetition in the code owner backends.
  */
 public class CodeOwnersUpdate {
   interface Factory {
@@ -80,7 +80,7 @@ public class CodeOwnersUpdate {
   /**
    * Updates/Creates a code owner config.
    *
-   * <p>Detects which code owners backend is configurated and delegates the code owner config
+   * <p>Detects which code owner backend is configurated and delegates the code owner config
    * update/creation to this backend.
    *
    * <p>If the specified code owner config doesn't exist yet, it is created.
@@ -95,9 +95,9 @@ public class CodeOwnersUpdate {
    */
   public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
-    CodeOwnersBackend codeOwnersBackend =
+    CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
-    return codeOwnersBackend.upsertCodeOwnerConfig(
+    return codeOwnerBackend.upsertCodeOwnerConfig(
         codeOwnerConfigKey, codeOwnerConfigUpdate, currentUser.orElse(null));
   }
 }

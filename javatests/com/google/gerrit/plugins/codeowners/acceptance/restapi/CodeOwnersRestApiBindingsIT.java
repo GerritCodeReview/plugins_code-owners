@@ -32,7 +32,7 @@ import org.junit.Test;
  * extension API and hence would not detect issues with the Guice bindings of the code owners REST
  * endpoints.
  *
- * <p>The tests in this class do not depend on the used code owners backend, hence we do not need to
+ * <p>The tests in this class do not depend on the used code owner backend, hence we do not need to
  * extend {@link AbstractCodeOwnersIT}.
  */
 public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
