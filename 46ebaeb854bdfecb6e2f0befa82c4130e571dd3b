@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "280e5c99_c4ce12ec",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:01:44Z",
+      "side": 1,
+      "message": "Can you help me understand what you mean by upward and downward path expressions?\n\nVia path expressions it should only be possible to match files inside the folder (including subdirs) in which the code owner config is defined, but not outside of it (parent folder, sibling folder). We don\u0027t have any validation of path expressions yet, but there will be some logic that prevents you from adding invalid or non-allowed path expressions (on upload and on submit check). Is this what you meant?",
+      "parentUuid": "6b8c5164_06b56efd",
+      "range": {
+        "startLine": 12,
+        "startChar": 24,
+        "endLine": 12,
+        "endChar": 64
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c46e15ac_3b67a12b",
         "filename": "/COMMIT_MSG",
         "patchSetId": 13
@@ -114,6 +138,47 @@
       "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d9a6fd8_986fa26a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:01:44Z",
+      "side": 1,
+      "message": "My main concern was to keep the order as it is. I think I wasn\u0027t aware that ImmutableSets would keep the iteration order too.\n\nI\u0027m not sure yet what\u0027s best to do about duplicate CodeOwnerSets (whether to keep or drop them). For the MVP it\u0027s not important what we decide here, since we will not expose any REST endpoints to edit code owner configs nor do programmatic updates to them. For now writing code owner configs is only needed for tests and later we will also need it for the migration.\n\nDo you have thoughts on what\u0027s best to do with duplicate CodeOwnerSets? Given that ImmutableSets keep the iteration order we could just switch to use ImmutableSet for CodeOwnerSets.",
+      "parentUuid": "89d774b8_f71bbf58",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 28
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9db07d1e_844c9e87",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:01:44Z",
+      "side": 1,
+      "message": "Thanks for your review comments. Looks like at the end of the MVP I will finally know all secrets about dealing with Truth :)",
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -347,6 +412,30 @@
     },
     {
       "key": {
+        "uuid": "b3a31ba1_6da62066",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigInfoSubject.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:01:44Z",
+      "side": 1,
+      "message": "Thanks a lot, I hoped that you would have a better suggestion for this. I will try out what you propose.",
+      "parentUuid": "55f432fd_9a240d73",
+      "range": {
+        "startLine": 60,
+        "startChar": 11,
+        "endLine": 61,
+        "endChar": 71
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "153591da_ff24efe0",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigInfoSubject.java",
         "patchSetId": 13
@@ -358,6 +447,30 @@
       "writtenOn": "2020-07-02T18:12:35Z",
       "side": 1,
       "message": "Is this commented code and the todo removed in a follow-up change?",
+      "range": {
+        "startLine": 57,
+        "startChar": 2,
+        "endLine": 63,
+        "endChar": 98
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30f70508_62438a88",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigInfoSubject.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:01:44Z",
+      "side": 1,
+      "message": "This is just garbage I forgot to remove. I actually thought that I did remove this and also addressed the todos. Maybe I accidentally did this in a follow-up change. But I\u0027m sure that even my revised code is not compliant with how this should be done in Truth.",
+      "parentUuid": "153591da_ff24efe0",
       "range": {
         "startLine": 57,
         "startChar": 2,
@@ -404,6 +517,30 @@
       "writtenOn": "2020-07-02T18:12:35Z",
       "side": 1,
       "message": "Optional: As a result of my other messages, this method might go away. If we still need it afterwards, we should consider to switch to a different style as we wouldn\u0027t want to introduce an assertWithMessage() to every custom subject. Truth\u0027s standard solution is this:\n- Expose a factory method for the custom subject type (see below).\n- Callers which want to set a custom message would use Truth.assertWithMessage(message, args).about(codeOwnerSetSubjects()).that(codeOwnerSet) for assertions.\n\nThe public factory method has many usages as you might see from my other comments so adding it is generally a good idea even if it is only used in the assertThat(..) method in the beginning.\n\nFactory method example:\n\n  public static Factory\u003cCodeOwnerSetSubject, CodeOwnerSet\u003e codeOwnerSetSubjects() {\n    return CodeOwnerSetSubject::new;\n  }",
+      "range": {
+        "startLine": 61,
+        "startChar": 36,
+        "endLine": 61,
+        "endChar": 53
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "842b7f09_6b92c7c1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerSetSubject.java",
+        "patchSetId": 13
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:01:44Z",
+      "side": 1,
+      "message": "Thanks. This is good to know even if this method will no longer be needed. I was wondering if there was a better way to do this.",
+      "parentUuid": "ddcba1f3_9eb7e3c8",
       "range": {
         "startLine": 61,
         "startChar": 36,
