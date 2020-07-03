@@ -16,12 +16,15 @@ package com.google.gerrit.plugins.codeowners.backend.proto;
 
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.update.RetryHelper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Optional;
 import org.eclipse.jgit.lib.PersonIdent;
 
 /** Backend that supports a proto syntax for storing {@link CodeOwnerConfig}s. */
@@ -47,5 +50,10 @@ public class ProtoBackend extends AbstractFileBasedCodeOwnersBackend {
         retryHelper,
         CODE_OWNER_CONFIG_FILE_NAME,
         codeOwnerConfigParser);
+  }
+
+  @Override
+  public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    return Optional.of(SimplePathExpressionMatcher.INSTANCE);
   }
 }
