@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "36443e14_0732ed3c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:33:23Z",
+      "side": 1,
+      "message": "The way I imagine this to work is this:\n\nLet\u0027s assume the CodeOwnerBackend doesn\u0027t support path expressions, but the syntax does. Since the CodeOwnerBackend controls the parser it can decide what to do with code owner sets that have path expressions. It can\na) silently drop them\nb) throw a parsing error\nc) ignore the path expressions and interpret the users in it as global code owners\nd) parse the path expressions and let it fail only when someone requests code owners where this code owner set is relevant\n\nI think in practice you would either do a) or b).\n\nLater the CodeOwnerBackend will also control the code owner config validation. Here the CodeOwnerBackend could prevent that code owner sets with path expressions are added in the first place. In case of option b) the CodeOwnerBackend would need to implement anything, since rejecting non-parseable code owner configs will be implemented generically.",
+      "parentUuid": "bee048af_58544faa",
+      "range": {
+        "startLine": 21,
+        "startChar": 0,
+        "endLine": 24,
+        "endChar": 43
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "f8bed069_c4e79651",
         "filename": "/COMMIT_MSG",
         "patchSetId": 12
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "64b276b3_fe7a5a6a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 12
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:33:23Z",
+      "side": 1,
+      "message": "No plans for the MVP, but I actually would like to make this configurable at some point (e.g. personally I would prefer using the ProtoBackend + Java NIO Globs if I would need to setup code owners for a project).",
+      "parentUuid": "f8bed069_c4e79651",
+      "range": {
+        "startLine": 32,
+        "startChar": 18,
+        "endLine": 33,
+        "endChar": 61
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "19ee30dc_21e6b0f4",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSet.java",
         "patchSetId": 12
@@ -59,6 +107,30 @@
       "writtenOn": "2020-07-02T19:40:31Z",
       "side": 1,
       "message": "Shouldn\u0027t this parameter be set on the builder?",
+      "range": {
+        "startLine": 75,
+        "startChar": 27,
+        "endLine": 75,
+        "endChar": 42
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d05cc839_497930d5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSet.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:33:23Z",
+      "side": 1,
+      "message": "Yes, I\u0027m a bit puzzled how this was not detected by tests. I guess it\u0027s because all tests that use path expressions rather use the builder() method to construct the code owner sets. I guess this means we can probably drop this method.",
+      "parentUuid": "19ee30dc_21e6b0f4",
       "range": {
         "startLine": 75,
         "startChar": 27,
@@ -128,6 +200,30 @@
       "writtenOn": "2020-07-02T19:40:31Z",
       "side": 1,
       "message": "Is the idea that every PathExpressionMatcher also needs to implement (and test) the logic to match non-regexes? Or might there even be some PathExpressionMatchers in the future which don\u0027t accept non-regexes?\n\n(This shouldn\u0027t necessarily be a trigger to change anything in the code as I guess identifying non-regexes reliably might involve more code than the current approach.)",
+      "range": {
+        "startLine": 26,
+        "startChar": 17,
+        "endLine": 26,
+        "endChar": 38
+      },
+      "revId": "ea6b06d28bf18c0bcb32ca659304efe53ae7b3e9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c32201e_9e307e57",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressionMatcher.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T07:33:23Z",
+      "side": 1,
+      "message": "I\u0027m not sure I understand the problem with matching non-regexes. Can you maybe make an example?\n\nIn general we will have some logic that will validate path expressions when they are added to code owner configs, and invalid/non-allowed path expressions will be rejected. This means code owner configs should only contain path expressions which are understood by the used PathExpressionMatcher and if not the path expressions would just not match anything.",
+      "parentUuid": "006a02a9_97b35f59",
       "range": {
         "startLine": 26,
         "startChar": 17,
