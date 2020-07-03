@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "ca37a7d6_b744b40b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-03T08:17:26Z",
+      "side": 1,
+      "message": "Yes, that validation logic is what I meant.\n\nWhat I mean with upward/downward expressions:\nGoing to parent or sibling folders would be upwards to me (e.g. ../*.txt or ../../another_folder/*). Downwards would be subfolders (e.g. subfolder/*.txt).\n\nIf we only support the current/subfolders in path expressions, it would be good to mention it in this change (even if we implement the validation later) as the implementation seems to be written with that assumption in mind which is a bit in contrast to the general descriptions regarding path expressions in this change.",
+      "parentUuid": "280e5c99_c4ce12ec",
+      "range": {
+        "startLine": 12,
+        "startChar": 24,
+        "endLine": 12,
+        "endChar": 64
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "c46e15ac_3b67a12b",
         "filename": "/COMMIT_MSG",
         "patchSetId": 13
@@ -153,6 +177,30 @@
       "side": 1,
       "message": "My main concern was to keep the order as it is. I think I wasn\u0027t aware that ImmutableSets would keep the iteration order too.\n\nI\u0027m not sure yet what\u0027s best to do about duplicate CodeOwnerSets (whether to keep or drop them). For the MVP it\u0027s not important what we decide here, since we will not expose any REST endpoints to edit code owner configs nor do programmatic updates to them. For now writing code owner configs is only needed for tests and later we will also need it for the migration.\n\nDo you have thoughts on what\u0027s best to do with duplicate CodeOwnerSets? Given that ImmutableSets keep the iteration order we could just switch to use ImmutableSet for CodeOwnerSets.",
       "parentUuid": "89d774b8_f71bbf58",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 42,
+        "endChar": 28
+      },
+      "revId": "46ebaeb854bdfecb6e2f0befa82c4130e571dd3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e1b67b74_20ebba51",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 13
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-03T08:17:26Z",
+      "side": 1,
+      "message": "I would drop duplicate CodeOwnerSets as we also drop duplicate code owners or path expressions within them.\n\nWe can also stay with ImmutableList now and simply switch later if we still want to. ImmutableList might make some of the tests easier as lists have a defined order by default so I\u0027m also fine if you want to concentrate on other implementation aspects first. Maybe we could just put a note somewhere what the intention was behind using a list (-\u003e the kept ordering) so that we don\u0027t have to remember at some point in the future what the original reasons were.",
+      "parentUuid": "4d9a6fd8_986fa26a",
       "range": {
         "startLine": 40,
         "startChar": 0,
