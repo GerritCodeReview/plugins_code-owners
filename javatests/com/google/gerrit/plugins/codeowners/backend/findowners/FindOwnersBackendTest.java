@@ -14,9 +14,14 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
+
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnersBackendTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
+import org.junit.Test;
 
 /** Tests for {@link FindOwnersBackend}. */
 public class FindOwnersBackendTest extends AbstractFileBasedCodeOwnersBackendTest {
@@ -33,5 +38,12 @@ public class FindOwnersBackendTest extends AbstractFileBasedCodeOwnersBackendTes
   @Override
   protected Class<? extends CodeOwnerConfigParser> getParserClass() {
     return FindOwnersCodeOwnerConfigParser.class;
+  }
+
+  @Test
+  public void getPathExpressionMatcher() throws Exception {
+    assertThat(codeOwnersBackend.getPathExpressionMatcher())
+        .value()
+        .isInstanceOf(GlobMatcher.class);
   }
 }
