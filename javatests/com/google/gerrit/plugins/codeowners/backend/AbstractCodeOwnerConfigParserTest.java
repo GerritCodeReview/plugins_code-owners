@@ -62,10 +62,11 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
    *
    * @param ignoreParentCodeOwners whether code owners from parent code owner configs (code owner
    *     configs in parent folders) should be ignored
-   * @param emails emails that should be assigned as code owners
+   * @param codeOwnerSets the code owner sets that define the code ownerships
    * @return the expected code owner config string for a code owner config with the given parameters
    */
-  protected abstract String getCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails);
+  protected abstract String getCodeOwnerConfig(
+      boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets);
 
   /**
    * Returns the expected code owner config string for a code owner config with the given emails as
@@ -76,7 +77,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
    *     code owners
    */
   protected String getCodeOwnerConfig(String... emails) {
-    return getCodeOwnerConfig(false, emails);
+    return getCodeOwnerConfig(false, CodeOwnerSet.createWithoutPathExpressions(emails));
   }
 
   @Test
@@ -268,7 +269,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   @Test
   public void codeOwnerConfigWithIgnoreParentCodeOwners() throws Exception {
     assertParseAndFormat(
-        getCodeOwnerConfig(true, EMAIL_1),
+        getCodeOwnerConfig(true, CodeOwnerSet.createWithoutPathExpressions(EMAIL_1)),
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
           assertThat(codeOwnerConfig)
@@ -277,7 +278,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
               .hasCodeOwnersEmailsThat()
               .containsExactly(EMAIL_1);
         },
-        getCodeOwnerConfig(true, EMAIL_1));
+        getCodeOwnerConfig(true, CodeOwnerSet.createWithoutPathExpressions(EMAIL_1)));
   }
 
   @Test
@@ -289,6 +290,86 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
           assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().isEmpty();
         },
         getCodeOwnerConfig(true));
+  }
+
+  @Test
+  public void setCodeOwnerSets() throws Exception {
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(EMAIL_2).build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(codeOwnerSet1, codeOwnerSet2)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
+  }
+
+  @Test
+  public void setMultipleCodeOwnerSetsWithPathExpressions() throws Exception {
+    CodeOwnerSet codeOwnerSet1 =
+        CodeOwnerSet.builder()
+            .addPathExpression("bar")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_3)
+            .build();
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder().addPathExpression("bar").addCodeOwnerEmail(EMAIL_2).build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(codeOwnerSet1, codeOwnerSet2)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
+  }
+
+  @Test
+  public void duplicateCodeOwnerSetsAreFilteredOut() throws Exception {
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.builder()
+            .addPathExpression("bar")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_3)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet, codeOwnerSet),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(codeOwnerSet)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, codeOwnerSet));
+  }
+
+  @Test
+  public void codeOwnerSetWithoutCodeOwnersIsFilteredOut() throws Exception {
+    CodeOwnerSet validCodeOwnerSet =
+        CodeOwnerSet.builder()
+            .addPathExpression("bar")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_3)
+            .build();
+    CodeOwnerSet codeOwnerSetWithoutCodeOwners =
+        CodeOwnerSet.builder().addPathExpression("baz").build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, validCodeOwnerSet, codeOwnerSetWithoutCodeOwners),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(validCodeOwnerSet)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, validCodeOwnerSet));
   }
 
   private static String modifyLines(
