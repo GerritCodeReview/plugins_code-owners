@@ -21,7 +21,7 @@ import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersFactory;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackendId;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
 import org.eclipse.jgit.lib.Config;
@@ -54,20 +54,20 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
    */
   @ConfigSuite.Configs
   public static ImmutableMap<String, Config> againstCodeOwnerBackends() {
-    return Arrays.stream(CodeOwnersBackendId.values())
+    return Arrays.stream(CodeOwnerBackendId.values())
         .collect(
             toImmutableMap(
-                CodeOwnersBackendId::getBackendId,
-                AbstractCodeOwnersIT::createConfigWithCodeOwnersBackend));
+                CodeOwnerBackendId::getBackendId,
+                AbstractCodeOwnersIT::createConfigWithCodeOwnerBackend));
   }
 
-  private static Config createConfigWithCodeOwnersBackend(CodeOwnersBackendId codeOwnersBackendId) {
+  private static Config createConfigWithCodeOwnerBackend(CodeOwnerBackendId codeOwnerBackendId) {
     Config cfg = new Config(defaultConfig());
     cfg.setString(
         "plugin",
         "code-owners",
         CodeOwnersPluginConfiguration.KEY_BACKEND,
-        codeOwnersBackendId.getBackendId());
+        codeOwnerBackendId.getBackendId());
     return cfg;
   }
 

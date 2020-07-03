@@ -19,18 +19,18 @@ import java.io.IOException;
 /**
  * Parser and formatter for {@link CodeOwnerConfig}s.
  *
- * <p>To be implemented by {@link CodeOwnersBackend}s, as the syntax that is used to represent a
- * {@link CodeOwnerConfig} as string depends on the {@link CodeOwnersBackend}.
+ * <p>To be implemented by {@link CodeOwnerBackend}s, as the syntax that is used to represent a
+ * {@link CodeOwnerConfig} as string depends on the {@link CodeOwnerBackend}.
  *
- * <p>Most {@link CodeOwnersBackend}s store the string representations of {@link CodeOwnerConfig}s
- * in files, but other storages are also possible.
+ * <p>Most {@link CodeOwnerBackend}s store the string representations of {@link CodeOwnerConfig}s in
+ * files, but other storages are also possible.
  */
 public interface CodeOwnerConfigParser {
   /**
    * Parses a {@link CodeOwnerConfig} from a string.
    *
-   * <p>Most code owners backends store code owner configs in files. In this case the provided
-   * string is the file content.
+   * <p>Most code owner backends store code owner configs in files. In this case the provided string
+   * is the file content.
    *
    * <p><strong>Note:</strong> Parsing a code owner config by using the {@link
    * #parse(CodeOwnerConfig.Key, String)} and then formatting the parsed code owner config back to a
@@ -50,8 +50,7 @@ public interface CodeOwnerConfigParser {
   /**
    * Formats the given code owner config as string.
    *
-   * <p>Most code owners backends store the string representation of the code owner config in a
-   * file.
+   * <p>Most code owner backends store the string representation of the code owner config in a file.
    *
    * @param codeOwnerConfig the code owner config that should be formatted
    * @return the code owner config as string

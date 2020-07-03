@@ -25,29 +25,29 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
  * <p>This enum is used to execute the integration tests for all code owner backends (see {@link
  * com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT}.
  */
-public enum CodeOwnersBackendId {
+public enum CodeOwnerBackendId {
   FIND_OWNERS(FindOwnersBackend.ID, FindOwnersBackend.class),
   PROTO(ProtoBackend.ID, ProtoBackend.class);
 
-  /** The ID under which the code owners backend is registered. */
+  /** The ID under which the code owner backend is registered. */
   private final String backendId;
 
-  /** The class that implements the code owners backend. */
-  private final Class<? extends CodeOwnersBackend> codeOwnersBackendClass;
+  /** The class that implements the code owner backend. */
+  private final Class<? extends CodeOwnerBackend> codeOwnerBackendClass;
 
-  private CodeOwnersBackendId(
-      String backendId, Class<? extends CodeOwnersBackend> codeOwnersBackendClass) {
+  private CodeOwnerBackendId(
+      String backendId, Class<? extends CodeOwnerBackend> codeOwnerBackendClass) {
     this.backendId = backendId;
-    this.codeOwnersBackendClass = codeOwnersBackendClass;
+    this.codeOwnerBackendClass = codeOwnerBackendClass;
   }
 
-  /** Gets the ID under which the code owners backend is registered. */
+  /** Gets the ID under which the code owner backend is registered. */
   public String getBackendId() {
     return backendId;
   }
 
-  /** Gets the class that implements the code owners backend. */
-  public Class<? extends CodeOwnersBackend> getCodeOwnersBackendClass() {
-    return codeOwnersBackendClass;
+  /** Gets the class that implements the code owner backend. */
+  public Class<? extends CodeOwnerBackend> getCodeOwnerBackendClass() {
+    return codeOwnerBackendClass;
   }
 }
