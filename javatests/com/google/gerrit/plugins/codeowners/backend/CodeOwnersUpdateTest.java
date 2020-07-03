@@ -92,6 +92,6 @@ public class CodeOwnersUpdateTest extends AbstractCodeOwnersTest {
     RegistrationHandle registrationHandle =
         ((PrivateInternals_DynamicMapImpl<CodeOwnerBackend>) codeOwnerBackends)
             .put("gerrit", id, Providers.of(codeOwnerBackend));
-    return () -> registrationHandle.remove();
+    return registrationHandle::remove;
   }
 }
