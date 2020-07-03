@@ -81,7 +81,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails((admin.email())))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions((admin.email())))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
@@ -114,7 +114,8 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
               codeOwnerConfigKey,
               CodeOwnerConfigUpdate.builder()
                   .setCodeOwnerSetsModification(
-                      CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(admin.email())))
+                      CodeOwnerSetModification.set(
+                          CodeOwnerSet.createWithoutPathExpressions(admin.email())))
                   .build(),
               currentUser);
       assertThat(codeOwnerConfig).isPresent();
@@ -163,7 +164,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
@@ -226,7 +227,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
@@ -274,7 +275,7 @@ public abstract class AbstractFileBasedCodeOwnersBackendTest extends AbstractCod
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 

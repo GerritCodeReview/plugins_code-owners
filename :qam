@@ -1,0 +1,95 @@
+Add abstraction for a set of code owners
+
+So far code owner configs can only contain a plain set of code owners
+that own the complete folder in which the code owner config is stored.
+
+Next we want to support defining code owners on path expressions. This
+means code owner configs should allow to define sets of code owners that
+own files matched by sets of path expressions.
+
+In the code owners proto this will be expressed by code owner sets: A
+code owner config can contain multiple code owner sets, each code owner
+set contains a set of code owners and a set of path expressions for
+which the ownership applies. Code owners for a complete folder are
+expressed as a code owner set with an empty set of path expressions.
+
+Since the code owners proto syntax will be our primary syntax we want to
+keep the Java abstraction for code owner configs as close as possible
+to it. For this reason we are adding a CodeOwnerSet abstraction that
+defines a set of code owners for a set of path expressions. As a first
+step (this change), we add the CodeOwnerSet class and use it to
+represent the code owners for the whole folder. This means the
+CodeOwnerSet contains the set of code owners and the set of path
+expressions is empty aka doesn't exist yet (the field for the path
+expressions will be added to CodeOwnerSet by a follow-up change).
+
+Path expressions can only match files inside the folder (including
+subfolders) in which the code owner config is stored. It will not be
+possible to match files in other folders (parent folders or sibling
+folders). Path expressions that match files in other folders will be
+rejected on addition (a validation for this will be implemented later)
+and will have no effect if they anyway exist.
+
+The API's to read and write code owner configs are adapted to support
+code owner sets. As a result of this we need to adapt all tests that
+set/get code owners for a complete folder.
+
+Modifying code owner sets requires a bit of boilerplate code. To avoid
+that callers need to deal with it CodeOwnerSetModification offers a set
+of static methods that do basic code owner set modifications.
+
+Since there is no natural order for code owner sets, the code owner
+config parsers/formatters keep the order of the code owner sets in the
+code owner configs as it is, but duplicate code owner sets are filtered
+out.
+
+Change-Id: I52fc24a19ed2e51d7820d7a990410940f12df4f8
+Signed-off-by: Edwin Kempin <ekempin@google.com>
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Wed Jun 17 11:28:59 2020 +0200
+#
+# interactive rebase in progress; onto 33b001a3fc
+# Last command done (1 command done):
+#    edit c17b8762eb Add abstraction for a set of code owners
+# Next commands to do (23 remaining commands):
+#    pick e2c87417c2 CodeOwnersPluginConfiguration: Do not hard-code plugin name
+#    pick a6d80130ec Adapt tests to use new account test API for setting secondary emails
+# You are currently splitting a commit during a rebase.
+#
+# Changes to be committed:
+#	modified:   java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImpl.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigCreation.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestCodeOwnerConfigUpdate.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/api/CodeOwnerConfigInfo.java
+#	new file:   java/com/google/gerrit/plugins/codeowners/api/CodeOwnerSetInfo.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFile.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigUpdate.java
+#	new file:   java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSet.java
+#	new file:   java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSetModification.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParser.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigJson.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/testing/BUILD
+#	modified:   java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigInfoSubject.java
+#	modified:   java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigSubject.java
+#	new file:   java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerSetInfoSubject.java
+#	new file:   java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerSetSubject.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/AbstractFileBasedCodeOwnersBackendTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java
+#	new file:   javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSetModificationTest.java
+#	new file:   javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSetTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersUpdateTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParserTest.java
+#	modified:   javatests/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigJsonTest.java
+#	modified:   resources/Documentation/rest-api.md
+#
