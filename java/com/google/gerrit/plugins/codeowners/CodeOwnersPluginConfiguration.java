@@ -19,8 +19,8 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicMap;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackendId;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.inject.Inject;
@@ -47,7 +47,7 @@ public class CodeOwnersPluginConfiguration {
 
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
-  private final DynamicMap<CodeOwnersBackend> codeOwnersBackends;
+  private final DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   /** The name of the configured code owners default backend. */
   private final String defaultBackendName;
@@ -56,24 +56,24 @@ public class CodeOwnersPluginConfiguration {
   CodeOwnersPluginConfiguration(
       @PluginName String pluginName,
       PluginConfigFactory pluginConfigFactory,
-      DynamicMap<CodeOwnersBackend> codeOwnersBackends) {
+      DynamicMap<CodeOwnerBackend> codeOwnerBackends) {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
-    this.codeOwnersBackends = codeOwnersBackends;
+    this.codeOwnerBackends = codeOwnerBackends;
 
     this.defaultBackendName =
         pluginConfigFactory
             .getFromGerritConfig(pluginName)
-            .getString(KEY_BACKEND, CodeOwnersBackendId.FIND_OWNERS.getBackendId());
+            .getString(KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
   }
 
   /**
-   * Returns the configured {@link CodeOwnersBackend}.
+   * Returns the configured {@link CodeOwnerBackend}.
    *
    * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
    * exist the call fails with {@link IllegalStateException}.
    *
-   * <p>The code owners backend configuration is evaluated in the following order:
+   * <p>The code owner backend configuration is evaluated in the following order:
    *
    * <ul>
    *   <li>backend configuration for branch (with inheritance, first by full branch name, then by
@@ -82,37 +82,35 @@ public class CodeOwnersPluginConfiguration {
    *   <li>default backend (first globally configured backend, then hard-coded default backend)
    * </ul>
    *
-   * <p>The first code owners backend configuration that exists counts and the evaluation is
-   * stopped.
+   * <p>The first code owner backend configuration that exists counts and the evaluation is stopped.
    *
-   * @param branchNameKey project and branch for which the configured code owners backend should be
+   * @param branchNameKey project and branch for which the configured code owner backend should be
    *     returned
-   * @return the {@link CodeOwnersBackend} that should be used
+   * @return the {@link CodeOwnerBackend} that should be used
    */
-  public CodeOwnersBackend getBackend(BranchNameKey branchNameKey) {
+  public CodeOwnerBackend getBackend(BranchNameKey branchNameKey) {
     Config pluginConfig = getPluginConfig(branchNameKey.project());
 
     // check if a branch specific backend is configured
-    Optional<CodeOwnersBackend> codeOwnersBackend =
-        getBackendForBranch(pluginConfig, branchNameKey);
-    if (codeOwnersBackend.isPresent()) {
-      return codeOwnersBackend.get();
+    Optional<CodeOwnerBackend> codeOwnerBackend = getBackendForBranch(pluginConfig, branchNameKey);
+    if (codeOwnerBackend.isPresent()) {
+      return codeOwnerBackend.get();
     }
 
     // check if a project specific backend is configured
-    codeOwnersBackend = getBackendForProject(pluginConfig);
-    if (codeOwnersBackend.isPresent()) {
-      return codeOwnersBackend.get();
+    codeOwnerBackend = getBackendForProject(pluginConfig);
+    if (codeOwnerBackend.isPresent()) {
+      return codeOwnerBackend.get();
     }
 
     // fall back to the default backend
     return getDefaultBackend();
   }
 
-  private Optional<CodeOwnersBackend> getBackendForBranch(
+  private Optional<CodeOwnerBackend> getBackendForBranch(
       Config pluginConfig, BranchNameKey branch) {
     // check for branch specific backend by full branch name
-    Optional<CodeOwnersBackend> backend = getBackendForBranch(pluginConfig, branch.branch());
+    Optional<CodeOwnerBackend> backend = getBackendForBranch(pluginConfig, branch.branch());
     if (!backend.isPresent()) {
       // check for branch specific backend by short branch name
       backend = getBackendForBranch(pluginConfig, branch.shortName());
@@ -120,7 +118,7 @@ public class CodeOwnersPluginConfiguration {
     return backend;
   }
 
-  private Optional<CodeOwnersBackend> getBackendForBranch(Config pluginConfig, String branch) {
+  private Optional<CodeOwnerBackend> getBackendForBranch(Config pluginConfig, String branch) {
     String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, branch, KEY_BACKEND);
     if (backendName == null) {
       return Optional.empty();
@@ -136,7 +134,7 @@ public class CodeOwnersPluginConfiguration {
                             backendName, pluginName, SECTION_CODE_OWNERS, branch, KEY_BACKEND))));
   }
 
-  private Optional<CodeOwnersBackend> getBackendForProject(Config pluginConfig) {
+  private Optional<CodeOwnerBackend> getBackendForProject(Config pluginConfig) {
     String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
     if (backendName == null) {
       return Optional.empty();
@@ -153,7 +151,7 @@ public class CodeOwnersPluginConfiguration {
   }
 
   @VisibleForTesting
-  public CodeOwnersBackend getDefaultBackend() {
+  public CodeOwnerBackend getDefaultBackend() {
     return lookupBackend(defaultBackendName)
         .orElseThrow(
             () ->
@@ -182,9 +180,9 @@ public class CodeOwnersPluginConfiguration {
     }
   }
 
-  private Optional<CodeOwnersBackend> lookupBackend(String backendName) {
+  private Optional<CodeOwnerBackend> lookupBackend(String backendName) {
     // We must use "gerrit" as plugin name since DynamicMapProvider#get() hard-codes "gerrit" as
     // plugin name.
-    return Optional.ofNullable(codeOwnersBackends.get("gerrit", backendName));
+    return Optional.ofNullable(codeOwnerBackends.get("gerrit", backendName));
   }
 }

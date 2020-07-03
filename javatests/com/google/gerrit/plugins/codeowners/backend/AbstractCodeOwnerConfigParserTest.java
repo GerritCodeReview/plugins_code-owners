@@ -31,7 +31,7 @@ import org.junit.Test;
 /**
  * Base class for testing {@link CodeOwnerConfigParser}s.
  *
- * <p>All {@link CodeOwnersBackend}s implement {@link CodeOwnerConfigParser} that need to be tested.
+ * <p>All {@link CodeOwnerBackend}s implement {@link CodeOwnerConfigParser} that need to be tested.
  * To avoid code duplication for these tests, the common parts are implemented in this class.
  */
 public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwnersTest {
