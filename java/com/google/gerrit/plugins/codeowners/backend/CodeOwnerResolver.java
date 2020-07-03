@@ -161,7 +161,7 @@ public class CodeOwnerResolver {
       return Optional.empty();
     }
 
-    if (extIds.stream().map(extId -> extId.accountId()).distinct().count() > 1) {
+    if (extIds.stream().map(ExternalId::accountId).distinct().count() > 1) {
       logger.atFine().log("cannot resolve code owner email %s: email is ambiguous", email);
       return Optional.empty();
     }

@@ -66,7 +66,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey);
     assertThat(perCodeOwnerConfigOperations.exists()).isFalse();
     IllegalStateException exception =
-        assertThrows(IllegalStateException.class, () -> perCodeOwnerConfigOperations.get());
+        assertThrows(IllegalStateException.class, perCodeOwnerConfigOperations::get);
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("code owner config %s does not exist", codeOwnerConfigKey));
