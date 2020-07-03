@@ -22,6 +22,30 @@
       "revId": "859e14d3c01aedff4271258b50041a739a1aea52",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc3af571_a64268c6",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigJsonTest.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-03T08:30:34Z",
+      "side": 1,
+      "message": "Yes, it\u0027s not needed here.\n\nDone",
+      "parentUuid": "bfd70555_7bc8805e",
+      "range": {
+        "startLine": 71,
+        "startChar": 12,
+        "endLine": 71,
+        "endChar": 40
+      },
+      "revId": "859e14d3c01aedff4271258b50041a739a1aea52",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
