@@ -29,7 +29,7 @@ public class CodeOwnerInfo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(account);
+    return Objects.hashCode(account);
   }
 
   @Override

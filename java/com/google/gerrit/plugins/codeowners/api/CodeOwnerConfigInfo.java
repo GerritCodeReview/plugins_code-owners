@@ -42,7 +42,7 @@ public class CodeOwnerConfigInfo {
 
   @Override
   public int hashCode() {
-    return Objects.hash(codeOwnerSets);
+    return Objects.hashCode(codeOwnerSets);
   }
 
   @Override
