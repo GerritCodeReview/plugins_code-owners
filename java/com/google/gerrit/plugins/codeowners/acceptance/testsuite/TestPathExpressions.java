@@ -18,6 +18,7 @@ import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
 import com.google.inject.Inject;
 
 /**
@@ -57,7 +58,8 @@ public class TestPathExpressions {
                                 .getDefaultBackend()
                                 .getClass()
                                 .getName())));
-    if (pathExpressionMatcher instanceof GlobMatcher) {
+    if (pathExpressionMatcher instanceof GlobMatcher
+        || pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
       return "*." + fileType;
     }
     throw new IllegalStateException(
