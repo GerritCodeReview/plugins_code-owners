@@ -22,7 +22,6 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Test;
@@ -105,46 +104,6 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class, () -> createCodeOwnerBuilder().addCodeOwnerSet(null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerSet");
-  }
-
-  @Test
-  public void getEmptyLocalCodeOwners() throws Exception {
-    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
-    assertThat(codeOwnerConfig.localCodeOwners(Paths.get("/foo/bar/baz.md"))).isEmpty();
-  }
-
-  @Test
-  public void getLocalCodeOwners() throws Exception {
-    String codeOwnerEmail1 = "jdoe@example.com";
-    String codeOwnerEmail2 = "jroe@example.com";
-    CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerBuilder()
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(codeOwnerEmail1, codeOwnerEmail2))
-            .build();
-    assertThat(codeOwnerConfig.localCodeOwners(Paths.get("/foo/bar/baz.md")))
-        .comparingElementsUsing(CodeOwnerSetSubject.CODE_OWNER_REFERENCE_TO_EMAIL)
-        .containsExactly(codeOwnerEmail1, codeOwnerEmail2);
-  }
-
-  @Test
-  public void cannotGetLocalCodeOwnersForNullPath() throws Exception {
-    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
-    NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwnerConfig.localCodeOwners(null));
-    assertThat(npe).hasMessageThat().isEqualTo("path");
-  }
-
-  @Test
-  public void cannotGetLocalCodeOwnersForRelativePath() throws Exception {
-    String relativePath = "foo/bar/baz.md";
-    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
-    IllegalStateException exception =
-        assertThrows(
-            IllegalStateException.class,
-            () -> codeOwnerConfig.localCodeOwners(Paths.get(relativePath)));
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(String.format("path %s must be absolute", relativePath));
   }
 
   @Test

@@ -54,4 +54,15 @@ public interface CodeOwnersBackend {
       CodeOwnerConfig.Key codeOwnerConfigKey,
       CodeOwnerConfigUpdate codeOwnerConfigUpdate,
       @Nullable IdentifiedUser currentUser);
+
+  /**
+   * Gets the {@link PathExpressionMatcher} that should be used to match path expressions.
+   *
+   * <p>May return {@link Optional#empty()} if path expressions are not supported by the code owner
+   * backend. It this case all {@link CodeOwnerSet}s that have path expressions are ignored and will
+   * not have any effect.
+   */
+  default Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    return Optional.empty();
+  }
 }

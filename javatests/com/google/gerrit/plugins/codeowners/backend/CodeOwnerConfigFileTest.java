@@ -86,7 +86,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
             .setIgnoreParentCodeOwners()
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
 
@@ -122,7 +122,8 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           CodeOwnerConfigUpdate.builder()
               .setIgnoreParentCodeOwners(true)
               .setCodeOwnerSetsModification(
-                  CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(admin.email())))
+                  CodeOwnerSetModification.set(
+                      CodeOwnerSet.createWithoutPathExpressions(admin.email())))
               .build());
       codeOwnerConfigFile.commit(metaDataUpdate);
 
@@ -233,7 +234,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
           CodeOwnerConfigUpdate.builder()
               .setCodeOwnerSetsModification(
-                  CodeOwnerSetModification.set(CodeOwnerSet.createForEmails(email)))
+                  CodeOwnerSetModification.set(CodeOwnerSet.createWithoutPathExpressions(email)))
               .build());
       IllegalStateException exception =
           assertThrows(
@@ -258,7 +259,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
 
@@ -314,7 +315,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
 
@@ -361,7 +362,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createForEmails(admin.email()))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
 
