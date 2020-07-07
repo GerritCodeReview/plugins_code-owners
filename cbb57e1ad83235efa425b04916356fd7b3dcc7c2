@@ -22,6 +22,30 @@
       "revId": "cbb57e1ad83235efa425b04916356fd7b3dcc7c2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0895ca9b_d909fd78",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/GlobMatcherTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-07T15:04:28Z",
+      "side": 1,
+      "message": "I agree, that\u0027s really not obvious.\n\n\u0027{EXP1,EXP2}\u0027 matches either of the 2 expressions.\n\nIn this case here the first expression is \u0027**/\u0027 which means any string including slashes (\u0027**\u0027) followed by a \u0027/\u0027.\n\nThe second expression is \u0027\u0027 which means it matches an empty string.\n\nThis means \"{**/,}BUILD\" is an expression that matches both, \u0027**/BUILD\u0027 and \u0027BUILD\u0027.\n\nAnyway, it\u0027s a good idea explain the syntax in the javadoc of GlobMatcher. Done",
+      "parentUuid": "0677a1fa_c21eda3e",
+      "range": {
+        "startLine": 43,
+        "startChar": 29,
+        "endLine": 43,
+        "endChar": 35
+      },
+      "revId": "cbb57e1ad83235efa425b04916356fd7b3dcc7c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
