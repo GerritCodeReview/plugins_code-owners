@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.git.meta.VersionedMetaData;
 import java.io.IOException;
@@ -136,7 +137,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   protected void onLoad() throws IOException, ConfigInvalidException {
     if (revision != null) {
       Optional<String> codeOwnerConfigFileContent =
-          getFileIfItExists(codeOwnerConfigKey.filePathForJgit(fileName));
+          getFileIfItExists(JgitPath.of(codeOwnerConfigKey.filePath(fileName)).get());
       if (codeOwnerConfigFileContent.isPresent()) {
         loadedCodeOwnersConfig =
             Optional.of(
@@ -198,7 +199,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
         codeOwnerConfigParser.formatAsString(updatedCodeOwnerConfig);
 
     // Save the new code owner config.
-    saveUTF8(codeOwnerConfigKey.filePathForJgit(fileName), codeOwnerConfigFileContent);
+    saveUTF8(JgitPath.of(codeOwnerConfigKey.filePath(fileName)).get(), codeOwnerConfigFileContent);
 
     // If the file content is empty, the update led to a deletion of the code owner config file.
     boolean isDeleted = codeOwnerConfigFileContent.isEmpty();

@@ -224,26 +224,6 @@ public abstract class CodeOwnerConfig {
     }
 
     /**
-     * Gets the path for the given code owner config file name as string that can be used for the
-     * jgit API.
-     *
-     * <p>The jgit API doesn't accept leading '/' for absolute paths, so this method makes sure to
-     * remove it.
-     *
-     * @param codeOwnerConfigFileName the name of the code owner config file for which the path
-     *     should be returned
-     * @return the path for the given file code owner config file name as string that can be used
-     *     for the jgit API
-     */
-    public String filePathForJgit(String codeOwnerConfigFileName) {
-      String filePath = filePath(codeOwnerConfigFileName).toString();
-      if (filePath.startsWith("/")) {
-        filePath = filePath.substring(1);
-      }
-      return filePath;
-    }
-
-    /**
      * Creates a code owner config key.
      *
      * @param project the project to which the code owner config belongs
