@@ -22,6 +22,30 @@
       "revId": "ea43954979b467c3e14c12d7d7216134a3139f46",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "998b7336_a5c083d5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/proto/ProtoCodeOwnerConfigParserTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-07T13:30:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "be8309a1_77f9fcf7",
+      "range": {
+        "startLine": 107,
+        "startChar": 0,
+        "endLine": 115,
+        "endChar": 0
+      },
+      "revId": "ea43954979b467c3e14c12d7d7216134a3139f46",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
