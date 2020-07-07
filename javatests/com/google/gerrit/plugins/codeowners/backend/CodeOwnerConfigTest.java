@@ -83,22 +83,6 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getFilePathForJgit() throws Exception {
-    CodeOwnerConfig.Key codeOwnerConfigKey =
-        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/foo/bar/");
-    assertThat(codeOwnerConfigKey.filePathForJgit("OWNERS")).isEqualTo("foo/bar/OWNERS");
-  }
-
-  @Test
-  public void cannotGetFilePathForJgitForNullFileName() throws Exception {
-    CodeOwnerConfig.Key codeOwnerConfigKey =
-        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/foo/bar/");
-    NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwnerConfigKey.filePathForJgit(null));
-    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileName");
-  }
-
-  @Test
   public void cannotAddNullAsCodeOwnerSet() throws Exception {
     NullPointerException npe =
         assertThrows(
