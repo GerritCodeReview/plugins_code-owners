@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "574c1142_bfd1433a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 353,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-07T13:50:53Z",
+      "side": 1,
+      "message": "What happens if you remove the only code owner of a set? I\u0027m not sure the behavior will be desirable (empty set?), but either way, a test is probably a good idea.",
+      "range": {
+        "startLine": 353,
+        "startChar": 14,
+        "endLine": 353,
+        "endChar": 32
+      },
+      "revId": "676fbf12496980ccbb6bd987a79daa85137ce5ef",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
