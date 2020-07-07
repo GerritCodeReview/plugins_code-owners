@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.testing.backend;
 
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -68,7 +69,9 @@ public class TestCodeOwnerConfigStorage {
               .commit()
               .parent(head)
               .message("Add test code owner config")
-              .add(codeOwnerConfig.key().filePathForJgit(fileName), formattedCodeOwnerConfig));
+              .add(
+                  JgitPath.of(codeOwnerConfig.key().filePath(fileName)).get(),
+                  formattedCodeOwnerConfig));
     }
   }
 
@@ -89,7 +92,7 @@ public class TestCodeOwnerConfigStorage {
       }
 
       RevCommit commit = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      String filePath = codeOwnerConfigKey.filePathForJgit(fileName);
+      String filePath = JgitPath.of(codeOwnerConfigKey.filePath(fileName)).get();
       try (TreeWalk tw =
           TreeWalk.forPath(testRepo.getRevWalk().getObjectReader(), filePath, commit.getTree())) {
         if (tw == null) {
