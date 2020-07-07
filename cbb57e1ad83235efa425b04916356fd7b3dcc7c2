@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0677a1fa_c21eda3e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/GlobMatcherTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-07T14:27:46Z",
+      "side": 1,
+      "message": "The syntax makes perfect sense to me even without documentation, except this {**/,}.\nCan you add the syntax to the docs of GlobMatcher?",
+      "range": {
+        "startLine": 43,
+        "startChar": 29,
+        "endLine": 43,
+        "endChar": 35
+      },
+      "revId": "cbb57e1ad83235efa425b04916356fd7b3dcc7c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
