@@ -21,13 +21,9 @@ import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestView;
-import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInChangeCollection.PathResource;
 import com.google.gerrit.server.change.RevisionResource;
-import com.google.gerrit.server.git.GitRepositoryManager;
-import com.google.gerrit.server.project.FileResource;
-import com.google.gerrit.server.project.ProjectCache;
-import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -42,17 +38,13 @@ import java.nio.file.Path;
 public class CodeOwnersInChangeCollection
     implements ChildCollection<RevisionResource, PathResource> {
   private final DynamicMap<RestView<PathResource>> views;
-  private final GitRepositoryManager repoManager;
-  private final ProjectCache projectCache;
+  private final ChangedFiles changedFiles;
 
   @Inject
   CodeOwnersInChangeCollection(
-      DynamicMap<RestView<PathResource>> views,
-      GitRepositoryManager repoManager,
-      ProjectCache projectCache) {
+      DynamicMap<RestView<PathResource>> views, ChangedFiles changedFiles) {
     this.views = views;
-    this.repoManager = repoManager;
-    this.projectCache = projectCache;
+    this.changedFiles = changedFiles;
   }
 
   @Override
@@ -75,25 +67,18 @@ public class CodeOwnersInChangeCollection
   private void checkThatFileExists(
       RevisionResource revisionResource, PathResource pathResource, IdString id)
       throws RestApiException, IOException {
-    ProjectState projectState =
-        projectCache
-            .get(revisionResource.getProject())
-            .orElseThrow(
-                () ->
-                    new ResourceNotFoundException(
-                        String.format("project %s not found", revisionResource.getProject())));
-    try {
-      // TODO(ekempin): Also accept requests for the old paths of files that have been renamed or
-      // deleted. When a file is renamed/deleted we require code owner approval on the old path,
-      // hence it should be possible to list the code owners for these old paths.
-      FileResource.create(
-          repoManager,
-          projectState,
-          revisionResource.getPatchSet().commitId(),
-          JgitPath.of(pathResource.getPath()).get());
-    } catch (ResourceNotFoundException e) {
-      // Make sure that the exception is thrown with the path we got as input and not the Jgit
-      // version of the path which always has no leading '/'.
+    if (!changedFiles.compute(revisionResource).stream()
+        .anyMatch(
+            changedFile ->
+                // Check whether the path matches any file in the change.
+                changedFile.hasNewPath(pathResource.getPath())
+                    // For renamed and deleted files we also accept requests for the old path.
+                    // Listing code owners for the old path of renamed/deleted files should be
+                    // possible because these files require a code owner approval on the old path
+                    // for submit and users need to know whom they need to add as reviewer for this.
+                    || ((changedFile.isRename() || changedFile.isDeletion())
+                        && changedFile.hasOldPath(pathResource.getPath())))) {
+      // Throw the exception with the path we got as input.
       throw new ResourceNotFoundException(id);
     }
   }
