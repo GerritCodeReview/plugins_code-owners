@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -48,5 +49,11 @@ public class JgitPathTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(NullPointerException.class, () -> JgitPath.of((Path) null));
     assertThat(npe).hasMessageThat().isEqualTo("path");
+  }
+
+  @Test
+  public void getPathAsAbsolutePath() throws Exception {
+    assertThat(JgitPath.of("foo/bar/OWNERS").getAsAbsolutePath())
+        .isEqualTo(Paths.get("/foo/bar/OWNERS"));
   }
 }
