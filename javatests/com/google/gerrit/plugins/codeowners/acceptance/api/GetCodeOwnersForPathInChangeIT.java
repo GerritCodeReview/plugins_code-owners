@@ -14,16 +14,20 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import java.util.List;
 import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Acceptance test for the {@link
@@ -69,5 +73,34 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .that(gApi.changes().id(changeId).current().files())
         .containsKey(JgitPath.of(path).get());
     return super.queryCodeOwners(queryRequest, path);
+  }
+
+  @Test
+  public void getCodeOwnersForDeletedFile() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "/foo/bar/baz.txt";
+    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
+
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Change Deleting A File",
+            JgitPath.of(path).get(),
+            "file content");
+    Result r = push.rm("refs/for/master");
+    r.assertOkStatus();
+    String changeId = r.getChangeId();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.change(changeId, "current").query().get(path);
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
   }
 }
