@@ -34,6 +34,24 @@
       "revId": "e193df6f98af4680f2c73550ace23c9f3d3241b6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23dd102d_1c5a9e14",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-08T14:49:13Z",
+      "side": 1,
+      "message": "Thanks for asking, I actually didn\u0027t check the documentation before. I\u0027ve had a look now and it actually looks fine. These occurrences are in config.md, and \"codeOwnersBackend\" is used as anchor here, to point to the section that describes the \"codeOwners.backend\" config parameter. Since this parameter is not renamed I think keeping \"codeOwnersBackend\" as anchor name is fine here.",
+      "parentUuid": "05029375_499b8e38",
+      "revId": "e193df6f98af4680f2c73550ace23c9f3d3241b6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
