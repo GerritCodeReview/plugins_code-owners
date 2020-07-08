@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
@@ -31,7 +32,8 @@ public class JgitPath {
   /**
    * Creates a {@link JgitPath} from the given path.
    *
-   * @param path the path that should be converted to a jgit path
+   * @param path absolute path that should be converted to a jgit path, or a jgit path that should
+   *     be converted to an absolute path
    */
   public static JgitPath of(String path) {
     return new JgitPath(path);
@@ -40,7 +42,8 @@ public class JgitPath {
   /**
    * Creates a {@link JgitPath} from the given path.
    *
-   * @param path the path that should be converted to a jgit path
+   * @param path absolute path that should be converted to a jgit path, or a jgit path that should
+   *     be converted to an absolute path
    */
   public static JgitPath of(Path path) {
     requireNonNull(path, "path");
@@ -55,6 +58,11 @@ public class JgitPath {
   /** Returns the path as string that can be used for the jgit API. */
   public String get() {
     return jgitPath;
+  }
+
+  /** Returns the path as absolute path. */
+  public Path getAsAbsolutePath() {
+    return Paths.get("/" + get());
   }
 
   @Override
