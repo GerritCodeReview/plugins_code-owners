@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3a563425_74e43959",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/SimplePathExpressionMatcherTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-08T10:59:20Z",
+      "side": 1,
+      "message": "This and below look almost completely duplicated to GlobMatcherTest\nNit: Can you create a base test class with those private methods?",
+      "range": {
+        "startLine": 77,
+        "startChar": 22,
+        "endLine": 77,
+        "endChar": 33
+      },
+      "revId": "990f5bd68a298bde3a11d968372b18749376f592",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
