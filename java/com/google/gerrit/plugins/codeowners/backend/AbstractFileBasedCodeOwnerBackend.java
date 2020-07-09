@@ -18,7 +18,6 @@ import com.google.common.base.Throwables;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig.Key;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -61,7 +60,8 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
   }
 
   @Override
-  public final Optional<CodeOwnerConfig> getCodeOwnerConfig(Key codeOwnerConfigKey) {
+  public final Optional<CodeOwnerConfig> getCodeOwnerConfig(
+      CodeOwnerConfig.Key codeOwnerConfigKey) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       return CodeOwnerConfigFile.load(
               fileName, codeOwnerConfigParser, repository, codeOwnerConfigKey)
