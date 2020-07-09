@@ -17,12 +17,13 @@ package com.google.gerrit.plugins.codeowners;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Test;
 
 /** Tests for {@link JgitPath}. */
-public class JgitPathTest {
+public class JgitPathTest extends AbstractCodeOwnersTest {
   @Test
   public void getJgitPathOfStringPath() throws Exception {
     assertThat(JgitPath.of("foo/bar/OWNERS").get()).isEqualTo("foo/bar/OWNERS");
