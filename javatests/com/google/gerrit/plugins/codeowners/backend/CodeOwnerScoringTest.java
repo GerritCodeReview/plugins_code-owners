@@ -73,10 +73,9 @@ public class CodeOwnerScoringTest extends AbstractCodeOwnersTest {
     builder.putValueForCodeOwner(codeOwner, 25);
 
     Optional<Integer> bestValue = builder.build().bestValue(codeOwner);
-    assertThat(bestValue).isPresent();
 
     // for the distance score a lower value is better
-    assertThat(bestValue.get()).isEqualTo(25);
+    assertThat(bestValue).hasValue(25);
   }
 
   @Test
