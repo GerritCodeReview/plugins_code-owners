@@ -22,6 +22,30 @@
       "revId": "65264c60badf5b548b422c14196e6eb9065f22e3",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4b1d0cc3_3d52d2aa",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnersInChangeCollection.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-09T13:51:09Z",
+      "side": 1,
+      "message": "Extended the comment to explain why we don\u0027t need to allow the old path in case of copy. I guess it\u0027s good to mention it because it\u0027s really not that obvious.",
+      "parentUuid": "8edb2b4b_ea9c246b",
+      "range": {
+        "startLine": 75,
+        "startChar": 27,
+        "endLine": 75,
+        "endChar": 34
+      },
+      "revId": "65264c60badf5b548b422c14196e6eb9065f22e3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
