@@ -19,7 +19,6 @@ import static com.google.common.truth.Truth.assertWithMessage;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.nio.file.Paths;
-import java.util.Arrays;
 
 /** Base class for testing {@link PathExpressionMatcher}s. */
 public abstract class AbstractPathExpressionMatcherTest extends AbstractCodeOwnersTest {
@@ -46,7 +45,7 @@ public abstract class AbstractPathExpressionMatcherTest extends AbstractCodeOwne
   private static ImmutableList<String> toList(String firstValue, String... moreValues) {
     ImmutableList.Builder<String> pathsBuilder = ImmutableList.builder();
     pathsBuilder.add(firstValue);
-    pathsBuilder.addAll(Arrays.asList(moreValues));
+    pathsBuilder.add(moreValues);
     return pathsBuilder.build();
   }
 }
