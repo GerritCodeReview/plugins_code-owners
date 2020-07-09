@@ -1,0 +1,19 @@
+{
+    "name": "image-diff",
+    "browser": true,
+    "scripts": {
+        "test": "polymer serve",
+        "eslint": "npx eslint --ext .js ./",
+        "eslintfix": "npm run eslint -- --fix",
+        "wct-test": "npm i && npx bower i && npx polymer test -l chrome"
+    },
+    "devDependencies": {
+        "eslint": "^6.6.0",
+        "eslint-config-google": "^0.13.0",
+        "eslint-plugin-html": "^6.0.0",
+        "eslint-plugin-import": "^2.20.1",
+        "eslint-plugin-jsdoc": "^19.2.0"
+    },
+    "license": "Apache-2.0",
+    "private": true
+}
