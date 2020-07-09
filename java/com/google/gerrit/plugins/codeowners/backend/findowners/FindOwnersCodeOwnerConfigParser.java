@@ -195,11 +195,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final String PER_FILE_LINE_FORMAT = "per-file %s=%s\n";
 
     static String formatAsString(CodeOwnerConfig codeOwnerConfig) {
-      return new StringBuilder()
-          .append(formatIgnoreParentCodeOwners(codeOwnerConfig))
-          .append(formatGlobalCodeOwners(codeOwnerConfig))
-          .append(formatPerFileCodeOwners(codeOwnerConfig))
-          .toString();
+      return formatIgnoreParentCodeOwners(codeOwnerConfig)
+          + formatGlobalCodeOwners(codeOwnerConfig)
+          + formatPerFileCodeOwners(codeOwnerConfig);
     }
 
     private static String formatIgnoreParentCodeOwners(CodeOwnerConfig codeOwnerConfig) {
