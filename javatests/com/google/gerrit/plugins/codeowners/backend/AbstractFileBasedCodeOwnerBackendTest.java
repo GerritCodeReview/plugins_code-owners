@@ -80,7 +80,7 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
         CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions((admin.email())))
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
