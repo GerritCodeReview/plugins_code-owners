@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerReferenceInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerSetInfo;
@@ -44,8 +45,7 @@ public final class CodeOwnerConfigJson {
     ImmutableList<CodeOwnerSetInfo> codeOwnerSetInfos =
         codeOwnerConfig.codeOwnerSets().stream()
             .map(CodeOwnerConfigJson::format)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
+            .flatMap(Streams::stream)
             .collect(toImmutableList());
     info.codeOwnerSets = !codeOwnerSetInfos.isEmpty() ? codeOwnerSetInfos : null;
 

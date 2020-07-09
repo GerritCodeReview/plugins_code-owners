@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.exceptions.StorageException;
@@ -86,8 +87,7 @@ public class CodeOwnerResolver {
 
     return localCodeOwners.get(codeOwnerConfig, absolutePath).stream()
         .map(this::resolve)
-        .filter(Optional::isPresent)
-        .map(Optional::get)
+        .flatMap(Streams::stream)
         .collect(toImmutableSet());
   }
 
