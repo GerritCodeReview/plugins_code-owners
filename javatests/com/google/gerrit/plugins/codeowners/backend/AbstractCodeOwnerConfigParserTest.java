@@ -20,7 +20,6 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.Streams;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.io.IOException;
@@ -374,7 +373,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
 
   private static String modifyLines(
       String codeOwnerConfigAsString, Function<String, String> lineModifier) {
-    return Streams.stream(Splitter.on('\n').split(codeOwnerConfigAsString))
+    return Splitter.on('\n')
+        .splitToStream(codeOwnerConfigAsString)
         .map(lineModifier)
         .collect(joining("\n"));
   }
