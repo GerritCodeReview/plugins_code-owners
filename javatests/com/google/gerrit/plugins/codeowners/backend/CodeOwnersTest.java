@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
