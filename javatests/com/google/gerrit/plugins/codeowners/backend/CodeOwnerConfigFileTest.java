@@ -35,8 +35,9 @@ import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigFile}. */
 public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
-  private static String CODE_OWNER_CONFIG_FILE_NAME = "CODE_OWNER_CONFIG";
-  private static CodeOwnerConfigParser CODE_OWNER_CONFIG_PARSER = new TestCodeOwnerConfigParser();
+  private static final String CODE_OWNER_CONFIG_FILE_NAME = "CODE_OWNER_CONFIG";
+  private static final CodeOwnerConfigParser CODE_OWNER_CONFIG_PARSER =
+      new TestCodeOwnerConfigParser();
 
   @Inject private MetaDataUpdate.Server metaDataUpdateServer;
 
