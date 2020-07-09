@@ -76,8 +76,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
   public final Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey,
       CodeOwnerConfigUpdate codeOwnerConfigUpdate,
-      @Nullable IdentifiedUser currentUser)
-      throws StorageException {
+      @Nullable IdentifiedUser currentUser) {
     try {
       return retryHelper
           .pluginUpdate(
