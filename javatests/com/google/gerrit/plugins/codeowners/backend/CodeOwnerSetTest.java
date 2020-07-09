@@ -18,10 +18,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerSet}. */
-public class CodeOwnerSetTest {
+public class CodeOwnerSetTest extends AbstractCodeOwnersTest {
   @Test
   public void addCodeOwners() throws Exception {
     CodeOwnerReference codeOwner1 = CodeOwnerReference.create("jdoe@example.com");
