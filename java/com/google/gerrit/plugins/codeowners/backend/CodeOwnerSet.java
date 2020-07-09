@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
-import java.util.stream.Stream;
+import java.util.Arrays;
 
 /**
  * A code owner set defines a set of code owners for a set of path expressions.
@@ -72,7 +72,7 @@ public abstract class CodeOwnerSet {
    */
   public static CodeOwnerSet createWithoutPathExpressions(String... emails) {
     return createWithoutPathExpressions(
-        Stream.of(emails).map(CodeOwnerReference::create).collect(toImmutableSet()));
+        Arrays.stream(emails).map(CodeOwnerReference::create).collect(toImmutableSet()));
   }
 
   @AutoValue.Builder
