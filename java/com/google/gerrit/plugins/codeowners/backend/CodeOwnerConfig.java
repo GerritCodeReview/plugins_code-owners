@@ -70,7 +70,7 @@ public abstract class CodeOwnerConfig {
    * @return the code owner sets of this code owner config as list
    */
   public ImmutableList<CodeOwnerSet> codeOwnerSetsAsList() {
-    return ImmutableList.copyOf(codeOwnerSets());
+    return codeOwnerSets().asList();
   }
 
   /**
