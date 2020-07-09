@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c266ff8e_088b48f2",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInChangeIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-09T10:09:04Z",
+      "side": 1,
+      "message": "Those test classes and the implementation classes are really neat :)",
+      "range": {
+        "startLine": 30,
+        "startChar": 13,
+        "endLine": 30,
+        "endChar": 43
+      },
+      "revId": "d5da900368750e286c89b2f1e1d7922a7449d981",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
