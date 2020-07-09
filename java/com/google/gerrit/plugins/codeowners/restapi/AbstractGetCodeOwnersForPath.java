@@ -55,9 +55,9 @@ public abstract class AbstractGetCodeOwnersForPath {
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final CodeOwnerResolver codeOwnerResolver;
   private final CodeOwnerJson.Factory codeOwnerJsonFactory;
+  private final EnumSet<ListAccountsOption> options;
+  private final Set<String> hexOptions;
 
-  private EnumSet<ListAccountsOption> options;
-  private Set<String> hexOptions;
   private int limit = DEFAULT_LIMIT;
 
   @Option(
