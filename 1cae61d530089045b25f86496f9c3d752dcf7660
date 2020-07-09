@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ea107cae_c57e8303",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFile.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-09T13:45:27Z",
+      "side": 1,
+      "message": "No, we treat COPY the same way as a new file. \n\nFor a change you need owner approval for\n* all new paths (new/copied files and modified files)\n* all old paths that have been modified (deleted or renamed)\n\nIn case of COPY the file at the old path is not modified, hence we do not need to ask the owners of that old path to approve anything.",
+      "parentUuid": "c13b3f15_7bf6a004",
+      "range": {
+        "startLine": 85,
+        "startChar": 17,
+        "endLine": 85,
+        "endChar": 25
+      },
+      "revId": "1cae61d530089045b25f86496f9c3d752dcf7660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cfc8f7f1_0b45e6e2",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
         "patchSetId": 5
@@ -45,6 +69,30 @@
       "revId": "1cae61d530089045b25f86496f9c3d752dcf7660",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8f609715_a16c96fd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-09T13:45:27Z",
+      "side": 1,
+      "message": "Yes, thanks for suggesting. Added a test.",
+      "parentUuid": "cfc8f7f1_0b45e6e2",
+      "range": {
+        "startLine": 66,
+        "startChar": 87,
+        "endLine": 66,
+        "endChar": 91
+      },
+      "revId": "1cae61d530089045b25f86496f9c3d752dcf7660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
