@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c13b3f15_7bf6a004",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFile.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-09T10:46:57Z",
+      "side": 1,
+      "message": "Do you care about ChangeType.COPY, as well as RENAME and DELETE?",
+      "range": {
+        "startLine": 85,
+        "startChar": 17,
+        "endLine": 85,
+        "endChar": 25
+      },
+      "revId": "1cae61d530089045b25f86496f9c3d752dcf7660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cfc8f7f1_0b45e6e2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-09T10:46:57Z",
+      "side": 1,
+      "message": "Is it a good idea to have a test for when this is null?",
+      "range": {
+        "startLine": 66,
+        "startChar": 87,
+        "endLine": 66,
+        "endChar": 91
+      },
+      "revId": "1cae61d530089045b25f86496f9c3d752dcf7660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
