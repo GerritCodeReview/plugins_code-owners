@@ -146,7 +146,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   @Test
   public void codeOwnerConfigWithWindowsLineBreaks() throws Exception {
     assertParseAndFormat(
-        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3).replaceAll("\n", "\r\n"),
+        getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3).replace("\n", "\r\n"),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig)
                 .hasCodeOwnerSetsThat()
