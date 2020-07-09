@@ -199,8 +199,8 @@ public interface CodeOwnerSetModification {
     return codeOwnerSet
         .toBuilder()
         .setCodeOwners(
-            ImmutableSet.copyOf(
-                Sets.difference(codeOwnerSet.codeOwners(), ImmutableSet.of(codeOwnerReference))))
+            Sets.difference(codeOwnerSet.codeOwners(), ImmutableSet.of(codeOwnerReference))
+                .immutableCopy())
         .build();
   }
 
