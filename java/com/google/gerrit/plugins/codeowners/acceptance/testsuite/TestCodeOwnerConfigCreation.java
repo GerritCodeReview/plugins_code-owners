@@ -132,7 +132,7 @@ public abstract class TestCodeOwnerConfigCreation {
 
   /** Returns whether the code owner config would be empty. */
   public boolean isEmpty() {
-    return ignoreParentCodeOwners() == false && computeCodeOwnerSets().isEmpty();
+    return !ignoreParentCodeOwners() && computeCodeOwnerSets().isEmpty();
   }
 
   /**
