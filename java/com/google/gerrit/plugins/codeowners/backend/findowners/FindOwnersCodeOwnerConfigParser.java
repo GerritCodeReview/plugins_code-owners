@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
@@ -111,7 +112,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       CodeOwnerSet.Builder globalCodeOwnerSetBuilder = CodeOwnerSet.builder();
       List<CodeOwnerSet> perFileCodeOwnerSet = new ArrayList<>();
 
-      for (String line : codeOwnerConfigAsString.split("\\R")) {
+      for (String line : Splitter.onPattern("\\R").split(codeOwnerConfigAsString)) {
         parseLine(codeOwnerConfigBuilder, globalCodeOwnerSetBuilder, perFileCodeOwnerSet, line);
       }
 
