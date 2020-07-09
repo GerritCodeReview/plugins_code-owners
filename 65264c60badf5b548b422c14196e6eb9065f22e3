@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8edb2b4b_ea9c246b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnersInChangeCollection.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-09T10:49:23Z",
+      "side": 1,
+      "message": "Why not accept for copied files too?",
+      "range": {
+        "startLine": 75,
+        "startChar": 27,
+        "endLine": 75,
+        "endChar": 34
+      },
+      "revId": "65264c60badf5b548b422c14196e6eb9065f22e3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
