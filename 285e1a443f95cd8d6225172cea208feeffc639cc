@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "23ee0f5f_606e161a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-10T08:36:29Z",
+      "side": 1,
+      "message": "Is this necessarily a good change?\nI think that before this change the error message in case of failure would be better, as you would get \"assertion failed\" instead of \"Exception thrown element not found\".\n\nI put +2 in case you disagree, up to you.",
+      "revId": "285e1a443f95cd8d6225172cea208feeffc639cc",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
