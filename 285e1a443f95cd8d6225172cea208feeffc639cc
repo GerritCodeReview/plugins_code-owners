@@ -16,6 +16,24 @@
       "revId": "285e1a443f95cd8d6225172cea208feeffc639cc",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "57e6c1b8_a9dbe4f0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-10T08:41:58Z",
+      "side": 1,
+      "message": "This doesn\u0027t change the error message since the value method in OptionalSubject takes care to check isPresent before accessing the value [1].\n\n[1] https://gerrit.googlesource.com/gerrit/+/refs/heads/master/java/com/google/gerrit/truth/OptionalSubject.java#72",
+      "parentUuid": "23ee0f5f_606e161a",
+      "revId": "285e1a443f95cd8d6225172cea208feeffc639cc",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
