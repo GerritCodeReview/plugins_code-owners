@@ -34,13 +34,11 @@ import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 
 /** Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s. */
-@Singleton
 public class CodeOwnerResolver {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -50,6 +48,9 @@ public class CodeOwnerResolver {
   private final AccountCache accountCache;
   private final AccountControl.Factory accountControlFactory;
   private final LocalCodeOwners localCodeOwners;
+
+  // Enforce visibility by default.
+  private boolean enforceVisibility = true;
 
   @Inject
   CodeOwnerResolver(
@@ -65,6 +66,18 @@ public class CodeOwnerResolver {
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
     this.localCodeOwners = localCodeOwners;
+  }
+
+  /**
+   * Whether it should be enforced that the returned code owners are visible to the current user.
+   *
+   * @param enforceVisibility whether it should be enforced that the returned code owners are
+   *     visible to the current user
+   * @return the {@link CodeOwnerResolver} instance for chaining calls
+   */
+  public CodeOwnerResolver enforceVisibility(boolean enforceVisibility) {
+    this.enforceVisibility = enforceVisibility;
+    return this;
   }
 
   /**
@@ -131,7 +144,7 @@ public class CodeOwnerResolver {
 
     Optional<AccountState> accountState =
         lookupEmail(email).flatMap(accountId -> lookupAccount(accountId, email));
-    if (!accountState.isPresent() || !isVisible(accountState.get(), email)) {
+    if (!accountState.isPresent() || (enforceVisibility && !isVisible(accountState.get(), email))) {
       return Optional.empty();
     }
 

@@ -23,6 +23,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import java.util.List;
 
 /**
@@ -39,7 +40,7 @@ public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
   GetCodeOwnersForPathInChange(
       PermissionBackend permissionBackend,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
-      CodeOwnerResolver codeOwnerResolver,
+      Provider<CodeOwnerResolver> codeOwnerResolver,
       CodeOwnerJson.Factory codeOwnerJsonFactory) {
     super(permissionBackend, codeOwnerConfigHierarchy, codeOwnerResolver, codeOwnerJsonFactory);
   }
