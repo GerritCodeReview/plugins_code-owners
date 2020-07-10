@@ -35,6 +35,7 @@ import com.google.gerrit.server.account.AccountLoader;
 import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -53,7 +54,7 @@ public abstract class AbstractGetCodeOwnersForPath {
 
   private final PermissionBackend permissionBackend;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
-  private final CodeOwnerResolver codeOwnerResolver;
+  private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final CodeOwnerJson.Factory codeOwnerJsonFactory;
   private final EnumSet<ListAccountsOption> options;
   private final Set<String> hexOptions;
@@ -87,7 +88,7 @@ public abstract class AbstractGetCodeOwnersForPath {
   protected AbstractGetCodeOwnersForPath(
       PermissionBackend permissionBackend,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
-      CodeOwnerResolver codeOwnerResolver,
+      Provider<CodeOwnerResolver> codeOwnerResolver,
       CodeOwnerJson.Factory codeOwnerJsonFactory) {
     this.permissionBackend = permissionBackend;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
@@ -114,7 +115,7 @@ public abstract class AbstractGetCodeOwnersForPath {
         rsrc.getPath(),
         codeOwnerConfig -> {
           ImmutableSet<CodeOwner> localCodeOwners =
-              codeOwnerResolver.resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath());
+              codeOwnerResolver.get().resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath());
           codeOwners.addAll(localCodeOwners);
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
           localCodeOwners.forEach(
