@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.hasAccountId;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -69,8 +70,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveCodeOwnerReferenceForEmail() throws Exception {
     Optional<CodeOwner> codeOwner =
         codeOwnerResolver.resolve(CodeOwnerReference.create(admin.email()));
-    assertThat(codeOwner).isPresent();
-    assertThat(codeOwner.get()).hasAccountIdThat().isEqualTo(admin.id());
+    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(admin.id());
   }
 
   @Test
