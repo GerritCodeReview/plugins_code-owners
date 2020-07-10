@@ -38,7 +38,7 @@ public abstract class ChangedFile {
   /**
    * The new path of the file.
    *
-   * <p>Not set of the file was deleted.
+   * <p>Not set if the file was deleted.
    *
    * <p>If set, the new path is returned as absolute path.
    */
