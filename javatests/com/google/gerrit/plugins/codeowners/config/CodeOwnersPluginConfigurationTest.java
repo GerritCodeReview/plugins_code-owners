@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -30,6 +31,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
+import com.google.gerrit.plugins.codeowners.backend.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
@@ -253,18 +255,248 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     }
   }
 
+  @Test
+  public void cannotGetRequiredApprovalForNonExistingProject() throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnersPluginConfiguration.getRequiredApproval(
+                    BranchNameKey.create(Project.nameKey("non-existing-project"), "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "cannot get code-owners plugin config for non-existing project non-existing-project");
+  }
+
+  @Test
+  public void getRequiredApprovalForNonExistingBranch() throws Exception {
+    assertThat(
+            codeOwnersPluginConfiguration.getRequiredApproval(
+                BranchNameKey.create(project, "non-existing")))
+        .isEqualTo(
+            RequiredApproval.createDefault(
+                projectCache.get(project).orElseThrow(illegalState(project))));
+  }
+
+  @Test
+  public void getDefaultRequiredApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
+    assertThat(
+            codeOwnersPluginConfiguration.getRequiredApproval(
+                BranchNameKey.create(project, "master")))
+        .isEqualTo(
+            RequiredApproval.createDefault(
+                projectCache.get(project).orElseThrow(illegalState(project))));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
+  public void getConfiguredDefaultRequireApproval() throws Exception {
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.value()).isEqualTo(2);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Foo-Bar+1")
+  public void cannotGetRequiredApprovalIfNonExistingLabelIsConfiguredAsRequiredApproval()
+      throws Exception {
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () ->
+                codeOwnersPluginConfiguration.getRequiredApproval(
+                    BranchNameKey.create(project, "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Invalid configuration of the code-owners plugin. Required approval 'Foo-Bar+1'"
+                    + " that is configured in gerrit.config (parameter"
+                    + " plugin.code-owners.requiredApproval) is invalid: Label Foo-Bar doesn't exist"
+                    + " for project %s.",
+                project.get()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+3")
+  public void cannotGetRequiredApprovalIfNonExistingLabelValueIsConfiguredAsRequiredApproval()
+      throws Exception {
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () ->
+                codeOwnersPluginConfiguration.getRequiredApproval(
+                    BranchNameKey.create(project, "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Invalid configuration of the code-owners plugin. Required approval"
+                    + " 'Code-Review+3' that is configured in gerrit.config (parameter"
+                    + " plugin.code-owners.requiredApproval) is invalid: Label Code-Review on"
+                    + " project %s doesn't allow value 3.",
+                project.get()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "INVALID")
+  public void cannotGetRequiredApprovalIfInvalidRequiredApprovalIsConfigured() throws Exception {
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () ->
+                codeOwnersPluginConfiguration.getRequiredApproval(
+                    BranchNameKey.create(project, "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that is"
+                + " configured in gerrit.config (parameter plugin.code-owners.requiredApproval) is"
+                + " invalid: Invalid format, expected '<label-name>+<label-value>'.");
+  }
+
+  @Test
+  public void getRequiredApprovalConfiguredOnProjectLevel() throws Exception {
+    configureRequiredApproval(project, "Code-Review+2");
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.value()).isEqualTo(2);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+1")
+  public void requiredApprovalConfiguredOnProjectLevelOverridesDefaultRequiredApproval()
+      throws Exception {
+    configureRequiredApproval(project, "Code-Review+2");
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.value()).isEqualTo(2);
+  }
+
+  @Test
+  public void requiredApprovalIsInheritedFromParentProject() throws Exception {
+    configureRequiredApproval(allProjects, "Code-Review+2");
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.value()).isEqualTo(2);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = FindOwnersBackend.ID)
+  public void inheritedRequiredApprovalOverridesDefaultRequiredApproval() throws Exception {
+    configureRequiredApproval(allProjects, "Code-Review+2");
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.value()).isEqualTo(2);
+  }
+
+  @Test
+  public void projectLevelRequiredApprovalOverridesInheritedRequiredApproval() throws Exception {
+    configureRequiredApproval(allProjects, "Code-Review+1");
+    configureRequiredApproval(project, "Code-Review+2");
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.value()).isEqualTo(2);
+  }
+
+  @Test
+  public void
+      cannotGetRequiredApprovalIfNonExistingLabelIsConfiguredAsRequiredApprovalOnProjectLevel()
+          throws Exception {
+    configureRequiredApproval(project, "Foo-Bar+1");
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () ->
+                codeOwnersPluginConfiguration.getRequiredApproval(
+                    BranchNameKey.create(project, "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Invalid configuration of the code-owners plugin. Required approval 'Foo-Bar+1'"
+                    + " that is configured in code-owners.config (parameter"
+                    + " codeOwners.requiredApproval) is invalid: Label Foo-Bar doesn't exist for"
+                    + " project %s.",
+                project.get()));
+  }
+
+  @Test
+  public void
+      cannotGetRequiredApprovalIfNonExistingLabelValueIsConfiguredAsRequiredApprovalOnProjectLevel()
+          throws Exception {
+    configureRequiredApproval(project, "Code-Review+3");
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () ->
+                codeOwnersPluginConfiguration.getRequiredApproval(
+                    BranchNameKey.create(project, "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Invalid configuration of the code-owners plugin. Required approval"
+                    + " 'Code-Review+3' that is configured in code-owners.config (parameter"
+                    + " codeOwners.requiredApproval) is invalid: Label Code-Review on project %s"
+                    + " doesn't allow value 3.",
+                project.get()));
+  }
+
+  @Test
+  public void cannotGetRequiredApprovalIfInvalidRequiredApprovalIsConfiguredOnProjectLevel()
+      throws Exception {
+    configureRequiredApproval(project, "INVALID");
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () ->
+                codeOwnersPluginConfiguration.getRequiredApproval(
+                    BranchNameKey.create(project, "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that is"
+                + " configured in code-owners.config (parameter codeOwners.requiredApproval) is"
+                + " invalid: Invalid format, expected '<label-name>+<label-value>'.");
+  }
+
+  @Test
+  public void projectLevelRequiredApprovalForOtherProjectHasNoEffect() throws Exception {
+    Project.NameKey otherProject = projectOperations.newProject().create();
+    configureRequiredApproval(otherProject, "Code-Review+2");
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.value()).isEqualTo(1);
+  }
+
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
     configureBackend(project, null, backendName);
   }
 
   private void configureBackend(
       Project.NameKey project, @Nullable String branch, String backendName) throws Exception {
+    setConfig(project, branch, CodeOwnersPluginConfiguration.KEY_BACKEND, backendName);
+  }
+
+  private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
+      throws Exception {
+    setConfig(project, null, CodeOwnersPluginConfiguration.KEY_REQUIRED_APPROVAL, requiredApproval);
+  }
+
+  private void setConfig(Project.NameKey project, String subsection, String key, String value)
+      throws Exception {
     Config codeOwnersConfig = new Config();
     codeOwnersConfig.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        branch,
-        CodeOwnersPluginConfiguration.KEY_BACKEND,
-        backendName);
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value);
     try (TestRepository<Repository> testRepo =
         new TestRepository<>(repoManager.openRepository(project))) {
       Ref ref = testRepo.getRepository().exactRef(RefNames.REFS_CONFIG);
