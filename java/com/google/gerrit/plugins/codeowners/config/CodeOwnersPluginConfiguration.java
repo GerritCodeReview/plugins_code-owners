@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
+import static com.google.gerrit.server.project.ProjectCache.illegalState;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
@@ -22,8 +24,11 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.RequiredApproval;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
+import com.google.gerrit.server.project.ProjectCache;
+import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Optional;
@@ -46,11 +51,13 @@ public class CodeOwnersPluginConfiguration {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   @VisibleForTesting public static final String KEY_BACKEND = "backend";
+  @VisibleForTesting public static final String KEY_REQUIRED_APPROVAL = "requiredApproval";
   @VisibleForTesting public static final String SECTION_CODE_OWNERS = "codeOwners";
 
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
   private final DynamicMap<CodeOwnerBackend> codeOwnerBackends;
+  private final ProjectCache projectCache;
 
   /** The name of the configured code owners default backend. */
   private final String defaultBackendName;
@@ -59,10 +66,12 @@ public class CodeOwnersPluginConfiguration {
   CodeOwnersPluginConfiguration(
       @PluginName String pluginName,
       PluginConfigFactory pluginConfigFactory,
-      DynamicMap<CodeOwnerBackend> codeOwnerBackends) {
+      DynamicMap<CodeOwnerBackend> codeOwnerBackends,
+      ProjectCache projectCache) {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
     this.codeOwnerBackends = codeOwnerBackends;
+    this.projectCache = projectCache;
 
     this.defaultBackendName =
         pluginConfigFactory
@@ -109,6 +118,52 @@ public class CodeOwnersPluginConfiguration {
 
     // fall back to the default backend
     return getDefaultBackend();
+  }
+
+  /**
+   * Returns the configured {@link RequiredApproval}.
+   *
+   * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
+   * exist the call fails with {@link IllegalStateException}.
+   *
+   * <p>The code owner required approval configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>required approval configuration for project (with inheritance)
+   *   <li>globally configured required approval
+   *   <li>hard-coded default required approval
+   * </ul>
+   *
+   * <p>The first code owner backend configuration that exists counts and the evaluation is stopped.
+   *
+   * @param branchNameKey project and branch for which the configured code owner backend should be
+   *     returned
+   * @return the {@link CodeOwnerBackend} that should be used
+   */
+  public RequiredApproval getRequiredApproval(BranchNameKey branchNameKey)
+      throws InvalidPluginConfigurationException {
+    Config pluginConfig = getPluginConfig(branchNameKey.project());
+
+    ProjectState projectState =
+        projectCache
+            .get(branchNameKey.project())
+            .orElseThrow(illegalState(branchNameKey.project()));
+
+    // check if a project specific required approval is configured
+    Optional<RequiredApproval> requiredApproval =
+        getRequiredApprovalForProject(projectState, pluginConfig);
+    if (requiredApproval.isPresent()) {
+      return requiredApproval.get();
+    }
+
+    // check if a required approval is globally configured
+    requiredApproval = getRequiredApprovalFromGlobalPluginConfig(projectState);
+    if (requiredApproval.isPresent()) {
+      return requiredApproval.get();
+    }
+
+    // fall back to hard-coded default required approval
+    return RequiredApproval.createDefault(projectState);
   }
 
   private Optional<CodeOwnerBackend> getBackendForBranch(Config pluginConfig, BranchNameKey branch)
@@ -212,5 +267,49 @@ public class CodeOwnersPluginConfiguration {
     // We must use "gerrit" as plugin name since DynamicMapProvider#get() hard-codes "gerrit" as
     // plugin name.
     return Optional.ofNullable(codeOwnerBackends.get("gerrit", backendName));
+  }
+
+  private Optional<RequiredApproval> getRequiredApprovalForProject(
+      ProjectState projectState, Config pluginConfig) throws InvalidPluginConfigurationException {
+    String requiredApproval =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL);
+    if (requiredApproval == null) {
+      return Optional.empty();
+    }
+
+    try {
+      return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
+    } catch (IllegalStateException | IllegalArgumentException e) {
+      throw new InvalidPluginConfigurationException(
+          pluginName,
+          String.format(
+              "Required approval '%s' that is configured in %s.config"
+                  + " (parameter %s.%s) is invalid: %s",
+              requiredApproval,
+              pluginName,
+              SECTION_CODE_OWNERS,
+              KEY_REQUIRED_APPROVAL,
+              e.getMessage()));
+    }
+  }
+
+  private Optional<RequiredApproval> getRequiredApprovalFromGlobalPluginConfig(
+      ProjectState projectState) throws InvalidPluginConfigurationException {
+    String requiredApproval =
+        pluginConfigFactory.getFromGerritConfig(pluginName).getString(KEY_REQUIRED_APPROVAL);
+    if (requiredApproval == null) {
+      return Optional.empty();
+    }
+
+    try {
+      return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
+    } catch (IllegalStateException | IllegalArgumentException e) {
+      throw new InvalidPluginConfigurationException(
+          pluginName,
+          String.format(
+              "Required approval '%s' that is configured in gerrit.config"
+                  + " (parameter plugin.%s.%s) is invalid: %s",
+              requiredApproval, pluginName, KEY_REQUIRED_APPROVAL, e.getMessage()));
+    }
   }
 }

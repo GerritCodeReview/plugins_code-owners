@@ -20,6 +20,18 @@ Parameters that are not set for a project are inherited from the parent project.
         [Backends](backends.html) page.\
         By default `find-owners`.
 
+<a id="pluginCodeOwnersRequiredApproval">plugin.@PLUGIN@.requiredApproval</a>
+:       Approval that is required from code owners to approve the files in a
+        change.\
+        The required approval must be specified in the format
+        "<label-name>+<label-value>".\
+        The configured label must exist for all projects for which this setting
+        applies (all projects that have code owners enabled and for which this
+        setting is not overridden).\
+        Can be overridden per project by setting
+        [codeOwners.requiredApproval](#codeOwnersRequiredApproval) in
+        `@PLUGIN@.config`.\
+        By default "Code-Review+1".
 
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
@@ -43,6 +55,21 @@ Parameters that are not set for a project are inherited from the parent project.
         [Backends](backends.html) page.\
         If not set, the project level configuration
         [codeOwners.backend](#codeOwnersBackend) is used.
+
+<a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>
+:       Approval that is required from code owners to approve the files in a
+        change.\
+        The required approval must be specified in the format
+        "<label-name>+<label-value>".\
+        The configured label must exist for all projects for which this setting
+        applies (all child projects that have code owners enabled and for which
+        this setting is not overridden).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.requiredApproval](#pluginCodeOwnersRequiredApproval) in
+        `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.requiredApproval](#pluginCodeOwnersRequiredApproval) in
+        `gerrit.config` is used.
 
 Part of [Gerrit Code Review](../../../Documentation/index.html)
 
