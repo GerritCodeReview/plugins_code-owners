@@ -43,7 +43,7 @@ public class CodeOwnerSubject extends Subject {
    * @return the created {@link CodeOwnerSubject}
    */
   public static CodeOwnerSubject assertThat(CodeOwner codeOwner) {
-    return assertAbout(CodeOwnerSubject::new).that(codeOwner);
+    return assertAbout(codeOwners()).that(codeOwner);
   }
 
   /**

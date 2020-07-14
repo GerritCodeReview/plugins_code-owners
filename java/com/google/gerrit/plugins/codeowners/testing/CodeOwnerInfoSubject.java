@@ -51,15 +51,15 @@ public class CodeOwnerInfoSubject extends Subject {
    * @return the created {@link CodeOwnerInfoSubject}
    */
   public static CodeOwnerInfoSubject assertThat(CodeOwnerInfo codeOwnerInfo) {
-    return assertAbout(CodeOwnerInfoSubject::new).that(codeOwnerInfo);
+    return assertAbout(codeOwnerInfos()).that(codeOwnerInfo);
   }
 
   public static ListSubject<CodeOwnerInfoSubject, CodeOwnerInfo> assertThatList(
       List<CodeOwnerInfo> codeOwnerInfos) {
-    return ListSubject.assertThat(codeOwnerInfos, codeOwners());
+    return ListSubject.assertThat(codeOwnerInfos, codeOwnerInfos());
   }
 
-  private static Factory<CodeOwnerInfoSubject, CodeOwnerInfo> codeOwners() {
+  private static Factory<CodeOwnerInfoSubject, CodeOwnerInfo> codeOwnerInfos() {
     return CodeOwnerInfoSubject::new;
   }
 

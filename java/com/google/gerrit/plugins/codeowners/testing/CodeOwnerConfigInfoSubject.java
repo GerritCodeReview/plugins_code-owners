@@ -38,7 +38,7 @@ public class CodeOwnerConfigInfoSubject extends Subject {
    * @return the created {@link CodeOwnerConfigInfoSubject}
    */
   public static CodeOwnerConfigInfoSubject assertThat(CodeOwnerConfigInfo codeOwnerConfigInfo) {
-    return assertAbout(CodeOwnerConfigInfoSubject::new).that(codeOwnerConfigInfo);
+    return assertAbout(codeOwnerConfigInfos()).that(codeOwnerConfigInfo);
   }
 
   /**
