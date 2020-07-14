@@ -15,10 +15,20 @@
  * limitations under the License.
  */
 
+import {OwnerStatusColumnContent, OwnerStatusColumnHeader} from './owner-status-column.js';
+
 Gerrit.install(plugin => {
-  // The code owner plugin will use following plugin endpoints:
-  // - change-view-file-list-header-prepend
-  // - change-view-file-list-content-prepend
-  // - reply-reviewers (slot: right, bottom)
-  // - submit-requirement-item-wip (slot: value)
+  const restApi = plugin.restApi();
+
+  // owner status column / rows for file list
+  plugin.registerDynamicCustomComponent(
+      'change-view-file-list-header-prepend', OwnerStatusColumnHeader.is)
+      .onAttached(view => {
+        view.restApi = restApi;
+      });
+  plugin.registerDynamicCustomComponent(
+      'change-view-file-list-content-prepend', OwnerStatusColumnContent.is)
+      .onAttached(view => {
+        view.restApi = restApi;
+      });
 });
