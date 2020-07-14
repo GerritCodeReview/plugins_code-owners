@@ -15,8 +15,8 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
@@ -62,10 +62,10 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile.newPath()).value().isEqualTo(Paths.get(path));
-    assertThat(changedFile.oldPath()).isEmpty();
-    assertThat(changedFile.isRename()).isFalse();
-    assertThat(changedFile.isDeletion()).isFalse();
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().isEmpty();
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
   }
 
   @Test
@@ -80,10 +80,10 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile.newPath()).value().isEqualTo(Paths.get(path));
-    assertThat(changedFile.oldPath()).value().isEqualTo(Paths.get(path));
-    assertThat(changedFile.isRename()).isFalse();
-    assertThat(changedFile.isDeletion()).isFalse();
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
   }
 
   @Test
@@ -105,10 +105,10 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile.newPath()).isEmpty();
-    assertThat(changedFile.oldPath()).value().isEqualTo(Paths.get(path));
-    assertThat(changedFile.isRename()).isFalse();
-    assertThat(changedFile.isDeletion()).isTrue();
+    assertThat(changedFile).hasNewPath().isEmpty();
+    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isDeletion();
   }
 
   @Test
@@ -122,10 +122,10 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile.newPath()).value().isEqualTo(Paths.get(path));
-    assertThat(changedFile.oldPath()).isEmpty();
-    assertThat(changedFile.isRename()).isFalse();
-    assertThat(changedFile.isDeletion()).isFalse();
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().isEmpty();
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
   }
 
   private RevisionResource getRevisionResource(String changeId) throws Exception {
