@@ -105,6 +105,65 @@ order is random.
   ]
 ```
 
+## <a id="change-endpoints"> Change Endpoints
+
+### <a id="get-code-owner-status"> Get Code Owner Status
+_'GET /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/code_owners.status'_
+
+Gets the code owner statuses for the files in a change.
+
+The code owner statuses are always listed for the files in the current revision
+of the change (latest patch set).
+
+The code owner statuses are returned as a
+[CodeOwnerStatusInfo](#code-owner-status-info) entity.
+
+#### Request
+
+```
+  GET /changes/275378/code_owners.status HTTP/1.0
+```
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "patch_set_number": 2,
+    "file_code_owner_statuses": [
+      {
+        "change_type": "ADDED",
+        "new_path_status" {
+          "path": "docs/readme.md",
+          "code_owner_status": "APPROVED"
+        }
+      },
+      {
+        "change_type": "DELETED",
+        "old_path_status" {
+          "path": "docs/todo.txt",
+          "code_owner_status": "PENDING"
+        }
+      },
+      {
+        "change_type": "RENAMED",
+        "old_path_status" {
+          "path": "user-introduction.txt",
+          "code_owner_status": "INSUFFICIENT_REVIEWERS"
+        },
+        "new_path_status" {
+          "path": "docs/user-intro.md",
+          "code_owner_status": "APPROVED"
+        }
+      }
+    ]
+  }
+```
+
 ## <a id="revision-endpoints"> Revision Endpoints
 
 ### <a id="list-code-owners-for-path-in-change"> List Code Owners for path in change
@@ -155,7 +214,6 @@ The `CodeOwnerInfo` entity contains information about a code owner.
 The `CodeOwnerReferenceInfo` entity contains information about a code owner
 reference in a code owner config.
 
-
 | Field Name | Description |
 | ---------- | ----------- |
 | `email`    | The email of the code owner.
@@ -168,6 +226,36 @@ The `CodeOwnerSetInfo` entity defines a set of code owners.
 | Field Name    |          | Description |
 | ------------- | -------- | ----------- |
 | `code_owners` | optional | The list of code owners as [CodeOwnerReferenceInfo](#code-owner-reference-info) entities.
+
+### <a id="code-owner-status-info"> CodeOwnerStatusInfo
+The `CodeOwnerStatusInfo` entity describes the code owner statuses for the files
+in a change.
+
+| Field Name         | Description |
+| ------------------ | ----------- |
+| `patch_set_number` | The number of the patch set for which the code owner statuses are returned.
+| `file_code_owner_statuses` | List of the code owner statuses for the files in the change as [FileCodeOwnerStatusInfo](#file-code-owner-status-info) entities, sorted by new path, then old path.
+
+### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
+The `FileCodeOwnerStatusInfo` entity describes the code owner statuses for a
+file in a change.
+
+| Field Name    |          | Description |
+| ------------- | -------- | ----------- |
+| `change_type` | optional | The type of the file modification. Can be `ADDED`, `MODIFIED`, `DELETED`, `RENAMED` or `COPIED`. Not set if `MODIFIED`.
+| `old_path_status` | optional | The code owner status for the old path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Only set if `change_type` is `DELETED` or `RENAMED`.
+| `new_path_status` | optional | The code owner status for the new path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Not set if `change_type` is `DELETED`.
+
+### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
+The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path
+in a change.
+
+| Field Name         | Description |
+| ------------------ | ----------- |
+| `path` | The path to which the code owner status applies.
+| `code_owner_status` | The code owner status for the path. Can be 'INSUFFICIENT_REVIEWERS' (the path needs a code owner approval, but none of its code owners is currently a reviewer of the change), `PENDING` (a code owner of this path has been added as reviewer, but no code owner approval for this path has been given yet) or `APPROVED` (the path has been approved by a code owner or a code owners override is present).
+
+---
 
 Part of [Gerrit Code Review](../../../Documentation/index.html)
 
