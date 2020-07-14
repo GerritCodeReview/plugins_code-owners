@@ -14,15 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.config.FactoryModule;
+/** JSON entity that describes the code owner status for a path that was touched in a change. */
+public class PathCodeOwnerStatusInfo {
+  /**
+   * The path to which the code owner status applies.
+   *
+   * <p>The path doesn't have any leading '/' (same formatting as for paths in other JSON entities).
+   */
+  public String path;
 
-/** Guice module that binds the Java extension API for the code-owners plugin. */
-public class ApiModule extends FactoryModule {
-  @Override
-  protected void configure() {
-    factory(CodeOwnerConfigsInBranchImpl.Factory.class);
-    factory(CodeOwnersInBranchImpl.Factory.class);
-    factory(CodeOwnersInChangeImpl.Factory.class);
-    factory(ChangeCodeOwnersImpl.Factory.class);
-  }
+  /** The code owner status for the path. */
+  public CodeOwnerStatus status;
 }
