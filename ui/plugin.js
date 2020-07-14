@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import {SuggestOwners, SuggestOwnersTrigger} from './suggest-owners.js';
 import {OwnerStatusColumnContent, OwnerStatusColumnHeader} from './owner-status-column.js';
 import {OwnerRequirementValue} from './owner-requirement.js';
 
@@ -38,6 +39,15 @@ Gerrit.install(plugin => {
       'submit-requirement-item-code-owners',
       OwnerRequirementValue.is, {slot: 'value'}
   )
+      .onAttached(view => {
+        view.restApi = restApi;
+      });
+
+  // suggest owners for reply dialog
+  plugin.registerCustomComponent(
+      'reply-reviewers', SuggestOwnersTrigger.is, {slot: 'right'});
+  plugin.registerCustomComponent(
+      'reply-reviewers', SuggestOwners.is, {slot: 'below'})
       .onAttached(view => {
         view.restApi = restApi;
       });

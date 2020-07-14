@@ -16,6 +16,7 @@
  */
 
 import {CodeOwnerService, OwnerStatus} from './code-owners-service.js';
+import {ownerState} from './owner-ui-state.js';
 
 /**
  * Owner requirement control for `submit-requirement-item-code-owners` endpoint.
@@ -126,6 +127,7 @@ export class OwnerRequirementValue extends Polymer.Element {
           bubbles: true,
         })
     );
+    ownerState.expandSuggestion = true;
   }
 }
 
