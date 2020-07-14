@@ -43,6 +43,9 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
       ImmutableList.of(RestCall.get("/projects/%s/branches/%s/code-owners~code_owners/%s"));
 
   private static final ImmutableList<RestCall> CHANGE_CODE_OWNERS_ENDPOINTS =
+      ImmutableList.of(RestCall.get("/changes/%s/code-owners~code_owners.status"));
+
+  private static final ImmutableList<RestCall> REVISION_CODE_OWNERS_ENDPOINTS =
       ImmutableList.of(RestCall.get("/changes/%s/revisions/%s/code-owners~code_owners/%s"));
 
   @Test
@@ -67,11 +70,17 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
 
   @Test
   public void changeCodeOwnersEndpoints() throws Exception {
+    String changeId = createChange().getChangeId();
+    RestApiCallHelper.execute(adminRestSession, CHANGE_CODE_OWNERS_ENDPOINTS, urlEncode(changeId));
+  }
+
+  @Test
+  public void revisionCodeOwnersEndpoints() throws Exception {
     String filePath = "foo/bar.baz";
     String changeId = createChange("Test Change", filePath, "file content").getChangeId();
     RestApiCallHelper.execute(
         adminRestSession,
-        CHANGE_CODE_OWNERS_ENDPOINTS,
+        REVISION_CODE_OWNERS_ENDPOINTS,
         urlEncode(changeId),
         urlEncode("current"),
         urlEncode(filePath));

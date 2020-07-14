@@ -81,6 +81,11 @@ public abstract class ChangedFile {
     return oldPath().isPresent() && oldPath().get().equals(absolutePath);
   }
 
+  /** Gets the change type. */
+  public ChangeType changeType() {
+    return diffEntry().getChangeType();
+  }
+
   /** Whether the file was renamed. */
   public boolean isRename() {
     return diffEntry().getChangeType() == ChangeType.RENAME;
