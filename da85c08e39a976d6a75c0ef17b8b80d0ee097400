@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "03562148_5359756d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-07-14T11:57:57Z",
+      "side": 1,
+      "message": "Splitting the WIP change into multiple smaller changes so easier to review:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/271996",
+      "revId": "da85c08e39a976d6a75c0ef17b8b80d0ee097400",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
