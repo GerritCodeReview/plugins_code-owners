@@ -30,7 +30,7 @@ public abstract class FileCodeOwnerStatus {
    *
    * <p>Not set if the file was deleted.
    */
-  public abstract Optional<PathCodeOwnerStatus> newPathCodeOwnerStatus();
+  public abstract Optional<PathCodeOwnerStatus> newPathStatus();
 
   /**
    * The code owner status for the old path.
@@ -40,7 +40,7 @@ public abstract class FileCodeOwnerStatus {
    * <p>{@link #changedFile()} also has an old path if the file was copied, but in case of copy the
    * old path didn't change and hence we do not need any code owner approval for it.
    */
-  public abstract Optional<PathCodeOwnerStatus> oldPathCodeOwnerStatus();
+  public abstract Optional<PathCodeOwnerStatus> oldPathStatus();
 
   /**
    * Creates a {@link FileCodeOwnerStatus} instance.

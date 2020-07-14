@@ -52,17 +52,17 @@ public class FileCodeOwnerStatusSubject extends Subject {
   }
 
   /** Returns an {@link OptionalSubject} for the code owners status of the new path. */
-  public OptionalSubject<PathCodeOwnerStatusSubject, ?> hasNewPathCodeOwnerStatus() {
-    return check("newPathCodeOwnerStatus()")
+  public OptionalSubject<PathCodeOwnerStatusSubject, ?> hasNewPathStatus() {
+    return check("newPathStatus()")
         .about(optionals())
-        .thatCustom(fileCodeOwnerStatus().newPathCodeOwnerStatus(), pathCodeOwnerStatuses());
+        .thatCustom(fileCodeOwnerStatus().newPathStatus(), pathCodeOwnerStatuses());
   }
 
   /** Returns an {@link OptionalSubject} for the code owners status of the old path. */
-  public OptionalSubject<PathCodeOwnerStatusSubject, ?> hasOldPathCodeOwnerStatus() {
-    return check("oldPathCodeOwnerStatus()")
+  public OptionalSubject<PathCodeOwnerStatusSubject, ?> hasOldPathStatus() {
+    return check("oldPathStatus()")
         .about(optionals())
-        .thatCustom(fileCodeOwnerStatus().oldPathCodeOwnerStatus(), pathCodeOwnerStatuses());
+        .thatCustom(fileCodeOwnerStatus().oldPathStatus(), pathCodeOwnerStatuses());
   }
 
   private FileCodeOwnerStatus fileCodeOwnerStatus() {

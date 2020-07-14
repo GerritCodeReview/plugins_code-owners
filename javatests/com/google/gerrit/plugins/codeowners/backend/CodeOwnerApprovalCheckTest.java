@@ -78,13 +78,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
@@ -110,13 +110,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
@@ -139,10 +139,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -169,15 +169,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(newPath);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -212,13 +212,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
@@ -252,13 +252,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
@@ -289,10 +289,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
@@ -327,15 +327,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(newPath);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
@@ -370,15 +370,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(newPath);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -408,13 +408,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
@@ -443,13 +443,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
@@ -475,10 +475,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
@@ -509,15 +509,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(newPath);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
@@ -548,15 +548,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getStatuses(getRevisionResource(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(newPath);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
-    fileCodeOwnerStatusSubject.hasOldPathCodeOwnerStatus().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
     fileCodeOwnerStatusSubject
-        .hasOldPathCodeOwnerStatus()
+        .hasOldPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -610,9 +610,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // level approved the change.
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatSet(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathCodeOwnerStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
-        .hasNewPathCodeOwnerStatus()
+        .hasNewPathStatus()
         .value()
         .hasCodeOwnerStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
