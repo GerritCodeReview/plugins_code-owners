@@ -18,6 +18,9 @@ import static com.google.gerrit.server.change.RevisionResource.REVISION_KIND;
 import static com.google.gerrit.server.project.BranchResource.BRANCH_KIND;
 
 import com.google.gerrit.extensions.registration.DynamicMap;
+import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.extensions.webui.JavaScriptPlugin;
+import com.google.gerrit.extensions.webui.WebUiPlugin;
 
 /** Guice module that binds the REST API for the code-owners plugin. */
 public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiModule {
@@ -36,5 +39,7 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
     DynamicMap.mapOf(binder(), CodeOwnersInChangeCollection.PathResource.PATH_KIND);
     child(REVISION_KIND, "code_owners").to(CodeOwnersInChangeCollection.class);
     get(CodeOwnersInChangeCollection.PathResource.PATH_KIND).to(GetCodeOwnersForPathInChange.class);
+
+    DynamicSet.bind(binder(), WebUiPlugin.class).toInstance(new JavaScriptPlugin("code-owners.js"));
   }
 }
