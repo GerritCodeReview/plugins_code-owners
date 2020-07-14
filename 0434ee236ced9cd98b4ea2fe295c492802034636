@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "1c21d682_205b930a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-14T08:31:12Z",
+      "side": 1,
+      "message": "Actually they really make writing tests easier.\n\nIn this case I was not sure if it\u0027s worth the overhead, hence I initially skipped it, but now in follow-up changes I see that I need to do assertions on this class also in further places, so that it\u0027s better to have a subject for this.",
+      "parentUuid": "6737bfa4_5ee7d629",
+      "revId": "0434ee236ced9cd98b4ea2fe295c492802034636",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "4a31cbf2_1f198317",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/ChangedFileSubject.java",
         "patchSetId": 1
@@ -39,6 +57,30 @@
       "revId": "0434ee236ced9cd98b4ea2fe295c492802034636",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9af2f39_19db240b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/ChangedFileSubject.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-14T08:31:12Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a31cbf2_1f198317",
+      "range": {
+        "startLine": 64,
+        "startChar": 28,
+        "endLine": 64,
+        "endChar": 34
+      },
+      "revId": "0434ee236ced9cd98b4ea2fe295c492802034636",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
