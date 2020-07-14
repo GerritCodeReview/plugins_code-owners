@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "16f4e327_42500998",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1079742
+      },
+      "writtenOn": "2020-07-14T15:28:02Z",
+      "side": 1,
+      "message": "Owners and Files are too close to each other and look like they belong together. I suggest we add --spacing-m: 8px between Owners and Files column title. We will still position the file status icon centered with the Owners title. ",
+      "revId": "34e947ac2ac9aad4d310500184210ffc4dd7459f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
