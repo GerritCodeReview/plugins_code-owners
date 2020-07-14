@@ -16,6 +16,24 @@
       "revId": "34e947ac2ac9aad4d310500184210ffc4dd7459f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbae1f07_a80591f6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-07-14T15:31:53Z",
+      "side": 1,
+      "message": "Noted! BTW: These changes are more for scaffolding :) I will do a polish run against the specs, and will add you to all of them :)",
+      "parentUuid": "16f4e327_42500998",
+      "revId": "34e947ac2ac9aad4d310500184210ffc4dd7459f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
