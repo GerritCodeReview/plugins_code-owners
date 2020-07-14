@@ -31,7 +31,12 @@ public class ChangedFileSubject extends Subject {
    * @return the created {@link ChangedFileSubject}
    */
   public static ChangedFileSubject assertThat(ChangedFile changedFile) {
-    return assertAbout(ChangedFileSubject::new).that(changedFile);
+    return assertAbout(changedFiles()).that(changedFile);
+  }
+
+  /** Creates subject factory for mapping {@link ChangedFile}s to {@link ChangedFileSubject}s. */
+  private static Subject.Factory<ChangedFileSubject, ChangedFile> changedFiles() {
+    return ChangedFileSubject::new;
   }
 
   private final ChangedFile changedFile;

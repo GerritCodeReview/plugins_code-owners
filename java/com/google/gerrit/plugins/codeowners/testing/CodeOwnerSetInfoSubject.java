@@ -40,7 +40,7 @@ public class CodeOwnerSetInfoSubject extends Subject {
    * @return the created {@link CodeOwnerSetInfoSubject}
    */
   public static CodeOwnerSetInfoSubject assertThat(CodeOwnerSetInfo codeOwnerSetInfo) {
-    return assertAbout(CodeOwnerSetInfoSubject::new).that(codeOwnerSetInfo);
+    return assertAbout(codeOwnerSetInfos()).that(codeOwnerSetInfo);
   }
 
   public static Factory<CodeOwnerSetInfoSubject, CodeOwnerSetInfo> codeOwnerSetInfos() {
