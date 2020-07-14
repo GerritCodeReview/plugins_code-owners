@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6737bfa4_5ee7d629",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-14T08:24:18Z",
+      "side": 1,
+      "message": "I don\u0027t feel that this change adds alot of value, I might be biased against \"Subject\" classes, though.",
+      "revId": "0434ee236ced9cd98b4ea2fe295c492802034636",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4a31cbf2_1f198317",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/ChangedFileSubject.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-14T08:24:18Z",
+      "side": 1,
+      "message": "comment is wrong (and below).",
+      "range": {
+        "startLine": 64,
+        "startChar": 28,
+        "endLine": 64,
+        "endChar": 34
+      },
+      "revId": "0434ee236ced9cd98b4ea2fe295c492802034636",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
