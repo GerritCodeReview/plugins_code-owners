@@ -16,6 +16,7 @@
  */
 
 import {OwnerStatusColumnContent, OwnerStatusColumnHeader} from './owner-status-column.js';
+import {OwnerRequirementValue} from './owner-requirement.js';
 
 Gerrit.install(plugin => {
   const restApi = plugin.restApi();
@@ -28,6 +29,15 @@ Gerrit.install(plugin => {
       });
   plugin.registerDynamicCustomComponent(
       'change-view-file-list-content-prepend', OwnerStatusColumnContent.is)
+      .onAttached(view => {
+        view.restApi = restApi;
+      });
+
+  // submit requirement value for owner's requirement
+  plugin.registerCustomComponent(
+      'submit-requirement-item-code-owners',
+      OwnerRequirementValue.is, {slot: 'value'}
+  )
       .onAttached(view => {
         view.restApi = restApi;
       });
