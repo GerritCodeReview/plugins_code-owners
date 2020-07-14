@@ -35,7 +35,7 @@ public class ChangedFileSubject extends Subject {
   }
 
   /** Creates subject factory for mapping {@link ChangedFile}s to {@link ChangedFileSubject}s. */
-  private static Subject.Factory<ChangedFileSubject, ChangedFile> changedFiles() {
+  public static Subject.Factory<ChangedFileSubject, ChangedFile> changedFiles() {
     return ChangedFileSubject::new;
   }
 
