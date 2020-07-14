@@ -20,7 +20,6 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.extensions.restapi.IdString;
@@ -89,18 +88,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   @Test
   public void computeForChangeThatDeletedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
-    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
-
-    PushOneCommit push =
-        pushFactory.create(
-            admin.newIdent(),
-            testRepo,
-            "Change Deleting A File",
-            JgitPath.of(path).get(),
-            "file content");
-    Result r = push.rm("refs/for/master");
-    r.assertOkStatus();
-    String changeId = r.getChangeId();
+    String changeId = createChangeWithFileDeletion(path).getChangeId();
 
     ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);

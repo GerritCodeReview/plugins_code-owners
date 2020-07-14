@@ -20,7 +20,6 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.
 import static java.util.stream.Collectors.toMap;
 
 import com.google.gerrit.acceptance.PushOneCommit;
-import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
@@ -86,18 +85,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .create();
 
     String path = "/foo/bar/baz.txt";
-    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
-
-    PushOneCommit push =
-        pushFactory.create(
-            admin.newIdent(),
-            testRepo,
-            "Change Deleting A File",
-            JgitPath.of(path).get(),
-            "file content");
-    Result r = push.rm("refs/for/master");
-    r.assertOkStatus();
-    String changeId = r.getChangeId();
+    String changeId = createChangeWithFileDeletion(path).getChangeId();
 
     List<CodeOwnerInfo> codeOwnerInfos =
         codeOwnersApiFactory.change(changeId, "current").query().get(path);

@@ -15,7 +15,10 @@
 package com.google.gerrit.plugins.codeowners.acceptance;
 
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
+import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 
 /**
  * Base class for code owner integration tests.
@@ -29,4 +32,19 @@ import com.google.gerrit.acceptance.TestPlugin;
 @TestPlugin(
     name = "code-owners",
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
-public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {}
+public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
+  protected PushOneCommit.Result createChangeWithFileDeletion(String filePath) throws Exception {
+    createChange("Change Adding A File", JgitPath.of(filePath).get(), "file content").getChangeId();
+
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Change Deleting A File",
+            JgitPath.of(filePath).get(),
+            "file content");
+    Result r = push.rm("refs/for/master");
+    r.assertOkStatus();
+    return r;
+  }
+}
