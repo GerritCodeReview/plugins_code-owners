@@ -85,10 +85,45 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .create();
 
     String path = "/foo/bar/baz.txt";
-    String changeId = createChangeWithFileDeletion(path).getChangeId();
+    String changeId = createChangeWithFileDeletion(path);
 
     List<CodeOwnerInfo> codeOwnerInfos =
         codeOwnersApiFactory.change(changeId, "current").query().get(path);
     assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
+  }
+
+  @Test
+  public void getCodeOwnersForRenamedFile() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/new/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/old/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String oldPath = "/foo/old/bar.txt";
+    String newPath = "/foo/new/bar.txt";
+    String changeId = createChangeWithFileRename(oldPath, newPath);
+
+    List<CodeOwnerInfo> codeOwnerInfosNewPath =
+        codeOwnersApiFactory.change(changeId, "current").query().get(newPath);
+    assertThat(codeOwnerInfosNewPath)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+
+    List<CodeOwnerInfo> codeOwnerInfosOldPath =
+        codeOwnersApiFactory.change(changeId, "current").query().get(oldPath);
+    assertThat(codeOwnerInfosOldPath)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id());
   }
 }

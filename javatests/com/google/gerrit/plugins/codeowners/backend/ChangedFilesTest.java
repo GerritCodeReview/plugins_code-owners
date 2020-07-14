@@ -88,7 +88,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   @Test
   public void computeForChangeThatDeletedAFile() throws Exception {
     String path = "/foo/bar/baz.txt";
-    String changeId = createChangeWithFileDeletion(path).getChangeId();
+    String changeId = createChangeWithFileDeletion(path);
 
     ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
@@ -97,6 +97,23 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(path));
     assertThat(changedFile).isNoRename();
     assertThat(changedFile).isDeletion();
+  }
+
+  @Test
+  public void computeForChangeThatRenamedAFile() throws Exception {
+    String oldPath = "/foo/bar/old.txt";
+    String newPath = "/foo/bar/new.txt";
+    String changeId = createChangeWithFileRename(oldPath, newPath);
+
+    gApi.changes().id(changeId).current().files();
+
+    ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
+    assertThat(changedFilesSet).hasSize(1);
+    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(newPath));
+    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(oldPath));
+    assertThat(changedFile).isRename();
+    assertThat(changedFile).isNoDeletion();
   }
 
   @Test

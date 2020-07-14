@@ -18,6 +18,8 @@ import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
+import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 
 /**
@@ -33,7 +35,7 @@ import com.google.gerrit.plugins.codeowners.JgitPath;
     name = "code-owners",
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
 public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
-  protected PushOneCommit.Result createChangeWithFileDeletion(String filePath) throws Exception {
+  protected String createChangeWithFileDeletion(String filePath) throws Exception {
     createChange("Change Adding A File", JgitPath.of(filePath).get(), "file content").getChangeId();
 
     PushOneCommit push =
@@ -45,6 +47,29 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
             "file content");
     Result r = push.rm("refs/for/master");
     r.assertOkStatus();
-    return r;
+    return r.getChangeId();
+  }
+
+  protected String createChangeWithFileRename(String oldFilePath, String newFilePath)
+      throws Exception {
+    String changeId1 =
+        createChange("Change Adding A File", JgitPath.of(oldFilePath).get(), "file content")
+            .getChangeId();
+
+    // The PushOneCommit test API doesn't support renaming files in a change. Use the change edit
+    // Java API instead.
+    ChangeInput changeInput = new ChangeInput();
+    changeInput.project = project.get();
+    changeInput.branch = "master";
+    changeInput.subject = "Change Renaming A File";
+    changeInput.baseChange = changeId1;
+    String changeId2 = gApi.changes().create(changeInput).id();
+    gApi.changes().id(changeId2).edit().create();
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldFilePath).get(), JgitPath.of(newFilePath).get());
+    gApi.changes().id(changeId2).edit().publish(new PublishChangeEditInput());
+    return changeId2;
   }
 }
