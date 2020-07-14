@@ -21,6 +21,7 @@ import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.plugins.codeowners.JgitPath;
+import java.nio.file.Path;
 
 /**
  * Base class for code owner integration tests.
@@ -35,6 +36,10 @@ import com.google.gerrit.plugins.codeowners.JgitPath;
     name = "code-owners",
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
 public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
+  protected String createChangeWithFileDeletion(Path filePath) throws Exception {
+    return createChangeWithFileDeletion(filePath.toString());
+  }
+
   protected String createChangeWithFileDeletion(String filePath) throws Exception {
     createChange("Change Adding A File", JgitPath.of(filePath).get(), "file content").getChangeId();
 
@@ -48,6 +53,10 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     Result r = push.rm("refs/for/master");
     r.assertOkStatus();
     return r.getChangeId();
+  }
+
+  protected String createChangeWithFileRename(Path oldFilePath, Path newFilePath) throws Exception {
+    return createChangeWithFileRename(oldFilePath.toString(), newFilePath.toString());
   }
 
   protected String createChangeWithFileRename(String oldFilePath, String newFilePath)
