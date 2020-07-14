@@ -14,15 +14,28 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.config.FactoryModule;
+import com.google.gerrit.extensions.common.ChangeType;
 
-/** Guice module that binds the Java extension API for the code-owners plugin. */
-public class ApiModule extends FactoryModule {
-  @Override
-  protected void configure() {
-    factory(CodeOwnerConfigsInBranchImpl.Factory.class);
-    factory(CodeOwnersInBranchImpl.Factory.class);
-    factory(CodeOwnersInChangeImpl.Factory.class);
-    factory(ChangeCodeOwnersImpl.Factory.class);
-  }
+/** JSON entity that describes the code owner status for a file that was touched in a change. */
+public class FileCodeOwnerStatusInfo {
+  /**
+   * The type of the file modification.
+   *
+   * <p>Not set if {@link ChangeType#MODIFIED}.
+   */
+  public ChangeType changeType;
+
+  /**
+   * Code owner status for the old path of the file.
+   *
+   * <p>Only set if the file was deleted or renamed.
+   */
+  public PathCodeOwnerStatusInfo oldPathStatus;
+
+  /**
+   * Code owner status for the new path of the file.
+   *
+   * <p>Not set if the file was deleted.
+   */
+  public PathCodeOwnerStatusInfo newPathStatus;
 }
