@@ -30,21 +30,20 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.restapi.change.ChangesCollection;
-import com.google.gerrit.server.restapi.change.Revisions;
+import com.google.inject.Inject;
 import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link ChangedFiles}. */
 public class ChangedFilesTest extends AbstractCodeOwnersTest {
+  @Inject private ChangesCollection changesCollection;
+
   private ChangedFiles changedFiles;
-  private ChangesCollection changesCollection;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     changedFiles = plugin.getSysInjector().getInstance(ChangedFiles.class);
-    changesCollection = plugin.getSysInjector().getInstance(ChangesCollection.class);
-    revisions = plugin.getSysInjector().getInstance(Revisions.class);
   }
 
   @Test
