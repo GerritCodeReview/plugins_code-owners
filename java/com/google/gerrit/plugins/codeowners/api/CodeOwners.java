@@ -29,9 +29,9 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Java API for code owners in a branch.
+ * Java API for code owners in a branch or change revision.
  *
- * <p>To create an instance for a branch use {@link CodeOwnersFactory}.
+ * <p>To create an instance for a branch or change revision use {@link CodeOwnersFactory}.
  */
 public interface CodeOwners {
   /** Query code owners for a path. */
