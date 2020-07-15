@@ -44,8 +44,6 @@ Gets a code owner config for a path in a branch.
 If the path does not exist or if no code owner config exists for the path
 '`204 No Content`' is returned.
 
-## <a id="branch-endpoints"> Branch Endpoints
-
 ### <a id="list-code-owners-for-path-in-branch"> List Code Owners for path in branch
 _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners/[\{path\}](#path)'_
 
@@ -106,6 +104,8 @@ order is random.
     }
   ]
 ```
+
+## <a id="revision-endpoints"> Revision Endpoints
 
 ### <a id="list-code-owners-for-path-in-change"> List Code Owners for path in change
 _'GET /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners/[\{path\}](#path)'_
