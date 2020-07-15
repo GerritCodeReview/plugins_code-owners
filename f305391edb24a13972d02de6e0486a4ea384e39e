@@ -16,6 +16,24 @@
       "revId": "f305391edb24a13972d02de6e0486a4ea384e39e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7a59418e_4d1bc551",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/RestApiModule.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-07-15T14:39:11Z",
+      "side": 1,
+      "message": "ah i was looking at https://chromium-review.googlesource.com/c/infra/gerrit-plugins/buildbucket/+/2165806 which seems have this when extend RestApiModule",
+      "parentUuid": "4654b7bb_4059820f",
+      "revId": "f305391edb24a13972d02de6e0486a4ea384e39e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
