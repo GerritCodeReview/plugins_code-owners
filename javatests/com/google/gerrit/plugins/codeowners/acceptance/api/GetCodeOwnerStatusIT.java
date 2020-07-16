@@ -82,10 +82,6 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
   public void cannotGetStatusIfPluginConfigurationIsInvalid() throws Exception {
     String changeId = createChange().getChangeId();
-
-    // Add a reviewer to avoid short-cut.
-    gApi.changes().id(changeId).addReviewer(user.email());
-
     ResourceConflictException exception =
         assertThrows(
             ResourceConflictException.class,
