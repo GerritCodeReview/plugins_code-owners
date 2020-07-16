@@ -59,9 +59,15 @@ export class SuggestOwnersTrigger extends Polymer.Element {
     super.connectedCallback();
     this.ownerService = CodeOwnerService
         .getOwnerService(this.restApi, this.change);
-    this.ownerService.getStatus().then(({file_owner_statuses}) => {
-      const hasPendingFiles = Object.keys(file_owner_statuses)
-          .some(path => file_owner_statuses[path] !== OwnerStatus.APPROVED);
+    this.ownerService.getStatus().then(({rawStatuses}) => {
+      const hasPendingFiles = rawStatuses.some(status => {
+        const oldPathStatus = status.old_path_status;
+        const newPathStatus = status.new_path_status;
+        if (newPathStatus.status !== OwnerStatus.APPROVED) {
+          return true;
+        }
+        return oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
+      });
       this.hidden = !hasPendingFiles;
     });
     ownerState.onExpandSuggestionChange(expanded => {

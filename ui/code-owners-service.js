@@ -82,7 +82,7 @@ export class CodeOwnerService {
     this.restApi = restApi;
     this.change = change;
     this.options = {maxConcurrentRequests: 10, ...options};
-    this.codeOwnerApi = new CodeOwnerApi(restApi);
+    this.codeOwnerApi = new MockCodeOwnerApi(restApi);
 
     this.init();
   }
@@ -91,12 +91,22 @@ export class CodeOwnerService {
    * Initial fetches.
    */
   init() {
-    this.statusPromise = this.codeOwnerApi.listOwnerStatus(this.change._number);
+    this.statusPromise = this.codeOwnerApi
+        .listOwnerStatus(this.change._number)
+        .then(res => {
+          return {
+            patchsetNumber: res.patch_set_number,
+            codeOwnerStatusMap: this._formatStatuses(
+                res.file_code_owner_statuses
+            ),
+            rawStatuses: res.file_code_owner_statuses,
+          };
+        });
   }
 
   getStatus() {
     return this.statusPromise.then(res => {
-      if (!this.isOnLatestPatchset(res.patch_set_id)) {
+      if (!this.isOnLatestPatchset(res.patchsetNumber)) {
         // status is outdated, re-init
         this.init();
         return this.statusPromise;
@@ -114,30 +124,55 @@ export class CodeOwnerService {
    */
   getSuggestedOwners(opt = {}) {
     return this.getStatus()
-        .then(({file_owner_statuses}) => {
-          let filesToFetchOwners = Object.keys(file_owner_statuses);
+        .then(({codeOwnerStatusMap}) => {
+          let filesToFetchOwners = Object.keys(codeOwnerStatusMap);
           if (opt.skipApproved) {
             filesToFetchOwners = filesToFetchOwners.filter(
-                file => file_owner_statuses[file] !== OwnerStatus.APPROVED
+                file => codeOwnerStatusMap[file].status !== OwnerStatus.APPROVED
             );
           }
           if (opt.onlyApproved) {
             filesToFetchOwners = filesToFetchOwners.filter(
-                file => file_owner_statuses[file] === OwnerStatus.APPROVED
+                file => codeOwnerStatusMap[file].status === OwnerStatus.APPROVED
             );
           }
-          return this.batchFetchCodeOwners(filesToFetchOwners);
-        })
-        .then(fileOwnersMap => {
-          return this._groupFilesByOwners(fileOwnersMap);
+          return this.batchFetchCodeOwners(filesToFetchOwners)
+              .then(ownersMap =>
+                this._groupFilesByOwners(ownersMap)
+              );
         });
   }
 
+  _formatStatuses(statuses) {
+    // convert the array of statuses to map between file path -> status
+    return statuses.reduce((prev, cur) => {
+      const newPathStatus = cur.new_path_status;
+      const oldPathStatus = cur.old_path_status;
+      if (oldPathStatus) {
+        prev[oldPathStatus.path] = {
+          changeType: cur.change_type,
+          status: oldPathStatus.code_owner_status,
+          newPath: newPathStatus.path,
+        };
+      }
+      if (newPathStatus) {
+        prev[newPathStatus.path] = {
+          changeType: cur.change_type,
+          status: newPathStatus.code_owner_status,
+          oldPath: oldPathStatus ? oldPathStatus.path : null,
+        };
+      }
+      return prev;
+    }, {});
+  }
+
   _groupFilesByOwners(fileOwnersMap) {
-    // TODO(taoalpha): For moved files, they need to be always in a different group
-    // since they may need two owners to approve
-    const ownersFilesMap = {};
+    // TODO(taoalpha): For moved files, we are treating them as two separate items
+    // when suggesting here, may change later for UX
     const allFiles = Object.keys(fileOwnersMap);
+    // for moved files, group by both sets (new path and old path)
+    // for the rest, group by owner set
+    const ownersFilesMap = {};
     for (let i = 0; i < allFiles.length; i++) {
       const filePath = allFiles[i];
       // TODO(taoalpha): handle failed fetches, fileOwnersMap[filePath]
@@ -179,12 +214,6 @@ export class CodeOwnerService {
   isOnLatestPatchset(patchsetId) {
     const latestRevision = this.change.revisions[this.change.current_revision];
     return `${latestRevision._number}` === `${patchsetId}`;
-  }
-
-  getStatusForPath(path) {
-    return this.getStatus().then(({file_owner_statuses}) => {
-      return file_owner_statuses[path];
-    });
   }
 
   /**
@@ -231,5 +260,129 @@ export class CodeOwnerService {
       });
     }
     return this.ownerService;
+  }
+}
+
+// The mock is for change: https://gerrit-review.googlesource.com/c/plugins/code-owners/+/271996
+// testing purpose only
+class MockCodeOwnerApi extends CodeOwnerApi {
+  /**
+   * Returns a promise fetching the owner statuses for all files within the change.
+   *
+   * @param {string} changeId
+   */
+  listOwnerStatus(changeId) {
+    return new Promise(resolve => {
+      setTimeout(
+          () =>
+            resolve({
+              patch_set_number: '2',
+              file_code_owner_statuses: [
+              /* eslint-disable */
+              {
+                change_type: "ADDED",
+                'new_path_status': {
+                  path: "package.json",
+                  code_owner_status: OwnerStatus.APPROVED,
+                }
+              },
+              {
+                change_type: "ADDED",
+                'new_path_status': {
+                  path: ".eslintrc.json",
+                  code_owner_status: OwnerStatus.APPROVED,
+                }
+              },
+              {
+                change_type: "ADDED",
+                'new_path_status': {
+                  path: "BUILD",
+                  code_owner_status: OwnerStatus.PENDING,
+                }
+              },
+              {
+                change_type: "ADDED",
+                'new_path_status': {
+                  path: "ui/owner-status-column.js",
+                  code_owner_status: OwnerStatus.PENDING,
+                }
+              },
+              {
+                change_type: "ADDED",
+                'new_path_status': {
+                  path: "ui/plugin.js",
+                  code_owner_status: OwnerStatus.APPROVED,
+                }
+              },
+              {
+                change_type: "ADDED",
+                'new_path_status': {
+                  path: "ui/suggest-owners.js",
+                  code_owner_status: OwnerStatus.APPROVED,
+                }
+              },
+              {
+                change_type: "ADDED",
+                'new_path_status': {
+                  path: "ui/code-owners-service.js",
+                  code_owner_status: OwnerStatus.APPROVED,
+                },
+                'old_path_status': {
+                  path: "java/code-owners-service1.js",
+                  code_owner_status: OwnerStatus.INSUFFICIENT_REVIEWERS,
+                }
+              }
+              /* eslint-disable */
+            ],
+          }),
+        1000
+      );
+    });
+  }
+
+  /**
+   * Returns a promise fetching the owners for a given path.
+   *
+   * @param {string} project
+   * @param {string} branch
+   * @param {string} path
+   */
+  listOwnersForPath(project, branch, path) {
+    const baseFakeAccount = {
+      avatars: [
+        {
+          height: 32,
+          url:
+            "https://lh3.googleusercontent.com/-XdUIqdMkCWA/AAAAAAAAAAI/AAAAAAAAAAA/4252rscbv5M/s32/photo.jpg",
+        },
+      ],
+      display_name: "Ben",
+      email: "brohlfs@google.com",
+      name: "Ben Rohlfs",
+      _account_id: 1013302,
+    };
+
+    const accountsPool = new Array(5)
+      .fill(0)
+      .map((_, idx) =>
+        Object.assign({}, baseFakeAccount, {
+          display_name: idx === 0 ? "Ben": "Tester " + idx,
+          _account_id: baseFakeAccount._account_id + idx,
+        })
+      );
+
+    function pickAccounts() {
+      const res = accountsPool.slice();
+      delete res[Math.floor(Math.random() * res.length)];
+      return res.filter((d) => !!d);
+    }
+
+    return new Promise((resolve) => {
+      setTimeout(() => resolve(pickAccounts()), 1000);
+    });
+  }
+
+  isOnLatestPatchset() {
+    return true;
   }
 }

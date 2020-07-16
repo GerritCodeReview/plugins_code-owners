@@ -20,13 +20,18 @@ import {CodeOwnerService, OwnerStatus} from './code-owners-service.js';
 const MAGIC_FILES = ['/COMMIT_MSG', '/MERGE_LIST', '/PATCHSET_LEVEL'];
 const STATUS_CODE = {
   PENDING: 'pending',
+  PENDING_OLD_PATH: 'pending-old-path',
   MISSING: 'missing',
+  MISSING_OLD_PATH: 'missing-old-path',
   APPROVED: 'approved',
   ERROR: 'error',
+  ERROR_OLD_PATH: 'error-old-path',
 };
 const STATUS_ICON = {
   [STATUS_CODE.PENDING]: 'gr-icons:schedule',
   [STATUS_CODE.MISSING]: 'gr-icons:close',
+  [STATUS_CODE.PENDING_OLD_PATH]: 'gr-icons:schedule',
+  [STATUS_CODE.MISSING_OLD_PATH]: 'gr-icons:close',
   [STATUS_CODE.APPROVED]: 'gr-icons:check',
   // TODO: not finalized yet
   [STATUS_CODE.ERROR]: 'gr-icons:info-outline',
@@ -34,6 +39,10 @@ const STATUS_ICON = {
 const STATUS_TOOLTIP = {
   [STATUS_CODE.PENDING]: 'Owner has not approved yet.',
   [STATUS_CODE.MISSING]: 'Missing owner in reviewers, please add.',
+  [STATUS_CODE.PENDING_OLD_PATH]: 'Owner of the file before'
+    + ' renmaed has not approved yet.',
+  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing owner for the file before'
+    + ' renamed in reviewers, please add.',
   [STATUS_CODE.APPROVED]: 'This file has been approved by the owner'
      + 'or owned by you.',
   [STATUS_CODE.ERROR]: 'Can not determine owner status for this file.',
@@ -121,8 +130,14 @@ export class OwnerStatusColumnContent extends BaseEl {
       },
       restApi: Object,
       ownerService: Object,
-      statusIcon: String,
-      statusInfo: String,
+      statusIcon: {
+        type: String,
+        computed: '_computeIcon(status)',
+      },
+      statusInfo: {
+        type: String,
+        computed: '_computeTooltip(status)',
+      },
       status: {
         type: String,
         reflectToAttribute: true,
@@ -167,31 +182,56 @@ export class OwnerStatusColumnContent extends BaseEl {
     if ([ownerService, path].includes(undefined)) return;
     if (MAGIC_FILES.includes(path)) return;
 
-    ownerService.getStatusForPath(path)
-        .then(status => {
-          switch (status) {
-            case OwnerStatus.APPROVED:
-              this.status = STATUS_CODE.APPROVED;
-              break;
-            case OwnerStatus.INSUFFICIENT_REVIEWERS:
-              this.status = STATUS_CODE.MISSING;
-              break;
-            case OwnerStatus.PENDING:
-              this.status = STATUS_CODE.PENDING;
-              break;
-            default:
-              this.status = STATUS_CODE.ERROR;
-              break;
+    ownerService.getStatus()
+        .then(({codeOwnerStatusMap}) => {
+          const statusItem = codeOwnerStatusMap[path];
+          if (!statusItem) {
+            this.status = STATUS_CODE.ERROR;
+            return;
           }
-          this.statusIcon = STATUS_ICON[this.status];
-          this.statusInfo = STATUS_TOOLTIP[this.status];
+
+          const status = statusItem.status;
+          let oldPathStatus = null;
+          if (statusItem.oldPath) {
+            const oldStatusItem = codeOwnerStatusMap[statusItem.oldPath];
+            if (!oldStatusItem) {
+              // should not happen
+            } else {
+              oldPathStatus = oldStatusItem.status;
+            }
+          }
+
+          const newPathStatus = this._computeStatus(status);
+          if (!oldPathStatus) {
+            this.status = newPathStatus;
+          } else {
+            this.status = newPathStatus === STATUS_CODE.APPROVED
+              ? this._computeStatus(oldPathStatus, /* oldPath=*/ true)
+              : newPathStatus;
+          }
         })
         .catch(e => {
           this.status = STATUS_CODE.ERROR;
-          this.statusIcon = STATUS_ICON[this.status];
-          this.statusInfo = STATUS_TOOLTIP[this.status];
           throw e;
         });
+  }
+
+  _computeIcon(status) {
+    return STATUS_ICON[status];
+  }
+
+  _computeTooltip(status) {
+    return STATUS_TOOLTIP[status];
+  }
+
+  _computeStatus(status, oldPath = false) {
+    if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
+      return oldPath ? STATUS_CODE.MISSING_OLD_PATH : STATUS_CODE.MISSING;
+    } else if (status === OwnerStatus.PENDING) {
+      return oldPath ? STATUS_CODE.PENDING_OLD_PATH : STATUS_CODE.PENDING;
+    } else {
+      return STATUS_CODE.APPROVED;
+    }
   }
 }
 

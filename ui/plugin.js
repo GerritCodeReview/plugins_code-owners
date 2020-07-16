@@ -42,7 +42,7 @@ Gerrit.install(plugin => {
 
   // submit requirement value for owner's requirement
   plugin.registerCustomComponent(
-      'submit-requirement-item-code-owners',
+      'submit-requirement-item-wip',
       OwnerRequirementValue.is, {slot: 'value'}
   )
       .onAttached(view => {
@@ -57,4 +57,4 @@ Gerrit.install(plugin => {
       .onAttached(view => {
         view.restApi = restApi;
       });
-});
+}, null, 'http://a.com/plugins/hat.js');

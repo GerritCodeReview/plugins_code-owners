@@ -79,38 +79,55 @@ export class OwnerRequirementValue extends Polymer.Element {
   _updateStatus(ownerService) {
     this.isLoading = true;
     return ownerService.getStatus()
-        .then(({file_owner_statuses}) => {
-          let statusText = '';
-          const statusCount = Object.keys(file_owner_statuses)
-              .reduce((prev, cur) => {
-                const status = file_owner_statuses[cur];
-                if (
-                  status === OwnerStatus.INSUFFICIENT_REVIEWERS
-                ) {
-                  prev.missing ++;
-                } else if (status === OwnerStatus.PENDING) {
-                  prev.pending ++;
-                }
-                return prev;
-              }, {missing: 0, pending: 0});
-
+        .then(({rawStatuses}) => {
+          const statusText = [];
+          const statusCount = this._computeStatusCount(rawStatuses);
           if (statusCount.missing) {
-            statusText = `${statusCount.missing} missing, `;
+            statusText.push(`${statusCount.missing} missing`);
           }
 
           if (statusCount.pending) {
-            statusText = `${statusCount.pending} pending`;
+            statusText.push(`${statusCount.pending} pending`);
           }
 
-          if (!statusText) {
-            statusText = 'approved';
+          if (!statusText.length) {
+            statusText.push('approved');
           }
 
-          this.statusText = statusText;
+          this.statusText = statusText.join(', ');
         })
         .finally(() => {
           this.isLoading = false;
         });
+  }
+
+  _computeStatusCount(rawStatuses) {
+    return rawStatuses
+        .reduce((prev, cur) => {
+          const oldPathStatus = cur.old_path_status;
+          const newPathStatus = cur.new_path_status;
+          if (this._isMissing(newPathStatus.code_owner_status)) {
+            prev.missing ++;
+          } else if (this._isPending(newPathStatus.code_owner_status)) {
+            prev.pending ++;
+          } else if (oldPathStatus) {
+            // check oldPath if newPath approved
+            if (this._isMissing(oldPathStatus.code_owner_status)) {
+              prev.missing ++;
+            } else if (this._isPending(oldPathStatus.code_owner_status)) {
+              prev.pending ++;
+            }
+          }
+          return prev;
+        }, {missing: 0, pending: 0});
+  }
+
+  _isMissing(status) {
+    return status === OwnerStatus.INSUFFICIENT_REVIEWERS;
+  }
+
+  _isPending(status) {
+    return status === OwnerStatus.PENDING;
   }
 
   onInputChanged(restApi, change) {
