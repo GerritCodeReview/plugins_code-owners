@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "13b0d43f_d13ba087",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-16T12:19:04Z",
+      "side": 1,
+      "message": "LGTM minus one stability question",
+      "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8abf1b37_d443394d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/RequiredApproval.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-16T12:19:04Z",
+      "side": 1,
+      "message": "These check state calls are potentially dangerous in that they can bring down large parts of Gerrit (i.e. all callers of this, such as a future submit rule and REST endpoints) when the caller doens\u0027t handle them correctly.\n\nShould we used checked exceptions instead? Or are we taking other measures to ensure this won\u0027t happen?\n\nFor project.config you could install a hook to ensure the configured RequiredApproval is actually correct and refers to a label, but for gerrit.config in our setup, we can\u0027t run such checks.",
+      "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
