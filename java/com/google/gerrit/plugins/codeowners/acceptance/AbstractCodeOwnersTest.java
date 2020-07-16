@@ -63,7 +63,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     changeInput.branch = "master";
     changeInput.subject = "Change Renaming A File";
     changeInput.baseChange = changeId1;
-    String changeId2 = gApi.changes().create(changeInput).id();
+    String changeId2 = gApi.changes().create(changeInput).get().changeId;
     gApi.changes().id(changeId2).edit().create();
     gApi.changes()
         .id(changeId2)
