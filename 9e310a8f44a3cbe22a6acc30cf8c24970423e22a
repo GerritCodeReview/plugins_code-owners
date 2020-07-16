@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3ec201e2_c33e0686",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 156,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-07-16T08:55:54Z",
+      "side": 1,
+      "message": "should we also just drop the `code_owner_` for them as well ?",
+      "range": {
+        "startLine": 156,
+        "startChar": 11,
+        "endLine": 156,
+        "endChar": 28
+      },
+      "revId": "9e310a8f44a3cbe22a6acc30cf8c24970423e22a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
