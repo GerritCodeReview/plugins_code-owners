@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners;
+package com.google.gerrit.plugins.codeowners.config;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
@@ -42,6 +43,8 @@ import org.eclipse.jgit.lib.Config;
  */
 @Singleton
 public class CodeOwnersPluginConfiguration {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   @VisibleForTesting public static final String KEY_BACKEND = "backend";
   @VisibleForTesting public static final String SECTION_CODE_OWNERS = "codeOwners";
 
@@ -88,7 +91,8 @@ public class CodeOwnersPluginConfiguration {
    *     returned
    * @return the {@link CodeOwnerBackend} that should be used
    */
-  public CodeOwnerBackend getBackend(BranchNameKey branchNameKey) {
+  public CodeOwnerBackend getBackend(BranchNameKey branchNameKey)
+      throws InvalidPluginConfigurationException {
     Config pluginConfig = getPluginConfig(branchNameKey.project());
 
     // check if a branch specific backend is configured
@@ -98,7 +102,7 @@ public class CodeOwnersPluginConfiguration {
     }
 
     // check if a project specific backend is configured
-    codeOwnerBackend = getBackendForProject(pluginConfig);
+    codeOwnerBackend = getBackendForProject(pluginConfig, branchNameKey.project());
     if (codeOwnerBackend.isPresent()) {
       return codeOwnerBackend.get();
     }
@@ -107,18 +111,21 @@ public class CodeOwnersPluginConfiguration {
     return getDefaultBackend();
   }
 
-  private Optional<CodeOwnerBackend> getBackendForBranch(
-      Config pluginConfig, BranchNameKey branch) {
+  private Optional<CodeOwnerBackend> getBackendForBranch(Config pluginConfig, BranchNameKey branch)
+      throws InvalidPluginConfigurationException {
     // check for branch specific backend by full branch name
-    Optional<CodeOwnerBackend> backend = getBackendForBranch(pluginConfig, branch.branch());
+    Optional<CodeOwnerBackend> backend =
+        getBackendForBranch(pluginConfig, branch.project(), branch.branch());
     if (!backend.isPresent()) {
       // check for branch specific backend by short branch name
-      backend = getBackendForBranch(pluginConfig, branch.shortName());
+      backend = getBackendForBranch(pluginConfig, branch.project(), branch.shortName());
     }
     return backend;
   }
 
-  private Optional<CodeOwnerBackend> getBackendForBranch(Config pluginConfig, String branch) {
+  private Optional<CodeOwnerBackend> getBackendForBranch(
+      Config pluginConfig, Project.NameKey project, String branch)
+      throws InvalidPluginConfigurationException {
     String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, branch, KEY_BACKEND);
     if (backendName == null) {
       return Optional.empty();
@@ -126,15 +133,26 @@ public class CodeOwnersPluginConfiguration {
     return Optional.of(
         lookupBackend(backendName)
             .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        String.format(
-                            "Code owner backend '%s' that is configured in %s.config"
-                                + " (parameter %s.%s.%s) not found",
-                            backendName, pluginName, SECTION_CODE_OWNERS, branch, KEY_BACKEND))));
+                () -> {
+                  InvalidPluginConfigurationException e =
+                      new InvalidPluginConfigurationException(
+                          pluginName,
+                          String.format(
+                              "Code owner backend '%s' that is configured for project %s in"
+                                  + " %s.config (parameter %s.%s.%s) not found.",
+                              backendName,
+                              project,
+                              pluginName,
+                              SECTION_CODE_OWNERS,
+                              branch,
+                              KEY_BACKEND));
+                  logger.atSevere().log(e.getMessage());
+                  return e;
+                }));
   }
 
-  private Optional<CodeOwnerBackend> getBackendForProject(Config pluginConfig) {
+  private Optional<CodeOwnerBackend> getBackendForProject(
+      Config pluginConfig, Project.NameKey project) throws InvalidPluginConfigurationException {
     String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
     if (backendName == null) {
       return Optional.empty();
@@ -142,24 +160,34 @@ public class CodeOwnersPluginConfiguration {
     return Optional.of(
         lookupBackend(backendName)
             .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        String.format(
-                            "Code owner backend '%s' that is configured in %s.config"
-                                + " (parameter %s.%s) not found",
-                            backendName, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND))));
+                () -> {
+                  InvalidPluginConfigurationException e =
+                      new InvalidPluginConfigurationException(
+                          pluginName,
+                          String.format(
+                              "Code owner backend '%s' that is configured for project %s in"
+                                  + " %s.config (parameter %s.%s) not found.",
+                              backendName, project, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND));
+                  logger.atSevere().log(e.getMessage());
+                  return e;
+                }));
   }
 
   @VisibleForTesting
-  public CodeOwnerBackend getDefaultBackend() {
+  public CodeOwnerBackend getDefaultBackend() throws InvalidPluginConfigurationException {
     return lookupBackend(defaultBackendName)
         .orElseThrow(
-            () ->
-                new IllegalStateException(
-                    String.format(
-                        "Code owner backend '%s' that is configured in gerrit.config"
-                            + " (parameter plugin.%s.%s) not found",
-                        defaultBackendName, pluginName, KEY_BACKEND)));
+            () -> {
+              InvalidPluginConfigurationException e =
+                  new InvalidPluginConfigurationException(
+                      pluginName,
+                      String.format(
+                          "Code owner backend '%s' that is configured in gerrit.config"
+                              + " (parameter plugin.%s.%s) not found.",
+                          defaultBackendName, pluginName, KEY_BACKEND));
+              logger.atSevere().log(e.getMessage());
+              return e;
+            });
   }
 
   /**

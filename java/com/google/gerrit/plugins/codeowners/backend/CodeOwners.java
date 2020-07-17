@@ -14,7 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Optional;
@@ -44,7 +45,8 @@ public class CodeOwners {
    * @return the code owner config for the given key if it exists, otherwise {@link
    *     Optional#empty()}
    */
-  public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey) {
+  public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey)
+      throws InvalidPluginConfigurationException {
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey);

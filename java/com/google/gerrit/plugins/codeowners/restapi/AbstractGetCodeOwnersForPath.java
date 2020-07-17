@@ -23,6 +23,7 @@ import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
@@ -30,6 +31,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
 import com.google.gerrit.server.permissions.GlobalPermission;
@@ -99,7 +101,8 @@ public abstract class AbstractGetCodeOwnersForPath {
   }
 
   protected Response<List<CodeOwnerInfo>> applyImpl(AbstractPathResource rsrc)
-      throws AuthException, BadRequestException, PermissionBackendException {
+      throws AuthException, BadRequestException, ResourceConflictException,
+          PermissionBackendException {
     parseHexOptions();
     validateLimit();
 
@@ -110,24 +113,28 @@ public abstract class AbstractGetCodeOwnersForPath {
     CodeOwnerScoring.Builder distanceScoring = CodeOwnerScore.DISTANCE.createScoring(maxDistance);
 
     Set<CodeOwner> codeOwners = new HashSet<>();
-    codeOwnerConfigHierarchy.visit(
-        rsrc.getBranch(),
-        rsrc.getPath(),
-        codeOwnerConfig -> {
-          ImmutableSet<CodeOwner> localCodeOwners =
-              codeOwnerResolver.get().resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath());
-          codeOwners.addAll(localCodeOwners);
-          int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
-          localCodeOwners.forEach(
-              localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
+    try {
+      codeOwnerConfigHierarchy.visit(
+          rsrc.getBranch(),
+          rsrc.getPath(),
+          codeOwnerConfig -> {
+            ImmutableSet<CodeOwner> localCodeOwners =
+                codeOwnerResolver.get().resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath());
+            codeOwners.addAll(localCodeOwners);
+            int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
+            localCodeOwners.forEach(
+                localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
-          // If codeOwners.size() >= limit we have gathered enough code owners and do not need to
-          // look at further code owner configs.
-          // We can abort here, since all further code owners will have a lower distance scoring
-          // and hence they would appear at the end of the sorted code owners list and be dropped
-          // due to the limit.
-          return codeOwners.size() < limit;
-        });
+            // If codeOwners.size() >= limit we have gathered enough code owners and do not need to
+            // look at further code owner configs.
+            // We can abort here, since all further code owners will have a lower distance scoring
+            // and hence they would appear at the end of the sorted code owners list and be dropped
+            // due to the limit.
+            return codeOwners.size() < limit;
+          });
+    } catch (InvalidPluginConfigurationException e) {
+      throw new ResourceConflictException("Cannot get code owners: " + e.getMessage(), e);
+    }
 
     return Response.ok(
         codeOwnerJsonFactory

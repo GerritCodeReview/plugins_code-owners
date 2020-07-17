@@ -17,11 +17,11 @@ package com.google.gerrit.plugins.codeowners.acceptance;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
 import org.eclipse.jgit.lib.Config;

@@ -23,6 +23,7 @@ import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountControl;
@@ -93,7 +94,8 @@ public class CodeOwnerResolver {
    * @return the resolved code owners
    */
   public ImmutableSet<CodeOwner> resolveLocalCodeOwners(
-      CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
+      CodeOwnerConfig codeOwnerConfig, Path absolutePath)
+      throws InvalidPluginConfigurationException {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);

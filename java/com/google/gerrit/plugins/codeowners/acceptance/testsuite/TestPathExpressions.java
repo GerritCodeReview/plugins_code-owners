@@ -14,11 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
-import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.inject.Inject;
 
 /**
@@ -44,20 +45,18 @@ public class TestPathExpressions {
    *
    * @param fileType the file type
    */
-  public String matchFileTypeInCurrentFolder(String fileType) {
+  public String matchFileTypeInCurrentFolder(String fileType)
+      throws InvalidPluginConfigurationException {
+    CodeOwnerBackend defaultBackend = codeOwnersPluginConfiguration.getDefaultBackend();
     PathExpressionMatcher pathExpressionMatcher =
-        codeOwnersPluginConfiguration
-            .getDefaultBackend()
+        defaultBackend
             .getPathExpressionMatcher()
             .orElseThrow(
                 () ->
                     new IllegalStateException(
                         String.format(
                             "code owner backend %s doesn't support path expressions",
-                            codeOwnersPluginConfiguration
-                                .getDefaultBackend()
-                                .getClass()
-                                .getName())));
+                            defaultBackend.getClass().getName())));
     if (pathExpressionMatcher instanceof GlobMatcher
         || pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
       return "*." + fileType;

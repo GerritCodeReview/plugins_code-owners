@@ -20,7 +20,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
@@ -53,7 +54,8 @@ class LocalCodeOwners {
    *     absolute; can be the path of a file or folder; the path may or may not exist
    * @return the local code owners for the given path
    */
-  public ImmutableSet<CodeOwnerReference> get(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
+  public ImmutableSet<CodeOwnerReference> get(CodeOwnerConfig codeOwnerConfig, Path absolutePath)
+      throws InvalidPluginConfigurationException {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
@@ -82,7 +84,8 @@ class LocalCodeOwners {
    * @return the {@link PathExpressionMatcher} that should be used for the specified code owner
    *     config
    */
-  private PathExpressionMatcher getMatcher(CodeOwnerConfig.Key codeOwnerConfigKey) {
+  private PathExpressionMatcher getMatcher(CodeOwnerConfig.Key codeOwnerConfigKey)
+      throws InvalidPluginConfigurationException {
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
     return codeOwnerBackend

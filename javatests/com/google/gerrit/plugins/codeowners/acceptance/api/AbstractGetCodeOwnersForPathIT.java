@@ -29,6 +29,7 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
@@ -36,6 +37,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpress
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.inject.Inject;
 import java.util.List;
@@ -544,5 +546,19 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             BadRequestException.class,
             () -> queryCodeOwners(getCodeOwnersApi().query().withLimit(-1), "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
+  public void cannotGetCodeOwnersIfPluginConfigurationIsInvalid() throws Exception {
+    ResourceConflictException exception =
+        assertThrows(ResourceConflictException.class, () -> queryCodeOwners("/foo/bar/baz.md"));
+    assertThat(exception).hasCauseThat().isInstanceOf(InvalidPluginConfigurationException.class);
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "Cannot get code owners: Invalid configuration of the code-owners plugin. Code owner"
+                + " backend 'non-existing-backend' that is configured in gerrit.config (parameter"
+                + " plugin.code-owners.backend) not found.");
   }
 }

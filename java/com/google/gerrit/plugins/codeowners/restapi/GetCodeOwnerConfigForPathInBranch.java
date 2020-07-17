@@ -14,11 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigsInBranchCollection.PathResource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,11 +45,15 @@ public class GetCodeOwnerConfigForPathInBranch
   }
 
   @Override
-  public Response<CodeOwnerConfigInfo> apply(PathResource rsrc) {
-    Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(rsrc.getCodeOwnerConfigKey());
-    return codeOwnerConfig
-        .map(CodeOwnerConfigJson::format)
-        .map(Response::ok)
-        .orElse(Response.none());
+  public Response<CodeOwnerConfigInfo> apply(PathResource rsrc) throws ResourceConflictException {
+    try {
+      Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(rsrc.getCodeOwnerConfigKey());
+      return codeOwnerConfig
+          .map(CodeOwnerConfigJson::format)
+          .map(Response::ok)
+          .orElse(Response.none());
+    } catch (InvalidPluginConfigurationException e) {
+      throw new ResourceConflictException("Cannot get code owner configs: " + e.getMessage(), e);
+    }
   }
 }

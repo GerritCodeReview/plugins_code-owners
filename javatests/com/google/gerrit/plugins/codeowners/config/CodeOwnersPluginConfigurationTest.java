@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners;
+package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -98,16 +98,17 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
   public void cannotGetBackendIfNonExistingBackendIsConfigured() throws Exception {
-    IllegalStateException exception =
+    InvalidPluginConfigurationException exception =
         assertThrows(
-            IllegalStateException.class,
+            InvalidPluginConfigurationException.class,
             () ->
                 codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
-            "Code owner backend 'non-existing-backend' that is configured in gerrit.config"
-                + " (parameter plugin.code-owners.backend) not found");
+            "Invalid configuration of the code-owners plugin. Code owner backend"
+                + " 'non-existing-backend' that is configured in gerrit.config (parameter"
+                + " plugin.code-owners.backend) not found.");
   }
 
   @Test
@@ -161,16 +162,19 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetBackendIfNonExistingBackendIsConfiguredOnProjectLevel() throws Exception {
     configureBackend(project, "non-existing-backend");
-    IllegalStateException exception =
+    InvalidPluginConfigurationException exception =
         assertThrows(
-            IllegalStateException.class,
+            InvalidPluginConfigurationException.class,
             () ->
                 codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
-            "Code owner backend 'non-existing-backend' that is configured in code-owners.config"
-                + " (parameter codeOwners.backend) not found");
+            String.format(
+                "Invalid configuration of the code-owners plugin. Code owner backend"
+                    + " 'non-existing-backend' that is configured for project %s in"
+                    + " code-owners.config (parameter codeOwners.backend) not found.",
+                project));
   }
 
   @Test
@@ -225,16 +229,19 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetBackendIfNonExistingBackendIsConfiguredOnBranchLevel() throws Exception {
     configureBackend(project, "master", "non-existing-backend");
-    IllegalStateException exception =
+    InvalidPluginConfigurationException exception =
         assertThrows(
-            IllegalStateException.class,
+            InvalidPluginConfigurationException.class,
             () ->
                 codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
-            "Code owner backend 'non-existing-backend' that is configured in code-owners.config"
-                + " (parameter codeOwners.master.backend) not found");
+            String.format(
+                "Invalid configuration of the code-owners plugin. Code owner backend"
+                    + " 'non-existing-backend' that is configured for project %s in"
+                    + " code-owners.config (parameter codeOwners.master.backend) not found.",
+                project));
   }
 
   @Test

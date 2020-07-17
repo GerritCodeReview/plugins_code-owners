@@ -14,7 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import com.google.gerrit.plugins.codeowners.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -94,7 +95,8 @@ public class CodeOwnersUpdate {
    *     deletion of the code owner config or if the creation was a no-op
    */
   public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
+      CodeOwnerConfig.Key codeOwnerConfigKey, CodeOwnerConfigUpdate codeOwnerConfigUpdate)
+      throws InvalidPluginConfigurationException {
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
     return codeOwnerBackend.upsertCodeOwnerConfig(
