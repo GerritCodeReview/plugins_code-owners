@@ -33,6 +33,24 @@
       "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "27a35de5_60d08b83",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/RequiredApproval.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-17T11:04:08Z",
+      "side": 1,
+      "message": "\u003e Should we used checked exceptions instead? Or are we taking other measures to ensure this won\u0027t happen?\n\nGood point. That\u0027s actually also an issue with the configuration that we already have in the existing code. I\u0027ve made a separate change to fix this [1]. If this looks good, I will rebase this change on top of it.\n\n\u003e For project.config you could install a hook\nYes, I will do this in a later change.\n\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/275714",
+      "parentUuid": "8abf1b37_d443394d",
+      "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
