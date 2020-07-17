@@ -51,6 +51,24 @@
       "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0053cf5d_34f2bda0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/RequiredApproval.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-17T13:30:21Z",
+      "side": 1,
+      "message": "Done. CodeOwnersPluginConfiguration takes care to convert these exceptions into a checked exception now.",
+      "parentUuid": "27a35de5_60d08b83",
+      "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
