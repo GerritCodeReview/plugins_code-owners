@@ -69,6 +69,24 @@
       "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "aa2c67e1_2a34b0bb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/RequiredApproval.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-17T15:28:47Z",
+      "side": 1,
+      "message": "LGTM",
+      "parentUuid": "0053cf5d_34f2bda0",
+      "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
