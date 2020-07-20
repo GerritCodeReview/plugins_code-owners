@@ -87,6 +87,24 @@
       "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e7d4fb81_00f9eba6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/RequiredApproval.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T10:22:53Z",
+      "side": 1,
+      "message": "\u003e\u003e For project.config you could install a hook\n\n\u003e Yes, I will do this in a later change.\n\nDone in [2]\n\n[2] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/275927",
+      "parentUuid": "aa2c67e1_2a34b0bb",
+      "revId": "6eec84b171019ee18a3cda39b3befd68e33f3fd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
