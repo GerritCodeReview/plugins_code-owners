@@ -109,8 +109,7 @@ public class Backend {
     return ImmutableList.copyOf(validationMessages);
   }
 
-  Optional<CodeOwnerBackend> getForBranch(Config pluginConfig, BranchNameKey branch)
-      throws InvalidPluginConfigurationException {
+  Optional<CodeOwnerBackend> getForBranch(Config pluginConfig, BranchNameKey branch) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(branch, "branch");
 
@@ -125,8 +124,7 @@ public class Backend {
   }
 
   private Optional<CodeOwnerBackend> getForBranch(
-      Config pluginConfig, Project.NameKey project, String branch)
-      throws InvalidPluginConfigurationException {
+      Config pluginConfig, Project.NameKey project, String branch) {
     String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, branch, KEY_BACKEND);
     if (backendName == null) {
       return Optional.empty();
@@ -152,8 +150,7 @@ public class Backend {
                 }));
   }
 
-  Optional<CodeOwnerBackend> getForProject(Config pluginConfig, Project.NameKey project)
-      throws InvalidPluginConfigurationException {
+  Optional<CodeOwnerBackend> getForProject(Config pluginConfig, Project.NameKey project) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(project, "project");
 
@@ -178,7 +175,7 @@ public class Backend {
   }
 
   @VisibleForTesting
-  public CodeOwnerBackend getDefault() throws InvalidPluginConfigurationException {
+  public CodeOwnerBackend getDefault() {
     return lookupBackend(defaultBackendName)
         .orElseThrow(
             () -> {

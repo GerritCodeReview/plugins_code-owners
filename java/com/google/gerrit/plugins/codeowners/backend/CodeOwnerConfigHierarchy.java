@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.entities.BranchNameKey;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
@@ -36,7 +35,7 @@ public class CodeOwnerConfigHierarchy {
      * @param codeOwnerConfig the code owner config that was found
      * @return whether further code owner configs should be visited
      */
-    boolean visit(CodeOwnerConfig codeOwnerConfig) throws InvalidPluginConfigurationException;
+    boolean visit(CodeOwnerConfig codeOwnerConfig);
   }
 
   private final CodeOwners codeOwners;
@@ -55,8 +54,8 @@ public class CodeOwnerConfigHierarchy {
    * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
    *     configs
    */
-  public void visit(BranchNameKey branch, Path path, CodeOwnerConfigVisitor codeOwnerConfigVisitor)
-      throws InvalidPluginConfigurationException {
+  public void visit(
+      BranchNameKey branch, Path path, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
     // Next path in which we look for a code owner configuration. We start at the given path and
     // then go up the parent hierarchy.
     Path ownerConfigFolder = path;

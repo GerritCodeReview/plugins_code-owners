@@ -24,7 +24,6 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.notedb.ChangeNotes;
@@ -78,7 +77,7 @@ public class CodeOwnerApprovalCheck {
    * @param revisionResource the revision for which the code owner statuses should be returned
    */
   public ImmutableSet<FileCodeOwnerStatus> getFileStatuses(RevisionResource revisionResource)
-      throws InvalidPluginConfigurationException, IOException {
+      throws IOException {
     requireNonNull(revisionResource, "revisionResource");
 
     RequiredApproval requiredApproval =
@@ -136,8 +135,7 @@ public class CodeOwnerApprovalCheck {
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
-      Path absolutePath)
-      throws InvalidPluginConfigurationException {
+      Path absolutePath) {
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     codeOwnerConfigHierarchy.visit(
@@ -187,8 +185,7 @@ public class CodeOwnerApprovalCheck {
    * @param absolutePath the path for which the code owners should be retrieved
    */
   private ImmutableSet<Account.Id> getCodeOwnerAccountIds(
-      CodeOwnerConfig codeOwnerConfig, Path absolutePath)
-      throws InvalidPluginConfigurationException {
+      CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
     return codeOwnerResolver.get().enforceVisibility(false)
         .resolveLocalCodeOwners(codeOwnerConfig, absolutePath).stream()
         .map(CodeOwner::accountId)
