@@ -25,6 +25,9 @@ import com.google.common.primitives.Ints;
 import com.google.gerrit.common.data.LabelType;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.server.config.PluginConfigFactory;
+import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
@@ -66,13 +69,47 @@ public abstract class RequiredApproval {
     return labelType().getName() + "+" + value();
   }
 
+  /**
+   * Validates the required approval configuration in the given project level configuration.
+   *
+   * @param fileName the name of the config file
+   * @param projectLevelConfig the project level plugin configuration
+   * @return list of validation messages for validation errors, empty list if there are no
+   *     validation errors
+   */
+  static Optional<CommitValidationMessage> validateProjectLevelConfig(
+      ProjectState projectState, String fileName, ProjectLevelConfig projectLevelConfig) {
+    requireNonNull(projectState, "projectState");
+    requireNonNull(fileName, "fileName");
+    requireNonNull(projectLevelConfig, "projectLevelConfig");
+
+    String requiredApproval =
+        projectLevelConfig.get().getString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL);
+    if (requiredApproval != null) {
+      try {
+        RequiredApproval.parse(projectState, requiredApproval);
+      } catch (IllegalArgumentException | IllegalStateException e) {
+        return Optional.of(
+            new CommitValidationMessage(
+                String.format(
+                    "Required approval '%s' that is configured in %s (parameter %s.%s) is invalid: %s",
+                    requiredApproval,
+                    fileName,
+                    SECTION_CODE_OWNERS,
+                    KEY_REQUIRED_APPROVAL,
+                    e.getMessage()),
+                ValidationMessage.Type.ERROR));
+      }
+    }
+    return Optional.empty();
+  }
+
   static Optional<RequiredApproval> getForProject(
       String pluginName, ProjectState projectState, Config pluginConfig)
       throws InvalidPluginConfigurationException {
     requireNonNull(pluginName, "pluginName");
     requireNonNull(projectState, "projectState");
     requireNonNull(pluginConfig, "pluginConfig");
-
     String requiredApproval =
         pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL);
     if (requiredApproval == null) {

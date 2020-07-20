@@ -17,15 +17,22 @@ package com.google.gerrit.plugins.codeowners.config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.Backend.KEY_BACKEND;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
+import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.project.ProjectLevelConfig;
+import com.google.gerrit.server.project.ProjectState;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -168,5 +175,81 @@ public class BackendTest extends AbstractCodeOwnersTest {
             "Invalid configuration of the code-owners plugin. Code owner backend 'INVALID' that"
                 + " is configured in gerrit.config (parameter plugin.code-owners.backend) not"
                 + " found.");
+  }
+
+  @Test
+  public void cannotValidateProjectLevelConfigWithNullFileName() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                backend.validateProjectLevelConfig(
+                    null, new ProjectLevelConfig("code-owners.config", projectState)));
+    assertThat(npe).hasMessageThat().isEqualTo("fileName");
+  }
+
+  @Test
+  public void cannotValidateProjectLevelConfigWithForNullProjectLevelConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> backend.validateProjectLevelConfig("code-owners.config", null));
+    assertThat(npe).hasMessageThat().isEqualTo("projectLevelConfig");
+  }
+
+  @Test
+  public void validateEmptyProjectLevelConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    ImmutableList<CommitValidationMessage> commitValidationMessage =
+        backend.validateProjectLevelConfig(
+            "code-owners.config", new ProjectLevelConfig("code-owners.config", projectState));
+    assertThat(commitValidationMessage).isEmpty();
+  }
+
+  @Test
+  public void validateValidProjectLevelConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
+    cfg.get()
+        .setString(
+            SECTION_CODE_OWNERS, null, KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
+    ImmutableList<CommitValidationMessage> commitValidationMessage =
+        backend.validateProjectLevelConfig("code-owners.config", cfg);
+    assertThat(commitValidationMessage).isEmpty();
+  }
+
+  @Test
+  public void validateInvalidProjectLevelConfig_invalidProjectConfiguration() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
+    cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_BACKEND, "INVALID");
+    ImmutableList<CommitValidationMessage> commitValidationMessages =
+        backend.validateProjectLevelConfig("code-owners.config", cfg);
+    assertThat(commitValidationMessages).hasSize(1);
+    CommitValidationMessage commitValidationMessage =
+        Iterables.getOnlyElement(commitValidationMessages);
+    assertThat(commitValidationMessage.getType()).isEqualTo(ValidationMessage.Type.ERROR);
+    assertThat(commitValidationMessage.getMessage())
+        .isEqualTo(
+            "Code owner backend 'INVALID' that is configured in code-owners.config (parameter"
+                + " codeOwners.backend) not found.");
+  }
+
+  @Test
+  public void validateInvalidProjectLevelConfig_invalidBranchConfiguration() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
+    cfg.get().setString(SECTION_CODE_OWNERS, "someBranch", KEY_BACKEND, "INVALID");
+    ImmutableList<CommitValidationMessage> commitValidationMessages =
+        backend.validateProjectLevelConfig("code-owners.config", cfg);
+    assertThat(commitValidationMessages).hasSize(1);
+    CommitValidationMessage commitValidationMessage =
+        Iterables.getOnlyElement(commitValidationMessages);
+    assertThat(commitValidationMessage.getType()).isEqualTo(ValidationMessage.Type.ERROR);
+    assertThat(commitValidationMessage.getMessage())
+        .isEqualTo(
+            "Code owner backend 'INVALID' that is configured in code-owners.config (parameter"
+                + " codeOwners.someBranch.backend) not found.");
   }
 }

@@ -34,6 +34,9 @@ import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
+import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.util.time.TimeUtil;
 import com.google.inject.Inject;
@@ -345,6 +348,83 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
             "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that is"
                 + " configured in gerrit.config (parameter plugin.code-owners.requiredApproval) is"
                 + " invalid: Invalid format, expected '<label-name>+<label-value>'.");
+  }
+
+  @Test
+  public void cannotValidateProjectLevelConfigWithNullProjectState() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                RequiredApproval.validateProjectLevelConfig(
+                    null,
+                    "code-owners.config",
+                    new ProjectLevelConfig("code-owners.config", projectState)));
+    assertThat(npe).hasMessageThat().isEqualTo("projectState");
+  }
+
+  @Test
+  public void cannotValidateProjectLevelConfigWithNullFileName() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                RequiredApproval.validateProjectLevelConfig(
+                    projectState,
+                    null,
+                    new ProjectLevelConfig("code-owners.config", projectState)));
+    assertThat(npe).hasMessageThat().isEqualTo("fileName");
+  }
+
+  @Test
+  public void cannotValidateProjectLevelConfigWithForNullProjectLevelConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                RequiredApproval.validateProjectLevelConfig(
+                    projectState, "code-owners.config", null));
+    assertThat(npe).hasMessageThat().isEqualTo("projectLevelConfig");
+  }
+
+  @Test
+  public void validateEmptyProjectLevelConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    Optional<CommitValidationMessage> commitValidationMessage =
+        RequiredApproval.validateProjectLevelConfig(
+            projectState,
+            "code-owners.config",
+            new ProjectLevelConfig("code-owners.config", projectState));
+    assertThat(commitValidationMessage).isEmpty();
+  }
+
+  @Test
+  public void validateValidProjectLevelConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
+    cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "Code-Review+2");
+    Optional<CommitValidationMessage> commitValidationMessage =
+        RequiredApproval.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
+    assertThat(commitValidationMessage).isEmpty();
+  }
+
+  @Test
+  public void validateInvalidProjectLevelConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
+    cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "INVALID");
+    Optional<CommitValidationMessage> commitValidationMessage =
+        RequiredApproval.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
+    assertThat(commitValidationMessage).isPresent();
+    assertThat(commitValidationMessage.get().getType()).isEqualTo(ValidationMessage.Type.ERROR);
+    assertThat(commitValidationMessage.get().getMessage())
+        .isEqualTo(
+            "Required approval 'INVALID' that is configured in code-owners.config (parameter"
+                + " codeOwners.requiredApproval) is invalid: Invalid format, expected"
+                + " '<label-name>+<label-value>'.");
   }
 
   private static LabelType createLabelType(String labelName, int firstValue, int... furtherValues) {

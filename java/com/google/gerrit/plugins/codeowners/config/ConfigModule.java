@@ -12,21 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners;
+package com.google.gerrit.plugins.codeowners.config;
 
-import com.google.gerrit.extensions.config.FactoryModule;
-import com.google.gerrit.plugins.codeowners.api.ApiModule;
-import com.google.gerrit.plugins.codeowners.backend.BackendModule;
-import com.google.gerrit.plugins.codeowners.config.ConfigModule;
-import com.google.gerrit.plugins.codeowners.restapi.RestApiModule;
+import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.server.git.validators.CommitValidationListener;
+import com.google.inject.AbstractModule;
 
-/** Guice module that registers the extensions of the code-owners plugin. */
-public class Module extends FactoryModule {
+/** Guice module that registers config extensions of the code-owners plugin. */
+public class ConfigModule extends AbstractModule {
   @Override
   protected void configure() {
-    install(new ApiModule());
-    install(new BackendModule());
-    install(new ConfigModule());
-    install(new RestApiModule());
+    DynamicSet.bind(binder(), CommitValidationListener.class)
+        .to(CodeOwnersPluginConfigValidator.class);
   }
 }
