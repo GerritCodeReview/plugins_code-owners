@@ -31,6 +31,7 @@ import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.restapi.change.ChangesCollection;
 import com.google.inject.Inject;
 import java.nio.file.Paths;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,6 +51,21 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(NullPointerException.class, () -> changedFiles.compute(null));
     assertThat(npe).hasMessageThat().isEqualTo("revisionResource");
+  }
+
+  @Test
+  public void cannotComputeForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> changedFiles.compute(null, ObjectId.zeroId()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotComputeForNullRevision() throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> changedFiles.compute(project, null));
+    assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
   @Test

@@ -18,6 +18,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
@@ -27,6 +28,7 @@ import java.util.List;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -60,9 +62,27 @@ public class ChangedFiles {
    */
   public ImmutableSet<ChangedFile> compute(RevisionResource revisionResource) throws IOException {
     requireNonNull(revisionResource, "revisionResource");
-    try (Repository repository = repoManager.openRepository(revisionResource.getProject());
+    return compute(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
+  }
+
+  /**
+   * Computes the files that have been changed in the given revision.
+   *
+   * <p>The diff is computed against the parent commit.
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be computed
+   * @return the files that have been changed in the given revision
+   * @throws IOException thrown if the computation fails due to an I/O error
+   */
+  public ImmutableSet<ChangedFile> compute(Project.NameKey project, ObjectId revision)
+      throws IOException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+
+    try (Repository repository = repoManager.openRepository(project);
         RevWalk revWalk = new RevWalk(repository)) {
-      RevCommit revCommit = revWalk.parseCommit(revisionResource.getPatchSet().commitId());
+      RevCommit revCommit = revWalk.parseCommit(revision);
       RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
       try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
         diffFormatter.setReader(revWalk.getObjectReader(), repository.getConfig());

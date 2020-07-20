@@ -18,6 +18,7 @@ import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfig
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -26,8 +27,13 @@ import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.server.config.PluginConfigFactory;
+import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
@@ -71,6 +77,51 @@ public class BackendConfig {
         pluginConfigFactory
             .getFromGerritConfig(pluginName)
             .getString(KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
+  }
+
+  /**
+   * Validates the backend configuration in the given project level configuration.
+   *
+   * @param fileName the name of the config file
+   * @param projectLevelConfig the project level plugin configuration
+   * @return list of validation messages for validation errors, empty list if there are no
+   *     validation errors
+   */
+  ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
+      String fileName, ProjectLevelConfig projectLevelConfig) {
+    requireNonNull(fileName, "fileName");
+    requireNonNull(projectLevelConfig, "projectLevelConfig");
+
+    List<CommitValidationMessage> validationMessages = new ArrayList<>();
+
+    String backendName = projectLevelConfig.get().getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
+    if (backendName != null) {
+      if (!lookupBackend(backendName).isPresent()) {
+        validationMessages.add(
+            new CommitValidationMessage(
+                String.format(
+                    "Code owner backend '%s' that is configured in %s (parameter %s.%s) not found.",
+                    backendName, fileName, SECTION_CODE_OWNERS, KEY_BACKEND),
+                ValidationMessage.Type.ERROR));
+      }
+    }
+
+    for (String subsection : projectLevelConfig.get().getSubsections(SECTION_CODE_OWNERS)) {
+      backendName =
+          projectLevelConfig.get().getString(SECTION_CODE_OWNERS, subsection, KEY_BACKEND);
+      if (backendName != null) {
+        if (!lookupBackend(backendName).isPresent()) {
+          validationMessages.add(
+              new CommitValidationMessage(
+                  String.format(
+                      "Code owner backend '%s' that is configured in %s (parameter %s.%s.%s) not found.",
+                      backendName, fileName, SECTION_CODE_OWNERS, subsection, KEY_BACKEND),
+                  ValidationMessage.Type.ERROR));
+        }
+      }
+    }
+
+    return ImmutableList.copyOf(validationMessages);
   }
 
   Optional<CodeOwnerBackend> getForBranch(Config pluginConfig, BranchNameKey branch)
