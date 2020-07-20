@@ -15,8 +15,13 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.config.RequiredApproval.KEY_REQUIRED_APPROVAL;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -27,13 +32,20 @@ import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.server.config.PluginConfig;
+import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.util.time.TimeUtil;
+import com.google.inject.Inject;
 import java.util.Arrays;
+import java.util.Optional;
+import org.eclipse.jgit.lib.Config;
 import org.junit.Test;
 
 /** Tests for {@link RequiredApproval}. */
 public class RequiredApprovalTest extends AbstractCodeOwnersTest {
+  @Inject private PluginConfigFactory pluginConfigFactory;
+
   @Test
   public void cannotCheckIsCodeOwnerApprovalForNullPatchSetApproval() throws Exception {
     LabelType labelType = createLabelType("Foo", -2, -1, 0, 1, 2);
@@ -143,6 +155,13 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getDefaultRequiresProjectState() throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> RequiredApproval.createDefault(null));
+    assertThat(npe).hasMessageThat().isEqualTo("projectState");
+  }
+
+  @Test
   public void createDefault() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     RequiredApproval requiredApproval = RequiredApproval.createDefault(projectState);
@@ -182,6 +201,150 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
         .isEqualTo(
             String.format(
                 "Label Code-Review on project %s doesn't allow default value 1.", project.get()));
+  }
+
+  @Test
+  public void cannotGetForProjectWithNullPluginName() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> RequiredApproval.getForProject(null, projectState, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginName");
+  }
+
+  @Test
+  public void cannotGetForProjectForNullProjectState() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> RequiredApproval.getForProject("code-owners", null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("projectState");
+  }
+
+  @Test
+  public void cannotGetForProjectForNullConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> RequiredApproval.getForProject("code-owners", projectState, null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void getForProjectWhenRequiredApprovalIsNotSet() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    assertThat(RequiredApproval.getForProject("code-owners", projectState, new Config())).isEmpty();
+  }
+
+  @Test
+  public void getForProject() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "Code-Review+2");
+    Optional<RequiredApproval> requiredApproval =
+        RequiredApproval.getForProject("code-owners", projectState, cfg);
+    assertThat(requiredApproval).isPresent();
+    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.get().value()).isEqualTo(2);
+  }
+
+  @Test
+  public void cannotGetForProjectIfConfigIsInvalid() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "INVALID");
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () -> RequiredApproval.getForProject("code-owners", projectState, cfg));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that is"
+                + " configured in code-owners.config (parameter codeOwners.requiredApproval) is"
+                + " invalid: Invalid format, expected '<label-name>+<label-value>'.");
+  }
+
+  @Test
+  public void cannotGetFromGlobalPluginConfigWithNullPluginConfigFactory() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> RequiredApproval.getFromGlobalPluginConfig(null, "code-owners", projectState));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfigFactory");
+  }
+
+  @Test
+  public void cannotGetFromGlobalPluginConfigWithNullPluginName() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                RequiredApproval.getFromGlobalPluginConfig(
+                    pluginConfigFactory, null, projectState));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginName");
+  }
+
+  @Test
+  public void cannotGetFromGlobalPluginConfigForNullProjectState() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                RequiredApproval.getFromGlobalPluginConfig(
+                    pluginConfigFactory, "code-owners", null));
+    assertThat(npe).hasMessageThat().isEqualTo("projectState");
+  }
+
+  @Test
+  public void getFromGlobalPluginConfigWhenRequiredApprovalIsNotSet() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    assertThat(
+            RequiredApproval.getFromGlobalPluginConfig(
+                pluginConfigFactory, "code-owners", projectState))
+        .isEmpty();
+  }
+
+  @Test
+  public void getFromGlobalPluginConfig() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    Config cfg = new Config();
+    cfg.setString("plugin", "code-owners", KEY_REQUIRED_APPROVAL, "Code-Review+2");
+    PluginConfigFactory pluginConfigFactory = mock(PluginConfigFactory.class);
+    when(pluginConfigFactory.getFromGerritConfig("code-owners"))
+        .thenReturn(new PluginConfig("code-owners", cfg));
+    Optional<RequiredApproval> requiredApproval =
+        RequiredApproval.getFromGlobalPluginConfig(
+            pluginConfigFactory, "code-owners", projectState);
+    assertThat(requiredApproval).isPresent();
+    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.get().value()).isEqualTo(2);
+  }
+
+  @Test
+  public void cannotGetFromGlobalPluginConfigIfConfigIsInvalid() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    Config cfg = new Config();
+    cfg.setString("plugin", "code-owners", KEY_REQUIRED_APPROVAL, "INVALID");
+    PluginConfigFactory pluginConfigFactory = mock(PluginConfigFactory.class);
+    when(pluginConfigFactory.getFromGerritConfig("code-owners"))
+        .thenReturn(new PluginConfig("code-owners", cfg));
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () ->
+                RequiredApproval.getFromGlobalPluginConfig(
+                    pluginConfigFactory, "code-owners", projectState));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that is"
+                + " configured in gerrit.config (parameter plugin.code-owners.requiredApproval) is"
+                + " invalid: Invalid format, expected '<label-name>+<label-value>'.");
   }
 
   private static LabelType createLabelType(String labelName, int firstValue, int... furtherValues) {

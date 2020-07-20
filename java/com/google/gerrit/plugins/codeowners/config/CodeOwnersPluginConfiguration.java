@@ -50,8 +50,7 @@ public class CodeOwnersPluginConfiguration {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   @VisibleForTesting public static final String KEY_BACKEND = "backend";
-  @VisibleForTesting public static final String KEY_REQUIRED_APPROVAL = "requiredApproval";
-  @VisibleForTesting public static final String SECTION_CODE_OWNERS = "codeOwners";
+  @VisibleForTesting static final String SECTION_CODE_OWNERS = "codeOwners";
 
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
@@ -150,13 +149,14 @@ public class CodeOwnersPluginConfiguration {
 
     // check if a project specific required approval is configured
     Optional<RequiredApproval> requiredApproval =
-        getRequiredApprovalForProject(projectState, pluginConfig);
+        RequiredApproval.getForProject(pluginName, projectState, pluginConfig);
     if (requiredApproval.isPresent()) {
       return requiredApproval.get();
     }
 
     // check if a required approval is globally configured
-    requiredApproval = getRequiredApprovalFromGlobalPluginConfig(projectState);
+    requiredApproval =
+        RequiredApproval.getFromGlobalPluginConfig(pluginConfigFactory, pluginName, projectState);
     if (requiredApproval.isPresent()) {
       return requiredApproval.get();
     }
@@ -266,49 +266,5 @@ public class CodeOwnersPluginConfiguration {
     // We must use "gerrit" as plugin name since DynamicMapProvider#get() hard-codes "gerrit" as
     // plugin name.
     return Optional.ofNullable(codeOwnerBackends.get("gerrit", backendName));
-  }
-
-  private Optional<RequiredApproval> getRequiredApprovalForProject(
-      ProjectState projectState, Config pluginConfig) throws InvalidPluginConfigurationException {
-    String requiredApproval =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL);
-    if (requiredApproval == null) {
-      return Optional.empty();
-    }
-
-    try {
-      return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
-    } catch (IllegalStateException | IllegalArgumentException e) {
-      throw new InvalidPluginConfigurationException(
-          pluginName,
-          String.format(
-              "Required approval '%s' that is configured in %s.config"
-                  + " (parameter %s.%s) is invalid: %s",
-              requiredApproval,
-              pluginName,
-              SECTION_CODE_OWNERS,
-              KEY_REQUIRED_APPROVAL,
-              e.getMessage()));
-    }
-  }
-
-  private Optional<RequiredApproval> getRequiredApprovalFromGlobalPluginConfig(
-      ProjectState projectState) throws InvalidPluginConfigurationException {
-    String requiredApproval =
-        pluginConfigFactory.getFromGerritConfig(pluginName).getString(KEY_REQUIRED_APPROVAL);
-    if (requiredApproval == null) {
-      return Optional.empty();
-    }
-
-    try {
-      return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
-    } catch (IllegalStateException | IllegalArgumentException e) {
-      throw new InvalidPluginConfigurationException(
-          pluginName,
-          String.format(
-              "Required approval '%s' that is configured in gerrit.config"
-                  + " (parameter plugin.%s.%s) is invalid: %s",
-              requiredApproval, pluginName, KEY_REQUIRED_APPROVAL, e.getMessage()));
-    }
   }
 }

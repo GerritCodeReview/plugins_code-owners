@@ -488,7 +488,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
-    setConfig(project, null, CodeOwnersPluginConfiguration.KEY_REQUIRED_APPROVAL, requiredApproval);
+    setConfig(project, null, RequiredApproval.KEY_REQUIRED_APPROVAL, requiredApproval);
   }
 
   private void setConfig(Project.NameKey project, String subsection, String key, String value)
