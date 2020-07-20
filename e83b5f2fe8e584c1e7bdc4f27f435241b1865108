@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "37275c9e_0a7166a4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-20T07:48:17Z",
+      "side": 1,
+      "message": "Do you mean as part of preloading in index.html? We do know which plugins are active there.\n\nFor the rest we know if it was enabled per-host, but not per-project, so you\u0027d always have to request it.\n\nWhat happens if a caller requests the option, but the plugin is not enabled for the project? If that\u0027s a cheap early return, we could always request it?",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "03eeb06a_ffc0cd08",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerStatusInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-20T07:48:17Z",
+      "side": 1,
+      "message": "I think it would be better to just follow the established practice of making this a per-patch set endpoint to avoid the race.\n\nThis way, we are forcing callers to send a second request if they detect a race and to detect a race in the first place. If we built it as a revision endpoint, there\u0027d be no races. There is also a complexity cost involved here: With the current implementation, one has to know, read or otherwise find out that there might be races. For your UI, that might be OK, but for robot callers that others write, this presents a trap that is too easy to fall into.",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "61406520_3b7b1f26",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerStatusInfoJson.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-20T07:48:17Z",
+      "side": 1,
+      "message": "throw new IllegalStateException(\"got neither oldPath, nor newPath\")",
+      "range": {
+        "startLine": 48,
+        "startChar": 12,
+        "endLine": 49,
+        "endChar": 22
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
