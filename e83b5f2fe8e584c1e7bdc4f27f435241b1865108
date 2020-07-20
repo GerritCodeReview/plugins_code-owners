@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "2fce41f4_61ee2537",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerStatusInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T11:16:51Z",
+      "side": 1,
+      "message": "Basically this REST endpoint tells you which code owner approvals you need to make the change submittable.\nOld revisions are never submittable, hence asking which code owner approvals you need to make the old revision submittable makes no sense.",
+      "parentUuid": "9bd10a12_ff97d11c",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "61406520_3b7b1f26",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerStatusInfoJson.java",
         "patchSetId": 6
@@ -116,6 +140,30 @@
       "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "384ccd62_42ea4d95",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerStatusInfoJson.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T11:16:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "61406520_3b7b1f26",
+      "range": {
+        "startLine": 48,
+        "startChar": 12,
+        "endLine": 49,
+        "endChar": 22
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
