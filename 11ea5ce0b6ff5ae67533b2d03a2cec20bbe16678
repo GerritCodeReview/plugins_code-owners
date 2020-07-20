@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "017893dd_c5a3f310",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T10:34:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "32cb3359_ec3415c5",
+      "range": {
+        "startLine": 23,
+        "startChar": 22,
+        "endLine": 23,
+        "endChar": 62
+      },
+      "revId": "11ea5ce0b6ff5ae67533b2d03a2cec20bbe16678",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "74f65167_8140c025",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 7
@@ -65,6 +89,30 @@
     },
     {
       "key": {
+        "uuid": "d893fe28_be66c754",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerStatus.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T10:34:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f139ab8a_1b38a32f",
+      "range": {
+        "startLine": 19,
+        "startChar": 2,
+        "endLine": 19,
+        "endChar": 4
+      },
+      "revId": "11ea5ce0b6ff5ae67533b2d03a2cec20bbe16678",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cbc3db4a_011b8081",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 7
@@ -88,6 +136,30 @@
     },
     {
       "key": {
+        "uuid": "a77b1003_5c017118",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T10:34:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cbc3db4a_011b8081",
+      "range": {
+        "startLine": 78,
+        "startChar": 43,
+        "endLine": 78,
+        "endChar": 54
+      },
+      "revId": "11ea5ce0b6ff5ae67533b2d03a2cec20bbe16678",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "998d48b8_ddf9f17e",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 7
@@ -108,6 +180,30 @@
       "revId": "11ea5ce0b6ff5ae67533b2d03a2cec20bbe16678",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53153401_6c04926b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T10:34:45Z",
+      "side": 1,
+      "message": "Ack. Also see commit message of the change that added this class [1]:\n\n\"The Gerrit diff caches are currently being redesigned. Once the envisioned ModifiedFilesCache is available we should consider using it.\"\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/274705",
+      "parentUuid": "998d48b8_ddf9f17e",
+      "range": {
+        "startLine": 95,
+        "startChar": 35,
+        "endLine": 95,
+        "endChar": 56
+      },
+      "revId": "11ea5ce0b6ff5ae67533b2d03a2cec20bbe16678",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
