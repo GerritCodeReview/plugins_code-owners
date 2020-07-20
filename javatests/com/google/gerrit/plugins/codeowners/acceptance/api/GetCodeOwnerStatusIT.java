@@ -14,20 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
-import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
-import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.common.ChangeType;
-import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject;
 import com.google.inject.Inject;
 import org.junit.Test;
@@ -35,6 +30,10 @@ import org.junit.Test;
 /**
  * Acceptance test for the {@link com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus}
  * REST endpoint.
+ *
+ * <p>Further tests for the {@link com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus}
+ * REST endpoint that require using the REST API are implemented in {@link
+ * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnerStatusRestIT}.
  */
 public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
@@ -76,22 +75,5 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
-  public void cannotGetStatusIfPluginConfigurationIsInvalid() throws Exception {
-    String changeId = createChange().getChangeId();
-    ResourceConflictException exception =
-        assertThrows(
-            ResourceConflictException.class,
-            () -> changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus());
-    assertThat(exception).hasCauseThat().isInstanceOf(InvalidPluginConfigurationException.class);
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            "Cannot get code owner status: Invalid configuration of the code-owners plugin. Code"
-                + " owner backend 'non-existing-backend' that is configured in gerrit.config"
-                + " (parameter plugin.code-owners.backend) not found.");
   }
 }

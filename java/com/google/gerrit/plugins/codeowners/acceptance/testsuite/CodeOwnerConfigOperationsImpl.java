@@ -21,7 +21,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -98,12 +97,12 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
     }
 
     @Override
-    public boolean exists() throws InvalidPluginConfigurationException {
+    public boolean exists() {
       return getCodeOwnerConfig().isPresent();
     }
 
     @Override
-    public CodeOwnerConfig get() throws InvalidPluginConfigurationException {
+    public CodeOwnerConfig get() {
       return getCodeOwnerConfig()
           .orElseThrow(
               () ->
@@ -116,8 +115,7 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
       return TestCodeOwnerConfigUpdate.builder(this::updateNewCodeOwnerConfig);
     }
 
-    private Optional<CodeOwnerConfig> getCodeOwnerConfig()
-        throws InvalidPluginConfigurationException {
+    private Optional<CodeOwnerConfig> getCodeOwnerConfig() {
       return codeOwners.get(codeOwnerConfigKey);
     }
 
