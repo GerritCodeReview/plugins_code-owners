@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6bdefa57_2e3c78ee",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T11:10:12Z",
+      "side": 1,
+      "message": "\u003e Do you mean as part of preloading in index.html? We do know which plugins are active there.\nSorry, I don\u0027t know the details. I just was told that this was an issue with the checks plugin. Hence we follow the example of the checks plugin to avoid this issue. AFAIK nothing has changed which would have made this issue go away. I guess Alice knows more.\n\n\u003e If that\u0027s a cheap early return, we could always request it?\n\nIf the plugin is not loaded yet, the core frontend doesn\u0027t know that such a plugin option exists and hence it cannot request it.\n\nOn server side we don\u0027t want to return this info for all change requests, because computing the file statuses is rather expensive and many callers will not need this info.",
+      "parentUuid": "37275c9e_0a7166a4",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "03eeb06a_ffc0cd08",
         "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerStatusInfo.java",
         "patchSetId": 6
@@ -36,6 +60,30 @@
       "writtenOn": "2020-07-20T07:48:17Z",
       "side": 1,
       "message": "I think it would be better to just follow the established practice of making this a per-patch set endpoint to avoid the race.\n\nThis way, we are forcing callers to send a second request if they detect a race and to detect a race in the first place. If we built it as a revision endpoint, there\u0027d be no races. There is also a complexity cost involved here: With the current implementation, one has to know, read or otherwise find out that there might be races. For your UI, that might be OK, but for robot callers that others write, this presents a trap that is too easy to fall into.",
+      "range": {
+        "startLine": 24,
+        "startChar": 0,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9bd10a12_ff97d11c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerStatusInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T11:10:12Z",
+      "side": 1,
+      "message": "Computing file statuses for non-current patch sets makes no sense hence we do not provide this.\nE.g. which votes would you consider to compute them? The latest votes, or the votes that were present before the successor patch set was uploaded? In the first case somebody looked at the latest patch set and implicitly approved a file modification in an old patch set that they didn\u0027t see. In the second case what\u0027s the meaning of status \u0027PENDING\u0027 approval if an approval can never be granted on the old patch set?\n\nI think we could offer this REST endpoint on revision level and let it fail if it\u0027s called for a non-current patch set. Did you mean this?\n\n\u003e If we built it as a revision endpoint, there\u0027d be no races. \nThere is still the same race, but the failure would require the caller to handle this case, so this may be better because of that?",
+      "parentUuid": "03eeb06a_ffc0cd08",
       "range": {
         "startLine": 24,
         "startChar": 0,
