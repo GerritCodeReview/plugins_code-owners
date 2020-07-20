@@ -39,6 +39,30 @@
       "revId": "66b980b6adacffcd563a8a82008bbfbdf400749f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cae040b9_e323faba",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T06:20:32Z",
+      "side": 1,
+      "message": "I think we often omit the @throws annotation if there is nothing worth to say. Leaving it as is :)",
+      "parentUuid": "40d34439_0794374d",
+      "range": {
+        "startLine": 38,
+        "startChar": 5,
+        "endLine": 38,
+        "endChar": 7
+      },
+      "revId": "66b980b6adacffcd563a8a82008bbfbdf400749f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
