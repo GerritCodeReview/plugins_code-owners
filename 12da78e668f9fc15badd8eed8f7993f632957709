@@ -16,6 +16,24 @@
       "revId": "12da78e668f9fc15badd8eed8f7993f632957709",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0deff33d_38d13328",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-20T11:44:29Z",
+      "side": 1,
+      "message": "\u003e Does this need to be documented?\nYes, it will be documented, but documentation has rather low priority at this point in time, hence it will be added only later.\n\n\u003e IIRC it was an explicit decision to choose uploader and not author?\n\u003e Can this be documented in the commit message?\n\nYes. Done.",
+      "parentUuid": "62429f50_a464b3fe",
+      "revId": "12da78e668f9fc15badd8eed8f7993f632957709",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
