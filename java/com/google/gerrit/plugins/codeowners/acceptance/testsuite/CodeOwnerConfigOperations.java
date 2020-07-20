@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 
 /**
  * An aggregation of operations on code owner configs for test purposes.
@@ -78,7 +77,7 @@ public interface CodeOwnerConfigOperations {
      *
      * @return {@code true} if the code owner config exists
      */
-    boolean exists() throws InvalidPluginConfigurationException;
+    boolean exists();
 
     /**
      * Retrieves the code owner config.
@@ -89,7 +88,7 @@ public interface CodeOwnerConfigOperations {
      *
      * @return the corresponding {@code CodeOwnerConfig}
      */
-    CodeOwnerConfig get() throws InvalidPluginConfigurationException;
+    CodeOwnerConfig get();
 
     /**
      * Starts the fluent chain to update a code owner config. The returned builder can be used to

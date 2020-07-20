@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.joining;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.RestResponse;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
@@ -151,5 +152,17 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
     r.assertBadRequest();
     assertThat(r.getEntityContent())
         .isEqualTo(String.format("\"%s\" is not a valid value for \"-O\"", unknownHexOption));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
+  public void cannotGetCodeOwnersIfPluginConfigurationIsInvalid() throws Exception {
+    RestResponse r = adminRestSession.get(getUrl(TEST_PATH));
+    r.assertConflict();
+    assertThat(r.getEntityContent())
+        .contains(
+            "Invalid configuration of the code-owners plugin. Code owner backend"
+                + " 'non-existing-backend' that is configured in gerrit.config (parameter"
+                + " plugin.code-owners.backend) not found.");
   }
 }

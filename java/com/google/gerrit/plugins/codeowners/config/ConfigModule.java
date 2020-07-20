@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.server.ExceptionHook;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.inject.AbstractModule;
 
@@ -24,5 +25,7 @@ public class ConfigModule extends AbstractModule {
   protected void configure() {
     DynamicSet.bind(binder(), CommitValidationListener.class)
         .to(CodeOwnersPluginConfigValidator.class);
+    DynamicSet.bind(binder(), ExceptionHook.class)
+        .to(InvalidPluginConfigurationException.ExceptionHook.class);
   }
 }

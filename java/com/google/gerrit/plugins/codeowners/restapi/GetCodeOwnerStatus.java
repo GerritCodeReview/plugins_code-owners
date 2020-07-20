@@ -16,14 +16,12 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.extensions.restapi.IdString;
-import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalCheck;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -69,14 +67,9 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
     RevisionResource revisionResource =
         revisions.parse(changeResource, IdString.fromDecoded("current"));
 
-    try {
-      ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-          codeOwnerApprovalCheck.getFileStatuses(revisionResource);
-      return Response.ok(
-          CodeOwnerStatusInfoJson.format(
-              revisionResource.getPatchSet().id(), fileCodeOwnerStatuses));
-    } catch (InvalidPluginConfigurationException e) {
-      throw new ResourceConflictException("Cannot get code owner status: " + e.getMessage(), e);
-    }
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(revisionResource);
+    return Response.ok(
+        CodeOwnerStatusInfoJson.format(revisionResource.getPatchSet().id(), fileCodeOwnerStatuses));
   }
 }

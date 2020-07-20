@@ -31,7 +31,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.inject.Key;
 import com.google.inject.Provider;
@@ -471,8 +470,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .isEqualTo(String.format("code owner config %s does not exist", codeOwnerConfigKey));
   }
 
-  private CodeOwnerConfig getCodeOwnerConfigFromServer(CodeOwnerConfig.Key codeOwnerConfigKey)
-      throws InvalidPluginConfigurationException {
+  private CodeOwnerConfig getCodeOwnerConfigFromServer(CodeOwnerConfig.Key codeOwnerConfigKey) {
     return codeOwners
         .get(codeOwnerConfigKey)
         .orElseThrow(
@@ -481,26 +479,22 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
                     String.format("code owner config %s does not exist", codeOwnerConfigKey)));
   }
 
-  private CodeOwnerConfig createArbitraryCodeOwnerConfig()
-      throws InvalidPluginConfigurationException {
+  private CodeOwnerConfig createArbitraryCodeOwnerConfig() {
     return createCodeOwnerConfig(admin.email());
   }
 
-  private CodeOwnerConfig createCodeOwnerConfig(String... emails)
-      throws InvalidPluginConfigurationException {
+  private CodeOwnerConfig createCodeOwnerConfig(String... emails) {
     return createCodeOwnerConfig(false, emails);
   }
 
-  private CodeOwnerConfig createCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails)
-      throws InvalidPluginConfigurationException {
+  private CodeOwnerConfig createCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {
     return createCodeOwnerConfig(
         ignoreParentCodeOwners,
         CodeOwnerSetModification.set(CodeOwnerSet.createWithoutPathExpressions(emails)));
   }
 
   private CodeOwnerConfig createCodeOwnerConfig(
-      boolean ignoreParentCodeOwners, CodeOwnerSetModification codeOwnerSetsModification)
-      throws InvalidPluginConfigurationException {
+      boolean ignoreParentCodeOwners, CodeOwnerSetModification codeOwnerSetsModification) {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfigUpdate codeOwnerConfigUpdate =
         CodeOwnerConfigUpdate.builder()

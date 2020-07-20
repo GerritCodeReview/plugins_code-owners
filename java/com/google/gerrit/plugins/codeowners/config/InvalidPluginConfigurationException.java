@@ -14,11 +14,44 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
+import com.google.gerrit.common.Nullable;
+import java.util.Optional;
+
 /**
  * Exception that is thrown if a configuration parameter of the code-owners plugin has an invalid
  * value.
  */
-public class InvalidPluginConfigurationException extends Exception {
+public class InvalidPluginConfigurationException extends RuntimeException {
+  public static class ExceptionHook implements com.google.gerrit.server.ExceptionHook {
+    @Override
+    public boolean skipRetryWithTrace(String actionType, String actionName, Throwable throwable) {
+      return isInvalidPluginConfigurationException(throwable);
+    }
+
+    @Override
+    public ImmutableList<String> getUserMessages(Throwable throwable, @Nullable String traceId) {
+      if (isInvalidPluginConfigurationException(throwable)) {
+        return ImmutableList.of(throwable.getMessage());
+      }
+      return ImmutableList.of();
+    }
+
+    @Override
+    public Optional<Status> getStatus(Throwable throwable) {
+      if (isInvalidPluginConfigurationException(throwable)) {
+        return Optional.of(Status.create(409, "Conflict"));
+      }
+      return Optional.empty();
+    }
+
+    private static boolean isInvalidPluginConfigurationException(Throwable throwable) {
+      return Throwables.getCausalChain(throwable).stream()
+          .anyMatch(t -> t instanceof InvalidPluginConfigurationException);
+    }
+  }
+
   private static final long serialVersionUID = 1L;
 
   private static final String MESSAGE_FORMAT = "Invalid configuration of the %s plugin. %s";

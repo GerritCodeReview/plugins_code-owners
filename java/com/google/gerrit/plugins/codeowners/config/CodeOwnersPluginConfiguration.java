@@ -84,8 +84,7 @@ public class CodeOwnersPluginConfiguration {
    *     returned
    * @return the {@link CodeOwnerBackend} that should be used
    */
-  public CodeOwnerBackend getBackend(BranchNameKey branchNameKey)
-      throws InvalidPluginConfigurationException {
+  public CodeOwnerBackend getBackend(BranchNameKey branchNameKey) {
     Config pluginConfig = getPluginConfig(branchNameKey.project());
 
     // check if a branch specific backend is configured
@@ -124,8 +123,7 @@ public class CodeOwnersPluginConfiguration {
    *     returned
    * @return the {@link CodeOwnerBackend} that should be used
    */
-  public RequiredApproval getRequiredApproval(BranchNameKey branchNameKey)
-      throws InvalidPluginConfigurationException {
+  public RequiredApproval getRequiredApproval(BranchNameKey branchNameKey) {
     Config pluginConfig = getPluginConfig(branchNameKey.project());
 
     ProjectState projectState =

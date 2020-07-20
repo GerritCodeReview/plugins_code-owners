@@ -24,42 +24,27 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import org.junit.Test;
 
 /**
- * Acceptance test for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigForPathInBranch} REST endpoint
- * that require using via REST.
+ * Acceptance test for the {@link com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus}
+ * REST endpoint. that require using via REST.
  *
  * <p>Acceptance test for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigForPathInBranch} REST endpoint
- * that can use the Java API are implemented in {@link
- * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnerConfigForPathInBranchIT}.
+ * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus} REST endpoint that can use the
+ * Java API are implemented in {@link
+ * com.google.gerrit.plugins.codeowners.acceptance.api.GetCodeOwnerStatusIT}.
+ *
+ * <p>*
  *
  * <p>The tests in this class do not depend on the used code owner backend, hence we do not need to
  * extend {@link AbstractCodeOwnersIT}.
  */
-public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersTest {
-  @Test
-  public void getCodeOwnersForInvalidPath() throws Exception {
-    RestResponse r =
-        adminRestSession.get(
-            String.format(
-                "/projects/%s/branches/%s/code_owners.config/%s",
-                IdString.fromDecoded(project.get()),
-                IdString.fromDecoded("master"),
-                IdString.fromDecoded("\0")));
-    r.assertBadRequest();
-    assertThat(r.getEntityContent()).contains("Nul character not allowed");
-  }
-
+public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
-  public void cannotGetCodeOwnerConfigIfPluginConfigurationIsInvalid() throws Exception {
+  public void cannotGetStatusIfPluginConfigurationIsInvalid() throws Exception {
+    String changeId = createChange().getChangeId();
     RestResponse r =
         adminRestSession.get(
-            String.format(
-                "/projects/%s/branches/%s/code_owners.config/%s",
-                IdString.fromDecoded(project.get()),
-                IdString.fromDecoded("master"),
-                IdString.fromDecoded("/foo/bar/baz.md")));
+            String.format("/changes/%s/code_owners.status", IdString.fromDecoded(changeId)));
     r.assertConflict();
     assertThat(r.getEntityContent())
         .contains(
