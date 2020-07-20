@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e96bd643_32e5ee7b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/Backend.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-20T13:31:31Z",
+      "side": 1,
+      "message": "nit: missing JavaDoc",
+      "revId": "e5dd6893d4f2b0562de424bffca473b5431e6f21",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b9848139_8769346b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/Backend.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2020-07-20T13:31:31Z",
+      "side": 1,
+      "message": "nit: this should be the first member of any class",
+      "revId": "e5dd6893d4f2b0562de424bffca473b5431e6f21",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
