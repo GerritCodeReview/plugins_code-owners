@@ -21,7 +21,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfig
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
 import org.eclipse.jgit.lib.Config;
@@ -64,10 +64,7 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
   private static Config createConfigWithCodeOwnerBackend(CodeOwnerBackendId codeOwnerBackendId) {
     Config cfg = new Config(defaultConfig());
     cfg.setString(
-        "plugin",
-        "code-owners",
-        CodeOwnersPluginConfiguration.KEY_BACKEND,
-        codeOwnerBackendId.getBackendId());
+        "plugin", "code-owners", BackendConfig.KEY_BACKEND, codeOwnerBackendId.getBackendId());
     return cfg;
   }
 

@@ -483,7 +483,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   private void configureBackend(
       Project.NameKey project, @Nullable String branch, String backendName) throws Exception {
-    setConfig(project, branch, CodeOwnersPluginConfiguration.KEY_BACKEND, backendName);
+    setConfig(project, branch, BackendConfig.KEY_BACKEND, backendName);
   }
 
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)

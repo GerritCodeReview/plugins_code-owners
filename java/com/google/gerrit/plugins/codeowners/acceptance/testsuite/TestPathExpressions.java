@@ -18,7 +18,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.inject.Inject;
 
@@ -33,11 +33,11 @@ import com.google.inject.Inject;
  * CodeOwnerBackend}s.
  */
 public class TestPathExpressions {
-  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final BackendConfig backendConfig;
 
   @Inject
-  TestPathExpressions(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
-    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+  TestPathExpressions(BackendConfig backendConfig) {
+    this.backendConfig = backendConfig;
   }
 
   /**
@@ -47,7 +47,7 @@ public class TestPathExpressions {
    */
   public String matchFileTypeInCurrentFolder(String fileType)
       throws InvalidPluginConfigurationException {
-    CodeOwnerBackend defaultBackend = codeOwnersPluginConfiguration.getDefaultBackend();
+    CodeOwnerBackend defaultBackend = backendConfig.getDefault();
     PathExpressionMatcher pathExpressionMatcher =
         defaultBackend
             .getPathExpressionMatcher()

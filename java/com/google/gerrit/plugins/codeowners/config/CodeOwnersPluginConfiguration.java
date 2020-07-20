@@ -17,13 +17,10 @@ package com.google.gerrit.plugins.codeowners.config;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
-import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.project.ProjectCache;
@@ -47,34 +44,23 @@ import org.eclipse.jgit.lib.Config;
  */
 @Singleton
 public class CodeOwnersPluginConfiguration {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
-  @VisibleForTesting public static final String KEY_BACKEND = "backend";
   @VisibleForTesting static final String SECTION_CODE_OWNERS = "codeOwners";
 
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
-  private final DynamicMap<CodeOwnerBackend> codeOwnerBackends;
   private final ProjectCache projectCache;
-
-  /** The name of the configured code owners default backend. */
-  private final String defaultBackendName;
+  private final BackendConfig backendConfig;
 
   @Inject
   CodeOwnersPluginConfiguration(
       @PluginName String pluginName,
       PluginConfigFactory pluginConfigFactory,
-      DynamicMap<CodeOwnerBackend> codeOwnerBackends,
-      ProjectCache projectCache) {
+      ProjectCache projectCache,
+      BackendConfig backendConfig) {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
-    this.codeOwnerBackends = codeOwnerBackends;
     this.projectCache = projectCache;
-
-    this.defaultBackendName =
-        pluginConfigFactory
-            .getFromGerritConfig(pluginName)
-            .getString(KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
+    this.backendConfig = backendConfig;
   }
 
   /**
@@ -103,19 +89,20 @@ public class CodeOwnersPluginConfiguration {
     Config pluginConfig = getPluginConfig(branchNameKey.project());
 
     // check if a branch specific backend is configured
-    Optional<CodeOwnerBackend> codeOwnerBackend = getBackendForBranch(pluginConfig, branchNameKey);
+    Optional<CodeOwnerBackend> codeOwnerBackend =
+        backendConfig.getForBranch(pluginConfig, branchNameKey);
     if (codeOwnerBackend.isPresent()) {
       return codeOwnerBackend.get();
     }
 
     // check if a project specific backend is configured
-    codeOwnerBackend = getBackendForProject(pluginConfig, branchNameKey.project());
+    codeOwnerBackend = backendConfig.getForProject(pluginConfig, branchNameKey.project());
     if (codeOwnerBackend.isPresent()) {
       return codeOwnerBackend.get();
     }
 
     // fall back to the default backend
-    return getDefaultBackend();
+    return backendConfig.getDefault();
   }
 
   /**
@@ -165,85 +152,6 @@ public class CodeOwnersPluginConfiguration {
     return RequiredApproval.createDefault(projectState);
   }
 
-  private Optional<CodeOwnerBackend> getBackendForBranch(Config pluginConfig, BranchNameKey branch)
-      throws InvalidPluginConfigurationException {
-    // check for branch specific backend by full branch name
-    Optional<CodeOwnerBackend> backend =
-        getBackendForBranch(pluginConfig, branch.project(), branch.branch());
-    if (!backend.isPresent()) {
-      // check for branch specific backend by short branch name
-      backend = getBackendForBranch(pluginConfig, branch.project(), branch.shortName());
-    }
-    return backend;
-  }
-
-  private Optional<CodeOwnerBackend> getBackendForBranch(
-      Config pluginConfig, Project.NameKey project, String branch)
-      throws InvalidPluginConfigurationException {
-    String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, branch, KEY_BACKEND);
-    if (backendName == null) {
-      return Optional.empty();
-    }
-    return Optional.of(
-        lookupBackend(backendName)
-            .orElseThrow(
-                () -> {
-                  InvalidPluginConfigurationException e =
-                      new InvalidPluginConfigurationException(
-                          pluginName,
-                          String.format(
-                              "Code owner backend '%s' that is configured for project %s in"
-                                  + " %s.config (parameter %s.%s.%s) not found.",
-                              backendName,
-                              project,
-                              pluginName,
-                              SECTION_CODE_OWNERS,
-                              branch,
-                              KEY_BACKEND));
-                  logger.atSevere().log(e.getMessage());
-                  return e;
-                }));
-  }
-
-  private Optional<CodeOwnerBackend> getBackendForProject(
-      Config pluginConfig, Project.NameKey project) throws InvalidPluginConfigurationException {
-    String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
-    if (backendName == null) {
-      return Optional.empty();
-    }
-    return Optional.of(
-        lookupBackend(backendName)
-            .orElseThrow(
-                () -> {
-                  InvalidPluginConfigurationException e =
-                      new InvalidPluginConfigurationException(
-                          pluginName,
-                          String.format(
-                              "Code owner backend '%s' that is configured for project %s in"
-                                  + " %s.config (parameter %s.%s) not found.",
-                              backendName, project, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND));
-                  logger.atSevere().log(e.getMessage());
-                  return e;
-                }));
-  }
-
-  @VisibleForTesting
-  public CodeOwnerBackend getDefaultBackend() throws InvalidPluginConfigurationException {
-    return lookupBackend(defaultBackendName)
-        .orElseThrow(
-            () -> {
-              InvalidPluginConfigurationException e =
-                  new InvalidPluginConfigurationException(
-                      pluginName,
-                      String.format(
-                          "Code owner backend '%s' that is configured in gerrit.config"
-                              + " (parameter plugin.%s.%s) not found.",
-                          defaultBackendName, pluginName, KEY_BACKEND));
-              logger.atSevere().log(e.getMessage());
-              return e;
-            });
-  }
-
   /**
    * Reads and returns the config from the {@code code-owners.config} file in {@code
    * refs/meta/config} branch of the given project.
@@ -260,11 +168,5 @@ public class CodeOwnersPluginConfiguration {
               "cannot get %s plugin config for non-existing project %s", pluginName, project),
           e);
     }
-  }
-
-  private Optional<CodeOwnerBackend> lookupBackend(String backendName) {
-    // We must use "gerrit" as plugin name since DynamicMapProvider#get() hard-codes "gerrit" as
-    // plugin name.
-    return Optional.ofNullable(codeOwnerBackends.get("gerrit", backendName));
   }
 }
