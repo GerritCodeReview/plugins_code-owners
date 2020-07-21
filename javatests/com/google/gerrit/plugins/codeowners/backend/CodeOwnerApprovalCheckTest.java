@@ -563,6 +563,235 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getStatusForFileAddition_implicitlyApprovedByPatchSetUploader() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    amendChange(user, changeId);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatSet(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+  }
+
+  @Test
+  public void getStatusForFileModification_implicitlyApprovedByPatchSetUploader() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
+    String changeId =
+        createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
+            .getChangeId();
+    amendChange(user, changeId);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatSet(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+  }
+
+  @Test
+  public void getStatusForFileDeletion_implicitlyApprovedByPatchSetUploader() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId = createChangeWithFileDeletion(path);
+    amendChange(user, changeId);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatSet(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasOldPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
+    fileCodeOwnerStatusSubject.hasChangedFile().isDeletion();
+  }
+
+  @Test
+  public void getStatusForFileRename_implicitlyApprovedOldPathByPatchSetUploader()
+      throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Path oldPath = Paths.get("/foo/bar/abc.txt");
+    Path newPath = Paths.get("/foo/baz/abc.txt");
+    String changeId = createChangeWithFileRename(oldPath, newPath);
+    amendChange(user, changeId);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatSet(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusSubject
+        .hasOldPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasChangedFile().isRename();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+  }
+
+  @Test
+  public void getStatusForFileRename_implicitlyApprovedNewPathByPatchSetUploader()
+      throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/baz/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Path oldPath = Paths.get("/foo/bar/abc.txt");
+    Path newPath = Paths.get("/foo/baz/abc.txt");
+    String changeId = createChangeWithFileRename(oldPath, newPath);
+    amendChange(user, changeId);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatSet(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusSubject
+        .hasOldPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    fileCodeOwnerStatusSubject.hasChangedFile().isRename();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+  }
+
+  @Test
+  public void getStatusForFileAddition_noImplicitlyApprovalByChangeOwner() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    amendChange(user, changeId);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatSet(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+  }
+
+  @Test
+  public void getStatusForFileAddition_noImplicitlyApprovalByPreviousPatchSetUploader()
+      throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    amendChange(user, changeId);
+    amendChange(user2, changeId);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatSet(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    // we expect state PENDING because 'user' got added as reviewer on upload of the second patch
+    // set (the patch set uploader becomes a reviewer if the change is owned by another user).
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.PENDING);
+    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
+    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+  }
+
+  @Test
   public void parentCodeOwnerConfigsAreConsidered() throws Exception {
     TestAccount user2 = accountCreator.user2();
     TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
