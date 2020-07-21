@@ -41,9 +41,6 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
   public void cannotGetStatusIfPluginConfigurationIsInvalid() throws Exception {
     String changeId = createChange().getChangeId();
 
-    // Add a reviewer to avoid short-cut.
-    gApi.changes().id(changeId).addReviewer(user.email());
-
     RestResponse r =
         adminRestSession.get(
             String.format("/changes/%s/code_owners.status", IdString.fromDecoded(changeId)));
