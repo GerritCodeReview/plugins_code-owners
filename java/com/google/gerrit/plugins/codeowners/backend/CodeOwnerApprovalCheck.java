@@ -38,6 +38,7 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -81,6 +82,23 @@ public class CodeOwnerApprovalCheck {
   }
 
   /**
+   * Whether the given change has sufficient code owner approvals to be submittable.
+   *
+   * @param changeNotes the change notes
+   * @return whether the given change has sufficient code owner approvals to be submittable
+   */
+  public boolean isSubmittable(ChangeNotes changeNotes) throws IOException {
+    requireNonNull(changeNotes, "changeNotes");
+    return !getFileStatuses(changeNotes)
+        .anyMatch(
+            fileStatus ->
+                (fileStatus.newPathStatus().isPresent()
+                        && fileStatus.newPathStatus().get().status() != CodeOwnerStatus.APPROVED)
+                    || (fileStatus.oldPathStatus().isPresent()
+                        && fileStatus.oldPathStatus().get().status() != CodeOwnerStatus.APPROVED));
+  }
+
+  /**
    * Gets the code owner statuses for all files/paths that were changed in the current revision of
    * the given change.
    *
@@ -106,8 +124,7 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the notes of the change for which the current code owner statuses should be
    *     returned
    */
-  public ImmutableSet<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes)
-      throws IOException {
+  public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes) throws IOException {
     requireNonNull(changeNotes, "changeNotes");
 
     RequiredApproval requiredApproval =
@@ -121,50 +138,59 @@ public class CodeOwnerApprovalCheck {
     ImmutableSet<Account.Id> approverAccountIds =
         getApproverAccountIds(requiredApproval, changeNotes);
 
-    ImmutableSet.Builder<FileCodeOwnerStatus> fileCodeOwnerStatusBuilder = ImmutableSet.builder();
-
-    // Iterate over all files that have been changed in the revision.
-    for (ChangedFile changedFile :
-        changedFiles.compute(
-            changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())) {
-      // Compute the code owner status for the new path, if there is a new path.
-      Optional<PathCodeOwnerStatus> newPathStatus = Optional.empty();
-      if (changedFile.newPath().isPresent()) {
-        newPathStatus =
-            Optional.of(
-                getCodeOwnerStatus(
+    return changedFiles
+        .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId()).stream()
+        .map(
+            changedFile ->
+                getFileStatus(
                     branch,
                     revision,
                     patchSetUploader,
                     reviewerAccountIds,
                     approverAccountIds,
-                    changedFile.newPath().get()));
-      }
-
-      // Compute the code owner status for the old path, if the file was deleted or renamed.
-      Optional<PathCodeOwnerStatus> oldPathStatus = Optional.empty();
-      if (changedFile.isDeletion() || changedFile.isRename()) {
-        checkState(
-            changedFile.oldPath().isPresent(), "old path must be present for deletion/rename");
-        oldPathStatus =
-            Optional.of(
-                getCodeOwnerStatus(
-                    branch,
-                    revision,
-                    patchSetUploader,
-                    reviewerAccountIds,
-                    approverAccountIds,
-                    changedFile.oldPath().get()));
-      }
-
-      fileCodeOwnerStatusBuilder.add(
-          FileCodeOwnerStatus.create(changedFile, newPathStatus, oldPathStatus));
-    }
-
-    return fileCodeOwnerStatusBuilder.build();
+                    changedFile));
   }
 
-  private PathCodeOwnerStatus getCodeOwnerStatus(
+  private FileCodeOwnerStatus getFileStatus(
+      BranchNameKey branch,
+      ObjectId revision,
+      Account.Id patchSetUploader,
+      ImmutableSet<Account.Id> reviewerAccountIds,
+      ImmutableSet<Account.Id> approverAccountIds,
+      ChangedFile changedFile) {
+    // Compute the code owner status for the new path, if there is a new path.
+    Optional<PathCodeOwnerStatus> newPathStatus =
+        changedFile
+            .newPath()
+            .map(
+                newPath ->
+                    getPathCodeOwnerStatus(
+                        branch,
+                        revision,
+                        patchSetUploader,
+                        reviewerAccountIds,
+                        approverAccountIds,
+                        newPath));
+
+    // Compute the code owner status for the old path, if the file was deleted or renamed.
+    Optional<PathCodeOwnerStatus> oldPathStatus = Optional.empty();
+    if (changedFile.isDeletion() || changedFile.isRename()) {
+      checkState(changedFile.oldPath().isPresent(), "old path must be present for deletion/rename");
+      oldPathStatus =
+          Optional.of(
+              getPathCodeOwnerStatus(
+                  branch,
+                  revision,
+                  patchSetUploader,
+                  reviewerAccountIds,
+                  approverAccountIds,
+                  changedFile.oldPath().get()));
+    }
+
+    return FileCodeOwnerStatus.create(changedFile, newPathStatus, oldPathStatus);
+  }
+
+  private PathCodeOwnerStatus getPathCodeOwnerStatus(
       BranchNameKey branch,
       ObjectId revision,
       Account.Id patchSetUploader,

@@ -14,24 +14,24 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject.changedFiles;
 import static com.google.gerrit.plugins.codeowners.testing.PathCodeOwnerStatusSubject.pathCodeOwnerStatuses;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.OptionalSubject;
-import java.util.Set;
+import java.util.stream.Stream;
 
 /** {@link Subject} for doing assertions on {@link FileCodeOwnerStatus}es. */
 public class FileCodeOwnerStatusSubject extends Subject {
-  public static ListSubject<FileCodeOwnerStatusSubject, FileCodeOwnerStatus> assertThatSet(
-      Set<FileCodeOwnerStatus> fileCodeOwnerStatuses) {
+  public static ListSubject<FileCodeOwnerStatusSubject, FileCodeOwnerStatus> assertThatStream(
+      Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses) {
     return ListSubject.assertThat(
-        ImmutableList.copyOf(fileCodeOwnerStatuses), fileCodeOwnerStatuses());
+        fileCodeOwnerStatuses.collect(toImmutableList()), fileCodeOwnerStatuses());
   }
 
   private static Factory<FileCodeOwnerStatusSubject, FileCodeOwnerStatus> fileCodeOwnerStatuses() {
