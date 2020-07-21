@@ -22,6 +22,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigsInBranchCollection.PathResource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.Optional;
 
 /**
@@ -43,8 +44,9 @@ public class GetCodeOwnerConfigForPathInBranch
   }
 
   @Override
-  public Response<CodeOwnerConfigInfo> apply(PathResource rsrc) {
-    Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(rsrc.getCodeOwnerConfigKey());
+  public Response<CodeOwnerConfigInfo> apply(PathResource rsrc) throws IOException {
+    Optional<CodeOwnerConfig> codeOwnerConfig =
+        codeOwners.get(rsrc.getCodeOwnerConfigKey(), rsrc.getRevision());
     return codeOwnerConfig
         .map(CodeOwnerConfigJson::format)
         .map(Response::ok)

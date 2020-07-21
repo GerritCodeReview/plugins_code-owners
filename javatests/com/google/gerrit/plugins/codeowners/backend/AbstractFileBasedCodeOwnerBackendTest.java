@@ -19,10 +19,13 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubjec
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 import com.google.gerrit.server.IdentifiedUser;
 import java.util.Optional;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -65,14 +68,14 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   public void getNonExistingCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/non-existing/");
-    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null)).isEmpty();
   }
 
   @Test
   public void getCodeOwnerConfigFromNonExistingBranch() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "non-existing", "/");
-    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey)).isEmpty();
+    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null)).isEmpty();
   }
 
   @Test
@@ -85,8 +88,45 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
     testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
-        codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey);
+        codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
     assertThatOptional(codeOwnerConfig).value().isEqualTo(codeOwnerConfigInRepository);
+  }
+
+  @Test
+  public void getCodeOwnerConfigFromOldRevision() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    CodeOwnerConfig codeOwnerConfigInRepository =
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+            .build();
+    ObjectId revision1 =
+        testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+
+    // update the code owner config, which creates a new revision
+    ObjectId revision2 =
+        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+            codeOwnerConfigInRepository.toBuilder().setIgnoreParentCodeOwners().build());
+    assertThat(revision1).isNotEqualTo(revision2);
+
+    Optional<CodeOwnerConfig> codeOwnerConfig =
+        codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision1);
+    assertThatOptional(codeOwnerConfig).value().isEqualTo(codeOwnerConfigInRepository);
+  }
+
+  @Test
+  public void cannotGetCodeOwnerConfigFromNonExistingRevision() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    StorageException exception =
+        assertThrows(
+            StorageException.class,
+            () ->
+                codeOwnerBackend.getCodeOwnerConfig(
+                    codeOwnerConfigKey,
+                    ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("failed to load code owner config %s", codeOwnerConfigKey));
+    assertThat(exception).hasCauseThat().isInstanceOf(MissingObjectException.class);
   }
 
   @Test

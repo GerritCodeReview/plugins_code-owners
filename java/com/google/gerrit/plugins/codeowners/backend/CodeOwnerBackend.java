@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.server.IdentifiedUser;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Interface for code owner backends.
@@ -31,9 +32,12 @@ public interface CodeOwnerBackend {
    *
    * @param codeOwnerConfigKey the code owner config key for which the code owner config should be
    *     returned
+   * @param revision the branch revision from which the code owner config should be loaded, if
+   *     {@code null} the code owner config is loaded from the current revision of the branch
    * @return code owner config for the given key if it exists, otherwise {@link Optional#empty()}
    */
-  Optional<CodeOwnerConfig> getCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey);
+  Optional<CodeOwnerConfig> getCodeOwnerConfig(
+      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision);
 
   /**
    * Updates/Creates a code owner config.

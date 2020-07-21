@@ -20,6 +20,7 @@ import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * API to read code owner configurations.
@@ -40,16 +41,32 @@ public class CodeOwners {
   }
 
   /**
-   * Retrieves the code owner config for the given key if it exists.
+   * Retrieves the code owner config for the given key from the given branch revision.
    *
-   * @param codeOwnerConfigKey the key of the code owner config that should be retrieved.
+   * @param codeOwnerConfigKey the key of the code owner config that should be retrieved
+   * @param revision the branch revision from which the code owner config should be loaded
    * @return the code owner config for the given key if it exists, otherwise {@link
    *     Optional#empty()}
    */
-  public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey) {
+  public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision) {
+    requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+    requireNonNull(revision, "revision");
+    CodeOwnerBackend codeOwnerBackend =
+        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
+    return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
+  }
+
+  /**
+   * Retrieves the code owner config for the given key from the current revision of the branch.
+   *
+   * @param codeOwnerConfigKey the key of the code owner config that should be retrieved
+   * @return the code owner config for the given key if it exists, otherwise {@link
+   *     Optional#empty()}
+   */
+  public Optional<CodeOwnerConfig> getFromCurrentRevision(CodeOwnerConfig.Key codeOwnerConfigKey) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
-    return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey);
+    return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
   }
 }

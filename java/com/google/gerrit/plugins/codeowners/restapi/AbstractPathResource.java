@@ -23,6 +23,7 @@ import com.google.gerrit.server.project.BranchResource;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Abstract REST resource that represents a path in a REST collection under a branch or revision in
@@ -52,15 +53,22 @@ abstract class AbstractPathResource implements RestResource {
   }
 
   private final BranchNameKey branchNameKey;
+  private final ObjectId revision;
   private final Path path;
 
   protected AbstractPathResource(BranchResource branchResource, Path path) {
     this.branchNameKey = branchResource.getBranchKey();
+    this.revision =
+        branchResource.getRevision() != null
+            ? ObjectId.fromString(branchResource.getRevision())
+            : ObjectId.zeroId();
     this.path = path;
   }
 
-  protected AbstractPathResource(RevisionResource revisionResource, Path path) {
+  protected AbstractPathResource(
+      RevisionResource revisionResource, ObjectId branchRevision, Path path) {
     this.branchNameKey = revisionResource.getChange().getDest();
+    this.revision = branchRevision;
     this.path = path;
   }
 
@@ -71,6 +79,15 @@ abstract class AbstractPathResource implements RestResource {
    */
   public BranchNameKey getBranch() {
     return branchNameKey;
+  }
+
+  /**
+   * Returns the revision of the branch.
+   *
+   * @return the revision of the branch
+   */
+  public ObjectId getRevision() {
+    return revision;
   }
 
   /**
