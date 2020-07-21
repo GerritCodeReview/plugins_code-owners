@@ -26,6 +26,7 @@ java_library(
     deps = [
         "//java/com/google/gerrit/common:annotations",
         "//java/com/google/gerrit/entities",
+        "//java/com/google/gerrit/exceptions",
         "//java/com/google/gerrit/server",
         "//java/com/google/gerrit/testing:gerrit-test-util",
         "//lib:jgit",

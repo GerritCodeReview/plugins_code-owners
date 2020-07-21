@@ -14,6 +14,9 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.gerrit.entities.Change;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ChildCollection;
@@ -24,11 +27,16 @@ import com.google.gerrit.extensions.restapi.RestView;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInChangeCollection.PathResource;
 import com.google.gerrit.server.change.RevisionResource;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
 import java.io.IOException;
 import java.nio.file.Path;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * REST collection that serves requests to {@code
@@ -38,12 +46,16 @@ import java.nio.file.Path;
 public class CodeOwnersInChangeCollection
     implements ChildCollection<RevisionResource, PathResource> {
   private final DynamicMap<RestView<PathResource>> views;
+  private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
 
   @Inject
   CodeOwnersInChangeCollection(
-      DynamicMap<RestView<PathResource>> views, ChangedFiles changedFiles) {
+      DynamicMap<RestView<PathResource>> views,
+      GitRepositoryManager repoManager,
+      ChangedFiles changedFiles) {
     this.views = views;
+    this.repoManager = repoManager;
     this.changedFiles = changedFiles;
   }
 
@@ -59,9 +71,30 @@ public class CodeOwnersInChangeCollection
     // Check if the file exists in the revision only after creating the path resource. This way we
     // get a more specific error response for invalid paths ('400 Bad Request' instead of a '404 Not
     // Found').
-    PathResource pathResource = PathResource.parse(revisionResource, id);
+    PathResource pathResource =
+        PathResource.parse(
+            revisionResource, getDestBranchRevision(revisionResource.getChange()), id);
     checkThatFileExists(revisionResource, pathResource, id);
     return pathResource;
+  }
+
+  /**
+   * Gets the current revision of the destination branch of the given change.
+   *
+   * <p>This is the revision from which the code owner configs should be read when computing code
+   * owners for the files that are touched in the change.
+   */
+  private ObjectId getDestBranchRevision(Change change) throws IOException {
+    try (Repository repository = repoManager.openRepository(change.getProject());
+        RevWalk rw = new RevWalk(repository)) {
+      Ref ref = repository.exactRef(change.getDest().branch());
+      checkNotNull(
+          ref,
+          "branch %s in repository %s not found",
+          change.getDest().branch(),
+          change.getProject().get());
+      return rw.parseCommit(ref.getObjectId());
+    }
   }
 
   private void checkThatFileExists(
@@ -102,13 +135,14 @@ public class CodeOwnersInChangeCollection
     static final TypeLiteral<RestView<PathResource>> PATH_KIND =
         new TypeLiteral<RestView<PathResource>>() {};
 
-    static PathResource parse(RevisionResource revisionResource, IdString pathId)
+    static PathResource parse(
+        RevisionResource revisionResource, ObjectId branchRevision, IdString pathId)
         throws BadRequestException {
-      return new PathResource(revisionResource, parsePath(pathId));
+      return new PathResource(revisionResource, branchRevision, parsePath(pathId));
     }
 
-    private PathResource(RevisionResource revisionResource, Path path) {
-      super(revisionResource, path);
+    private PathResource(RevisionResource revisionResource, ObjectId branchRevision, Path path) {
+      super(revisionResource, branchRevision, path);
     }
   }
 }

@@ -29,6 +29,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.inject.Key;
 import com.google.inject.util.Providers;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -46,7 +47,29 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
 
   @Test
   public void cannotGetCodeOwnerConfigForNullCodeOwnerConfigKey() throws Exception {
-    NullPointerException npe = assertThrows(NullPointerException.class, () -> codeOwners.get(null));
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwners.get(
+                    null, ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
+  }
+
+  @Test
+  public void cannotGetCodeOwnerConfigForNullRevision() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwners.get(CodeOwnerConfig.Key.create(project, "master", "/"), null));
+    assertThat(npe).hasMessageThat().isEqualTo("revision");
+  }
+
+  @Test
+  public void cannotGetCodeOwnerConfigFromCurrentRevisionForNullCodeOwnerConfigKey()
+      throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> codeOwners.getFromCurrentRevision(null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
   }
 
@@ -59,12 +82,32 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnerBackend codeOwnerBackendMock = mock(CodeOwnerBackend.class);
-    when(codeOwnerBackendMock.getCodeOwnerConfig(codeOwnerConfigKey))
+    when(codeOwnerBackendMock.getCodeOwnerConfig(codeOwnerConfigKey, null))
         .thenReturn(Optional.of(expectedCodeOwnersConfig));
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnerBackendMock)) {
-      Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey);
+      Optional<CodeOwnerConfig> codeOwnerConfig =
+          codeOwners.getFromCurrentRevision(codeOwnerConfigKey);
       assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
-      verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey);
+      verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey, null);
+    }
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = "test-backend")
+  public void revisionIsPassedToConfiguredBackend() throws Exception {
+    ObjectId revision = ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    CodeOwnerConfig expectedCodeOwnersConfig =
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+            .build();
+    CodeOwnerBackend codeOwnerBackendMock = mock(CodeOwnerBackend.class);
+    when(codeOwnerBackendMock.getCodeOwnerConfig(codeOwnerConfigKey, revision))
+        .thenReturn(Optional.of(expectedCodeOwnersConfig));
+    try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnerBackendMock)) {
+      Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey, revision);
+      assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
+      verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey, revision);
     }
   }
 

@@ -116,7 +116,7 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
     }
 
     private Optional<CodeOwnerConfig> getCodeOwnerConfig() {
-      return codeOwners.get(codeOwnerConfigKey);
+      return codeOwners.getFromCurrentRevision(codeOwnerConfigKey);
     }
 
     private void updateNewCodeOwnerConfig(TestCodeOwnerConfigUpdate codeOwnerConfigUpdate)

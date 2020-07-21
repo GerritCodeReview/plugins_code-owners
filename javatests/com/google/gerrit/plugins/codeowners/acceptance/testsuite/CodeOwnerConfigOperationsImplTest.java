@@ -389,7 +389,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     // was dropped.
     // Since this made the code owner config empty it caused a deletion of the code owner config
     // file.
-    assertThat(codeOwners.get(codeOwnerConfig.key())).isEmpty();
+    assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
   }
 
   @Test
@@ -455,7 +455,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .update();
 
     // Removing all code owner sets leads to a deletion of the code owner config file.
-    assertThat(codeOwners.get(codeOwnerConfig.key())).isEmpty();
+    assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
   }
 
   @Test
@@ -472,7 +472,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfig getCodeOwnerConfigFromServer(CodeOwnerConfig.Key codeOwnerConfigKey) {
     return codeOwners
-        .get(codeOwnerConfigKey)
+        .getFromCurrentRevision(codeOwnerConfigKey)
         .orElseThrow(
             () ->
                 new IllegalStateException(

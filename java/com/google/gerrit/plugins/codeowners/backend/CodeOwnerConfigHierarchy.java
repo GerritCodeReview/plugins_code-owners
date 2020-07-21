@@ -21,6 +21,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Class to visit the code owner configs in a given branch that apply for a given path by following
@@ -52,13 +53,18 @@ public class CodeOwnerConfigHierarchy {
    * the path hierarchy from the given path up to the root folder.
    *
    * @param branch project and branch from which the code owner configs should be visited
+   * @param revision the branch revision from which the code owner configs should be loaded
    * @param path the path for which the code owner configs should be visited
    * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
    *     configs
    */
   public void visit(
-      BranchNameKey branch, Path path, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
+      BranchNameKey branch,
+      ObjectId revision,
+      Path path,
+      CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
     requireNonNull(branch, "branch");
+    requireNonNull(revision, "revision");
     requireNonNull(path, "path");
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
 
@@ -71,7 +77,7 @@ public class CodeOwnerConfigHierarchy {
       // Read code owner config and invoke the codeOwnerConfigVisitor if the code owner config
       // exists.
       Optional<CodeOwnerConfig> codeOwnerConfig =
-          codeOwners.get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder));
+          codeOwners.get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder), revision);
       if (codeOwnerConfig.isPresent()) {
         boolean visitFurtherCodeOwnerConfigs = codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
         if (!visitFurtherCodeOwnerConfigs || codeOwnerConfig.get().ignoreParentCodeOwners()) {
