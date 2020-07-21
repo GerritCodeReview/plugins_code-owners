@@ -38,6 +38,8 @@ public class BackendModule extends FactoryModule {
           .annotatedWith(Exports.named(codeOwnerBackendId.getBackendId()))
           .to(codeOwnerBackendId.getCodeOwnerBackendClass());
     }
+
+    install(new CodeOwnerSubmitRule.Module());
   }
 
   @Provides
