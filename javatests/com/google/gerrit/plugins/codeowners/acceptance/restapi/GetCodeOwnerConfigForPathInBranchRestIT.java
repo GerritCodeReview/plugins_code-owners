@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.gerrit.acceptance.RestResponse;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -47,5 +48,23 @@ public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersT
                 IdString.fromDecoded("\0")));
     r.assertBadRequest();
     assertThat(r.getEntityContent()).contains("Nul character not allowed");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
+  public void cannotGetCodeOwnerConfigIfPluginConfigurationIsInvalid() throws Exception {
+    RestResponse r =
+        adminRestSession.get(
+            String.format(
+                "/projects/%s/branches/%s/code_owners.config/%s",
+                IdString.fromDecoded(project.get()),
+                IdString.fromDecoded("master"),
+                IdString.fromDecoded("/foo/bar/baz.md")));
+    r.assertConflict();
+    assertThat(r.getEntityContent())
+        .contains(
+            "Invalid configuration of the code-owners plugin. Code owner backend"
+                + " 'non-existing-backend' that is configured in gerrit.config (parameter"
+                + " plugin.code-owners.backend) not found.");
   }
 }

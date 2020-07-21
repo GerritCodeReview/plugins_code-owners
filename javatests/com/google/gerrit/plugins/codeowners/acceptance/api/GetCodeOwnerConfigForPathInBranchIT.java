@@ -14,16 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThatOptional;
-import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import com.google.gerrit.acceptance.config.GerritConfig;
-import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -71,21 +66,5 @@ public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
     assertThatOptional(codeOwnerConfigInfo)
         .value()
         .correspondsTo(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
-  public void cannotGetCodeOwnerConfigIfPluginConfigurationIsInvalid() throws Exception {
-    ResourceConflictException exception =
-        assertThrows(
-            ResourceConflictException.class,
-            () -> codeOwnerConfigsApiFactory.branch(project, "master").get("/foo/bar/baz.md"));
-    assertThat(exception).hasCauseThat().isInstanceOf(InvalidPluginConfigurationException.class);
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            "Cannot get code owner configs: Invalid configuration of the code-owners plugin. Code"
-                + " owner backend 'non-existing-backend' that is configured in gerrit.config"
-                + " (parameter plugin.code-owners.backend) not found.");
   }
 }

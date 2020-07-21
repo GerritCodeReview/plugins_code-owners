@@ -105,8 +105,7 @@ public abstract class RequiredApproval {
   }
 
   static Optional<RequiredApproval> getForProject(
-      String pluginName, ProjectState projectState, Config pluginConfig)
-      throws InvalidPluginConfigurationException {
+      String pluginName, ProjectState projectState, Config pluginConfig) {
     requireNonNull(pluginName, "pluginName");
     requireNonNull(projectState, "projectState");
     requireNonNull(pluginConfig, "pluginConfig");
@@ -133,8 +132,7 @@ public abstract class RequiredApproval {
   }
 
   static Optional<RequiredApproval> getFromGlobalPluginConfig(
-      PluginConfigFactory pluginConfigFactory, String pluginName, ProjectState projectState)
-      throws InvalidPluginConfigurationException {
+      PluginConfigFactory pluginConfigFactory, String pluginName, ProjectState projectState) {
     requireNonNull(pluginConfigFactory, "pluginConfigFactory");
     requireNonNull(pluginName, "pluginName");
     requireNonNull(projectState, "projectState");
