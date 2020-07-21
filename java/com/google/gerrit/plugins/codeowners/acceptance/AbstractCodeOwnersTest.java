@@ -14,14 +14,20 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.PushOneCommit.Result;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
+import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import java.nio.file.Path;
+import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
+import org.eclipse.jgit.junit.TestRepository;
 
 /**
  * Base class for code owner integration tests.
@@ -80,5 +86,22 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
         .renameFile(JgitPath.of(oldFilePath).get(), JgitPath.of(newFilePath).get());
     gApi.changes().id(changeId2).edit().publish(new PublishChangeEditInput());
     return changeId2;
+  }
+
+  protected void amendChange(TestAccount testAccount, String changeId) throws Exception {
+    ChangeInfo changeInfo = gApi.changes().id(changeId).get();
+
+    TestRepository<InMemoryRepository> testRepo = cloneProject(project, testAccount);
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+    testRepo.reset(changeInfo.currentRevision);
+
+    PushOneCommit push =
+        pushFactory.create(
+            testAccount.newIdent(),
+            testRepo,
+            changeInfo.subject,
+            ImmutableMap.<String, String>of(),
+            changeId);
+    push.to("refs/for/master").assertOkStatus();
   }
 }
