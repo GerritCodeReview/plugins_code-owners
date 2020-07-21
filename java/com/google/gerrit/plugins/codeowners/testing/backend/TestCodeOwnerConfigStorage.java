@@ -22,6 +22,7 @@ import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.Optional;
 import org.eclipse.jgit.junit.TestRepository;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -56,14 +57,15 @@ public class TestCodeOwnerConfigStorage {
    * already exist.
    *
    * @param codeOwnerConfig the code owner config that should be written
+   * @return the ID of the created commit
    */
-  public void writeCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) throws Exception {
+  public ObjectId writeCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) throws Exception {
     String formattedCodeOwnerConfig = codeOwnerConfigParser.formatAsString(codeOwnerConfig);
     try (TestRepository<Repository> testRepo =
         new TestRepository<>(repoManager.openRepository(codeOwnerConfig.key().project()))) {
       Ref ref = testRepo.getRepository().exactRef(codeOwnerConfig.key().ref());
       RevCommit head = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      testRepo.update(
+      return testRepo.update(
           codeOwnerConfig.key().ref(),
           testRepo
               .commit()

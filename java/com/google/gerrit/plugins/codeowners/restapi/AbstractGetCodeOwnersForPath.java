@@ -112,6 +112,7 @@ public abstract class AbstractGetCodeOwnersForPath {
     Set<CodeOwner> codeOwners = new HashSet<>();
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
+        rsrc.getRevision(),
         rsrc.getPath(),
         codeOwnerConfig -> {
           ImmutableSet<CodeOwner> localCodeOwners =

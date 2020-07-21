@@ -39,6 +39,7 @@ import com.google.inject.util.Providers;
 import java.util.Optional;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -522,7 +523,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     static final String ID = "test-backend";
 
     @Override
-    public Optional<CodeOwnerConfig> getCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey) {
+    public Optional<CodeOwnerConfig> getCodeOwnerConfig(
+        CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
       throw new UnsupportedOperationException("not implemented");
     }
 
