@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,11 +22,20 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy.CodeOwnerConfigVisitor;
+import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
+import com.google.inject.Inject;
+import java.io.IOException;
 import java.nio.file.Paths;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +52,8 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
 
   @Mock private CodeOwnerConfigVisitor visitor;
 
+  @Inject private ProjectOperations projectOperations;
+
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
   private CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
 
@@ -57,36 +69,59 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerConfigHierarchy.visit(null, Paths.get("/foo/bar/baz.md"), visitor));
+            () ->
+                codeOwnerConfigHierarchy.visit(
+                    null,
+                    getCurrentRevision(BranchNameKey.create(project, "master")),
+                    Paths.get("/foo/bar/baz.md"),
+                    visitor));
     assertThat(npe).hasMessageThat().isEqualTo("branch");
   }
 
   @Test
-  public void cannotVisitCodeOwnerConfigsForNullPath() throws Exception {
+  public void cannotVisitCodeOwnerConfigsForNullRevision() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
             () ->
                 codeOwnerConfigHierarchy.visit(
-                    BranchNameKey.create(project, "master"), null, visitor));
+                    BranchNameKey.create(project, "master"),
+                    null,
+                    Paths.get("/foo/bar/baz.md"),
+                    visitor));
+    assertThat(npe).hasMessageThat().isEqualTo("revision");
+  }
+
+  @Test
+  public void cannotVisitCodeOwnerConfigsForNullPath() throws Exception {
+    BranchNameKey branchNameKey = BranchNameKey.create(project, "master");
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwnerConfigHierarchy.visit(
+                    branchNameKey, getCurrentRevision(branchNameKey), null, visitor));
     assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 
   @Test
   public void cannotVisitCodeOwnerConfigsWithNullVisitor() throws Exception {
+    BranchNameKey branchNameKey = BranchNameKey.create(project, "master");
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
             () ->
                 codeOwnerConfigHierarchy.visit(
-                    BranchNameKey.create(project, "master"), Paths.get("/foo/bar/baz.md"), null));
+                    branchNameKey,
+                    getCurrentRevision(branchNameKey),
+                    Paths.get("/foo/bar/baz.md"),
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
   }
 
   @Test
   public void visitorNotInvokedIfNoCodeOwnerConfigExists() throws Exception {
-    codeOwnerConfigHierarchy.visit(
-        BranchNameKey.create(project, "master"), Paths.get("/foo/bar/baz.md"), visitor);
+    visit("master", "/foo/bar/baz.md");
     verifyZeroInteractions(visitor);
   }
 
@@ -102,8 +137,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    codeOwnerConfigHierarchy.visit(
-        BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz.md"), visitor);
+    visit(branch, "/foo/bar/baz.md");
     verifyZeroInteractions(visitor);
   }
 
@@ -139,8 +173,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             .create();
 
     when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
-    codeOwnerConfigHierarchy.visit(
-        BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz.md"), visitor);
+    visit(branch, "/foo/bar/baz.md");
 
     // Verify that we received the callbacks in the right order, starting from the folder of the
     // given path up to the root folder.
@@ -180,8 +213,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             .create();
 
     when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
-    codeOwnerConfigHierarchy.visit(
-        BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz.md"), visitor);
+    visit(branch, "/foo/bar/baz.md");
 
     // Verify that we received the callbacks in the right order, starting from the folder of the
     // given path up to the root folder. There is no callback for the '/foo/' folder as this folder
@@ -193,6 +225,65 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     orderVerifier
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void visitorInvokedWithCodeOwnerConfigsFromOldRevision() throws Exception {
+    String branch = "master";
+
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    RevCommit revision1 = projectOperations.project(project).getHead(branch);
+    CodeOwnerConfig expectedRootCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get();
+    CodeOwnerConfig expectedFooCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get();
+
+    // Update one code owner config.
+    codeOwnerConfigOperations
+        .codeOwnerConfig(fooCodeOwnerConfigKey)
+        .forUpdate()
+        .ignoreParentCodeOwners()
+        .update();
+
+    // Create a new code owner config.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branch)
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    RevCommit revision2 = projectOperations.project(project).getHead(branch);
+    assertThat(revision1).isNotEqualTo(revision2);
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    codeOwnerConfigHierarchy.visit(
+        BranchNameKey.create(project, branch), revision1, Paths.get("/foo/bar/baz.md"), visitor);
+
+    // Verify that we received the callbacks for the code owner configs from the old revison, in
+    // the right order, starting from the folder of the given path up to the root folder.
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier.verify(visitor).visit(expectedFooCodeOwnerConfig);
+    orderVerifier.verify(visitor).visit(expectedRootCodeOwnerConfig);
     verifyNoMoreInteractions(visitor);
   }
 
@@ -228,8 +319,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
 
     // Return true for the first time the visitor is invoked, and false for all further invocations.
     when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true).thenReturn(false);
-    codeOwnerConfigHierarchy.visit(
-        BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz.md"), visitor);
+    visit(branch, "/foo/bar/baz.md");
 
     // Verify that we received the callbacks in the right order, starting from the folder of the
     // given path up to the root folder. We expect only 2 callbacks, since the visitor returns false
@@ -285,8 +375,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             .create();
 
     when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
-    codeOwnerConfigHierarchy.visit(
-        BranchNameKey.create(project, branch), Paths.get("/foo/bar/baz/README.md"), visitor);
+    visit(branch, "/foo/bar/baz/README.md");
 
     // Verify that we received the callbacks in the right order, starting from the folder of the
     // given path up to the root folder. There is no callback for the '/' and '/foo/' folders since
@@ -300,5 +389,25 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+  }
+
+  private void visit(String branchName, String path)
+      throws InvalidPluginConfigurationException, IOException {
+    BranchNameKey branchNameKey = BranchNameKey.create(project, branchName);
+    codeOwnerConfigHierarchy.visit(
+        branchNameKey, getCurrentRevision(branchNameKey), Paths.get(path), visitor);
+  }
+
+  private ObjectId getCurrentRevision(BranchNameKey branchNameKey) throws IOException {
+    try (Repository repository = repoManager.openRepository(branchNameKey.project());
+        RevWalk rw = new RevWalk(repository)) {
+      Ref ref = repository.exactRef(branchNameKey.branch());
+      checkNotNull(
+          ref,
+          "branch %s in repository %s not found",
+          branchNameKey.branch(),
+          branchNameKey.project().get());
+      return rw.parseCommit(ref.getObjectId());
+    }
   }
 }

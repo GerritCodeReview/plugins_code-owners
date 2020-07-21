@@ -26,6 +26,7 @@ import com.google.gerrit.server.update.RetryHelper;
 import java.io.IOException;
 import java.util.Optional;
 import org.eclipse.jgit.errors.ConfigInvalidException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
 
@@ -61,10 +62,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
   @Override
   public final Optional<CodeOwnerConfig> getCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey) {
+      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       return CodeOwnerConfigFile.load(
-              fileName, codeOwnerConfigParser, repository, codeOwnerConfigKey)
+              fileName, codeOwnerConfigParser, repository, revision, codeOwnerConfigKey)
           .getLoadedCodeOwnerConfig();
     } catch (IOException | ConfigInvalidException e) {
       throw new StorageException(
@@ -97,7 +98,8 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       CodeOwnerConfigFile codeOwnerConfigFile =
-          CodeOwnerConfigFile.load(fileName, codeOwnerConfigParser, repository, codeOwnerConfigKey)
+          CodeOwnerConfigFile.load(
+                  fileName, codeOwnerConfigParser, repository, null, codeOwnerConfigKey)
               .setCodeOwnerConfigUpdate(codeOwnerConfigUpdate);
 
       try (MetaDataUpdate metaDataUpdate =

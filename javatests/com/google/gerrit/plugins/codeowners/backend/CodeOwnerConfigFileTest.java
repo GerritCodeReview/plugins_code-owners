@@ -19,6 +19,7 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubjec
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
@@ -28,6 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import org.eclipse.jgit.errors.ConfigInvalidException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -101,6 +104,40 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
         .onlyElement()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
+  }
+
+  @Test
+  public void loadCodeOwnerConfigFileFromOldRevision() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .setIgnoreParentCodeOwners()
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+            .build();
+    ObjectId revision1 = testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+
+    // update the code owner config, which creates a new revision
+    ObjectId revision2 =
+        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+            codeOwnerConfig.toBuilder().setIgnoreParentCodeOwners(false).build());
+    assertThat(revision1).isNotEqualTo(revision2);
+
+    CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey, revision1);
+    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+        .value()
+        .hasIgnoreParentCodeOwnersThat()
+        .isTrue();
+  }
+
+  @Test
+  public void cannotLoadCodeOwnerConfigFileFromNonExistingRevision() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    assertThrows(
+        MissingObjectException.class,
+        () ->
+            loadCodeOwnerConfig(
+                codeOwnerConfigKey,
+                ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")));
   }
 
   @Test
@@ -407,9 +444,19 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfigFile loadCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey)
       throws IOException, ConfigInvalidException {
+    return loadCodeOwnerConfig(codeOwnerConfigKey, null);
+  }
+
+  private CodeOwnerConfigFile loadCodeOwnerConfig(
+      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision)
+      throws IOException, ConfigInvalidException {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       return CodeOwnerConfigFile.load(
-          CODE_OWNER_CONFIG_FILE_NAME, CODE_OWNER_CONFIG_PARSER, repository, codeOwnerConfigKey);
+          CODE_OWNER_CONFIG_FILE_NAME,
+          CODE_OWNER_CONFIG_PARSER,
+          repository,
+          revision,
+          codeOwnerConfigKey);
     }
   }
 

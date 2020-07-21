@@ -36,6 +36,7 @@ import com.google.inject.util.Providers;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -290,7 +291,8 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
     }
 
     @Override
-    public Optional<CodeOwnerConfig> getCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey) {
+    public Optional<CodeOwnerConfig> getCodeOwnerConfig(
+        CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
       throw new UnsupportedOperationException("not implemented");
     }
 
