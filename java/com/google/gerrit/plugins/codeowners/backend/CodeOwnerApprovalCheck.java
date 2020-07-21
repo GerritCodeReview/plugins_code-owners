@@ -115,6 +115,7 @@ public class CodeOwnerApprovalCheck {
 
     BranchNameKey branch = changeNotes.getChange().getDest();
     ObjectId revision = getDestBranchRevision(changeNotes.getChange());
+    Account.Id patchSetUploader = revisionResource.getPatchSet().uploader();
 
     ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);
     ImmutableSet<Account.Id> approverAccountIds =
@@ -134,6 +135,7 @@ public class CodeOwnerApprovalCheck {
                 getCodeOwnerStatus(
                     branch,
                     revision,
+                    patchSetUploader,
                     reviewerAccountIds,
                     approverAccountIds,
                     changedFile.newPath().get()));
@@ -149,6 +151,7 @@ public class CodeOwnerApprovalCheck {
                 getCodeOwnerStatus(
                     branch,
                     revision,
+                    patchSetUploader,
                     reviewerAccountIds,
                     approverAccountIds,
                     changedFile.oldPath().get()));
@@ -164,17 +167,10 @@ public class CodeOwnerApprovalCheck {
   private PathCodeOwnerStatus getCodeOwnerStatus(
       BranchNameKey branch,
       ObjectId revision,
+      Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       Path absolutePath) {
-    // TODO(ekempin): Check if the path is owned by the uploader of the patch set since paths that
-    // are owned by the patch set uploader should be considered as approved.
-    if (reviewerAccountIds.isEmpty()) {
-      // Short-cut, if there are no reviewers, any path has the INSUFFICIENT_REVIEWERS code owner
-      // status.
-      return PathCodeOwnerStatus.create(absolutePath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    }
-
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     codeOwnerConfigHierarchy.visit(
@@ -184,6 +180,15 @@ public class CodeOwnerApprovalCheck {
         codeOwnerConfig -> {
           ImmutableSet<Account.Id> codeOwnerAccountIds =
               getCodeOwnerAccountIds(codeOwnerConfig, absolutePath);
+
+          if (codeOwnerAccountIds.contains(patchSetUploader)) {
+            // If the uploader of the patch set owns the path, there is an implicit code owner
+            // approval from the patch set uploader so that the path is automatically approved.
+            codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+
+            // We can abort since we already found that the path was approved.
+            return false;
+          }
 
           if (Collections.disjoint(codeOwnerAccountIds, reviewerAccountIds)) {
             // We need to continue to check if any of the higher-level code owners is a reviewer.
