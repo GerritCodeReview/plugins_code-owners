@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -48,6 +50,37 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
     codeOwnerConfigHierarchy = plugin.getSysInjector().getInstance(CodeOwnerConfigHierarchy.class);
+  }
+
+  @Test
+  public void cannotVisitCodeOwnerConfigsForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerConfigHierarchy.visit(null, Paths.get("/foo/bar/baz.md"), visitor));
+    assertThat(npe).hasMessageThat().isEqualTo("branch");
+  }
+
+  @Test
+  public void cannotVisitCodeOwnerConfigsForNullPath() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwnerConfigHierarchy.visit(
+                    BranchNameKey.create(project, "master"), null, visitor));
+    assertThat(npe).hasMessageThat().isEqualTo("path");
+  }
+
+  @Test
+  public void cannotVisitCodeOwnerConfigsWithNullVisitor() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwnerConfigHierarchy.visit(
+                    BranchNameKey.create(project, "master"), Paths.get("/foo/bar/baz.md"), null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
   }
 
   @Test

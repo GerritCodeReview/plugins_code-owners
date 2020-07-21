@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,6 +42,12 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
     codeOwners = plugin.getSysInjector().getInstance(CodeOwners.class);
     codeOwnerBackends =
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
+  }
+
+  @Test
+  public void cannotGetCodeOwnerConfigForNullCodeOwnerConfigKey() throws Exception {
+    NullPointerException npe = assertThrows(NullPointerException.class, () -> codeOwners.get(null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
   }
 
   @Test

@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -56,6 +58,10 @@ public class CodeOwnerConfigHierarchy {
    */
   public void visit(
       BranchNameKey branch, Path path, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
+    requireNonNull(branch, "branch");
+    requireNonNull(path, "path");
+    requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
+
     // Next path in which we look for a code owner configuration. We start at the given path and
     // then go up the parent hierarchy.
     Path ownerConfigFolder = path;

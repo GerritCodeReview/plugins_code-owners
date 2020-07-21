@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -45,6 +47,7 @@ public class CodeOwners {
    *     Optional#empty()}
    */
   public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey) {
+    requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey);
