@@ -14,8 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.restapi.Response;
@@ -58,15 +60,28 @@ public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> 
       throws RestApiException, PermissionBackendException, IOException {
     projectResource.getProjectState().checkStatePermitsRead();
 
+    boolean isDisabled = codeOwnersPluginConfiguration.isDisabled(projectResource.getNameKey());
+    ImmutableList<BranchNameKey> disabledBranches = getDisabledBranches(projectResource);
+
     String backendId =
         CodeOwnerBackendId.getBackendId(
             codeOwnersPluginConfiguration.getBackend(projectResource.getNameKey()).getClass());
     ImmutableMap<BranchNameKey, String> backendIdsPerBranch =
         getBackendIdsPerBranch(projectResource);
+
     RequiredApproval requiredApproval =
         codeOwnersPluginConfiguration.getRequiredApproval(projectResource.getNameKey());
     return Response.ok(
-        CodeOwnerProjectConfigJson.format(backendId, backendIdsPerBranch, requiredApproval));
+        CodeOwnerProjectConfigJson.format(
+            isDisabled, disabledBranches, backendId, backendIdsPerBranch, requiredApproval));
+  }
+
+  private ImmutableList<BranchNameKey> getDisabledBranches(ProjectResource projectResource)
+      throws RestApiException, PermissionBackendException, IOException {
+    return listBranches.get().apply(projectResource).value().stream()
+        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref))
+        .filter(codeOwnersPluginConfiguration::isDisabled)
+        .collect(toImmutableList());
   }
 
   private ImmutableMap<BranchNameKey, String> getBackendIdsPerBranch(

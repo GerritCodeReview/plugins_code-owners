@@ -143,6 +143,9 @@ order is random.
   ]
 ```
 
+If the code owners functionality is disabled for the branch '405 Method Not
+Allowed' is returned.
+
 ## <a id="change-endpoints"> Change Endpoints
 
 ### <a id="get-code-owner-status"> Get Code Owner Status
@@ -201,6 +204,9 @@ The code owner statuses are returned as a
     ]
   }
 ```
+
+If the code owners functionality is disabled for the branch '405 Method Not
+Allowed' is returned.
 
 ## <a id="revision-endpoints"> Revision Endpoints
 
@@ -262,10 +268,11 @@ The `CodeOwnerInfo` entity contains information about a code owner.
 The `CodeOwnerProjectConfigInfo` entity describes the code owner project
 configuration.
 
-| Field Name | Description |
-| ---------- | ----------- |
-| `backend`  | The code owner backend configuration as [BackendInfo](#backend-info) entity.
-| `required_approval` | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval.
+| Field Name |          | Description |
+| ---------- | -------- | ----------- |
+| `status`   | optional | The code owner status configuration as [CodeOwnersStatusInfo](#code-owners-status-info) entity. Contains information about whether the code owners functionality is disabled for the project or for any branch. Not set if the code owners functionality is neither disabled for the project nor for any branch.
+| `backend`  || The code owner backend configuration as [BackendInfo](#backend-info) entity.
+| `required_approval` || The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval.
 
 ---
 
@@ -294,6 +301,15 @@ in a change.
 | ------------------ | ----------- |
 | `patch_set_number` | The number of the patch set for which the code owner statuses are returned.
 | `file_code_owner_statuses` | List of the code owner statuses for the files in the change as [FileCodeOwnerStatusInfo](#file-code-owner-status-info) entities, sorted by new path, then old path.
+
+### <a id="code-owners-status-info"> CodeOwnersStatusInfo
+The `CodeOwnersStatusInfo` contains information about whether the code owners
+functionality is disabled for a project or for any branch.
+
+| Field Name |         | Description |
+| ---------- | ------- | ----------- |
+| `disabled` | optinal | Whether the code owners functionality is disabled for the project. If `true` the code owners API is disabled and submitting changes doesn't require code owner approvals. Not set if `false`.
+| `disabled_branches` | optional | Branches for which the code owners functionality is disabled. Configurations for non-existing and non-visible branches are omitted. Not set if the `disabled` field is `true` or if no branch specific status configuration is returned.
 
 ### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
 The `FileCodeOwnerStatusInfo` entity describes the code owner statuses for a

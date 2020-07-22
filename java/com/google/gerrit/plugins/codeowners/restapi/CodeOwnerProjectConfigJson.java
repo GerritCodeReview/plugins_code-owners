@@ -14,14 +14,18 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import java.util.Map;
@@ -29,17 +33,39 @@ import java.util.Map;
 public class CodeOwnerProjectConfigJson {
 
   static CodeOwnerProjectConfigInfo format(
+      boolean isDisabled,
+      ImmutableList<BranchNameKey> disabledBranches,
       String backendId,
       ImmutableMap<BranchNameKey, String> backendIdsPerBranch,
       RequiredApproval requiredApproval) {
     CodeOwnerProjectConfigInfo info = new CodeOwnerProjectConfigInfo();
-    info.backend = format(backendId, backendIdsPerBranch);
-    info.requiredApproval = format(requiredApproval);
+    info.status = formatStatusInfo(isDisabled, disabledBranches);
+    info.backend = formatBackendInfo(backendId, backendIdsPerBranch);
+    info.requiredApproval = formatRequiredApprovalInfo(requiredApproval);
     return info;
   }
 
   @VisibleForTesting
-  static BackendInfo format(
+  @Nullable
+  static CodeOwnersStatusInfo formatStatusInfo(
+      boolean isDisabled, ImmutableList<BranchNameKey> disabledBranches) {
+    requireNonNull(disabledBranches, "disabledBranches");
+
+    if (!isDisabled && disabledBranches.isEmpty()) {
+      return null;
+    }
+
+    CodeOwnersStatusInfo info = new CodeOwnersStatusInfo();
+    info.disabled = isDisabled ? true : null;
+    if (!isDisabled && !disabledBranches.isEmpty()) {
+      info.disabledBranches =
+          disabledBranches.stream().map(BranchNameKey::branch).collect(toImmutableList());
+    }
+    return info;
+  }
+
+  @VisibleForTesting
+  static BackendInfo formatBackendInfo(
       String backendId, ImmutableMap<BranchNameKey, String> backendIdsPerBranch) {
     requireNonNull(backendId, "backendId");
     requireNonNull(backendIdsPerBranch, "backendIdsPerBranch");
@@ -57,7 +83,7 @@ public class CodeOwnerProjectConfigJson {
   }
 
   @VisibleForTesting
-  static RequiredApprovalInfo format(RequiredApproval requiredApproval) {
+  static RequiredApprovalInfo formatRequiredApprovalInfo(RequiredApproval requiredApproval) {
     requireNonNull(requiredApproval, "requiredApproval");
 
     RequiredApprovalInfo info = new RequiredApprovalInfo();
