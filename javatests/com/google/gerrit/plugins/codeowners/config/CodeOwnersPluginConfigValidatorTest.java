@@ -58,6 +58,80 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
   }
 
   @Test
+  public void setDisabledForProject() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setBoolean(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, null, StatusConfig.KEY_DISABLED, true);
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isTrue();
+  }
+
+  @Test
+  public void configureDisabledBranch() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        StatusConfig.KEY_DISABLED_BRANCH,
+        "refs/heads/master");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
+  @Test
+  public void cannotSetInvalidValueForDisabledForProject() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        StatusConfig.KEY_DISABLED,
+        "INVALID");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            "Disabled value 'INVALID' that is configured in code-owners.config"
+                + " (parameter codeOwners.disabled) is invalid.");
+  }
+
+  @Test
+  public void cannotConfigureInvalidDisabledBranch() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        StatusConfig.KEY_DISABLED_BRANCH,
+        "^refs/heads/[");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            "Disabled branch '^refs/heads/[' that is configured in code-owners.config (parameter"
+                + " codeOwners.disabledBranch) is invalid: Unclosed character class");
+  }
+
+  @Test
   public void configureBackendForProject() throws Exception {
     fetchRefsMetaConfig();
 

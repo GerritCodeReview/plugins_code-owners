@@ -37,12 +37,7 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.util.Providers;
 import java.util.Optional;
-import org.eclipse.jgit.junit.TestRepository;
-import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -59,6 +54,192 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         plugin.getSysInjector().getInstance(CodeOwnersPluginConfiguration.class);
     codeOwnerBackends =
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
+  }
+
+  @Test
+  public void cannotCheckForNullProjectIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnersPluginConfiguration.isDisabled((Project.NameKey) null));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotCheckForNullBranchIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnersPluginConfiguration.isDisabled((BranchNameKey) null));
+    assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
+  }
+
+  @Test
+  public void cannotCheckIfCodeOwnersFunctionalityIsDisabledForNonExistingProject()
+      throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnersPluginConfiguration.isDisabled(Project.nameKey("non-existing-project")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "cannot get code-owners plugin config for non-existing project non-existing-project");
+  }
+
+  @Test
+  public void cannotCheckIfCodeOwnersFunctionalityIsDisabledForBranchOfNonExistingProject()
+      throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnersPluginConfiguration.isDisabled(
+                    BranchNameKey.create(Project.nameKey("non-existing-project"), "master")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "cannot get code-owners plugin config for non-existing project non-existing-project");
+  }
+
+  @Test
+  public void checkIfCodeOwnersFunctionalityIsDisabledForNonExistingBranch() throws Exception {
+    assertThat(
+            codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "non-existing")))
+        .isFalse();
+  }
+
+  @Test
+  public void checkIfCodeOwnersFunctionalityIsDisabledForProjectWithEmptyConfig() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isFalse();
+  }
+
+  @Test
+  public void checkIfCodeOwnersFunctionalityIsDisabledForBranchWithEmptyConfig() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
+  public void codeOwnersFunctionalityIsDisabledForProject() throws Exception {
+    disableCodeOwnersForProject(project);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isTrue();
+  }
+
+  @Test
+  public void codeOwnersFunctionalityIsDisabledForBranchIfItIsDisabledForProject()
+      throws Exception {
+    disableCodeOwnersForProject(project);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
+  @Test
+  public void codeOwnersFunctionalityIsDisabledForBranch_exactRef() throws Exception {
+    configureDisabledBranch(project, "refs/heads/master");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isTrue();
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "other")))
+        .isFalse();
+  }
+
+  @Test
+  public void codeOwnersFunctionalityIsDisabledForBranch_refPattern() throws Exception {
+    configureDisabledBranch(project, "refs/heads/*");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isTrue();
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "other")))
+        .isTrue();
+    assertThat(
+            codeOwnersPluginConfiguration.isDisabled(
+                BranchNameKey.create(project, RefNames.REFS_META)))
+        .isFalse();
+  }
+
+  @Test
+  public void codeOwnersFunctionalityIsDisabledForBranch_regularExpression() throws Exception {
+    configureDisabledBranch(project, "^refs/heads/.*");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isTrue();
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "other")))
+        .isTrue();
+    assertThat(
+            codeOwnersPluginConfiguration.isDisabled(
+                BranchNameKey.create(project, RefNames.REFS_META)))
+        .isFalse();
+  }
+
+  @Test
+  public void codeOwnersFunctionalityIsDisabledForBranch_invalidRegularExpression()
+      throws Exception {
+    configureDisabledBranch(project, "^refs/heads/[");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
+  public void disabledIsInheritedFromParentProject() throws Exception {
+    disableCodeOwnersForProject(allProjects);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isTrue();
+  }
+
+  @Test
+  public void inheritedDisabledAlsoCountsForBranch() throws Exception {
+    disableCodeOwnersForProject(allProjects);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
+  @Test
+  public void inheritedDisabledValueIsIgnoredIfInvalid() throws Exception {
+    configureDisabled(project, "invalid");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isFalse();
+  }
+
+  @Test
+  public void inheritedDisabledValueIsIgnoredForBranchIfInvalid() throws Exception {
+    configureDisabled(project, "invalid");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
+  public void disabledForOtherProjectHasNoEffect() throws Exception {
+    Project.NameKey otherProject = projectOperations.newProject().create();
+    disableCodeOwnersForProject(otherProject);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isFalse();
+  }
+
+  @Test
+  public void disabledBranchForOtherProjectHasNoEffect() throws Exception {
+    Project.NameKey otherProject = projectOperations.newProject().create();
+    configureDisabledBranch(otherProject, "refs/heads/master");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
+  public void disabledBranchIsInheritedFromParentProject() throws Exception {
+    configureDisabledBranch(allProjects, "refs/heads/master");
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
+  @Test
+  public void inheritedDisabledCanBeOverridden() throws Exception {
+    disableCodeOwnersForProject(allProjects);
+    enableCodeOwnersForProject(project);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
+  public void inheritedDisabledBranchCanBeOverridden() throws Exception {
+    configureDisabledBranch(allProjects, "refs/heads/master");
+    enableCodeOwnersForAllBranches(project);
+    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+        .isFalse();
   }
 
   @Test
@@ -447,38 +628,35 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     assertThat(requiredApproval.value()).isEqualTo(1);
   }
 
+  private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, disabled);
+  }
+
+  private void configureDisabledBranch(Project.NameKey project, String disabledBranch)
+      throws Exception {
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
+  }
+
+  private void enableCodeOwnersForProject(Project.NameKey project) throws Exception {
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+  }
+
+  private void enableCodeOwnersForAllBranches(Project.NameKey project) throws Exception {
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, "");
+  }
+
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
     configureBackend(project, null, backendName);
   }
 
   private void configureBackend(
       Project.NameKey project, @Nullable String branch, String backendName) throws Exception {
-    setConfig(project, branch, BackendConfig.KEY_BACKEND, backendName);
+    setCodeOwnersConfig(project, branch, BackendConfig.KEY_BACKEND, backendName);
   }
 
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
-    setConfig(project, null, RequiredApproval.KEY_REQUIRED_APPROVAL, requiredApproval);
-  }
-
-  private void setConfig(Project.NameKey project, String subsection, String key, String value)
-      throws Exception {
-    Config codeOwnersConfig = new Config();
-    codeOwnersConfig.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value);
-    try (TestRepository<Repository> testRepo =
-        new TestRepository<>(repoManager.openRepository(project))) {
-      Ref ref = testRepo.getRepository().exactRef(RefNames.REFS_CONFIG);
-      RevCommit head = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      testRepo.update(
-          RefNames.REFS_CONFIG,
-          testRepo
-              .commit()
-              .parent(head)
-              .message("Configure code owner backend")
-              .add("code-owners.config", codeOwnersConfig.toText()));
-    }
-    projectCache.evict(project);
+    setCodeOwnersConfig(project, null, RequiredApproval.KEY_REQUIRED_APPROVAL, requiredApproval);
   }
 
   private AutoCloseable registerTestBackend() {

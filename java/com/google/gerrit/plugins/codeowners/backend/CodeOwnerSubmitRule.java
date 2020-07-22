@@ -22,6 +22,7 @@ import com.google.gerrit.entities.SubmitRecord;
 import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.rules.SubmitRule;
@@ -50,10 +51,14 @@ class CodeOwnerSubmitRule implements SubmitRule {
           .setType("code-owners")
           .build();
 
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
 
   @Inject
-  CodeOwnerSubmitRule(CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
+  CodeOwnerSubmitRule(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
   }
 
@@ -61,6 +66,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
   public Optional<SubmitRecord> evaluate(ChangeData changeData) {
     try {
       requireNonNull(changeData, "changeData");
+
+      if (codeOwnersPluginConfiguration.isDisabled(changeData.change().getDest())) {
+        return Optional.empty();
+      }
+
       return Optional.of(getSubmitRecord(changeData.notes()));
     } catch (Throwable t) {
       String errorMessage = "Failed to evaluate code owner statuses";

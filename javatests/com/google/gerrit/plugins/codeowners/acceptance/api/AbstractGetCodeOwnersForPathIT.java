@@ -545,4 +545,20 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             () -> queryCodeOwners(getCodeOwnersApi().query().withLimit(-1), "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
   }
+
+  @Test
+  public void getCodeOwnersIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    disableCodeOwnersForProject(project);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
+  }
 }
