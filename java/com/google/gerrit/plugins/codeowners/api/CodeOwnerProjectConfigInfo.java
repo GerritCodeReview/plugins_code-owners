@@ -14,16 +14,19 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.config.FactoryModule;
+/**
+ * Representation of the code owner project configuration in the REST API.
+ *
+ * <p>This class determines the JSON format of code owner project configuration in the REST API.
+ */
+public class CodeOwnerProjectConfigInfo {
+  /** The code owner backend configuration. */
+  public BackendInfo backend;
 
-/** Guice module that binds the Java extension API for the code-owners plugin. */
-public class ApiModule extends FactoryModule {
-  @Override
-  protected void configure() {
-    factory(CodeOwnerConfigsInBranchImpl.Factory.class);
-    factory(CodeOwnersInBranchImpl.Factory.class);
-    factory(CodeOwnersInChangeImpl.Factory.class);
-    factory(ChangeCodeOwnersImpl.Factory.class);
-    factory(ProjectCodeOwnersImpl.Factory.class);
-  }
+  /**
+   * The approval that is required from code owners to approve the files in a change.
+   *
+   * <p>Defines which approval counts as code owner approval.
+   */
+  public RequiredApprovalInfo requiredApproval;
 }

@@ -6,6 +6,44 @@ This page describes the code owners REST endpoints that are added by the
 Please also take note of the general information on the
 [REST API](../../../Documentation/rest-api.html).
 
+## <a id="project-endpoints">Project Endpoints
+
+### <a id="get-code-owner-project-config">Get Code Owner Project Config
+_'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/code_owners.project_config'_
+
+Gets the code owner project configuration.
+
+As a response a [CodeOwnerProjectConfigInfo](#code-owner-project-config-info)
+entity is returned that describes the code owner project configuration.
+
+#### Request
+
+```
+  GET /projects/foo%2Fbar/code_owners.project_config HTTP/1.0
+```
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "backend": {
+      "id": "find-owners",
+      "ids_by_branch": {
+        "refs/heads/experimental": "proto"
+      }
+    },
+    "required_approval": {
+      "label": "Code-Review",
+      "value": 1
+    }
+  }
+```
+
 ## <a id="branch-endpoints">Branch Endpoints
 
 ### <a id="get-code-owner-config">Get Code Owner Config
@@ -189,6 +227,16 @@ The path may or may not exist in the branch.
 
 ## <a id="json-entities"> JSON Entities
 
+### <a id="backend-info"> BackendInfo
+The `BackendInfo` entity describes the code owner backend configuration.
+
+| Field Name      |          | Description |
+| --------------- | -------- | ----------- |
+| `id`            || ID of the code owner backend that is configured for the project.
+| `ids_by_branch` | optional | IDs of the code owner backends that are configured for individual branches as map of full branch names to code owner backend IDs. Only contains entries for branches for which a code owner backend is configured that differs from the backend that is configured for the project (see `id` field). Configurations for non-existing and non-visible branches are omitted. Not set if no branch specific backend configuration is returned.
+
+---
+
 ### <a id="code-owner-config-info"> CodeOwnerConfigInfo
 The `CodeOwnerConfigInfo` entity contains information about a code owner config
 for a path.
@@ -207,6 +255,17 @@ The `CodeOwnerInfo` entity contains information about a code owner.
 | Field Name  |          | Description |
 | ----------- | -------- | ----------- |
 | `account`   | optional | The account of the code owner as an [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entity. At the moment the `account` field is always set, but it's marked as optional as in the future we may also return groups as code owner and then the `account` field would be unset.
+
+---
+
+### <a id="code-owner-project-config-info"> CodeOwnerProjectConfigInfo
+The `CodeOwnerProjectConfigInfo` entity describes the code owner project
+configuration.
+
+| Field Name | Description |
+| ---------- | ----------- |
+| `backend`  | The code owner backend configuration as [BackendInfo](#backend-info) entity.
+| `required_approval` | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval.
 
 ---
 
@@ -254,6 +313,18 @@ in a change.
 | ------------------ | ----------- |
 | `path` | The path to which the code owner status applies.
 | `status` | The code owner status for the path. Can be 'INSUFFICIENT_REVIEWERS' (the path needs a code owner approval, but none of its code owners is currently a reviewer of the change), `PENDING` (a code owner of this path has been added as reviewer, but no code owner approval for this path has been given yet) or `APPROVED` (the path has been approved by a code owner or a code owners override is present).
+
+---
+
+### <a id="required-approval-info"> RequiredApprovalInfo
+The `RequiredApprovalInfo` entity describes the approval that is required from
+code owners to approve the files in a change. The required approval defines
+which approval counts as code owner approval.
+
+| Field Name | Description |
+| ---------- | ----------- |
+| `label`    | The name of label on which an approval from a code owner is required.
+| `value`    | The voting value that is required on the label.
 
 ---
 

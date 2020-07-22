@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 import static com.google.gerrit.server.change.ChangeResource.CHANGE_KIND;
 import static com.google.gerrit.server.change.RevisionResource.REVISION_KIND;
 import static com.google.gerrit.server.project.BranchResource.BRANCH_KIND;
+import static com.google.gerrit.server.project.ProjectResource.PROJECT_KIND;
 
 import com.google.gerrit.extensions.registration.DynamicMap;
 
@@ -39,5 +40,7 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
     get(CodeOwnersInChangeCollection.PathResource.PATH_KIND).to(GetCodeOwnersForPathInChange.class);
 
     get(CHANGE_KIND, "code_owners.status").to(GetCodeOwnerStatus.class);
+
+    get(PROJECT_KIND, "code_owners.project_config").to(GetCodeOwnerProjectConfig.class);
   }
 }
