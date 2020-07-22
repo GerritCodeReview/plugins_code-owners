@@ -45,7 +45,7 @@ public class TestPathExpressions {
    * @param fileType the file type
    */
   public String matchFileTypeInCurrentFolder(String fileType) {
-    CodeOwnerBackend defaultBackend = backendConfig.getDefault();
+    CodeOwnerBackend defaultBackend = backendConfig.getDefaultBackend();
     PathExpressionMatcher pathExpressionMatcher =
         defaultBackend
             .getPathExpressionMatcher()

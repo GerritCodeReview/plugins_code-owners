@@ -47,59 +47,62 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetForBranchWithNullPluginConfig() throws Exception {
+  public void cannotGetBackendForBranchWithNullPluginConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> backendConfig.getForBranch(null, BranchNameKey.create(project, "master")));
+            () -> backendConfig.getBackendForBranch(null, BranchNameKey.create(project, "master")));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
-  public void cannotGetForBranchForNullBranch() throws Exception {
+  public void cannotGetBackendForBranchForNullBranch() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> backendConfig.getForBranch(new Config(), null));
+            NullPointerException.class,
+            () -> backendConfig.getBackendForBranch(new Config(), null));
     assertThat(npe).hasMessageThat().isEqualTo("branch");
   }
 
   @Test
-  public void getForBranchWhenBackendIsNotSet() throws Exception {
-    assertThat(backendConfig.getForBranch(new Config(), BranchNameKey.create(project, "master")))
+  public void getBackendForBranchWhenBackendIsNotSet() throws Exception {
+    assertThat(
+            backendConfig.getBackendForBranch(
+                new Config(), BranchNameKey.create(project, "master")))
         .isEmpty();
   }
 
   @Test
-  public void getForBranch() throws Exception {
+  public void getBackendForBranch() throws Exception {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS,
         "refs/heads/master",
         KEY_BACKEND,
         CodeOwnerBackendId.FIND_OWNERS.getBackendId());
-    assertThat(backendConfig.getForBranch(cfg, BranchNameKey.create(project, "master")))
+    assertThat(backendConfig.getBackendForBranch(cfg, BranchNameKey.create(project, "master")))
         .value()
         .isInstanceOf(FindOwnersBackend.class);
   }
 
   @Test
-  public void getForBranchShortName() throws Exception {
+  public void getBackendForBranchShortName() throws Exception {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, "master", KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
-    assertThat(backendConfig.getForBranch(cfg, BranchNameKey.create(project, "master")))
+    assertThat(backendConfig.getBackendForBranch(cfg, BranchNameKey.create(project, "master")))
         .value()
         .isInstanceOf(FindOwnersBackend.class);
   }
 
   @Test
-  public void cannotGetForBranchIfConfigIsInvalid() throws Exception {
+  public void cannotGetBackendForBranchIfConfigIsInvalid() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, "master", KEY_BACKEND, "INVALID");
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () -> backendConfig.getForBranch(cfg, BranchNameKey.create(project, "master")));
+            () -> backendConfig.getBackendForBranch(cfg, BranchNameKey.create(project, "master")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -111,43 +114,45 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetForProjectWithNullPluginConfig() throws Exception {
+  public void cannotGetBackendForProjectWithNullPluginConfig() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> backendConfig.getForProject(null, project));
+        assertThrows(
+            NullPointerException.class, () -> backendConfig.getBackendForProject(null, project));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
-  public void cannotGetForProjectForNullProject() throws Exception {
+  public void cannotGetBackendForProjectForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> backendConfig.getForProject(new Config(), null));
+            NullPointerException.class,
+            () -> backendConfig.getBackendForProject(new Config(), null));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
   @Test
-  public void getForProjectWhenBackendIsNotSet() throws Exception {
-    assertThat(backendConfig.getForProject(new Config(), project)).isEmpty();
+  public void getBackendForProjectWhenBackendIsNotSet() throws Exception {
+    assertThat(backendConfig.getBackendForProject(new Config(), project)).isEmpty();
   }
 
   @Test
-  public void getForProject() throws Exception {
+  public void getBackendForProject() throws Exception {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, null, KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
-    assertThat(backendConfig.getForProject(cfg, project))
+    assertThat(backendConfig.getBackendForProject(cfg, project))
         .value()
         .isInstanceOf(FindOwnersBackend.class);
   }
 
   @Test
-  public void cannotGetForProjectIfConfigIsInvalid() throws Exception {
+  public void cannotGetBackendForProjectIfConfigIsInvalid() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_BACKEND, "INVALID");
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () -> backendConfig.getForProject(cfg, project));
+            () -> backendConfig.getBackendForProject(cfg, project));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -159,21 +164,22 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getDefault() throws Exception {
-    assertThat(backendConfig.getDefault()).isInstanceOf(FindOwnersBackend.class);
+  public void getDefaultBackend() throws Exception {
+    assertThat(backendConfig.getDefaultBackend()).isInstanceOf(FindOwnersBackend.class);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = ProtoBackend.ID)
-  public void getConfiguredDefault() throws Exception {
-    assertThat(backendConfig.getDefault()).isInstanceOf(ProtoBackend.class);
+  public void getConfiguredDefaultBackend() throws Exception {
+    assertThat(backendConfig.getDefaultBackend()).isInstanceOf(ProtoBackend.class);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "INVALID")
-  public void cannotGetDefaultIfConfigIsInvalid() throws Exception {
+  public void cannotGetDefaultBackendIfConfigIsInvalid() throws Exception {
     InvalidPluginConfigurationException exception =
-        assertThrows(InvalidPluginConfigurationException.class, () -> backendConfig.getDefault());
+        assertThrows(
+            InvalidPluginConfigurationException.class, () -> backendConfig.getDefaultBackend());
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
