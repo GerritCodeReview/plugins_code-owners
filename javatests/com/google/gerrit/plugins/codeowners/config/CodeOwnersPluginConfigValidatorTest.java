@@ -149,8 +149,7 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(2);
   }

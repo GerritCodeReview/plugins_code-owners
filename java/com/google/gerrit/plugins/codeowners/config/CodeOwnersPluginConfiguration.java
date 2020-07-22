@@ -120,17 +120,13 @@ public class CodeOwnersPluginConfiguration {
    *
    * <p>The first code owner required approval that exists counts and the evaluation is stopped.
    *
-   * @param branchNameKey project and branch for which the configured required approval should be
-   *     returned
+   * @param project project for which the configured required approval should be returned
    * @return the {@link RequiredApproval} that should be used
    */
-  public RequiredApproval getRequiredApproval(BranchNameKey branchNameKey) {
-    Config pluginConfig = getPluginConfig(branchNameKey.project());
+  public RequiredApproval getRequiredApproval(Project.NameKey project) {
+    Config pluginConfig = getPluginConfig(project);
 
-    ProjectState projectState =
-        projectCache
-            .get(branchNameKey.project())
-            .orElseThrow(illegalState(branchNameKey.project()));
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
 
     // check if a project specific required approval is configured
     Optional<RequiredApproval> requiredApproval =
