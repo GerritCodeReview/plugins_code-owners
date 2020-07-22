@@ -89,7 +89,7 @@ public class CodeOwnersPluginConfiguration {
 
     // check if a branch specific backend is configured
     Optional<CodeOwnerBackend> codeOwnerBackend =
-        backendConfig.getForBranch(pluginConfig, branchNameKey);
+        backendConfig.getBackendForBranch(pluginConfig, branchNameKey);
     if (codeOwnerBackend.isPresent()) {
       return codeOwnerBackend.get();
     }
@@ -120,13 +120,13 @@ public class CodeOwnersPluginConfiguration {
 
     // check if a project specific backend is configured
     Optional<CodeOwnerBackend> codeOwnerBackend =
-        backendConfig.getForProject(pluginConfig, project);
+        backendConfig.getBackendForProject(pluginConfig, project);
     if (codeOwnerBackend.isPresent()) {
       return codeOwnerBackend.get();
     }
 
     // fall back to the default backend
-    return backendConfig.getDefault();
+    return backendConfig.getDefaultBackend();
   }
 
   /**
