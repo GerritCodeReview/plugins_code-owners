@@ -50,4 +50,21 @@ public enum CodeOwnerBackendId {
   public Class<? extends CodeOwnerBackend> getCodeOwnerBackendClass() {
     return codeOwnerBackendClass;
   }
+
+  /**
+   * Returns the ID for the given code owner backend.
+   *
+   * <p>Throws {@link IllegalStateException} if the given code owner backend is not known.
+   *
+   * @param codeOwnerBackendClass the code owner backend class for which the ID should be returned.
+   */
+  public static String getBackendId(Class<? extends CodeOwnerBackend> codeOwnerBackendClass) {
+    for (CodeOwnerBackendId codeOwnerBackendId : values()) {
+      if (codeOwnerBackendId.getCodeOwnerBackendClass().equals(codeOwnerBackendClass)) {
+        return codeOwnerBackendId.getBackendId();
+      }
+    }
+    throw new IllegalStateException(
+        String.format("unknown code owner backend: %s", codeOwnerBackendClass.getName()));
+  }
 }

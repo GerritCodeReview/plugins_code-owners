@@ -39,12 +39,12 @@ import org.eclipse.jgit.lib.Config;
  */
 @AutoValue
 public abstract class RequiredApproval {
-  @VisibleForTesting static final String KEY_REQUIRED_APPROVAL = "requiredApproval";
+  @VisibleForTesting public static final String KEY_REQUIRED_APPROVAL = "requiredApproval";
 
   /** By default a {@code Code-Review+1} vote from a code owner approves the file. */
-  @VisibleForTesting static final String DEFAULT_LABEL = "Code-Review";
+  @VisibleForTesting public static final String DEFAULT_LABEL = "Code-Review";
 
-  @VisibleForTesting static final short DEFAULT_VALUE = 1;
+  @VisibleForTesting public static final short DEFAULT_VALUE = 1;
 
   /** The label on which an approval from a code owner is required. */
   public abstract LabelType labelType();
@@ -233,7 +233,7 @@ public abstract class RequiredApproval {
   }
 
   @VisibleForTesting
-  static RequiredApproval create(LabelType labelType, short vote) {
+  public static RequiredApproval create(LabelType labelType, short vote) {
     return new AutoValue_RequiredApproval(labelType, vote);
   }
 }
