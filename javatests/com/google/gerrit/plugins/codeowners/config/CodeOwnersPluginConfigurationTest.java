@@ -262,7 +262,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
             IllegalStateException.class,
             () ->
                 codeOwnersPluginConfiguration.getRequiredApproval(
-                    BranchNameKey.create(Project.nameKey("non-existing-project"), "master")));
+                    Project.nameKey("non-existing-project")));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -270,20 +270,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getRequiredApprovalForNonExistingBranch() throws Exception {
-    assertThat(
-            codeOwnersPluginConfiguration.getRequiredApproval(
-                BranchNameKey.create(project, "non-existing")))
-        .isEqualTo(
-            RequiredApproval.createDefault(
-                projectCache.get(project).orElseThrow(illegalState(project))));
-  }
-
-  @Test
   public void getDefaultRequiredApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
-    assertThat(
-            codeOwnersPluginConfiguration.getRequiredApproval(
-                BranchNameKey.create(project, "master")))
+    assertThat(codeOwnersPluginConfiguration.getRequiredApproval(project))
         .isEqualTo(
             RequiredApproval.createDefault(
                 projectCache.get(project).orElseThrow(illegalState(project))));
@@ -292,8 +280,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
   public void getConfiguredDefaultRequireApproval() throws Exception {
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(2);
   }
@@ -305,9 +292,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () ->
-                codeOwnersPluginConfiguration.getRequiredApproval(
-                    BranchNameKey.create(project, "master")));
+            () -> codeOwnersPluginConfiguration.getRequiredApproval(project));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -326,9 +311,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () ->
-                codeOwnersPluginConfiguration.getRequiredApproval(
-                    BranchNameKey.create(project, "master")));
+            () -> codeOwnersPluginConfiguration.getRequiredApproval(project));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -346,9 +329,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () ->
-                codeOwnersPluginConfiguration.getRequiredApproval(
-                    BranchNameKey.create(project, "master")));
+            () -> codeOwnersPluginConfiguration.getRequiredApproval(project));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -360,8 +341,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   public void getRequiredApprovalConfiguredOnProjectLevel() throws Exception {
     configureRequiredApproval(project, "Code-Review+2");
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(2);
   }
@@ -371,8 +351,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void requiredApprovalConfiguredOnProjectLevelOverridesDefaultRequiredApproval()
       throws Exception {
     configureRequiredApproval(project, "Code-Review+2");
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(2);
   }
@@ -380,8 +359,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   public void requiredApprovalIsInheritedFromParentProject() throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+2");
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(2);
   }
@@ -390,8 +368,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.backend", value = FindOwnersBackend.ID)
   public void inheritedRequiredApprovalOverridesDefaultRequiredApproval() throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+2");
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(2);
   }
@@ -400,8 +377,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void projectLevelRequiredApprovalOverridesInheritedRequiredApproval() throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+1");
     configureRequiredApproval(project, "Code-Review+2");
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(2);
   }
@@ -414,9 +390,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () ->
-                codeOwnersPluginConfiguration.getRequiredApproval(
-                    BranchNameKey.create(project, "master")));
+            () -> codeOwnersPluginConfiguration.getRequiredApproval(project));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -436,9 +410,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () ->
-                codeOwnersPluginConfiguration.getRequiredApproval(
-                    BranchNameKey.create(project, "master")));
+            () -> codeOwnersPluginConfiguration.getRequiredApproval(project));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -457,9 +429,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () ->
-                codeOwnersPluginConfiguration.getRequiredApproval(
-                    BranchNameKey.create(project, "master")));
+            () -> codeOwnersPluginConfiguration.getRequiredApproval(project));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -472,8 +442,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void projectLevelRequiredApprovalForOtherProjectHasNoEffect() throws Exception {
     Project.NameKey otherProject = projectOperations.newProject().create();
     configureRequiredApproval(otherProject, "Code-Review+2");
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(BranchNameKey.create(project, "master"));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(1);
   }
