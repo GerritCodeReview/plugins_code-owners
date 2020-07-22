@@ -20,6 +20,17 @@ package com.google.gerrit.plugins.codeowners.api;
  * <p>This class determines the JSON format of code owner project configuration in the REST API.
  */
 public class CodeOwnerProjectConfigInfo {
+  /**
+   * The code owners status configuration.
+   *
+   * <p>Contains information about whether the code owners functionality is disabled for the project
+   * or for any branch.
+   *
+   * <p>Not set if the code owners functionality is neither disabled for the project nor for any
+   * branch.
+   */
+  public CodeOwnersStatusInfo status;
+
   /** The code owner backend configuration. */
   public BackendInfo backend;
 

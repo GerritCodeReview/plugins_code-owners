@@ -32,6 +32,27 @@ import org.junit.Test;
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}. */
 public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   @Test
+  public void changeIsSubmittableIfCodeOwnersFuctionalityIsDisabled() throws Exception {
+    disableCodeOwnersForProject(project);
+
+    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+
+    // Approve by a non-code-owner.
+    approve(changeId);
+
+    // Check the submittable flag.
+    ChangeInfo changeInfo = gApi.changes().id(changeId).get(ListChangesOption.SUBMITTABLE);
+    assertThat(changeInfo.submittable).isTrue();
+
+    // Check that there is no submit requirement.
+    assertThat(changeInfo.requirements).isEmpty();
+
+    // Submit the change.
+    gApi.changes().id(changeId).current().submit();
+    assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
   public void changeWithInsufficentReviewersIsNotSubmittable() throws Exception {
     String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
 
