@@ -124,21 +124,21 @@ public class BackendConfig {
     return ImmutableList.copyOf(validationMessages);
   }
 
-  Optional<CodeOwnerBackend> getForBranch(Config pluginConfig, BranchNameKey branch) {
+  Optional<CodeOwnerBackend> getBackendForBranch(Config pluginConfig, BranchNameKey branch) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(branch, "branch");
 
     // check for branch specific backend by full branch name
     Optional<CodeOwnerBackend> backend =
-        getForBranch(pluginConfig, branch.project(), branch.branch());
+        getBackendForBranch(pluginConfig, branch.project(), branch.branch());
     if (!backend.isPresent()) {
       // check for branch specific backend by short branch name
-      backend = getForBranch(pluginConfig, branch.project(), branch.shortName());
+      backend = getBackendForBranch(pluginConfig, branch.project(), branch.shortName());
     }
     return backend;
   }
 
-  private Optional<CodeOwnerBackend> getForBranch(
+  private Optional<CodeOwnerBackend> getBackendForBranch(
       Config pluginConfig, Project.NameKey project, String branch) {
     String backendName = pluginConfig.getString(SECTION_CODE_OWNERS, branch, KEY_BACKEND);
     if (backendName == null) {
@@ -165,7 +165,7 @@ public class BackendConfig {
                 }));
   }
 
-  Optional<CodeOwnerBackend> getForProject(Config pluginConfig, Project.NameKey project) {
+  Optional<CodeOwnerBackend> getBackendForProject(Config pluginConfig, Project.NameKey project) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(project, "project");
 
@@ -190,7 +190,7 @@ public class BackendConfig {
   }
 
   @VisibleForTesting
-  public CodeOwnerBackend getDefault() {
+  public CodeOwnerBackend getDefaultBackend() {
     return lookupBackend(defaultBackendName)
         .orElseThrow(
             () -> {

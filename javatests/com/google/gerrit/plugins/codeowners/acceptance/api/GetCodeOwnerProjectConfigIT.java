@@ -80,7 +80,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.backend.id)
-        .isEqualTo(CodeOwnerBackendId.getBackendId(backendConfig.getDefault().getClass()));
+        .isEqualTo(CodeOwnerBackendId.getBackendId(backendConfig.getDefaultBackend().getClass()));
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.label)
         .isEqualTo(RequiredApproval.DEFAULT_LABEL);
@@ -90,7 +90,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getConfigWithConfiguredBackend() throws Exception {
-    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefault());
+    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefaultBackend());
     configureBackend(project, otherBackendId);
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
@@ -99,7 +99,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getConfigWithConfiguredBranchSpecificBackend() throws Exception {
-    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefault());
+    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefaultBackend());
     configureBackend(project, "master", otherBackendId);
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
@@ -110,7 +110,8 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void branchSpecificBackendIsOmittedIfItMatchesTheRepositoryBackend() throws Exception {
-    String backendId = CodeOwnerBackendId.getBackendId(backendConfig.getDefault().getClass());
+    String backendId =
+        CodeOwnerBackendId.getBackendId(backendConfig.getDefaultBackend().getClass());
     configureBackend(project, "master", backendId);
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
@@ -120,7 +121,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void branchSpecificBackendIsOmittedForNonExistingBranch() throws Exception {
-    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefault());
+    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefaultBackend());
     configureBackend(project, "non-existing", otherBackendId);
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
@@ -136,7 +137,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         .add(block(Permission.READ).ref("refs/heads/master").group(REGISTERED_USERS))
         .update();
 
-    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefault());
+    String otherBackendId = getOtherCodeOwnerBackend(backendConfig.getDefaultBackend());
     configureBackend(project, "master", otherBackendId);
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
