@@ -21,6 +21,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfig
 import com.google.gerrit.plugins.codeowners.api.ChangeCodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersFactory;
+import com.google.gerrit.plugins.codeowners.api.ProjectCodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.testing.ConfigSuite;
@@ -73,6 +74,7 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
   protected CodeOwnerConfigsFactory codeOwnerConfigsApiFactory;
   protected CodeOwnersFactory codeOwnersApiFactory;
   protected ChangeCodeOwnersFactory changeCodeOwnersApiFactory;
+  protected ProjectCodeOwnersFactory projectCodeOwnersApiFactory;
 
   @Before
   public void baseSetup() throws Exception {
@@ -81,5 +83,7 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
     codeOwnerConfigsApiFactory = plugin.getSysInjector().getInstance(CodeOwnerConfigsFactory.class);
     codeOwnersApiFactory = plugin.getSysInjector().getInstance(CodeOwnersFactory.class);
     changeCodeOwnersApiFactory = plugin.getSysInjector().getInstance(ChangeCodeOwnersFactory.class);
+    projectCodeOwnersApiFactory =
+        plugin.getSysInjector().getInstance(ProjectCodeOwnersFactory.class);
   }
 }

@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
+import java.util.Arrays;
 
 /**
  * Enum of all code owner backend IDs.
@@ -49,5 +50,26 @@ public enum CodeOwnerBackendId {
   /** Gets the class that implements the code owner backend. */
   public Class<? extends CodeOwnerBackend> getCodeOwnerBackendClass() {
     return codeOwnerBackendClass;
+  }
+
+  /**
+   * Returns the ID for the given code owner backend.
+   *
+   * <p>Throws {@link IllegalStateException} if the given code owner backend is not known.
+   *
+   * @param codeOwnerBackendClass the code owner backend class for which the ID should be returned.
+   */
+  public static String getBackendId(Class<? extends CodeOwnerBackend> codeOwnerBackendClass) {
+    return Arrays.stream(values())
+        .filter(
+            codeOwnerBackendId ->
+                codeOwnerBackendId.getCodeOwnerBackendClass().equals(codeOwnerBackendClass))
+        .map(CodeOwnerBackendId::getBackendId)
+        .findAny()
+        .orElseThrow(
+            () ->
+                new IllegalStateException(
+                    String.format(
+                        "unknown code owner backend: %s", codeOwnerBackendClass.getName())));
   }
 }

@@ -14,16 +14,14 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.config.FactoryModule;
+import com.google.gerrit.extensions.restapi.RestApiException;
 
-/** Guice module that binds the Java extension API for the code-owners plugin. */
-public class ApiModule extends FactoryModule {
-  @Override
-  protected void configure() {
-    factory(CodeOwnerConfigsInBranchImpl.Factory.class);
-    factory(CodeOwnersInBranchImpl.Factory.class);
-    factory(CodeOwnersInChangeImpl.Factory.class);
-    factory(ChangeCodeOwnersImpl.Factory.class);
-    factory(ProjectCodeOwnersImpl.Factory.class);
-  }
+/**
+ * Project-level Java API of the code-owners plugin.
+ *
+ * <p>To create an instance for a project use {@link ProjectCodeOwnersFactory}.
+ */
+public interface ProjectCodeOwners {
+  /** Returns the code owner project configuration. */
+  CodeOwnerProjectConfigInfo getConfig() throws RestApiException;
 }
