@@ -14,12 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.common.ChangeType;
+import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
@@ -75,5 +78,21 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
+  }
+
+  @Test
+  public void cannotGetCodeOwnerStatusIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    disableCodeOwnersForProject(project);
+    String changeId = createChange().getChangeId();
+    MethodNotAllowedException exception =
+        assertThrows(
+            MethodNotAllowedException.class,
+            () -> changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "code owners functionality is disabled for branch refs/heads/master in project %s",
+                project.get()));
   }
 }
