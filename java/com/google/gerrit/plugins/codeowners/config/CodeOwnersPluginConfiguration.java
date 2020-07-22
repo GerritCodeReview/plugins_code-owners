@@ -118,11 +118,11 @@ public class CodeOwnersPluginConfiguration {
    *   <li>hard-coded default required approval
    * </ul>
    *
-   * <p>The first code owner backend configuration that exists counts and the evaluation is stopped.
+   * <p>The first code owner required approval that exists counts and the evaluation is stopped.
    *
-   * @param branchNameKey project and branch for which the configured code owner backend should be
+   * @param branchNameKey project and branch for which the configured required approval should be
    *     returned
-   * @return the {@link CodeOwnerBackend} that should be used
+   * @return the {@link RequiredApproval} that should be used
    */
   public RequiredApproval getRequiredApproval(BranchNameKey branchNameKey) {
     Config pluginConfig = getPluginConfig(branchNameKey.project());
