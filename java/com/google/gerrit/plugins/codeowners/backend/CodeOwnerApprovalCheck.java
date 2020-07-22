@@ -128,7 +128,7 @@ public class CodeOwnerApprovalCheck {
     requireNonNull(changeNotes, "changeNotes");
 
     RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getChange().getDest());
+        codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getChange().getProject());
 
     BranchNameKey branch = changeNotes.getChange().getDest();
     ObjectId revision = getDestBranchRevision(changeNotes.getChange());
