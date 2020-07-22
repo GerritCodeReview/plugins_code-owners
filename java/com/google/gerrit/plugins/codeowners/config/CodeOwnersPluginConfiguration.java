@@ -15,11 +15,13 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
@@ -49,6 +51,7 @@ public class CodeOwnersPluginConfiguration {
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
   private final ProjectCache projectCache;
+  private final StatusConfig statusConfig;
   private final BackendConfig backendConfig;
 
   @Inject
@@ -56,11 +59,93 @@ public class CodeOwnersPluginConfiguration {
       @PluginName String pluginName,
       PluginConfigFactory pluginConfigFactory,
       ProjectCache projectCache,
+      StatusConfig statusConfig,
       BackendConfig backendConfig) {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
     this.projectCache = projectCache;
+    this.statusConfig = statusConfig;
     this.backendConfig = backendConfig;
+  }
+
+  /**
+   * Checks that the code owners functionality is enabled for the given branch.
+   *
+   * @param branchNameKey the project and branch for which it should be checked that the code owners
+   *     functionality is enabled
+   * @throws MethodNotAllowedException thrown if the code owners functionality is disabled for the
+   *     given branch
+   */
+  public void checkEnabled(BranchNameKey branchNameKey) throws MethodNotAllowedException {
+    requireNonNull(branchNameKey, "branchNameKey");
+
+    if (isDisabled(branchNameKey)) {
+      throw new MethodNotAllowedException(
+          String.format(
+              "code owners functionality is disabled for branch %s in project %s",
+              branchNameKey.branch(), branchNameKey.project().get()));
+    }
+  }
+
+  /**
+   * Whether the code owners functionality is disabled for the given branch.
+   *
+   * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
+   * exist the call fails with {@link IllegalStateException}.
+   *
+   * <p>The configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>disabled configuration for the branch (with inheritance)
+   *   <li>disabled configuration for the project (with inheritance)
+   *   <li>hard-coded default (not disabled)
+   * </ul>
+   *
+   * <p>The first disabled configuration that exists counts and the evaluation is stopped.
+   *
+   * @param branchNameKey the branch and project for which it should be checked whether the code
+   *     owners functionality is disabled
+   * @return {@code true} if the code owners functionality is disabled for the given branch,
+   *     otherwise {@code false}
+   */
+  public boolean isDisabled(BranchNameKey branchNameKey) {
+    requireNonNull(branchNameKey, "branchNameKey");
+
+    Config pluginConfig = getPluginConfig(branchNameKey.project());
+
+    boolean isDisabled = statusConfig.isDisabledForBranch(pluginConfig, branchNameKey);
+    if (isDisabled) {
+      return true;
+    }
+
+    return isDisabled(branchNameKey.project());
+  }
+
+  /**
+   * Whether the code owners functionality is disabled for the given project.
+   *
+   * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
+   * exist the call fails with {@link IllegalStateException}.
+   *
+   * <p>The configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>disabled configuration for the project (with inheritance)
+   *   <li>hard-coded default (not disabled)
+   * </ul>
+   *
+   * <p>The first disabled configuration that exists counts and the evaluation is stopped.
+   *
+   * @param project the project for which it should be checked whether the code owners functionality
+   *     is disabled
+   * @return {@code true} if the code owners functionality is disabled for the given project,
+   *     otherwise {@code false}
+   */
+  public boolean isDisabled(Project.NameKey project) {
+    requireNonNull(project, "project");
+
+    Config pluginConfig = getPluginConfig(project);
+    return statusConfig.isDisabledForProject(pluginConfig, project);
   }
 
   /**

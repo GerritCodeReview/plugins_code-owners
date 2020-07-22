@@ -21,13 +21,21 @@ import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import java.nio.file.Path;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
+import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 /**
  * Base class for code owner integration tests.
@@ -103,5 +111,29 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
             ImmutableMap.<String, String>of(),
             changeId);
     push.to("refs/for/master").assertOkStatus();
+  }
+
+  protected void disableCodeOwnersForProject(Project.NameKey project) throws Exception {
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "true");
+  }
+
+  protected void setCodeOwnersConfig(
+      Project.NameKey project, String subsection, String key, String value) throws Exception {
+    Config codeOwnersConfig = new Config();
+    codeOwnersConfig.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value);
+    try (TestRepository<Repository> testRepo =
+        new TestRepository<>(repoManager.openRepository(project))) {
+      Ref ref = testRepo.getRepository().exactRef(RefNames.REFS_CONFIG);
+      RevCommit head = testRepo.getRevWalk().parseCommit(ref.getObjectId());
+      testRepo.update(
+          RefNames.REFS_CONFIG,
+          testRepo
+              .commit()
+              .parent(head)
+              .message("Configure code owner backend")
+              .add("code-owners.config", codeOwnersConfig.toText()));
+    }
+    projectCache.evict(project);
   }
 }
