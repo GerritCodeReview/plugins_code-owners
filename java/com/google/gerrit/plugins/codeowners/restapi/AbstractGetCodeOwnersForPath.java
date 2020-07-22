@@ -23,6 +23,7 @@ import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
@@ -30,6 +31,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
 import com.google.gerrit.server.permissions.GlobalPermission;
@@ -53,6 +55,7 @@ public abstract class AbstractGetCodeOwnersForPath {
   @VisibleForTesting public static final int DEFAULT_LIMIT = 10;
 
   private final PermissionBackend permissionBackend;
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final CodeOwnerJson.Factory codeOwnerJsonFactory;
@@ -87,10 +90,12 @@ public abstract class AbstractGetCodeOwnersForPath {
 
   protected AbstractGetCodeOwnersForPath(
       PermissionBackend permissionBackend,
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       CodeOwnerJson.Factory codeOwnerJsonFactory) {
     this.permissionBackend = permissionBackend;
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.codeOwnerJsonFactory = codeOwnerJsonFactory;
@@ -99,7 +104,10 @@ public abstract class AbstractGetCodeOwnersForPath {
   }
 
   protected Response<List<CodeOwnerInfo>> applyImpl(AbstractPathResource rsrc)
-      throws AuthException, BadRequestException, PermissionBackendException {
+      throws AuthException, BadRequestException, MethodNotAllowedException,
+          PermissionBackendException {
+    codeOwnersPluginConfiguration.checkEnabled(rsrc.getBranch());
+
     parseHexOptions();
     validateLimit();
 

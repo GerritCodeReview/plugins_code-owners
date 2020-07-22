@@ -29,6 +29,7 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
@@ -544,5 +545,18 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             BadRequestException.class,
             () -> queryCodeOwners(getCodeOwnersApi().query().withLimit(-1), "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
+  }
+
+  @Test
+  public void cannotGetCodeOwnersIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    disableCodeOwnersForProject(project);
+    MethodNotAllowedException exception =
+        assertThrows(MethodNotAllowedException.class, () -> queryCodeOwners("/foo/bar/baz.md"));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "code owners functionality is disabled for branch refs/heads/master in project %s",
+                project.get()));
   }
 }
