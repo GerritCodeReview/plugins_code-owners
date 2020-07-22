@@ -76,4 +76,22 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
   }
+
+  @Test
+  public void getCodeOwnerStatusIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    disableCodeOwnersForProject(project);
+    String path = "foo/bar.baz";
+    String changeId = createChange("Change Adding A File", path, "file content").getChangeId();
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
 }

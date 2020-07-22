@@ -50,6 +50,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
   private final ProjectCache projectCache;
   private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
+  private final StatusConfig statusConfig;
   private final BackendConfig backendConfig;
 
   @Inject
@@ -58,11 +59,13 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       ProjectCache projectCache,
       GitRepositoryManager repoManager,
       ChangedFiles changedFiles,
+      StatusConfig statusConfig,
       BackendConfig backendConfig) {
     this.pluginName = pluginName;
     this.projectCache = projectCache;
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
+    this.statusConfig = statusConfig;
     this.backendConfig = backendConfig;
   }
 
@@ -142,6 +145,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       throws CommitValidationException {
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
     validationMessages.addAll(backendConfig.validateProjectLevelConfig(fileName, cfg));
+    validationMessages.addAll(statusConfig.validateProjectLevelConfig(fileName, cfg));
     RequiredApproval.validateProjectLevelConfig(projectState, fileName, cfg)
         .ifPresent(validationMessages::add);
     if (!validationMessages.isEmpty()) {

@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.SubmitRecordSubject.assertThatOptional;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,13 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
     codeOwnerSubmitRule = plugin.getSysInjector().getInstance(CodeOwnerSubmitRule.class);
+  }
+
+  @Test
+  public void emptyIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    disableCodeOwnersForProject(project);
+    ChangeData changeData = createChange().getChange();
+    assertThat(codeOwnerSubmitRule.evaluate(changeData)).isEmpty();
   }
 
   @Test
