@@ -67,4 +67,10 @@ public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
         .value()
         .correspondsTo(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
   }
+
+  @Test
+  public void getCodeOwnerConfigIfCodeOwnersFunctionalityIsDisabled() throws Exception {
+    disableCodeOwnersForProject(project);
+    testGetCodeOwnerConfig(true);
+  }
 }

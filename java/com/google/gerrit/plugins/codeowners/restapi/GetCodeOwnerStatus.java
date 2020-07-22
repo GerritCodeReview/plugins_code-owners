@@ -23,6 +23,7 @@ import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalCheck;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
@@ -51,16 +52,22 @@ import java.io.IOException;
  */
 @Singleton
 public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
 
   @Inject
-  public GetCodeOwnerStatus(CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
+  public GetCodeOwnerStatus(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
   }
 
   @Override
   public Response<CodeOwnerStatusInfo> apply(ChangeResource changeResource)
       throws RestApiException, IOException, PermissionBackendException {
+    codeOwnersPluginConfiguration.checkEnabled(changeResource.getChange().getDest());
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
         codeOwnerApprovalCheck.getFileStatuses(changeResource.getNotes()).collect(toImmutableSet());
     return Response.ok(
