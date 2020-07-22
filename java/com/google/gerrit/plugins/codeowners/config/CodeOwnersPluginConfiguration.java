@@ -44,7 +44,7 @@ import org.eclipse.jgit.lib.Config;
  */
 @Singleton
 public class CodeOwnersPluginConfiguration {
-  @VisibleForTesting static final String SECTION_CODE_OWNERS = "codeOwners";
+  @VisibleForTesting public static final String SECTION_CODE_OWNERS = "codeOwners";
 
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
@@ -64,7 +64,7 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
-   * Returns the configured {@link CodeOwnerBackend}.
+   * Returns the configured {@link CodeOwnerBackend} for the given branch.
    *
    * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
    * exist the call fails with {@link IllegalStateException}.
@@ -82,7 +82,7 @@ public class CodeOwnersPluginConfiguration {
    *
    * @param branchNameKey project and branch for which the configured code owner backend should be
    *     returned
-   * @return the {@link CodeOwnerBackend} that should be used
+   * @return the {@link CodeOwnerBackend} that should be used for the branch
    */
   public CodeOwnerBackend getBackend(BranchNameKey branchNameKey) {
     Config pluginConfig = getPluginConfig(branchNameKey.project());
@@ -94,8 +94,33 @@ public class CodeOwnersPluginConfiguration {
       return codeOwnerBackend.get();
     }
 
+    return getBackend(branchNameKey.project());
+  }
+
+  /**
+   * Returns the configured {@link CodeOwnerBackend} for the given project.
+   *
+   * <p>Callers must ensure that the project exists. If the project doesn't exist the call fails
+   * with {@link IllegalStateException}.
+   *
+   * <p>The code owner backend configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>backend configuration for project (with inheritance)
+   *   <li>default backend (first globally configured backend, then hard-coded default backend)
+   * </ul>
+   *
+   * <p>The first code owner backend configuration that exists counts and the evaluation is stopped.
+   *
+   * @param project project for which the configured code owner backend should be returned
+   * @return the {@link CodeOwnerBackend} that should be used for the project
+   */
+  public CodeOwnerBackend getBackend(Project.NameKey project) {
+    Config pluginConfig = getPluginConfig(project);
+
     // check if a project specific backend is configured
-    codeOwnerBackend = backendConfig.getForProject(pluginConfig, branchNameKey.project());
+    Optional<CodeOwnerBackend> codeOwnerBackend =
+        backendConfig.getForProject(pluginConfig, project);
     if (codeOwnerBackend.isPresent()) {
       return codeOwnerBackend.get();
     }

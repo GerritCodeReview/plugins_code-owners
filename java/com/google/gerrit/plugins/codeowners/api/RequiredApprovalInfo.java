@@ -14,16 +14,18 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.config.FactoryModule;
+/**
+ * Representation of the configured required approval in the REST API.
+ *
+ * <p>This class determines the JSON format of configured required approval in the REST API.
+ *
+ * <p>The required approval is the approval that is required from code owners to approve the files
+ * in a change. This means it defines which approval counts as code owner approval.
+ */
+public class RequiredApprovalInfo {
+  /** The name of label on which an approval from a code owner is required. */
+  public String label;
 
-/** Guice module that binds the Java extension API for the code-owners plugin. */
-public class ApiModule extends FactoryModule {
-  @Override
-  protected void configure() {
-    factory(CodeOwnerConfigsInBranchImpl.Factory.class);
-    factory(CodeOwnersInBranchImpl.Factory.class);
-    factory(CodeOwnersInChangeImpl.Factory.class);
-    factory(ChangeCodeOwnersImpl.Factory.class);
-    factory(ProjectCodeOwnersImpl.Factory.class);
-  }
+  /** The voting value that is required on the label. */
+  public short value;
 }
