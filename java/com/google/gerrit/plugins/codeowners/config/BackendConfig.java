@@ -124,6 +124,21 @@ public class BackendConfig {
     return ImmutableList.copyOf(validationMessages);
   }
 
+  /**
+   * Gets the code owner backend that is configured for the given branch.
+   *
+   * <p>The code owner backend configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>backend configuration for branch by full name (with inheritance)
+   *   <li>backend configuration for branch by short name (with inheritance)
+   * </ul>
+   *
+   * @param pluginConfig the plugin config from which the code owner backend should be read.
+   * @param branch the project and branch for which the configured code owner backend should be read
+   * @return the code owner backend that is configured for the given branch, {@link
+   *     Optional#empty()} if there is no branch-specific code owner backend configuration
+   */
   Optional<CodeOwnerBackend> getBackendForBranch(Config pluginConfig, BranchNameKey branch) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(branch, "branch");
@@ -165,6 +180,14 @@ public class BackendConfig {
                 }));
   }
 
+  /**
+   * Gets the code owner backend that is configured for the given project.
+   *
+   * @param pluginConfig the plugin config from which the code owner backend should be read.
+   * @param project the project for which the configured code owner backend should be read
+   * @return the code owner backend that is configured for the given project, {@link
+   *     Optional#empty()} if there is no project-specific code owner backend configuration
+   */
   Optional<CodeOwnerBackend> getBackendForProject(Config pluginConfig, Project.NameKey project) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(project, "project");
@@ -189,6 +212,7 @@ public class BackendConfig {
                 }));
   }
 
+  /** Gets the default code owner backend. */
   @VisibleForTesting
   public CodeOwnerBackend getDefaultBackend() {
     return lookupBackend(defaultBackendName)
