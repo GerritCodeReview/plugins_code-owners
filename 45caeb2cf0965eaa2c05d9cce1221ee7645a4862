@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c630cbee_0aa840cd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractPathResource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-23T13:12:31Z",
+      "side": 1,
+      "message": "I think these are 2 different things:\n\n* null in CodeOwnerConfigFile#load means that we want to load the current revision of the branch\n* ObjectId.zeroId() here means that the branch doesn\u0027t exist\n\nActually I think it should never happen here that the branch doesn\u0027t exist and hence branchResource.getRevision() should never return null. I\u0027ve changed the code to fail with a proper message now if this assumption is wrong.",
+      "parentUuid": "388a1b21_b7e9a242",
+      "range": {
+        "startLine": 64,
+        "startChar": 14,
+        "endLine": 64,
+        "endChar": 31
+      },
+      "revId": "45caeb2cf0965eaa2c05d9cce1221ee7645a4862",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "0f7b8c1c_02ea9b3c",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "45caeb2cf0965eaa2c05d9cce1221ee7645a4862",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd374330_58cfd63c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-23T13:12:31Z",
+      "side": 1,
+      "message": "Thanks, you are right that this assertion is not needed. Dropped it.",
+      "parentUuid": "0f7b8c1c_02ea9b3c",
+      "range": {
+        "startLine": 130,
+        "startChar": 4,
+        "endLine": 134,
+        "endChar": 40
+      },
+      "revId": "45caeb2cf0965eaa2c05d9cce1221ee7645a4862",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
