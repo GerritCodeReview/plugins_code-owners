@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "388a1b21_b7e9a242",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractPathResource.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2020-07-23T12:55:31Z",
+      "side": 1,
+      "message": "This is assigned here as ObjectId.zeroId, then when you visit the hierarchy in CodeOwnerConfigFile#load you check for if it\u0027s null.\nShould this be assigned as null here?",
+      "range": {
+        "startLine": 64,
+        "startChar": 14,
+        "endLine": 64,
+        "endChar": 31
+      },
+      "revId": "45caeb2cf0965eaa2c05d9cce1221ee7645a4862",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0f7b8c1c_02ea9b3c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 134,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2020-07-23T12:55:31Z",
+      "side": 1,
+      "message": "config from revision 2 will also evaluate to true here. I think you can modify or remove this assert.",
+      "range": {
+        "startLine": 130,
+        "startChar": 4,
+        "endLine": 134,
+        "endChar": 40
+      },
+      "revId": "45caeb2cf0965eaa2c05d9cce1221ee7645a4862",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
