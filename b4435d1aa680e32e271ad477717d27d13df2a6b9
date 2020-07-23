@@ -104,6 +104,24 @@
       "revId": "b4435d1aa680e32e271ad477717d27d13df2a6b9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "74f073d9_fa08cd09",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-23T12:31:39Z",
+      "side": 1,
+      "message": "Actually I did:\n\"CI failure is unrelated now.\" on PS1",
+      "parentUuid": "dbccd8e7_f6749684",
+      "revId": "b4435d1aa680e32e271ad477717d27d13df2a6b9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
