@@ -46,13 +46,16 @@ entity is returned that describes the code owner project configuration.
 
 ## <a id="branch-endpoints">Branch Endpoints
 
-### <a id="get-code-owner-config">Get Code Owner Config
+### <a id="get-code-owner-config">[EXPERIMENTAL] Get Code Owner Config
 _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.config/[\{path\}](#path)'_
 
 Gets a code owner config for a path in a branch.
 
 The code owner config is returned as
 [CodeOwnerConfigInfo](#code-owner-config-info) entity
+
+This REST endpoint is experimental which means that the response format is
+likely still going to be changed.
 
 #### Request
 
