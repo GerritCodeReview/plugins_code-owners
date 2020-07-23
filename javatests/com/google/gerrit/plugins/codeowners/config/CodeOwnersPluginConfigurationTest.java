@@ -27,6 +27,7 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
+import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -626,6 +627,35 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
     assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.value()).isEqualTo(1);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "false")
+  public void checkExperimentalRestEndpointsEnabledThrowsExceptionIfDisabled() throws Exception {
+    MethodNotAllowedException exception =
+        assertThrows(
+            MethodNotAllowedException.class,
+            () -> codeOwnersPluginConfiguration.checkExperimentalRestEndpointsEnabled());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("experimental code owners REST endpoints are disabled");
+  }
+
+  @Test
+  public void experimentalRestEndpointsNotEnabled() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
+  public void experimentalRestEndpointsEnabled() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "invalid")
+  public void experimentalRestEndpointsNotEnabled_invalidConfig() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
   }
 
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {

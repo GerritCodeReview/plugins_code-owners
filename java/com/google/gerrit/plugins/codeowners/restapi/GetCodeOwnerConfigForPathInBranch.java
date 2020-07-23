@@ -14,11 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigsInBranchCollection.PathResource;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -39,15 +41,21 @@ import java.util.Optional;
 @Singleton
 public class GetCodeOwnerConfigForPathInBranch
     implements RestReadView<CodeOwnerConfigsInBranchCollection.PathResource> {
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwners codeOwners;
 
   @Inject
-  GetCodeOwnerConfigForPathInBranch(CodeOwners codeOwners) {
+  GetCodeOwnerConfigForPathInBranch(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration, CodeOwners codeOwners) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwners = codeOwners;
   }
 
   @Override
-  public Response<CodeOwnerConfigInfo> apply(PathResource rsrc) throws IOException {
+  public Response<CodeOwnerConfigInfo> apply(PathResource rsrc)
+      throws MethodNotAllowedException, IOException {
+    codeOwnersPluginConfiguration.checkExperimentalRestEndpointsEnabled();
+
     Optional<CodeOwnerConfig> codeOwnerConfig =
         codeOwners.get(rsrc.getCodeOwnerConfigKey(), rsrc.getRevision());
     return codeOwnerConfig
