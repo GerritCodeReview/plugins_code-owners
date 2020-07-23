@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.rest.util.RestApiCallHelper;
 import com.google.gerrit.acceptance.rest.util.RestCall;
 import com.google.gerrit.extensions.restapi.IdString;
@@ -52,6 +53,7 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
       ImmutableList.of(RestCall.get("/projects/%s/code-owners~code_owners.project_config"));
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void branchCodeOwnerConfigsEndpoints() throws Exception {
     RestApiCallHelper.execute(
         adminRestSession,
