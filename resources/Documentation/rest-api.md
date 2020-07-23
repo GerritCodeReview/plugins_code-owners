@@ -51,6 +51,9 @@ _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html
 
 Gets a code owner config for a path in a branch.
 
+The code owner config is returned as
+[CodeOwnerConfigInfo](#code-owner-config-info) entity
+
 #### Request
 
 ```
