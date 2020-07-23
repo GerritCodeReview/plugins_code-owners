@@ -33,6 +33,10 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default "Code-Review+1".
 
+<a id="pluginCodeOwnersEnableExperimentalRestEndpoints">plugin.@PLUGIN@.enableExperimentalRestEndpoints</a>
+:       Whether experimental REST endpoints are enabled.\
+        By default `false`.
+
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
 <a id="codeOwnersDisabled">codeOwners.disabled</a>
