@@ -32,6 +32,9 @@ import java.util.Optional;
  * /projects/<project-name>/branches/<branch-name>/code_owners.config/<path>} requests.
  *
  * <p>The path may or may not exist in the branch.
+ *
+ * <p><strong>Note:</strong> This REST endpoint is experimental which means that the response format
+ * is likely still going to be changed.
  */
 @Singleton
 public class GetCodeOwnerConfigForPathInBranch
