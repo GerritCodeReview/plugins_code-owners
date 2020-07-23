@@ -38,6 +38,7 @@ import org.junit.Test;
  */
 public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersTest {
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getCodeOwnersForInvalidPath() throws Exception {
     RestResponse r =
         adminRestSession.get(
@@ -52,6 +53,7 @@ public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersT
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void cannotGetCodeOwnerConfigIfPluginConfigurationIsInvalid() throws Exception {
     RestResponse r =
         adminRestSession.get(

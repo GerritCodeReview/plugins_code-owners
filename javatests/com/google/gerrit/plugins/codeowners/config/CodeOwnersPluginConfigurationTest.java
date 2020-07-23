@@ -643,6 +643,35 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     assertThat(requiredApproval.value()).isEqualTo(1);
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "false")
+  public void checkExperimentalRestEndpointsEnabledThrowsExceptionIfDisabled() throws Exception {
+    MethodNotAllowedException exception =
+        assertThrows(
+            MethodNotAllowedException.class,
+            () -> codeOwnersPluginConfiguration.checkExperimentalRestEndpointsEnabled());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("experimental code owners REST endpoints are disabled");
+  }
+
+  @Test
+  public void experimentalRestEndpointsNotEnabled() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
+  public void experimentalRestEndpointsEnabled() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "invalid")
+  public void experimentalRestEndpointsNotEnabled_invalidConfig() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
+  }
+
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
     setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, disabled);
   }
