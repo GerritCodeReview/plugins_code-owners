@@ -10,7 +10,7 @@ load(
     "gerrit_plugin",
 )
 load("//tools/bzl:js.bzl", "polygerrit_plugin")
-load("@npm_bazel_rollup//:index.bzl", "rollup_bundle")
+load("@npm//@bazel/rollup:index.bzl", "rollup_bundle")
 
 gerrit_plugin(
     name = "code-owners",
