@@ -18,6 +18,7 @@ import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
@@ -45,7 +46,12 @@ import org.eclipse.jgit.lib.Config;
  */
 @Singleton
 public class CodeOwnersPluginConfiguration {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   @VisibleForTesting public static final String SECTION_CODE_OWNERS = "codeOwners";
+
+  @VisibleForTesting
+  static final String KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS = "enableExperimentalRestEndpoints";
 
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
@@ -234,6 +240,35 @@ public class CodeOwnersPluginConfiguration {
 
     // fall back to hard-coded default required approval
     return RequiredApproval.createDefault(projectState);
+  }
+
+  /**
+   * Checks whether experimental REST endpoints are enabled.
+   *
+   * @throws MethodNotAllowedException thrown if experimental REST endpoints are disabled
+   */
+  public void checkExperimentalRestEndpointsEnabled() throws MethodNotAllowedException {
+    if (!areExperimentalRestEndpointsEnabled()) {
+      throw new MethodNotAllowedException("experimental code owners REST endpoints are disabled");
+    }
+  }
+
+  /** Whether experimental REST endpoints are enabled. */
+  public boolean areExperimentalRestEndpointsEnabled() {
+    try {
+      return pluginConfigFactory
+          .getFromGerritConfig(pluginName)
+          .getBoolean(KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS, false);
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().withCause(e).log(
+          "Value '%s' in gerrit.config (parameter plugin.%s.%s) is invalid.",
+          pluginConfigFactory
+              .getFromGerritConfig(pluginName)
+              .getString(KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS),
+          pluginName,
+          KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS);
+      return false;
+    }
   }
 
   /**
