@@ -33,6 +33,23 @@
       "revId": "b4435d1aa680e32e271ad477717d27d13df2a6b9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c99c7ba9_853a3f4f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
+      },
+      "writtenOn": "2020-07-23T12:15:42Z",
+      "side": 1,
+      "message": "\u003e Removed Verified-1 by Zuul (1094198)\n\nWhy Zuul vote was removed? ",
+      "revId": "b4435d1aa680e32e271ad477717d27d13df2a6b9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
