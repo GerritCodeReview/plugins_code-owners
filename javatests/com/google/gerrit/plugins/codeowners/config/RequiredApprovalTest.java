@@ -25,8 +25,8 @@ import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gerrit.common.data.LabelType;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.LabelValue;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;

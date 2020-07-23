@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Ints;
-import com.google.gerrit.common.data.LabelType;
+import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
