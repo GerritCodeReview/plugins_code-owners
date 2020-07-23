@@ -50,6 +50,24 @@
       "revId": "b4435d1aa680e32e271ad477717d27d13df2a6b9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7abdb38_851f6397",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-23T12:15:52Z",
+      "side": 1,
+      "message": "Patrick just submitted a change in core that moved a bunch of classes. We need to adapt to this now. Will upload a fix.",
+      "parentUuid": "2203bbf3_a4eb394d",
+      "revId": "b4435d1aa680e32e271ad477717d27d13df2a6b9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
