@@ -54,6 +54,9 @@ Gets a code owner config for a path in a branch.
 The code owner config is returned as
 [CodeOwnerConfigInfo](#code-owner-config-info) entity
 
+This REST endpoint is experimental which means that the response format is
+likely still going to be changed.
+
 #### Request
 
 ```
