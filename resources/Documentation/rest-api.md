@@ -55,7 +55,9 @@ The code owner config is returned as
 [CodeOwnerConfigInfo](#code-owner-config-info) entity
 
 This REST endpoint is experimental which means that the response format is
-likely still going to be changed.
+likely still going to be changed. It is only available if
+[experimental REST endpoints are enabled](config.html#pluginCodeOwnersEnableExperimentalRestEndpoints)
+in `gerrit.config`.
 
 #### Request
 

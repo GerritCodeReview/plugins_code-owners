@@ -14,8 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThatOptional;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -33,16 +37,19 @@ import org.junit.Test;
  */
 public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getNonExistingCodeOwnerConfig() throws Exception {
     assertThatOptional(codeOwnerConfigsApiFactory.branch(project, "master").get("/")).isEmpty();
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getCodeOwnerConfigForAbsolutePath() throws Exception {
     testGetCodeOwnerConfig(true);
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getCodeOwnerConfigForNonAbsolutePath() throws Exception {
     testGetCodeOwnerConfig(false);
   }
@@ -69,8 +76,21 @@ public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getCodeOwnerConfigIfCodeOwnersFunctionalityIsDisabled() throws Exception {
     disableCodeOwnersForProject(project);
     testGetCodeOwnerConfig(true);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "false")
+  public void cannotGetCodeOwnerConfigIfExperimentalRestEndpointsAreNotEnabled() throws Exception {
+    MethodNotAllowedException exception =
+        assertThrows(
+            MethodNotAllowedException.class,
+            () -> codeOwnerConfigsApiFactory.branch(project, "master").get("/foo/bar/"));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("experimental code owners REST endpoints are disabled");
   }
 }
