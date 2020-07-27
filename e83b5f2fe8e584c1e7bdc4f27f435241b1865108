@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "904844d1_4d12e993",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1030912
+      },
+      "writtenOn": "2020-07-27T13:08:33Z",
+      "side": 1,
+      "message": "Edwin already mentioned all important aspects. I\u0027m just providing some additional context on the checks plugin and our struggles with query options.\n\nWe use a ChangeAttribute [1] to return additional data as part of GetChange calls (QueryChanges, GetDetail). Thus, callers can decide whether they need the additional data or not. In the latter case, they can avoid unnecessary computations (-\u003e unchanged latencies for existing callers).\n\nThe issue with this approach, though, is that we need to send the correct attribute/option along when making the GetDetail call on the change page and the QueryChanges call on the dashboard. Our original plan was to use the frontend part of the plugin to provide the attribute/option. However, the frontend part of the plugins is not loaded yet when the calls occur. We didn\u0027t want to change this as waiting for the plugins to load would increase the latency of the dashboard or the change page. We also didn\u0027t want to introduce anything which would conflict with preloading.\n\nWe toyed with the idea of including plugin options with a page indication in index.html but didn\u0027t get further than discussing it as one of the possible solutions.\n\n[1] https://gerrit-review.googlesource.com/c/plugins/checks/+/218064",
+      "parentUuid": "6bdefa57_2e3c78ee",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "03eeb06a_ffc0cd08",
         "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerStatusInfo.java",
         "patchSetId": 6
