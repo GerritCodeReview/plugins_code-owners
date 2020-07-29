@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "e95dad9a_4f7ff480",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 6
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-29T06:31:21Z",
+      "side": 1,
+      "message": "That\u0027s an idea that we should reconsider at a later point in time. It might be worth it.",
+      "parentUuid": "cb1140c0_78bf13d8",
+      "range": {
+        "startLine": 69,
+        "startChar": 0,
+        "endLine": 70,
+        "endChar": 9
+      },
+      "revId": "e83b5f2fe8e584c1e7bdc4f27f435241b1865108",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "03eeb06a_ffc0cd08",
         "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerStatusInfo.java",
         "patchSetId": 6
