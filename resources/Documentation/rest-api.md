@@ -40,6 +40,10 @@ entity is returned that describes the code owner project configuration.
     "required_approval": {
       "label": "Code-Review",
       "value": 1
+    },
+    "override_approval": {
+      "label": "Owners-Override",
+      "value": 1
     }
   }
 ```
@@ -275,6 +279,7 @@ configuration.
 | `status`   | optional | The code owner status configuration as [CodeOwnersStatusInfo](#code-owners-status-info) entity. Contains information about whether the code owners functionality is disabled for the project or for any branch. Not set if the code owners functionality is neither disabled for the project nor for any branch.
 | `backend`  || The code owner backend configuration as [BackendInfo](#backend-info) entity.
 | `required_approval` || The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval.
+| `override_approval` | optional | The approval that is required to override the code owners submit check as [RequiredApprovalInfo](#required-approval-info) entity. If unset, overriding the code owners submit check is disabled.
 
 ---
 
@@ -335,13 +340,12 @@ in a change.
 ---
 
 ### <a id="required-approval-info"> RequiredApprovalInfo
-The `RequiredApprovalInfo` entity describes the approval that is required from
-code owners to approve the files in a change. The required approval defines
-which approval counts as code owner approval.
+The `RequiredApprovalInfo` entity describes an approval that is required for an
+action.
 
 | Field Name | Description |
 | ---------- | ----------- |
-| `label`    | The name of label on which an approval from a code owner is required.
+| `label`    | The name of label on which an approval is required.
 | `value`    | The voting value that is required on the label.
 
 ---

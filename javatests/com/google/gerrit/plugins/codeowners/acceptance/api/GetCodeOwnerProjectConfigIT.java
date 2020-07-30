@@ -33,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
 import com.google.inject.Inject;
 import org.eclipse.jgit.junit.TestRepository;
@@ -86,6 +87,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         .isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.value)
         .isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval).isNull();
   }
 
   @Test
@@ -154,6 +156,15 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.value).isEqualTo(2);
   }
 
+  @Test
+  public void getConfigWithConfiguredOverrideApproval() throws Exception {
+    configureOverrideApproval(project, "Code-Review+2");
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.label).isEqualTo("Code-Review");
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.value).isEqualTo(2);
+  }
+
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
     configureBackend(project, null, backendName);
   }
@@ -166,6 +177,11 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
     setConfig(project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
+  }
+
+  private void configureOverrideApproval(Project.NameKey project, String requiredApproval)
+      throws Exception {
+    setConfig(project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, requiredApproval);
   }
 
   private void setConfig(Project.NameKey project, String subsection, String key, String value)

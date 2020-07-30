@@ -27,25 +27,32 @@ import com.google.gerrit.server.project.ProjectState;
 import java.util.Optional;
 
 /**
- * Approval that is required from code owners to approve the files in a change.
+ * Approval that is required for an action.
  *
- * <p>Defines which approval counts as code owner approval.
+ * <p>A required approval is used to represent:
+ *
+ * <ul>
+ *   <li>the approval that is required from code owners to approve the files in a change (see {@link
+ *       RequiredApprovalConfig})
+ *   <li>the approval that is required to override the code owners submit check (see {@link
+ *       OverrideApprovalConfig})
+ * </ul>
  */
 @AutoValue
 public abstract class RequiredApproval {
-  /** The label on which an approval from a code owner is required. */
+  /** The label on which an approval is required. */
   public abstract LabelType labelType();
 
   /** The voting value that is required on the {@link #labelType()} . */
   public abstract short value();
 
   /**
-   * Whether the given patch set approval is a code owner approval.
+   * Whether the given patch set approval fulfills this required approval
    *
-   * @param patchSetApproval the patch set approval for which it should be checked whether it is a
-   *     code owner approval
+   * @param patchSetApproval the patch set approval for which it should be checked whether it is
+   *     fulfilled by this required approval
    */
-  public boolean isCodeOwnerApproval(PatchSetApproval patchSetApproval) {
+  public boolean isApprovedBy(PatchSetApproval patchSetApproval) {
     requireNonNull(patchSetApproval, "patchSetApproval");
     return labelType().getLabelId().equals(patchSetApproval.key().labelId())
         && patchSetApproval.value() >= value();
