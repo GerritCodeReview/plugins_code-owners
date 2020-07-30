@@ -20,33 +20,25 @@ import static com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.server.config.PluginConfig;
-import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
-import com.google.inject.Inject;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
+import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link RequiredApprovalConfig}. */
 public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
-  @Inject private PluginConfigFactory pluginConfigFactory;
+  private RequiredApprovalConfig requiredApprovalConfig;
 
-  @Test
-  public void cannotGetForProjectWithNullPluginName() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () -> RequiredApprovalConfig.getForProject(null, projectState, new Config()));
-    assertThat(npe).hasMessageThat().isEqualTo("pluginName");
+  @Before
+  public void setUpCodeOwnersPlugin() throws Exception {
+    requiredApprovalConfig = plugin.getSysInjector().getInstance(RequiredApprovalConfig.class);
   }
 
   @Test
@@ -54,7 +46,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> RequiredApprovalConfig.getForProject("code-owners", null, new Config()));
+            () -> requiredApprovalConfig.getForProject(null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("projectState");
   }
 
@@ -64,15 +56,14 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> RequiredApprovalConfig.getForProject("code-owners", projectState, null));
+            () -> requiredApprovalConfig.getForProject(projectState, null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
   public void getForProjectWhenRequiredApprovalIsNotSet() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    assertThat(RequiredApprovalConfig.getForProject("code-owners", projectState, new Config()))
-        .isEmpty();
+    assertThat(requiredApprovalConfig.getForProject(projectState, new Config())).isEmpty();
   }
 
   @Test
@@ -81,7 +72,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "Code-Review+2");
     Optional<RequiredApproval> requiredApproval =
-        RequiredApprovalConfig.getForProject("code-owners", projectState, cfg);
+        requiredApprovalConfig.getForProject(projectState, cfg);
     assertThat(requiredApproval).isPresent();
     assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.get().value()).isEqualTo(2);
@@ -95,7 +86,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () -> RequiredApprovalConfig.getForProject("code-owners", projectState, cfg));
+            () -> requiredApprovalConfig.getForProject(projectState, cfg));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -105,60 +96,26 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFromGlobalPluginConfigWithNullPluginConfigFactory() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () ->
-                RequiredApprovalConfig.getFromGlobalPluginConfig(
-                    null, "code-owners", projectState));
-    assertThat(npe).hasMessageThat().isEqualTo("pluginConfigFactory");
-  }
-
-  @Test
-  public void cannotGetFromGlobalPluginConfigWithNullPluginName() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () ->
-                RequiredApprovalConfig.getFromGlobalPluginConfig(
-                    pluginConfigFactory, null, projectState));
-    assertThat(npe).hasMessageThat().isEqualTo("pluginName");
-  }
-
-  @Test
   public void cannotGetFromGlobalPluginConfigForNullProjectState() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                RequiredApprovalConfig.getFromGlobalPluginConfig(
-                    pluginConfigFactory, "code-owners", null));
+            () -> requiredApprovalConfig.getFromGlobalPluginConfig(null));
     assertThat(npe).hasMessageThat().isEqualTo("projectState");
   }
 
   @Test
   public void getFromGlobalPluginConfigWhenRequiredApprovalIsNotSet() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    assertThat(
-            RequiredApprovalConfig.getFromGlobalPluginConfig(
-                pluginConfigFactory, "code-owners", projectState))
-        .isEmpty();
+    assertThat(requiredApprovalConfig.getFromGlobalPluginConfig(projectState)).isEmpty();
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
   public void getFromGlobalPluginConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    Config cfg = new Config();
-    cfg.setString("plugin", "code-owners", KEY_REQUIRED_APPROVAL, "Code-Review+2");
-    PluginConfigFactory pluginConfigFactory = mock(PluginConfigFactory.class);
-    when(pluginConfigFactory.getFromGerritConfig("code-owners"))
-        .thenReturn(new PluginConfig("code-owners", cfg));
     Optional<RequiredApproval> requiredApproval =
-        RequiredApprovalConfig.getFromGlobalPluginConfig(
-            pluginConfigFactory, "code-owners", projectState);
+        requiredApprovalConfig.getFromGlobalPluginConfig(projectState);
     assertThat(requiredApproval).isPresent();
     assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.get().value()).isEqualTo(2);
@@ -167,33 +124,27 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void createDefaultRequiresProjectState() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> RequiredApprovalConfig.createDefault(null));
+        assertThrows(NullPointerException.class, () -> requiredApprovalConfig.createDefault(null));
     assertThat(npe).hasMessageThat().isEqualTo("projectState");
   }
 
   @Test
   public void createDefault() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    RequiredApproval requiredApproval = RequiredApprovalConfig.createDefault(projectState);
+    RequiredApproval requiredApproval = requiredApprovalConfig.createDefault(projectState);
     assertThat(requiredApproval.labelType().getName())
         .isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
     assertThat(requiredApproval.value()).isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "INVALID")
   public void cannotGetFromGlobalPluginConfigIfConfigIsInvalid() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    Config cfg = new Config();
-    cfg.setString("plugin", "code-owners", KEY_REQUIRED_APPROVAL, "INVALID");
-    PluginConfigFactory pluginConfigFactory = mock(PluginConfigFactory.class);
-    when(pluginConfigFactory.getFromGerritConfig("code-owners"))
-        .thenReturn(new PluginConfig("code-owners", cfg));
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () ->
-                RequiredApprovalConfig.getFromGlobalPluginConfig(
-                    pluginConfigFactory, "code-owners", projectState));
+            () -> requiredApprovalConfig.getFromGlobalPluginConfig(projectState));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -209,7 +160,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                RequiredApprovalConfig.validateProjectLevelConfig(
+                requiredApprovalConfig.validateProjectLevelConfig(
                     null,
                     "code-owners.config",
                     new ProjectLevelConfig("code-owners.config", projectState)));
@@ -223,7 +174,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                RequiredApprovalConfig.validateProjectLevelConfig(
+                requiredApprovalConfig.validateProjectLevelConfig(
                     projectState,
                     null,
                     new ProjectLevelConfig("code-owners.config", projectState)));
@@ -237,7 +188,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                RequiredApprovalConfig.validateProjectLevelConfig(
+                requiredApprovalConfig.validateProjectLevelConfig(
                     projectState, "code-owners.config", null));
     assertThat(npe).hasMessageThat().isEqualTo("projectLevelConfig");
   }
@@ -246,7 +197,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
   public void validateEmptyProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     Optional<CommitValidationMessage> commitValidationMessage =
-        RequiredApprovalConfig.validateProjectLevelConfig(
+        requiredApprovalConfig.validateProjectLevelConfig(
             projectState,
             "code-owners.config",
             new ProjectLevelConfig("code-owners.config", projectState));
@@ -259,7 +210,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
     ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
     cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "Code-Review+2");
     Optional<CommitValidationMessage> commitValidationMessage =
-        RequiredApprovalConfig.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
+        requiredApprovalConfig.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
     assertThat(commitValidationMessage).isEmpty();
   }
 
@@ -269,7 +220,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
     ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
     cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "INVALID");
     Optional<CommitValidationMessage> commitValidationMessage =
-        RequiredApprovalConfig.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
+        requiredApprovalConfig.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
     assertThat(commitValidationMessage).isPresent();
     assertThat(commitValidationMessage.get().getType()).isEqualTo(ValidationMessage.Type.ERROR);
     assertThat(commitValidationMessage.get().getMessage())

@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -453,10 +452,10 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getDefaultRequiredApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getRequiredApproval(project))
-        .isEqualTo(
-            RequiredApprovalConfig.createDefault(
-                projectCache.get(project).orElseThrow(illegalState(project))));
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    assertThat(requiredApproval.labelType().getName())
+        .isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
+    assertThat(requiredApproval.value()).isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
   }
 
   @Test
