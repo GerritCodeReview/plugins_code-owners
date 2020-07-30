@@ -16,7 +16,6 @@ package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
@@ -24,13 +23,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.primitives.Ints;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.PatchSetApproval;
-import com.google.gerrit.server.config.PluginConfigFactory;
-import com.google.gerrit.server.git.validators.CommitValidationMessage;
-import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
 import java.util.Optional;
-import org.eclipse.jgit.lib.Config;
 
 /**
  * Approval that is required from code owners to approve the files in a change.
@@ -39,13 +33,6 @@ import org.eclipse.jgit.lib.Config;
  */
 @AutoValue
 public abstract class RequiredApproval {
-  @VisibleForTesting public static final String KEY_REQUIRED_APPROVAL = "requiredApproval";
-
-  /** By default a {@code Code-Review+1} vote from a code owner approves the file. */
-  @VisibleForTesting public static final String DEFAULT_LABEL = "Code-Review";
-
-  @VisibleForTesting public static final short DEFAULT_VALUE = 1;
-
   /** The label on which an approval from a code owner is required. */
   public abstract LabelType labelType();
 
@@ -70,92 +57,6 @@ public abstract class RequiredApproval {
   }
 
   /**
-   * Validates the required approval configuration in the given project level configuration.
-   *
-   * @param fileName the name of the config file
-   * @param projectLevelConfig the project level plugin configuration
-   * @return list of validation messages for validation errors, empty list if there are no
-   *     validation errors
-   */
-  static Optional<CommitValidationMessage> validateProjectLevelConfig(
-      ProjectState projectState, String fileName, ProjectLevelConfig projectLevelConfig) {
-    requireNonNull(projectState, "projectState");
-    requireNonNull(fileName, "fileName");
-    requireNonNull(projectLevelConfig, "projectLevelConfig");
-
-    String requiredApproval =
-        projectLevelConfig.get().getString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL);
-    if (requiredApproval != null) {
-      try {
-        RequiredApproval.parse(projectState, requiredApproval);
-      } catch (IllegalArgumentException | IllegalStateException e) {
-        return Optional.of(
-            new CommitValidationMessage(
-                String.format(
-                    "Required approval '%s' that is configured in %s (parameter %s.%s) is invalid: %s",
-                    requiredApproval,
-                    fileName,
-                    SECTION_CODE_OWNERS,
-                    KEY_REQUIRED_APPROVAL,
-                    e.getMessage()),
-                ValidationMessage.Type.ERROR));
-      }
-    }
-    return Optional.empty();
-  }
-
-  static Optional<RequiredApproval> getForProject(
-      String pluginName, ProjectState projectState, Config pluginConfig) {
-    requireNonNull(pluginName, "pluginName");
-    requireNonNull(projectState, "projectState");
-    requireNonNull(pluginConfig, "pluginConfig");
-    String requiredApproval =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL);
-    if (requiredApproval == null) {
-      return Optional.empty();
-    }
-
-    try {
-      return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
-    } catch (IllegalStateException | IllegalArgumentException e) {
-      throw new InvalidPluginConfigurationException(
-          pluginName,
-          String.format(
-              "Required approval '%s' that is configured in %s.config"
-                  + " (parameter %s.%s) is invalid: %s",
-              requiredApproval,
-              pluginName,
-              SECTION_CODE_OWNERS,
-              KEY_REQUIRED_APPROVAL,
-              e.getMessage()));
-    }
-  }
-
-  static Optional<RequiredApproval> getFromGlobalPluginConfig(
-      PluginConfigFactory pluginConfigFactory, String pluginName, ProjectState projectState) {
-    requireNonNull(pluginConfigFactory, "pluginConfigFactory");
-    requireNonNull(pluginName, "pluginName");
-    requireNonNull(projectState, "projectState");
-
-    String requiredApproval =
-        pluginConfigFactory.getFromGerritConfig(pluginName).getString(KEY_REQUIRED_APPROVAL);
-    if (requiredApproval == null) {
-      return Optional.empty();
-    }
-
-    try {
-      return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
-    } catch (IllegalStateException | IllegalArgumentException e) {
-      throw new InvalidPluginConfigurationException(
-          pluginName,
-          String.format(
-              "Required approval '%s' that is configured in gerrit.config"
-                  + " (parameter plugin.%s.%s) is invalid: %s",
-              requiredApproval, pluginName, KEY_REQUIRED_APPROVAL, e.getMessage()));
-    }
-  }
-
-  /**
    * Parses a string-representation of a {@link RequiredApproval}.
    *
    * @param projectState the project for which the required approval should be parsed
@@ -167,7 +68,6 @@ public abstract class RequiredApproval {
    * @throws IllegalStateException thrown if the parsed label doesn't exist on the project, or if
    *     the parsed voting value is not allowed for the label
    */
-  @VisibleForTesting
   static RequiredApproval parse(ProjectState projectState, String requiredApprovalString)
       throws IllegalArgumentException, IllegalStateException {
     requireNonNull(projectState, "projectState");
@@ -206,30 +106,34 @@ public abstract class RequiredApproval {
    * Creates the default {@link RequiredApproval} if no {@link RequiredApproval} was configured.
    *
    * @param projectState the project for which the default required approval should be returned
+   * @param defaultLabel name of the default label
+   * @param defaultValue default value that is required for the default label
    * @return the default {@link RequiredApproval}
    * @throws IllegalStateException thrown if the default label doesn't exist on the project, or if
    *     the default voting value is not allowed for the label
    */
-  @VisibleForTesting
-  static RequiredApproval createDefault(ProjectState projectState) throws IllegalStateException {
+  static RequiredApproval createDefault(
+      ProjectState projectState, String defaultLabel, short defaultValue)
+      throws IllegalStateException {
     requireNonNull(projectState, "projectState");
+    requireNonNull(defaultLabel, "defaultLabel");
 
     Optional<LabelType> labelType =
         projectState.getLabelTypes().getLabelTypes().stream()
-            .filter(lt -> lt.getName().equals(DEFAULT_LABEL))
+            .filter(lt -> lt.getName().equals(defaultLabel))
             .findFirst();
     checkState(
         labelType.isPresent(),
         "Default label %s doesn't exist for project %s.",
-        DEFAULT_LABEL,
+        defaultLabel,
         projectState.getName());
     checkState(
-        labelType.get().getByValue().containsKey(DEFAULT_VALUE),
+        labelType.get().getByValue().containsKey(defaultValue),
         "Label %s on project %s doesn't allow default value %s.",
-        DEFAULT_LABEL,
+        defaultLabel,
         projectState.getName(),
-        DEFAULT_VALUE);
-    return create(labelType.get(), DEFAULT_VALUE);
+        defaultValue);
+    return create(labelType.get(), defaultValue);
   }
 
   @VisibleForTesting
