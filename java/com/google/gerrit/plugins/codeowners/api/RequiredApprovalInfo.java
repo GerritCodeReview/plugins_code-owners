@@ -15,15 +15,23 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 /**
- * Representation of the configured required approval in the REST API.
+ * Representation of an configured required approval in the REST API.
  *
- * <p>This class determines the JSON format of configured required approval in the REST API.
+ * <p>This class determines the JSON format of an configured required approval in the REST API.
  *
- * <p>The required approval is the approval that is required from code owners to approve the files
- * in a change. This means it defines which approval counts as code owner approval.
+ * <p>Represents an approval that is required for an action.
+ *
+ * <p>A required approval is used to represent:
+ *
+ * <ul>
+ *   <li>the approval that is required from code owners to approve the files in a change (see {@link
+ *       CodeOwnerProjectConfigInfo#requiredApproval})
+ *   <li>the approval that is required to override the code owners submit check (see {@link
+ *       CodeOwnerProjectConfigInfo#overrideApproval})
+ * </ul>
  */
 public class RequiredApprovalInfo {
-  /** The name of label on which an approval from a code owner is required. */
+  /** The name of label on which an approval is required. */
   public String label;
 
   /** The voting value that is required on the label. */

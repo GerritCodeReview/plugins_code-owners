@@ -40,4 +40,7 @@ public class CodeOwnerProjectConfigInfo {
    * <p>Defines which approval counts as code owner approval.
    */
   public RequiredApprovalInfo requiredApproval;
+
+  /** The approval that is required to override the code owners submit check. */
+  public RequiredApprovalInfo overrideApproval;
 }
