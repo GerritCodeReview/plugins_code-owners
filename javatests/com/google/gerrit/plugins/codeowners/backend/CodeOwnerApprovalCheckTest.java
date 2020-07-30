@@ -14,14 +14,22 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThatStream;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
@@ -39,6 +47,7 @@ import org.junit.Test;
 public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Inject private ChangeNotes.Factory changeNotesFactory;
   @Inject private RequestScopeOperations requestScopeOperations;
+  @Inject private ProjectOperations projectOperations;
 
   private CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
@@ -845,6 +854,67 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void getStatus_OverrideApprovesAllFiles() throws Exception {
+    // Create the Owners-Override label.
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    // Create a change.
+    String changeId =
+        pushFactory
+            .create(
+                admin.newIdent(),
+                testRepo,
+                "Test Change",
+                ImmutableMap.of(
+                    "foo/baz.config", "content",
+                    "bar/baz.config", "other content"))
+            .to("refs/for/master")
+            .getChangeId();
+
+    // Without Owners-Override approval the expected status is INSUFFICIENT_REVIEWERS.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
+    // Add an override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // With Owners-Override approval the expected status is APPROVED.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.APPROVED);
+    }
+  }
+
+  @Test
   public void cannotCheckIfSubmittableForNullChangeNotes() throws Exception {
     NullPointerException npe =
         assertThrows(NullPointerException.class, () -> codeOwnerApprovalCheck.isSubmittable(null));
@@ -895,6 +965,49 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
+    assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void isSubmittableIfOverrideIsPresent() throws Exception {
+    // Create the Owners-Override label.
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    // Create a change.
+    String changeId =
+        pushFactory
+            .create(
+                admin.newIdent(),
+                testRepo,
+                "Test Change",
+                ImmutableMap.of(
+                    "foo/baz.config", "content",
+                    "bar/baz.config", "other content"))
+            .to("refs/for/master")
+            .getChangeId();
+
+    // Without override approval the change is not submittable.
+    assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isFalse();
+
+    // Add an override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // With override approval the change is submittable.
     assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isTrue();
   }
 
