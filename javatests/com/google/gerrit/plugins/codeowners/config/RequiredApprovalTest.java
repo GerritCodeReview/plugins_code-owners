@@ -37,7 +37,7 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
     LabelType labelType = createLabelType("Foo", -2, -1, 0, 1, 2);
     RequiredApproval requiredApproval = RequiredApproval.create(labelType, (short) 1);
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> requiredApproval.isCodeOwnerApproval(null));
+        assertThrows(NullPointerException.class, () -> requiredApproval.isApprovedBy(null));
     assertThat(npe).hasMessageThat().isEqualTo("patchSetApproval");
   }
 
@@ -45,11 +45,11 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
   public void isCodeOwnerApproval() throws Exception {
     LabelType labelType = createLabelType("Foo", -2, -1, 0, 1, 2);
     RequiredApproval requiredApproval = RequiredApproval.create(labelType, (short) 1);
-    assertThat(requiredApproval.isCodeOwnerApproval(createApproval(labelType, -2))).isFalse();
-    assertThat(requiredApproval.isCodeOwnerApproval(createApproval(labelType, -1))).isFalse();
-    assertThat(requiredApproval.isCodeOwnerApproval(createApproval(labelType, 0))).isFalse();
-    assertThat(requiredApproval.isCodeOwnerApproval(createApproval(labelType, 1))).isTrue();
-    assertThat(requiredApproval.isCodeOwnerApproval(createApproval(labelType, 2))).isTrue();
+    assertThat(requiredApproval.isApprovedBy(createApproval(labelType, -2))).isFalse();
+    assertThat(requiredApproval.isApprovedBy(createApproval(labelType, -1))).isFalse();
+    assertThat(requiredApproval.isApprovedBy(createApproval(labelType, 0))).isFalse();
+    assertThat(requiredApproval.isApprovedBy(createApproval(labelType, 1))).isTrue();
+    assertThat(requiredApproval.isApprovedBy(createApproval(labelType, 2))).isTrue();
   }
 
   @Test

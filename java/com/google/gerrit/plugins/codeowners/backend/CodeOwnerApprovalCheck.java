@@ -274,7 +274,7 @@ public class CodeOwnerApprovalCheck {
   private ImmutableSet<Account.Id> getApproverAccountIds(
       RequiredApproval requiredApproval, ChangeNotes changeNotes) {
     return changeNotes.getApprovals().get(changeNotes.getCurrentPatchSet().id()).stream()
-        .filter(requiredApproval::isCodeOwnerApproval)
+        .filter(requiredApproval::isApprovedBy)
         .map(PatchSetApproval::accountId)
         .collect(toImmutableSet());
   }

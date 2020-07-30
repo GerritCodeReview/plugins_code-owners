@@ -34,6 +34,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.util.Optional;
 import java.util.function.Function;
 
 /**
@@ -71,9 +72,16 @@ public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> 
 
     RequiredApproval requiredApproval =
         codeOwnersPluginConfiguration.getRequiredApproval(projectResource.getNameKey());
+    Optional<RequiredApproval> overrideApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(projectResource.getNameKey());
     return Response.ok(
         CodeOwnerProjectConfigJson.format(
-            isDisabled, disabledBranches, backendId, backendIdsPerBranch, requiredApproval));
+            isDisabled,
+            disabledBranches,
+            backendId,
+            backendIdsPerBranch,
+            requiredApproval,
+            overrideApproval.orElse(null)));
   }
 
   private ImmutableList<BranchNameKey> getDisabledBranches(ProjectResource projectResource)
