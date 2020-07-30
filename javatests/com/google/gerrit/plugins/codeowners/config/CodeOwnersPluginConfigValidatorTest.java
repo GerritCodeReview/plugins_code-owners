@@ -217,7 +217,7 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
         null,
-        RequiredApproval.KEY_REQUIRED_APPROVAL,
+        RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "Code-Review+2");
     setCodeOwnersConfig(cfg);
 
@@ -236,7 +236,7 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
         null,
-        RequiredApproval.KEY_REQUIRED_APPROVAL,
+        RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "INVALID");
     setCodeOwnersConfig(cfg);
 
