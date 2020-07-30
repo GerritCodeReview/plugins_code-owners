@@ -33,7 +33,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
 import com.google.inject.Inject;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Config;
@@ -83,9 +83,9 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         .isEqualTo(CodeOwnerBackendId.getBackendId(backendConfig.getDefaultBackend().getClass()));
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.label)
-        .isEqualTo(RequiredApproval.DEFAULT_LABEL);
+        .isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.value)
-        .isEqualTo(RequiredApproval.DEFAULT_VALUE);
+        .isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
   }
 
   @Test
@@ -165,7 +165,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
-    setConfig(project, null, RequiredApproval.KEY_REQUIRED_APPROVAL, requiredApproval);
+    setConfig(project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
   }
 
   private void setConfig(Project.NameKey project, String subsection, String key, String value)

@@ -146,7 +146,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
     validationMessages.addAll(backendConfig.validateProjectLevelConfig(fileName, cfg));
     validationMessages.addAll(statusConfig.validateProjectLevelConfig(fileName, cfg));
-    RequiredApproval.validateProjectLevelConfig(projectState, fileName, cfg)
+    RequiredApprovalConfig.validateProjectLevelConfig(projectState, fileName, cfg)
         .ifPresent(validationMessages::add);
     if (!validationMessages.isEmpty()) {
       throw new CommitValidationException(
