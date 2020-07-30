@@ -455,7 +455,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void getDefaultRequiredApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
     assertThat(codeOwnersPluginConfiguration.getRequiredApproval(project))
         .isEqualTo(
-            RequiredApproval.createDefault(
+            RequiredApprovalConfig.createDefault(
                 projectCache.get(project).orElseThrow(illegalState(project))));
   }
 
@@ -686,7 +686,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
-    setCodeOwnersConfig(project, null, RequiredApproval.KEY_REQUIRED_APPROVAL, requiredApproval);
+    setCodeOwnersConfig(
+        project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
   }
 
   private AutoCloseable registerTestBackend() {
