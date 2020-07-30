@@ -53,6 +53,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
   private final StatusConfig statusConfig;
   private final BackendConfig backendConfig;
   private final RequiredApprovalConfig requiredApprovalConfig;
+  private final OverrideApprovalConfig overrideApprovalConfig;
 
   @Inject
   CodeOwnersPluginConfigValidator(
@@ -62,7 +63,8 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       ChangedFiles changedFiles,
       StatusConfig statusConfig,
       BackendConfig backendConfig,
-      RequiredApprovalConfig requiredApprovalConfig) {
+      RequiredApprovalConfig requiredApprovalConfig,
+      OverrideApprovalConfig overrideApprovalConfig) {
     this.pluginName = pluginName;
     this.projectCache = projectCache;
     this.repoManager = repoManager;
@@ -70,6 +72,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
     this.statusConfig = statusConfig;
     this.backendConfig = backendConfig;
     this.requiredApprovalConfig = requiredApprovalConfig;
+    this.overrideApprovalConfig = overrideApprovalConfig;
   }
 
   @Override
@@ -150,6 +153,9 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
     validationMessages.addAll(backendConfig.validateProjectLevelConfig(fileName, cfg));
     validationMessages.addAll(statusConfig.validateProjectLevelConfig(fileName, cfg));
     requiredApprovalConfig
+        .validateProjectLevelConfig(projectState, fileName, cfg)
+        .ifPresent(validationMessages::add);
+    overrideApprovalConfig
         .validateProjectLevelConfig(projectState, fileName, cfg)
         .ifPresent(validationMessages::add);
     if (!validationMessages.isEmpty()) {
