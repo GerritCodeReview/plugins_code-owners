@@ -18,11 +18,14 @@ import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfig
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
@@ -39,6 +42,7 @@ import org.eclipse.jgit.lib.Config;
  * <p>Projects that have no required approval configuration inherit the configuration from their
  * parent projects.
  */
+@Singleton
 public class RequiredApprovalConfig {
   @VisibleForTesting public static final String KEY_REQUIRED_APPROVAL = "requiredApproval";
 
@@ -47,9 +51,16 @@ public class RequiredApprovalConfig {
 
   @VisibleForTesting public static final short DEFAULT_VALUE = 1;
 
-  static Optional<RequiredApproval> getForProject(
-      String pluginName, ProjectState projectState, Config pluginConfig) {
-    requireNonNull(pluginName, "pluginName");
+  private final String pluginName;
+  private final PluginConfigFactory pluginConfigFactory;
+
+  @Inject
+  RequiredApprovalConfig(@PluginName String pluginName, PluginConfigFactory pluginConfigFactory) {
+    this.pluginName = pluginName;
+    this.pluginConfigFactory = pluginConfigFactory;
+  }
+
+  Optional<RequiredApproval> getForProject(ProjectState projectState, Config pluginConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(pluginConfig, "pluginConfig");
     String requiredApproval =
@@ -74,10 +85,7 @@ public class RequiredApprovalConfig {
     }
   }
 
-  static Optional<RequiredApproval> getFromGlobalPluginConfig(
-      PluginConfigFactory pluginConfigFactory, String pluginName, ProjectState projectState) {
-    requireNonNull(pluginConfigFactory, "pluginConfigFactory");
-    requireNonNull(pluginName, "pluginName");
+  Optional<RequiredApproval> getFromGlobalPluginConfig(ProjectState projectState) {
     requireNonNull(projectState, "projectState");
 
     String requiredApproval =
@@ -106,7 +114,7 @@ public class RequiredApprovalConfig {
    * @return list of validation messages for validation errors, empty list if there are no
    *     validation errors
    */
-  static Optional<CommitValidationMessage> validateProjectLevelConfig(
+  Optional<CommitValidationMessage> validateProjectLevelConfig(
       ProjectState projectState, String fileName, ProjectLevelConfig projectLevelConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(fileName, "fileName");
@@ -133,7 +141,7 @@ public class RequiredApprovalConfig {
     return Optional.empty();
   }
 
-  static RequiredApproval createDefault(ProjectState projectState) throws IllegalStateException {
+  RequiredApproval createDefault(ProjectState projectState) throws IllegalStateException {
     return RequiredApproval.createDefault(projectState, DEFAULT_LABEL, DEFAULT_VALUE);
   }
 }
