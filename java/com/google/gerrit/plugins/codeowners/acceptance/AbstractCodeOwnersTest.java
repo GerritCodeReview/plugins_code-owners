@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance;
 
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
+
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
@@ -21,14 +23,19 @@ import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.ChangeInput;
+import com.google.gerrit.extensions.common.LabelDefinitionInput;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import com.google.inject.Inject;
 import java.nio.file.Path;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
@@ -50,6 +57,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
     name = "code-owners",
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
 public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
+  @Inject private ProjectOperations projectOperations;
+
   protected String createChangeWithFileDeletion(Path filePath) throws Exception {
     return createChangeWithFileDeletion(filePath.toString());
   }
@@ -135,5 +144,23 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
               .add("code-owners.config", codeOwnersConfig.toText()));
     }
     projectCache.evict(project);
+  }
+
+  protected void createOwnersOverrideLabel() throws RestApiException {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
   }
 }

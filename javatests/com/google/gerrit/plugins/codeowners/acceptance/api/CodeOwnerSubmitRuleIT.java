@@ -19,6 +19,8 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSu
 import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject.assertThatCollection;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
@@ -31,6 +33,7 @@ import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}. */
 public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
+
   @Test
   public void changeIsSubmittableIfCodeOwnersFuctionalityIsDisabled() throws Exception {
     disableCodeOwnersForProject(project);
@@ -183,6 +186,42 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
     // Check that there is no submit requirement.
     assertThatCollection(changeInfo.requirements).isEmpty();
+
+    // Submit the change.
+    gApi.changes().id(changeId).current().submit();
+    assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeWithOverrideApprovalIsSubmittable() throws Exception {
+    createOwnersOverrideLabel();
+
+    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+
+    // Check that the change is not submittable.
+    assertThat(gApi.changes().id(changeId).get(ListChangesOption.SUBMITTABLE).submittable)
+        .isFalse();
+
+    // Add an override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Verify that the code owner status for the changed file is APPROVED.
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .onlyElement()
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+
+    // Approve by a non-code-owner to satisfy the Code-Review+2 requirement.
+    approve(changeId);
+
+    // Check that there is no submit requirement.
+    assertThatCollection(gApi.changes().id(changeId).get().requirements).isEmpty();
 
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
