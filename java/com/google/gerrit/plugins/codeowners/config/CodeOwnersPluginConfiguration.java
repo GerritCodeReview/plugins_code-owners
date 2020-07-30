@@ -59,6 +59,7 @@ public class CodeOwnersPluginConfiguration {
   private final ProjectCache projectCache;
   private final StatusConfig statusConfig;
   private final BackendConfig backendConfig;
+  private final RequiredApprovalConfig requiredApprovalConfig;
 
   @Inject
   CodeOwnersPluginConfiguration(
@@ -66,12 +67,14 @@ public class CodeOwnersPluginConfiguration {
       PluginConfigFactory pluginConfigFactory,
       ProjectCache projectCache,
       StatusConfig statusConfig,
-      BackendConfig backendConfig) {
+      BackendConfig backendConfig,
+      RequiredApprovalConfig requiredApprovalConfig) {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
     this.projectCache = projectCache;
     this.statusConfig = statusConfig;
     this.backendConfig = backendConfig;
+    this.requiredApprovalConfig = requiredApprovalConfig;
   }
 
   /**
@@ -227,21 +230,19 @@ public class CodeOwnersPluginConfiguration {
 
     // check if a project specific required approval is configured
     Optional<RequiredApproval> requiredApproval =
-        RequiredApprovalConfig.getForProject(pluginName, projectState, pluginConfig);
+        requiredApprovalConfig.getForProject(projectState, pluginConfig);
     if (requiredApproval.isPresent()) {
       return requiredApproval.get();
     }
 
     // check if a required approval is globally configured
-    requiredApproval =
-        RequiredApprovalConfig.getFromGlobalPluginConfig(
-            pluginConfigFactory, pluginName, projectState);
+    requiredApproval = requiredApprovalConfig.getFromGlobalPluginConfig(projectState);
     if (requiredApproval.isPresent()) {
       return requiredApproval.get();
     }
 
     // fall back to hard-coded default required approval
-    return RequiredApprovalConfig.createDefault(projectState);
+    return requiredApprovalConfig.createDefault(projectState);
   }
 
   /**
