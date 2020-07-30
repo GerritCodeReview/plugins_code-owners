@@ -37,11 +37,14 @@ public class CodeOwnerProjectConfigJson {
       ImmutableList<BranchNameKey> disabledBranches,
       String backendId,
       ImmutableMap<BranchNameKey, String> backendIdsPerBranch,
-      RequiredApproval requiredApproval) {
+      RequiredApproval requiredApproval,
+      @Nullable RequiredApproval overrideApproval) {
     CodeOwnerProjectConfigInfo info = new CodeOwnerProjectConfigInfo();
     info.status = formatStatusInfo(isDisabled, disabledBranches);
     info.backend = formatBackendInfo(backendId, backendIdsPerBranch);
     info.requiredApproval = formatRequiredApprovalInfo(requiredApproval);
+    info.overrideApproval =
+        overrideApproval != null ? formatRequiredApprovalInfo(overrideApproval) : null;
     return info;
   }
 
