@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -629,6 +630,58 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotGetOverrideApprovalForNonExistingProject() throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnersPluginConfiguration.getOverrideApproval(
+                    Project.nameKey("non-existing-project")));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "cannot get code-owners plugin config for non-existing project non-existing-project");
+  }
+
+  @Test
+  public void getOverrideApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Code-Review+2")
+  public void getConfiguredDefaultOverrideApproval() throws Exception {
+    Optional<RequiredApproval> requiredApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(project);
+    assertThat(requiredApproval).isPresent();
+    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.get().value()).isEqualTo(2);
+  }
+
+  @Test
+  public void getOverrideApprovalConfiguredOnProjectLevel() throws Exception {
+    configureOverrideApproval(project, "Code-Review+2");
+    Optional<RequiredApproval> requiredApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(project);
+    assertThat(requiredApproval).isPresent();
+    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
+    assertThat(requiredApproval.get().value()).isEqualTo(2);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "INVALID")
+  public void getOverrideApprovalIfInvalidOverrideApprovalIsConfigured() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+  }
+
+  @Test
+  public void getOverrideApprovalIfInvalidOverrideApprovalIsConfiguredOnProjectLevel()
+      throws Exception {
+    configureOverrideApproval(project, "INVALID");
+    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "false")
   public void checkExperimentalRestEndpointsEnabledThrowsExceptionIfDisabled() throws Exception {
     MethodNotAllowedException exception =
@@ -687,6 +740,12 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
       throws Exception {
     setCodeOwnersConfig(
         project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
+  }
+
+  private void configureOverrideApproval(Project.NameKey project, String requiredApproval)
+      throws Exception {
+    setCodeOwnersConfig(
+        project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, requiredApproval);
   }
 
   private AutoCloseable registerTestBackend() {
