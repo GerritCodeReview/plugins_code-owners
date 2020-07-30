@@ -17,20 +17,30 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject.assertThatCollection;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject;
+import com.google.inject.Inject;
 import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}. */
 public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
+  @Inject private ProjectOperations projectOperations;
+
   @Test
   public void changeIsSubmittableIfCodeOwnersFuctionalityIsDisabled() throws Exception {
     disableCodeOwnersForProject(project);
@@ -176,6 +186,57 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
+
+    // Check the submittable flag.
+    ChangeInfo changeInfo = gApi.changes().id(changeId).get(ListChangesOption.SUBMITTABLE);
+    assertThat(changeInfo.submittable).isTrue();
+
+    // Check that there is no submit requirement.
+    assertThatCollection(changeInfo.requirements).isEmpty();
+
+    // Submit the change.
+    gApi.changes().id(changeId).current().submit();
+    assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeWithOverrideApprovalIsSubmittable() throws Exception {
+    // Create the Owners-Override label.
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+
+    // Add an override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Verify that the code owner status for the changed file is APPROVED.
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .onlyElement()
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+
+    // Approve by a non-code-owner to satisfy the Code-Review+2 requirement.
+    approve(changeId);
 
     // Check the submittable flag.
     ChangeInfo changeInfo = gApi.changes().id(changeId).get(ListChangesOption.SUBMITTABLE);
