@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "59c158c3_901d3808",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/ProjectCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-30T13:21:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b066e0ea_6f1bede0",
+      "range": {
+        "startLine": 20,
+        "startChar": 26,
+        "endLine": 20,
+        "endChar": 29
+      },
+      "revId": "b5fc50d44b0a759328f9afdaaffe01040079dc37",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f3ebaafc_9bf09eac",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerBackendId.java",
         "patchSetId": 5
@@ -45,6 +69,30 @@
       "revId": "b5fc50d44b0a759328f9afdaaffe01040079dc37",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5e9cec3e_3a655414",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerBackendId.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-30T13:21:09Z",
+      "side": 1,
+      "message": "Yes, thanks for suggesting. Done.",
+      "parentUuid": "f3ebaafc_9bf09eac",
+      "range": {
+        "startLine": 62,
+        "startChar": 0,
+        "endLine": 67,
+        "endChar": 0
+      },
+      "revId": "b5fc50d44b0a759328f9afdaaffe01040079dc37",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "82877502_4e6b37d5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-30T13:21:09Z",
+      "side": 1,
+      "message": "Yes, I see your point, but I would prefer to keep these comments attached to the methods for now. The reason is that in follow-up changes we add further configuration parameters which have a different evaluation order (e.g. no possibility for branch-specific configuration or no hard-coded default value as fallback). Hence I think it\u0027s clearer to keep these comments on the methods even if it means duplicating some text.",
+      "parentUuid": "47483b77_54aeb52b",
+      "range": {
+        "startLine": 100,
+        "startChar": 3,
+        "endLine": 100,
+        "endChar": 5
+      },
+      "revId": "b5fc50d44b0a759328f9afdaaffe01040079dc37",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fbb4dcd0_7fee0b0d",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnerProjectConfigRestIT.java",
         "patchSetId": 5
@@ -91,6 +163,30 @@
       "revId": "b5fc50d44b0a759328f9afdaaffe01040079dc37",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "72d173be_1e67553e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnerProjectConfigRestIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-30T13:21:09Z",
+      "side": 1,
+      "message": "This sentence is broken. Fixed it.",
+      "parentUuid": "fbb4dcd0_7fee0b0d",
+      "range": {
+        "startLine": 26,
+        "startChar": 3,
+        "endLine": 30,
+        "endChar": 2
+      },
+      "revId": "b5fc50d44b0a759328f9afdaaffe01040079dc37",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
