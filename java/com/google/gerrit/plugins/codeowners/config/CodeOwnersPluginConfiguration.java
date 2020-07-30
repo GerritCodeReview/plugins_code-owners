@@ -60,6 +60,7 @@ public class CodeOwnersPluginConfiguration {
   private final StatusConfig statusConfig;
   private final BackendConfig backendConfig;
   private final RequiredApprovalConfig requiredApprovalConfig;
+  private final OverrideApprovalConfig overrideApprovalConfig;
 
   @Inject
   CodeOwnersPluginConfiguration(
@@ -68,13 +69,15 @@ public class CodeOwnersPluginConfiguration {
       ProjectCache projectCache,
       StatusConfig statusConfig,
       BackendConfig backendConfig,
-      RequiredApprovalConfig requiredApprovalConfig) {
+      RequiredApprovalConfig requiredApprovalConfig,
+      OverrideApprovalConfig overrideApprovalConfig) {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
     this.projectCache = projectCache;
     this.statusConfig = statusConfig;
     this.backendConfig = backendConfig;
     this.requiredApprovalConfig = requiredApprovalConfig;
+    this.overrideApprovalConfig = overrideApprovalConfig;
   }
 
   /**
@@ -205,7 +208,10 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
-   * Returns the configured {@link RequiredApproval}.
+   * Returns the approval that is required from code owners to approve the files in a change of the
+   * given project.
+   *
+   * <p>Defines which approval counts as code owner approval.
    *
    * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
    * exist the call fails with {@link IllegalStateException}.
@@ -218,12 +224,72 @@ public class CodeOwnersPluginConfiguration {
    *   <li>hard-coded default required approval
    * </ul>
    *
-   * <p>The first code owner required approval that exists counts and the evaluation is stopped.
+   * <p>The first required code owner approval that exists counts and the evaluation is stopped.
    *
-   * @param project project for which the configured required approval should be returned
-   * @return the {@link RequiredApproval} that should be used
+   * @param project project for which the required approval should be returned
+   * @return the required code owner approval that should be used for the given project
    */
   public RequiredApproval getRequiredApproval(Project.NameKey project) {
+    Optional<RequiredApproval> configuredRequiredApprovalConfig =
+        getConfiguredRequiredApproval(requiredApprovalConfig, project);
+    if (configuredRequiredApprovalConfig.isPresent()) {
+      return configuredRequiredApprovalConfig.get();
+    }
+
+    // fall back to hard-coded default required approval
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    return requiredApprovalConfig.createDefault(projectState);
+  }
+
+  /**
+   * Returns the approval that is required to override the code owners submit check for a change of
+   * the given project.
+   *
+   * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
+   * exist the call fails with {@link IllegalStateException}.
+   *
+   * <p>The override approval configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>override approval configuration for project (with inheritance)
+   *   <li>globally configured override approval
+   * </ul>
+   *
+   * <p>The first override approval that exists counts and the evaluation is stopped.
+   *
+   * @param project project for which the override approval should be returned
+   * @return the override approval that should be used for the given project, {@link
+   *     Optional#empty()} if no override approval is configured, in this case the override
+   *     functionality is disabled
+   */
+  public Optional<RequiredApproval> getOverrideApproval(Project.NameKey project) {
+    try {
+      Optional<RequiredApproval> configuredOverrideApprovalConfig =
+          getConfiguredRequiredApproval(overrideApprovalConfig, project);
+      if (configuredOverrideApprovalConfig.isPresent()) {
+        return configuredOverrideApprovalConfig;
+      }
+    } catch (InvalidPluginConfigurationException e) {
+      logger.atWarning().withCause(e).log(
+          String.format(
+              "Ignoring invalid override approval configuration for project %s."
+                  + " Overrides are disabled.",
+              project.get()));
+    }
+
+    return Optional.empty();
+  }
+
+  /**
+   * Gets the required approval that is configured for the given project.
+   *
+   * @param requiredApprovalConfig the config from which the required approval should be read
+   * @param project the project for which the configured required approval should be returned
+   * @return the required approval that is configured for the given project, {@link
+   *     Optional#empty()} if no required approval is configured
+   */
+  private Optional<RequiredApproval> getConfiguredRequiredApproval(
+      AbstractRequiredApprovalConfig requiredApprovalConfig, Project.NameKey project) {
     Config pluginConfig = getPluginConfig(project);
 
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
@@ -232,17 +298,16 @@ public class CodeOwnersPluginConfiguration {
     Optional<RequiredApproval> requiredApproval =
         requiredApprovalConfig.getForProject(projectState, pluginConfig);
     if (requiredApproval.isPresent()) {
-      return requiredApproval.get();
+      return requiredApproval;
     }
 
     // check if a required approval is globally configured
     requiredApproval = requiredApprovalConfig.getFromGlobalPluginConfig(projectState);
     if (requiredApproval.isPresent()) {
-      return requiredApproval.get();
+      return requiredApproval;
     }
 
-    // fall back to hard-coded default required approval
-    return requiredApprovalConfig.createDefault(projectState);
+    return Optional.empty();
   }
 
   /**

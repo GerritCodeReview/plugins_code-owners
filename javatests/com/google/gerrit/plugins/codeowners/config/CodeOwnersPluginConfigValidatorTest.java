@@ -23,6 +23,7 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
+import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.PushResult;
@@ -245,9 +246,55 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
         .isEqualTo(Status.REJECTED_OTHER_REASON);
     assertThat(r.getMessages())
         .contains(
-            "Required approval 'INVALID' that is configured in code-owners.config (parameter"
-                + " codeOwners.requiredApproval) is invalid: Invalid format, expected"
-                + " '<label-name>+<label-value>'.");
+            String.format(
+                "Required approval 'INVALID' that is configured in code-owners.config (parameter"
+                    + " codeOwners.%s) is invalid: Invalid format, expected"
+                    + " '<label-name>+<label-value>'.",
+                RequiredApprovalConfig.KEY_REQUIRED_APPROVAL));
+  }
+
+  @Test
+  public void configureOverrideApproval() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        "Code-Review+2");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    Optional<RequiredApproval> overrideApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(project);
+    assertThat(overrideApproval.get().labelType().getName()).isEqualTo("Code-Review");
+    assertThat(overrideApproval.get().value()).isEqualTo(2);
+  }
+
+  @Test
+  public void cannotConfigureInvalidOverrideApproval() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        "INVALID");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            String.format(
+                "Required approval 'INVALID' that is configured in code-owners.config (parameter"
+                    + " codeOwners.%s) is invalid: Invalid format, expected"
+                    + " '<label-name>+<label-value>'.",
+                OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL));
   }
 
   private void fetchRefsMetaConfig() throws Exception {
