@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject.changedFiles;
 import static com.google.gerrit.plugins.codeowners.testing.PathCodeOwnerStatusSubject.pathCodeOwnerStatuses;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
@@ -28,6 +29,10 @@ import java.util.stream.Stream;
 
 /** {@link Subject} for doing assertions on {@link FileCodeOwnerStatus}es. */
 public class FileCodeOwnerStatusSubject extends Subject {
+  public static FileCodeOwnerStatusSubject assertThat(FileCodeOwnerStatus fileCodeOwnerStatus) {
+    return assertAbout(fileCodeOwnerStatuses()).that(fileCodeOwnerStatus);
+  }
+
   public static ListSubject<FileCodeOwnerStatusSubject, FileCodeOwnerStatus> assertThatStream(
       Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses) {
     return ListSubject.assertThat(

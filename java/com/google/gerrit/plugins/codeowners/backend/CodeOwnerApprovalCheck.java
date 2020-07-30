@@ -128,7 +128,11 @@ public class CodeOwnerApprovalCheck {
     requireNonNull(changeNotes, "changeNotes");
 
     RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getChange().getProject());
+        codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
+    Optional<RequiredApproval> overrideApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
+    boolean hasOverride =
+        overrideApproval.isPresent() && hasOverride(overrideApproval.get(), changeNotes);
 
     BranchNameKey branch = changeNotes.getChange().getDest();
     ObjectId revision = getDestBranchRevision(changeNotes.getChange());
@@ -148,6 +152,7 @@ public class CodeOwnerApprovalCheck {
                     patchSetUploader,
                     reviewerAccountIds,
                     approverAccountIds,
+                    hasOverride,
                     changedFile));
   }
 
@@ -157,6 +162,7 @@ public class CodeOwnerApprovalCheck {
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
+      boolean hasOverride,
       ChangedFile changedFile) {
     // Compute the code owner status for the new path, if there is a new path.
     Optional<PathCodeOwnerStatus> newPathStatus =
@@ -170,6 +176,7 @@ public class CodeOwnerApprovalCheck {
                         patchSetUploader,
                         reviewerAccountIds,
                         approverAccountIds,
+                        hasOverride,
                         newPath));
 
     // Compute the code owner status for the old path, if the file was deleted or renamed.
@@ -184,6 +191,7 @@ public class CodeOwnerApprovalCheck {
                   patchSetUploader,
                   reviewerAccountIds,
                   approverAccountIds,
+                  hasOverride,
                   changedFile.oldPath().get()));
     }
 
@@ -196,7 +204,12 @@ public class CodeOwnerApprovalCheck {
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
+      boolean hasOverride,
       Path absolutePath) {
+    if (hasOverride) {
+      return PathCodeOwnerStatus.create(absolutePath, CodeOwnerStatus.APPROVED);
+    }
+
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     codeOwnerConfigHierarchy.visit(
@@ -277,6 +290,18 @@ public class CodeOwnerApprovalCheck {
         .filter(requiredApproval::isApprovedBy)
         .map(PatchSetApproval::accountId)
         .collect(toImmutableSet());
+  }
+
+  /**
+   * Checks whether the given change has an override approval.
+   *
+   * @param overrideApproval approval that is required to override the code owners submit check.
+   * @param changeNotes the change notes
+   * @return whether the given change has an override approval
+   */
+  private boolean hasOverride(RequiredApproval overrideApproval, ChangeNotes changeNotes) {
+    return changeNotes.getApprovals().get(changeNotes.getCurrentPatchSet().id()).stream()
+        .anyMatch(overrideApproval::isApprovedBy);
   }
 
   /**
