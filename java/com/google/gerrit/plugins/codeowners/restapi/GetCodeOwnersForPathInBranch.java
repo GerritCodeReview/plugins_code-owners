@@ -14,17 +14,34 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.server.change.IncludedInResolver;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import java.io.IOException;
 import java.util.List;
+import org.eclipse.jgit.errors.IncorrectObjectTypeException;
+import org.eclipse.jgit.errors.InvalidObjectIdException;
+import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.kohsuke.args4j.Option;
 
 /**
  * REST endpoint that gets the code owners for an arbitrary path in a branch.
@@ -36,18 +53,55 @@ import java.util.List;
  */
 public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
     implements RestReadView<CodeOwnersInBranchCollection.PathResource> {
+  private GitRepositoryManager repoManager;
+  private String revision;
+
+  @Option(name = "-revision", usage = "revision from which the code owner configs should be read")
+  public void setRevision(String revision) {
+    this.revision = revision;
+  }
+
   @Inject
   GetCodeOwnersForPathInBranch(
       PermissionBackend permissionBackend,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
-      CodeOwnerJson.Factory codeOwnerJsonFactory) {
+      CodeOwnerJson.Factory codeOwnerJsonFactory,
+      GitRepositoryManager repoManager) {
     super(permissionBackend, codeOwnerConfigHierarchy, codeOwnerResolver, codeOwnerJsonFactory);
+    this.repoManager = repoManager;
   }
 
   @Override
   public Response<List<CodeOwnerInfo>> apply(CodeOwnersInBranchCollection.PathResource rsrc)
-      throws RestApiException, PermissionBackendException {
+      throws RestApiException, PermissionBackendException, IOException {
+    if (revision != null) {
+      validateRevision(rsrc.getBranch(), revision);
+      rsrc = rsrc.forRevision(revision);
+    }
+
     return super.applyImpl(rsrc);
+  }
+
+  private void validateRevision(BranchNameKey branchNameKey, String revision)
+      throws BadRequestException, IOException {
+    try (Repository repository = repoManager.openRepository(branchNameKey.project());
+        RevWalk rw = new RevWalk(repository)) {
+      ObjectId revisionId = ObjectId.fromString(revision);
+      Ref ref = repository.exactRef(branchNameKey.branch());
+      checkNotNull(
+          ref,
+          "branch %s not found in repository %s",
+          branchNameKey.branch(),
+          branchNameKey.project());
+      RevCommit commit = rw.parseCommit(revisionId);
+      if (!IncludedInResolver.includedInAny(repository, rw, commit, ImmutableSet.of(ref))) {
+        throw new BadRequestException("unknown revision");
+      }
+    } catch (InvalidObjectIdException | IncorrectObjectTypeException e) {
+      throw new BadRequestException("invalid revision", e);
+    } catch (MissingObjectException e) {
+      throw new BadRequestException("unknown revision", e);
+    }
   }
 }
