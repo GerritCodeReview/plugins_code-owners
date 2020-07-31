@@ -17,14 +17,19 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
+import com.google.inject.Inject;
 import java.util.List;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -38,6 +43,8 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnersForPathInChangeRestIT}.
  */
 public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPathIT {
+  @Inject private ProjectOperations projectOperations;
+
   private String changeId;
 
   @Before
@@ -125,5 +132,17 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
     assertThat(codeOwnerInfosOldPath)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
+  }
+
+  @Test
+  public void cannotGetCodeOwnersForRevision() throws Exception {
+    RevCommit revision = projectOperations.project(project).getHead("master");
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                queryCodeOwners(
+                    getCodeOwnersApi().query().forRevision(revision.name()), "/foo/bar/baz.md"));
+    assertThat(exception).hasMessageThat().isEqualTo("specifying revision is not supported");
   }
 }
