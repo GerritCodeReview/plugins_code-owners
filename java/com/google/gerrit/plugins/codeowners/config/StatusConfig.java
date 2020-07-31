@@ -55,7 +55,7 @@ public class StatusConfig {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   @VisibleForTesting public static final String KEY_DISABLED = "disabled";
-  @VisibleForTesting static final String KEY_DISABLED_BRANCH = "disabledBranch";
+  @VisibleForTesting public static final String KEY_DISABLED_BRANCH = "disabledBranch";
 
   private final String pluginName;
 
