@@ -71,6 +71,12 @@ abstract class AbstractPathResource implements RestResource {
     this.path = path;
   }
 
+  protected AbstractPathResource(BranchNameKey branchNameKey, String revision, Path path) {
+    this.branchNameKey = branchNameKey;
+    this.revision = ObjectId.fromString(revision);
+    this.path = path;
+  }
+
   protected AbstractPathResource(
       RevisionResource revisionResource, ObjectId branchRevision, Path path) {
     this.branchNameKey = revisionResource.getChange().getDest();

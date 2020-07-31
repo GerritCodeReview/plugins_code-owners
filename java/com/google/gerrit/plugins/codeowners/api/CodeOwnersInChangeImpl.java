@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.api;
 
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInChangeCollection;
@@ -53,6 +54,10 @@ public class CodeOwnersInChangeImpl implements CodeOwners {
       @Override
       public List<CodeOwnerInfo> get(Path path) throws RestApiException {
         try {
+          if (getRevision().isPresent()) {
+            throw new BadRequestException("specifying revision is not supported");
+          }
+
           GetCodeOwnersForPathInChange getCodeOwners = getCodeOwnersProvider.get();
           getOptions().forEach(getCodeOwners::addOption);
           getLimit().ifPresent(getCodeOwners::setLimit);

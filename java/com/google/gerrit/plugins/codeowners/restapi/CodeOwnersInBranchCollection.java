@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ChildCollection;
@@ -74,8 +75,16 @@ public class CodeOwnersInBranchCollection implements ChildCollection<BranchResou
       return new PathResource(branchResource, parsePath(pathId));
     }
 
+    public PathResource forRevision(String revision) {
+      return new PathResource(getBranch(), revision, getPath());
+    }
+
     private PathResource(BranchResource branchResource, Path path) {
       super(branchResource, path);
+    }
+
+    private PathResource(BranchNameKey branchNameKey, String revision, Path path) {
+      super(branchNameKey, revision, path);
     }
   }
 }

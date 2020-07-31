@@ -95,7 +95,8 @@ public abstract class TestCodeOwnerConfigUpdate {
      * @return the Builder instance for chaining calls
      * @see TestCodeOwnerConfigUpdate#codeOwnerSetsModification()
      */
-    abstract Builder codeOwnerSetsModification(CodeOwnerSetModification codeOwnerSetsModification);
+    public abstract Builder codeOwnerSetsModification(
+        CodeOwnerSetModification codeOwnerSetsModification);
 
     /**
      * Gets the code owner modification.
