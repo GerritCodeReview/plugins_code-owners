@@ -54,7 +54,7 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnerProjectConfigRestIT}.
  */
 public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
-  @Inject ProjectOperations projectOperations;
+  @Inject private ProjectOperations projectOperations;
 
   private BackendConfig backendConfig;
 
