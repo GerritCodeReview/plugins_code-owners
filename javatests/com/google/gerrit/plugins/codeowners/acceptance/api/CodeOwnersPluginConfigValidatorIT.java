@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.config;
+package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.acceptance.GitUtil.fetch;
 import static com.google.gerrit.acceptance.GitUtil.pushHead;
 
-import com.google.gerrit.entities.BranchNameKey;
-import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
-import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import java.util.Optional;
+
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.PushResult;
@@ -31,8 +27,20 @@ import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link CodeOwnersPluginConfigValidator}. */
-public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest {
+import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
+import com.google.gerrit.plugins.codeowners.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
+import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
+import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+
+/** Tests for {@code com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfigValidator}. */
+public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   private CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
 
   @Before
