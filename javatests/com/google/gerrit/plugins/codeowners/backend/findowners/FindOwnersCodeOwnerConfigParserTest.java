@@ -22,6 +22,7 @@ import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParse
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
 import java.util.Arrays;
 import org.junit.Test;
 
@@ -57,14 +58,22 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         Arrays.stream(codeOwnerSets)
             .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
             .collect(toImmutableList())) {
-      b.append(
-          String.format(
-              "per-file %s=%s\n",
-              codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
-              codeOwnerSet.codeOwners().stream()
-                  .map(CodeOwnerReference::email)
-                  .sorted()
-                  .collect(joining(","))));
+      if (codeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
+        b.append(
+            String.format(
+                "per-file %s=set noparent\n",
+                codeOwnerSet.pathExpressions().stream().sorted().collect(joining(","))));
+      }
+      if (!codeOwnerSet.codeOwners().isEmpty()) {
+        b.append(
+            String.format(
+                "per-file %s=%s\n",
+                codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
+                codeOwnerSet.codeOwners().stream()
+                    .map(CodeOwnerReference::email)
+                    .sorted()
+                    .collect(joining(","))));
+      }
     }
 
     return b.toString();
@@ -170,5 +179,40 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         // The code owner sets without path expressions are merged into one code owner set.
         getCodeOwnerConfig(
             false, CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_2, EMAIL_3)));
+  }
+
+  @Test
+  public void setNoParentForPathExpressions() throws Exception {
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.builder()
+            .setIgnoreGlobalAndParentCodeOwners()
+            .addPathExpression("*.md")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_2)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet),
+        codeOwnerConfig -> {
+          // we expect 2 code owner sets:
+          // 1. code owner set for line "per-file *.md,foo=set noparent"
+          // 2. code owner set for line "per-file *.md,foo=admin@example.com,jdoe@example.com"
+          assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().hasSize(2);
+
+          // 1. assert code owner set for line "per-file *.md,foo=set noparent"
+          CodeOwnerSetSubject codeOwnerSet1Subject =
+              assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().element(0);
+          codeOwnerSet1Subject.hasIgnoreParentCodeOwnersThat().isTrue();
+          codeOwnerSet1Subject.hasPathExpressionsThat().containsExactly("*.md", "foo");
+          codeOwnerSet1Subject.hasCodeOwnersThat().isEmpty();
+
+          // 2. assert code owner set for line "per-file
+          // *.md,foo=admin@example.com,jdoe@example.com"
+          CodeOwnerSetSubject codeOwnerSet2Subject =
+              assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().element(1);
+          codeOwnerSet2Subject.hasIgnoreParentCodeOwnersThat().isFalse();
+          codeOwnerSet2Subject.hasPathExpressionsThat().containsExactly("*.md", "foo");
+          codeOwnerSet2Subject.hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2);
+        });
   }
 }

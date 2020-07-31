@@ -112,4 +112,29 @@ public class CodeOwnerSetTest extends AbstractCodeOwnersTest {
             NullPointerException.class, () -> CodeOwnerSet.builder().addPathExpression(null));
     assertThat(npe).hasMessageThat().isEqualTo("pathExpression");
   }
+
+  @Test
+  public void cannotCreateCodeOwnerSetThatIgnoresParentCodeOwnersAndHasNoPathExpressions()
+      throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> CodeOwnerSet.builder().setIgnoreGlobalAndParentCodeOwners().build());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "ignoreParentCodeOwners = true is not allowed for code owner set without path expressions");
+  }
+
+  @Test
+  public void canCreateCodeOwnerSetThatIgnoresParentCodeOwnersIfPathExpressionHaveBeenSet()
+      throws Exception {
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.builder()
+            .setIgnoreGlobalAndParentCodeOwners()
+            .addPathExpression("*.md")
+            .build();
+    assertThat(codeOwnerSet).hasIgnoreParentCodeOwnersThat().isTrue();
+    assertThat(codeOwnerSet).hasPathExpressionsThat().isNotEmpty();
+  }
 }

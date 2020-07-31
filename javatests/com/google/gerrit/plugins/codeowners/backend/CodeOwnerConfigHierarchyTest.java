@@ -26,6 +26,7 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy.CodeOwnerConfigVisitor;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.inject.Inject;
@@ -56,12 +57,14 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
   private CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
+  private TestPathExpressions testPathExpressions;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
     codeOwnerConfigHierarchy = plugin.getSysInjector().getInstance(CodeOwnerConfigHierarchy.class);
+    testPathExpressions = plugin.getSysInjector().getInstance(TestPathExpressions.class);
   }
 
   @Test
@@ -101,7 +104,25 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerConfigHierarchy.visit(
                     branchNameKey, getCurrentRevision(branchNameKey), null, visitor));
-    assertThat(npe).hasMessageThat().isEqualTo("path");
+    assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
+  }
+
+  @Test
+  public void cannotVisitCodeOwnerConfigsForRelativePath() throws Exception {
+    BranchNameKey branchNameKey = BranchNameKey.create(project, "master");
+    String relativePath = "foo/bar/baz.md";
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnerConfigHierarchy.visit(
+                    branchNameKey,
+                    getCurrentRevision(branchNameKey),
+                    Paths.get(relativePath),
+                    visitor));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("path %s must be absolute", relativePath));
   }
 
   @Test
@@ -388,6 +409,125 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     orderVerifier
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void
+      visitorIsNotInvokedForParentCodeOwnerConfigsIfAMatchingCodeOwnerSetIgnoresParentCodeOwners()
+          throws Exception {
+    String branch = "master";
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branch)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branch)
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    CodeOwnerConfig.Key fooBarCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/bar/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .setIgnoreGlobalAndParentCodeOwners()
+                    .addPathExpression(testPathExpressions.matchAllFilesInSubfolder("baz"))
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .create();
+
+    CodeOwnerConfig.Key fooBarBazCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/bar/baz")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit(branch, "/foo/bar/baz/README.md");
+
+    // Verify that we received the callbacks in the right order, starting from the folder of the
+    // given path up to the root folder. There is no callback for the '/' and '/foo/' folders since
+    // the code owner config for the '/foo/bar/' folder contains a matching code owner set that
+    // defines that parent code owners should be
+    // ignored.
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarBazCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void
+      visitorIsInvokedForParentCodeOwnerConfigsIfANonMatchingCodeOwnerSetIgnoresParentCodeOwners()
+          throws Exception {
+    String branch = "master";
+
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key fooBarCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branch)
+            .folderPath("/foo/bar/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .setIgnoreGlobalAndParentCodeOwners()
+                    .addPathExpression(testPathExpressions.matchFileTypeInCurrentFolder("txt"))
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit(branch, "/foo/bar/baz.md");
+
+    // Verify that we received the callbacks in the right order, starting from the folder of the
+    // given path up to the root folder.
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
   }
 

@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
 
+import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
@@ -50,6 +51,15 @@ public class CodeOwnerSetSubject extends Subject {
   private CodeOwnerSetSubject(FailureMetadata metadata, CodeOwnerSet codeOwnerSet) {
     super(metadata, codeOwnerSet);
     this.codeOwnerSet = codeOwnerSet;
+  }
+
+  /**
+   * Returns an subject for the ignore parent code owners flag in the code owner set.
+   *
+   * @return subject for the ignore parent code owners flag in the code owner set
+   */
+  public BooleanSubject hasIgnoreParentCodeOwnersThat() {
+    return check("codeOwners()").that(codeOwnerSet().ignoreGlobalAndParentCodeOwners());
   }
 
   /**
