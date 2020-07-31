@@ -24,6 +24,7 @@ import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
+import java.util.stream.Stream;
 
 /**
  * Class to compute the local code owners for a path from a {@link CodeOwnerConfig}.
@@ -58,12 +59,59 @@ class LocalCodeOwners {
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
+    Stream.Builder<CodeOwnerSet> matchingCodeOwnerSets = Stream.builder();
+
+    // Add all code owner sets that have matching path expressions.
+    getMatchingPerFileCodeOwnerSets(codeOwnerConfig, absolutePath)
+        .forEach(matchingCodeOwnerSets::add);
+
+    // Add all code owner sets without path expressions if global code owners are not ignored.
+    if (!ignoreGlobalCodeOwners(codeOwnerConfig, absolutePath)) {
+      codeOwnerConfig.codeOwnerSets().stream()
+          .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
+          .forEach(matchingCodeOwnerSets::add);
+    }
+
+    // Resolve the matching code owner sets to code owner references.
+    return matchingCodeOwnerSets
+        .build()
+        .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+        .collect(toImmutableSet());
+  }
+
+  /**
+   * Whether parent code owners should be ignored for the given path.
+   *
+   * @param codeOwnerConfig the code owner config to be read
+   * @param absolutePath path for which it should be checked if parent code owners should be
+   *     ignored; the path must be absolute; can be the path of a file or folder; the path may or
+   *     may not exist
+   * @return whether parent code owners should be ignored for the given path
+   */
+  public boolean ignoreParentCodeOwners(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    requireNonNull(absolutePath, "absolutePath");
+    checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
+
+    if (codeOwnerConfig.ignoreParentCodeOwners()) {
+      return true;
+    }
+
+    return ignoreGlobalCodeOwners(codeOwnerConfig, absolutePath);
+  }
+
+  private boolean ignoreGlobalCodeOwners(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
+    return getMatchingPerFileCodeOwnerSets(codeOwnerConfig, absolutePath)
+        .anyMatch(codeOwnerSet -> codeOwnerSet.ignoreGlobalAndParentCodeOwners());
+  }
+
+  private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets(
+      CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
     Path relativePath = codeOwnerConfig.relativize(absolutePath);
     PathExpressionMatcher matcher = getMatcher(codeOwnerConfig.key());
     return codeOwnerConfig.codeOwnerSets().stream()
-        .filter(codeOwnerSet -> matches(codeOwnerSet, relativePath, matcher))
-        .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
-        .collect(toImmutableSet());
+        .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
+        .filter(codeOwnerSet -> matches(codeOwnerSet, relativePath, matcher));
   }
 
   /**
@@ -91,13 +139,14 @@ class LocalCodeOwners {
   }
 
   /**
-   * Whether the given owner set matches the given path.
+   * Whether the given code owner set matches the given path.
    *
-   * <p>A path matches the owner set, if any of its path expressions matches the path, or if the
-   * code owner set doesn't contain any path expressions.
+   * <p>A path matches the code owner set, if any of its path expressions matches the path.
+   *
+   * <p>The passed in code owner set must have at least one path expression.
    *
    * @param codeOwnerSet the code owner set for which it should be checked if it matches the given
-   *     path
+   *     path, must have at least one path expression
    * @param relativePath path for which it should be checked whether it matches the given owner set;
    *     the path must be relative to the path in which the {@link CodeOwnerConfig} is stored that
    *     contains the code owner set; can be the path of a file or folder; the path may or may not
@@ -113,11 +162,8 @@ class LocalCodeOwners {
     requireNonNull(relativePath, "relativePath");
     requireNonNull(matcher, "matcher");
     checkState(!relativePath.isAbsolute(), "path %s must be relative", relativePath);
-
-    // If no path expressions are set, the code owners apply for all files.
-    if (codeOwnerSet.pathExpressions().isEmpty()) {
-      return true;
-    }
+    checkState(
+        !codeOwnerSet.pathExpressions().isEmpty(), "code owner set must have path expressions");
 
     return codeOwnerSet.pathExpressions().stream()
         .anyMatch(pathExpression -> matcher.matches(pathExpression, relativePath));

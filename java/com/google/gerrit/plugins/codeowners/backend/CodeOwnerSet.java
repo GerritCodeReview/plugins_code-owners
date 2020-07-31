@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
@@ -37,6 +38,30 @@ import java.util.Arrays;
  */
 @AutoValue
 public abstract class CodeOwnerSet {
+  /**
+   * Gets whether global code owners (code owners from code owner sets without path expression in
+   * the same code owner config) and code owners from parent code owner configs (code owner configs
+   * in parent folders) should be ignored.
+   *
+   * <p>Code owner configs are organized hierarchically, e.g. the code owner config at "/" is the
+   * parent config of the code owner config at "/foo" which in turn is the parent config of the code
+   * owner config at "/foo/bar". Code owners from the parent config can be ignored by setting {@link
+   * CodeOwnerConfig#ignoreParentCodeOwners()} on code owner config level.
+   *
+   * <p>In addition there are 2 hierarchy levels within each code owner config. 1. global code
+   * owners applying to all files in the folder (represented by code owner sets without path
+   * expressions), 2. per file code owners (represented by code owner sets with path expressions).
+   * On per file level it is possible to ignore the global code owners (code owner sets without path
+   * expressions) by setting {@link #ignoreGlobalAndParentCodeOwners()} on the code owner set. If
+   * {@link #ignoreGlobalAndParentCodeOwners()} is set, implicitly for matching files also all code
+   * owners inherited from parent code owner configs are ignored.
+   *
+   * <p>If a matching code owner set ignores glabel and parent code owners, matching sibling code
+   * owner sets (other code owner sets with matching path expressions in the same code owner config)
+   * are still honored.
+   */
+  public abstract boolean ignoreGlobalAndParentCodeOwners();
+
   /** Path expressions that match the files that are owned by the {@link #codeOwners()}. */
   public abstract ImmutableSet<String> pathExpressions();
 
@@ -52,7 +77,9 @@ public abstract class CodeOwnerSet {
 
   /** Creates a builder for a {@link CodeOwnerSet}. */
   public static CodeOwnerSet.Builder builder() {
-    return new AutoValue_CodeOwnerSet.Builder().setPathExpressions(ImmutableSet.of());
+    return new AutoValue_CodeOwnerSet.Builder()
+        .setIgnoreGlobalAndParentCodeOwners(false)
+        .setPathExpressions(ImmutableSet.of());
   }
 
   /**
@@ -77,6 +104,31 @@ public abstract class CodeOwnerSet {
 
   @AutoValue.Builder
   public abstract static class Builder {
+    /**
+     * Sets whether global code owners (code owners from code owner sets without path expression in
+     * the same code owner config) and code owners from parent code owner configs (code owner
+     * configs in parent folders) should be ignored.
+     *
+     * @param ignoreGlobalAndParentCodeOwners whether global code owners and code owners from parent
+     *     code owner configs should be ignored
+     * @return the Builder instance for chaining calls
+     * @see CodeOwnerSet#ignoreGlobalAndParentCodeOwners()
+     */
+    public abstract Builder setIgnoreGlobalAndParentCodeOwners(
+        boolean ignoreGlobalAndParentCodeOwners);
+
+    /**
+     * Sets that global code owners (code owners from code owner sets without path expression in the
+     * same code owner config) and code owners from parent code owner configs (code owner configs in
+     * parent folders) should be ignored.
+     *
+     * @return the Builder instance for chaining calls
+     * @see CodeOwnerSet#ignoreGlobalAndParentCodeOwners()
+     */
+    public Builder setIgnoreGlobalAndParentCodeOwners() {
+      return setIgnoreGlobalAndParentCodeOwners(true);
+    }
+
     /**
      * Sets the path expressions that match the files that are owned by the code owners.
      *
@@ -132,6 +184,16 @@ public abstract class CodeOwnerSet {
     }
 
     /** Builds the {@link CodeOwnerSet} instance. */
-    public abstract CodeOwnerSet build();
+    public CodeOwnerSet build() {
+      CodeOwnerSet codeOwnerSet = autoBuild();
+      checkState(
+          !(codeOwnerSet.ignoreGlobalAndParentCodeOwners()
+              && codeOwnerSet.pathExpressions().isEmpty()),
+          "ignoreGlobalAndParentCodeOwners = true is not allowed for code owner set without path"
+              + " expressions");
+      return codeOwnerSet;
+    }
+
+    abstract CodeOwnerSet autoBuild();
   }
 }
