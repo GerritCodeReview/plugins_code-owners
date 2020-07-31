@@ -120,6 +120,7 @@ The following request parameters can be specified:
 | `o`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) that controls which fields in the returned accounts should be populated. Can be specified multiple times. If not given, only the `_account_id` field for the account ID is populated.
 | `O`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
 | `limit`\|`n` | optional | Limit defining how many code owners should be returned at most. By default 10.
+| `revision` | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
 
 As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
 The returned code owners are sorted by an internal score that expresses how good
