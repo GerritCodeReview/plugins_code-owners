@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8f027db8_67bd56bd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-31T13:51:29Z",
+      "side": 1,
+      "message": "seems that you\u0027re overriding the code owner configs. Wouldn\u0027t it be nice to be able to disable a code owner config, and then enable it, without losing all the data? (Did I understand correctly that all the data is lost?)",
+      "range": {
+        "startLine": 120,
+        "startChar": 17,
+        "endLine": 120,
+        "endChar": 36
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5b30fee_b3c08183",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInfo.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-31T13:51:29Z",
+      "side": 1,
+      "message": "I think it\u0027s a little weird that status is not set, but maybe in your use case it\u0027s fine.",
+      "range": {
+        "startLine": 29,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 15
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "00078e1e_54c44ea1",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-31T13:51:29Z",
+      "side": 1,
+      "message": "optional",
+      "range": {
+        "startLine": 305,
+        "startChar": 15,
+        "endLine": 305,
+        "endChar": 22
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "406f7089_32205fb7",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-07-31T13:51:29Z",
+      "side": 1,
+      "message": "are",
+      "range": {
+        "startLine": 306,
+        "startChar": 84,
+        "endLine": 306,
+        "endChar": 86
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
