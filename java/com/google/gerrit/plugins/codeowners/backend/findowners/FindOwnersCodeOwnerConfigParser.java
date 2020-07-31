@@ -65,6 +65,9 @@ import java.util.stream.Stream;
 @Singleton
 @VisibleForTesting
 public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
+  // Artifical owner token for "set noparent" when used in per-file.
+  private static final String TOK_SET_NOPARENT = "set noparent";
+
   @Override
   public CodeOwnerConfig parse(
       CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
@@ -96,7 +99,8 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
 
-    private static final Pattern PAT_PER_FILE_OWNERS = Pattern.compile("^(" + EMAIL_LIST + ")$");
+    private static final Pattern PAT_PER_FILE_OWNERS =
+        Pattern.compile("^(" + EMAIL_LIST + "|" + SET_NOPARENT + ")$");
     private static final Pattern PAT_GLOBS =
         Pattern.compile("^(" + GLOB + "(" + COMMA + GLOB + ")*)$");
 
@@ -158,6 +162,12 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
           new String[] {removeExtraSpaces(m.group(1)), removeExtraSpaces(m.group(2))};
       String[] dirGlobs = globsAndOwners[0].split(COMMA, -1);
       String directive = globsAndOwners[1];
+      if (directive.equals(TOK_SET_NOPARENT)) {
+        return CodeOwnerSet.builder()
+            .setIgnoreGlobalAndParentCodeOwners()
+            .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
+            .build();
+      }
       List<String> ownerEmails = Arrays.asList(directive.split(COMMA, -1));
       return CodeOwnerSet.builder()
           .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
@@ -230,17 +240,26 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
           // code owner set defines global code owners and is handled in
           // formatGlobalCodeOwners(CodeOwnerConfig).
           .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
-          // Filter out code owner sets without code owners. The OWNERS syntax doesn't support
-          // per-file expressions without code owners and if they were possible they would have no
-          // effect.
-          .filter(codeOwnerSet -> !codeOwnerSet.codeOwners().isEmpty())
-          .map(
-              codeOwnerSet ->
-                  String.format(
-                      PER_FILE_LINE_FORMAT,
-                      formatValuesAsList(codeOwnerSet.pathExpressions()),
-                      formatCodeOwnerReferencesAsList(codeOwnerSet.codeOwners())))
+          .map(Formatter::formatCodeOwnerSet)
           .forEach(b::append);
+      return b.toString();
+    }
+
+    private static String formatCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
+      String formattedPathExpressions = formatValuesAsList(codeOwnerSet.pathExpressions());
+
+      StringBuilder b = new StringBuilder();
+      if (codeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
+        b.append(String.format(PER_FILE_LINE_FORMAT, formattedPathExpressions, TOK_SET_NOPARENT));
+      }
+
+      if (!codeOwnerSet.codeOwners().isEmpty()) {
+        b.append(
+            String.format(
+                PER_FILE_LINE_FORMAT,
+                formattedPathExpressions,
+                formatCodeOwnerReferencesAsList(codeOwnerSet.codeOwners())));
+      }
       return b.toString();
     }
 

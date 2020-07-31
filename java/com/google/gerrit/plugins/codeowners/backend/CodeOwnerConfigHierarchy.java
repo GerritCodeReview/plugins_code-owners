@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.gerrit.entities.BranchNameKey;
@@ -42,10 +43,12 @@ public class CodeOwnerConfigHierarchy {
   }
 
   private final CodeOwners codeOwners;
+  private final LocalCodeOwners localCodeOwners;
 
   @Inject
-  CodeOwnerConfigHierarchy(CodeOwners codeOwners) {
+  CodeOwnerConfigHierarchy(CodeOwners codeOwners, LocalCodeOwners localCodeOwners) {
     this.codeOwners = codeOwners;
+    this.localCodeOwners = localCodeOwners;
   }
 
   /**
@@ -54,23 +57,25 @@ public class CodeOwnerConfigHierarchy {
    *
    * @param branch project and branch from which the code owner configs should be visited
    * @param revision the branch revision from which the code owner configs should be loaded
-   * @param path the path for which the code owner configs should be visited
+   * @param absolutePath the path for which the code owner configs should be visited; the path must
+   *     be absolute; can be the path of a file or folder; the path may or may not exist
    * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
    *     configs
    */
   public void visit(
       BranchNameKey branch,
       ObjectId revision,
-      Path path,
+      Path absolutePath,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
     requireNonNull(branch, "branch");
     requireNonNull(revision, "revision");
-    requireNonNull(path, "path");
+    requireNonNull(absolutePath, "absolutePath");
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
+    checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
     // Next path in which we look for a code owner configuration. We start at the given path and
     // then go up the parent hierarchy.
-    Path ownerConfigFolder = path;
+    Path ownerConfigFolder = absolutePath;
 
     // Iterate over the parent code owner configurations.
     while (ownerConfigFolder != null) {
@@ -80,7 +85,8 @@ public class CodeOwnerConfigHierarchy {
           codeOwners.get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder), revision);
       if (codeOwnerConfig.isPresent()) {
         boolean visitFurtherCodeOwnerConfigs = codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
-        if (!visitFurtherCodeOwnerConfigs || codeOwnerConfig.get().ignoreParentCodeOwners()) {
+        if (!visitFurtherCodeOwnerConfigs
+            || localCodeOwners.ignoreParentCodeOwners(codeOwnerConfig.get(), absolutePath)) {
           return;
         }
       }
