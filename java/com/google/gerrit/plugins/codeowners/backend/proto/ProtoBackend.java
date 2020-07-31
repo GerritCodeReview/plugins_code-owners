@@ -27,7 +27,14 @@ import com.google.inject.Singleton;
 import java.util.Optional;
 import org.eclipse.jgit.lib.PersonIdent;
 
-/** Backend that supports a proto syntax for storing {@link CodeOwnerConfig}s. */
+/**
+ * Backend that supports a proto syntax for storing {@link CodeOwnerConfig}s.
+ *
+ * <p><strong>Note:</strong> This backend is currently only experimental and should not be used in
+ * production. The reason for this is that the proto syntax is not finalized yet and backwards
+ * incompatible changes to it are likely to happen. Instead it's recommended to use the {@link
+ * com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend}.
+ */
 @Singleton
 public class ProtoBackend extends AbstractFileBasedCodeOwnerBackend {
   /** The ID of this code owner backend. */
