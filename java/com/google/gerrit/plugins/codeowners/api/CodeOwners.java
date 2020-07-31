@@ -46,6 +46,7 @@ public interface CodeOwners {
   abstract class QueryRequest {
     private Set<ListAccountsOption> options = EnumSet.noneOf(ListAccountsOption.class);
     private Integer limit;
+    private String revision;
 
     /**
      * Lists the code owners for the given path.
@@ -91,6 +92,18 @@ public interface CodeOwners {
       return this;
     }
 
+    /**
+     * Sets the branch revision from which the code owner configs should be read.
+     *
+     * <p>Not supported for querying code owners for a path in a change.
+     *
+     * @param revision the revision from which the code owner configs should be read
+     */
+    public QueryRequest forRevision(String revision) {
+      this.revision = revision;
+      return this;
+    }
+
     /** Returns the {@link ListAccountsOption} options which have been set on the request. */
     public ImmutableSet<ListAccountsOption> getOptions() {
       return ImmutableSet.copyOf(options);
@@ -99,6 +112,11 @@ public interface CodeOwners {
     /** Returns the limit which has been set on the request. */
     public Optional<Integer> getLimit() {
       return Optional.ofNullable(limit);
+    }
+
+    /** Returns the branch revision from which the code owner configs should be read. */
+    public Optional<String> getRevision() {
+      return Optional.ofNullable(revision);
     }
 
     @Override
