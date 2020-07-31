@@ -147,4 +147,29 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
     b.append("  }\n").append("}\n");
     return b.toString();
   }
+
+  @Test
+  public void cannotFormatCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners() throws Exception {
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.builder()
+            .setIgnoreGlobalAndParentCodeOwners()
+            .addPathExpression("*.md")
+            .addPathExpression("foo")
+            .addCodeOwnerEmail(EMAIL_1)
+            .addCodeOwnerEmail(EMAIL_2)
+            .build();
+
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addCodeOwnerSet(codeOwnerSet)
+            .build();
+
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigParser.formatAsString(codeOwnerConfig));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("ignoreGlobaleAndParentCodeOwners is not supported");
+  }
 }

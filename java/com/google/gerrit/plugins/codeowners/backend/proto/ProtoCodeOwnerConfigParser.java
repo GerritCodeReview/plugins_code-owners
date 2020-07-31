@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.proto;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
@@ -112,6 +113,9 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static void setCodeOwnerSets(
         OwnersConfig.Builder ownersConfigProtoBuilder, CodeOwnerConfig codeOwnerConfig) {
       for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
+        checkState(
+            !codeOwnerSet.ignoreGlobalAndParentCodeOwners(),
+            "ignoreGlobaleAndParentCodeOwners is not supported");
         OwnerSet.Builder ownerSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
         ownerSetProtoBuilder.addAllPathExpressions(codeOwnerSet.pathExpressions());
         codeOwnerSet.codeOwners().stream()
