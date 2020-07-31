@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "464a2308_5f26683d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-31T14:08:09Z",
+      "side": 1,
+      "message": "Yes, this is correct. This method overrides the config.\n\nThis is test code and at the moment no test needs to append something to an existing config, hence this method is kept simple. We can improve it when a test needs this functionality.",
+      "parentUuid": "8f027db8_67bd56bd",
+      "range": {
+        "startLine": 120,
+        "startChar": 17,
+        "endLine": 120,
+        "endChar": 36
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5b30fee_b3c08183",
         "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInfo.java",
         "patchSetId": 8
@@ -36,6 +60,30 @@
       "writtenOn": "2020-07-31T13:51:29Z",
       "side": 1,
       "message": "I think it\u0027s a little weird that status is not set, but maybe in your use case it\u0027s fine.",
+      "range": {
+        "startLine": 29,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 15
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9b5700d3_1121da17",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInfo.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-31T14:08:09Z",
+      "side": 1,
+      "message": "I think this is consistent with the rest of the REST API. If an entity is empty or if it represents the default value, we always omit it in the JSON. If we would return this entity in this case all fields in it would be empty. So callers would need to be aware of this instead of being aware that the status can be omitted. So it doesn\u0027t make anything easier for callers.\n\nSo I prefer to keep this as it is.",
+      "parentUuid": "c5b30fee_b3c08183",
       "range": {
         "startLine": 29,
         "startChar": 8,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "a5a8924d_8ae3fc2d",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-31T14:08:09Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "00078e1e_54c44ea1",
+      "range": {
+        "startLine": 305,
+        "startChar": 15,
+        "endLine": 305,
+        "endChar": 22
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "406f7089_32205fb7",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 8
@@ -91,6 +163,30 @@
       "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a13ea570_be33f194",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 306,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-07-31T14:08:09Z",
+      "side": 1,
+      "message": "I think \"is\" is correct here as it\u0027s the code owners functionality that is disabled, not the branches.",
+      "parentUuid": "406f7089_32205fb7",
+      "range": {
+        "startLine": 306,
+        "startChar": 84,
+        "endLine": 306,
+        "endChar": 86
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
