@@ -45,16 +45,7 @@ public class TestPathExpressions {
    * @param fileType the file type
    */
   public String matchFileTypeInCurrentFolder(String fileType) {
-    CodeOwnerBackend defaultBackend = backendConfig.getDefaultBackend();
-    PathExpressionMatcher pathExpressionMatcher =
-        defaultBackend
-            .getPathExpressionMatcher()
-            .orElseThrow(
-                () ->
-                    new IllegalStateException(
-                        String.format(
-                            "code owner backend %s doesn't support path expressions",
-                            defaultBackend.getClass().getName())));
+    PathExpressionMatcher pathExpressionMatcher = getPathExpressionMatcher();
     if (pathExpressionMatcher instanceof GlobMatcher
         || pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
       return "*." + fileType;
@@ -63,5 +54,35 @@ public class TestPathExpressions {
         String.format(
             "path expression matcher %s not supported",
             pathExpressionMatcher.getClass().getName()));
+  }
+
+  /**
+   * Creates a path expression that matches all files of the given subfolder.
+   *
+   * @param subfolder the subfolder
+   */
+  public String matchAllFilesInSubfolder(String subfolder) {
+    PathExpressionMatcher pathExpressionMatcher = getPathExpressionMatcher();
+    if (pathExpressionMatcher instanceof GlobMatcher) {
+      return subfolder + "/**";
+    } else if (pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
+      return subfolder + "/...";
+    }
+    throw new IllegalStateException(
+        String.format(
+            "path expression matcher %s not supported",
+            pathExpressionMatcher.getClass().getName()));
+  }
+
+  private PathExpressionMatcher getPathExpressionMatcher() {
+    CodeOwnerBackend defaultBackend = backendConfig.getDefaultBackend();
+    return defaultBackend
+        .getPathExpressionMatcher()
+        .orElseThrow(
+            () ->
+                new IllegalStateException(
+                    String.format(
+                        "code owner backend %s doesn't support path expressions",
+                        defaultBackend.getClass().getName())));
   }
 }
