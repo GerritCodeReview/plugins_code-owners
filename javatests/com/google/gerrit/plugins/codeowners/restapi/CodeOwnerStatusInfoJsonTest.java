@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.common.ChangeType;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.FileCodeOwnerStatusInfo;
@@ -41,7 +42,7 @@ import org.eclipse.jgit.diff.DiffEntry;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerStatusInfoJson}. */
-public class CodeOwnerStatusInfoJsonTest {
+public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotFormatNullPathCodeOwnerStatus() throws Exception {
     NullPointerException npe =
