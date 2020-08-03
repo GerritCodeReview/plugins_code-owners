@@ -65,7 +65,7 @@ public abstract class RequiredApproval {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return labelType().getName() + "+" + value();
   }
 
