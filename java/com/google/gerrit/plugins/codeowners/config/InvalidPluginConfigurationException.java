@@ -54,8 +54,6 @@ public class InvalidPluginConfigurationException extends RuntimeException {
 
   private static final long serialVersionUID = 1L;
 
-  private static final String MESSAGE_FORMAT = "Invalid configuration of the %s plugin. %s";
-
   /**
    * Constructor.
    *
@@ -63,6 +61,6 @@ public class InvalidPluginConfigurationException extends RuntimeException {
    *     exposed to end users
    */
   public InvalidPluginConfigurationException(String pluginName, String message) {
-    super(String.format(MESSAGE_FORMAT, pluginName, message));
+    super(String.format("Invalid configuration of the %s plugin. %s", pluginName, message));
   }
 }
