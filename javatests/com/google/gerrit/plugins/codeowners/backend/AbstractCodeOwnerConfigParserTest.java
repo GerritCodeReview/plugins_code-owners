@@ -23,6 +23,7 @@ import com.google.common.base.Splitter;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.function.Function;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,7 +57,15 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   protected abstract Class<? extends CodeOwnerConfigParser> getCodeOwnerConfigParserClass();
 
   /**
-   * Must return the expected code owner config string for a code owner config with the given
+   * Must return the expected code owner config string for the given code owner config.
+   *
+   * @param codeOwnerConfig the code owner sets that should be formatted
+   * @return the expected code owner config string for the given code owner config
+   */
+  protected abstract String getCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig);
+
+  /**
+   * Returns the expected code owner config string for a code owner config with the given
    * parameters.
    *
    * @param ignoreParentCodeOwners whether code owners from parent code owner configs (code owner
@@ -64,8 +73,14 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
    * @param codeOwnerSets the code owner sets that define the code ownerships
    * @return the expected code owner config string for a code owner config with the given parameters
    */
-  protected abstract String getCodeOwnerConfig(
-      boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets);
+  protected String getCodeOwnerConfig(
+      boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets) {
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .setIgnoreParentCodeOwners(ignoreParentCodeOwners);
+    Arrays.stream(codeOwnerSets).forEach(codeOwnerConfigBuilder::addCodeOwnerSet);
+    return getCodeOwnerConfig(codeOwnerConfigBuilder.build());
+  }
 
   /**
    * Returns the expected code owner config string for a code owner config with the given emails as

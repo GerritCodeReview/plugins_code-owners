@@ -19,11 +19,11 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubjec
 import static java.util.stream.Collectors.joining;
 
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
-import java.util.Arrays;
 import org.junit.Test;
 
 /** Tests for {@link FindOwnersCodeOwnerConfigParser}. */
@@ -34,16 +34,15 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Override
-  protected String getCodeOwnerConfig(
-      boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets) {
+  protected String getCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) {
     StringBuilder b = new StringBuilder();
-    if (ignoreParentCodeOwners) {
+    if (codeOwnerConfig.ignoreParentCodeOwners()) {
       b.append("set noparent\n");
     }
 
     // global code owners
     for (String email :
-        Arrays.stream(codeOwnerSets)
+        codeOwnerConfig.codeOwnerSets().stream()
             .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
             .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
             .map(CodeOwnerReference::email)
@@ -55,7 +54,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
     // per-file code owners
     for (CodeOwnerSet codeOwnerSet :
-        Arrays.stream(codeOwnerSets)
+        codeOwnerConfig.codeOwnerSets().stream()
             .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
             .collect(toImmutableList())) {
       if (codeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
