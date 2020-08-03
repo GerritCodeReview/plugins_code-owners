@@ -37,14 +37,13 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
   }
 
   @Override
-  protected String getCodeOwnerConfig(
-      boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets) {
+  protected String getCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) {
     StringBuilder b = new StringBuilder();
     b.append("owners_config {\n");
-    if (ignoreParentCodeOwners) {
+    if (codeOwnerConfig.ignoreParentCodeOwners()) {
       b.append("  ignore_parent_owners: true\n");
     }
-    for (CodeOwnerSet codeOwnerSet : codeOwnerSets) {
+    for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
       if (!codeOwnerSet.codeOwners().isEmpty()) {
         b.append("  owner_sets {\n");
         for (String pathExpression : codeOwnerSet.pathExpressions()) {
