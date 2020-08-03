@@ -319,7 +319,7 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
     cfg.setString("plugin", "code-owners", KEY_REQUIRED_APPROVAL, "Code-Review+2");
     PluginConfigFactory pluginConfigFactory = mock(PluginConfigFactory.class);
     when(pluginConfigFactory.getFromGerritConfig("code-owners"))
-        .thenReturn(new PluginConfig("code-owners", cfg));
+        .thenReturn(PluginConfig.create("code-owners", cfg, null));
     Optional<RequiredApproval> requiredApproval =
         RequiredApproval.getFromGlobalPluginConfig(
             pluginConfigFactory, "code-owners", projectState);
@@ -335,7 +335,7 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
     cfg.setString("plugin", "code-owners", KEY_REQUIRED_APPROVAL, "INVALID");
     PluginConfigFactory pluginConfigFactory = mock(PluginConfigFactory.class);
     when(pluginConfigFactory.getFromGerritConfig("code-owners"))
-        .thenReturn(new PluginConfig("code-owners", cfg));
+        .thenReturn(PluginConfig.create("code-owners", cfg, null));
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
