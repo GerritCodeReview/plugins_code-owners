@@ -148,32 +148,28 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void resolveLocalCodeOwnersForEmptyCodeOwnerConfig() throws Exception {
+  public void resolvePathCodeOwnersForEmptyCodeOwnerConfig() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/")).build();
     assertThat(
-            codeOwnerResolver
-                .get()
-                .resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
+            codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .isEmpty();
   }
 
   @Test
-  public void resolveLocalCodeOwners() throws Exception {
+  public void resolvePathCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     assertThat(
-            codeOwnerResolver
-                .get()
-                .resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
+            codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id());
   }
 
   @Test
-  public void resolveLocalCodeOwnersNonResolvableCodeOwnersAreFilteredOut() throws Exception {
+  public void resolvePathCodeOwnersNonResolvableCodeOwnersAreFilteredOut() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
             .addCodeOwnerSet(
@@ -181,24 +177,22 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                     admin.email(), "non-existing@example.com"))
             .build();
     assertThat(
-            codeOwnerResolver
-                .get()
-                .resolveLocalCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
+            codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id());
   }
 
   @Test
-  public void cannotResolveLocalCodeOwnersOfNullCodeOwnerConfig() throws Exception {
+  public void cannotResolvePathCodeOwnersOfNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().resolveLocalCodeOwners(null, Paths.get("/README.md")));
+            () -> codeOwnerResolver.get().resolvePathCodeOwners(null, Paths.get("/README.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
   @Test
-  public void cannotResolveLocalCodeOwnersForNullPath() throws Exception {
+  public void cannotResolvePathCodeOwnersForNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
@@ -206,12 +200,12 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().resolveLocalCodeOwners(codeOwnerConfig, null));
+            () -> codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 
   @Test
-  public void cannotResolveLocalCodeOwnersForRelativePath() throws Exception {
+  public void cannotResolvePathCodeOwnersForRelativePath() throws Exception {
     String relativePath = "foo/bar.md";
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
@@ -223,7 +217,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerResolver
                     .get()
-                    .resolveLocalCodeOwners(codeOwnerConfig, Paths.get(relativePath)));
+                    .resolvePathCodeOwners(codeOwnerConfig, Paths.get(relativePath)));
     assertThat(npe)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));

@@ -262,7 +262,7 @@ public class CodeOwnerApprovalCheck {
   private ImmutableSet<Account.Id> getCodeOwnerAccountIds(
       CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
     return codeOwnerResolver.get().enforceVisibility(false)
-        .resolveLocalCodeOwners(codeOwnerConfig, absolutePath).stream()
+        .resolvePathCodeOwners(codeOwnerConfig, absolutePath).stream()
         .map(CodeOwner::accountId)
         .collect(toImmutableSet());
   }

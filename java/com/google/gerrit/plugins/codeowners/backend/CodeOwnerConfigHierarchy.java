@@ -43,12 +43,12 @@ public class CodeOwnerConfigHierarchy {
   }
 
   private final CodeOwners codeOwners;
-  private final LocalCodeOwners localCodeOwners;
+  private final PathCodeOwners pathCodeOwners;
 
   @Inject
-  CodeOwnerConfigHierarchy(CodeOwners codeOwners, LocalCodeOwners localCodeOwners) {
+  CodeOwnerConfigHierarchy(CodeOwners codeOwners, PathCodeOwners pathCodeOwners) {
     this.codeOwners = codeOwners;
-    this.localCodeOwners = localCodeOwners;
+    this.pathCodeOwners = pathCodeOwners;
   }
 
   /**
@@ -86,7 +86,7 @@ public class CodeOwnerConfigHierarchy {
       if (codeOwnerConfig.isPresent()) {
         boolean visitFurtherCodeOwnerConfigs = codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
         if (!visitFurtherCodeOwnerConfigs
-            || localCodeOwners.ignoreParentCodeOwners(codeOwnerConfig.get(), absolutePath)) {
+            || pathCodeOwners.ignoreParentCodeOwners(codeOwnerConfig.get(), absolutePath)) {
           return;
         }
       }
