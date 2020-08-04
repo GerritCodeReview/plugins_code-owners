@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.common.base.Throwables;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
@@ -38,6 +39,8 @@ import org.eclipse.jgit.lib.Repository;
  * branch is stored as a file in the {@code /foo/bar} folder of the {@code master}
  */
 public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBackend {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final GitRepositoryManager repoManager;
   private final PersonIdent serverIdent;
   private final MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory;
@@ -63,6 +66,13 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
   @Override
   public final Optional<CodeOwnerConfig> getCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
+    if (codeOwnerConfigKey.fileName().isPresent()
+        && !fileName.equals(codeOwnerConfigKey.fileName().get())) {
+      logger.atWarning().log(
+          "Cannot load code owner config %s: unsupported file name", codeOwnerConfigKey);
+      return Optional.empty();
+    }
+
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       return CodeOwnerConfigFile.load(
               fileName, codeOwnerConfigParser, repository, revision, codeOwnerConfigKey)
