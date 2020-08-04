@@ -74,6 +74,17 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getFilePathWithCustomFileName() throws Exception {
+    String customFileName = "FOO_CODE_OWNERS";
+    String folderPath = "/foo/bar/";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(
+            Project.nameKey("project"), "master", folderPath, customFileName);
+    assertThat(codeOwnerConfigKey.filePath("OWNERS"))
+        .isEqualTo(Paths.get(folderPath, customFileName));
+  }
+
+  @Test
   public void cannotGetFilePathForNullFileName() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/foo/bar/");

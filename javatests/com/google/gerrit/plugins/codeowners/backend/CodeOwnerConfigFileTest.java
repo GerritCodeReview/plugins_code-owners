@@ -141,6 +141,30 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void loadCodeOwnerConfigFileWithCustomFileName() throws Exception {
+    String customFileName = "FOO_CODE_OWNERS";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "master", "/", customFileName);
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(codeOwnerConfigKey)
+            .setIgnoreParentCodeOwners()
+            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+            .build();
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+
+    CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
+    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+        .value()
+        .hasIgnoreParentCodeOwnersThat()
+        .isTrue();
+    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+        .hasCodeOwnerSetsThat()
+        .onlyElement()
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
+  }
+
+  @Test
   public void createCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/foo/bar/");
@@ -294,6 +318,60 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       // Check that the branch was not created.
       assertThat(repo.exactRef(codeOwnerConfigKey.ref())).isNull();
+    }
+  }
+
+  @Test
+  public void createCodeOwnerConfigFileWithCustomName() throws Exception {
+    String customFileName = "FOO_CODE_OWNERS";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "master", "/foo/bar/", customFileName);
+    try (Repository repo = repoManager.openRepository(project);
+        MetaDataUpdate metaDataUpdate = metaDataUpdateServer.create(project)) {
+      CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
+
+      // Check that the code owner config doesn't exist yet.
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).isEmpty();
+      assertThatOptional(testCodeOwnerConfigStorage.readCodeOwnerConfig(codeOwnerConfigKey))
+          .isEmpty();
+
+      // Remember head so that we can check that the branch is changed.
+      RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
+
+      // Create the code owner config.
+      codeOwnerConfigFile.setCodeOwnerConfigUpdate(
+          CodeOwnerConfigUpdate.builder()
+              .setIgnoreParentCodeOwners(true)
+              .setCodeOwnerSetsModification(
+                  CodeOwnerSetModification.set(
+                      CodeOwnerSet.createWithoutPathExpressions(admin.email())))
+              .build());
+      codeOwnerConfigFile.commit(metaDataUpdate);
+
+      // Check that the loaded code owner config was updated.
+      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
+          .value()
+          .hasIgnoreParentCodeOwnersThat()
+          .isTrue();
+      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+          .hasCodeOwnerSetsThat()
+          .onlyElement()
+          .hasCodeOwnersEmailsThat()
+          .containsExactly(admin.email());
+
+      // Check that the code owner config was created in the repository.
+      Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
+          testCodeOwnerConfigStorage.readCodeOwnerConfig(codeOwnerConfigKey);
+      assertThatOptional(codeOwnerConfigInRepo).value().hasIgnoreParentCodeOwnersThat().isTrue();
+      assertThatOptional(codeOwnerConfigInRepo)
+          .value()
+          .hasCodeOwnerSetsThat()
+          .onlyElement()
+          .hasCodeOwnersEmailsThat()
+          .containsExactly(admin.email());
+
+      // Check that the branch was changed.
+      assertThat(head).isNotEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
     }
   }
 

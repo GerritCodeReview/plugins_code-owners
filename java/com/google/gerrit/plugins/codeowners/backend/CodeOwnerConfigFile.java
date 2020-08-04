@@ -59,7 +59,8 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
    * #setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate)} and committing the {@link
    * CodeOwnerConfigUpdate} via {@link #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)}.
    *
-   * @param fileName name of the code owner configuration files
+   * @param defaultFileName the name of the code owner configuration files that should be used if
+   *     none is specified in the code owner config key
    * @param codeOwnerConfigParser the parser that should be used to parse code owner config files
    * @param repository the repository in which the code owner config is stored
    * @param revision the branch revision from which the code owner config file should be loaded, if
@@ -71,14 +72,14 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
    *     invalid format
    */
   public static CodeOwnerConfigFile load(
-      String fileName,
+      String defaultFileName,
       CodeOwnerConfigParser codeOwnerConfigParser,
       Repository repository,
       @Nullable ObjectId revision,
       CodeOwnerConfig.Key codeOwnerConfigKey)
       throws IOException, ConfigInvalidException {
     CodeOwnerConfigFile codeOwnerConfigFile =
-        new CodeOwnerConfigFile(fileName, codeOwnerConfigParser, codeOwnerConfigKey);
+        new CodeOwnerConfigFile(defaultFileName, codeOwnerConfigParser, codeOwnerConfigKey);
     if (revision != null) {
       codeOwnerConfigFile.load(codeOwnerConfigKey.project(), repository, revision);
     } else {
@@ -87,7 +88,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
     return codeOwnerConfigFile;
   }
 
-  private final String fileName;
+  private final String defaultFileName;
   private final CodeOwnerConfigParser codeOwnerConfigParser;
   private final CodeOwnerConfig.Key codeOwnerConfigKey;
 
@@ -96,10 +97,10 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   private Optional<CodeOwnerConfigUpdate> codeOwnerConfigUpdate = Optional.empty();
 
   private CodeOwnerConfigFile(
-      String fileName,
+      String defaultFileName,
       CodeOwnerConfigParser codeOwnerConfigParser,
       CodeOwnerConfig.Key codeOwnerConfigKey) {
-    this.fileName = fileName;
+    this.defaultFileName = defaultFileName;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
     this.codeOwnerConfigKey = codeOwnerConfigKey;
   }
@@ -146,7 +147,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   protected void onLoad() throws IOException, ConfigInvalidException {
     if (revision != null) {
       Optional<String> codeOwnerConfigFileContent =
-          getFileIfItExists(JgitPath.of(codeOwnerConfigKey.filePath(fileName)).get());
+          getFileIfItExists(JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get());
       if (codeOwnerConfigFileContent.isPresent()) {
         loadedCodeOwnersConfig =
             Optional.of(
@@ -208,7 +209,9 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
         codeOwnerConfigParser.formatAsString(updatedCodeOwnerConfig);
 
     // Save the new code owner config.
-    saveUTF8(JgitPath.of(codeOwnerConfigKey.filePath(fileName)).get(), codeOwnerConfigFileContent);
+    saveUTF8(
+        JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get(),
+        codeOwnerConfigFileContent);
 
     // If the file content is empty, the update led to a deletion of the code owner config file.
     boolean isDeleted = codeOwnerConfigFileContent.isEmpty();
