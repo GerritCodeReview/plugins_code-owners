@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "679c8937_820c452e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RequiredApprovalInfo.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-04T19:00:18Z",
+      "side": 1,
+      "message": "a",
+      "range": {
+        "startLine": 18,
+        "startChar": 21,
+        "endLine": 18,
+        "endChar": 23
+      },
+      "revId": "61acbf2afdcd044a9ec761f0139eba64963c6a4b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "aa96cd51_76715b08",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RequiredApprovalInfo.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-04T19:00:18Z",
+      "side": 1,
+      "message": "a",
+      "range": {
+        "startLine": 20,
+        "startChar": 47,
+        "endLine": 20,
+        "endChar": 49
+      },
+      "revId": "61acbf2afdcd044a9ec761f0139eba64963c6a4b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "eeb775ab_658f9af2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RequiredApprovalInfo.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-04T19:00:18Z",
+      "side": 1,
+      "message": "the label",
+      "range": {
+        "startLine": 34,
+        "startChar": 18,
+        "endLine": 34,
+        "endChar": 23
+      },
+      "revId": "61acbf2afdcd044a9ec761f0139eba64963c6a4b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bc3b02e_c4997d24",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/config/AbstractRequiredApprovalConfigTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-04T19:00:18Z",
+      "side": 1,
+      "message": "omit?",
+      "range": {
+        "startLine": 165,
+        "startChar": 50,
+        "endLine": 165,
+        "endChar": 53
+      },
+      "revId": "61acbf2afdcd044a9ec761f0139eba64963c6a4b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
