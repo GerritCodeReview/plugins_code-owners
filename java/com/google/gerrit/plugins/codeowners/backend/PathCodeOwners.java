@@ -27,32 +27,28 @@ import java.nio.file.Path;
 import java.util.stream.Stream;
 
 /**
- * Class to compute the local code owners for a path from a {@link CodeOwnerConfig}.
+ * Class to compute the code owners for a path from a {@link CodeOwnerConfig}.
  *
- * <p>The <strong>local</strong> code owners are the code owners that are directly mentioned in a
- * code owner config. Code owners in inherited and included code owner configs are not considered.
+ * <p>Code owners from inherited code owner configs are not considered.
  */
 @Singleton
-class LocalCodeOwners {
+class PathCodeOwners {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
 
   @Inject
-  LocalCodeOwners(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+  PathCodeOwners(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
   }
 
   /**
-   * Gets the local code owners from the given code owner config that apply the given path.
+   * Gets the code owners from the given code owner config that apply the given path.
    *
-   * <p>This method computes the <strong>local</strong> code owners which means that only code
-   * owners that are directly mentioned in the code owner config are considered. Code owners in
-   * inherited and included code owner configs are not considered.
+   * <p>Code owners from inherited code owner configs are not considered.
    *
-   * @param codeOwnerConfig the code owner config from which the local code owners should be
-   *     returned
-   * @param absolutePath path for which the local code owners should be returned; the path must be
+   * @param codeOwnerConfig the code owner config from which the code owners should be returned
+   * @param absolutePath path for which the code owners should be returned; the path must be
    *     absolute; can be the path of a file or folder; the path may or may not exist
-   * @return the local code owners for the given path
+   * @return the code owners for the given path
    */
   public ImmutableSet<CodeOwnerReference> get(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");

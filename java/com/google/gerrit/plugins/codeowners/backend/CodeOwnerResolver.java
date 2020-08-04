@@ -47,7 +47,7 @@ public class CodeOwnerResolver {
   private final ExternalIds externalIds;
   private final AccountCache accountCache;
   private final AccountControl.Factory accountControlFactory;
-  private final LocalCodeOwners localCodeOwners;
+  private final PathCodeOwners pathCodeOwners;
 
   // Enforce visibility by default.
   private boolean enforceVisibility = true;
@@ -59,13 +59,13 @@ public class CodeOwnerResolver {
       ExternalIds externalIds,
       AccountCache accountCache,
       AccountControl.Factory accountControlFactory,
-      LocalCodeOwners localCodeOwners) {
+      PathCodeOwners pathCodeOwners) {
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
     this.externalIds = externalIds;
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
-    this.localCodeOwners = localCodeOwners;
+    this.pathCodeOwners = pathCodeOwners;
   }
 
   /**
@@ -81,24 +81,24 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Resolves the local code owners from the given code owner config for the given path from {@link
+   * Resolves the code owners from the given code owner config for the given path from {@link
    * CodeOwnerReference}s to a {@link CodeOwner}s.
    *
    * <p>Non-resolvable code owners are filtered out.
    *
    * @param codeOwnerConfig the code owner config for which the local owners for the given path
    *     should be resolved
-   * @param absolutePath path for which the local code owners should be returned; the path must be
+   * @param absolutePath path for which the code owners should be returned; the path must be
    *     absolute; can be the path of a file or folder; the path may or may not exist
    * @return the resolved code owners
    */
-  public ImmutableSet<CodeOwner> resolveLocalCodeOwners(
+  public ImmutableSet<CodeOwner> resolvePathCodeOwners(
       CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
-    return localCodeOwners.get(codeOwnerConfig, absolutePath).stream()
+    return pathCodeOwners.get(codeOwnerConfig, absolutePath).stream()
         .map(this::resolve)
         .flatMap(Streams::stream)
         .collect(toImmutableSet());

@@ -40,68 +40,68 @@ import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link LocalCodeOwners}. */
-public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
-  private LocalCodeOwners localCodeOwners;
+/** Tests for {@link PathCodeOwners}. */
+public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
+  private PathCodeOwners pathCodeOwners;
   private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    localCodeOwners = plugin.getSysInjector().getInstance(LocalCodeOwners.class);
+    pathCodeOwners = plugin.getSysInjector().getInstance(PathCodeOwners.class);
     codeOwnerBackends =
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
-  public void cannotGetLocalCodeOwnersForNullCodeOwnerConfig() throws Exception {
+  public void cannotGetPathCodeOwnersForNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> localCodeOwners.get(null, Paths.get("/foo/bar/baz.md")));
+            () -> pathCodeOwners.get(null, Paths.get("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
   @Test
-  public void cannotGetLocalCodeOwnersForNullPath() throws Exception {
+  public void cannotGetPathCodeOwnersForNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> localCodeOwners.get(codeOwnerConfig, null));
+        assertThrows(NullPointerException.class, () -> pathCodeOwners.get(codeOwnerConfig, null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 
   @Test
-  public void cannotGetLocalCodeOwnersForRelativePath() throws Exception {
+  public void cannotGetPathCodeOwnersForRelativePath() throws Exception {
     String relativePath = "foo/bar/baz.md";
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> localCodeOwners.get(codeOwnerConfig, Paths.get(relativePath)));
+            () -> pathCodeOwners.get(codeOwnerConfig, Paths.get(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
   }
 
   @Test
-  public void getEmptyLocalCodeOwners() throws Exception {
+  public void getEmptyPathCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
-    assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md"))).isEmpty();
+    assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md"))).isEmpty();
   }
 
   @Test
-  public void getLocalCodeOwnersIfNoPathExpressionsAreUsed() throws Exception {
+  public void getPathCodeOwnersIfNoPathExpressionsAreUsed() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         createCodeOwnerBuilder()
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
-    assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+    assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
-  public void getLocalCodeOwnersReturnsCodeOwnersFromMatchingCodeOwnerSets() throws Exception {
+  public void getPathCodeOwnersReturnsCodeOwnersFromMatchingCodeOwnerSets() throws Exception {
     PathExpressionMatcher pathExpressionMatcher = mock(PathExpressionMatcher.class);
 
     // Create a matching code owner set.
@@ -130,7 +130,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(matchingCodeOwnerSet2)
               .addCodeOwnerSet(nonMatchingCodeOwnerSet)
               .build();
-      assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -149,14 +149,14 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
                       .addCodeOwnerEmail(admin.email())
                       .build())
               .build();
-      assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md"))).isEmpty();
+      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md"))).isEmpty();
     }
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
   public void
-      getLocalCodeOwnersOmitsGlobalCodeOwnersIfMatchingPerFileCodeOwnerSetIgnoresParentCodeOwners()
+      getPathCodeOwnersOmitsGlobalCodeOwnersIfMatchingPerFileCodeOwnerSetIgnoresParentCodeOwners()
           throws Exception {
     PathExpressionMatcher pathExpressionMatcher = mock(PathExpressionMatcher.class);
 
@@ -179,7 +179,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(perFileCodeOwnerSet)
               .addCodeOwnerSet(globalCodeOwnerSet)
               .build();
-      assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email());
     }
@@ -188,7 +188,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
   public void
-      getLocalCodeOwnersIncludesGlobalCodeOwnersIfMatchingPerFileCodeOwnerSetDoesNotIgnoreParentCodeOwners()
+      getPathCodeOwnersIncludesGlobalCodeOwnersIfMatchingPerFileCodeOwnerSetDoesNotIgnoreParentCodeOwners()
           throws Exception {
     PathExpressionMatcher pathExpressionMatcher = mock(PathExpressionMatcher.class);
 
@@ -211,7 +211,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(perFileCodeOwnerSet)
               .addCodeOwnerSet(globalCodeOwnerSet)
               .build();
-      assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -220,7 +220,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
   public void
-      getLocalCodeOwnersIncludesCodeOwnersFromAllMatchingPerFileCodeOwnerSetsIfOneIgnoresParentCodeOwners()
+      getPathCodeOwnersIncludesCodeOwnersFromAllMatchingPerFileCodeOwnerSetsIfOneIgnoresParentCodeOwners()
           throws Exception {
     PathExpressionMatcher pathExpressionMatcher = mock(PathExpressionMatcher.class);
 
@@ -244,7 +244,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(perFileCodeOwnerSet1)
               .addCodeOwnerSet(perFileCodeOwnerSet2)
               .build();
-      assertThat(localCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -255,7 +255,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> localCodeOwners.ignoreParentCodeOwners(null, Paths.get("/foo/bar/baz.md")));
+            () -> pathCodeOwners.ignoreParentCodeOwners(null, Paths.get("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
@@ -264,7 +264,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> localCodeOwners.ignoreParentCodeOwners(createCodeOwnerBuilder().build(), null));
+            () -> pathCodeOwners.ignoreParentCodeOwners(createCodeOwnerBuilder().build(), null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 
@@ -275,7 +275,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
         assertThrows(
             IllegalStateException.class,
             () ->
-                localCodeOwners.ignoreParentCodeOwners(
+                pathCodeOwners.ignoreParentCodeOwners(
                     createCodeOwnerBuilder().build(), Paths.get(relativePath)));
     assertThat(exception)
         .hasMessageThat()
@@ -286,7 +286,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   public void checkThatParentCodeOwnersAreIgnoredIfCodeOwnerConfigIgnoresParentCodeOwners()
       throws Exception {
     assertThat(
-            localCodeOwners.ignoreParentCodeOwners(
+            pathCodeOwners.ignoreParentCodeOwners(
                 createCodeOwnerBuilder().setIgnoreParentCodeOwners().build(),
                 Paths.get("/foo/bar/baz.md")))
         .isTrue();
@@ -296,7 +296,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   public void checkThatParentCodeOwnersAreNotIgnoredIfCodeOwnerConfigDoesNotIgnoreParentCodeOwners()
       throws Exception {
     assertThat(
-            localCodeOwners.ignoreParentCodeOwners(
+            pathCodeOwners.ignoreParentCodeOwners(
                 createCodeOwnerBuilder().setIgnoreParentCodeOwners(false).build(),
                 Paths.get("/foo/bar/baz.md")))
         .isFalse();
@@ -306,7 +306,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
   public void checkThatParentCodeOwnersAreIgnoredIfMatchingCodeOwnerSetIgnoresParentCodeOwners()
       throws Exception {
     assertThat(
-            localCodeOwners.ignoreParentCodeOwners(
+            pathCodeOwners.ignoreParentCodeOwners(
                 createCodeOwnerBuilder()
                     .addCodeOwnerSet(
                         CodeOwnerSet.builder()
@@ -323,7 +323,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
       checkThatParentCodeOwnersAreNotIgnoredIfNonMatchingCodeOwnerSetIgnoresParentCodeOwners()
           throws Exception {
     assertThat(
-            localCodeOwners.ignoreParentCodeOwners(
+            pathCodeOwners.ignoreParentCodeOwners(
                 createCodeOwnerBuilder()
                     .addCodeOwnerSet(
                         CodeOwnerSet.builder()
@@ -341,7 +341,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                LocalCodeOwners.matches(
+                PathCodeOwners.matches(
                     null, Paths.get("bar/baz.md"), mock(PathExpressionMatcher.class)));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerSet");
   }
@@ -352,7 +352,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                LocalCodeOwners.matches(
+                PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
                     null,
                     mock(PathExpressionMatcher.class)));
@@ -366,7 +366,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
         assertThrows(
             IllegalStateException.class,
             () ->
-                LocalCodeOwners.matches(
+                PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
                     Paths.get(absolutePath),
                     mock(PathExpressionMatcher.class)));
@@ -381,7 +381,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                LocalCodeOwners.matches(
+                PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
                     Paths.get("bar/baz.md"),
                     null));
@@ -395,7 +395,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
         assertThrows(
             IllegalStateException.class,
             () ->
-                LocalCodeOwners.matches(
+                PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
                     Paths.get("bar/baz.md"),
                     pathExpressionMatcher));
@@ -407,7 +407,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
     PathExpressionMatcher pathExpressionMatcher = mock(PathExpressionMatcher.class);
     when(pathExpressionMatcher.matches(anyString(), any(Path.class))).thenReturn(true);
     assertThat(
-            LocalCodeOwners.matches(
+            PathCodeOwners.matches(
                 CodeOwnerSet.builder()
                     .addPathExpression("*.md")
                     .addCodeOwnerEmail(admin.email())
@@ -422,7 +422,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
     PathExpressionMatcher pathExpressionMatcher = mock(PathExpressionMatcher.class);
     when(pathExpressionMatcher.matches(anyString(), any(Path.class))).thenReturn(false);
     assertThat(
-            LocalCodeOwners.matches(
+            PathCodeOwners.matches(
                 CodeOwnerSet.builder()
                     .addPathExpression("*.md")
                     .addCodeOwnerEmail(admin.email())
@@ -439,7 +439,7 @@ public class LocalCodeOwnersTest extends AbstractCodeOwnersTest {
         .thenReturn(true)
         .thenReturn(false);
     assertThat(
-            LocalCodeOwners.matches(
+            PathCodeOwners.matches(
                 CodeOwnerSet.builder()
                     .addPathExpression("*.md")
                     .addPathExpression("config/*")
