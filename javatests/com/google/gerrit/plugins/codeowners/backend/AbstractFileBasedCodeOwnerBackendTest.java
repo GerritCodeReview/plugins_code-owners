@@ -79,6 +79,13 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   }
 
   @Test
+  public void getCodeOwnerConfigForUnsupportedFileName() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "master", "/", "UNSUPPORTED_CODE_OWNERS");
+    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null)).isEmpty();
+  }
+
+  @Test
   public void getCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
