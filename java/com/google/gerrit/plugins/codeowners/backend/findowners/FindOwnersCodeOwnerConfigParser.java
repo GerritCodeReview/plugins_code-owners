@@ -23,8 +23,11 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.inject.Singleton;
@@ -86,17 +89,33 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     private static final String COMMA = "[\\s]*,[\\s]*";
 
+    // Separator for project and file paths in an include line.
+    private static final String COLON = "[\\s]*:[\\s]*"; // project:file
+
     private static final String BOL = "^[\\s]*"; // begin-of-line
     private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
     private static final String GLOB = "[^\\s,=]+"; // a file glob
 
     private static final String EMAIL = "([^\\s<>@,]+@[^\\s<>@#,]+)";
     private static final String EMAIL_LIST = "(" + EMAIL + "(" + COMMA + EMAIL + ")*)";
+
+    // A Gerrit project name followed by a colon and optional spaces.
+    private static final String PROJECT_NAME = "([^\\s:]+" + COLON + ")?";
+
+    // A relative or absolute file path name without any colon or space character.
+    private static final String FILE_PATH = "([^\\s:#]+)";
+
+    private static final String PROJECT_AND_FILE = PROJECT_NAME + FILE_PATH;
+
     private static final String SET_NOPARENT = "set[\\s]+noparent";
+
+    private static final String INCLUDE_OR_FILE = "(file:[\\s]*|include[\\s]+)";
 
     // Simple input lines with 0 or 1 sub-pattern.
     private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
     private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
+    private static final Pattern PAT_INCLUDE =
+        Pattern.compile(BOL + INCLUDE_OR_FILE + PROJECT_AND_FILE + EOL);
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
 
     private static final Pattern PAT_PER_FILE_OWNERS =
@@ -137,6 +156,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         String line) {
       String email;
       CodeOwnerSet codeOwnerSet;
+      CodeOwnerConfigReference codeOwnerConfigReference;
       if (isNoParent(line)) {
         codeOwnerConfigBuilder.setIgnoreParentCodeOwners();
       } else if (isComment(line)) {
@@ -145,6 +165,8 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         globalCodeOwnerSetBuilder.addCodeOwner(CodeOwnerReference.create(email));
       } else if ((codeOwnerSet = parsePerFile(line)) != null) {
         perFileCodeOwnerSets.add(codeOwnerSet);
+      } else if ((codeOwnerConfigReference = parseInclude(line)) != null) {
+        codeOwnerConfigBuilder.addImport(codeOwnerConfigReference);
       } else {
         logger.atInfo().log("Skipping unknown line: %s", line);
       }
@@ -189,6 +211,31 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       return m.matches() ? m.group(1).trim() : null;
     }
 
+    private static CodeOwnerConfigReference parseInclude(String line) {
+      Matcher m = Parser.PAT_INCLUDE.matcher(line);
+      if (!m.matches()) {
+        return null;
+      }
+
+      String keyword = m.group(1).trim();
+      CodeOwnerConfigImportMode importMode =
+          keyword.equals("include")
+              ? CodeOwnerConfigImportMode.ALL
+              : CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY;
+
+      CodeOwnerConfigReference.Builder builder =
+          CodeOwnerConfigReference.builder(importMode, m.group(3).trim());
+
+      String projectName = m.group(2);
+      if (projectName != null && projectName.length() > 1) {
+        // PROJECT_NAME ends with ':'
+        projectName = projectName.split(COLON, -1)[0].trim();
+        builder.setProject(Project.nameKey(projectName));
+      }
+
+      return builder.build();
+    }
+
     private static boolean isGlobs(String line) {
       return PAT_GLOBS.matcher(line).matches();
     }
@@ -207,6 +254,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     static String formatAsString(CodeOwnerConfig codeOwnerConfig) {
       return formatIgnoreParentCodeOwners(codeOwnerConfig)
+          + formatImports(codeOwnerConfig)
           + formatGlobalCodeOwners(codeOwnerConfig)
           + formatPerFileCodeOwners(codeOwnerConfig);
     }
@@ -274,6 +322,41 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     private static String formatValuesAsList(Stream<String> stream) {
       return stream.sorted().distinct().collect(joining(","));
+    }
+
+    private static String formatImports(CodeOwnerConfig codeOwnerConfig) {
+      StringBuilder b = new StringBuilder();
+      codeOwnerConfig
+          .imports()
+          .forEach(codeOwnerConfigReference -> b.append(formatImport(codeOwnerConfigReference)));
+      return b.toString();
+    }
+
+    private static String formatImport(CodeOwnerConfigReference codeOwnerConfigReference) {
+      StringBuilder b = new StringBuilder();
+
+      // write the keyword
+      switch (codeOwnerConfigReference.importMode()) {
+        case ALL:
+          b.append("include ");
+          break;
+        case GLOBAL_CODE_OWNER_SETS_ONLY:
+          b.append("file: ");
+          break;
+        default:
+          throw new IllegalStateException(
+              String.format("unknown import mode: %s", codeOwnerConfigReference.importMode()));
+      }
+
+      // write the project
+      if (codeOwnerConfigReference.project().isPresent()) {
+        b.append(codeOwnerConfigReference.project().get()).append(':');
+      }
+
+      // write the file path
+      b.append(codeOwnerConfigReference.filePath());
+
+      return b.toString();
     }
   }
 }
