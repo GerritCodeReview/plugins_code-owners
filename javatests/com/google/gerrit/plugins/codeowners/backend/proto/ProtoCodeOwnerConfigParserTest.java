@@ -22,7 +22,9 @@ import static java.util.Objects.requireNonNull;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.protobuf.TextFormat;
@@ -170,5 +172,21 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo("ignoreGlobaleAndParentCodeOwners is not supported");
+  }
+
+  @Test
+  public void cannotFormatCodeOwnerConfigWithImports() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/foo/bar/OWNERS")
+                    .build())
+            .build();
+
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigParser.formatAsString(codeOwnerConfig));
+    assertThat(exception).hasMessageThat().isEqualTo("imports are not supported");
   }
 }
