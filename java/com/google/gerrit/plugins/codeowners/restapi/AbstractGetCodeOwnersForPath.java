@@ -115,11 +115,11 @@ public abstract class AbstractGetCodeOwnersForPath {
         rsrc.getRevision(),
         rsrc.getPath(),
         codeOwnerConfig -> {
-          ImmutableSet<CodeOwner> localCodeOwners =
-              codeOwnerResolver.get().resolveLocalCodeOwners(codeOwnerConfig, rsrc.getPath());
-          codeOwners.addAll(localCodeOwners);
+          ImmutableSet<CodeOwner> pathCodeOwners =
+              codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
+          codeOwners.addAll(pathCodeOwners);
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
-          localCodeOwners.forEach(
+          pathCodeOwners.forEach(
               localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
           // If codeOwners.size() >= limit we have gathered enough code owners and do not need to
