@@ -23,6 +23,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 /**
  * Code owner configuration for a folder in a branch.
@@ -200,6 +201,13 @@ public abstract class CodeOwnerConfig {
     public abstract Path folderPath();
 
     /**
+     * Gets the name of the code owner config file.
+     *
+     * <p>If not set the default file of the code owner backend should be used.
+     */
+    public abstract Optional<String> fileName();
+
+    /**
      * Gets the project to which the code owner config belongs.
      *
      * @return the project to which the code owner config belongs
@@ -227,15 +235,15 @@ public abstract class CodeOwnerConfig {
     }
 
     /**
-     * Gets the path for the given code owner config file name.
+     * Gets the path of the code owner config file.
      *
-     * @param codeOwnerConfigFileName the name of the code owner config file for which the path
-     *     should be returned
-     * @return the path for the given file code owner config file name
+     * @param defaultCodeOwnerConfigFileName the name of the code owner config file that should be
+     *     used if no {@link #fileName()} is set.
+     * @return the path of the code owner config file
      */
-    public Path filePath(String codeOwnerConfigFileName) {
-      return folderPath()
-          .resolve(requireNonNull(codeOwnerConfigFileName, "codeOwnerConfigFileName"));
+    public Path filePath(String defaultCodeOwnerConfigFileName) {
+      requireNonNull(defaultCodeOwnerConfigFileName, "codeOwnerConfigFileName");
+      return folderPath().resolve(fileName().orElse(defaultCodeOwnerConfigFileName));
     }
 
     /**
@@ -253,6 +261,20 @@ public abstract class CodeOwnerConfig {
     /**
      * Creates a code owner config key.
      *
+     * @param project the project to which the code owner config belongs
+     * @param branch the branch to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs
+     * @param fileName the name of the code owner config file
+     * @return the code owner config key
+     */
+    public static Key create(
+        Project.NameKey project, String branch, String folderPath, String fileName) {
+      return create(BranchNameKey.create(project, branch), Paths.get(folderPath), fileName);
+    }
+
+    /**
+     * Creates a code owner config key.
+     *
      * @param branch the branch to which the code owner config belongs
      * @param folderPath the path of the folder to which the code owner config belongs
      * @return the code owner config key
@@ -261,6 +283,22 @@ public abstract class CodeOwnerConfig {
       return new AutoValue_CodeOwnerConfig_Key.Builder()
           .setBranch(branch)
           .setFolderPath(folderPath)
+          .build();
+    }
+
+    /**
+     * Creates a code owner config key.
+     *
+     * @param branch the branch to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs
+     * @param fileName the name of the code owner config file
+     * @return the code owner config key
+     */
+    public static Key create(BranchNameKey branch, Path folderPath, String fileName) {
+      return new AutoValue_CodeOwnerConfig_Key.Builder()
+          .setBranch(branch)
+          .setFolderPath(folderPath)
+          .setFileName(fileName)
           .build();
     }
 
@@ -281,6 +319,14 @@ public abstract class CodeOwnerConfig {
        * @return the Builder instance for chaining calls
        */
       public abstract Builder setFolderPath(Path folderPath);
+
+      /**
+       * Sets the name of the code owner config file for this owner config key.
+       *
+       * @param fileName the name of the code owner config file
+       * @return the Builder instance for chaining calls
+       */
+      public abstract Builder setFileName(String fileName);
 
       /**
        * Builds the {@link Key} instance.
