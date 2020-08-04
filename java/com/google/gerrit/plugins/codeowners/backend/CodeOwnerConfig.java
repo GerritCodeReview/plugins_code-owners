@@ -41,7 +41,8 @@ public abstract class CodeOwnerConfig {
    */
   public abstract boolean ignoreParentCodeOwners();
 
-  // TODO(ekempin): add field for included code owner configs
+  /** Gets references to the code owner configs that should be imported. */
+  public abstract ImmutableSet<CodeOwnerConfigReference> imports();
 
   /**
    * Gets the code owner sets of this code owner config.
@@ -120,6 +121,20 @@ public abstract class CodeOwnerConfig {
      * @return the Builder instance for chaining calls
      */
     public abstract Builder setIgnoreParentCodeOwners(boolean ignoreParentCodeOwners);
+
+    /** Gets a builder to add references to code owner configs that should be imported. */
+    abstract ImmutableSet.Builder<CodeOwnerConfigReference> importsBuilder();
+
+    /**
+     * Adds a reference to code owner configs that should be imported.
+     *
+     * @param codeOwnerConfigReference reference to the code owner config that should be imported
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addImport(CodeOwnerConfigReference codeOwnerConfigReference) {
+      importsBuilder().add(codeOwnerConfigReference);
+      return this;
+    }
 
     /**
      * Sets that code owners from parent code owner configs (code owner configs in parent folders)
