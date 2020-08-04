@@ -36,16 +36,16 @@ public class TestCodeOwnerConfigStorage {
     TestCodeOwnerConfigStorage create(String fileName, CodeOwnerConfigParser codeOwnerConfigParser);
   }
 
-  private final String fileName;
+  private final String defaultFileName;
   private final GitRepositoryManager repoManager;
   private final CodeOwnerConfigParser codeOwnerConfigParser;
 
   @Inject
   TestCodeOwnerConfigStorage(
       GitRepositoryManager repoManager,
-      @Assisted String fileName,
+      @Assisted String defaultFileName,
       @Assisted CodeOwnerConfigParser codeOwnerConfigParser) {
-    this.fileName = fileName;
+    this.defaultFileName = defaultFileName;
     this.repoManager = repoManager;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
   }
@@ -72,7 +72,7 @@ public class TestCodeOwnerConfigStorage {
               .parent(head)
               .message("Add test code owner config")
               .add(
-                  JgitPath.of(codeOwnerConfig.key().filePath(fileName)).get(),
+                  JgitPath.of(codeOwnerConfig.key().filePath(defaultFileName)).get(),
                   formattedCodeOwnerConfig));
     }
   }
@@ -94,7 +94,7 @@ public class TestCodeOwnerConfigStorage {
       }
 
       RevCommit commit = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      String filePath = JgitPath.of(codeOwnerConfigKey.filePath(fileName)).get();
+      String filePath = JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get();
       try (TreeWalk tw =
           TreeWalk.forPath(testRepo.getRevWalk().getObjectReader(), filePath, commit.getTree())) {
         if (tw == null) {
