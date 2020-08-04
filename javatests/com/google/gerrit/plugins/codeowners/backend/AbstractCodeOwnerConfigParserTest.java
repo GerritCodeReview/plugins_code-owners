@@ -83,6 +83,20 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   }
 
   /**
+   * Returns the expected code owner config string for a code owner config with the given
+   * parameters.
+   *
+   * @param codeOwnerConfigReferences references to code owner configs that should be imported
+   * @return the expected code owner config string for a code owner config with the given parameters
+   */
+  protected String getCodeOwnerConfig(CodeOwnerConfigReference... codeOwnerConfigReferences) {
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"));
+    Arrays.stream(codeOwnerConfigReferences).forEach(codeOwnerConfigBuilder::addImport);
+    return getCodeOwnerConfig(codeOwnerConfigBuilder.build());
+  }
+
+  /**
    * Returns the expected code owner config string for a code owner config with the given emails as
    * code owners.
    *
