@@ -47,7 +47,7 @@ public class CodeOwnerResolver {
   private final ExternalIds externalIds;
   private final AccountCache accountCache;
   private final AccountControl.Factory accountControlFactory;
-  private final PathCodeOwners pathCodeOwners;
+  private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
   // Enforce visibility by default.
   private boolean enforceVisibility = true;
@@ -59,13 +59,13 @@ public class CodeOwnerResolver {
       ExternalIds externalIds,
       AccountCache accountCache,
       AccountControl.Factory accountControlFactory,
-      PathCodeOwners pathCodeOwners) {
+      PathCodeOwners.Factory pathCodeOwnersFactory) {
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
     this.externalIds = externalIds;
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
-    this.pathCodeOwners = pathCodeOwners;
+    this.pathCodeOwnersFactory = pathCodeOwnersFactory;
   }
 
   /**
@@ -98,7 +98,7 @@ public class CodeOwnerResolver {
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
-    return pathCodeOwners.get(codeOwnerConfig, absolutePath).stream()
+    return pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get().stream()
         .map(this::resolve)
         .flatMap(Streams::stream)
         .collect(toImmutableSet());
