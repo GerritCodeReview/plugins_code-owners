@@ -24,7 +24,9 @@ import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Stream;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Class to compute the code owners for a path from a {@link CodeOwnerConfig}.
@@ -35,15 +37,27 @@ class PathCodeOwners {
   @Singleton
   public static class Factory {
     private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+    private final CodeOwners codeOwners;
 
     @Inject
-    Factory(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+    Factory(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration, CodeOwners codeOwners) {
       this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+      this.codeOwners = codeOwners;
     }
 
     public PathCodeOwners create(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
       requireNonNull(codeOwnerConfig, "codeOwnerConfig");
       return new PathCodeOwners(codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfig.key()));
+    }
+
+    public Optional<PathCodeOwners> create(
+        CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision, Path absolutePath) {
+      return codeOwners
+          .get(codeOwnerConfigKey, revision)
+          .map(
+              codeOwnerConfig ->
+                  new PathCodeOwners(
+                      codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfigKey)));
     }
 
     /**
@@ -83,6 +97,11 @@ class PathCodeOwners {
     this.pathExpressionMatcher = requireNonNull(pathExpressionMatcher, "pathExpressionMatcher");
 
     checkState(path.isAbsolute(), "path %s must be absolute", path);
+  }
+
+  /** Returns the local code owner config. */
+  public CodeOwnerConfig getCodeOwnerConfig() {
+    return codeOwnerConfig;
   }
 
   /**
