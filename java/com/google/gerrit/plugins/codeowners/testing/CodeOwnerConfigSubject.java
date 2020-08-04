@@ -15,13 +15,16 @@
 package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubject.codeOwnerConfigReferences;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.codeOwnerSets;
 import static com.google.gerrit.truth.ListSubject.elements;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.OptionalSubject;
@@ -71,6 +74,17 @@ public class CodeOwnerConfigSubject extends Subject {
     return check("codeOwnerSets()")
         .about(elements())
         .thatCustom(codeOwnerConfig().codeOwnerSetsAsList(), codeOwnerSets());
+  }
+
+  /**
+   * Returns an {@link ListSubject} for the code owner config references in the code owner config.
+   *
+   * @return {@link ListSubject} for the code owner config references in the code owner config
+   */
+  public ListSubject<CodeOwnerConfigReferenceSubject, CodeOwnerConfigReference> hasImportsThat() {
+    return check("imports()")
+        .about(elements())
+        .thatCustom(ImmutableList.copyOf(codeOwnerConfig().imports()), codeOwnerConfigReferences());
   }
 
   /**

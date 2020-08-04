@@ -18,12 +18,18 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static java.util.stream.Collectors.joining;
 
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubject;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import org.junit.Test;
 
 /** Tests for {@link FindOwnersCodeOwnerConfigParser}. */
@@ -39,6 +45,27 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     if (codeOwnerConfig.ignoreParentCodeOwners()) {
       b.append("set noparent\n");
     }
+
+    codeOwnerConfig.imports().stream()
+        .forEach(
+            codeOwnerConfigReference -> {
+              String keyword;
+              if (codeOwnerConfigReference.importMode().equals(CodeOwnerConfigImportMode.ALL)) {
+                keyword = "include";
+              } else {
+                keyword = "file:";
+              }
+              b.append(
+                  String.format(
+                      "%s %s%s",
+                      keyword,
+                      codeOwnerConfigReference
+                          .project()
+                          .map(Project.NameKey::get)
+                          .map(projectName -> projectName + ":")
+                          .orElse(""),
+                      codeOwnerConfigReference.filePath()));
+            });
 
     // global code owners
     for (String email :
@@ -212,6 +239,71 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
           codeOwnerSet2Subject.hasIgnoreGlobalAndParentCodeOwnersThat().isFalse();
           codeOwnerSet2Subject.hasPathExpressionsThat().containsExactly("*.md", "foo");
           codeOwnerSet2Subject.hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2);
+        });
+  }
+
+  @Test
+  public void importCodeOwnerConfigFromSameProject() throws Exception {
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(path).build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfigReference),
+        codeOwnerConfig -> {
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              assertThat(codeOwnerConfig).hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+        });
+  }
+
+  @Test
+  public void importCodeOwnerConfigFromOtherProject() throws Exception {
+    String otherProject = "otherProject";
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(path).setProject(Project.nameKey(otherProject)).build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfigReference),
+        codeOwnerConfig -> {
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              assertThat(codeOwnerConfig).hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().value().isEqualTo(otherProject);
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+        });
+  }
+
+  @Test
+  public void importCodeOwnerConfigWithImportModeAll() throws Exception {
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder("/foo/bar/OWNERS")
+            .setImportMode(CodeOwnerConfigImportMode.ALL)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfigReference),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasImportsThat()
+              .onlyElement()
+              .hasImportModeThat()
+              .isEqualTo(CodeOwnerConfigImportMode.ALL);
+        });
+  }
+
+  @Test
+  public void importCodeOwnerConfigWithImportModeGlobalCodeOwnerSetsOnly() throws Exception {
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder("/foo/bar/OWNERS")
+            .setImportMode(CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfigReference),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasImportsThat()
+              .onlyElement()
+              .hasImportModeThat()
+              .isEqualTo(CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
         });
   }
 }
