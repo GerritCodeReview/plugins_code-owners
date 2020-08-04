@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.hasEmail;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -24,13 +25,16 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.server.IdentifiedUser;
+import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.util.Providers;
 import java.nio.file.Path;
@@ -42,18 +46,23 @@ import org.junit.Test;
 
 /** Tests for {@link PathCodeOwners}. */
 public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
+  @Inject private ProjectOperations projectOperations;
+
+  private CodeOwnerConfigOperations codeOwnerConfigOperations;
   private PathCodeOwners.Factory pathCodeOwnersFactory;
   private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
+    codeOwnerConfigOperations =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
     pathCodeOwnersFactory = plugin.getSysInjector().getInstance(PathCodeOwners.Factory.class);
     codeOwnerBackends =
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
-  public void createPathCodeOwners() throws Exception {
+  public void createPathCodeOwnersForCodeOwnerConfig() throws Exception {
     PathCodeOwners pathCodeOwners =
         pathCodeOwnersFactory.create(
             createCodeOwnerBuilder().build(), Paths.get("/foo/bar/baz.md"));
@@ -70,7 +79,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotCreatePathCodeOwnersWithNullPath() throws Exception {
+  public void cannotCreatePathCodeOwnersForCodeOwnerConfigWithNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
         assertThrows(
@@ -79,13 +88,106 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotCreatePathCodeOwnersWithRelativePath() throws Exception {
+  public void cannotCreatePathCodeOwnersForCodeOwnerConfigWithRelativePath() throws Exception {
     String relativePath = "foo/bar/baz.md";
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
             () -> pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get(relativePath)));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("path %s must be absolute", relativePath));
+  }
+
+  @Test
+  public void createPathCodeOwnersForCodeOwnerConfigKey() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            codeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+  }
+
+  @Test
+  public void cannotCreatePathCodeOwnersForNullCodeOwnerConfigKey() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                pathCodeOwnersFactory.create(
+                    null,
+                    projectOperations.project(project).getHead("master"),
+                    Paths.get("/foo/bar/baz.md")));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
+  }
+
+  @Test
+  public void cannotCreatePathCodeOwnersForNullRevision() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                pathCodeOwnersFactory.create(
+                    CodeOwnerConfig.Key.create(
+                        BranchNameKey.create(project, "master"), Paths.get("/")),
+                    null,
+                    Paths.get("/foo/bar/baz.md")));
+    assertThat(npe).hasMessageThat().isEqualTo("revision");
+  }
+
+  @Test
+  public void cannotCreatePathCodeOwnersForCodeOwnerConfigKeyWithNullPath() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                pathCodeOwnersFactory.create(
+                    codeOwnerConfigKey,
+                    projectOperations.project(project).getHead("master"),
+                    null));
+    assertThat(npe).hasMessageThat().isEqualTo("path");
+  }
+
+  @Test
+  public void cannotCreatePathForCodeOwnerConfigKeyWithRelativePath() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    String relativePath = "foo/bar/baz.md";
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                pathCodeOwnersFactory.create(
+                    codeOwnerConfigKey,
+                    projectOperations.project(project).getHead("master"),
+                    Paths.get(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));

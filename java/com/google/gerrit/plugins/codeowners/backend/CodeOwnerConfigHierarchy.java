@@ -42,12 +42,10 @@ public class CodeOwnerConfigHierarchy {
     boolean visit(CodeOwnerConfig codeOwnerConfig);
   }
 
-  private final CodeOwners codeOwners;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
   @Inject
-  CodeOwnerConfigHierarchy(CodeOwners codeOwners, PathCodeOwners.Factory pathCodeOwnersFactory) {
-    this.codeOwners = codeOwners;
+  CodeOwnerConfigHierarchy(PathCodeOwners.Factory pathCodeOwnersFactory) {
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
   }
 
@@ -81,13 +79,13 @@ public class CodeOwnerConfigHierarchy {
     while (ownerConfigFolder != null) {
       // Read code owner config and invoke the codeOwnerConfigVisitor if the code owner config
       // exists.
-      Optional<CodeOwnerConfig> codeOwnerConfig =
-          codeOwners.get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder), revision);
-      if (codeOwnerConfig.isPresent()) {
-        PathCodeOwners pathCodeOwners =
-            pathCodeOwnersFactory.create(codeOwnerConfig.get(), absolutePath);
-        boolean visitFurtherCodeOwnerConfigs = codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
-        if (!visitFurtherCodeOwnerConfigs || pathCodeOwners.ignoreParentCodeOwners()) {
+      Optional<PathCodeOwners> pathCodeOwners =
+          pathCodeOwnersFactory.create(
+              CodeOwnerConfig.Key.create(branch, ownerConfigFolder), revision, absolutePath);
+      if (pathCodeOwners.isPresent()) {
+        boolean visitFurtherCodeOwnerConfigs =
+            codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
+        if (!visitFurtherCodeOwnerConfigs || pathCodeOwners.get().ignoreParentCodeOwners()) {
           return;
         }
       }
