@@ -31,38 +31,75 @@ import java.util.stream.Stream;
  *
  * <p>Code owners from inherited code owner configs are not considered.
  */
-@Singleton
 class PathCodeOwners {
-  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  @Singleton
+  public static class Factory {
+    private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
 
-  @Inject
-  PathCodeOwners(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
-    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    @Inject
+    Factory(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+      this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    }
+
+    public PathCodeOwners create(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
+      requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+      return new PathCodeOwners(codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfig.key()));
+    }
+
+    /**
+     * Gets the {@link PathExpressionMatcher} that should be used for the specified code owner
+     * config.
+     *
+     * <p>Checks which {@link CodeOwnerBackend} is responsible for the specified code owner config
+     * and retrieves the {@link PathExpressionMatcher} from it.
+     *
+     * <p>If the {@link CodeOwnerBackend} doesn't support path expressions and doesn't provide a
+     * {@link PathExpressionMatcher} a {@link PathExpressionMatcher} that never matches is returned.
+     * This way {@link CodeOwnerSet}s that have path expressions are ignored and will not have any
+     * effect.
+     *
+     * @param codeOwnerConfigKey the key of the code owner config for which the path expression
+     *     matcher should be returned
+     * @return the {@link PathExpressionMatcher} that should be used for the specified code owner
+     *     config
+     */
+    private PathExpressionMatcher getMatcher(CodeOwnerConfig.Key codeOwnerConfigKey) {
+      CodeOwnerBackend codeOwnerBackend =
+          codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
+      return codeOwnerBackend
+          .getPathExpressionMatcher()
+          .orElse((pathExpression, relativePath) -> false);
+    }
+  }
+
+  private final CodeOwnerConfig codeOwnerConfig;
+  private final Path path;
+  private final PathExpressionMatcher pathExpressionMatcher;
+
+  private PathCodeOwners(
+      CodeOwnerConfig codeOwnerConfig, Path path, PathExpressionMatcher pathExpressionMatcher) {
+    this.codeOwnerConfig = requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    this.path = requireNonNull(path, "path");
+    this.pathExpressionMatcher = requireNonNull(pathExpressionMatcher, "pathExpressionMatcher");
+
+    checkState(path.isAbsolute(), "path %s must be absolute", path);
   }
 
   /**
-   * Gets the code owners from the given code owner config that apply the given path.
+   * Gets the code owners from the code owner config that apply to the path.
    *
    * <p>Code owners from inherited code owner configs are not considered.
    *
-   * @param codeOwnerConfig the code owner config from which the code owners should be returned
-   * @param absolutePath path for which the code owners should be returned; the path must be
-   *     absolute; can be the path of a file or folder; the path may or may not exist
-   * @return the code owners for the given path
+   * @return the code owners of the path
    */
-  public ImmutableSet<CodeOwnerReference> get(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
-    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
-    requireNonNull(absolutePath, "absolutePath");
-    checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
-
+  public ImmutableSet<CodeOwnerReference> get() {
     Stream.Builder<CodeOwnerSet> matchingCodeOwnerSets = Stream.builder();
 
     // Add all code owner sets that have matching path expressions.
-    getMatchingPerFileCodeOwnerSets(codeOwnerConfig, absolutePath)
-        .forEach(matchingCodeOwnerSets::add);
+    getMatchingPerFileCodeOwnerSets().forEach(matchingCodeOwnerSets::add);
 
     // Add all code owner sets without path expressions if global code owners are not ignored.
-    if (!ignoreGlobalCodeOwners(codeOwnerConfig, absolutePath)) {
+    if (!ignoreGlobalCodeOwners()) {
       codeOwnerConfig.codeOwnerSets().stream()
           .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
           .forEach(matchingCodeOwnerSets::add);
@@ -76,62 +113,28 @@ class PathCodeOwners {
   }
 
   /**
-   * Whether parent code owners should be ignored for the given path.
+   * Whether parent code owners should be ignored for the path.
    *
-   * @param codeOwnerConfig the code owner config to be read
-   * @param absolutePath path for which it should be checked if parent code owners should be
-   *     ignored; the path must be absolute; can be the path of a file or folder; the path may or
-   *     may not exist
-   * @return whether parent code owners should be ignored for the given path
+   * @return whether parent code owners should be ignored for the path
    */
-  public boolean ignoreParentCodeOwners(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
-    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
-    requireNonNull(absolutePath, "absolutePath");
-    checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
-
+  public boolean ignoreParentCodeOwners() {
     if (codeOwnerConfig.ignoreParentCodeOwners()) {
       return true;
     }
 
-    return ignoreGlobalCodeOwners(codeOwnerConfig, absolutePath);
+    return ignoreGlobalCodeOwners();
   }
 
-  private boolean ignoreGlobalCodeOwners(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
-    return getMatchingPerFileCodeOwnerSets(codeOwnerConfig, absolutePath)
+  private boolean ignoreGlobalCodeOwners() {
+    return getMatchingPerFileCodeOwnerSets()
         .anyMatch(codeOwnerSet -> codeOwnerSet.ignoreGlobalAndParentCodeOwners());
   }
 
-  private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets(
-      CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
-    Path relativePath = codeOwnerConfig.relativize(absolutePath);
-    PathExpressionMatcher matcher = getMatcher(codeOwnerConfig.key());
+  private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets() {
+    Path relativePath = codeOwnerConfig.relativize(path);
     return codeOwnerConfig.codeOwnerSets().stream()
         .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
-        .filter(codeOwnerSet -> matches(codeOwnerSet, relativePath, matcher));
-  }
-
-  /**
-   * Gets the {@link PathExpressionMatcher} that should be used for the specified code owner config.
-   *
-   * <p>Checks which {@link CodeOwnerBackend} is responsible for the specified code owner config and
-   * retrieves the {@link PathExpressionMatcher} from it.
-   *
-   * <p>If the {@link CodeOwnerBackend} doesn't support path expressions and doesn't provide a
-   * {@link PathExpressionMatcher} a {@link PathExpressionMatcher} that never matches is returned.
-   * This way {@link CodeOwnerSet}s that have path expressions are ignored and will not have any
-   * effect.
-   *
-   * @param codeOwnerConfigKey the key of the code owner config for which the path expression
-   *     matcher should be returned
-   * @return the {@link PathExpressionMatcher} that should be used for the specified code owner
-   *     config
-   */
-  private PathExpressionMatcher getMatcher(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
-    return codeOwnerBackend
-        .getPathExpressionMatcher()
-        .orElse((pathExpression, relativePath) -> false);
+        .filter(codeOwnerSet -> matches(codeOwnerSet, relativePath, pathExpressionMatcher));
   }
 
   /**
