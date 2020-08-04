@@ -42,41 +42,50 @@ import org.junit.Test;
 
 /** Tests for {@link PathCodeOwners}. */
 public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
-  private PathCodeOwners pathCodeOwners;
+  private PathCodeOwners.Factory pathCodeOwnersFactory;
   private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    pathCodeOwners = plugin.getSysInjector().getInstance(PathCodeOwners.class);
+    pathCodeOwnersFactory = plugin.getSysInjector().getInstance(PathCodeOwners.Factory.class);
     codeOwnerBackends =
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
-  public void cannotGetPathCodeOwnersForNullCodeOwnerConfig() throws Exception {
+  public void createPathCodeOwners() throws Exception {
+    PathCodeOwners pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            createCodeOwnerBuilder().build(), Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isNotNull();
+  }
+
+  @Test
+  public void cannotCreatePathCodeOwnersForNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> pathCodeOwners.get(null, Paths.get("/foo/bar/baz.md")));
+            () -> pathCodeOwnersFactory.create(null, Paths.get("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
   @Test
-  public void cannotGetPathCodeOwnersForNullPath() throws Exception {
+  public void cannotCreatePathCodeOwnersWithNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> pathCodeOwners.get(codeOwnerConfig, null));
-    assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
+        assertThrows(
+            NullPointerException.class, () -> pathCodeOwnersFactory.create(codeOwnerConfig, null));
+    assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 
   @Test
-  public void cannotGetPathCodeOwnersForRelativePath() throws Exception {
+  public void cannotCreatePathCodeOwnersWithRelativePath() throws Exception {
     String relativePath = "foo/bar/baz.md";
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> pathCodeOwners.get(codeOwnerConfig, Paths.get(relativePath)));
+            () -> pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -84,8 +93,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getEmptyPathCodeOwners() throws Exception {
-    CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
-    assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md"))).isEmpty();
+    CodeOwnerConfig emptyCodeOwnerConfig = createCodeOwnerBuilder().build();
+    PathCodeOwners pathCodeOwners =
+        pathCodeOwnersFactory.create(emptyCodeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners.get()).isEmpty();
   }
 
   @Test
@@ -94,7 +105,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerBuilder()
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
-    assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+    PathCodeOwners pathCodeOwners =
+        pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners.get())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -130,7 +143,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(matchingCodeOwnerSet2)
               .addCodeOwnerSet(nonMatchingCodeOwnerSet)
               .build();
-      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      PathCodeOwners pathCodeOwners =
+          pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+      assertThat(pathCodeOwners.get())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -149,7 +164,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                       .addCodeOwnerEmail(admin.email())
                       .build())
               .build();
-      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md"))).isEmpty();
+      PathCodeOwners pathCodeOwners =
+          pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+      assertThat(pathCodeOwners.get()).isEmpty();
     }
   }
 
@@ -179,7 +196,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(perFileCodeOwnerSet)
               .addCodeOwnerSet(globalCodeOwnerSet)
               .build();
-      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      PathCodeOwners pathCodeOwners =
+          pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+      assertThat(pathCodeOwners.get())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email());
     }
@@ -211,7 +230,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(perFileCodeOwnerSet)
               .addCodeOwnerSet(globalCodeOwnerSet)
               .build();
-      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      PathCodeOwners pathCodeOwners =
+          pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+      assertThat(pathCodeOwners.get())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -244,95 +265,65 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(perFileCodeOwnerSet1)
               .addCodeOwnerSet(perFileCodeOwnerSet2)
               .build();
-      assertThat(pathCodeOwners.get(codeOwnerConfig, Paths.get("/foo/bar/baz.md")))
+      PathCodeOwners pathCodeOwners =
+          pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+      assertThat(pathCodeOwners.get())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
   }
 
   @Test
-  public void cannotCheckIfParentCodeOwnersAreIgnoreForNullCodeOwnerConfig() throws Exception {
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () -> pathCodeOwners.ignoreParentCodeOwners(null, Paths.get("/foo/bar/baz.md")));
-    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
-  }
-
-  @Test
-  public void cannotCheckIfParentCodeOwnersAreIgnoreForNullPath() throws Exception {
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () -> pathCodeOwners.ignoreParentCodeOwners(createCodeOwnerBuilder().build(), null));
-    assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
-  }
-
-  @Test
-  public void cannotCheckIfParentCodeOwnersAreIgnoreForRelativePath() throws Exception {
-    String relativePath = "foo/bar/baz.md";
-    IllegalStateException exception =
-        assertThrows(
-            IllegalStateException.class,
-            () ->
-                pathCodeOwners.ignoreParentCodeOwners(
-                    createCodeOwnerBuilder().build(), Paths.get(relativePath)));
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(String.format("path %s must be absolute", relativePath));
-  }
-
-  @Test
   public void checkThatParentCodeOwnersAreIgnoredIfCodeOwnerConfigIgnoresParentCodeOwners()
       throws Exception {
-    assertThat(
-            pathCodeOwners.ignoreParentCodeOwners(
-                createCodeOwnerBuilder().setIgnoreParentCodeOwners().build(),
-                Paths.get("/foo/bar/baz.md")))
-        .isTrue();
+    PathCodeOwners pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            createCodeOwnerBuilder().setIgnoreParentCodeOwners().build(),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isTrue();
   }
 
   @Test
   public void checkThatParentCodeOwnersAreNotIgnoredIfCodeOwnerConfigDoesNotIgnoreParentCodeOwners()
       throws Exception {
-    assertThat(
-            pathCodeOwners.ignoreParentCodeOwners(
-                createCodeOwnerBuilder().setIgnoreParentCodeOwners(false).build(),
-                Paths.get("/foo/bar/baz.md")))
-        .isFalse();
+    PathCodeOwners pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            createCodeOwnerBuilder().setIgnoreParentCodeOwners(false).build(),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isFalse();
   }
 
   @Test
   public void checkThatParentCodeOwnersAreIgnoredIfMatchingCodeOwnerSetIgnoresParentCodeOwners()
       throws Exception {
-    assertThat(
-            pathCodeOwners.ignoreParentCodeOwners(
-                createCodeOwnerBuilder()
-                    .addCodeOwnerSet(
-                        CodeOwnerSet.builder()
-                            .setIgnoreGlobalAndParentCodeOwners()
-                            .addPathExpression("*.md")
-                            .build())
-                    .build(),
-                Paths.get("/foo.md")))
-        .isTrue();
+    PathCodeOwners pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            createCodeOwnerBuilder()
+                .addCodeOwnerSet(
+                    CodeOwnerSet.builder()
+                        .setIgnoreGlobalAndParentCodeOwners()
+                        .addPathExpression("*.md")
+                        .build())
+                .build(),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isTrue();
   }
 
   @Test
   public void
       checkThatParentCodeOwnersAreNotIgnoredIfNonMatchingCodeOwnerSetIgnoresParentCodeOwners()
           throws Exception {
-    assertThat(
-            pathCodeOwners.ignoreParentCodeOwners(
-                createCodeOwnerBuilder()
-                    .addCodeOwnerSet(
-                        CodeOwnerSet.builder()
-                            .setIgnoreGlobalAndParentCodeOwners()
-                            .addPathExpression("*.txt")
-                            .build())
-                    .build(),
-                Paths.get("/foo.md")))
-        .isFalse();
+    PathCodeOwners pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            createCodeOwnerBuilder()
+                .addCodeOwnerSet(
+                    CodeOwnerSet.builder()
+                        .setIgnoreGlobalAndParentCodeOwners()
+                        .addPathExpression("*.txt")
+                        .build())
+                .build(),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isFalse();
   }
 
   @Test

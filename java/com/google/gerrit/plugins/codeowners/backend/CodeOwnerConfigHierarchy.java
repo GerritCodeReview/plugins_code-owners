@@ -43,12 +43,12 @@ public class CodeOwnerConfigHierarchy {
   }
 
   private final CodeOwners codeOwners;
-  private final PathCodeOwners pathCodeOwners;
+  private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
   @Inject
-  CodeOwnerConfigHierarchy(CodeOwners codeOwners, PathCodeOwners pathCodeOwners) {
+  CodeOwnerConfigHierarchy(CodeOwners codeOwners, PathCodeOwners.Factory pathCodeOwnersFactory) {
     this.codeOwners = codeOwners;
-    this.pathCodeOwners = pathCodeOwners;
+    this.pathCodeOwnersFactory = pathCodeOwnersFactory;
   }
 
   /**
@@ -84,9 +84,10 @@ public class CodeOwnerConfigHierarchy {
       Optional<CodeOwnerConfig> codeOwnerConfig =
           codeOwners.get(CodeOwnerConfig.Key.create(branch, ownerConfigFolder), revision);
       if (codeOwnerConfig.isPresent()) {
+        PathCodeOwners pathCodeOwners =
+            pathCodeOwnersFactory.create(codeOwnerConfig.get(), absolutePath);
         boolean visitFurtherCodeOwnerConfigs = codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
-        if (!visitFurtherCodeOwnerConfigs
-            || pathCodeOwners.ignoreParentCodeOwners(codeOwnerConfig.get(), absolutePath)) {
+        if (!visitFurtherCodeOwnerConfigs || pathCodeOwners.ignoreParentCodeOwners()) {
           return;
         }
       }
