@@ -546,7 +546,8 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
-        CodeOwnerConfig.Key.create(BranchNameKey.create(project, "master"), Paths.get("/")));
+        CodeOwnerConfig.Key.create(BranchNameKey.create(project, "master"), Paths.get("/")),
+        ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"));
   }
 
   private AutoCloseable registerTestBackend(@Nullable PathExpressionMatcher pathExpressionMatcher) {

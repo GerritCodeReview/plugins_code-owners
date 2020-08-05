@@ -35,6 +35,9 @@ import org.junit.Test;
 
 /** Tests for {@link CodeOwners}. */
 public class CodeOwnersTest extends AbstractCodeOwnersTest {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   private CodeOwners codeOwners;
   private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
@@ -48,11 +51,7 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetCodeOwnerConfigForNullCodeOwnerConfigKey() throws Exception {
     NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () ->
-                codeOwners.get(
-                    null, ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")));
+        assertThrows(NullPointerException.class, () -> codeOwners.get(null, TEST_REVISION));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
   }
 
@@ -78,7 +77,7 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
   public void codeOwnerConfigIsRetrievedFromConfiguredBackend() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig expectedCodeOwnersConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
+        CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnerBackend codeOwnerBackendMock = mock(CodeOwnerBackend.class);
@@ -95,19 +94,18 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "test-backend")
   public void revisionIsPassedToConfiguredBackend() throws Exception {
-    ObjectId revision = ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig expectedCodeOwnersConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
+        CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnerBackend codeOwnerBackendMock = mock(CodeOwnerBackend.class);
-    when(codeOwnerBackendMock.getCodeOwnerConfig(codeOwnerConfigKey, revision))
+    when(codeOwnerBackendMock.getCodeOwnerConfig(codeOwnerConfigKey, TEST_REVISION))
         .thenReturn(Optional.of(expectedCodeOwnersConfig));
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnerBackendMock)) {
-      Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey, revision);
+      Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey, TEST_REVISION);
       assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
-      verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey, revision);
+      verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey, TEST_REVISION);
     }
   }
 

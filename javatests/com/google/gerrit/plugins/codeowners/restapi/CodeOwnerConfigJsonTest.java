@@ -29,10 +29,14 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigJson}. */
 public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   @Test
   public void formatCodeOwnerReference() throws Exception {
     CodeOwnerReference codeOwnerReference = CodeOwnerReference.create(admin.email());
@@ -84,7 +88,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatCodeOwnerConfigWithCodeOwnerSet() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
@@ -98,7 +102,8 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatCodeOwnerConfigWithoutCodeOwnerSet() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/")).build();
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
     assertThat(codeOwnerConfigInfo).hasCodeOwnerSetsThat().isNull();
   }
@@ -106,7 +111,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatCodeOwnerConfigWithIgnoreParentCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .setIgnoreParentCodeOwners()
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
@@ -122,7 +127,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatCodeOwnerConfigWithOnlyIgnoreParentCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .setIgnoreParentCodeOwners()
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);
@@ -133,7 +138,7 @@ public class CodeOwnerConfigJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatCodeOwnerConfigWithoutIgnoreParentCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnerConfigInfo codeOwnerConfigInfo = CodeOwnerConfigJson.format(codeOwnerConfig);

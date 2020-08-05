@@ -65,6 +65,11 @@ public class CodeOwnerConfigSubject extends Subject {
     this.codeOwnerConfig = codeOwnerConfig;
   }
 
+  /** Returns a subject for the revision. */
+  public Subject hasRevisionThat() {
+    return check("revision()").that(codeOwnerConfig().revision());
+  }
+
   /**
    * Returns an {@link ListSubject} for the code owners in the code owner config.
    *
