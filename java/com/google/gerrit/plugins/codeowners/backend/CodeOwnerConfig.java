@@ -24,6 +24,7 @@ import com.google.gerrit.entities.Project;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Code owner configuration for a folder in a branch.
@@ -35,6 +36,9 @@ import java.util.Optional;
 public abstract class CodeOwnerConfig {
   /** Gets the key of this code owner config. */
   public abstract Key key();
+
+  /** The revision from which this code owner config was loaded. */
+  public abstract ObjectId revision();
 
   /**
    * Gets whether code owners from parent code owner configs (code owner configs in parent folders)
@@ -97,10 +101,14 @@ public abstract class CodeOwnerConfig {
    * Creates a builder for a code owner config.
    *
    * @param key the key of the code owner config
+   * @param revision the revision from which the code owner config was loaded
    * @return builder for a code owner config
    */
-  public static Builder builder(Key key) {
-    return new AutoValue_CodeOwnerConfig.Builder().setKey(key).setIgnoreParentCodeOwners(false);
+  public static Builder builder(Key key, ObjectId revision) {
+    return new AutoValue_CodeOwnerConfig.Builder()
+        .setKey(key)
+        .setRevision(revision)
+        .setIgnoreParentCodeOwners(false);
   }
 
   @AutoValue.Builder
@@ -112,6 +120,14 @@ public abstract class CodeOwnerConfig {
      * @return the Builder instance for chaining calls
      */
     public abstract Builder setKey(Key key);
+
+    /**
+     * Sets the revision from which this code owner config was loaded.
+     *
+     * @param revision the revision from which this code owner config was loaded
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder setRevision(ObjectId revision);
 
     /**
      * Sets whether code owners from parent code owner configs (code owner configs in parent

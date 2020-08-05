@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Parser and formatter for the syntax that is used to store {@link CodeOwnerConfig}s in {@code
@@ -73,8 +74,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public CodeOwnerConfig parse(
-      CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
+      ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
     return Parser.parse(
+        requireNonNull(revision, "revision"),
         requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"),
         Strings.nullToEmpty(codeOwnerConfigAsString));
   }
@@ -130,8 +132,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         Pattern.compile(BOL + "per-file[\\s]+([^=#]+)=[\\s]*([^#]+)" + EOL);
 
     static CodeOwnerConfig parse(
-        CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
-      CodeOwnerConfig.Builder codeOwnerConfigBuilder = CodeOwnerConfig.builder(codeOwnerConfigKey);
+        ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
+      CodeOwnerConfig.Builder codeOwnerConfigBuilder =
+          CodeOwnerConfig.builder(codeOwnerConfigKey, revision);
       CodeOwnerSet.Builder globalCodeOwnerSetBuilder = CodeOwnerSet.builder();
       List<CodeOwnerSet> perFileCodeOwnerSet = new ArrayList<>();
 

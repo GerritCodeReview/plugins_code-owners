@@ -114,6 +114,13 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   public Optional<CodeOwnerConfig> getLoadedCodeOwnerConfig() {
     checkLoaded();
 
+    // Set the revision in the loaded code owner config if it was not set yet, or if it is outdated.
+    if (loadedCodeOwnersConfig.isPresent()
+        && (!loadedCodeOwnersConfig.get().revision().equals(revision))) {
+      loadedCodeOwnersConfig =
+          Optional.of(loadedCodeOwnersConfig.get().toBuilder().setRevision(revision).build());
+    }
+
     return loadedCodeOwnersConfig;
   }
 
@@ -151,7 +158,8 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
       if (codeOwnerConfigFileContent.isPresent()) {
         loadedCodeOwnersConfig =
             Optional.of(
-                codeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfigFileContent.get()));
+                codeOwnerConfigParser.parse(
+                    revision, codeOwnerConfigKey, codeOwnerConfigFileContent.get()));
       }
     }
 
@@ -195,7 +203,8 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
 
     // Update the code owner config.
     CodeOwnerConfig originalCodeOwnerConfig =
-        loadedCodeOwnersConfig.orElse(CodeOwnerConfig.builder(codeOwnerConfigKey).build());
+        loadedCodeOwnersConfig.orElse(
+            CodeOwnerConfig.builder(codeOwnerConfigKey, revision).build());
     CodeOwnerConfig updatedCodeOwnerConfig =
         updateCodeOwnerConfig(originalCodeOwnerConfig, codeOwnerConfigUpdate.get());
 

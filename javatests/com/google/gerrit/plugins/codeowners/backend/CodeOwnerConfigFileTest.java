@@ -19,8 +19,10 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubjec
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
@@ -42,6 +44,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   private static final CodeOwnerConfigParser CODE_OWNER_CONFIG_PARSER =
       new TestCodeOwnerConfigParser();
 
+  @Inject private ProjectOperations projectOperations;
   @Inject private MetaDataUpdate.Server metaDataUpdateServer;
 
   private TestCodeOwnerConfigStorage testCodeOwnerConfigStorage;
@@ -74,59 +77,64 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   @Test
   public void loadEmptyCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfig = CodeOwnerConfig.builder(codeOwnerConfigKey).build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigKey, b -> {});
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
-    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
-        .value()
-        .hasCodeOwnerSetsThat()
-        .isEmpty();
+    CodeOwnerConfigSubject codeOwnerConfigSubject =
+        assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).value();
+    codeOwnerConfigSubject.hasCodeOwnerSetsThat().isEmpty();
+    codeOwnerConfigSubject
+        .hasRevisionThat()
+        .isEqualTo(projectOperations.project(project).getHead("master"));
   }
 
   @Test
   public void loadCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .setIgnoreParentCodeOwners()
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b ->
+            b.setIgnoreParentCodeOwners()
+                .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
-    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
-        .value()
-        .hasIgnoreParentCodeOwnersThat()
-        .isTrue();
-    assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+    CodeOwnerConfigSubject codeOwnerConfigSubject =
+        assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).value();
+    codeOwnerConfigSubject.hasIgnoreParentCodeOwnersThat().isTrue();
+    codeOwnerConfigSubject
         .hasCodeOwnerSetsThat()
         .onlyElement()
         .hasCodeOwnersEmailsThat()
         .containsExactly(admin.email());
+    codeOwnerConfigSubject
+        .hasRevisionThat()
+        .isEqualTo(projectOperations.project(project).getHead("master"));
   }
 
   @Test
   public void loadCodeOwnerConfigFileFromOldRevision() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .setIgnoreParentCodeOwners()
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    ObjectId revision1 = testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+    ObjectId revision1 =
+        testCodeOwnerConfigStorage
+            .writeCodeOwnerConfig(
+                codeOwnerConfigKey,
+                b ->
+                    b.setIgnoreParentCodeOwners()
+                        .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())))
+            .revision();
 
     // update the code owner config, which creates a new revision
     ObjectId revision2 =
-        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
-            codeOwnerConfig.toBuilder().setIgnoreParentCodeOwners(false).build());
+        testCodeOwnerConfigStorage
+            .writeCodeOwnerConfig(codeOwnerConfigKey, b -> b.setIgnoreParentCodeOwners(false))
+            .revision();
     assertThat(revision1).isNotEqualTo(revision2);
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey, revision1);
-    assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
-        .value()
-        .hasIgnoreParentCodeOwnersThat()
-        .isTrue();
+    CodeOwnerConfigSubject codeOwnerConfigSubject =
+        assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).value();
+    codeOwnerConfigSubject.hasIgnoreParentCodeOwnersThat().isTrue();
+    codeOwnerConfigSubject.hasRevisionThat().isEqualTo(revision1);
   }
 
   @Test
@@ -145,12 +153,11 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
     String customFileName = "FOO_CODE_OWNERS";
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/", customFileName);
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .setIgnoreParentCodeOwners()
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b ->
+            b.setIgnoreParentCodeOwners()
+                .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     CodeOwnerConfigFile codeOwnerConfigFile = loadCodeOwnerConfig(codeOwnerConfigKey);
     assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
@@ -178,7 +185,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .isEmpty();
 
       // Remember head so that we can check that the branch is changed.
-      RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
+      RevCommit oldHead = getHead(repo, codeOwnerConfigKey.ref());
 
       // Create the code owner config.
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
@@ -190,30 +197,33 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
               .build());
       codeOwnerConfigFile.commit(metaDataUpdate);
 
+      RevCommit newHead = getHead(repo, codeOwnerConfigKey.ref());
+
       // Check that the loaded code owner config was updated.
-      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
-          .value()
-          .hasIgnoreParentCodeOwnersThat()
-          .isTrue();
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+      CodeOwnerConfigSubject loadedCodeOwnerConfigSubject =
+          assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).value();
+      loadedCodeOwnerConfigSubject.hasIgnoreParentCodeOwnersThat().isTrue();
+      loadedCodeOwnerConfigSubject
           .hasCodeOwnerSetsThat()
           .onlyElement()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
+      loadedCodeOwnerConfigSubject.hasRevisionThat().isEqualTo(newHead);
 
       // Check that the code owner config was created in the repository.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           testCodeOwnerConfigStorage.readCodeOwnerConfig(codeOwnerConfigKey);
-      assertThatOptional(codeOwnerConfigInRepo).value().hasIgnoreParentCodeOwnersThat().isTrue();
-      assertThatOptional(codeOwnerConfigInRepo)
-          .value()
+      CodeOwnerConfigSubject codeOwnerConfigInRepoSubject =
+          assertThatOptional(codeOwnerConfigInRepo).value();
+      codeOwnerConfigInRepoSubject.hasIgnoreParentCodeOwnersThat().isTrue();
+      codeOwnerConfigInRepoSubject
           .hasCodeOwnerSetsThat()
           .onlyElement()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
 
       // Check that the branch was changed.
-      assertThat(head).isNotEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
+      assertThat(oldHead).isNotEqualTo(newHead);
     }
   }
 
@@ -378,11 +388,9 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   @Test
   public void updateCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     try (Repository repo = repoManager.openRepository(project);
         MetaDataUpdate metaDataUpdate = metaDataUpdateServer.create(project)) {
@@ -394,7 +402,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .isPresent();
 
       // Remember head so that we can check that the branch is changed.
-      RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
+      RevCommit oldHead = getHead(repo, codeOwnerConfigKey.ref());
 
       // Update the code owner config.
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(
@@ -405,41 +413,42 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
       codeOwnerConfigFile.commit(metaDataUpdate);
 
+      RevCommit newHead = getHead(repo, codeOwnerConfigKey.ref());
+
       // Check that the loaded code owner config was updated.
-      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
-          .value()
-          .hasIgnoreParentCodeOwnersThat()
-          .isTrue();
-      assertThat(codeOwnerConfigFile.getLoadedCodeOwnerConfig().get())
+      CodeOwnerConfigSubject loadedCodeOwnerConfigSubject =
+          assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).value();
+      loadedCodeOwnerConfigSubject.hasIgnoreParentCodeOwnersThat().isTrue();
+      loadedCodeOwnerConfigSubject
           .hasCodeOwnerSetsThat()
           .onlyElement()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
+      loadedCodeOwnerConfigSubject.hasRevisionThat().isEqualTo(newHead);
 
       // Check that the code owner config was updated in the repository.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
           testCodeOwnerConfigStorage.readCodeOwnerConfig(codeOwnerConfigKey);
-      assertThatOptional(codeOwnerConfigInRepo).value().hasIgnoreParentCodeOwnersThat().isTrue();
-      assertThatOptional(codeOwnerConfigInRepo)
-          .value()
+      CodeOwnerConfigSubject codeOwnerConfigInRepoSubject =
+          assertThatOptional(codeOwnerConfigInRepo).value();
+      codeOwnerConfigInRepoSubject.hasIgnoreParentCodeOwnersThat().isTrue();
+      codeOwnerConfigInRepoSubject
           .hasCodeOwnerSetsThat()
           .onlyElement()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email(), user.email());
 
       // Check that the branch was changed.
-      assertThat(head).isNotEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
+      assertThat(oldHead).isNotEqualTo(newHead);
     }
   }
 
   @Test
   public void codeOwnerConfigFileIsNotUpdatedIfUpdateIsANoOp() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     try (Repository repo = repoManager.openRepository(project);
         MetaDataUpdate metaDataUpdate = metaDataUpdateServer.create(project)) {
@@ -451,19 +460,23 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .isPresent();
 
       // Remember head so that we can check that the branch doesn't change.
-      RevCommit head = getHead(repo, codeOwnerConfigKey.ref());
+      RevCommit oldHead = getHead(repo, codeOwnerConfigKey.ref());
 
       // Update the code owner config without changing it.
       codeOwnerConfigFile.setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate.builder().build());
       codeOwnerConfigFile.commit(metaDataUpdate);
 
+      RevCommit newHead = getHead(repo, codeOwnerConfigKey.ref());
+
       // Check that the loaded code owner config didn't change.
-      assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig())
-          .value()
+      CodeOwnerConfigSubject loadedCodeOwnerConfigSubject =
+          assertThatOptional(codeOwnerConfigFile.getLoadedCodeOwnerConfig()).value();
+      loadedCodeOwnerConfigSubject
           .hasCodeOwnerSetsThat()
           .onlyElement()
           .hasCodeOwnersEmailsThat()
           .containsExactly(admin.email());
+      loadedCodeOwnerConfigSubject.hasRevisionThat().isEqualTo(newHead);
 
       // Check that the code owner config in the repository didn't change.
       Optional<CodeOwnerConfig> codeOwnerConfigInRepo =
@@ -476,18 +489,16 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
           .containsExactly(admin.email());
 
       // Check that the branch didn't change.
-      assertThat(head).isEqualTo(getHead(repo, codeOwnerConfigKey.ref()));
+      assertThat(oldHead).isEqualTo(newHead);
     }
   }
 
   @Test
   public void updateCodeOwnerConfigFileSoThatItBecomesEmptyAndIsDeleted() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfig);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     try (Repository repo = repoManager.openRepository(project);
         MetaDataUpdate metaDataUpdate = metaDataUpdateServer.create(project)) {
@@ -543,12 +554,17 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
     @Override
     public CodeOwnerConfig parse(
-        CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) throws IOException {
+        ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
+        throws IOException {
       if (codeOwnerConfigAsString.isEmpty()) {
-        return CodeOwnerConfig.builder(codeOwnerConfigKey).build();
+        return CodeOwnerConfig.builder(codeOwnerConfigKey, revision).build();
       }
 
-      return codeOwnerConfigCache.get(codeOwnerConfigAsString);
+      return codeOwnerConfigCache
+          .get(codeOwnerConfigAsString)
+          .toBuilder()
+          .setRevision(revision)
+          .build();
     }
 
     @Override

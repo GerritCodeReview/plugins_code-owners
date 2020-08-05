@@ -83,7 +83,9 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
         TextFormat.ParseException.class,
         () ->
             codeOwnerConfigParser.parse(
-                codeOwnerConfigKey, "owners_config {\n  owner_sets {\nINVALID_LINE\n  }\n}\n"));
+                TEST_REVISION,
+                codeOwnerConfigKey,
+                "owners_config {\n  owner_sets {\nINVALID_LINE\n  }\n}\n"));
   }
 
   @Test
@@ -160,7 +162,7 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
             .build();
 
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(codeOwnerSet)
             .build();
 
@@ -176,7 +178,7 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
   @Test
   public void cannotFormatCodeOwnerConfigWithImports() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addImport(CodeOwnerConfigReference.builder("/foo/bar/OWNERS").build())
             .build();
 

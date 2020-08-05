@@ -89,10 +89,9 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   public void getCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+            codeOwnerConfigKey,
+            b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
         codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
@@ -103,16 +102,16 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   public void getCodeOwnerConfigFromOldRevision() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    ObjectId revision1 =
-        testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+            codeOwnerConfigKey,
+            b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
+    ObjectId revision1 = codeOwnerConfigInRepository.revision();
 
     // update the code owner config, which creates a new revision
     ObjectId revision2 =
-        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
-            codeOwnerConfigInRepository.toBuilder().setIgnoreParentCodeOwners().build());
+        testCodeOwnerConfigStorage
+            .writeCodeOwnerConfig(codeOwnerConfigKey, b -> b.setIgnoreParentCodeOwners())
+            .revision();
     assertThat(revision1).isNotEqualTo(revision2);
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
@@ -207,11 +206,9 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
 
   private void testUpdateCodeOwnerConfig(@Nullable IdentifiedUser currentUser) throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     try (Repository repo = repoManager.openRepository(project)) {
       // Remember head for later assertions.
@@ -270,11 +267,9 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   private void testDeleteCodeOwnerConfigInitiatedByServer(@Nullable IdentifiedUser currentUser)
       throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     try (Repository repo = repoManager.openRepository(project)) {
       // Remember head for later assertions.
@@ -318,11 +313,9 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   @Test
   public void noOpCodeOwnerConfigUpdate() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfigInRepository =
-        CodeOwnerConfig.builder(codeOwnerConfigKey)
-            .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-            .build();
-    testCodeOwnerConfigStorage.writeCodeOwnerConfig(codeOwnerConfigInRepository);
+    testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+        codeOwnerConfigKey,
+        b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
 
     try (Repository repo = repoManager.openRepository(project)) {
       // Remember head for later assertions.

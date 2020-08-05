@@ -21,6 +21,7 @@ import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -56,24 +57,42 @@ public class TestCodeOwnerConfigStorage {
    * <p>Requires that the repository and the branch in which the code owner config should be stored
    * already exist.
    *
-   * @param codeOwnerConfig the code owner config that should be written
-   * @return the ID of the created commit
+   * @param codeOwnerConfigKey the key of the code owner config that should be written
+   * @param codeOwnerConfigUpdater consumer for a code owner config builder on which the code owner
+   *     config properties should be set
+   * @return the code owner config that was written
    */
-  public ObjectId writeCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) throws Exception {
+  public CodeOwnerConfig writeCodeOwnerConfig(
+      CodeOwnerConfig.Key codeOwnerConfigKey,
+      Consumer<CodeOwnerConfig.Builder> codeOwnerConfigUpdater)
+      throws Exception {
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder =
+        readCodeOwnerConfig(codeOwnerConfigKey)
+            .map(key -> key.toBuilder())
+            .orElse(
+                CodeOwnerConfig.builder(
+                    codeOwnerConfigKey,
+                    ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef")));
+    codeOwnerConfigUpdater.accept(codeOwnerConfigBuilder);
+    CodeOwnerConfig codeOwnerConfig = codeOwnerConfigBuilder.build();
+
     String formattedCodeOwnerConfig = codeOwnerConfigParser.formatAsString(codeOwnerConfig);
     try (TestRepository<Repository> testRepo =
-        new TestRepository<>(repoManager.openRepository(codeOwnerConfig.key().project()))) {
-      Ref ref = testRepo.getRepository().exactRef(codeOwnerConfig.key().ref());
+        new TestRepository<>(repoManager.openRepository(codeOwnerConfigKey.project()))) {
+      Ref ref = testRepo.getRepository().exactRef(codeOwnerConfigKey.ref());
       RevCommit head = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      return testRepo.update(
-          codeOwnerConfig.key().ref(),
-          testRepo
-              .commit()
-              .parent(head)
-              .message("Add test code owner config")
-              .add(
-                  JgitPath.of(codeOwnerConfig.key().filePath(defaultFileName)).get(),
-                  formattedCodeOwnerConfig));
+      RevCommit revision =
+          testRepo.update(
+              codeOwnerConfigKey.ref(),
+              testRepo
+                  .commit()
+                  .parent(head)
+                  .message("Add test code owner config")
+                  .add(
+                      JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get(),
+                      formattedCodeOwnerConfig));
+
+      return codeOwnerConfig.toBuilder().setRevision(revision).build();
     }
   }
 
@@ -105,7 +124,7 @@ public class TestCodeOwnerConfigStorage {
       RevObject blob = testRepo.get(commit.getTree(), filePath);
       byte[] data = testRepo.getRepository().open(blob).getCachedBytes(Integer.MAX_VALUE);
       return Optional.of(
-          codeOwnerConfigParser.parse(codeOwnerConfigKey, RawParseUtils.decode(data)));
+          codeOwnerConfigParser.parse(commit, codeOwnerConfigKey, RawParseUtils.decode(data)));
     }
   }
 }
