@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import java.io.IOException;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Parser and formatter for {@link CodeOwnerConfig}s.
@@ -32,19 +33,21 @@ public interface CodeOwnerConfigParser {
    * <p>Most code owner backends store code owner configs in files. In this case the provided string
    * is the file content.
    *
-   * <p><strong>Note:</strong> Parsing a code owner config by using the {@link
-   * #parse(CodeOwnerConfig.Key, String)} and then formatting the parsed code owner config back to a
-   * string by using {@link #formatAsString(CodeOwnerConfig)} is not guaranteed to result in the
-   * exact same code owner config file (e.g. comment lines, invalid lines and invalid emails may be
-   * dropped or emails may be reordered).
+   * <p><strong>Note:</strong> Parsing a code owner config by using the {@link #parse(ObjectId,
+   * CodeOwnerConfig.Key, String)} and then formatting the parsed code owner config back to a string
+   * by using {@link #formatAsString(CodeOwnerConfig)} is not guaranteed to result in the exact same
+   * code owner config file (e.g. comment lines, invalid lines and invalid emails may be dropped or
+   * emails may be reordered).
    *
+   * @param revision the revision from which the code owner configuration was loaded
    * @param codeOwnerConfigKey the key of the code owner config that should be parsed
    * @param codeOwnerConfigAsString the code owner configuration as string, e.g. the content of the
    *     code owner config file
    * @return the parsed {@link CodeOwnerConfig}
    * @throws IOException throw is there is an IO error during the parsing
    */
-  CodeOwnerConfig parse(CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
+  CodeOwnerConfig parse(
+      ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
       throws IOException;
 
   /**
