@@ -155,15 +155,12 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void cannotValidateProjectLevelConfigWithNullProjectState() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
             () ->
                 requiredApprovalConfig.validateProjectLevelConfig(
-                    null,
-                    "code-owners.config",
-                    new ProjectLevelConfig("code-owners.config", projectState)));
+                    null, "code-owners.config", new ProjectLevelConfig.Bare("code-owners.config")));
     assertThat(npe).hasMessageThat().isEqualTo("projectState");
   }
 
@@ -175,9 +172,7 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 requiredApprovalConfig.validateProjectLevelConfig(
-                    projectState,
-                    null,
-                    new ProjectLevelConfig("code-owners.config", projectState)));
+                    projectState, null, new ProjectLevelConfig.Bare("code-owners.config")));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -198,17 +193,15 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     Optional<CommitValidationMessage> commitValidationMessage =
         requiredApprovalConfig.validateProjectLevelConfig(
-            projectState,
-            "code-owners.config",
-            new ProjectLevelConfig("code-owners.config", projectState));
+            projectState, "code-owners.config", new ProjectLevelConfig.Bare("code-owners.config"));
     assertThat(commitValidationMessage).isEmpty();
   }
 
   @Test
   public void validateValidProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
-    cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "Code-Review+2");
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "Code-Review+2");
     Optional<CommitValidationMessage> commitValidationMessage =
         requiredApprovalConfig.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
     assertThat(commitValidationMessage).isEmpty();
@@ -217,8 +210,8 @@ public class RequiredApprovalConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void validateInvalidProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
-    cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "INVALID");
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_REQUIRED_APPROVAL, "INVALID");
     Optional<CommitValidationMessage> commitValidationMessage =
         requiredApprovalConfig.validateProjectLevelConfig(projectState, "code-owners.config", cfg);
     assertThat(commitValidationMessage).isPresent();

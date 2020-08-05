@@ -88,13 +88,14 @@ public class BackendConfig {
    *     validation errors
    */
   ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
-      String fileName, ProjectLevelConfig projectLevelConfig) {
+      String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
 
-    String backendName = projectLevelConfig.get().getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
+    String backendName =
+        projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
     if (backendName != null) {
       if (!lookupBackend(backendName).isPresent()) {
         validationMessages.add(
@@ -106,9 +107,9 @@ public class BackendConfig {
       }
     }
 
-    for (String subsection : projectLevelConfig.get().getSubsections(SECTION_CODE_OWNERS)) {
+    for (String subsection : projectLevelConfig.getConfig().getSubsections(SECTION_CODE_OWNERS)) {
       backendName =
-          projectLevelConfig.get().getString(SECTION_CODE_OWNERS, subsection, KEY_BACKEND);
+          projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, subsection, KEY_BACKEND);
       if (backendName != null) {
         if (!lookupBackend(backendName).isPresent()) {
           validationMessages.add(

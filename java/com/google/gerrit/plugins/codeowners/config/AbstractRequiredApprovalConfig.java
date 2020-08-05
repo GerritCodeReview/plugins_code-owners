@@ -99,13 +99,13 @@ abstract class AbstractRequiredApprovalConfig {
    *     validation errors
    */
   Optional<CommitValidationMessage> validateProjectLevelConfig(
-      ProjectState projectState, String fileName, ProjectLevelConfig projectLevelConfig) {
+      ProjectState projectState, String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     String requiredApproval =
-        projectLevelConfig.get().getString(SECTION_CODE_OWNERS, null, getConfigKey());
+        projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, null, getConfigKey());
     if (requiredApproval != null) {
       try {
         RequiredApproval.parse(projectState, requiredApproval);

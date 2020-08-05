@@ -87,7 +87,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       }
 
       ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-      ProjectLevelConfig cfg = loadConfig(projectState, fileName, receiveEvent.commit);
+      ProjectLevelConfig.Bare cfg = loadConfig(project, fileName, receiveEvent.commit);
       validateConfig(projectState, fileName, cfg);
       return ImmutableList.of();
     } catch (IOException e) {
@@ -116,18 +116,18 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
   /**
    * Loads the configuration from the file and revision.
    *
-   * @param projectState the project state
+   * @param project the project name
    * @param fileName the name of the config file
    * @param revision the revision from which the configuration should be loaded
    * @return the loaded configuration
    * @throws CommitValidationException thrown if the configuration is invalid and cannot be parsed
    */
-  private ProjectLevelConfig loadConfig(
-      ProjectState projectState, String fileName, ObjectId revision)
+  private ProjectLevelConfig.Bare loadConfig(
+      Project.NameKey project, String fileName, ObjectId revision)
       throws CommitValidationException, IOException {
-    ProjectLevelConfig cfg = new ProjectLevelConfig(fileName, projectState);
-    try (Repository git = repoManager.openRepository(projectState.getNameKey())) {
-      cfg.load(projectState.getNameKey(), git, revision);
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare(fileName);
+    try (Repository git = repoManager.openRepository(project)) {
+      cfg.load(project, git, revision);
     } catch (ConfigInvalidException e) {
       throw new CommitValidationException(
           exceptionMessage(fileName, revision),
@@ -144,7 +144,8 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
    * @param cfg the project-level code-owners configuration that should be validated
    * @throws CommitValidationException throw if there are any validation errors
    */
-  private void validateConfig(ProjectState projectState, String fileName, ProjectLevelConfig cfg)
+  private void validateConfig(
+      ProjectState projectState, String fileName, ProjectLevelConfig.Bare cfg)
       throws CommitValidationException {
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
     validationMessages.addAll(backendConfig.validateProjectLevelConfig(fileName, cfg));
