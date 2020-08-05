@@ -25,6 +25,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Function;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -45,6 +46,9 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   protected static final String EMAIL_1 = "admin@example.com";
   protected static final String EMAIL_2 = "jdoe@example.com";
   protected static final String EMAIL_3 = "jroe@example.com";
+
+  protected static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
 
   protected CodeOwnerConfigParser codeOwnerConfigParser;
 
@@ -76,7 +80,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   protected String getCodeOwnerConfig(
       boolean ignoreParentCodeOwners, CodeOwnerSet... codeOwnerSets) {
     CodeOwnerConfig.Builder codeOwnerConfigBuilder =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .setIgnoreParentCodeOwners(ignoreParentCodeOwners);
     Arrays.stream(codeOwnerSets).forEach(codeOwnerConfigBuilder::addCodeOwnerSet);
     return getCodeOwnerConfig(codeOwnerConfigBuilder.build());
@@ -91,7 +95,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
    */
   protected String getCodeOwnerConfig(CodeOwnerConfigReference... codeOwnerConfigReferences) {
     CodeOwnerConfig.Builder codeOwnerConfigBuilder =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"));
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION);
     Arrays.stream(codeOwnerConfigReferences).forEach(codeOwnerConfigBuilder::addImport);
     return getCodeOwnerConfig(codeOwnerConfigBuilder.build());
   }
@@ -109,9 +113,21 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   }
 
   @Test
+  public void cannotParseIfRevisionIsNull() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwnerConfigParser.parse(
+                    null, CodeOwnerConfig.Key.create(project, "master", "/"), ""));
+    assertThat(npe).hasMessageThat().isEqualTo("revision");
+  }
+
+  @Test
   public void cannotParseIfCodeOwnerConfigKeyIsNull() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwnerConfigParser.parse(null, ""));
+        assertThrows(
+            NullPointerException.class, () -> codeOwnerConfigParser.parse(TEST_REVISION, null, ""));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
   }
 
@@ -254,7 +270,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
     CodeOwnerConfig parsedCodeOwnerConfig =
-        codeOwnerConfigParser.parse(codeOwnerConfigKey, codeOwnerConfig);
+        codeOwnerConfigParser.parse(TEST_REVISION, codeOwnerConfigKey, codeOwnerConfig);
 
     // Assert the parsed code owner config.
     codeOwnerConfigAsserter.doAssert(parsedCodeOwnerConfig);

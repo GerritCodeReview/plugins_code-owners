@@ -24,10 +24,14 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfig}. */
 public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   @Test
   public void createKey() throws Exception {
     Project.NameKey project = Project.nameKey("project");
@@ -115,7 +119,8 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
         CodeOwnerConfig.builder(
                 CodeOwnerConfig.Key.create(
                     BranchNameKey.create(Project.nameKey("project"), "master"),
-                    Paths.get("/foo/bar/")))
+                    Paths.get("/foo/bar/")),
+                TEST_REVISION)
             .build();
     Path relativizedPath = codeOwnerConfig.relativize(Paths.get("/foo/bar/baz.md"));
     assertThat(relativizedPath).isEqualTo(Paths.get("baz.md"));
@@ -124,6 +129,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   private static CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
         CodeOwnerConfig.Key.create(
-            BranchNameKey.create(Project.nameKey("project"), "master"), Paths.get("/")));
+            BranchNameKey.create(Project.nameKey("project"), "master"), Paths.get("/")),
+        TEST_REVISION);
   }
 }
