@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.BackendConfig.KEY_BACKEND;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
-import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
@@ -32,7 +31,6 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
-import com.google.gerrit.server.project.ProjectState;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -190,13 +188,12 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void cannotValidateProjectLevelConfigWithNullFileName() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
             () ->
                 backendConfig.validateProjectLevelConfig(
-                    null, new ProjectLevelConfig("code-owners.config", projectState)));
+                    null, new ProjectLevelConfig.Bare("code-owners.config")));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -211,18 +208,16 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void validateEmptyProjectLevelConfig() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         backendConfig.validateProjectLevelConfig(
-            "code-owners.config", new ProjectLevelConfig("code-owners.config", projectState));
+            "code-owners.config", new ProjectLevelConfig.Bare("code-owners.config"));
     assertThat(commitValidationMessage).isEmpty();
   }
 
   @Test
   public void validateValidProjectLevelConfig() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
-    cfg.get()
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig()
         .setString(
             SECTION_CODE_OWNERS, null, KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
     ImmutableList<CommitValidationMessage> commitValidationMessage =
@@ -232,9 +227,8 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void validateInvalidProjectLevelConfig_invalidProjectConfiguration() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
-    cfg.get().setString(SECTION_CODE_OWNERS, null, KEY_BACKEND, "INVALID");
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_BACKEND, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         backendConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);
@@ -249,9 +243,8 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void validateInvalidProjectLevelConfig_invalidBranchConfiguration() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
-    cfg.get().setString(SECTION_CODE_OWNERS, "someBranch", KEY_BACKEND, "INVALID");
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig().setString(SECTION_CODE_OWNERS, "someBranch", KEY_BACKEND, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         backendConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);

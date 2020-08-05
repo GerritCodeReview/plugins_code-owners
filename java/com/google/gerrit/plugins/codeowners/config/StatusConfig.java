@@ -73,21 +73,21 @@ public class StatusConfig {
    *     validation errors
    */
   ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
-      String fileName, ProjectLevelConfig projectLevelConfig) {
+      String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
 
     try {
-      projectLevelConfig.get().getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+      projectLevelConfig.getConfig().getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
     } catch (IllegalArgumentException e) {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
                   "Disabled value '%s' that is configured in %s.config (parameter %s.%s) is"
                       + " invalid.",
-                  projectLevelConfig.get().getString(SECTION_CODE_OWNERS, null, KEY_DISABLED),
+                  projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, null, KEY_DISABLED),
                   pluginName,
                   SECTION_CODE_OWNERS,
                   KEY_DISABLED),
@@ -95,7 +95,9 @@ public class StatusConfig {
     }
 
     for (String refPattern :
-        projectLevelConfig.get().getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
+        projectLevelConfig
+            .getConfig()
+            .getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
       try {
         RefPatternMatcher.getMatcher(refPattern).match("refs/heads/master", null);
       } catch (PatternSyntaxException e) {

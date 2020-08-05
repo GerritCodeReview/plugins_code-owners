@@ -133,7 +133,6 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
 
   @Test
   public void cannotValidateProjectLevelConfigWithNullProjectState() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
@@ -142,7 +141,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
                     .validateProjectLevelConfig(
                         null,
                         "code-owners.config",
-                        new ProjectLevelConfig("code-owners.config", projectState)));
+                        new ProjectLevelConfig.Bare("code-owners.config")));
     assertThat(npe).hasMessageThat().isEqualTo("projectState");
   }
 
@@ -155,9 +154,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
             () ->
                 getRequiredApprovalConfig()
                     .validateProjectLevelConfig(
-                        projectState,
-                        null,
-                        new ProjectLevelConfig("code-owners.config", projectState)));
+                        projectState, null, new ProjectLevelConfig.Bare("code-owners.config")));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -181,15 +178,15 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
             .validateProjectLevelConfig(
                 projectState,
                 "code-owners.config",
-                new ProjectLevelConfig("code-owners.config", projectState));
+                new ProjectLevelConfig.Bare("code-owners.config"));
     assertThat(commitValidationMessage).isEmpty();
   }
 
   @Test
   public void validateValidProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
-    cfg.get()
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig()
         .setString(
             SECTION_CODE_OWNERS, null, getRequiredApprovalConfig().getConfigKey(), "Code-Review+2");
     Optional<CommitValidationMessage> commitValidationMessage =
@@ -201,8 +198,8 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
   @Test
   public void validateInvalidProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig cfg = new ProjectLevelConfig("code-owners.config", projectState);
-    cfg.get()
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig()
         .setString(
             SECTION_CODE_OWNERS, null, getRequiredApprovalConfig().getConfigKey(), "INVALID");
     Optional<CommitValidationMessage> commitValidationMessage =
