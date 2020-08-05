@@ -35,12 +35,16 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.nio.file.Paths;
 import java.util.Optional;
+import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerResolver}. */
 public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private AccountOperations accountOperations;
@@ -150,7 +154,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void resolvePathCodeOwnersForEmptyCodeOwnerConfig() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/")).build();
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .build();
     assertThat(
             codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
         .isEmpty();
@@ -159,7 +164,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void resolvePathCodeOwners() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     assertThat(
@@ -171,7 +176,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void resolvePathCodeOwnersNonResolvableCodeOwnersAreFilteredOut() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(
                 CodeOwnerSet.createWithoutPathExpressions(
                     admin.email(), "non-existing@example.com"))
@@ -194,7 +199,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotResolvePathCodeOwnersForNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     NullPointerException npe =
@@ -208,7 +213,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void cannotResolvePathCodeOwnersForRelativePath() throws Exception {
     String relativePath = "foo/bar.md";
     CodeOwnerConfig codeOwnerConfig =
-        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"))
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     IllegalStateException npe =

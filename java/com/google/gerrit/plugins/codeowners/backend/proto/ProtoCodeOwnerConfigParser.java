@@ -34,6 +34,7 @@ import com.google.inject.Singleton;
 import com.google.protobuf.TextFormat;
 import java.io.IOException;
 import java.util.Comparator;
+import org.eclipse.jgit.lib.ObjectId;
 
 /**
  * Parser and formatter for the proto syntax that is used to store {@link CodeOwnerConfig}s in
@@ -48,8 +49,10 @@ import java.util.Comparator;
 class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
   @Override
   public CodeOwnerConfig parse(
-      CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) throws IOException {
+      ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
+      throws IOException {
     return Parser.parse(
+        requireNonNull(revision, "revision"),
         requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"),
         Strings.nullToEmpty(codeOwnerConfigAsString));
   }
@@ -61,9 +64,10 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   private static class Parser {
     static CodeOwnerConfig parse(
-        CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) throws IOException {
+        ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
+        throws IOException {
       OwnersConfig ownersConfig = parseProto(codeOwnerConfigAsString);
-      return CodeOwnerConfig.builder(codeOwnerConfigKey)
+      return CodeOwnerConfig.builder(codeOwnerConfigKey, revision)
           .setIgnoreParentCodeOwners(ownersConfig.getIgnoreParentOwners())
           .setCodeOwnerSets(getCodeOwnerSets(ownersConfig))
           .build();
