@@ -22,6 +22,30 @@
       "revId": "eafa8a1fd713969c2a319333a93f93e9f2e7ff6b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "310ea185_3cc46536",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-05T08:53:04Z",
+      "side": 1,
+      "message": "I didn\u0027t invent it, it\u0027s well-known :)",
+      "parentUuid": "f57b8166_a401d399",
+      "range": {
+        "startLine": 108,
+        "startChar": 38,
+        "endLine": 108,
+        "endChar": 46
+      },
+      "revId": "eafa8a1fd713969c2a319333a93f93e9f2e7ff6b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
