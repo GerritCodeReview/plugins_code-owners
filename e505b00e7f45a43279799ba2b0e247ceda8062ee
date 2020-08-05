@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc3e8b4b_5c21f19e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-05T07:51:39Z",
+      "side": 1,
+      "message": "The CI failures are caused by a change in Gerrit core, [1] adapts the plugin to it.\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/277802",
+      "revId": "e505b00e7f45a43279799ba2b0e247ceda8062ee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
