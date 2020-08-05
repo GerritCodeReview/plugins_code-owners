@@ -780,13 +780,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    // we expect state PENDING because 'user' got added as reviewer on upload of the second patch
-    // set (the patch set uploader becomes a reviewer if the change is owned by another user).
     fileCodeOwnerStatusSubject
         .hasNewPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
