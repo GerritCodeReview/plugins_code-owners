@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f2774266_4c80a1c8",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-05T07:23:02Z",
+      "side": 1,
+      "message": "Does it make sense to just create a label in the abstract class and use it everywhere?",
+      "range": {
+        "startLine": 205,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 0
+      },
+      "revId": "aa0aa866fb59fbcd54b4a76b06590a623fe29aea",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "52581739_3b1dab14",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-05T07:23:02Z",
+      "side": 1,
+      "message": "maybe before granting the override approval, check that the change is *not* submittable?",
+      "range": {
+        "startLine": 223,
+        "startChar": 0,
+        "endLine": 223,
+        "endChar": 0
+      },
+      "revId": "aa0aa866fb59fbcd54b4a76b06590a623fe29aea",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9c631b02_4483b9df",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-05T07:23:02Z",
+      "side": 1,
+      "message": "I think you can omit this part, since submit will fail if this part fails (alternatively, remove the submit).",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 247,
+        "endChar": 0
+      },
+      "revId": "aa0aa866fb59fbcd54b4a76b06590a623fe29aea",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
