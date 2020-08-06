@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ce2611d3_584ccb9d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigReference.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T10:03:15Z",
+      "side": 1,
+      "message": "Can you add an explanation for setting this import mode here?",
+      "range": {
+        "startLine": 78,
+        "startChar": 23,
+        "endLine": 78,
+        "endChar": 76
+      },
+      "revId": "9da965764c9fd4d93dc4ba0f529d62b0fa889ffb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1d687607_bf7919c4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigReference.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T10:03:15Z",
+      "side": 1,
+      "message": "omit",
+      "range": {
+        "startLine": 103,
+        "startChar": 51,
+        "endLine": 103,
+        "endChar": 52
+      },
+      "revId": "9da965764c9fd4d93dc4ba0f529d62b0fa889ffb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
