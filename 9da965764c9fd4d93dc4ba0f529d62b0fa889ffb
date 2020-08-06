@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "78c16ec9_01ceeb7c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigReference.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T10:46:24Z",
+      "side": 1,
+      "message": "Since it\u0027s a mandatory field I thought setting a default value is a good idea. But since you are asking now, I agree that it\u0027s safer to not set it here and require users to set it explicitly (to prove that they thought about this). All users do this already, so we can just drop it.\n\nDone",
+      "parentUuid": "ce2611d3_584ccb9d",
+      "range": {
+        "startLine": 78,
+        "startChar": 23,
+        "endLine": 78,
+        "endChar": 76
+      },
+      "revId": "9da965764c9fd4d93dc4ba0f529d62b0fa889ffb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1d687607_bf7919c4",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigReference.java",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "9da965764c9fd4d93dc4ba0f529d62b0fa889ffb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c9752815_935a1580",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigReference.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T10:46:24Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1d687607_bf7919c4",
+      "range": {
+        "startLine": 103,
+        "startChar": 51,
+        "endLine": 103,
+        "endChar": 52
+      },
+      "revId": "9da965764c9fd4d93dc4ba0f529d62b0fa889ffb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
