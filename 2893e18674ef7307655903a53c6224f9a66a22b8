@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "af2bd840_d0ee208d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/AbstractFileBasedCodeOwnerBackend.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 71,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T13:13:41Z",
+      "side": 1,
+      "message": "Why is this a warning rather than exception?\nIt\u0027s two conflicting file names, sounds like an invalid input (key).",
+      "range": {
+        "startLine": 71,
+        "startChar": 13,
+        "endLine": 71,
+        "endChar": 22
+      },
+      "revId": "2893e18674ef7307655903a53c6224f9a66a22b8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9dc89682_693e1397",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T13:13:41Z",
+      "side": 1,
+      "message": "(optional reformat) kind of confusing comment, maybe \"branchNameKey\" (also in other places in this file)?",
+      "range": {
+        "startLine": 292,
+        "startChar": 14,
+        "endLine": 292,
+        "endChar": 20
+      },
+      "revId": "2893e18674ef7307655903a53c6224f9a66a22b8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
