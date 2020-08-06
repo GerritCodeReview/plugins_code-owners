@@ -146,7 +146,7 @@ class PathCodeOwners {
 
   private boolean ignoreGlobalCodeOwners() {
     return getMatchingPerFileCodeOwnerSets()
-        .anyMatch(codeOwnerSet -> codeOwnerSet.ignoreGlobalAndParentCodeOwners());
+        .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners);
   }
 
   private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets() {
