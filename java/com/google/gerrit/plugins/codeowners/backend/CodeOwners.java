@@ -52,7 +52,7 @@ public class CodeOwners {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     requireNonNull(revision, "revision");
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
+        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
   }
 
@@ -66,7 +66,7 @@ public class CodeOwners {
   public Optional<CodeOwnerConfig> getFromCurrentRevision(CodeOwnerConfig.Key codeOwnerConfigKey) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
+        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
   }
 }
