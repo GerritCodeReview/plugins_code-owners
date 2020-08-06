@@ -20,6 +20,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -63,7 +64,7 @@ public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
             .newCodeOwnerConfig()
             .project(project)
             .branch(branch)
-            .folderPath(path)
+            .folderPath(JgitPath.of(path).getAsAbsolutePath())
             .ignoreParentCodeOwners()
             .addCodeOwnerEmail(admin.email())
             .create();
