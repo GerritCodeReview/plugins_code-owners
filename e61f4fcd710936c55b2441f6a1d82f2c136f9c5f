@@ -146,6 +146,24 @@
       "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "65cd9bb8_aa07cd48",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T12:29:33Z",
+      "side": 1,
+      "message": "Ah, got it :)",
+      "parentUuid": "0af28aba_6bed8776",
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
