@@ -211,8 +211,8 @@ public abstract class CodeOwnerConfig {
    */
   @AutoValue
   public abstract static class Key {
-    /** Gets the branch to which the code owner config belongs. */
-    public abstract BranchNameKey branch();
+    /** Gets the project and branch to which the code owner config belongs. */
+    public abstract BranchNameKey branchNameKey();
 
     /**
      * Gets the path of the folder to which the code owner config belongs.
@@ -234,7 +234,7 @@ public abstract class CodeOwnerConfig {
      * @return the project to which the code owner config belongs
      */
     public Project.NameKey project() {
-      return branch().project();
+      return branchNameKey().project();
     }
 
     /**
@@ -243,7 +243,7 @@ public abstract class CodeOwnerConfig {
      * @return the short name of the branch of this owner config key
      */
     public String shortBranchName() {
-      return branch().shortName();
+      return branchNameKey().shortName();
     }
 
     /**
@@ -252,7 +252,7 @@ public abstract class CodeOwnerConfig {
      * @return the ref name of the branch to which the code owner config belongs
      */
     public String ref() {
-      return branch().branch();
+      return branchNameKey().branch();
     }
 
     /**
@@ -298,14 +298,14 @@ public abstract class CodeOwnerConfig {
     /**
      * Creates a code owner config key.
      *
-     * @param branch the branch to which the code owner config belongs
+     * @param branchNameKey the project and branch to which the code owner config belongs
      * @param folderPath the path of the folder to which the code owner config belongs, must be
      *     absolute
      * @return the code owner config key
      */
-    public static Key create(BranchNameKey branch, Path folderPath) {
+    public static Key create(BranchNameKey branchNameKey, Path folderPath) {
       return new AutoValue_CodeOwnerConfig_Key.Builder()
-          .setBranch(branch)
+          .setBranchNameKey(branchNameKey)
           .setFolderPath(folderPath)
           .build();
     }
@@ -313,15 +313,15 @@ public abstract class CodeOwnerConfig {
     /**
      * Creates a code owner config key.
      *
-     * @param branch the branch to which the code owner config belongs
+     * @param branchNameKey the project and branch to which the code owner config belongs
      * @param folderPath the path of the folder to which the code owner config belongs, must be
      *     absolute
      * @param fileName the name of the code owner config file
      * @return the code owner config key
      */
-    public static Key create(BranchNameKey branch, Path folderPath, String fileName) {
+    public static Key create(BranchNameKey branchNameKey, Path folderPath, String fileName) {
       return new AutoValue_CodeOwnerConfig_Key.Builder()
-          .setBranch(branch)
+          .setBranchNameKey(branchNameKey)
           .setFolderPath(folderPath)
           .setFileName(fileName)
           .build();
@@ -330,12 +330,12 @@ public abstract class CodeOwnerConfig {
     @AutoValue.Builder
     abstract static class Builder {
       /**
-       * Sets the branch for this owner config key.
+       * Sets the project and branch for this owner config key.
        *
-       * @param branch the branch for this owner config key
+       * @param branchNameKey the project and branch for this owner config key
        * @return the Builder instance for chaining calls
        */
-      public abstract Builder setBranch(BranchNameKey branch);
+      public abstract Builder setBranchNameKey(BranchNameKey branchNameKey);
 
       /**
        * Sets the folder path for this owner config key.

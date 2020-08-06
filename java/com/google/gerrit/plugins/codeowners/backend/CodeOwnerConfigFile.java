@@ -147,7 +147,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
 
   @Override
   protected String getRefName() {
-    return codeOwnerConfigKey.branch().branch();
+    return codeOwnerConfigKey.branchNameKey().branch();
   }
 
   @Override

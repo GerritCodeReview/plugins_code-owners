@@ -96,7 +96,7 @@ public class CodeOwnersUpdate {
   public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branch());
+        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.upsertCodeOwnerConfig(
         codeOwnerConfigKey, codeOwnerConfigUpdate, currentUser.orElse(null));
   }
