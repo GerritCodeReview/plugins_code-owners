@@ -850,7 +850,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
-  public void getStatus_OverrideApprovesAllFiles() throws Exception {
+  public void getStatus_overrideApprovesAllFiles() throws Exception {
     createOwnersOverrideLabel();
 
     // Create a change.
