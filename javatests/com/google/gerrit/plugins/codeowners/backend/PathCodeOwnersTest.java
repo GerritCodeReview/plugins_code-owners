@@ -24,10 +24,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
@@ -41,6 +44,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -426,6 +430,706 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                 .build(),
             Paths.get("/foo.md"));
     assertThat(pathCodeOwners.ignoreParentCodeOwners()).isFalse();
+  }
+
+  @Test
+  public void nonResolveableImportIsIgnored() throws Exception {
+    // create importing config with non-resolveable import
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addImport(
+                CodeOwnerConfigReference.create(
+                    CodeOwnerConfigImportMode.ALL, "/non-existing/OWNERS"))
+            .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global code owner from the importing code owner config, the
+    // non-resolveable import is silenty ignored
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void importGlobalCodeOwners_importModeAll() throws Exception {
+    testImportGlobalCodeOwners(CodeOwnerConfigImportMode.ALL);
+  }
+
+  @Test
+  public void importGlobalCodeOwners_importModeGlobalCodeOwnerSetsOnly() throws Exception {
+    testImportGlobalCodeOwners(CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
+  }
+
+  private void testImportGlobalCodeOwners(CodeOwnerConfigImportMode importMode) throws Exception {
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(CodeOwnerConfigReference.create(importMode, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global code owners from the importing and the imported code owner
+    // config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void importPerFileCodeOwners_importModeAll() throws Exception {
+    // create importing config with matching per-file code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("*.md")
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with matching per-file code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("*.md")
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the matching per-file code owners from the importing and the imported
+    // code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void nonMatchingPerFileCodeOwnersAreNotImported_importModeAll() throws Exception {
+    // create importing config with matching per-file code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("*.md")
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with non-matching per-file code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("*.txt")
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we only get the matching per-file code owners from the importing code owner
+    // config, the per-file code owners from the imported code owner config are not relevant since
+    // they do not match
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void perFileCodeOwnersAreNotImported_importModeGlobalCodeOwnerSetsOnly() throws Exception {
+    // create importing config with matching per-file code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("*.md")
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .addImport(
+                CodeOwnerConfigReference.create(
+                    CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with matching per-file code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("*.md")
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we only get the matching per-file code owners from the importing code owner
+    // config, the matching per-file code owners from the imported code owner config are not
+    // relevant with import mode GLOBAL_CODE_OWNER_SETS_ONLY
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void
+      importIgnoreGlobalAndParentCodeOwnersFlagFromMatchingPerFileCodeOwnerSet_importModeAll()
+          throws Exception {
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with matching per-file code owner that has the
+    // ignoreGlobalAndParentCodeOwners flag set to true
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .setIgnoreGlobalAndParentCodeOwners()
+                .addPathExpression("*.md")
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we only get the matching per-file code owners from the imported code owner
+    // config, the global code owners from the importing code owner config are not relevant since
+    // the matching per-file code owner set in the imported code owner config has the
+    // ignoreGlobalAndParentCodeOwners flag set to true which causes global code owners to be
+    // ignored, in addition this flag causes parent code owners to be ignored
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(user.email());
+    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isTrue();
+  }
+
+  @Test
+  public void
+      ignoreGlobalAndParentCodeOwnersFlagIsNotImportedFromNonMatchingPerFileCodeOwnerSet_importModeAll()
+          throws Exception {
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with non-matching per-file code owner that has the
+    // ignoreGlobalAndParentCodeOwners flag set to true
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .setIgnoreGlobalAndParentCodeOwners()
+                .addPathExpression("*.txt")
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we only get the global code owners from the importing code owner config, the
+    // per-file code owners from the imported code owner config and its
+    // ignoreGlobalAndParentCodeOwners flag are not relevant since the per-file code owner set does
+    // not match
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isFalse();
+  }
+
+  @Test
+  public void ignoreGlobalAndParentCodeOwnersFlagIsNotImported_importModeGlobalCodeOwnerSetsOnly()
+      throws Exception {
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(
+                    CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with matching per-file code owner that has the
+    // ignoreGlobalAndParentCodeOwners flag set to true
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .setIgnoreGlobalAndParentCodeOwners()
+                .addPathExpression("*.md")
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we only get the global code owners from the importing code owner config, the
+    // matching per-file code owners from the imported code owner config and its
+    // ignoreGlobalAndParentCodeOwners flag are not relevant with import mode
+    // GLOBAL_CODE_OWNER_SETS_ONLY
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isFalse();
+  }
+
+  @Test
+  public void importIgnoreParentCodeOwnersFlag_importModeAll() throws Exception {
+    // create importing config
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .create();
+
+    // create imported config without the ignoreParentCodeOnwers flag set to true
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .ignoreParentCodeOwners()
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: ignoreParentCodeOwners is true because the ignoreParentCodeOwners flag in the
+    // imported code owner config is set to true
+    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isTrue();
+  }
+
+  @Test
+  public void ignoreParentCodeOwnersFlagNotImported_importModeGlobalCodeOwnerSetsOnly()
+      throws Exception {
+    // create importing config
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(
+                    CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS"))
+            .create();
+
+    // create imported config without the ignoreParentCodeOnwers flag set to true
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .ignoreParentCodeOwners()
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: ignoreParentCodeOwners is false because the ignoreParentCodeOwners flag in the
+    // imported code owner config is not relevant with import mode GLOBAL_CODE_OWNER_SETS_ONLY
+    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isFalse();
+  }
+
+  @Test
+  public void importsOfImportedCodeOwenerConfigAreResolved_importModeAll() throws Exception {
+    testImportsOfImportedCodeOwenerConfigAreResolved(CodeOwnerConfigImportMode.ALL);
+  }
+
+  @Test
+  public void importsOfImportedCodeOwenerConfigAreResolved_importModeGlobalCodeOwnerSetsOnly()
+      throws Exception {
+    testImportsOfImportedCodeOwenerConfigAreResolved(
+        CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
+  }
+
+  private void testImportsOfImportedCodeOwenerConfigAreResolved(
+      CodeOwnerConfigImportMode importMode) throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(CodeOwnerConfigReference.create(importMode, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with global code owner and import
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addImport(CodeOwnerConfigReference.create(importMode, "/baz/OWNERS"))
+        .create();
+
+    // create config with global code owner that is imported by the imported config
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/baz/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing code owner config, the imported code
+    // owner config and the code owner config that is imported by the imported code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email(), user2.email());
+  }
+
+  @Test
+  public void cyclicImports() throws Exception {
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with global code owner and that imports the importing config
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addImport(CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/OWNERS"))
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing and the imported code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void importsAreResolvedFromSameRevision() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with global code owner
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/bar/")
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    // remember the revision
+    RevCommit oldRevision = projectOperations.project(project).getHead("master");
+
+    // update imported config and add one additional global code owner
+    codeOwnerConfigOperations
+        .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+        .forUpdate()
+        .codeOwnerSetsModification(CodeOwnerSetModification.addToOnlySet(user2.email()))
+        .update();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(rootCodeOwnerConfigKey, oldRevision, Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing and the imported code owner config
+    // as they were defined at oldRevision
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void importWithRelativePath() throws Exception {
+    // create importing config with global code owner and import with relative path
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/bar/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "../baz/OWNERS"))
+            .create();
+
+    // create imported config with global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/baz/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing and the imported code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void importFromOtherProject() throws Exception {
+    Project.NameKey otherProject = projectOperations.newProject().create();
+
+    // create importing config with global code owner and import with relative path
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS")
+                    .setProject(otherProject)
+                    .build())
+            .create();
+
+    // create imported config with global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing and the imported code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void importFromOtherProjectIsResolvedFromSameBranch() throws Exception {
+    Project.NameKey otherProject = projectOperations.newProject().create();
+
+    // Create other branches in project.
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create other branches in other project.
+    branchInput.revision = projectOperations.project(otherProject).getHead("master").name();
+    gApi.projects().name(otherProject.get()).branch(branchInput.ref).create(branchInput);
+
+    // create importing config with global code owner and import with relative path
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branchName)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS")
+                    .setProject(otherProject)
+                    .build())
+            .create();
+
+    // create imported config with global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch(branchName)
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead(branchName),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing and the imported code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
   }
 
   @Test

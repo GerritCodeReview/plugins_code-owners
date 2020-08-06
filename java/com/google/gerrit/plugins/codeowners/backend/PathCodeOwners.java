@@ -20,11 +20,18 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -34,6 +41,8 @@ import org.eclipse.jgit.lib.ObjectId;
  * <p>Code owners from inherited code owner configs are not considered.
  */
 class PathCodeOwners {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   @Singleton
   public static class Factory {
     private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
@@ -47,7 +56,8 @@ class PathCodeOwners {
 
     public PathCodeOwners create(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
       requireNonNull(codeOwnerConfig, "codeOwnerConfig");
-      return new PathCodeOwners(codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfig.key()));
+      return new PathCodeOwners(
+          codeOwners, codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfig.key()));
     }
 
     public Optional<PathCodeOwners> create(
@@ -57,7 +67,7 @@ class PathCodeOwners {
           .map(
               codeOwnerConfig ->
                   new PathCodeOwners(
-                      codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfigKey)));
+                      codeOwners, codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfigKey)));
     }
 
     /**
@@ -86,12 +96,19 @@ class PathCodeOwners {
     }
   }
 
+  private final CodeOwners codeOwners;
   private final CodeOwnerConfig codeOwnerConfig;
   private final Path path;
   private final PathExpressionMatcher pathExpressionMatcher;
 
+  private CodeOwnerConfig resolvedCodeOwnerConfig;
+
   private PathCodeOwners(
-      CodeOwnerConfig codeOwnerConfig, Path path, PathExpressionMatcher pathExpressionMatcher) {
+      CodeOwners codeOwners,
+      CodeOwnerConfig codeOwnerConfig,
+      Path path,
+      PathExpressionMatcher pathExpressionMatcher) {
+    this.codeOwners = requireNonNull(codeOwners, "codeOwners");
     this.codeOwnerConfig = requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     this.path = requireNonNull(path, "path");
     this.pathExpressionMatcher = requireNonNull(pathExpressionMatcher, "pathExpressionMatcher");
@@ -112,21 +129,7 @@ class PathCodeOwners {
    * @return the code owners of the path
    */
   public ImmutableSet<CodeOwnerReference> get() {
-    Stream.Builder<CodeOwnerSet> matchingCodeOwnerSets = Stream.builder();
-
-    // Add all code owner sets that have matching path expressions.
-    getMatchingPerFileCodeOwnerSets().forEach(matchingCodeOwnerSets::add);
-
-    // Add all code owner sets without path expressions if global code owners are not ignored.
-    if (!ignoreGlobalCodeOwners()) {
-      codeOwnerConfig.codeOwnerSets().stream()
-          .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
-          .forEach(matchingCodeOwnerSets::add);
-    }
-
-    // Resolve the matching code owner sets to code owner references.
-    return matchingCodeOwnerSets
-        .build()
+    return resolveCodeOwnerConfig().codeOwnerSets().stream()
         .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
         .collect(toImmutableSet());
   }
@@ -137,23 +140,195 @@ class PathCodeOwners {
    * @return whether parent code owners should be ignored for the path
    */
   public boolean ignoreParentCodeOwners() {
-    if (codeOwnerConfig.ignoreParentCodeOwners()) {
-      return true;
+    return resolveCodeOwnerConfig().ignoreParentCodeOwners();
+  }
+
+  /**
+   * Resolves the {@link #codeOwnerConfig}.
+   *
+   * <p>Resolving means that:
+   *
+   * <ul>
+   *   <li>non-matching per-file code owner sets are dropped (since code owner sets that do not
+   *       match the {@link #path} are not relevant)
+   *   <li>imported code owner configs are loaded and replaced with the parts of them which should
+   *       be imported (depends on the {@link CodeOwnerConfigImportMode}) and that are relevant for
+   *       the {@link #path}
+   *   <li>global code owner sets are dropped if any matching per-file code owner set has the
+   *       ignoreGlobalAndParentCodeOwners flag set to {@code true} (since in this case global code
+   *       owners should be ignored and then the global code owner sets are not relevant)
+   *   <li>the ignoreParentCodeOwners flag is set to {@code true} if any matching per-file code
+   *       owner set has the ignoreGlobalAndParentCodeOwners flag set to true (since in this case
+   *       code owners from parent configurations should be ignored)
+   * </ul>
+   *
+   * <p>When resolving imports cycles are detected and code owner configs that have been seen
+   * already are not evaluated again.
+   *
+   * <p>Non-resolvable imports are silently ignored.
+   *
+   * <p>Imports that are loaded from the same project/branch as {@link #codeOwnerConfig} are
+   * imported from the same revision from which {@link #codeOwnerConfig} was loaded. Imports that
+   * are loaded from other projects/branches are imported from the current revision. If several
+   * imports are loaded from the same project/branch we guarantee that they are all loaded from the
+   * same revision, even if the current revision is changed by a concurrent request while the
+   * resolution is being performed.
+   *
+   * <p>Imports from other projects are always loaded from the same branch from which the importing
+   * code owner config was loaded.
+   *
+   * @return the resolved code owner config
+   */
+  private CodeOwnerConfig resolveCodeOwnerConfig() {
+    if (this.resolvedCodeOwnerConfig != null) {
+      return this.resolvedCodeOwnerConfig;
     }
 
-    return ignoreGlobalCodeOwners();
+    CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder =
+        CodeOwnerConfig.builder(codeOwnerConfig.key(), codeOwnerConfig.revision());
+
+    // Add all data from the importing code owner config.
+    resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners(
+        codeOwnerConfig.ignoreParentCodeOwners());
+    getGlobalCodeOwnerSets(codeOwnerConfig)
+        .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+    getMatchingPerFileCodeOwnerSets(codeOwnerConfig)
+        .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+
+    // To detect cyclic dependencies we keep track of all seen code owner configs.
+    Set<CodeOwnerConfig.Key> seenCodeOwnerConfigs = new HashSet<>();
+    seenCodeOwnerConfigs.add(codeOwnerConfig.key());
+
+    // To ensure that code owner configs from the same project/branch are imported from the same
+    // revision we keep track of the revisions.
+    Map<BranchNameKey, ObjectId> revisionMap = new HashMap<>();
+    revisionMap.put(codeOwnerConfig.key().branchNameKey(), codeOwnerConfig.revision());
+
+    resolveImports(
+        seenCodeOwnerConfigs, revisionMap, codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
+
+    CodeOwnerConfig resolvedCodeOwnerConfig = resolvedCodeOwnerConfigBuilder.build();
+
+    // Remove global code owner sets if any per-file code owner set has the
+    // ignoreGlobalAndParentCodeOwners flag set to true.
+    // In this case also set ignoreParentCodeOwners to true, so that we do not need to inspect the
+    // ignoreGlobalAndParentCodeOwners flags again.
+    if (getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
+        .anyMatch(codeOwnerSet -> codeOwnerSet.ignoreGlobalAndParentCodeOwners())) {
+      resolvedCodeOwnerConfig =
+          resolvedCodeOwnerConfig
+              .toBuilder()
+              .setIgnoreParentCodeOwners()
+              .setCodeOwnerSets(
+                  resolvedCodeOwnerConfig.codeOwnerSets().stream()
+                      .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
+                      .collect(toImmutableSet()))
+              .build();
+    }
+
+    this.resolvedCodeOwnerConfig = resolvedCodeOwnerConfig;
+    return this.resolvedCodeOwnerConfig;
   }
 
-  private boolean ignoreGlobalCodeOwners() {
-    return getMatchingPerFileCodeOwnerSets()
-        .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners);
+  private void resolveImports(
+      Set<CodeOwnerConfig.Key> seenCodeOwnerConfigs,
+      Map<BranchNameKey, ObjectId> revisionMap,
+      CodeOwnerConfig importingCodeOwnerConfig,
+      CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
+    for (CodeOwnerConfigReference codeOwnerConfigReference : importingCodeOwnerConfig.imports()) {
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+          createKeyForImportedCodeOwnerConfig(
+              importingCodeOwnerConfig.key(), codeOwnerConfigReference);
+
+      Optional<ObjectId> revision =
+          Optional.ofNullable(revisionMap.get(keyOfImportedCodeOwnerConfig.branchNameKey()));
+
+      Optional<CodeOwnerConfig> mayBeImportedCodeOwnerConfig =
+          revision.isPresent()
+              ? codeOwners.get(keyOfImportedCodeOwnerConfig, revision.get())
+              : codeOwners.getFromCurrentRevision(keyOfImportedCodeOwnerConfig);
+
+      if (!mayBeImportedCodeOwnerConfig.isPresent()) {
+        logger.atWarning().log(
+            "cannot resolve code owner config %s that is imported by code owner config %s"
+                + " (revision = %s)",
+            keyOfImportedCodeOwnerConfig,
+            importingCodeOwnerConfig.key(),
+            revision.map(ObjectId::name).orElse("current"));
+        continue;
+      }
+
+      CodeOwnerConfig importedCodeOwnerConfig = mayBeImportedCodeOwnerConfig.get();
+      CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
+
+      if (!revisionMap.containsKey(keyOfImportedCodeOwnerConfig.branchNameKey())) {
+        revisionMap.put(
+            keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
+      }
+
+      if (importMode.importIgnoreParentCodeOwners()
+          && importedCodeOwnerConfig.ignoreParentCodeOwners()) {
+        resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners();
+      }
+
+      if (importMode.importGlobalCodeOwnerSets()) {
+        getGlobalCodeOwnerSets(importedCodeOwnerConfig)
+            .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+      }
+
+      if (importMode.importPerFileCodeOwnerSets()) {
+        getMatchingPerFileCodeOwnerSets(importedCodeOwnerConfig)
+            .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+      }
+
+      if (importMode.resolveImportsOfImport()
+          && seenCodeOwnerConfigs.add(keyOfImportedCodeOwnerConfig)) {
+        resolveImports(
+            seenCodeOwnerConfigs,
+            revisionMap,
+            importedCodeOwnerConfig,
+            resolvedCodeOwnerConfigBuilder);
+      }
+    }
   }
 
-  private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets() {
-    Path relativePath = codeOwnerConfig.relativize(path);
+  private CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      CodeOwnerConfigReference codeOwnerConfigReference) {
+    // if the code owner config reference doesn't have a project, the imported code owner config
+    // file is contained in the same project as the importing code owner config
+    Project.NameKey project =
+        codeOwnerConfigReference.project().orElse(keyOfImportingCodeOwnerConfig.project());
+
+    // code owner configs are always imported from the same branch in which the importing code
+    // owner config is stored
+    String branch = keyOfImportingCodeOwnerConfig.branchNameKey().branch();
+
+    // if the path of the imported code owner config is relative, it should be resolved against
+    // the folder path of the importing code owner config
+    Path folderPath =
+        keyOfImportingCodeOwnerConfig
+            .folderPath()
+            .resolve(codeOwnerConfigReference.path())
+            .normalize();
+
+    return CodeOwnerConfig.Key.create(
+        BranchNameKey.create(project, branch), folderPath, codeOwnerConfigReference.fileName());
+  }
+
+  private Stream<CodeOwnerSet> getGlobalCodeOwnerSets(CodeOwnerConfig codeOwnerConfig) {
+    return codeOwnerConfig.codeOwnerSets().stream()
+        .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty());
+  }
+
+  private Stream<CodeOwnerSet> getMatchingPerFileCodeOwnerSets(CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.codeOwnerSets().stream()
         .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
-        .filter(codeOwnerSet -> matches(codeOwnerSet, relativePath, pathExpressionMatcher));
+        .filter(codeOwnerSet -> matches(codeOwnerSet, getRelativePath(), pathExpressionMatcher));
+  }
+
+  private Path getRelativePath() {
+    return codeOwnerConfig.relativize(path);
   }
 
   /**
