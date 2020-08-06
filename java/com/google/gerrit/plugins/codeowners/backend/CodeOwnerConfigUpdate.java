@@ -42,13 +42,23 @@ public abstract class CodeOwnerConfigUpdate {
   public abstract CodeOwnerSetModification codeOwnerSetsModification();
 
   /**
+   * Defines how the imports of the code owner config should be modified. By default (that is if
+   * nothing is specified), the imports remain unchanged.
+   *
+   * @return a {@link CodeOwnerConfigImportModification} which gets the current imports of the code
+   *     owner config as input and outputs the desired resulting imports
+   */
+  public abstract CodeOwnerConfigImportModification importsModification();
+
+  /**
    * Creates a builder for a {@link CodeOwnerConfigUpdate}.
    *
    * @return builder for a {@link CodeOwnerConfigUpdate}
    */
   public static Builder builder() {
     return new AutoValue_CodeOwnerConfigUpdate.Builder()
-        .setCodeOwnerSetsModification(CodeOwnerSetModification.keep());
+        .setCodeOwnerSetsModification(CodeOwnerSetModification.keep())
+        .setImportsModification(CodeOwnerConfigImportModification.keep());
   }
 
   @AutoValue.Builder
@@ -80,6 +90,14 @@ public abstract class CodeOwnerConfigUpdate {
      */
     public abstract Builder setCodeOwnerSetsModification(
         CodeOwnerSetModification codeOwnerSetsModification);
+
+    /**
+     * Sets the imports modification.
+     *
+     * @see #importsModification()
+     */
+    public abstract Builder setImportsModification(
+        CodeOwnerConfigImportModification codeOwnerImportModification);
 
     /**
      * Builds the {@link CodeOwnerConfigUpdate} instance.

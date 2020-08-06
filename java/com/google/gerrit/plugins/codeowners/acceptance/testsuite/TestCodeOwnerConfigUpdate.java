@@ -17,6 +17,8 @@ package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.testsuite.ThrowingConsumer;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportModification;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import java.util.Optional;
@@ -47,6 +49,15 @@ public abstract class TestCodeOwnerConfigUpdate {
   public abstract CodeOwnerSetModification codeOwnerSetsModification();
 
   /**
+   * Defines how the imports of the code owner config should be modified. By default (that is if
+   * nothing is specified), the imports remain unchanged.
+   *
+   * @return a function which gets the current imports of the code owner config as input and outputs
+   *     the desired resulting imports
+   */
+  public abstract CodeOwnerConfigImportModification importsModification();
+
+  /**
    * Gets the function that updates the code owner config.
    *
    * @return the function that updates the code owner config
@@ -63,7 +74,8 @@ public abstract class TestCodeOwnerConfigUpdate {
       ThrowingConsumer<TestCodeOwnerConfigUpdate> codeOwnerConfigUpdater) {
     return new AutoValue_TestCodeOwnerConfigUpdate.Builder()
         .codeOwnerConfigUpdater(codeOwnerConfigUpdater)
-        .codeOwnerSetsModification(CodeOwnerSetModification.keep());
+        .codeOwnerSetsModification(CodeOwnerSetModification.keep())
+        .importsModification(CodeOwnerConfigImportModification.keep());
   }
 
   /** Builder for a {@link TestCodeOwnerConfigUpdate}. */
@@ -112,6 +124,48 @@ public abstract class TestCodeOwnerConfigUpdate {
      */
     public Builder clearCodeOwnerSets() {
       return codeOwnerSetsModification(CodeOwnerSetModification.clear());
+    }
+
+    /**
+     * Adds an import.
+     *
+     * @param codeOwnerConfigReference reference to the code owner config that should be imported
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addImport(CodeOwnerConfigReference codeOwnerConfigReference) {
+      CodeOwnerConfigImportModification previousModification = importsModification();
+      importsModification(
+          originalImports ->
+              new ImmutableList.Builder<CodeOwnerConfigReference>()
+                  .addAll(previousModification.apply(originalImports))
+                  .add(codeOwnerConfigReference)
+                  .build());
+      return this;
+    }
+
+    /**
+     * Sets the import modification.
+     *
+     * @return the Builder instance for chaining calls
+     * @see TestCodeOwnerConfigUpdate#importsModification()
+     */
+    public abstract Builder importsModification(
+        CodeOwnerConfigImportModification importsModification);
+
+    /**
+     * Gets the import modification.
+     *
+     * @see TestCodeOwnerConfigUpdate#importsModification()
+     */
+    abstract CodeOwnerConfigImportModification importsModification();
+
+    /**
+     * Removes all imports.
+     *
+     * @return the Builder instance for chaining calls
+     */
+    public Builder clearImports() {
+      return importsModification(CodeOwnerConfigImportModification.clear());
     }
 
     /**

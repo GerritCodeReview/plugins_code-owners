@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
@@ -74,6 +75,8 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
                 .setIgnoreParentCodeOwners(codeOwnerConfigCreation.ignoreParentCodeOwners())
                 .setCodeOwnerSetsModification(
                     CodeOwnerSetModification.set(codeOwnerConfigCreation.computeCodeOwnerSets()))
+                .setImportsModification(
+                    CodeOwnerConfigImportModification.set(codeOwnerConfigCreation.imports()))
                 .build())
         .orElseThrow(
             () ->
@@ -129,6 +132,7 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
                   .setIgnoreParentCodeOwners(codeOwnerConfigUpdate.ignoreParentCodeOwners())
                   .setCodeOwnerSetsModification(
                       codeOwnerConfigUpdate.codeOwnerSetsModification()::apply)
+                  .setImportsModification(codeOwnerConfigUpdate.importsModification()::apply)
                   .build());
     }
   }
