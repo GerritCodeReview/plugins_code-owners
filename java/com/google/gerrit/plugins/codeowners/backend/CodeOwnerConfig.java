@@ -81,6 +81,23 @@ public abstract class CodeOwnerConfig {
   }
 
   /**
+   * Gets the imports of this code owner config as list.
+   *
+   * <p>For some callers it's better to retrieve the imports as list since lists have a defined
+   * order, e.g. for:
+   *
+   * <ul>
+   *   <li>updating imports where the updater must be aware that the order matters
+   *   <li>doing test assertions where the order should be verified
+   * </ul>
+   *
+   * @return the imports of this code owner config as list
+   */
+  public ImmutableList<CodeOwnerConfigReference> importsAsList() {
+    return imports().asList();
+  }
+
+  /**
    * Relativizes the given path in relation to the folder path of this code owner config.
    *
    * @param path the path that should be relativized
@@ -139,6 +156,24 @@ public abstract class CodeOwnerConfig {
      * @return the Builder instance for chaining calls
      */
     public abstract Builder setIgnoreParentCodeOwners(boolean ignoreParentCodeOwners);
+
+    /**
+     * Sets the imports of this code owner config.
+     *
+     * @param imports the imports of this code owner config
+     * @return the Builder instance for chaining calls
+     */
+    public Builder setImports(ImmutableList<CodeOwnerConfigReference> imports) {
+      return setImports(ImmutableSet.copyOf(imports));
+    }
+
+    /**
+     * Sets the imports of this code owner config.
+     *
+     * @param imports the imports of this code owner config
+     * @return the Builder instance for chaining calls
+     */
+    abstract Builder setImports(ImmutableSet<CodeOwnerConfigReference> imports);
 
     /** Gets a builder to add references to code owner configs that should be imported. */
     abstract ImmutableSet.Builder<CodeOwnerConfigReference> importsBuilder();

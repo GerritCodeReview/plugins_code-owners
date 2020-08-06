@@ -23,6 +23,7 @@ import com.google.gerrit.acceptance.testsuite.ThrowingFunction;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import java.nio.file.Path;
@@ -90,6 +91,13 @@ public abstract class TestCodeOwnerConfigCreation {
   abstract ImmutableList<CodeOwnerSet> codeOwnerSets();
 
   /**
+   * Gets the imports that have been set for the new code owner config.
+   *
+   * @return the imports that have been set for the new code owner config
+   */
+  abstract ImmutableList<CodeOwnerConfigReference> imports();
+
+  /**
    * Gets the code owner sets that should be set in the newly created code owner config.
    *
    * <p>Includes the global code owners that are defined by {@link #globalCodeOwners()}.
@@ -132,7 +140,7 @@ public abstract class TestCodeOwnerConfigCreation {
 
   /** Returns whether the code owner config would be empty. */
   public boolean isEmpty() {
-    return !ignoreParentCodeOwners() && computeCodeOwnerSets().isEmpty();
+    return !ignoreParentCodeOwners() && computeCodeOwnerSets().isEmpty() && imports().isEmpty();
   }
 
   /**
@@ -265,6 +273,24 @@ public abstract class TestCodeOwnerConfigCreation {
      */
     public Builder addCodeOwnerSet(CodeOwnerSet codeOwnerSet) {
       codeOwnerSetsBuilder().add(requireNonNull(codeOwnerSet, "codeOwnerSet"));
+      return this;
+    }
+
+    /**
+     * Gets a builder to add imports.
+     *
+     * @return builder to add imports
+     */
+    abstract ImmutableList.Builder<CodeOwnerConfigReference> importsBuilder();
+
+    /**
+     * Adds an import.
+     *
+     * @param codeOwnerConfigReference reference to the code owner config that should be imported
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addImport(CodeOwnerConfigReference codeOwnerConfigReference) {
+      importsBuilder().add(requireNonNull(codeOwnerConfigReference, "codeOwnerConfigReference"));
       return this;
     }
 

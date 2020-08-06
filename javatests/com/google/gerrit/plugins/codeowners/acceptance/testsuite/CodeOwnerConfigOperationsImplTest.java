@@ -26,6 +26,9 @@ import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations.PerCodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportModification;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
@@ -252,6 +255,30 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void specifiedImportsAreRespectedForCodeOwnerConfigCreation() throws Exception {
+    CodeOwnerConfigReference import1 =
+        CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/foo/OWNERS");
+    CodeOwnerConfigReference import2 =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS")
+            .setProject(allProjects)
+            .build();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .addImport(import1)
+            .addImport(import2)
+            .create();
+
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasImportsThat()
+        .containsExactly(import1, import2)
+        .inOrder();
+  }
+
+  @Test
   public void cannotCreateEmptyCodeOwnerConfig() throws Exception {
     IllegalStateException exception =
         assertThrows(
@@ -459,6 +486,69 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void addImport() throws Exception {
+    CodeOwnerConfigReference oldImport =
+        CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/foo/OWNERS");
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false,
+            CodeOwnerSetModification.keep(),
+            CodeOwnerConfigImportModification.set(ImmutableList.of(oldImport)));
+    CodeOwnerConfigReference newImport =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS");
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .addImport(newImport)
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasImportsThat()
+        .containsExactly(oldImport, newImport)
+        .inOrder();
+  }
+
+  @Test
+  public void removeImport() throws Exception {
+    CodeOwnerConfigReference import1 =
+        CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/foo/OWNERS");
+    CodeOwnerConfigReference import2 =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS");
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false,
+            CodeOwnerSetModification.keep(),
+            CodeOwnerConfigImportModification.set(ImmutableList.of(import1, import2)));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .importsModification(CodeOwnerConfigImportModification.remove(import1))
+        .update();
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfig.key()))
+        .hasImportsThat()
+        .containsExactly(import2);
+  }
+
+  @Test
+  public void clearImports() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            false,
+            CodeOwnerSetModification.keep(),
+            CodeOwnerConfigImportModification.set(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/foo/OWNERS")));
+    codeOwnerConfigOperations
+        .codeOwnerConfig(codeOwnerConfig.key())
+        .forUpdate()
+        .clearImports()
+        .update();
+
+    // Removing all code owner sets leads to a deletion of the code owner config file.
+    assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
+  }
+
+  @Test
   public void cannotUpdateNonExistingCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     IllegalStateException exception =
@@ -495,11 +585,22 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfig createCodeOwnerConfig(
       boolean ignoreParentCodeOwners, CodeOwnerSetModification codeOwnerSetsModification) {
+    return createCodeOwnerConfig(
+        ignoreParentCodeOwners,
+        codeOwnerSetsModification,
+        CodeOwnerConfigImportModification.keep());
+  }
+
+  private CodeOwnerConfig createCodeOwnerConfig(
+      boolean ignoreParentCodeOwners,
+      CodeOwnerSetModification codeOwnerSetsModification,
+      CodeOwnerConfigImportModification codeOwnerImportModification) {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     CodeOwnerConfigUpdate codeOwnerConfigUpdate =
         CodeOwnerConfigUpdate.builder()
             .setIgnoreParentCodeOwners(ignoreParentCodeOwners)
             .setCodeOwnerSetsModification(codeOwnerSetsModification)
+            .setImportsModification(codeOwnerImportModification)
             .build();
     return codeOwnersUpdate
         .get()
