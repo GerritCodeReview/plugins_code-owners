@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b638fb1a_b09eab90",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T10:36:20Z",
+      "side": 1,
+      "message": "probably should be a separate change, but should we have a hardcoded test that ensures this String looks exactly as you expect?\nIt\u0027s optional since it\u0027s a little bit of an overhead to maintain such test.",
+      "range": {
+        "startLine": 254,
+        "startChar": 18,
+        "endLine": 254,
+        "endChar": 32
+      },
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "321e6584_10a70886",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigReferenceSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T10:36:20Z",
+      "side": 1,
+      "message": "project",
+      "range": {
+        "startLine": 47,
+        "startChar": 32,
+        "endLine": 47,
+        "endChar": 41
+      },
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d8f0469f_837d7b66",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T10:36:20Z",
+      "side": 1,
+      "message": "here and above:\nAlso check the import mode?",
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
