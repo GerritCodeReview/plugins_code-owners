@@ -46,7 +46,8 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
       b.append("set noparent\n");
     }
 
-    codeOwnerConfig.imports().stream()
+    codeOwnerConfig
+        .imports()
         .forEach(
             codeOwnerConfigReference -> {
               String keyword;
