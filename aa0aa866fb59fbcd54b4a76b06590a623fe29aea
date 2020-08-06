@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "e23c7151_e1783384",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T06:53:20Z",
+      "side": 1,
+      "message": "Not sure if we want to create this label by default for all tests, including tests that don\u0027t do anything with overrides. ButI think it\u0027s a good idea to offer a utility method in the base class to create this label so that this code can be reused by different tests.\n\nDone.",
+      "parentUuid": "f2774266_4c80a1c8",
+      "range": {
+        "startLine": 205,
+        "startChar": 0,
+        "endLine": 209,
+        "endChar": 0
+      },
+      "revId": "aa0aa866fb59fbcd54b4a76b06590a623fe29aea",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "52581739_3b1dab14",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "0959d9c8_945b97bd",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T06:53:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "52581739_3b1dab14",
+      "range": {
+        "startLine": 223,
+        "startChar": 0,
+        "endLine": 223,
+        "endChar": 0
+      },
+      "revId": "aa0aa866fb59fbcd54b4a76b06590a623fe29aea",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9c631b02_4483b9df",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
         "patchSetId": 5
@@ -68,6 +116,30 @@
       "revId": "aa0aa866fb59fbcd54b4a76b06590a623fe29aea",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d5e0a06_f0ecd014",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 247,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T06:53:20Z",
+      "side": 1,
+      "message": "Yes, you are right about the submittable flag. Dropped this assertion.\n\nI would still keep the assertion for the requirements, since it\u0027s possible that there are requirements with OK status that do not block the submission and we want to check that there are none such requirements.",
+      "parentUuid": "9c631b02_4483b9df",
+      "range": {
+        "startLine": 241,
+        "startChar": 0,
+        "endLine": 247,
+        "endChar": 0
+      },
+      "revId": "aa0aa866fb59fbcd54b4a76b06590a623fe29aea",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
