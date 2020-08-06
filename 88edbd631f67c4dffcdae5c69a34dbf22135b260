@@ -22,6 +22,30 @@
       "revId": "88edbd631f67c4dffcdae5c69a34dbf22135b260",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d2184a9_de804de8",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnersTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T07:11:18Z",
+      "side": 0,
+      "message": "I think it\u0027s no longer needed since the ignoreParentCodeOwners() method doesn\u0027t have a parameter to pass in a path anymore. Instead the path is now passed in into PathCodeOwners on creation and the cannotCreatePathCodeOwnersWithRelativePath() test verifies that you cannot pass in a relative path there.",
+      "parentUuid": "28be8264_e35c07c8",
+      "range": {
+        "startLine": 272,
+        "startChar": 14,
+        "endLine": 272,
+        "endChar": 67
+      },
+      "revId": "88edbd631f67c4dffcdae5c69a34dbf22135b260",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
