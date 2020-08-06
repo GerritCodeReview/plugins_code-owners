@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d53978e4_3ac4a450",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFile.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T14:28:03Z",
+      "side": 1,
+      "message": "The condition doesn\u0027t appear the same as the comment.\nI think it would be the same as the comment like this:\nif (!loadedCodeOwnersConfig.isPresent() ||(!loadedCodeOwnersConfig.get().revision().equals(revision)))",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 100
+      },
+      "revId": "1d5683543a3474ac8882999a80b02df8be38e6ac",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
