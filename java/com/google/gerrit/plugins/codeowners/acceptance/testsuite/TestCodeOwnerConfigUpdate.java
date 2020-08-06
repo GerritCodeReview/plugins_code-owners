@@ -38,11 +38,11 @@ public abstract class TestCodeOwnerConfigUpdate {
   public abstract Optional<Boolean> ignoreParentCodeOwners();
 
   /**
-   * Defines how the code owners of the code owner config should be modified. By default (that is if
-   * nothing is specified), the code owners remain unchanged.
+   * Defines how the code owner sets of the code owner config should be modified. By default (that
+   * is if nothing is specified), the code owner sets remain unchanged.
    *
-   * @return a function which gets the current code owners of the code owner config as input and
-   *     outputs the desired resulting code owners
+   * @return a function which gets the current code owner sets of the code owner config as input and
+   *     outputs the desired resulting code owner sets
    */
   public abstract CodeOwnerSetModification codeOwnerSetsModification();
 
@@ -90,7 +90,7 @@ public abstract class TestCodeOwnerConfigUpdate {
     }
 
     /**
-     * Sets the code owner modification.
+     * Sets the code owner set modification.
      *
      * @return the Builder instance for chaining calls
      * @see TestCodeOwnerConfigUpdate#codeOwnerSetsModification()
@@ -99,7 +99,7 @@ public abstract class TestCodeOwnerConfigUpdate {
         CodeOwnerSetModification codeOwnerSetsModification);
 
     /**
-     * Gets the code owner modification.
+     * Gets the code owner set modification.
      *
      * @see TestCodeOwnerConfigUpdate#codeOwnerSetsModification()
      */
@@ -115,7 +115,7 @@ public abstract class TestCodeOwnerConfigUpdate {
     }
 
     /**
-     * Adds a code owner.
+     * Adds a code owner set.
      *
      * @param codeOwnerSet code owner set that should be added
      * @return the Builder instance for chaining calls

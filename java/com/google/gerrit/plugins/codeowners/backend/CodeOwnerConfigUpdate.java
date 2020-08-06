@@ -33,8 +33,8 @@ public abstract class CodeOwnerConfigUpdate {
   public abstract Optional<Boolean> ignoreParentCodeOwners();
 
   /**
-   * Defines how the code owners of the code owner config should be modified. By default (that is if
-   * nothing is specified), the code owners remain unchanged.
+   * Defines how the code owner sets of the code owner config should be modified. By default (that
+   * is if nothing is specified), the code owner sets remain unchanged.
    *
    * @return a {@link CodeOwnerSetModification} which gets the current code owner sets of the code
    *     owner config as input and outputs the desired resulting code owner sets
@@ -74,7 +74,7 @@ public abstract class CodeOwnerConfigUpdate {
     public abstract Builder setIgnoreParentCodeOwners(boolean ignoreParentCodeOwners);
 
     /**
-     * Sets the code owner modification.
+     * Sets the code owner sets modification.
      *
      * @see #codeOwnerSetsModification()
      */
