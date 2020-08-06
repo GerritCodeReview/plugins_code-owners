@@ -53,7 +53,7 @@ import org.kohsuke.args4j.Option;
  */
 public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
     implements RestReadView<CodeOwnersInBranchCollection.PathResource> {
-  private GitRepositoryManager repoManager;
+  private final GitRepositoryManager repoManager;
   private String revision;
 
   @Option(name = "-revision", usage = "revision from which the code owner configs should be read")
