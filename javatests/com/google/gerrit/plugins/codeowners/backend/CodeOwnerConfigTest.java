@@ -46,6 +46,20 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotCreateKeyWithRelativePath() throws Exception {
+    String relativeFolderPath = "foo/bar";
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                CodeOwnerConfig.Key.create(
+                    Project.nameKey("project"), "master", relativeFolderPath));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("folder path %s must be absolute", relativeFolderPath));
+  }
+
+  @Test
   public void getProject() throws Exception {
     Project.NameKey project = Project.nameKey("project");
     CodeOwnerConfig.Key codeOwnerConfigKey =

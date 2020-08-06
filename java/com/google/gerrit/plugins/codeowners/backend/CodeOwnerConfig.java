@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
@@ -213,7 +214,11 @@ public abstract class CodeOwnerConfig {
     /** Gets the branch to which the code owner config belongs. */
     public abstract BranchNameKey branch();
 
-    /** Gets the path of the folder to which the code owner config belongs. */
+    /**
+     * Gets the path of the folder to which the code owner config belongs.
+     *
+     * <p>The returned path is absolute.
+     */
     public abstract Path folderPath();
 
     /**
@@ -267,7 +272,8 @@ public abstract class CodeOwnerConfig {
      *
      * @param project the project to which the code owner config belongs
      * @param branch the branch to which the code owner config belongs
-     * @param folderPath the path of the folder to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs, must be
+     *     absolute
      * @return the code owner config key
      */
     public static Key create(Project.NameKey project, String branch, String folderPath) {
@@ -279,7 +285,8 @@ public abstract class CodeOwnerConfig {
      *
      * @param project the project to which the code owner config belongs
      * @param branch the branch to which the code owner config belongs
-     * @param folderPath the path of the folder to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs, must be
+     *     absolute
      * @param fileName the name of the code owner config file
      * @return the code owner config key
      */
@@ -292,7 +299,8 @@ public abstract class CodeOwnerConfig {
      * Creates a code owner config key.
      *
      * @param branch the branch to which the code owner config belongs
-     * @param folderPath the path of the folder to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs, must be
+     *     absolute
      * @return the code owner config key
      */
     public static Key create(BranchNameKey branch, Path folderPath) {
@@ -306,7 +314,8 @@ public abstract class CodeOwnerConfig {
      * Creates a code owner config key.
      *
      * @param branch the branch to which the code owner config belongs
-     * @param folderPath the path of the folder to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs, must be
+     *     absolute
      * @param fileName the name of the code owner config file
      * @return the code owner config key
      */
@@ -331,7 +340,7 @@ public abstract class CodeOwnerConfig {
       /**
        * Sets the folder path for this owner config key.
        *
-       * @param folderPath the folder path for this owner config key
+       * @param folderPath the folder path for this owner config key, must be absolute
        * @return the Builder instance for chaining calls
        */
       public abstract Builder setFolderPath(Path folderPath);
@@ -349,7 +358,19 @@ public abstract class CodeOwnerConfig {
        *
        * @return the {@link Key} instance
        */
-      abstract Key build();
+      abstract Key autoBuild();
+
+      /**
+       * Builds the {@link Key} instance with validation.
+       *
+       * @return the {@link Key} instance
+       */
+      public Key build() {
+        Key key = autoBuild();
+        checkState(
+            key.folderPath().isAbsolute(), "folder path %s must be absolute", key.folderPath());
+        return key;
+      }
     }
   }
 }
