@@ -22,6 +22,30 @@
       "revId": "1d5683543a3474ac8882999a80b02df8be38e6ac",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bb5b3e4_d7a4c878",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFile.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T15:26:27Z",
+      "side": 1,
+      "message": "Nice catch!\n\nActually it\u0027s the comment that is wrong. I forgot to update it after I made the revision field mandatory.\n\nThanks for noticing. This was really confusing.\n\nDone.",
+      "parentUuid": "d53978e4_3ac4a450",
+      "range": {
+        "startLine": 117,
+        "startChar": 0,
+        "endLine": 117,
+        "endChar": 100
+      },
+      "revId": "1d5683543a3474ac8882999a80b02df8be38e6ac",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
