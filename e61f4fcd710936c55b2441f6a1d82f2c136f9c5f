@@ -128,6 +128,24 @@
       "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0af28aba_6bed8776",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-06T12:16:21Z",
+      "side": 1,
+      "message": "The reason I suggested it was because there is also a default value (so I wanted to make sure it\u0027s tested).\nHowever you amended the previous change such that there is no default value, so this is not relevant :)",
+      "parentUuid": "fc9e2be3_40da6b98",
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
