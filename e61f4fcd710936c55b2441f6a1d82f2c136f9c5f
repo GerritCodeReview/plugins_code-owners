@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "a1e27064_52964979",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T11:07:46Z",
+      "side": 1,
+      "message": "I think this is already pretty well covered by the AbstractCodeOwnerConfigParserTest. Each test case in there tests the full round-trip: formatted String -\u003e code owner config -\u003e formatter String, checking that the formatted String in the end is the same as the input formatted String.",
+      "parentUuid": "b638fb1a_b09eab90",
+      "range": {
+        "startLine": 254,
+        "startChar": 18,
+        "endLine": 254,
+        "endChar": 32
+      },
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "321e6584_10a70886",
         "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigReferenceSubject.java",
         "patchSetId": 5
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "5b1c8237_dd1dd43e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/CodeOwnerConfigReferenceSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T11:07:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "321e6584_10a70886",
+      "range": {
+        "startLine": 47,
+        "startChar": 32,
+        "endLine": 47,
+        "endChar": 41
+      },
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d8f0469f_837d7b66",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
         "patchSetId": 5
@@ -62,6 +110,24 @@
       "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc9e2be3_40da6b98",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 270,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-06T11:07:46Z",
+      "side": 1,
+      "message": "It\u0027s intentionally not checked here. We have dedicated tests for the import mode below (importCodeOwnerConfigWithImportModeAll() and importCodeOwnerConfigWithImportModeGlobalCodeOwnerSetsOnly()) so the other tests don\u0027t need to do the same verification again.",
+      "parentUuid": "d8f0469f_837d7b66",
+      "revId": "e61f4fcd710936c55b2441f6a1d82f2c136f9c5f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
