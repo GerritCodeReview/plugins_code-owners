@@ -363,7 +363,7 @@ public abstract class CodeOwnerConfig {
     }
 
     @AutoValue.Builder
-    abstract static class Builder {
+    public abstract static class Builder {
       /**
        * Sets the project and branch for this owner config key.
        *
