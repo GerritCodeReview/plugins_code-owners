@@ -19,7 +19,6 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigRefere
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.codeOwnerSets;
 import static com.google.gerrit.truth.ListSubject.elements;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
@@ -89,7 +88,7 @@ public class CodeOwnerConfigSubject extends Subject {
   public ListSubject<CodeOwnerConfigReferenceSubject, CodeOwnerConfigReference> hasImportsThat() {
     return check("imports()")
         .about(elements())
-        .thatCustom(ImmutableList.copyOf(codeOwnerConfig().imports()), codeOwnerConfigReferences());
+        .thatCustom(codeOwnerConfig().imports().asList(), codeOwnerConfigReferences());
   }
 
   /**
