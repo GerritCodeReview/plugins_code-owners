@@ -112,14 +112,14 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
 
     @Override
     public TestCodeOwnerConfigUpdate.Builder forUpdate() {
-      return TestCodeOwnerConfigUpdate.builder(this::updateNewCodeOwnerConfig);
+      return TestCodeOwnerConfigUpdate.builder(this::updateCodeOwnerConfig);
     }
 
     private Optional<CodeOwnerConfig> getCodeOwnerConfig() {
       return codeOwners.getFromCurrentRevision(codeOwnerConfigKey);
     }
 
-    private void updateNewCodeOwnerConfig(TestCodeOwnerConfigUpdate codeOwnerConfigUpdate)
+    private void updateCodeOwnerConfig(TestCodeOwnerConfigUpdate codeOwnerConfigUpdate)
         throws Exception {
       codeOwnersUpdate
           .get()
