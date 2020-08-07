@@ -66,12 +66,12 @@ public abstract class CodeOwnerConfigReference {
   }
 
   /**
-   * Creates a builder for a code owner config.
+   * Creates a builder for a code owner config reference.
    *
    * @param importMode the import mode
    * @param filePath the path of the code owner config, may be absolute or relative to the path of
    *     the importing code owner config
-   * @return builder for a code owner config
+   * @return builder for a code owner config reference
    */
   public static Builder builder(CodeOwnerConfigImportMode importMode, String filePath) {
     requireNonNull(filePath, "filePath");
@@ -79,12 +79,12 @@ public abstract class CodeOwnerConfigReference {
   }
 
   /**
-   * Creates a builder for a code owner config.
+   * Creates a builder for a code owner config reference.
    *
    * @param importMode the import mode
    * @param filePath the path of the code owner config, may be absolute or relative to the path of
    *     the importing code owner config
-   * @return builder for a code owner config
+   * @return builder for a code owner config reference
    */
   public static Builder builder(CodeOwnerConfigImportMode importMode, Path filePath) {
     return new AutoValue_CodeOwnerConfigReference.Builder()
