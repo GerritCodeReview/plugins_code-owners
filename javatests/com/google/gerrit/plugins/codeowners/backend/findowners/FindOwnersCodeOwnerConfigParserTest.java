@@ -58,7 +58,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
               }
               b.append(
                   String.format(
-                      "%s %s%s",
+                      "%s %s%s\n",
                       keyword,
                       codeOwnerConfigReference
                           .project()
@@ -305,6 +305,33 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
               .onlyElement()
               .hasImportModeThat()
               .isEqualTo(CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
+        });
+  }
+
+  @Test
+  public void importMultipleCodeOwnerConfigs() throws Exception {
+    Path path1 = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference1 =
+        CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path1).build();
+    Path path2 = Paths.get("/foo/baz/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference2 =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path2)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfigReference1, codeOwnerConfigReference2),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig).hasImportsThat().hasSize(2);
+          assertThat(codeOwnerConfig)
+              .hasImportsThat()
+              .element(0)
+              .hasFilePathThat()
+              .isEqualTo(path1);
+          assertThat(codeOwnerConfig)
+              .hasImportsThat()
+              .element(1)
+              .hasFilePathThat()
+              .isEqualTo(path2);
         });
   }
 }

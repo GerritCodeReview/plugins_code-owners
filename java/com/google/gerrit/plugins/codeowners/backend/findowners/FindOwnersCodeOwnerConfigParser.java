@@ -359,6 +359,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       // write the file path
       b.append(codeOwnerConfigReference.filePath());
 
+      b.append('\n');
       return b.toString();
     }
   }
