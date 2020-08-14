@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CodeOwnerService, OwnerStatus} from './code-owners-service.js';
+import {CodeOwnerService, OwnerStatus, RenamedFileChip} from './code-owners-service.js';
 import {ownerState} from './owner-ui-state.js';
 
 export class SuggestOwnersTrigger extends Polymer.Element {
@@ -29,12 +29,20 @@ export class SuggestOwnersTrigger extends Polymer.Element {
         type: Boolean,
         value: false,
       },
+      restApi: Object,
       hidden: {
         type: Boolean,
         value: true,
         reflectToAttribute: true,
       },
     };
+  }
+
+
+  static get observers() {
+    return [
+      'onInputChanged(restApi, change)',
+    ];
   }
 
   static get template() {
@@ -57,15 +65,25 @@ export class SuggestOwnersTrigger extends Polymer.Element {
 
   connectedCallback() {
     super.connectedCallback();
-    this.ownerService = CodeOwnerService
-        .getOwnerService(this.restApi, this.change);
-    this.ownerService.getStatus().then(({file_owner_statuses}) => {
-      const hasPendingFiles = Object.keys(file_owner_statuses)
-          .some(path => file_owner_statuses[path] !== OwnerStatus.APPROVED);
-      this.hidden = !hasPendingFiles;
-    });
     ownerState.onExpandSuggestionChange(expanded => {
       this.expanded = expanded;
+    });
+  }
+
+  onInputChanged(restApi, change) {
+    if ([restApi, change].includes(undefined)) return;
+    this.ownerService = CodeOwnerService
+        .getOwnerService(this.restApi, this.change);
+    this.ownerService.getStatus().then(({rawStatuses}) => {
+      const notAllApproved = rawStatuses.some(status => {
+        const oldPathStatus = status.old_path_status;
+        const newPathStatus = status.new_path_status;
+        if (newPathStatus.status !== OwnerStatus.APPROVED) {
+          return true;
+        }
+        return oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
+      });
+      this.hidden = !notAllApproved;
     });
   }
 
@@ -94,18 +112,56 @@ class OwnerGroupFileList extends Polymer.Element {
 
   static get template() {
     return Polymer.html`
-      <style include="shared-styles"></style>
+      <style include="shared-styles">
+      span {
+        display: inline-block;
+        border-radius: var(--border-radius);
+        margin-left: var(--spacing-s);
+        padding: 0 var(--spacing-m);
+        color: var(--primary-text-color);
+        font-size: var(--font-size-small);
+      }
+      span.renamed-old {
+        background-color: var(--dark-remove-highlight-color);
+      }
+      span.renamed-new {
+        background-color: var(--dark-add-highlight-color);
+      }
+      </style>
       <ul>
         <template
           is="dom-repeat"
           items="[[files]]"
           as="file"
         >
-          <li>[[file]]</li>
+          <li>
+            [[computeFilePath(file)]]<!--
+            --><strong>[[computeFileName(file)]]</strong>
+            <span class$="[[computeStatusClass(file)]]">[[computeFileStatus(file)]]</span>
+          </li>
         </template>
       </ul>
     `;
   }
+
+  computeFilePath(file) {
+    const parts = file.path.split("/");
+    return parts.slice(0, parts.length - 2).join("/") + "/";
+  }
+
+  computeFileName(file) {
+    const parts = file.path.split("/");
+    return parts.pop();
+  }
+
+  computeFileStatus(file) {
+    return file.status;
+  }
+
+  computeStatusClass(file) {
+    return file.status === RenamedFileChip.NEW ? 'renamed-new' : 'renamed-old';
+  }
+
 }
 
 customElements.define(OwnerGroupFileList.is, OwnerGroupFileList);
@@ -208,23 +264,28 @@ export class SuggestOwners extends Polymer.Element {
                 files="[[suggestion.files]]"
               ></owner-group-file-list>
             </div>
-            <ul class="suggested-owners">
-              <template
-                is="dom-repeat"
-                items="[[suggestion.owners]]"
-                as="owner"
-                index-as="ownerIndex"
-              >
-                <gr-account-label
-                  data-suggestion-index$="[[suggestionIndex]]"
-                  data-owner-index$="[[ownerIndex]]"
-                  account="[[owner]]"
-                  hide-hovercard
-                  blurred$="[[!isAdded(owner)]]"
-                  on-click="toggleAccount">
-                </gr-account-label>
-              </template>
-            </ul>
+            <template is="dom-if" if="[[suggestion.error]]">
+              [[suggestion.error]]
+            </template>
+            <template is="dom-if" if="[[!suggestion.error]]">
+              <ul class="suggested-owners">
+                <template
+                  is="dom-repeat"
+                  items="[[suggestion.owners]]"
+                  as="owner"
+                  index-as="ownerIndex"
+                >
+                  <gr-account-label
+                    data-suggestion-index$="[[suggestionIndex]]"
+                    data-owner-index$="[[ownerIndex]]"
+                    account="[[owner.account]]"
+                    hide-hovercard
+                    blurred$="[[!isAdded(owner)]]"
+                    on-click="toggleAccount">
+                  </gr-account-label>
+                </template>
+              </ul>
+            </template>
           </li>
         </template>
       </ul>
@@ -276,7 +337,7 @@ export class SuggestOwners extends Polymer.Element {
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
 
     this.ownerService
-        .getSuggestedOwners({skipApproved: true})
+        .getSuggestedOwners()
         .then(suggestedOwners => {
           this.isLoading = false;
           this.suggestedOwners = suggestedOwners.map(suggestion => {
