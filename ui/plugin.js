@@ -51,7 +51,10 @@ Gerrit.install(plugin => {
 
   // suggest owners for reply dialog
   plugin.registerCustomComponent(
-      'reply-reviewers', SuggestOwnersTrigger.is, {slot: 'right'});
+      'reply-reviewers', SuggestOwnersTrigger.is, {slot: 'right'})
+      .onAttached(view => {
+        view.restApi = restApi;
+      });
   plugin.registerCustomComponent(
       'reply-reviewers', SuggestOwners.is, {slot: 'below'})
       .onAttached(view => {
