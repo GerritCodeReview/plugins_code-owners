@@ -27,6 +27,16 @@ export const OwnerStatus = {
 };
 
 /**
+ * New or old path for renamed files.
+ *
+ * @enum
+ */
+export const RenamedFileChip = {
+  NEW: 'Renamed - New',
+  OLD: 'Renamed - Old',
+};
+
+/**
  * Responsible for communicating with the rest-api
  *
  * @see resources/Documentation/rest-api.md
@@ -54,7 +64,7 @@ class CodeOwnerApi {
    */
   listOwnersForPath(project, branch, path) {
     return this.restApi.get(
-        `/projects/${project}/branches/${branch}/code_owners/${path}?limit=5`
+        `/projects/${project}/branches/${branch}/code_owners/${encodeURIComponent(path)}?limit=5&o=DETAILS`
     );
   }
 
@@ -91,12 +101,22 @@ export class CodeOwnerService {
    * Initial fetches.
    */
   init() {
-    this.statusPromise = this.codeOwnerApi.listOwnerStatus(this.change._number);
+    this.statusPromise = this.codeOwnerApi
+        .listOwnerStatus(this.change._number)
+        .then(res => {
+          return {
+            patchsetNumber: res.patch_set_number,
+            codeOwnerStatusMap: this._formatStatuses(
+                res.file_code_owner_statuses
+            ),
+            rawStatuses: res.file_code_owner_statuses,
+          };
+        });
   }
 
   getStatus() {
     return this.statusPromise.then(res => {
-      if (!this.isOnLatestPatchset(res.patch_set_id)) {
+      if (!this.isOnLatestPatchset(res.patchsetNumber)) {
         // status is outdated, re-init
         this.init();
         return this.statusPromise;
@@ -109,59 +129,104 @@ export class CodeOwnerService {
    * Gets owner suggestions.
    *
    * @param {!Object} opt
-   * @property {boolean} skipApproved
-   * @property {boolean} onlyApproved - this and skipApproved are mutual exclusive, will ignore skipApproved if set
    */
   getSuggestedOwners(opt = {}) {
     return this.getStatus()
-        .then(({file_owner_statuses}) => {
-          let filesToFetchOwners = Object.keys(file_owner_statuses);
-          if (opt.skipApproved) {
-            filesToFetchOwners = filesToFetchOwners.filter(
-                file => file_owner_statuses[file] !== OwnerStatus.APPROVED
-            );
-          }
-          if (opt.onlyApproved) {
-            filesToFetchOwners = filesToFetchOwners.filter(
-                file => file_owner_statuses[file] === OwnerStatus.APPROVED
-            );
-          }
-          return this.batchFetchCodeOwners(filesToFetchOwners);
-        })
-        .then(fileOwnersMap => {
-          return this._groupFilesByOwners(fileOwnersMap);
+        .then(({codeOwnerStatusMap}) => {
+          // only fetch those not approved yet
+          let filesToFetchOwners = [...codeOwnerStatusMap.keys()].filter(
+              file => codeOwnerStatusMap.get(file).status !== OwnerStatus.APPROVED
+          );
+          return this.batchFetchCodeOwners(filesToFetchOwners)
+              .then(ownersMap =>
+                this._groupFilesByOwners(ownersMap, codeOwnerStatusMap)
+              );
         });
   }
 
-  _groupFilesByOwners(fileOwnersMap) {
-    // TODO(taoalpha): For moved files, they need to be always in a different group
-    // since they may need two owners to approve
-    const ownersFilesMap = {};
+  _formatStatuses(statuses) {
+    // convert the array of statuses to map between file path -> status
+    return statuses.reduce((prev, cur) => {
+      const newPathStatus = cur.new_path_status;
+      const oldPathStatus = cur.old_path_status;
+      if (oldPathStatus) {
+        prev.set(oldPathStatus.path, {
+          changeType: cur.change_type,
+          status: oldPathStatus.status,
+          newPath: newPathStatus ? newPathStatus.path : null,
+        });
+      }
+      if (newPathStatus) {
+        prev.set(newPathStatus.path, {
+          changeType: cur.change_type,
+          status: newPathStatus.status,
+          oldPath: oldPathStatus ? oldPathStatus.path : null,
+        });
+      }
+      return prev;
+    }, new Map());
+  }
+
+  _computeFileStatus(fileStatusMap, path) {
+    // empty for modified files
+    // `renamed - old` for renamed files (old path)
+    // `renamed - new` for renamed files (new path)
+    const status = fileStatusMap.get(path);
+    if (status.newPath) {
+      return RenamedFileChip.OLD;
+    }
+    if (status.oldPath) {
+      return RenamedFileChip.NEW;
+    }
+    return;
+  }
+
+  _groupFilesByOwners(fileOwnersMap, codeOwnerStatusMap) {
+    // Note: for renamed or moved files, they will have two entries in the map
+    // we will treat them as two entries when group as well
     const allFiles = Object.keys(fileOwnersMap);
+    const ownersFilesMap = new Map();
+    const failedToFetchFiles = new Set();
     for (let i = 0; i < allFiles.length; i++) {
-      const filePath = allFiles[i];
-      // TODO(taoalpha): handle failed fetches, fileOwnersMap[filePath]
-      // will be {error}
-      const ownersKey = (fileOwnersMap[filePath].owners || [])
+      const fileInfo = {path: allFiles[i], status: this._computeFileStatus(codeOwnerStatusMap, allFiles[i])};
+      // for files failed to fetch, add them to the special group
+      if (fileOwnersMap[fileInfo.path].error) {
+        failedToFetchFiles.add(fileInfo);
+        continue;
+      }
+
+      const owners = [...fileOwnersMap[fileInfo.path].owners];
+      const ownersKey = owners
           .map(account => account._account_id)
           .sort()
           .join(',');
-      ownersFilesMap[ownersKey] = ownersFilesMap[ownersKey] || [];
-      ownersFilesMap[ownersKey].push(filePath);
+      ownersFilesMap.set(ownersKey, ownersFilesMap.get(ownersKey) || {files: [], owners});
+      ownersFilesMap.get(ownersKey).files.push(fileInfo);
     }
-    return Object.keys(ownersFilesMap).map(ownersKey => {
-      const groupName = this.getGroupName(ownersFilesMap[ownersKey]);
-      const firstFileInTheGroup = ownersFilesMap[ownersKey][0];
-      return {
+    const groupedItems = [];
+    for (const ownersKey of ownersFilesMap.keys()) {
+      const groupName = this.getGroupName(ownersFilesMap.get(ownersKey).files);
+      groupedItems.push({
         groupName,
-        files: ownersFilesMap[ownersKey],
-        owners: fileOwnersMap[firstFileInTheGroup].owners,
-      };
-    });
+        files: ownersFilesMap.get(ownersKey).files,
+        owners: ownersFilesMap.get(ownersKey).owners,
+      });
+    }
+
+    if (failedToFetchFiles.size > 0) {
+      const failedFiles = [...failedToFetchFiles];
+      groupedItems.push({
+        groupName: this.getGroupName(failedFiles),
+        files: failedFiles,
+        error: new Error("Failed to fetch owner info")
+      });
+    }
+
+    return groupedItems;
   }
 
   getGroupName(files) {
-    const fileName = files[0].split('/').pop();
+    const fileName = files[0].path.split('/').pop();
     return `${
       files.length > 1 ? `(${files.length} files) ${fileName}, ...` : fileName
     }`;
@@ -179,12 +244,6 @@ export class CodeOwnerService {
   isOnLatestPatchset(patchsetId) {
     const latestRevision = this.change.revisions[this.change.current_revision];
     return `${latestRevision._number}` === `${patchsetId}`;
-  }
-
-  getStatusForPath(path) {
-    return this.getStatus().then(({file_owner_statuses}) => {
-      return file_owner_statuses[path];
-    });
   }
 
   /**
@@ -207,7 +266,8 @@ export class CodeOwnerService {
                     filePath
                 )
                 .then(owners => {
-                  ownersMap[filePath].owners = owners;
+                  // use Set to de-dup
+                  ownersMap[filePath].owners = new Set(owners);
                 })
                 .catch(e => {
                   ownersMap[filePath].error = e;
