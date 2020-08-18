@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "1fc8ab6f_0c297d8e",
+        "filename": "ui/plugin.js",
+        "patchSetId": 4
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-08-18T07:58:32Z",
+      "side": 1,
+      "message": "?",
+      "revId": "57aa86143c83db13cb21eaacb3f886d0e5a3a58b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
