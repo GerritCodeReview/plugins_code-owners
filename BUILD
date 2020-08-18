@@ -18,6 +18,7 @@ gerrit_plugin(
     manifest_entries = [
         "Gerrit-PluginName: code-owners",
         "Gerrit-Module: com.google.gerrit.plugins.codeowners.Module",
+        "Gerrit-HttpModule: com.google.gerrit.plugins.codeowners.HttpModule",
     ],
     resource_strip_prefix = "plugins/code-owners/resources",
     resources = glob(["resources/**/*"]),
