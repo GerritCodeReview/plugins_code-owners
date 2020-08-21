@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4d30a582_1efe516d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-21T15:56:55Z",
+      "side": 0,
+      "message": "Why was this removed? I see that you\u0027re now supporting global imports, but is it no longer supported to ignore global code owners?",
+      "range": {
+        "startLine": 143,
+        "startChar": 0,
+        "endLine": 150,
+        "endChar": 3
+      },
+      "revId": "a88736b89e162a45a4b47782dc363e3365deeef4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}

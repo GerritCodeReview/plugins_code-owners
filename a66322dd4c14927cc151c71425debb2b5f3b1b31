@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8a2dfb65_da2be1c4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-21T15:56:55Z",
+      "side": 1,
+      "message": "nit: comma",
+      "range": {
+        "startLine": 165,
+        "startChar": 30,
+        "endLine": 165,
+        "endChar": 31
+      },
+      "revId": "a66322dd4c14927cc151c71425debb2b5f3b1b31",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a43efe37_fcc130db",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-21T15:56:55Z",
+      "side": 1,
+      "message": "Consider using a Queue rather than recursion.\nYou will then be able to create seenCodeOwnerConfigs and revisionMap inside this method. I also am not sure what\u0027s the worst case scenario in terms of search depth: Just to be safe and protect the stack from stackoverflow, I would switch to Queue.",
+      "range": {
+        "startLine": 286,
+        "startChar": 8,
+        "endLine": 286,
+        "endChar": 22
+      },
+      "revId": "a66322dd4c14927cc151c71425debb2b5f3b1b31",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c1081cab_da499b9d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnersTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 806,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-21T15:56:55Z",
+      "side": 1,
+      "message": "with? (also below)",
+      "range": {
+        "startLine": 806,
+        "startChar": 30,
+        "endLine": 806,
+        "endChar": 37
+      },
+      "revId": "a66322dd4c14927cc151c71425debb2b5f3b1b31",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
