@@ -137,7 +137,9 @@ class OwnerGroupFileList extends Polymer.Element {
           <li>
             [[computeFilePath(file)]]<!--
             --><strong>[[computeFileName(file)]]</strong>
-            <span class$="[[computeStatusClass(file)]]">[[computeFileStatus(file)]]</span>
+            <template is="dom-if" if="[[file.status]]">
+              <span class$="[[computeStatusClass(file)]]">[[computeFileStatus(file)]]</span>
+            </template>
           </li>
         </template>
       </ul>
@@ -159,6 +161,7 @@ class OwnerGroupFileList extends Polymer.Element {
   }
 
   computeStatusClass(file) {
+    if (!file.status) return '';
     return file.status === RenamedFileChip.NEW ? 'renamed-new' : 'renamed-old';
   }
 
@@ -218,11 +221,11 @@ export class SuggestOwners extends Polymer.Element {
         }
         gr-account-label {
           background-color: var(--background-color-tertiary);
-          padding: 0 var(--spacing-m) 0 var(--spacing-s);
-          margin-right: var(--spacing-m);
-          user-select: none;
           display: inline-block;
-          --label-border-radius: 10px;
+          padding: var(--spacing-xs) var(--spacing-m);
+          user-select: none;
+          --label-border-radius: 8px;
+          border: 1px solid transparent;
         }
         gr-account-label:focus {
           outline: none;
@@ -230,6 +233,11 @@ export class SuggestOwners extends Polymer.Element {
         gr-account-label:hover {
           box-shadow: var(--elevation-level-1);
           cursor: pointer;
+        }
+        gr-account-label[selected] {
+          background-color: var(--chip-selected-background-color);
+          border: 1px solid var(--chip-selected-background-color);
+          color: var(--chip-selected-text-color);
         }
       </style>
       <p class="loading" hidden="[[!isLoading]]">
@@ -247,17 +255,12 @@ export class SuggestOwners extends Polymer.Element {
             <div class="suggestion-grou-name">
               <span>
                 [[suggestion.groupName]]
-                <template
-                  is="dom-if"
-                  if="[[hasMoreThanOneFile(suggestion.files)]]"
-                >
-                  <gr-hovercard hidden="[[suggestion.expanded]]">
-                    <owner-group-file-list
-                      files="[[suggestion.files]]"
-                    >
-                    </owner-group-file-list>
-                  </gr-hovercard>
-                </template>
+                <gr-hovercard hidden="[[suggestion.expanded]]">
+                  <owner-group-file-list
+                    files="[[suggestion.files]]"
+                  >
+                  </owner-group-file-list>
+                </gr-hovercard>
               <span>
               <owner-group-file-list
                 hidden="[[!suggestion.expanded]]"
@@ -280,7 +283,7 @@ export class SuggestOwners extends Polymer.Element {
                     data-owner-index$="[[ownerIndex]]"
                     account="[[owner.account]]"
                     hide-hovercard
-                    blurred$="[[!isAdded(owner)]]"
+                    selected$="[[isSelected(owner)]]"
                     on-click="toggleAccount">
                   </gr-account-label>
                 </template>
@@ -343,10 +346,15 @@ export class SuggestOwners extends Polymer.Element {
           this.suggestedOwners = suggestedOwners.map(suggestion => {
             return this.formatSuggestionInfo(suggestion);
           });
+          this._updateAllChips(this._initialReviewers);
         });
   }
 
   onReviewerChange(reviewers) {
+    if (!this._initialReviewers) {
+      // remember the initial reviewers
+      this._initialReviewers = reviewers;
+    }
     this._updateAllChips(reviewers);
   }
 
@@ -361,22 +369,19 @@ export class SuggestOwners extends Polymer.Element {
         reviewers &&
         reviewers.find(reviewer => reviewer._account_id === owner._account_id)
       ) {
-        updatedOwner.added = true;
+        updatedOwner.selected = true;
       }
       return updatedOwner;
     });
     return res;
   }
 
-  hasMoreThanOneFile(files) {
-    return files.length > 1;
-  }
-
-  addAccount(reviewer) {
+  addAccount(owner) {
+    owner.selected = true;
     this.dispatchEvent(
         new CustomEvent('add-reviewer', {
           detail: {
-            reviewer,
+            reviewer: {...owner.account, _pendingAdd: true},
           },
           composed: true,
           bubbles: true,
@@ -384,11 +389,12 @@ export class SuggestOwners extends Polymer.Element {
     );
   }
 
-  removeAccount(reviewer) {
+  removeAccount(owner) {
+    owner.selected = false;
     this.dispatchEvent(
         new CustomEvent('remove-reviewer', {
           detail: {
-            reviewer,
+            reviewer: {...owner.account, _pendingAdd: true},
           },
           composed: true,
           bubbles: true,
@@ -397,41 +403,41 @@ export class SuggestOwners extends Polymer.Element {
   }
 
   toggleAccount(e) {
-    const account = e.currentTarget.account;
-    if (account.added || account._pendingAdd) {
-      this.removeAccount(account);
+    const grAccountLabel = e.currentTarget;
+    const owner = this.suggestedOwners[grAccountLabel.dataset.suggestionIndex].owners[grAccountLabel.dataset.ownerIndex];
+    if (this.isSelected(owner)) {
+      this.removeAccount(owner);
     } else {
-      this.addAccount(account);
+      this.addAccount(owner);
     }
   }
 
   _updateAllChips(accounts) {
-    if (!this.suggestedOwners || !accounts || !accounts.length) return;
+    if (!this.suggestedOwners || !accounts) return;
     // update all occurences
     this.suggestedOwners.forEach((suggestion, sId) => {
       suggestion.owners.forEach((owner, oId) => {
         if (
-          accounts.some(account => account._account_id === owner._account_id)
+          accounts.some(account => account._account_id === owner.account._account_id)
         ) {
           this.set(
               ['suggestedOwners', sId, 'owners', oId],
               {...owner,
-                added: false,
-                _pendingAdd: true,
+                selected: true,
               }
           );
         } else {
           this.set(
               ['suggestedOwners', sId, 'owners', oId],
-              {...owner, _pendingAdd: false}
+              {...owner, selected: false}
           );
         }
       });
     });
   }
 
-  isAdded(owner) {
-    return owner.added || owner._pendingAdd;
+  isSelected(owner) {
+    return owner.selected;
   }
 }
 
