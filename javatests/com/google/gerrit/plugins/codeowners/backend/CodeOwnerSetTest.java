@@ -138,4 +138,56 @@ public class CodeOwnerSetTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerSet).hasIgnoreGlobalAndParentCodeOwnersThat().isTrue();
     assertThat(codeOwnerSet).hasPathExpressionsThat().isNotEmpty();
   }
+
+  @Test
+  public void cannotCreateCodeOwnerSetWithImportsIfNoPathExpressionsHaveBeenSet() throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                CodeOwnerSet.builder()
+                    .addImport(
+                        CodeOwnerConfigReference.create(
+                            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                            "foo/bar/OWNERS"))
+                    .build());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("imports are not allowed for code owner set without path expressions");
+  }
+
+  @Test
+  public void cannotCreateCodeOwnerSetWithImportsThatUseNonGlobalCodeOwnerSetsOnlyImportMode()
+      throws Exception {
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                CodeOwnerSet.builder()
+                    .addImport(
+                        CodeOwnerConfigReference.create(
+                            CodeOwnerConfigImportMode.ALL, "foo/bar/OWNERS"))
+                    .addPathExpression("*.md")
+                    .build());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "imports in code owner set must have have import mode %s",
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY.name()));
+  }
+
+  @Test
+  public void canCreateCodeOwnerSetWithImports() throws Exception {
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "foo/bar/OWNERS");
+    CodeOwnerSet codeOwnerSet =
+        CodeOwnerSet.builder()
+            .addImport(codeOwnerConfigReference)
+            .addPathExpression("*.md")
+            .build();
+    assertThat(codeOwnerSet).hasImportsThat().containsExactly(codeOwnerConfigReference);
+    assertThat(codeOwnerSet).hasPathExpressionsThat().isNotEmpty();
+  }
 }

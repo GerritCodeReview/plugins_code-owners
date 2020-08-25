@@ -65,6 +65,9 @@ public abstract class CodeOwnerSet {
   /** Path expressions that match the files that are owned by the {@link #codeOwners()}. */
   public abstract ImmutableSet<String> pathExpressions();
 
+  /** Gets references to the code owner configs that should be imported. */
+  public abstract ImmutableSet<CodeOwnerConfigReference> imports();
+
   /** Gets the code owners of this code owner set. */
   public abstract ImmutableSet<CodeOwnerReference> codeOwners();
 
@@ -152,6 +155,29 @@ public abstract class CodeOwnerSet {
     }
 
     /**
+     * Sets the imports of this code owner set.
+     *
+     * @param codeOwnerConfigReferences references to the code owner configs that should be imported
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder setImports(
+        ImmutableSet<CodeOwnerConfigReference> codeOwnerConfigReferences);
+
+    /** Gets a builder to add imports. */
+    abstract ImmutableSet.Builder<CodeOwnerConfigReference> importsBuilder();
+
+    /**
+     * Adds an import.
+     *
+     * @param codeOwnerConfigReference reference to the code owner config that should be imported
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addImport(CodeOwnerConfigReference codeOwnerConfigReference) {
+      importsBuilder().add(requireNonNull(codeOwnerConfigReference, "codeOwnerConfigReference"));
+      return this;
+    }
+
+    /**
      * Sets the code owners of this code owner set.
      *
      * @param codeOwners the code owners of this code owner set
@@ -191,6 +217,17 @@ public abstract class CodeOwnerSet {
               && codeOwnerSet.pathExpressions().isEmpty()),
           "ignoreGlobalAndParentCodeOwners = true is not allowed for code owner set without path"
               + " expressions");
+      checkState(
+          !(!codeOwnerSet.imports().isEmpty() && codeOwnerSet.pathExpressions().isEmpty()),
+          "imports are not allowed for code owner set without path expressions");
+      checkState(
+          codeOwnerSet.imports().stream()
+              .allMatch(
+                  codeOwnerConfigReference ->
+                      CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY.equals(
+                          codeOwnerConfigReference.importMode())),
+          "imports in code owner set must have have import mode %s",
+          CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY.name());
       return codeOwnerSet;
     }
 

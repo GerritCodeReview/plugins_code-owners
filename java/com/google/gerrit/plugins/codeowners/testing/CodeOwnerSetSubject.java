@@ -82,6 +82,15 @@ public class CodeOwnerSetSubject extends Subject {
   }
 
   /**
+   * Returns an {@link IterableSubject} for the imports in the code owner set.
+   *
+   * @return {@link IterableSubject} for the imports in the code owner set
+   */
+  public IterableSubject hasImportsThat() {
+    return check("imports()").that(codeOwnerSet().imports());
+  }
+
+  /**
    * Returns an {@link IterableSubject} for the path expressions in the code owner set.
    *
    * @return {@link IterableSubject} for the path expressions in the code owner set
