@@ -249,6 +249,8 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
         codeOwnerConfigUpdate
             .codeOwnerSetsModification()
             .apply(codeOwnerConfig.codeOwnerSetsAsList()));
+    codeOwnerConfigBuilder.setImports(
+        codeOwnerConfigUpdate.importsModification().apply(codeOwnerConfig.importsAsList()));
     return codeOwnerConfigBuilder.build();
   }
 

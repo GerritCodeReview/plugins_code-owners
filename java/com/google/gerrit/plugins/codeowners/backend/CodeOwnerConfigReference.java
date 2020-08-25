@@ -66,6 +66,19 @@ public abstract class CodeOwnerConfigReference {
   }
 
   /**
+   * Creates a code owner config reference.
+   *
+   * @param importMode the import mode
+   * @param filePath the path of the code owner config, may be absolute or relative to the path of
+   *     the importing code owner config
+   * @return the created code owner reference
+   */
+  public static CodeOwnerConfigReference create(
+      CodeOwnerConfigImportMode importMode, String filePath) {
+    return builder(importMode, filePath).build();
+  }
+
+  /**
    * Creates a builder for a code owner config reference.
    *
    * @param importMode the import mode
