@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d3ea6155_470114fb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-25T12:21:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a2dfb65_da2be1c4",
+      "range": {
+        "startLine": 165,
+        "startChar": 30,
+        "endLine": 165,
+        "endChar": 31
+      },
+      "revId": "a66322dd4c14927cc151c71425debb2b5f3b1b31",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "a43efe37_fcc130db",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "989a0c8f_4ce9f63f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 286,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-25T12:21:31Z",
+      "side": 1,
+      "message": "Thanks for this suggestion. This is a really good idea. Done.",
+      "parentUuid": "a43efe37_fcc130db",
+      "range": {
+        "startLine": 286,
+        "startChar": 8,
+        "endLine": 286,
+        "endChar": 22
+      },
+      "revId": "a66322dd4c14927cc151c71425debb2b5f3b1b31",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c1081cab_da499b9d",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnersTest.java",
         "patchSetId": 2
@@ -68,6 +116,30 @@
       "revId": "a66322dd4c14927cc151c71425debb2b5f3b1b31",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "520f2fa0_04807a80",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnersTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 806,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-25T12:21:31Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c1081cab_da499b9d",
+      "range": {
+        "startLine": 806,
+        "startChar": 30,
+        "endLine": 806,
+        "endChar": 37
+      },
+      "revId": "a66322dd4c14927cc151c71425debb2b5f3b1b31",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
