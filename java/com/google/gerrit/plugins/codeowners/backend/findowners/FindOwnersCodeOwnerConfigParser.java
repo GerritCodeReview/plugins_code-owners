@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
@@ -111,6 +112,8 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     private static final String SET_NOPARENT = "set[\\s]+noparent";
 
+    private static final String FILE_DIRECTIVE = "file:[\\s]*" + PROJECT_AND_FILE;
+    private static final String INCLUDE_DIRECTIVE = "include[\\s]+" + PROJECT_AND_FILE;
     private static final String INCLUDE_OR_FILE = "(file:[\\s]*|include[\\s]+)";
 
     // Simple input lines with 0 or 1 sub-pattern.
@@ -121,7 +124,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
 
     private static final Pattern PAT_PER_FILE_OWNERS =
-        Pattern.compile("^(" + EMAIL_LIST + "|" + SET_NOPARENT + ")$");
+        Pattern.compile("^(" + EMAIL_LIST + "|" + SET_NOPARENT + "|" + FILE_DIRECTIVE + ")$");
+    private static final Pattern PAT_PER_FILE_INCLUDE =
+        Pattern.compile("^(" + INCLUDE_DIRECTIVE + ")$");
     private static final Pattern PAT_GLOBS =
         Pattern.compile("^(" + GLOB + "(" + COMMA + GLOB + ")*)$");
 
@@ -177,9 +182,17 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     private static CodeOwnerSet parsePerFile(String line) {
       Matcher m = PAT_PER_FILE.matcher(line);
-      if (!m.matches()
-          || !isGlobs(m.group(1).trim())
-          || !PAT_PER_FILE_OWNERS.matcher(m.group(2).trim()).matches()) {
+      if (!m.matches() || !isGlobs(m.group(1).trim())) {
+        return null;
+      }
+
+      String matchedGroup2 = m.group(2).trim();
+      if (!PAT_PER_FILE_OWNERS.matcher(matchedGroup2).matches()) {
+        checkState(
+            !PAT_PER_FILE_INCLUDE.matcher(matchedGroup2).matches(),
+            "import mode %s is unsupported for per file import: %s",
+            CodeOwnerConfigImportMode.ALL.name(),
+            line);
         return null;
       }
 
@@ -193,6 +206,15 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
             .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
             .build();
       }
+
+      CodeOwnerConfigReference codeOwnerConfigReference;
+      if ((codeOwnerConfigReference = parseInclude(directive)) != null) {
+        return CodeOwnerSet.builder()
+            .addImport(codeOwnerConfigReference)
+            .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
+            .build();
+      }
+
       List<String> ownerEmails = Arrays.asList(directive.split(COMMA, -1));
       return CodeOwnerSet.builder()
           .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
@@ -304,6 +326,14 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         b.append(String.format(PER_FILE_LINE_FORMAT, formattedPathExpressions, TOK_SET_NOPARENT));
       }
 
+      for (CodeOwnerConfigReference codeOwnerConfigReference : codeOwnerSet.imports()) {
+        b.append(
+            String.format(
+                PER_FILE_LINE_FORMAT,
+                formattedPathExpressions,
+                formatImport(codeOwnerConfigReference)));
+      }
+
       if (!codeOwnerSet.codeOwners().isEmpty()) {
         b.append(
             String.format(
@@ -331,7 +361,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       StringBuilder b = new StringBuilder();
       codeOwnerConfig
           .imports()
-          .forEach(codeOwnerConfigReference -> b.append(formatImport(codeOwnerConfigReference)));
+          .forEach(
+              codeOwnerConfigReference ->
+                  b.append(formatImport(codeOwnerConfigReference)).append('\n'));
       return b.toString();
     }
 
@@ -359,7 +391,6 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       // write the file path
       b.append(codeOwnerConfigReference.filePath());
 
-      b.append('\n');
       return b.toString();
     }
   }
