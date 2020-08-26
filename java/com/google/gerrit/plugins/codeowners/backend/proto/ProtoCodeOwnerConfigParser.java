@@ -97,6 +97,10 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
   private static class Formatter {
     static String formatAsString(CodeOwnerConfig codeOwnerConfig) {
       checkState(codeOwnerConfig.imports().isEmpty(), "imports are not supported");
+      checkState(
+          codeOwnerConfig.codeOwnerSets().stream()
+              .allMatch(codeOwnerSet -> codeOwnerSet.imports().isEmpty()),
+          "per file imports are not supported");
 
       if (codeOwnerConfig.ignoreParentCodeOwners() == false
           && codeOwnerConfig.codeOwnerSets().isEmpty()) {
