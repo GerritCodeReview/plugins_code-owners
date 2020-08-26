@@ -83,7 +83,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
     submitRequirementInfoSubject
         .hasFallbackTextThat()
-        .isEqualTo("All files must be approved by a code owner");
+        .isEqualTo("Code Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Try to submit the change.
@@ -95,7 +95,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: All files must be approved by a code owner",
+                    + "Change %d: Code Owners",
                 changeInfo._number));
   }
 
@@ -138,7 +138,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
     submitRequirementInfoSubject
         .hasFallbackTextThat()
-        .isEqualTo("All files must be approved by a code owner");
+        .isEqualTo("Code Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Try to submit the change.
@@ -150,7 +150,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: All files must be approved by a code owner",
+                    + "Change %d: Code Owners",
                 changeInfo._number));
   }
 

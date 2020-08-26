@@ -60,7 +60,7 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
     submitRequirementSubject
         .hasFallbackTextThat()
-        .isEqualTo("All files must be approved by a code owner");
+        .isEqualTo("Code Owners");
   }
 
   @Test

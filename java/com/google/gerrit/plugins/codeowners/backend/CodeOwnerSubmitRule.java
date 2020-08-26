@@ -47,7 +47,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
 
   private static final SubmitRequirement NOT_READY_SUBMIT_REQUIREMENT =
       SubmitRequirement.builder()
-          .setFallbackText("All files must be approved by a code owner")
+          .setFallbackText("Code Owners")
           .setType("code-owners")
           .build();
 
