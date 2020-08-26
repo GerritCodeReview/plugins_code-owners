@@ -19,7 +19,6 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.exceptions.StorageException;
@@ -37,6 +36,7 @@ import com.google.inject.Provider;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /** Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s. */
 public class CodeOwnerResolver {
@@ -99,13 +99,12 @@ public class CodeOwnerResolver {
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
     return pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get().stream()
-        .map(this::resolve)
-        .flatMap(Streams::stream)
+        .flatMap(this::resolve)
         .collect(toImmutableSet());
   }
 
   /**
-   * Resolves a {@link CodeOwnerReference} to a {@link CodeOwner}.
+   * Resolves a {@link CodeOwnerReference} to {@link CodeOwner}s.
    *
    * <p>Code owners are defined by {@link CodeOwnerReference}s (e.g. emails) that need to be
    * resolved to accounts. The accounts are wrapped in {@link CodeOwner}s so that we can support
@@ -139,16 +138,16 @@ public class CodeOwnerResolver {
    * @return the {@link CodeOwner} for the code owner reference if it was resolved, otherwise {@link
    *     Optional#empty()}
    */
-  public Optional<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
+  public Stream<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
     String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
 
     Optional<AccountState> accountState =
         lookupEmail(email).flatMap(accountId -> lookupAccount(accountId, email));
     if (!accountState.isPresent() || (enforceVisibility && !isVisible(accountState.get(), email))) {
-      return Optional.empty();
+      return Stream.of();
     }
 
-    return Optional.of(CodeOwner.create(accountState.get().account().id()));
+    return Stream.of(CodeOwner.create(accountState.get().account().id()));
   }
 
   /**
