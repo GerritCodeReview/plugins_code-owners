@@ -191,4 +191,26 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
             () -> codeOwnerConfigParser.formatAsString(codeOwnerConfig));
     assertThat(exception).hasMessageThat().isEqualTo("imports are not supported");
   }
+
+  @Test
+  public void cannotFormatCodeOwnerConfigWithPerFileImports() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("*.md")
+                    .addImport(
+                        CodeOwnerConfigReference.builder(
+                                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                                "/foo/bar/OWNERS")
+                            .build())
+                    .build())
+            .build();
+
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigParser.formatAsString(codeOwnerConfig));
+    assertThat(exception).hasMessageThat().isEqualTo("per file imports are not supported");
+  }
 }
