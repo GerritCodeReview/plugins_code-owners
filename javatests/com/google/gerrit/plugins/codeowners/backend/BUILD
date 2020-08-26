@@ -24,6 +24,7 @@ java_library(
     name = "testbases",
     srcs = glob(["Abstract*.java"]),
     deps = [
+        "//java/com/google/gerrit/acceptance/config",
         "//java/com/google/gerrit/common:annotations",
         "//java/com/google/gerrit/entities",
         "//java/com/google/gerrit/exceptions",
@@ -39,4 +40,3 @@ java_library(
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
     ],
 )
-

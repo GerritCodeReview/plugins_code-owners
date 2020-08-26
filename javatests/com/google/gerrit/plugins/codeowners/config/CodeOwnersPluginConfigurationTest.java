@@ -15,8 +15,8 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
@@ -710,6 +710,46 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
   }
 
+  @Test
+  public void cannotGetFileExtensionForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> codeOwnersPluginConfiguration.getFileExtension(null));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void getFileExtensionIfNoneIsConfigured() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void getFileExtensionIfNoneIsConfiguredOnProjectLevel() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).value().isEqualTo("foo");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void fileExtensionOnProjectLevelOverridesDefaultFileExtension() throws Exception {
+    configureFileExtension(project, "bar");
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).value().isEqualTo("bar");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void fileExtensionIsInheritedFromParentProject() throws Exception {
+    configureFileExtension(allProjects, "bar");
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).value().isEqualTo("bar");
+  }
+
+  @Test
+  public void inheritedFileExtensionCanBeOverridden() throws Exception {
+    configureFileExtension(allProjects, "foo");
+    configureFileExtension(project, "bar");
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).value().isEqualTo("bar");
+  }
+
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
     setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, disabled);
   }
@@ -746,6 +786,11 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
       throws Exception {
     setCodeOwnersConfig(
         project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, requiredApproval);
+  }
+
+  private void configureFileExtension(Project.NameKey project, String fileExtension)
+      throws Exception {
+    setCodeOwnersConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
   }
 
   private AutoCloseable registerTestBackend() {

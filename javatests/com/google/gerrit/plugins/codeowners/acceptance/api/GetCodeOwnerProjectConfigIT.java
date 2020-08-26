@@ -33,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
 import com.google.inject.Inject;
@@ -80,6 +81,8 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   public void getDefaultConfig() throws Exception {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
+    assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.id)
         .isEqualTo(CodeOwnerBackendId.getBackendId(backendConfig.getDefaultBackend().getClass()));
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
@@ -88,6 +91,14 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.value)
         .isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
     assertThat(codeOwnerProjectConfigInfo.overrideApproval).isNull();
+  }
+
+  @Test
+  public void getConfigWithConfiguredFileExtension() throws Exception {
+    configureFileExtension(project, "foo");
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
   }
 
   @Test
@@ -163,6 +174,11 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.overrideApproval.label).isEqualTo("Code-Review");
     assertThat(codeOwnerProjectConfigInfo.overrideApproval.value).isEqualTo(2);
+  }
+
+  private void configureFileExtension(Project.NameKey project, String fileExtension)
+      throws Exception {
+    setConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
   }
 
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {

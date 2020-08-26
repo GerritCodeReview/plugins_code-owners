@@ -18,6 +18,7 @@ import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBa
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
@@ -45,12 +46,14 @@ public class ProtoBackend extends AbstractFileBasedCodeOwnerBackend {
 
   @Inject
   ProtoBackend(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
       RetryHelper retryHelper,
       ProtoCodeOwnerConfigParser codeOwnerConfigParser) {
     super(
+        codeOwnersPluginConfiguration,
         repoManager,
         serverIdent,
         metaDataUpdateInternalFactory,

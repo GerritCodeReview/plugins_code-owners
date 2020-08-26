@@ -78,6 +78,9 @@ public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> 
         CodeOwnerProjectConfigJson.format(
             isDisabled,
             disabledBranches,
+            codeOwnersPluginConfiguration
+                .getFileExtension(projectResource.getNameKey())
+                .orElse(null),
             backendId,
             backendIdsPerBranch,
             requiredApproval,

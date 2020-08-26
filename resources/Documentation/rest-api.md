@@ -277,6 +277,7 @@ configuration.
 
 | Field Name |          | Description |
 | ---------- | -------- | ----------- |
+| `general`  || The general code owners configuration as [GeneralInfo](#general-info) entity.
 | `status`   | optional | The code owner status configuration as [CodeOwnersStatusInfo](#code-owners-status-info) entity. Contains information about whether the code owners functionality is disabled for the project or for any branch. Not set if the code owners functionality is neither disabled for the project nor for any branch.
 | `backend`  || The code owner backend configuration as [BackendInfo](#backend-info) entity.
 | `required_approval` || The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval.
@@ -328,6 +329,14 @@ file in a change.
 | `change_type` | optional | The type of the file modification. Can be `ADDED`, `MODIFIED`, `DELETED`, `RENAMED` or `COPIED`. Not set if `MODIFIED`.
 | `old_path_status` | optional | The code owner status for the old path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Only set if `change_type` is `DELETED` or `RENAMED`.
 | `new_path_status` | optional | The code owner status for the new path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Not set if `change_type` is `DELETED`.
+
+### <a id="general-info"> GeneralInfo
+The `GeneralInfo` entity contains general code owners configuration parameters.
+
+| Field Name       |          | Description |
+| ---------------- | -------- | ----------- |
+| `file_extension` | optional | The file extension that is used for the code
+owner config files in this project. Not set if no file extension is used.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path
