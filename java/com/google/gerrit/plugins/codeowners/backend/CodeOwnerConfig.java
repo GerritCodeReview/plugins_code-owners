@@ -199,6 +199,9 @@ public abstract class CodeOwnerConfig {
       return setIgnoreParentCodeOwners(true);
     }
 
+    /** Gets the code owner sets from this builder. */
+    public abstract ImmutableSet<CodeOwnerSet> codeOwnerSets();
+
     /**
      * Sets the code owner sets of this code owner config.
      *
