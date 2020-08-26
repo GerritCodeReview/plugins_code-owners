@@ -26,6 +26,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
+import com.google.gerrit.plugins.codeowners.api.GeneralInfo;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import java.util.Map;
@@ -35,17 +36,26 @@ public class CodeOwnerProjectConfigJson {
   static CodeOwnerProjectConfigInfo format(
       boolean isDisabled,
       ImmutableList<BranchNameKey> disabledBranches,
+      @Nullable String fileExtension,
       String backendId,
       ImmutableMap<BranchNameKey, String> backendIdsPerBranch,
       RequiredApproval requiredApproval,
       @Nullable RequiredApproval overrideApproval) {
     CodeOwnerProjectConfigInfo info = new CodeOwnerProjectConfigInfo();
+    info.general = formatGeneralInfo(fileExtension);
     info.status = formatStatusInfo(isDisabled, disabledBranches);
     info.backend = formatBackendInfo(backendId, backendIdsPerBranch);
     info.requiredApproval = formatRequiredApprovalInfo(requiredApproval);
     info.overrideApproval =
         overrideApproval != null ? formatRequiredApprovalInfo(overrideApproval) : null;
     return info;
+  }
+
+  @VisibleForTesting
+  static GeneralInfo formatGeneralInfo(@Nullable String fileExtension) {
+    GeneralInfo generalInfo = new GeneralInfo();
+    generalInfo.fileExtension = fileExtension;
+    return generalInfo;
   }
 
   @VisibleForTesting

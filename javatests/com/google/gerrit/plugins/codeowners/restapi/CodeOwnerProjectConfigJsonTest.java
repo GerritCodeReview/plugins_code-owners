@@ -102,6 +102,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         CodeOwnerProjectConfigJson.format(
             true,
             ImmutableList.of(),
+            "foo",
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(
                 BranchNameKey.create(project, "master"),
@@ -112,6 +113,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             RequiredApproval.create(LabelType.withDefaultValues("Owners-Override"), (short) 1));
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isTrue();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
+    assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
     assertThat(codeOwnerProjectConfigInfo.backend.id)
         .isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch)
@@ -129,6 +131,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         CodeOwnerProjectConfigJson.format(
             true,
             ImmutableList.of(BranchNameKey.create(project, "master")),
+            null,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
@@ -143,6 +146,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         CodeOwnerProjectConfigJson.format(
             false,
             ImmutableList.of(),
+            null,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
@@ -156,6 +160,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         CodeOwnerProjectConfigJson.format(
             false,
             ImmutableList.of(BranchNameKey.create(project, "master")),
+            null,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
@@ -176,6 +181,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
                 CodeOwnerProjectConfigJson.format(
                     false,
                     null,
+                    null,
                     CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
                     ImmutableMap.of(),
                     requiredApproval,
@@ -192,7 +198,13 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 CodeOwnerProjectConfigJson.format(
-                    false, ImmutableList.of(), null, ImmutableMap.of(), requiredApproval, null));
+                    false,
+                    ImmutableList.of(),
+                    null,
+                    null,
+                    ImmutableMap.of(),
+                    requiredApproval,
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("backendId");
   }
 
@@ -207,6 +219,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
                 CodeOwnerProjectConfigJson.format(
                     false,
                     ImmutableList.of(),
+                    null,
                     CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
                     null,
                     requiredApproval,
@@ -223,6 +236,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
                 CodeOwnerProjectConfigJson.format(
                     false,
                     ImmutableList.of(),
+                    null,
                     CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
                     ImmutableMap.of(),
                     null,
@@ -236,10 +250,26 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         CodeOwnerProjectConfigJson.format(
             false,
             ImmutableList.of(),
+            null,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
             null);
     assertThat(codeOwnerProjectConfigInfo.overrideApproval).isNull();
+  }
+
+  @Test
+  public void formatCodeOwnerProjectConfigForNullFileExtension() throws Exception {
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        CodeOwnerProjectConfigJson.format(
+            false,
+            ImmutableList.of(),
+            null,
+            CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
+            ImmutableMap.of(),
+            RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
+            null);
+    assertThat(codeOwnerProjectConfigInfo.general).isNotNull();
+    assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
   }
 }

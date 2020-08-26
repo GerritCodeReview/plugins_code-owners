@@ -18,6 +18,7 @@ import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBa
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
@@ -41,12 +42,14 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
 
   @Inject
   FindOwnersBackend(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       FindOwnersCodeOwnerConfigParser codeOwnerConfigParser,
       GitRepositoryManager repoManager,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
       RetryHelper retryHelper) {
     super(
+        codeOwnersPluginConfiguration,
         repoManager,
         serverIdent,
         metaDataUpdateInternalFactory,
