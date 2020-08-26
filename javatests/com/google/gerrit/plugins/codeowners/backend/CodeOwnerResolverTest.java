@@ -80,6 +80,33 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void resolveCodeOwnerReferenceForStarAsEmail() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+    Stream<CodeOwner> codeOwner =
+        codeOwnerResolver
+            .get()
+            .resolve(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
+    assertThat(codeOwner)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  public void resolveCodeOwnerReferenceForStarAsEmailChecksAccountVisibility() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // Set user2 as current user.
+    requestScopeOperations.setApiUser(user2.id());
+
+    Stream<CodeOwner> codeOwner =
+        codeOwnerResolver
+            .get()
+            .resolve(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
+    assertThat(codeOwner).comparingElementsUsing(hasAccountId()).containsExactly(user2.id());
+  }
+
+  @Test
   public void resolveCodeOwnerReferenceForAmbiguousEmail() throws Exception {
     // Create an external ID for 'user' account that has the same email as the 'admin' account.
     accountsUpdate

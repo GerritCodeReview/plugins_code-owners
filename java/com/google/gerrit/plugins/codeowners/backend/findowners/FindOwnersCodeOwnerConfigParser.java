@@ -99,8 +99,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
     private static final String GLOB = "[^\\s,=]+"; // a file glob
 
-    private static final String EMAIL = "([^\\s<>@,]+@[^\\s<>@#,]+)";
-    private static final String EMAIL_LIST = "(" + EMAIL + "(" + COMMA + EMAIL + ")*)";
+    private static final String EMAIL_OR_STAR = "([^\\s<>@,]+@[^\\s<>@#,]+|\\*)";
+    private static final String EMAIL_LIST =
+        "(" + EMAIL_OR_STAR + "(" + COMMA + EMAIL_OR_STAR + ")*)";
 
     // A Gerrit project name followed by a colon and optional spaces.
     private static final String PROJECT_NAME = "([^\\s:]+" + COLON + ")?";
@@ -118,7 +119,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     // Simple input lines with 0 or 1 sub-pattern.
     private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
-    private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL + EOL);
+    private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL_OR_STAR + EOL);
     private static final Pattern PAT_INCLUDE =
         Pattern.compile(BOL + INCLUDE_OR_FILE + PROJECT_AND_FILE + EOL);
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
