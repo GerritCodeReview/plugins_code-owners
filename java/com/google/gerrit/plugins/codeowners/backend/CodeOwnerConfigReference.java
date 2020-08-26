@@ -66,6 +66,13 @@ public abstract class CodeOwnerConfigReference {
   }
 
   /**
+   * Creates a builder from this code owner config reference.
+   *
+   * @return builder that was created from this code owner config reference
+   */
+  public abstract Builder toBuilder();
+
+  /**
    * Creates a code owner config reference.
    *
    * @param importMode the import mode
@@ -103,6 +110,12 @@ public abstract class CodeOwnerConfigReference {
     return new AutoValue_CodeOwnerConfigReference.Builder()
         .setImportMode(importMode)
         .setFilePath(filePath);
+  }
+
+  /** Returns a copy of the given code owner config reference with the given import mode. */
+  public static CodeOwnerConfigReference copyWithNewImportMode(
+      CodeOwnerConfigReference codeOwnerConfigReference, CodeOwnerConfigImportMode importMode) {
+    return codeOwnerConfigReference.toBuilder().setImportMode(importMode).build();
   }
 
   @AutoValue.Builder
