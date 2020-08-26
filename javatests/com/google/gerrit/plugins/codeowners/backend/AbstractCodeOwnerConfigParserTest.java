@@ -175,6 +175,18 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   }
 
   @Test
+  public void codeOwnerConfigWithStarAsEmail() throws Exception {
+    assertParseAndFormat(
+        getCodeOwnerConfig(CodeOwnerResolver.ALL_USERS_WILDCARD),
+        codeOwnerConfig ->
+            assertThat(codeOwnerConfig)
+                .hasCodeOwnerSetsThat()
+                .onlyElement()
+                .hasCodeOwnersEmailsThat()
+                .containsExactly(CodeOwnerResolver.ALL_USERS_WILDCARD));
+  }
+
+  @Test
   public void codeOwnerConfigWithTrailingLineBreak() throws Exception {
     assertParseAndFormat(
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3) + "\n",
