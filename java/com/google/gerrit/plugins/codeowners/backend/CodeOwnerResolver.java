@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
@@ -26,6 +27,7 @@ import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountState;
+import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.gerrit.server.account.externalids.ExternalIds;
 import com.google.gerrit.server.permissions.GlobalPermission;
@@ -42,10 +44,13 @@ import java.util.stream.Stream;
 public class CodeOwnerResolver {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  @VisibleForTesting public static final String ALL_USERS_WILDCARD = "*";
+
   private final PermissionBackend permissionBackend;
   private final Provider<CurrentUser> currentUser;
   private final ExternalIds externalIds;
   private final AccountCache accountCache;
+  private final Accounts accounts;
   private final AccountControl.Factory accountControlFactory;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
@@ -58,12 +63,14 @@ public class CodeOwnerResolver {
       Provider<CurrentUser> currentUser,
       ExternalIds externalIds,
       AccountCache accountCache,
+      Accounts accounts,
       AccountControl.Factory accountControlFactory,
       PathCodeOwners.Factory pathCodeOwnersFactory) {
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
     this.externalIds = externalIds;
     this.accountCache = accountCache;
+    this.accounts = accounts;
     this.accountControlFactory = accountControlFactory;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
   }
@@ -141,6 +148,10 @@ public class CodeOwnerResolver {
   public Stream<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
     String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
 
+    if (ALL_USERS_WILDCARD.equals(email)) {
+      return resolveAllUsersWildcard();
+    }
+
     Optional<AccountState> accountState =
         lookupEmail(email).flatMap(accountId -> lookupAccount(accountId, email));
     if (!accountState.isPresent() || (enforceVisibility && !isVisible(accountState.get(), email))) {
@@ -148,6 +159,19 @@ public class CodeOwnerResolver {
     }
 
     return Stream.of(CodeOwner.create(accountState.get().account().id()));
+  }
+
+  private Stream<CodeOwner> resolveAllUsersWildcard() {
+    try {
+      return accounts.all().stream()
+          .filter(
+              accountState ->
+                  !enforceVisibility || accountControlFactory.get().canSee(accountState))
+          .map(accountState -> CodeOwner.create(accountState.account().id()));
+    } catch (IOException e) {
+      throw new StorageException(
+          String.format("cannot resolve code owner email %s", ALL_USERS_WILDCARD), e);
+    }
   }
 
   /**
