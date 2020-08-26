@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -88,6 +89,21 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   @Test
   public void getCodeOwnerConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    CodeOwnerConfig codeOwnerConfigInRepository =
+        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
+            codeOwnerConfigKey,
+            b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
+
+    Optional<CodeOwnerConfig> codeOwnerConfig =
+        codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
+    assertThatOptional(codeOwnerConfig).value().isEqualTo(codeOwnerConfigInRepository);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void getCodeOwnerConfigWithExtension() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "master", "/", getFileName() + ".foo");
     CodeOwnerConfig codeOwnerConfigInRepository =
         testCodeOwnerConfigStorage.writeCodeOwnerConfig(
             codeOwnerConfigKey,

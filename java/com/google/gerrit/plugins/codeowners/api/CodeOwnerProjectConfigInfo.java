@@ -20,6 +20,9 @@ package com.google.gerrit.plugins.codeowners.api;
  * <p>This class determines the JSON format of code owner project configuration in the REST API.
  */
 public class CodeOwnerProjectConfigInfo {
+  /** The general code owners configuration. */
+  public GeneralInfo general;
+
   /**
    * The code owners status configuration.
    *
