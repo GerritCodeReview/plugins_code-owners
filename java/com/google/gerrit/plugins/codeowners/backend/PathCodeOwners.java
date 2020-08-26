@@ -236,6 +236,10 @@ class PathCodeOwners {
 
     Queue<CodeOwnerConfigReference> codeOwnerConfigsToImport = new LinkedList<>();
     codeOwnerConfigsToImport.addAll(importingCodeOwnerConfig.imports());
+    codeOwnerConfigsToImport.addAll(
+        resolvedCodeOwnerConfigBuilder.codeOwnerSets().stream()
+            .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
+            .collect(toImmutableSet()));
 
     while (!codeOwnerConfigsToImport.isEmpty()) {
       CodeOwnerConfigReference codeOwnerConfigReference = codeOwnerConfigsToImport.poll();
@@ -287,6 +291,10 @@ class PathCodeOwners {
       if (importMode.resolveImportsOfImport()
           && seenCodeOwnerConfigs.add(keyOfImportedCodeOwnerConfig)) {
         codeOwnerConfigsToImport.addAll(importedCodeOwnerConfig.imports());
+        codeOwnerConfigsToImport.addAll(
+            importedCodeOwnerConfig.codeOwnerSets().stream()
+                .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
+                .collect(toImmutableSet()));
       }
     }
   }
