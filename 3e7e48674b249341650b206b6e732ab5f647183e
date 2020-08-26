@@ -22,6 +22,30 @@
       "revId": "3e7e48674b249341650b206b6e732ab5f647183e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "4d7f1003_79d49571",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-26T10:30:30Z",
+      "side": 1,
+      "message": "Good observation. No, actually the checkState call below is redundant and is not possible trigger. I guess I should rather remove it.",
+      "parentUuid": "6248d3be_7f9474e5",
+      "range": {
+        "startLine": 193,
+        "startChar": 12,
+        "endLine": 193,
+        "endChar": 67
+      },
+      "revId": "3e7e48674b249341650b206b6e732ab5f647183e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
