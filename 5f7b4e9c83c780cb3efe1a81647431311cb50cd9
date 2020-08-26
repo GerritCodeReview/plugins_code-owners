@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4bcf8dc8_5aa1551c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-08-26T07:42:51Z",
+      "side": 1,
+      "message": "in UI, we actually allow a `tooltip` field to show on the label with additional info, but it seems that field is not defined in the SubmitRequirement.java, its better from UI perspective to not have longer name but have longer tooltip.\n\nAlso it seems we are using Code-Review, so not sure should we also jus use Code-Owners instead ?",
+      "revId": "5f7b4e9c83c780cb3efe1a81647431311cb50cd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
