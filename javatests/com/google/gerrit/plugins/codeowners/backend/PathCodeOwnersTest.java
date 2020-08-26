@@ -455,7 +455,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owner from the importing code owner config, the
-    // non-resolveable import is silenty ignored
+    // non-resolveable import is silently ignored
     assertThat(pathCodeOwners.get().get())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
@@ -862,19 +862,19 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void importsOfImportedCodeOwenerConfigAreResolved_importModeAll() throws Exception {
-    testImportsOfImportedCodeOwenerConfigAreResolved(CodeOwnerConfigImportMode.ALL);
+  public void importsOfImportedCodeOwnerConfigAreResolved_importModeAll() throws Exception {
+    testImportsOfImportedCodeOwnerConfigAreResolved(CodeOwnerConfigImportMode.ALL);
   }
 
   @Test
-  public void importsOfImportedCodeOwenerConfigAreResolved_importModeGlobalCodeOwnerSetsOnly()
+  public void importsOfImportedCodeOwnerConfigAreResolved_importModeGlobalCodeOwnerSetsOnly()
       throws Exception {
-    testImportsOfImportedCodeOwenerConfigAreResolved(
+    testImportsOfImportedCodeOwnerConfigAreResolved(
         CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
   }
 
-  private void testImportsOfImportedCodeOwenerConfigAreResolved(
-      CodeOwnerConfigImportMode importMode) throws Exception {
+  private void testImportsOfImportedCodeOwnerConfigAreResolved(CodeOwnerConfigImportMode importMode)
+      throws Exception {
     TestAccount user2 = accountCreator.user2();
 
     // create importing config with global code owner and import
