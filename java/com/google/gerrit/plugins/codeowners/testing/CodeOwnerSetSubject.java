@@ -15,14 +15,18 @@
 package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubject.codeOwnerConfigReferences;
+import static com.google.gerrit.truth.ListSubject.elements;
 
 import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.NullAwareCorrespondence;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerSet}s. */
@@ -82,12 +86,14 @@ public class CodeOwnerSetSubject extends Subject {
   }
 
   /**
-   * Returns an {@link IterableSubject} for the imports in the code owner set.
+   * Returns an {@link ListSubject} for the imports in the code owner set.
    *
-   * @return {@link IterableSubject} for the imports in the code owner set
+   * @return {@link ListSubject} for the imports in the code owner set
    */
-  public IterableSubject hasImportsThat() {
-    return check("imports()").that(codeOwnerSet().imports());
+  public ListSubject<CodeOwnerConfigReferenceSubject, CodeOwnerConfigReference> hasImportsThat() {
+    return check("imports()")
+        .about(elements())
+        .thatCustom(codeOwnerSet().imports().asList(), codeOwnerConfigReferences());
   }
 
   /**

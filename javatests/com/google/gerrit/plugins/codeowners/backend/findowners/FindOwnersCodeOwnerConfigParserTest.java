@@ -15,7 +15,9 @@
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.joining;
 
 import com.google.gerrit.entities.Project;
@@ -90,6 +92,18 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
             String.format(
                 "per-file %s=set noparent\n",
                 codeOwnerSet.pathExpressions().stream().sorted().collect(joining(","))));
+      }
+      for (CodeOwnerConfigReference codeOwnerConfigReference : codeOwnerSet.imports()) {
+        b.append(
+            String.format(
+                "per-file %s=file: %s%s\n",
+                codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
+                codeOwnerConfigReference
+                    .project()
+                    .map(Project.NameKey::get)
+                    .map(projectName -> projectName + ":")
+                    .orElse(""),
+                codeOwnerConfigReference.filePath()));
       }
       if (!codeOwnerSet.codeOwners().isEmpty()) {
         b.append(
@@ -332,6 +346,113 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
               .element(1)
               .hasFilePathThat()
               .isEqualTo(path2);
+        });
+  }
+
+  @Test
+  public void perFileCodeOwnerConfigImportFromSameProject() throws Exception {
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("foo")
+                    .addImport(codeOwnerConfigReference)
+                    .build())
+            .build();
+
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfig),
+        parsedCodeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(parsedCodeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasPathExpressionsThat().containsExactly("foo");
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              codeOwnerSetSubject.hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+        });
+  }
+
+  @Test
+  public void perFileCodeOwnerConfigImportFromOtherProject() throws Exception {
+    String otherProject = "otherProject";
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
+            .setProject(Project.nameKey(otherProject))
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("foo")
+                    .addImport(codeOwnerConfigReference)
+                    .build())
+            .build();
+
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfig),
+        parsedCodeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(parsedCodeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasPathExpressionsThat().containsExactly("foo");
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              codeOwnerSetSubject.hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().value().isEqualTo(otherProject);
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+        });
+  }
+
+  @Test
+  public void perFileCodeOwnerConfigImportCannotHaveImportModeAll() throws Exception {
+    // The 'include' keyword is used to for imports with import mode ALL, but it is not supported
+    // for per-file imports. Trying to use it anyway should result in a proper error message.
+    String line = "per-file foo=include /foo/bar/OWNERS";
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () ->
+                codeOwnerConfigParser.parse(
+                    TEST_REVISION, CodeOwnerConfig.Key.create(project, "master", "/"), line));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "import mode %s is unsupported for per file import: %s",
+                CodeOwnerConfigImportMode.ALL.name(), line));
+  }
+
+  @Test
+  public void perFileCodeOwnerConfigImportWithImportModeGlobalCodeOwnerSetsOnly() throws Exception {
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/foo/bar/OWNERS")
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("foo")
+                    .addImport(codeOwnerConfigReference)
+                    .build())
+            .build();
+
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfig),
+        parsedCodeOwnerConfig -> {
+          assertThat(parsedCodeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .onlyElement()
+              .hasImportsThat()
+              .onlyElement()
+              .hasImportModeThat()
+              .isEqualTo(CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
         });
   }
 }
