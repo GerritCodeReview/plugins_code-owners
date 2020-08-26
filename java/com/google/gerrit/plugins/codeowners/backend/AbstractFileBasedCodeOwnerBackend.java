@@ -19,6 +19,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -41,31 +42,35 @@ import org.eclipse.jgit.lib.Repository;
 public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBackend {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final GitRepositoryManager repoManager;
   private final PersonIdent serverIdent;
   private final MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory;
   private final RetryHelper retryHelper;
-  private final String fileName;
+  private final String defaultFileName;
   private final CodeOwnerConfigParser codeOwnerConfigParser;
 
   protected AbstractFileBasedCodeOwnerBackend(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
       RetryHelper retryHelper,
-      String fileName,
+      String defaultFileName,
       CodeOwnerConfigParser codeOwnerConfigParser) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
     this.serverIdent = serverIdent;
     this.metaDataUpdateInternalFactory = metaDataUpdateInternalFactory;
     this.retryHelper = retryHelper;
-    this.fileName = fileName;
+    this.defaultFileName = defaultFileName;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
   }
 
   @Override
   public final Optional<CodeOwnerConfig> getCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
+    String fileName = getFileName(codeOwnerConfigKey.project());
     if (codeOwnerConfigKey.fileName().isPresent()
         && !fileName.equals(codeOwnerConfigKey.fileName().get())) {
       // The file name can mismatch if we resolve imported code owner configs. When code owner
@@ -88,6 +93,11 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
     }
+  }
+
+  private String getFileName(Project.NameKey project) {
+    return defaultFileName
+        + codeOwnersPluginConfiguration.getFileExtension(project).map(ext -> "." + ext).orElse("");
   }
 
   @Override
@@ -116,7 +126,11 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       CodeOwnerConfigFile codeOwnerConfigFile =
           CodeOwnerConfigFile.load(
-                  fileName, codeOwnerConfigParser, repository, null, codeOwnerConfigKey)
+                  getFileName(codeOwnerConfigKey.project()),
+                  codeOwnerConfigParser,
+                  repository,
+                  null,
+                  codeOwnerConfigKey)
               .setCodeOwnerConfigUpdate(codeOwnerConfigUpdate);
 
       try (MetaDataUpdate metaDataUpdate =

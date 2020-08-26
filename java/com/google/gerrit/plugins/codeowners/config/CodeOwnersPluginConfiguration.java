@@ -57,6 +57,7 @@ public class CodeOwnersPluginConfiguration {
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
   private final ProjectCache projectCache;
+  private final GeneralConfig generalConfig;
   private final StatusConfig statusConfig;
   private final BackendConfig backendConfig;
   private final RequiredApprovalConfig requiredApprovalConfig;
@@ -67,6 +68,7 @@ public class CodeOwnersPluginConfiguration {
       @PluginName String pluginName,
       PluginConfigFactory pluginConfigFactory,
       ProjectCache projectCache,
+      GeneralConfig generalConfig,
       StatusConfig statusConfig,
       BackendConfig backendConfig,
       RequiredApprovalConfig requiredApprovalConfig,
@@ -74,10 +76,22 @@ public class CodeOwnersPluginConfiguration {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
     this.projectCache = projectCache;
+    this.generalConfig = generalConfig;
     this.statusConfig = statusConfig;
     this.backendConfig = backendConfig;
     this.requiredApprovalConfig = requiredApprovalConfig;
     this.overrideApprovalConfig = overrideApprovalConfig;
+  }
+
+  /**
+   * Gets the file extension that is configured for the given project.
+   *
+   * @param project the project for which the configured file extension should be returned
+   * @return the file extension that is configured for the given project
+   */
+  public Optional<String> getFileExtension(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getFileExtension(getPluginConfig(project));
   }
 
   /**
