@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Throwables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -70,9 +72,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
   @Override
   public final Optional<CodeOwnerConfig> getCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
-    String fileName = getFileName(codeOwnerConfigKey.project());
-    if (codeOwnerConfigKey.fileName().isPresent()
-        && !fileName.equals(codeOwnerConfigKey.fileName().get())) {
+    String fileName =
+        codeOwnerConfigKey.fileName().orElse(getFileName(codeOwnerConfigKey.project()));
+
+    if (!isCodeOwnerConfigFile(codeOwnerConfigKey.project(), fileName)) {
       // The file name can mismatch if we resolve imported code owner configs. When code owner
       // configs are imported the user specifies the full path of the code owner config (including
       // the file name) in the importing code owner config. If the user specifies a file name that
@@ -93,6 +96,22 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
     }
+  }
+
+  /**
+   * Checks whether the given file name is a code owner config file.
+   *
+   * @param project the project in which the code owner config files are stored
+   * @param fileName the name of the file for which it should be checked whether is a code owner
+   *     config file
+   * @return {@code true} if the given file name is a code owner config file, otherwise {@code
+   *     false}
+   */
+  private boolean isCodeOwnerConfigFile(Project.NameKey project, String fileName) {
+    requireNonNull(project, "project");
+    requireNonNull(fileName, "fileName");
+
+    return getFileName(project).equals(fileName);
   }
 
   private String getFileName(Project.NameKey project) {
