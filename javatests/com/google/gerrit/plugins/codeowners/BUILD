@@ -1,4 +1,5 @@
 load("//javatests/com/google/gerrit/acceptance:tests.bzl", "acceptance_tests")
+
 acceptance_tests(
     srcs = glob(["*Test.java"]),
     group = "codeowners",
@@ -7,4 +8,3 @@ acceptance_tests(
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
     ],
 )
-

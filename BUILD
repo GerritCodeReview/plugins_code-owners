@@ -27,8 +27,8 @@ gerrit_plugin(
 
 polygerrit_plugin(
     name = "code-owners-fe",
-    plugin_name = "code-owners",
     app = "plugin-bundle.js",
+    plugin_name = "code-owners",
 )
 
 rollup_bundle(
