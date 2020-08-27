@@ -21,6 +21,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.joining;
 
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
@@ -60,13 +61,14 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
               }
               b.append(
                   String.format(
-                      "%s %s%s\n",
+                      "%s %s%s%s\n",
                       keyword,
                       codeOwnerConfigReference
                           .project()
                           .map(Project.NameKey::get)
                           .map(projectName -> projectName + ":")
                           .orElse(""),
+                      codeOwnerConfigReference.branch().map(branch -> branch + ":").orElse(""),
                       codeOwnerConfigReference.filePath()));
             });
 
@@ -96,13 +98,14 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
       for (CodeOwnerConfigReference codeOwnerConfigReference : codeOwnerSet.imports()) {
         b.append(
             String.format(
-                "per-file %s=file: %s%s\n",
+                "per-file %s=file: %s%s%s\n",
                 codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
                 codeOwnerConfigReference
                     .project()
                     .map(Project.NameKey::get)
                     .map(projectName -> projectName + ":")
                     .orElse(""),
+                codeOwnerConfigReference.branch().map(branch -> branch + ":").orElse(""),
                 codeOwnerConfigReference.filePath()));
       }
       if (!codeOwnerSet.codeOwners().isEmpty()) {
@@ -258,7 +261,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
-  public void importCodeOwnerConfigFromSameProject() throws Exception {
+  public void importCodeOwnerConfigFromSameProjectAndBranch() throws Exception {
     Path path = Paths.get("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path).build();
@@ -268,6 +271,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
           CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
               assertThat(codeOwnerConfig).hasImportsThat().onlyElement();
           codeOwnerConfigReferenceSubject.hasProjectThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasBranchThat().isEmpty();
           codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
         });
   }
@@ -286,6 +290,62 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
           CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
               assertThat(codeOwnerConfig).hasImportsThat().onlyElement();
           codeOwnerConfigReferenceSubject.hasProjectThat().value().isEqualTo(otherProject);
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+        });
+  }
+
+  @Test
+  public void cannotFormatCodeOwnerConfigWithImportThatSpecifiesBranchWithoutProject()
+      throws Exception {
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path)
+            .setBranch("refs/heads/foo")
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(
+                CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/"),
+                TEST_REVISION)
+            .addImport(codeOwnerConfigReference)
+            .build();
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigParser.formatAsString(codeOwnerConfig));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "project is required if branch is specified: %s", codeOwnerConfigReference));
+  }
+
+  @Test
+  public void importCodeOwnerConfigFromOtherBranch_fullName() throws Exception {
+    testImportCodeOwnerConfigFromOtherBranch("refs/heads/foo");
+  }
+
+  @Test
+  public void importCodeOwnerConfigFromOtherBranch_shortName() throws Exception {
+    testImportCodeOwnerConfigFromOtherBranch("foo");
+  }
+
+  private void testImportCodeOwnerConfigFromOtherBranch(String branchName) throws Exception {
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path)
+            .setProject(project)
+            .setBranch(branchName)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfigReference),
+        codeOwnerConfig -> {
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              assertThat(codeOwnerConfig).hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().value().isEqualTo(project.get());
+          codeOwnerConfigReferenceSubject
+              .hasBranchThat()
+              .value()
+              .isEqualTo(RefNames.fullName(branchName));
           codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
         });
   }
@@ -350,7 +410,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
-  public void perFileCodeOwnerConfigImportFromSameProject() throws Exception {
+  public void perFileCodeOwnerConfigImportFromSameProjectAndBranch() throws Exception {
     Path path = Paths.get("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
@@ -374,6 +434,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
           CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
               codeOwnerSetSubject.hasImportsThat().onlyElement();
           codeOwnerConfigReferenceSubject.hasProjectThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasBranchThat().isEmpty();
           codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
         });
   }
@@ -405,6 +466,82 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
           CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
               codeOwnerSetSubject.hasImportsThat().onlyElement();
           codeOwnerConfigReferenceSubject.hasProjectThat().value().isEqualTo(otherProject);
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+        });
+  }
+
+  @Test
+  public void cannotFormatCodeOwnerConfigWithPerFileImportThatSpecifiesBranchWithoutProject()
+      throws Exception {
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
+            .setBranch("refs/heads/foo")
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(
+                CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/"),
+                TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("foo")
+                    .addImport(codeOwnerConfigReference)
+                    .build())
+            .build();
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigParser.formatAsString(codeOwnerConfig));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "project is required if branch is specified: %s", codeOwnerConfigReference));
+  }
+
+  @Test
+  public void perFileImportOfCodeOwnerConfigFromOtherBranch_fullName() throws Exception {
+    testPerFileImportOfCodeOwnerConfigFromOtherBranch("refs/heads/foo");
+  }
+
+  @Test
+  public void perFileImportOfCodeOwnerConfigFromOtherBranch_shortName() throws Exception {
+    testPerFileImportOfCodeOwnerConfigFromOtherBranch("foo");
+  }
+
+  private void testPerFileImportOfCodeOwnerConfigFromOtherBranch(String branchName)
+      throws Exception {
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
+            .setProject(project)
+            .setBranch(branchName)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(
+                CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/"),
+                TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("foo")
+                    .addImport(codeOwnerConfigReference)
+                    .build())
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(codeOwnerConfig),
+        parsedCodeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(parsedCodeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasPathExpressionsThat().containsExactly("foo");
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              codeOwnerSetSubject.hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().value().isEqualTo(project.get());
+          codeOwnerConfigReferenceSubject
+              .hasBranchThat()
+              .value()
+              .isEqualTo(RefNames.fullName(branchName));
           codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
         });
   }
