@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.server.IdentifiedUser;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
@@ -27,6 +28,17 @@ import org.eclipse.jgit.lib.ObjectId;
  * <p>New code owner backend implementations must be added to {@link CodeOwnerBackendId}.
  */
 public interface CodeOwnerBackend {
+  /**
+   * Checks whether the given file name is a code owner config file.
+   *
+   * @param project the project in which the code owner config files are stored
+   * @param fileName the name of the file for which it should be checked whether is a code owner
+   *     config file
+   * @return {@code true} if the given file name is a code owner config file, otherwise {@code
+   *     false}
+   */
+  public boolean isCodeOwnerConfigFile(Project.NameKey project, String fileName);
+
   /**
    * Gets the code owner config for the given key if it exists.
    *
