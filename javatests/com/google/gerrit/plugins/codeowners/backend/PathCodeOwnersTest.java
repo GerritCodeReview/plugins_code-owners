@@ -30,6 +30,7 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
@@ -1696,6 +1697,11 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     @Override
     public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
       return Optional.ofNullable(pathExpressionMatcher);
+    }
+
+    @Override
+    public boolean isCodeOwnerConfigFile(NameKey project, String fileName) {
+      throw new UnsupportedOperationException("not implemented");
     }
   }
 }
