@@ -90,7 +90,7 @@ Parameters that are not set for a project are inherited from the parent project.
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`\
         is used.
 
-<a id="codeOwners.branch.backend">codeOwners.\<branch\>.backend</a>
+<a id="codeOwnersBranchBackend">codeOwners.\<branch\>.backend</a>
 :       The code owners backend that should be used for this branch.\
         The branch can be the short or full name. If both configurations exist
         the one for the full name takes precedence.\
