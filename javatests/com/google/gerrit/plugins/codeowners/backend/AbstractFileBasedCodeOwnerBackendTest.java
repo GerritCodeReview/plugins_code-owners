@@ -80,30 +80,41 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   }
 
   @Test
-  public void getCodeOwnerConfigForUnsupportedFileName() throws Exception {
-    CodeOwnerConfig.Key codeOwnerConfigKey =
-        CodeOwnerConfig.Key.create(project, "master", "/", "UNSUPPORTED_CODE_OWNERS");
-    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null)).isEmpty();
-  }
-
-  @Test
   public void getCodeOwnerConfig() throws Exception {
-    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfig codeOwnerConfigInRepository =
-        testCodeOwnerConfigStorage.writeCodeOwnerConfig(
-            codeOwnerConfigKey,
-            b -> b.addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email())));
-
-    Optional<CodeOwnerConfig> codeOwnerConfig =
-        codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
-    assertThatOptional(codeOwnerConfig).value().isEqualTo(codeOwnerConfigInRepository);
+    testGetCodeOwnerConfig(getFileName());
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
   public void getCodeOwnerConfigWithFileExtension() throws Exception {
+    testGetCodeOwnerConfig(getFileName() + ".foo");
+  }
+
+  @Test
+  public void getCodeOwnerConfigWithPostFix() throws Exception {
+    testGetCodeOwnerConfig(getFileName() + "_post_fix");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void getCodeOwnerConfigWithPostFixAndFileExtension() throws Exception {
+    testGetCodeOwnerConfig(getFileName() + "_post_fix.foo");
+  }
+
+  @Test
+  public void getCodeOwnerConfigWithPreFix() throws Exception {
+    testGetCodeOwnerConfig("pre_fix_" + getFileName());
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void getCodeOwnerConfigWithPreFixAndFileExtension() throws Exception {
+    testGetCodeOwnerConfig("pre_fix_" + getFileName() + ".foo");
+  }
+
+  private void testGetCodeOwnerConfig(String fileName) throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
-        CodeOwnerConfig.Key.create(project, "master", "/", getFileName() + ".foo");
+        CodeOwnerConfig.Key.create(project, "master", "/", fileName);
     CodeOwnerConfig codeOwnerConfigInRepository =
         testCodeOwnerConfigStorage.writeCodeOwnerConfig(
             codeOwnerConfigKey,
@@ -112,6 +123,45 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
     Optional<CodeOwnerConfig> codeOwnerConfig =
         codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
     assertThatOptional(codeOwnerConfig).value().isEqualTo(codeOwnerConfigInRepository);
+  }
+
+  @Test
+  public void getCodeOwnerConfig_noCodeOwnerConfigFoundForUnsupportedFileName() throws Exception {
+    testGetCodeOwnerConfig_noCodeOwnerConfigFound("UNSUPPORTED_CODE_OWNERS");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void getCodeOwnerConfig_noCodeOwnerConfigFoundWhenUsingWrongFileExtension()
+      throws Exception {
+    testGetCodeOwnerConfig_noCodeOwnerConfigFound(getFileName() + ".bar");
+  }
+
+  @Test
+  public void getCodeOwnerConfig_noCodeOwnerConfigFoundWhenUsingFileExtensionButNoneWasConfigured()
+      throws Exception {
+    testGetCodeOwnerConfig_noCodeOwnerConfigFound(getFileName() + ".foo");
+  }
+
+  @Test
+  public void getCodeOwnerConfig_noCodeOwnerConfigFoundWhenUsingPreAndPostFix() throws Exception {
+    testGetCodeOwnerConfig_noCodeOwnerConfigFound("pre_fix_" + getFileName() + "_post_fix");
+  }
+
+  @Test
+  public void getCodeOwnerConfig_noCodeOwnerConfigFoundWhenUsingInvalidPostFix() throws Exception {
+    testGetCodeOwnerConfig_noCodeOwnerConfigFound(getFileName() + "_i n v a l i d");
+  }
+
+  @Test
+  public void getCodeOwnerConfig_noCodeOwnerConfigFoundWhenUsingInvalidPreFix() throws Exception {
+    testGetCodeOwnerConfig_noCodeOwnerConfigFound("i n v a l i d_" + getFileName());
+  }
+
+  private void testGetCodeOwnerConfig_noCodeOwnerConfigFound(String fileName) throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "master", "/", fileName);
+    assertThatOptional(codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null)).isEmpty();
   }
 
   @Test
