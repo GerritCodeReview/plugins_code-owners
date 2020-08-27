@@ -36,6 +36,7 @@ import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration
 import com.google.gerrit.plugins.codeowners.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
+import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import com.google.inject.Inject;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Config;
@@ -82,6 +83,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
+    assertThat(codeOwnerProjectConfigInfo.status).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.id)
         .isEqualTo(CodeOwnerBackendId.getBackendId(backendConfig.getDefaultBackend().getClass()));
@@ -99,6 +101,25 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
+  }
+
+  @Test
+  public void getConfigForDisabledProject() throws Exception {
+    disableCodeOwnersForProject(project);
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.status.disabled).isTrue();
+    assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
+  }
+
+  @Test
+  public void getConfigWithDisabledBranch() throws Exception {
+    configureDisabledBranch(project, "refs/heads/master");
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
+    assertThat(codeOwnerProjectConfigInfo.status.disabledBranches)
+        .containsExactly("refs/heads/master");
   }
 
   @Test
@@ -179,6 +200,11 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
     setConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+  }
+
+  private void configureDisabledBranch(Project.NameKey project, String disabledBranch)
+      throws Exception {
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
   }
 
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
