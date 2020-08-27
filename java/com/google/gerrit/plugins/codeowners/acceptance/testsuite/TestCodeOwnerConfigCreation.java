@@ -66,6 +66,14 @@ public abstract class TestCodeOwnerConfigCreation {
   public abstract Optional<Path> folderPath();
 
   /**
+   * Gets the file name for the code owner config.
+   *
+   * @return the file name for the code owner config, {@link Optional#empty()} if the caller didn't
+   *     specify a file name for the code owner config creation
+   */
+  public abstract Optional<String> fileName();
+
+  /**
    * Gets whether code owners from parent code owner configs (code owner configs in parent folders)
    * should be ignored.
    */
@@ -135,7 +143,8 @@ public abstract class TestCodeOwnerConfigCreation {
                         "project not specified, specifying a project is required for code owner config creation"));
     String branchName = branch().orElse("master");
     Path folderPath = folderPath().orElse(Paths.get("/"));
-    return CodeOwnerConfig.Key.create(BranchNameKey.create(projectName, branchName), folderPath);
+    return CodeOwnerConfig.Key.create(
+        BranchNameKey.create(projectName, branchName), folderPath, fileName().orElse(null));
   }
 
   /** Returns whether the code owner config would be empty. */
@@ -208,6 +217,14 @@ public abstract class TestCodeOwnerConfigCreation {
     public Builder folderPath(String folderPath) {
       return folderPath(Paths.get(folderPath));
     }
+
+    /**
+     * Sets the file name for the code owner config.
+     *
+     * @param fileName the file name for the code owner config
+     * @return the Builder instance for chaining calls
+     */
+    public abstract Builder fileName(String fileName);
 
     /**
      * Sets whether code owners from parent code owner configs (code owner configs in parent
