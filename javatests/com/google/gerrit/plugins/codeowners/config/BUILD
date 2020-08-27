@@ -8,7 +8,8 @@ package(
 acceptance_tests(
     srcs = glob(
         ["*Test.java"],
-        exclude = ["Abstract*.java"],),
+        exclude = ["Abstract*.java"],
+    ),
     group = "config",
     deps = [
         ":testbases",

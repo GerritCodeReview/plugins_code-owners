@@ -11,4 +11,3 @@ acceptance_tests(
         "//plugins/code-owners/javatests/com/google/gerrit/plugins/codeowners/backend:testbases",
     ],
 )
-
