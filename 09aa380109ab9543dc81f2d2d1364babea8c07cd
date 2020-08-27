@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ea863c03_c13f376e",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-08-27T10:49:30Z",
+      "side": 1,
+      "message": "Not related to the change, but I would recommend to set --account-max-length here, maybe to 120px? You want the chips to be on the small side, right?",
+      "revId": "09aa380109ab9543dc81f2d2d1364babea8c07cd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
