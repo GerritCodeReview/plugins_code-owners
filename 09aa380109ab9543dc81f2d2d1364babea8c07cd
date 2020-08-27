@@ -16,6 +16,24 @@
       "revId": "09aa380109ab9543dc81f2d2d1364babea8c07cd",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70aa152d_c8136b14",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-08-27T11:19:27Z",
+      "side": 1,
+      "message": "good suggestion, added in my current wip change.",
+      "parentUuid": "ea863c03_c13f376e",
+      "revId": "09aa380109ab9543dc81f2d2d1364babea8c07cd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
