@@ -15,4 +15,3 @@ java_library(
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
     ],
 )
-

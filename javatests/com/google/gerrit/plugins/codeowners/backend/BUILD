@@ -8,7 +8,8 @@ package(
 acceptance_tests(
     srcs = glob(
         ["*Test.java"],
-        exclude = ["Abstract*.java"],),
+        exclude = ["Abstract*.java"],
+    ),
     group = "backend",
     deps = [
         ":testbases",
@@ -30,8 +31,8 @@ java_library(
         "//java/com/google/gerrit/exceptions",
         "//java/com/google/gerrit/server",
         "//java/com/google/gerrit/testing:gerrit-test-util",
-        "//lib:jgit",
         "//lib:guava",
+        "//lib:jgit",
         "//lib/truth",
         "//lib/truth:truth-java8-extension",
         "//plugins/code-owners:code-owners__plugin",
