@@ -15,10 +15,12 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -43,6 +45,14 @@ public abstract class CodeOwnerConfigReference {
    * this code owner config reference.
    */
   public abstract Optional<Project.NameKey> project();
+
+  /**
+   * The full branch in which the code owner config is stored.
+   *
+   * <p>If not set, the branch is the same as the branch of the code owner config that contains this
+   * code owner config reference.
+   */
+  public abstract Optional<String> branch();
 
   /**
    * The path of the code owner config file.
@@ -139,6 +149,26 @@ public abstract class CodeOwnerConfigReference {
     public abstract Builder setProject(Project.NameKey project);
 
     /**
+     * Sets the branch in which the code owner config is stored.
+     *
+     * @param fullBranchName the full branch in which the code owner config is stored
+     * @return the Builder instance for chaining calls
+     */
+    abstract Builder setBranch(Optional<String> fullBranchName);
+
+    /**
+     * Sets the branch in which the code owner config is stored.
+     *
+     * @param branch the branch in which the code owner config is stored, the {@code refs/heads/}
+     *     prefix may be omitted
+     * @return the Builder instance for chaining calls
+     */
+    public Builder setBranch(String branch) {
+      requireNonNull(branch, "branch");
+      return setBranch(Optional.of(RefNames.fullName(branch)));
+    }
+
+    /**
      * Sets the path of the code owner config file.
      *
      * @param filePath path of the code owner config file, may be absolute or relative to the path
@@ -148,10 +178,25 @@ public abstract class CodeOwnerConfigReference {
     abstract Builder setFilePath(Path filePath);
 
     /**
-     * Builds the {@link CodeOwnerConfigReference} instance.
+     * Builds the {@link CodeOwnerConfigReference} instance without validation.
      *
      * @return the {@link CodeOwnerConfigReference} instance
      */
-    public abstract CodeOwnerConfigReference build();
+    abstract CodeOwnerConfigReference autoBuild();
+
+    /**
+     * Builds the {@link CodeOwnerConfigReference} instance with validation.
+     *
+     * @return the {@link CodeOwnerConfigReference} instance
+     */
+    public CodeOwnerConfigReference build() {
+      CodeOwnerConfigReference codeOwnerConfigReference = autoBuild();
+      if (codeOwnerConfigReference.branch().isPresent()) {
+        String branch = codeOwnerConfigReference.branch().get();
+        checkState(
+            branch.equals(RefNames.fullName(branch)), "branch must be full name: %s", branch);
+      }
+      return codeOwnerConfigReference;
+    }
   }
 }

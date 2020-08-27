@@ -323,9 +323,12 @@ class PathCodeOwners {
     Project.NameKey project =
         codeOwnerConfigReference.project().orElse(keyOfImportingCodeOwnerConfig.project());
 
-    // code owner configs are always imported from the same branch in which the importing code
-    // owner config is stored
-    String branch = keyOfImportingCodeOwnerConfig.branchNameKey().branch();
+    // if the code owner config reference doesn't have a branch, the imported code owner config file
+    // is imported from the same branch in which the importing code owner config is stored
+    String branch =
+        codeOwnerConfigReference
+            .branch()
+            .orElse(keyOfImportingCodeOwnerConfig.branchNameKey().branch());
 
     // if the path of the imported code owner config is relative, it should be resolved against
     // the folder path of the importing code owner config
