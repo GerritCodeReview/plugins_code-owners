@@ -84,6 +84,8 @@ Parameters that are not set for a project are inherited from the parent project.
 :       The code owners backend that should be used for the project.\
         Overrides the global setting
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`.\
+        Can be overridden per branch by setting
+        [codeOwners.\<branch\>.backend](#codeOwnersBranchBackend).\
         The supported code owner backends are listed at the
         [Backends](backends.html) page.\
         If not set, the global setting
