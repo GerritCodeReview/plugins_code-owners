@@ -51,6 +51,11 @@ public class CodeOwnerConfigReferenceSubject extends Subject {
         .that(codeOwnerConfigReference().project().map(Project.NameKey::get));
   }
 
+  /** Returns a subject for the branch. */
+  public OptionalSubject<Subject, ?> hasBranchThat() {
+    return check("branch()").about(optionals()).that(codeOwnerConfigReference().branch());
+  }
+
   /** Returns a subject for the file path. */
   public PathSubject hasFilePathThat() {
     return check("filePath()").about(paths()).that(codeOwnerConfigReference().filePath());
