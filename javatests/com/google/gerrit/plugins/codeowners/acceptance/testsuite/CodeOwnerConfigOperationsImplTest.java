@@ -111,7 +111,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void specifiedBranchIsARespectedForCodeOwnerConfigCreation() throws Exception {
+  public void specifiedBranchIsRespectedForCodeOwnerConfigCreation() throws Exception {
     String branchName = "foo";
     gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
 
@@ -166,7 +166,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void specifiedFolderPathIsARespectedForCodeOwnerConfigCreation() throws Exception {
+  public void specifiedFolderPathIsRespectedForCodeOwnerConfigCreation() throws Exception {
     String folderPath = "/foo/bar";
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
