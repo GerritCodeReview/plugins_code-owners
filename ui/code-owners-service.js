@@ -64,7 +64,8 @@ class CodeOwnerApi {
    */
   listOwnersForPath(project, branch, path) {
     return this.restApi.get(
-        `/projects/${project}/branches/${branch}/code_owners/${encodeURIComponent(path)}?limit=5&o=DETAILS`
+        `/projects/${project}/branches/${branch}/` +
+        `code_owners/${encodeURIComponent(path)}?limit=5&o=DETAILS`
     );
   }
 
@@ -134,8 +135,9 @@ export class CodeOwnerService {
     return this.getStatus()
         .then(({codeOwnerStatusMap}) => {
           // only fetch those not approved yet
-          let filesToFetchOwners = [...codeOwnerStatusMap.keys()].filter(
-              file => codeOwnerStatusMap.get(file).status !== OwnerStatus.APPROVED
+          const filesToFetchOwners = [...codeOwnerStatusMap.keys()].filter(
+              file => codeOwnerStatusMap
+                  .get(file).status !== OwnerStatus.APPROVED
           );
           return this.batchFetchCodeOwners(filesToFetchOwners)
               .then(ownersMap =>
@@ -188,7 +190,10 @@ export class CodeOwnerService {
     const ownersFilesMap = new Map();
     const failedToFetchFiles = new Set();
     for (let i = 0; i < allFiles.length; i++) {
-      const fileInfo = {path: allFiles[i], status: this._computeFileStatus(codeOwnerStatusMap, allFiles[i])};
+      const fileInfo = {
+        path: allFiles[i],
+        status: this._computeFileStatus(codeOwnerStatusMap, allFiles[i]),
+      };
       // for files failed to fetch, add them to the special group
       if (fileOwnersMap[fileInfo.path].error) {
         failedToFetchFiles.add(fileInfo);
@@ -200,7 +205,10 @@ export class CodeOwnerService {
           .map(account => account._account_id)
           .sort()
           .join(',');
-      ownersFilesMap.set(ownersKey, ownersFilesMap.get(ownersKey) || {files: [], owners});
+      ownersFilesMap.set(
+          ownersKey,
+          ownersFilesMap.get(ownersKey) || {files: [], owners}
+      );
       ownersFilesMap.get(ownersKey).files.push(fileInfo);
     }
     const groupedItems = [];
@@ -218,7 +226,7 @@ export class CodeOwnerService {
       groupedItems.push({
         groupName: this.getGroupName(failedFiles),
         files: failedFiles,
-        error: new Error("Failed to fetch owner info")
+        error: new Error('Failed to fetch owner info'),
       });
     }
 
@@ -227,9 +235,10 @@ export class CodeOwnerService {
 
   getGroupName(files) {
     const fileName = files[0].path.split('/').pop();
-    return `${
-      files.length > 1 ? `(${files.length} files) ${fileName}, ...` : fileName
-    }`;
+    return {
+      name: fileName,
+      prefix: files.length > 1 ? `+ ${files.length - 1} more` : '',
+    };
   }
 
   /**

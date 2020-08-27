@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 
-import {SuggestOwners, SuggestOwnersTrigger} from './suggest-owners.js';
+import {SuggestOwners} from './suggest-owners.js';
 import {OwnerStatusColumnContent, OwnerStatusColumnHeader} from './owner-status-column.js';
 import {OwnerRequirementValue} from './owner-requirement.js';
+import {SuggestOwnersTrigger} from './suggest-owners-trigger.js';
 
 Gerrit.install(plugin => {
   const ENABLED_EXPERIMENTS = window.ENABLED_EXPERIMENTS || [];

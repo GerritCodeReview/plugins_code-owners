@@ -56,7 +56,9 @@ export class OwnerRequirementValue extends Polymer.Element {
         <template is="dom-if" if="[[!isLoading]]">
           <span>[[statusText]]</span>
           <template is="dom-if" if="[[!allApproved]]">
-            <gr-button link on-click="_openReplyDialog">Suggest owners</gr-button>
+            <gr-button link on-click="_openReplyDialog">
+            Suggest owners
+          </gr-button>
           </template>
         </template>
       `;
@@ -85,7 +87,8 @@ export class OwnerRequirementValue extends Polymer.Element {
         .then(({rawStatuses}) => {
           const statusText = [];
           const statusCount = this._computeStatusCount(rawStatuses);
-          this.allApproved = statusCount.missing === 0 && statusCount.pending === 0;
+          this.allApproved = statusCount.missing === 0
+            && statusCount.pending === 0;
           if (statusCount.missing) {
             statusText.push(`${statusCount.missing} missing`);
           }

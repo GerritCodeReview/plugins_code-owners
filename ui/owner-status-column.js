@@ -206,7 +206,7 @@ export class OwnerStatusColumnContent extends BaseEl {
             this.status = newPathStatus;
           } else {
             this.status = newPathStatus === STATUS_CODE.APPROVED
-              ? this._computeStatus(oldPathStatus, /* oldPath=*/ true)
+              ? this._computeStatus(oldPathStatus, /* oldPath= */ true)
               : newPathStatus;
           }
         })
