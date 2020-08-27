@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.api;
 import java.util.Map;
 
 /**
- * Representation of the the code owner backend configuration in the REST API.
+ * Representation of the code owner backend configuration in the REST API.
  *
  * <p>This class determines the JSON format of code owner backend configuration in the REST API.
  */
