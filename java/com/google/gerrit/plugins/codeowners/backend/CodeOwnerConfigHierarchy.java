@@ -30,18 +30,6 @@ import org.eclipse.jgit.lib.ObjectId;
  */
 @Singleton
 public class CodeOwnerConfigHierarchy {
-  /** Callback interface to visit a code owner config. */
-  @FunctionalInterface
-  public interface CodeOwnerConfigVisitor {
-    /**
-     * Callback for a code owner config.
-     *
-     * @param codeOwnerConfig the code owner config that was found
-     * @return whether further code owner configs should be visited
-     */
-    boolean visit(CodeOwnerConfig codeOwnerConfig);
-  }
-
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
   @Inject
