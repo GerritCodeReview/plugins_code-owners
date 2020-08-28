@@ -299,7 +299,7 @@ class PathCodeOwners {
     }
   }
 
-  private CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
+  private static CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       CodeOwnerConfigReference codeOwnerConfigReference) {
     // if the code owner config reference doesn't have a project, the imported code owner config
@@ -323,7 +323,7 @@ class PathCodeOwners {
         BranchNameKey.create(project, branch), folderPath, codeOwnerConfigReference.fileName());
   }
 
-  private Stream<CodeOwnerSet> getGlobalCodeOwnerSets(CodeOwnerConfig codeOwnerConfig) {
+  private static Stream<CodeOwnerSet> getGlobalCodeOwnerSets(CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.codeOwnerSets().stream()
         .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty());
   }
