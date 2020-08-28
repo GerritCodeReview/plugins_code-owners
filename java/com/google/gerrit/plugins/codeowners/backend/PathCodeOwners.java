@@ -27,9 +27,9 @@ import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -234,7 +234,7 @@ class PathCodeOwners {
     Map<BranchNameKey, ObjectId> revisionMap = new HashMap<>();
     revisionMap.put(codeOwnerConfig.key().branchNameKey(), codeOwnerConfig.revision());
 
-    Queue<CodeOwnerConfigReference> codeOwnerConfigsToImport = new LinkedList<>();
+    Queue<CodeOwnerConfigReference> codeOwnerConfigsToImport = new ArrayDeque<>();
     codeOwnerConfigsToImport.addAll(importingCodeOwnerConfig.imports());
     codeOwnerConfigsToImport.addAll(
         resolvedCodeOwnerConfigBuilder.codeOwnerSets().stream()
