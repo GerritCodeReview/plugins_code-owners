@@ -20,6 +20,18 @@ Parameters that are not set for a project are inherited from the parent project.
         [Backends](backends.html) page.\
         By default `find-owners`.
 
+<a id="pluginCodeOwnersExtension">plugin.@PLUGIN@.fileExtension</a>
+:       The file extension that should be used for code owner config files.\
+        Allows to use different owner configurations for upstream and internal
+        in the same repository. E.g. if upstream uses `OWNERS` code owner config
+        files (no file extension configured) one could set `internal` as file
+        extension internally so that internally `OWNERS.internal` files are used
+        and the existing `OWNERS` files are ignored.\
+        Can be overridden per project by setting
+        [codeOwners.fileExtension](#codeOwnersFileExtension) in
+        `@PLUGIN@.config`.\
+        By default unset (no file extension is used).
+
 <a id="pluginCodeOwnersRequiredApproval">plugin.@PLUGIN@.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a
         change.\
@@ -72,13 +84,15 @@ Parameters that are not set for a project are inherited from the parent project.
 :       The code owners backend that should be used for the project.\
         Overrides the global setting
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`.\
+        Can be overridden per branch by setting
+        [codeOwners.\<branch\>.backend](#codeOwnersBranchBackend).\
         The supported code owner backends are listed at the
         [Backends](backends.html) page.\
         If not set, the global setting
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`\
         is used.
 
-<a id="codeOwners.branch.backend">codeOwners.\<branch\>.backend</a>
+<a id="codeOwnersBranchBackend">codeOwners.\<branch\>.backend</a>
 :       The code owners backend that should be used for this branch.\
         The branch can be the short or full name. If both configurations exist
         the one for the full name takes precedence.\
@@ -88,6 +102,21 @@ Parameters that are not set for a project are inherited from the parent project.
         [Backends](backends.html) page.\
         If not set, the project level configuration
         [codeOwners.backend](#codeOwnersBackend) is used.
+
+<a id="codeOwnersFileExtension">codeOwners.fileExtension</a>
+:       The file extension that should be used for the code owner config files
+        in this project.\
+        Allows to use different owner configurations for upstream and internal
+        in the same repository. E.g. if upstream uses `OWNERS` code owner config
+        files (no file extension configured) one could set `internal` as file
+        extension internally so that internally `OWNERS.internal` files are used
+        and the existing `OWNERS` files are ignored.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
+        `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
+        `gerrit.config` is used.
 
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a

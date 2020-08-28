@@ -18,4 +18,3 @@ java_library(
         "//plugins/code-owners:code-owners__plugin",
     ],
 )
-
