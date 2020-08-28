@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "811baeb5_673efa1b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-28T09:50:07Z",
+      "side": 1,
+      "message": "I wonder if this example is necessary, I\u0027m not sure if this should be a part of the documentation at least.\nIf it is a part of the documentation, I would put it explicitly as an example: It\u0027s kind of phrased as if it could only be used for this (but it could be used for other purposes, I guess).\nUp to you.",
+      "range": {
+        "startLine": 11,
+        "startChar": 52,
+        "endLine": 11,
+        "endChar": 60
+      },
+      "revId": "1e6157963b238958499498a6b1c38fff24f5e00d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
