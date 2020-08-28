@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e0a60c87_10eb4d4d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-28T08:25:50Z",
+      "side": 1,
+      "message": "Can you add a comment about admin and user being in a different group?",
+      "range": {
+        "startLine": 96,
+        "startChar": 14,
+        "endLine": 96,
+        "endChar": 76
+      },
+      "revId": "307c6284949833e549022bcd5e460fb8e59d943b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c70be926_65408903",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-08-28T08:25:50Z",
+      "side": 1,
+      "message": "Should you also test a case with enforceVisiblity\u003dfalse, and different groups?",
+      "revId": "307c6284949833e549022bcd5e460fb8e59d943b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
