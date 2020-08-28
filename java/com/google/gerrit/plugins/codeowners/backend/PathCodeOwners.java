@@ -268,10 +268,8 @@ class PathCodeOwners {
       CodeOwnerConfig importedCodeOwnerConfig = mayBeImportedCodeOwnerConfig.get();
       CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
 
-      if (!revisionMap.containsKey(keyOfImportedCodeOwnerConfig.branchNameKey())) {
-        revisionMap.put(
-            keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
-      }
+      revisionMap.putIfAbsent(
+          keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
 
       if (importMode.importIgnoreParentCodeOwners()
           && importedCodeOwnerConfig.ignoreParentCodeOwners()) {
