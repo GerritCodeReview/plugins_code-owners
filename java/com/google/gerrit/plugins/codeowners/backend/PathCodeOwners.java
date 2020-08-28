@@ -28,9 +28,9 @@ import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -207,7 +207,7 @@ class PathCodeOwners {
     // In this case also set ignoreParentCodeOwners to true, so that we do not need to inspect the
     // ignoreGlobalAndParentCodeOwners flags again.
     if (getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
-        .anyMatch(codeOwnerSet -> codeOwnerSet.ignoreGlobalAndParentCodeOwners())) {
+        .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)) {
       resolvedCodeOwnerConfig =
           resolvedCodeOwnerConfig
               .toBuilder()
@@ -235,7 +235,7 @@ class PathCodeOwners {
     Map<BranchNameKey, ObjectId> revisionMap = new HashMap<>();
     revisionMap.put(codeOwnerConfig.key().branchNameKey(), codeOwnerConfig.revision());
 
-    Queue<CodeOwnerConfigReference> codeOwnerConfigsToImport = new LinkedList<>();
+    Queue<CodeOwnerConfigReference> codeOwnerConfigsToImport = new ArrayDeque<>();
     codeOwnerConfigsToImport.addAll(importingCodeOwnerConfig.imports());
     codeOwnerConfigsToImport.addAll(
         resolvedCodeOwnerConfigBuilder.codeOwnerSets().stream()
@@ -269,10 +269,8 @@ class PathCodeOwners {
       CodeOwnerConfig importedCodeOwnerConfig = mayBeImportedCodeOwnerConfig.get();
       CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
 
-      if (!revisionMap.containsKey(keyOfImportedCodeOwnerConfig.branchNameKey())) {
-        revisionMap.put(
-            keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
-      }
+      revisionMap.putIfAbsent(
+          keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
 
       if (importMode.importIgnoreParentCodeOwners()
           && importedCodeOwnerConfig.ignoreParentCodeOwners()) {
@@ -317,7 +315,7 @@ class PathCodeOwners {
     }
   }
 
-  private CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
+  private static CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       CodeOwnerConfigReference codeOwnerConfigReference) {
     // if the code owner config reference doesn't have a project, the imported code owner config
@@ -341,7 +339,7 @@ class PathCodeOwners {
         BranchNameKey.create(project, branch), folderPath, codeOwnerConfigReference.fileName());
   }
 
-  private Stream<CodeOwnerSet> getGlobalCodeOwnerSets(CodeOwnerConfig codeOwnerConfig) {
+  private static Stream<CodeOwnerSet> getGlobalCodeOwnerSets(CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.codeOwnerSets().stream()
         .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty());
   }
