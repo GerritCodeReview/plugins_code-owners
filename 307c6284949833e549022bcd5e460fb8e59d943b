@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "2d7d307e_bcb298e0",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-28T09:29:49Z",
+      "side": 1,
+      "message": "Sure. Done.",
+      "parentUuid": "e0a60c87_10eb4d4d",
+      "range": {
+        "startLine": 96,
+        "startChar": 14,
+        "endLine": 96,
+        "endChar": 76
+      },
+      "revId": "307c6284949833e549022bcd5e460fb8e59d943b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c70be926_65408903",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
         "patchSetId": 1
@@ -39,6 +63,24 @@
       "revId": "307c6284949833e549022bcd5e460fb8e59d943b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a5a44072_00bc526e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 108,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-28T09:29:49Z",
+      "side": 1,
+      "message": "Oh yes, good point. Added this test.",
+      "parentUuid": "c70be926_65408903",
+      "revId": "307c6284949833e549022bcd5e460fb8e59d943b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
