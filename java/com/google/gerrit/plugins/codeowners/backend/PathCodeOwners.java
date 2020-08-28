@@ -206,7 +206,7 @@ class PathCodeOwners {
     // In this case also set ignoreParentCodeOwners to true, so that we do not need to inspect the
     // ignoreGlobalAndParentCodeOwners flags again.
     if (getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
-        .anyMatch(codeOwnerSet -> codeOwnerSet.ignoreGlobalAndParentCodeOwners())) {
+        .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)) {
       resolvedCodeOwnerConfig =
           resolvedCodeOwnerConfig
               .toBuilder()
