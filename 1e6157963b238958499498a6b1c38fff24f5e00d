@@ -22,6 +22,30 @@
       "revId": "1e6157963b238958499498a6b1c38fff24f5e00d",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7faadf1a_4fb6e21c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-08-28T10:22:50Z",
+      "side": 1,
+      "message": "Well this is the main purpose and the reason why this feature is implemented. Actually I\u0027m not sure if there is any other use-case where you would want to use a file extension. So I would leave this as is for now.\n\nI will soon start looking more into the documentation. I\u0027ll keep it in mind to see if in the documentation this can be more clearly formatted as an example.",
+      "parentUuid": "811baeb5_673efa1b",
+      "range": {
+        "startLine": 11,
+        "startChar": 52,
+        "endLine": 11,
+        "endChar": 60
+      },
+      "revId": "1e6157963b238958499498a6b1c38fff24f5e00d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
