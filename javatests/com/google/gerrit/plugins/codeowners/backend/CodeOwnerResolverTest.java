@@ -34,7 +34,7 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.stream.Stream;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.junit.Before;
@@ -74,9 +74,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
   @Test
   public void resolveCodeOwnerReferenceForEmail() throws Exception {
-    Optional<CodeOwner> codeOwner =
+    Stream<CodeOwner> codeOwner =
         codeOwnerResolver.get().resolve(CodeOwnerReference.create(admin.email()));
-    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(admin.id());
+    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(admin.id());
   }
 
   @Test
@@ -128,14 +128,14 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
     // admin has the "Modify Account" global capability and hence can see the secondary email of the
     // user account.
-    Optional<CodeOwner> codeOwner =
+    Stream<CodeOwner> codeOwner =
         codeOwnerResolver.get().resolve(CodeOwnerReference.create(secondaryEmail));
-    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
+    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(user.id());
 
     // user can see its own secondary email.
     requestScopeOperations.setApiUser(user.id());
     codeOwner = codeOwnerResolver.get().resolve(CodeOwnerReference.create(secondaryEmail));
-    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
+    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(user.id());
   }
 
   @Test
@@ -243,8 +243,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerResolver.get().resolve(adminCodeOwnerReference)).isEmpty();
 
     // if visibility is not enforced the code owner reference can be resolved regardless
-    Optional<CodeOwner> codeOwner =
+    Stream<CodeOwner> codeOwner =
         codeOwnerResolver.get().enforceVisibility(false).resolve(adminCodeOwnerReference);
-    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(admin.id());
+    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(admin.id());
   }
 }

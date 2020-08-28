@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toSet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
@@ -290,11 +291,28 @@ class PathCodeOwners {
 
       if (importMode.resolveImportsOfImport()
           && seenCodeOwnerConfigs.add(keyOfImportedCodeOwnerConfig)) {
-        codeOwnerConfigsToImport.addAll(importedCodeOwnerConfig.imports());
-        codeOwnerConfigsToImport.addAll(
+        Set<CodeOwnerConfigReference> transitiveImports = new HashSet<>();
+        transitiveImports.addAll(importedCodeOwnerConfig.imports());
+        transitiveImports.addAll(
             importedCodeOwnerConfig.codeOwnerSets().stream()
                 .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
                 .collect(toImmutableSet()));
+
+        if (importMode == CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY) {
+          // If only global code owners should be imported, transitive imports should also only
+          // import global code owners, no matter which import mode is specified in the imported
+          // code owner configs.
+          transitiveImports =
+              transitiveImports.stream()
+                  .map(
+                      codeOwnerCfgRef ->
+                          CodeOwnerConfigReference.copyWithNewImportMode(
+                              codeOwnerCfgRef,
+                              CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY))
+                  .collect(toSet());
+        }
+
+        codeOwnerConfigsToImport.addAll(transitiveImports);
       }
     }
   }
