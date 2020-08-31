@@ -24,12 +24,17 @@ import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSetApproval;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
+import com.google.gerrit.server.permissions.PermissionBackend;
+import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -61,22 +66,28 @@ import org.eclipse.jgit.revwalk.RevWalk;
  */
 @Singleton
 public class CodeOwnerApprovalCheck {
+  private final PermissionBackend permissionBackend;
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ChangedFiles changedFiles;
+  private final CodeOwnerConfigScanner codeOwnerConfigScanner;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
 
   @Inject
   CodeOwnerApprovalCheck(
+      PermissionBackend permissionBackend,
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       ChangedFiles changedFiles,
+      CodeOwnerConfigScanner codeOwnerConfigScanner,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver) {
+    this.permissionBackend = permissionBackend;
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.changedFiles = changedFiles;
+    this.codeOwnerConfigScanner = codeOwnerConfigScanner;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
   }
@@ -138,6 +149,11 @@ public class CodeOwnerApprovalCheck {
     ObjectId revision = getDestBranchRevision(changeNotes.getChange());
     Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
 
+    // If the branch doesn't contain any code owner config file yet, we apply special logic (project
+    // owners count as code owners) to allow bootstrapping the code owner configuration in the
+    // branch.
+    boolean isBootstrapping = !codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(branch);
+
     ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);
     ImmutableSet<Account.Id> approverAccountIds =
         getApproverAccountIds(requiredApproval, changeNotes);
@@ -153,6 +169,7 @@ public class CodeOwnerApprovalCheck {
                     reviewerAccountIds,
                     approverAccountIds,
                     hasOverride,
+                    isBootstrapping,
                     changedFile));
   }
 
@@ -163,6 +180,7 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       boolean hasOverride,
+      boolean isBootstrapping,
       ChangedFile changedFile) {
     // Compute the code owner status for the new path, if there is a new path.
     Optional<PathCodeOwnerStatus> newPathStatus =
@@ -177,6 +195,7 @@ public class CodeOwnerApprovalCheck {
                         reviewerAccountIds,
                         approverAccountIds,
                         hasOverride,
+                        isBootstrapping,
                         newPath));
 
     // Compute the code owner status for the old path, if the file was deleted or renamed.
@@ -192,6 +211,7 @@ public class CodeOwnerApprovalCheck {
                   reviewerAccountIds,
                   approverAccountIds,
                   hasOverride,
+                  isBootstrapping,
                   changedFile.oldPath().get()));
     }
 
@@ -205,6 +225,7 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       boolean hasOverride,
+      boolean isBootstrapping,
       Path absolutePath) {
     if (hasOverride) {
       return PathCodeOwnerStatus.create(absolutePath, CodeOwnerStatus.APPROVED);
@@ -212,45 +233,82 @@ public class CodeOwnerApprovalCheck {
 
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    codeOwnerConfigHierarchy.visit(
-        branch,
-        revision,
-        absolutePath,
-        codeOwnerConfig -> {
-          ImmutableSet<Account.Id> codeOwnerAccountIds =
-              getCodeOwnerAccountIds(codeOwnerConfig, absolutePath);
 
-          if (codeOwnerAccountIds.contains(patchSetUploader)) {
-            // If the uploader of the patch set owns the path, there is an implicit code owner
-            // approval from the patch set uploader so that the path is automatically approved.
+    if (isBootstrapping) {
+      // If we are in bootstrapping mode (the branch doesn't contain any code owner config file
+      // yet), we consider project owners as code owners. This allows bootstrapping the code owner
+      // configuration in the branch.
+      if (isProjectOwner(branch.project(), patchSetUploader)) {
+        // The uploader of the patch set is a project owner and thus a code owner. This means there
+        // is an implicit code owner approval from the patch set uploader so that the path is
+        // automatically approved.
+        codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+      } else if (approverAccountIds.stream()
+          .anyMatch(approverAccountId -> isProjectOwner(branch.project(), approverAccountId))) {
+        // At least on of the approvers is a project owner and thus a code owner.
+        codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+      } else if (reviewerAccountIds.stream()
+          .anyMatch(reviewerAccountId -> isProjectOwner(branch.project(), reviewerAccountId))) {
+        // At least on of the reviewers is a project owner and thus a code owner.
+        codeOwnerStatus.set(CodeOwnerStatus.PENDING);
+      }
+    } else {
+      codeOwnerConfigHierarchy.visit(
+          branch,
+          revision,
+          absolutePath,
+          codeOwnerConfig -> {
+            ImmutableSet<Account.Id> codeOwnerAccountIds =
+                getCodeOwnerAccountIds(codeOwnerConfig, absolutePath);
+
+            if (codeOwnerAccountIds.contains(patchSetUploader)) {
+              // If the uploader of the patch set owns the path, there is an implicit code owner
+              // approval from the patch set uploader so that the path is automatically approved.
+              codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+
+              // We can abort since we already found that the path was approved.
+              return false;
+            }
+
+            if (Collections.disjoint(codeOwnerAccountIds, reviewerAccountIds)) {
+              // We need to continue to check if any of the higher-level code owners is a reviewer.
+              return true;
+            }
+
+            if (Collections.disjoint(codeOwnerAccountIds, approverAccountIds)) {
+              // At least one of the code owners is a reviewer on the change.
+              codeOwnerStatus.set(CodeOwnerStatus.PENDING);
+
+              // We need to continue to check if any of the higher-level code owners has approved
+              // the change.
+              return true;
+            }
+
+            // At least one of the code owners approved the change.
             codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
 
             // We can abort since we already found that the path was approved.
             return false;
-          }
-
-          if (Collections.disjoint(codeOwnerAccountIds, reviewerAccountIds)) {
-            // We need to continue to check if any of the higher-level code owners is a reviewer.
-            return true;
-          }
-
-          if (Collections.disjoint(codeOwnerAccountIds, approverAccountIds)) {
-            // At least one of the code owners is a reviewer on the change.
-            codeOwnerStatus.set(CodeOwnerStatus.PENDING);
-
-            // We need to continue to check if any of the higher-level code owners has approved the
-            // change.
-            return true;
-          }
-
-          // At least one of the code owners approved the change.
-          codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
-
-          // We can abort since we already found that the path was approved.
-          return false;
-        });
+          });
+    }
 
     return PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
+  }
+
+  /** Whether the given account is a project owner of the given project. */
+  private boolean isProjectOwner(Project.NameKey project, Account.Id accountId) {
+    try {
+      return permissionBackend
+          .absentUser(accountId)
+          .project(project)
+          .test(ProjectPermission.WRITE_CONFIG);
+    } catch (PermissionBackendException e) {
+      throw new StorageException(
+          String.format(
+              "failed to check owner permission of project %s for account %d",
+              project.get(), accountId.get()),
+          e);
+    }
   }
 
   /**

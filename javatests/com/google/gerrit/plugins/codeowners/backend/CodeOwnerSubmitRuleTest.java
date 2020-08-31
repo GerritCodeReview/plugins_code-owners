@@ -51,6 +51,10 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
 
   @Test
   public void notReady() throws Exception {
+    // create arbitrary code owner config to avoid entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+    createArbitraryCodeOwnerConfigFile();
+
     ChangeData changeData = createChange().getChange();
     SubmitRecordSubject submitRecordSubject =
         assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
