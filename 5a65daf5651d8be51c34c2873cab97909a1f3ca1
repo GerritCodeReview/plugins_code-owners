@@ -16,6 +16,23 @@
       "revId": "5a65daf5651d8be51c34c2873cab97909a1f3ca1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "494d9ebc_4cf2e50f",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-08-31T13:52:36Z",
+      "side": 1,
+      "message": "opt nit: maybe 110 or 120?",
+      "revId": "5a65daf5651d8be51c34c2873cab97909a1f3ca1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
