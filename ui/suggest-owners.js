@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CodeOwnerService, RenamedFileChip} from './code-owners-service.js';
+import {CodeOwnerService} from './code-owners-service.js';
 import {ownerState} from './owner-ui-state.js';
 
 class OwnerGroupFileList extends Polymer.Element {
@@ -39,11 +39,8 @@ class OwnerGroupFileList extends Polymer.Element {
         color: var(--primary-text-color);
         font-size: var(--font-size-small);
       }
-      .renamed-old {
+      .Renamed {
         background-color: var(--dark-remove-highlight-color);
-      }
-      .renamed-new {
-        background-color: var(--dark-add-highlight-color);
       }
       </style>
       <ul>
@@ -56,8 +53,8 @@ class OwnerGroupFileList extends Polymer.Element {
             [[computeFilePath(file)]]<!--
             --><strong>[[computeFileName(file)]]</strong>
             <template is="dom-if" if="[[file.status]]">
-              <span class$="[[computeStatusClass(file)]]">
-                [[computeFileStatus(file)]]
+              <span class$="[[file.status]]">
+                [[file.status]]
               </span>
             </template>
           </li>
@@ -74,15 +71,6 @@ class OwnerGroupFileList extends Polymer.Element {
   computeFileName(file) {
     const parts = file.path.split('/');
     return parts.pop();
-  }
-
-  computeFileStatus(file) {
-    return file.status;
-  }
-
-  computeStatusClass(file) {
-    if (!file.status) return '';
-    return file.status === RenamedFileChip.NEW ? 'renamed-new' : 'renamed-old';
   }
 }
 
@@ -125,8 +113,15 @@ export class SuggestOwners extends Polymer.Element {
           border-bottom: 1px solid var(--border-color);
           padding: var(--spacing-s) var(--spacing-xs);
         }
-        .suggestion-row:hover {
-          background: var(--hover-background-color);
+        .suggestion-row-indicator {
+          margin-right: var(--spacing-m);
+          visibility: hidden;
+        }
+        .suggestion-row-indicator[visible] {
+          visibility: visible;
+        }
+        .suggestion-row-indicator[visible] iron-icon {
+          color: var(--link-color);
         }
         .suggestion-group-name {
           width: 200px;
@@ -147,8 +142,9 @@ export class SuggestOwners extends Polymer.Element {
           display: inline-block;
           padding: var(--spacing-xs) var(--spacing-m);
           user-select: none;
-          --label-border-radius: 8px;
           border: 1px solid transparent;
+          --label-border-radius: 8px;
+          --account-max-length: 100px;
         }
         gr-account-label:focus {
           outline: none;
@@ -175,6 +171,9 @@ export class SuggestOwners extends Polymer.Element {
           index-as="suggestionIndex"
         >
           <li class="suggestion-row">
+            <div class="suggestion-row-indicator" visible$="[[suggestion.hasSelected]]">
+              <iron-icon icon="gr-icons:check-circle"></iron-icon>
+            </div>
             <div class="suggestion-group-name">
               <span>
                 <template is="dom-if" if="[[suggestion.groupName.prefix]]">
@@ -202,7 +201,7 @@ export class SuggestOwners extends Polymer.Element {
             </template>
             <template is="dom-if" if="[[!suggestion.error]]">
               <template is="dom-if" if="[[!suggestion.owners.length]]">
-                All owners are not visible to you or missing required permissions.
+                Owners are not visible to you or no owners found
               </template>
               <ul class="suggested-owners">
                 <template
@@ -350,6 +349,7 @@ export class SuggestOwners extends Polymer.Element {
     if (!this.suggestedOwners || !accounts) return;
     // update all occurences
     this.suggestedOwners.forEach((suggestion, sId) => {
+      let hasSelected = false;
       suggestion.owners.forEach((owner, oId) => {
         if (
           accounts.some(account => account._account_id
@@ -361,6 +361,7 @@ export class SuggestOwners extends Polymer.Element {
                 selected: true,
               }
           );
+          hasSelected = true;
         } else {
           this.set(
               ['suggestedOwners', sId, 'owners', oId],
@@ -368,6 +369,7 @@ export class SuggestOwners extends Polymer.Element {
           );
         }
       });
+      this.set(['suggestedOwners', sId, 'hasSelected'], hasSelected);
     });
   }
 
