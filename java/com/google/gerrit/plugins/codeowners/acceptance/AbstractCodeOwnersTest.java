@@ -33,6 +33,7 @@ import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import com.google.inject.Inject;
@@ -43,6 +44,7 @@ import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.junit.Before;
 
 /**
  * Base class for code owner integration tests.
@@ -58,6 +60,14 @@ import org.eclipse.jgit.revwalk.RevCommit;
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
 public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   @Inject private ProjectOperations projectOperations;
+
+  private CodeOwnerConfigOperations codeOwnerConfigOperations;
+
+  @Before
+  public void testSetup() throws Exception {
+    codeOwnerConfigOperations =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
+  }
 
   protected String createChangeWithFileDeletion(Path filePath) throws Exception {
     return createChangeWithFileDeletion(filePath.toString());
@@ -162,5 +172,43 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
                 .group(REGISTERED_USERS)
                 .build())
         .update();
+  }
+
+  /**
+   * Creates an arbitrary code owner config file.
+   *
+   * <p>Can be used to create an arbitrary code owner config in order to avoid entering the
+   * bootstrapping code path in {@link
+   * com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalCheck}.
+   */
+  protected void createArbitraryCodeOwnerConfigFile() throws Exception {
+    TestAccount arbitraryUser =
+        accountCreator.create(
+            "arbitrary-user", "arbitrary-user@example.com", "Arbitrary User", null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/arbitrary/path/")
+        .addCodeOwnerEmail(arbitraryUser.email())
+        .create();
+  }
+
+  /**
+   * Creates a new change for the given test account.
+   *
+   * @param testAccount the account that should own the new change
+   * @param subject the subject of the new change
+   * @param fileName the name of the file in the change
+   * @param content the content of the file in the change
+   * @return the push result
+   */
+  protected PushOneCommit.Result createChange(
+      TestAccount testAccount, String subject, String fileName, String content) throws Exception {
+    TestRepository<InMemoryRepository> testRepo = cloneProject(project, testAccount);
+    PushOneCommit push =
+        pushFactory.create(testAccount.newIdent(), testRepo, subject, fileName, content);
+    return push.to("refs/for/master");
   }
 }
