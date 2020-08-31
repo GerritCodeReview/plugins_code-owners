@@ -46,10 +46,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
   }
 
   private static final SubmitRequirement NOT_READY_SUBMIT_REQUIREMENT =
-      SubmitRequirement.builder()
-          .setFallbackText("Code Owners")
-          .setType("code-owners")
-          .build();
+      SubmitRequirement.builder().setFallbackText("Code Owners").setType("code-owners").build();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
