@@ -299,6 +299,31 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     verifyNoMoreInteractions(visitor);
   }
 
+  @Test
+  public void containsNoCodeOwnerConfigFile() throws Exception {
+    assertThat(
+            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
+                BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
+  public void containsACodeOwnerConfigFile() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .fileName("OWNERS")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    assertThat(
+            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
+                BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
   private void visit() {
     codeOwnerConfigScanner.visit(BranchNameKey.create(project, "master"), visitor);
   }
