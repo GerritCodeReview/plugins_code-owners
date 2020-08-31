@@ -33,6 +33,24 @@
       "revId": "5a65daf5651d8be51c34c2873cab97909a1f3ca1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b632d3ea_d9dfc7fc",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-08-31T13:54:23Z",
+      "side": 1,
+      "message": "what\u0027s the difference ? recommended value ?",
+      "parentUuid": "494d9ebc_4cf2e50f",
+      "revId": "5a65daf5651d8be51c34c2873cab97909a1f3ca1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
