@@ -25,11 +25,13 @@ export class SuggestOwnersTrigger extends Polymer.Element {
   static get properties() {
     return {
       change: Object,
+      reporting: Object,
+      restApi: Object,
+
       expanded: {
         type: Boolean,
         value: false,
       },
-      restApi: Object,
       hidden: {
         type: Boolean,
         value: true,
@@ -89,6 +91,9 @@ export class SuggestOwnersTrigger extends Polymer.Element {
   toggleControlContent() {
     this.expanded = !this.expanded;
     ownerState.expandSuggestion = this.expanded;
+    this.reporting.reportInteraction('toggle-suggest-owners', {
+      expanded: this.expanded,
+    });
   }
 
   computeButtonText(expanded) {

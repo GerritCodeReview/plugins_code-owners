@@ -48,7 +48,8 @@ class BaseEl extends Polymer.Element {
   computeHidden(change, patchRange) {
     if ([change, patchRange].includes(undefined)) return true;
     // if code-owners is not a submit requirement, don't show status column
-    if (change.requirements && !change.requirements.find(r => r.type === "code-owners")) {
+    if (change.requirements
+        && !change.requirements.find(r => r.type === 'code-owners')) {
       return true;
     }
 
@@ -90,13 +91,15 @@ export class OwnerStatusColumnHeader extends BaseEl {
   static get properties() {
     return {
       change: Object,
+      reporting: Object,
       patchRange: Object,
+      restApi: Object,
+
       hidden: {
         type: Boolean,
         reflectToAttribute: true,
         computed: 'computeHidden(change, patchRange)',
       },
-      restApi: Object,
       ownerService: Object,
     };
   }
@@ -122,6 +125,9 @@ export class OwnerStatusColumnContent extends BaseEl {
   static get properties() {
     return {
       change: Object,
+      reporting: Object,
+      restApi: Object,
+
       path: String,
       patchRange: Object,
       hidden: {
@@ -129,7 +135,6 @@ export class OwnerStatusColumnContent extends BaseEl {
         reflectToAttribute: true,
         computed: 'computeHidden(change, patchRange)',
       },
-      restApi: Object,
       ownerService: Object,
       statusIcon: {
         type: String,

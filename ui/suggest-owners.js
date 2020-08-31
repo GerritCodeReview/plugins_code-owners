@@ -91,6 +91,7 @@ export class SuggestOwners extends Polymer.Element {
           border-radius: var(--border-radius);
           box-shadow: var(--elevation-level-1);
           padding: var(--spacing-m);
+          margin: var(--spacing-m) 0;
         }
         p.loading {
           text-align: center;
@@ -171,7 +172,10 @@ export class SuggestOwners extends Polymer.Element {
           index-as="suggestionIndex"
         >
           <li class="suggestion-row">
-            <div class="suggestion-row-indicator" visible$="[[suggestion.hasSelected]]">
+            <div
+              class="suggestion-row-indicator"
+              visible$="[[suggestion.hasSelected]]"
+            >
               <iron-icon icon="gr-icons:check-circle"></iron-icon>
             </div>
             <div class="suggestion-group-name">
@@ -232,6 +236,7 @@ export class SuggestOwners extends Polymer.Element {
       // @input
       change: Object,
       restApi: Object,
+      reporting: Object,
 
       // @internal attributes
       hidden: {
@@ -319,6 +324,7 @@ export class SuggestOwners extends Polymer.Element {
           bubbles: true,
         })
     );
+    this.reporting.reportInteraction('add-reviewer');
   }
 
   removeAccount(owner) {
@@ -332,6 +338,7 @@ export class SuggestOwners extends Polymer.Element {
           bubbles: true,
         })
     );
+    this.reporting.reportInteraction('remove-reviewer');
   }
 
   toggleAccount(e) {

@@ -49,13 +49,13 @@ export class OwnerRequirementValue extends Polymer.Element {
           padding-left: var(--spacing-m);
         }
         </style>
-        <p class="loading" hidden="[[!isLoading]]">
+        <p class="loading" hidden="[[!_isLoading]]">
           <span class="loadingSpin"></span>
           loading...
         </p>
-        <template is="dom-if" if="[[!isLoading]]">
-          <span>[[statusText]]</span>
-          <template is="dom-if" if="[[!allApproved]]">
+        <template is="dom-if" if="[[!_isLoading]]">
+          <span>[[_computeStatusText(_statusCount)]]</span>
+          <template is="dom-if" if="[[!_allApproved]]">
             <gr-button link on-click="_openReplyDialog">
             Suggest owners
           </gr-button>
@@ -67,11 +67,17 @@ export class OwnerRequirementValue extends Polymer.Element {
   static get properties() {
     return {
       change: Object,
-      statusText: String,
+      reporting: Object,
       restApi: Object,
+
       ownerService: Object,
-      isLoading: Boolean,
-      allApproved: Boolean,
+
+      _statusCount: Object,
+      _isLoading: Boolean,
+      _allApproved: {
+        type: Boolean,
+        computed: '_computeAllApproved(_statusCount)',
+      },
     };
   }
 
@@ -82,33 +88,22 @@ export class OwnerRequirementValue extends Polymer.Element {
   }
 
   _updateStatus(ownerService) {
-    this.isLoading = true;
+    this._isLoading = true;
     return ownerService.getStatus()
         .then(({rawStatuses}) => {
-          const statusText = [];
-          const statusCount = this._computeStatusCount(rawStatuses);
-          this.allApproved = statusCount.missing === 0
-            && statusCount.pending === 0;
-          if (statusCount.missing) {
-            statusText.push(`${statusCount.missing} missing`);
-          }
-
-          if (statusCount.pending) {
-            statusText.push(`${statusCount.pending} pending`);
-          }
-
-          if (!statusText.length) {
-            statusText.push('approved');
-          }
-
-          this.statusText = statusText.join(', ');
+          this._statusCount = this._getStatusCount(rawStatuses);
         })
         .finally(() => {
-          this.isLoading = false;
+          this._isLoading = false;
         });
   }
 
-  _computeStatusCount(rawStatuses) {
+  _computeAllApproved(statusCount) {
+    return statusCount.missing === 0
+            && statusCount.pending === 0;
+  }
+
+  _getStatusCount(rawStatuses) {
     return rawStatuses
         .reduce((prev, cur) => {
           const oldPathStatus = cur.old_path_status;
@@ -127,6 +122,23 @@ export class OwnerRequirementValue extends Polymer.Element {
           }
           return prev;
         }, {missing: 0, pending: 0});
+  }
+
+  _computeStatusText(statusCount) {
+    const statusText = [];
+    if (statusCount.missing) {
+      statusText.push(`${statusCount.missing} missing`);
+    }
+
+    if (statusCount.pending) {
+      statusText.push(`${statusCount.pending} pending`);
+    }
+
+    if (!statusText.length) {
+      statusText.push('approved');
+    }
+
+    return statusText.join(', ');
   }
 
   _isMissing(status) {
@@ -152,6 +164,11 @@ export class OwnerRequirementValue extends Polymer.Element {
         })
     );
     ownerState.expandSuggestion = true;
+
+    this.reporting.reportInteraction(
+        'suggest-owners-from-submit-requirement',
+        {...this._statusCount}
+    );
   }
 }
 

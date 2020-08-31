@@ -28,17 +28,20 @@ Gerrit.install(plugin => {
   }
 
   const restApi = plugin.restApi();
+  const reporting = plugin.reporting();
 
   // owner status column / rows for file list
   plugin.registerDynamicCustomComponent(
       'change-view-file-list-header-prepend', OwnerStatusColumnHeader.is)
       .onAttached(view => {
         view.restApi = restApi;
+        view.reporting = reporting;
       });
   plugin.registerDynamicCustomComponent(
       'change-view-file-list-content-prepend', OwnerStatusColumnContent.is)
       .onAttached(view => {
         view.restApi = restApi;
+        view.reporting = reporting;
       });
 
   // submit requirement value for owner's requirement
@@ -48,6 +51,7 @@ Gerrit.install(plugin => {
   )
       .onAttached(view => {
         view.restApi = restApi;
+        view.reporting = reporting;
       });
 
   // suggest owners for reply dialog
@@ -55,10 +59,12 @@ Gerrit.install(plugin => {
       'reply-reviewers', SuggestOwnersTrigger.is, {slot: 'right'})
       .onAttached(view => {
         view.restApi = restApi;
+        view.reporting = reporting;
       });
   plugin.registerCustomComponent(
       'reply-reviewers', SuggestOwners.is, {slot: 'below'})
       .onAttached(view => {
         view.restApi = restApi;
+        view.reporting = reporting;
       });
 });
