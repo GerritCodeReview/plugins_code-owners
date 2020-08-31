@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "519c7fed_7b1a7320",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-08-31T13:39:12Z",
+      "side": 1,
+      "message": "Align on the text copy and color on status icons and adding the check for fulfilled rows",
+      "revId": "5a65daf5651d8be51c34c2873cab97909a1f3ca1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
