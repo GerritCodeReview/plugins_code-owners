@@ -51,6 +51,24 @@
       "revId": "5a65daf5651d8be51c34c2873cab97909a1f3ca1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "78e9a842_718131b3",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-08-31T14:10:48Z",
+      "side": 1,
+      "message": "I used 100 as in full-width reply dialog, we have the area for showing owners at 550px and we show at most 5 owners, considering the buffer, I set to 100 per chip.\n\nThis should be easy to change if needed :)",
+      "parentUuid": "b632d3ea_d9dfc7fc",
+      "revId": "5a65daf5651d8be51c34c2873cab97909a1f3ca1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
