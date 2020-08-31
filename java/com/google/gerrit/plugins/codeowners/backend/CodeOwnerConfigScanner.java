@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -48,6 +49,25 @@ public class CodeOwnerConfigScanner {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+  }
+
+  /**
+   * Whether there is at least one code owner config file in the given project and branch.
+   *
+   * @param branchNameKey the project and branch for which if should be checked if it contains any
+   *     code owner config file
+   * @return {@code true} if there is at least one code owner config file in the given project and
+   *     branch, otherwise {@code false}
+   */
+  public boolean containsAnyCodeOwnerConfigFile(BranchNameKey branchNameKey) {
+    AtomicBoolean found = new AtomicBoolean(false);
+    visit(
+        branchNameKey,
+        codeOwnerConfig -> {
+          found.set(true);
+          return false;
+        });
+    return found.get();
   }
 
   /**
