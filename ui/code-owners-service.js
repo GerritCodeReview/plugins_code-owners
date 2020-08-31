@@ -27,16 +27,6 @@ export const OwnerStatus = {
 };
 
 /**
- * New or old path for renamed files.
- *
- * @enum
- */
-export const RenamedFileChip = {
-  NEW: 'Renamed - New',
-  OLD: 'Renamed - Old',
-};
-
-/**
  * Responsible for communicating with the rest-api
  *
  * @see resources/Documentation/rest-api.md
@@ -49,6 +39,7 @@ class CodeOwnerApi {
   /**
    * Returns a promise fetching the owner statuses for all files within the change.
    *
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#change-endpoints
    * @param {string} changeId
    */
   listOwnerStatus(changeId) {
@@ -58,6 +49,7 @@ class CodeOwnerApi {
   /**
    * Returns a promise fetching the owners for a given path.
    *
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
    * @param {string} project
    * @param {string} branch
    * @param {string} path
@@ -72,19 +64,30 @@ class CodeOwnerApi {
   /**
    * Returns a promise fetching the owners config for a given path.
    *
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#branch-endpoints
    * @param {string} project
    * @param {string} branch
    * @param {string} path
    */
   getConfigForPath(project, branch, path) {
-    // TODO: may need to handle the 204 when does not exist
     return this.restApi.get(
         `/projects/${project}/branches/${branch}/code_owners.config/${path}`
     );
   }
+
+  /**
+   * Returns a promise fetching project_config for code owners.
+   *
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#get-code-owner-project-config
+   * @param {string} project
+   */
+  getProjectConfig(project) {
+    return this.restApi.get(
+        `/projects/${project}/code_owners.project_config`
+    );
+  }
 }
 
-// TODO(taoalpha): error flows
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -170,15 +173,11 @@ export class CodeOwnerService {
   }
 
   _computeFileStatus(fileStatusMap, path) {
-    // empty for modified files
-    // `renamed - old` for renamed files (old path)
-    // `renamed - new` for renamed files (new path)
+    // empty for modified files and old-name files
+    // Show `Renamed` for renamed file
     const status = fileStatusMap.get(path);
-    if (status.newPath) {
-      return RenamedFileChip.OLD;
-    }
     if (status.oldPath) {
-      return RenamedFileChip.NEW;
+      return 'Renamed';
     }
     return;
   }
@@ -296,7 +295,8 @@ export class CodeOwnerService {
   static getOwnerService(restApi, change) {
     if (!this.ownerService || this.ownerService.change !== change) {
       this.ownerService = new CodeOwnerService(restApi, change, {
-        maxConcurrentRequests: 2,
+        // Chrome has a limit of 6 connections per host name, and a max of 10 connections.
+        maxConcurrentRequests: 6,
       });
     }
     return this.ownerService;

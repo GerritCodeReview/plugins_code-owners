@@ -33,24 +33,25 @@ const STATUS_ICON = {
   [STATUS_CODE.PENDING_OLD_PATH]: 'gr-icons:schedule',
   [STATUS_CODE.MISSING_OLD_PATH]: 'gr-icons:close',
   [STATUS_CODE.APPROVED]: 'gr-icons:check',
-  // TODO: not finalized yet
   [STATUS_CODE.ERROR]: 'gr-icons:info-outline',
 };
 const STATUS_TOOLTIP = {
-  [STATUS_CODE.PENDING]: 'Owner has not approved yet.',
-  [STATUS_CODE.MISSING]: 'Missing owner in reviewers, please add.',
-  [STATUS_CODE.PENDING_OLD_PATH]: 'Owner of the file before'
-    + ' renmaed has not approved yet.',
-  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing owner for the file before'
-    + ' renamed in reviewers, please add.',
-  [STATUS_CODE.APPROVED]: 'This file has been approved by the owner'
-     + ' or owned by you.',
-  [STATUS_CODE.ERROR]: 'Can not determine owner status for this file.',
+  [STATUS_CODE.PENDING]: 'Pending approval',
+  [STATUS_CODE.MISSING]: 'Missing file-owner approval',
+  [STATUS_CODE.PENDING_OLD_PATH]: 'Pending approval on pre-renamed file',
+  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing owner for pre-renamed file',
+  [STATUS_CODE.APPROVED]: 'Approved / Exempted',
+  [STATUS_CODE.ERROR]: 'Fail to fetch status',
 };
 
 class BaseEl extends Polymer.Element {
   computeHidden(change, patchRange) {
     if ([change, patchRange].includes(undefined)) return true;
+    // if code-owners is not a submit requirement, don't show status column
+    if (change.requirements && !change.requirements.find(r => r.type === "code-owners")) {
+      return true;
+    }
+
     const latestPatchset = change.revisions[change.current_revision];
     // only show if its comparing against base
     if (patchRange.basePatchNum !== 'PARENT') return true;
@@ -155,14 +156,14 @@ export class OwnerStatusColumnContent extends BaseEl {
           text-align: center;
         }
         :host([status=approved]) iron-icon {
-          color: var(--vote-color-approved);
+          color: var(--positive-green-text-color);
         }
         :host([status=pending]) iron-icon {
           color: #ffa62f;
         }
         :host([status=missing]) iron-icon,
         :host([status=error]) iron-icon {
-          color: var(--vote-color-disliked);
+          color: var(--negative-red-text-color);
         }
         </style>
         <gr-tooltip-content title="[[statusInfo]]" has-tooltip>
