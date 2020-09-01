@@ -64,10 +64,6 @@ public class CodeOwnerProjectConfigJson {
       boolean isDisabled, ImmutableList<BranchNameKey> disabledBranches) {
     requireNonNull(disabledBranches, "disabledBranches");
 
-    if (!isDisabled && disabledBranches.isEmpty()) {
-      return null;
-    }
-
     CodeOwnersStatusInfo info = new CodeOwnersStatusInfo();
     info.disabled = isDisabled ? true : null;
     if (!isDisabled && !disabledBranches.isEmpty()) {
