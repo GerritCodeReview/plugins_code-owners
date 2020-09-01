@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import java.nio.file.Path;
@@ -329,7 +330,7 @@ public abstract class CodeOwnerConfig {
      * @return the code owner config key
      */
     public static Key create(
-        Project.NameKey project, String branch, String folderPath, String fileName) {
+        Project.NameKey project, String branch, String folderPath, @Nullable String fileName) {
       return create(BranchNameKey.create(project, branch), Paths.get(folderPath), fileName);
     }
 
@@ -342,10 +343,7 @@ public abstract class CodeOwnerConfig {
      * @return the code owner config key
      */
     public static Key create(BranchNameKey branchNameKey, Path folderPath) {
-      return new AutoValue_CodeOwnerConfig_Key.Builder()
-          .setBranchNameKey(branchNameKey)
-          .setFolderPath(folderPath)
-          .build();
+      return create(branchNameKey, folderPath, null);
     }
 
     /**
@@ -357,12 +355,18 @@ public abstract class CodeOwnerConfig {
      * @param fileName the name of the code owner config file
      * @return the code owner config key
      */
-    public static Key create(BranchNameKey branchNameKey, Path folderPath, String fileName) {
-      return new AutoValue_CodeOwnerConfig_Key.Builder()
-          .setBranchNameKey(branchNameKey)
-          .setFolderPath(folderPath)
-          .setFileName(fileName)
-          .build();
+    public static Key create(
+        BranchNameKey branchNameKey, Path folderPath, @Nullable String fileName) {
+      Builder builder =
+          new AutoValue_CodeOwnerConfig_Key.Builder()
+              .setBranchNameKey(branchNameKey)
+              .setFolderPath(folderPath);
+
+      if (fileName != null) {
+        builder.setFileName(fileName);
+      }
+
+      return builder.build();
     }
 
     @AutoValue.Builder

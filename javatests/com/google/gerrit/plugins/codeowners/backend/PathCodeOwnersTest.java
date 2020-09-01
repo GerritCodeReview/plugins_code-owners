@@ -980,6 +980,56 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void importCodeOwnerConfigWithPostFix() throws Exception {
+    testImportCodeOwnerConfigWithNameExtension("OWNERS_post_fix");
+  }
+
+  @Test
+  public void importCodeOwnerConfigWithPreFix() throws Exception {
+    testImportCodeOwnerConfigWithNameExtension("pre_fix_OWNERS");
+  }
+
+  private void testImportCodeOwnerConfigWithNameExtension(String nameOfImportedCodeOwnerConfig)
+      throws Exception {
+    // create importing config with global code owner and import
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(
+                    CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                    "/bar/" + nameOfImportedCodeOwnerConfig))
+            .create();
+
+    // create imported config with global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .fileName(nameOfImportedCodeOwnerConfig)
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global code owners from the importing and the imported code owner
+    // config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
   public void cyclicImports() throws Exception {
     // create importing config with global code owner and import
     CodeOwnerConfig.Key rootCodeOwnerConfigKey =

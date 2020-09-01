@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Throwables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -27,6 +29,7 @@ import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.update.RetryHelper;
 import java.io.IOException;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
@@ -70,9 +73,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
   @Override
   public final Optional<CodeOwnerConfig> getCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
-    String fileName = getFileName(codeOwnerConfigKey.project());
-    if (codeOwnerConfigKey.fileName().isPresent()
-        && !fileName.equals(codeOwnerConfigKey.fileName().get())) {
+    String fileName =
+        codeOwnerConfigKey.fileName().orElse(getFileName(codeOwnerConfigKey.project()));
+
+    if (!isCodeOwnerConfigFile(codeOwnerConfigKey.project(), fileName)) {
       // The file name can mismatch if we resolve imported code owner configs. When code owner
       // configs are imported the user specifies the full path of the code owner config (including
       // the file name) in the importing code owner config. If the user specifies a file name that
@@ -93,6 +97,61 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
     }
+  }
+
+  /**
+   * Checks whether the given file name is a code owner config file.
+   *
+   * @param project the project in which the code owner config files are stored
+   * @param fileName the name of the file for which it should be checked whether is a code owner
+   *     config file
+   * @return {@code true} if the given file name is a code owner config file, otherwise {@code
+   *     false}
+   */
+  private boolean isCodeOwnerConfigFile(Project.NameKey project, String fileName) {
+    requireNonNull(project, "project");
+    requireNonNull(fileName, "fileName");
+
+    if (getFileName(project).equals(fileName)) {
+      return true;
+    }
+
+    return isCodeOwnerConfigFileWithExtension(project, fileName);
+  }
+
+  /**
+   * Checks whether the given file name is code owner config file with an extension in the name.
+   *
+   * <p>Name extensions can appear as post- or pre-fix:
+   *
+   * <ul>
+   *   <li>Post-fix: E.g. {@code OWNERS_<extension>} or {@code OWNERS_<extension>.<file-extension>}
+   *   <li>Pre-fix: E.g. {@code <extension>_OWNERS} or {@code <extension>_OWNERS.<file-extension>}
+   * </ul>
+   *
+   * @param project the project in which the code owner config files are stored
+   * @param fileName the name of the file for which it should be checked whether is a code owner
+   *     config file with extension
+   * @return whether the given file name is code owner config file with an extension in the name
+   */
+  private boolean isCodeOwnerConfigFileWithExtension(Project.NameKey project, String fileName) {
+    String quotedDefaultFileName = Pattern.quote(defaultFileName);
+    String quotedFileExtension =
+        Pattern.quote(
+            codeOwnersPluginConfiguration
+                .getFileExtension(project)
+                .map(ext -> "." + ext)
+                .orElse(""));
+    String nameExtension = "(\\w)+";
+
+    return Pattern.compile(
+                "^" + quotedDefaultFileName + "_" + nameExtension + quotedFileExtension + "$")
+            .matcher(fileName)
+            .matches()
+        || Pattern.compile(
+                "^" + nameExtension + "_" + quotedDefaultFileName + quotedFileExtension + "$")
+            .matcher(fileName)
+            .matches();
   }
 
   private String getFileName(Project.NameKey project) {

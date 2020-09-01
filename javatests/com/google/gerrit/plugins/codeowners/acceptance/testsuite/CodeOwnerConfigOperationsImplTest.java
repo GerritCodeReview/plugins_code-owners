@@ -15,12 +15,13 @@
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.truth.Truth8;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -110,7 +111,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void specifiedBranchIsARespectedForCodeOwnerConfigCreation() throws Exception {
+  public void specifiedBranchIsRespectedForCodeOwnerConfigCreation() throws Exception {
     String branchName = "foo";
     gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
 
@@ -165,7 +166,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void specifiedFolderPathIsARespectedForCodeOwnerConfigCreation() throws Exception {
+  public void specifiedFolderPathIsRespectedForCodeOwnerConfigCreation() throws Exception {
     String folderPath = "/foo/bar";
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
@@ -174,7 +175,26 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .folderPath(folderPath)
             .addCodeOwnerEmail(admin.email())
             .create();
-    assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Paths.get(folderPath));
+    Truth8.assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Paths.get(folderPath));
+    assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
+        .hasCodeOwnerSetsThat()
+        .onlyElement()
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void specifiedFileNameIsRespectedForCodeOwnerConfigCreation() throws Exception {
+    String folderPath = "/foo/bar";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .folderPath(folderPath)
+            .fileName("OWNERS_foo")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigKey.fileName()).value().isEqualTo("OWNERS_foo");
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
         .hasCodeOwnerSetsThat()
         .onlyElement()
