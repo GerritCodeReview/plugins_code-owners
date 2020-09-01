@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "6b2bf1be_2bde506f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInfo.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-01T07:13:53Z",
+      "side": 1,
+      "message": "After all, I actually changed my mind about this. If we want to add further fields in the status entity, it\u0027s  actually better to always set it:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/280158",
+      "parentUuid": "9b5700d3_1121da17",
+      "range": {
+        "startLine": 29,
+        "startChar": 8,
+        "endLine": 29,
+        "endChar": 15
+      },
+      "revId": "47f91cc88d5a63d5caa98f9950162f7e923096d0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00078e1e_54c44ea1",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 8
