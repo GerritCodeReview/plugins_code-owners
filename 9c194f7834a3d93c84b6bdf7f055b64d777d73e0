@@ -22,6 +22,30 @@
       "revId": "9c194f7834a3d93c84b6bdf7f055b64d777d73e0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8bde8a45_2201c75b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-01T14:06:19Z",
+      "side": 1,
+      "message": "Yes, it\u0027s needed.\n\nTruth8 contains the assertThat(Path) method that we need here, but we cannot statically import com.google.common.truth.Truth8.assertThat at the same time as com.google.gerrit.truth.OptionalSubject.assertThat, since both classes offer an assertThat(Optional) method and then the compiler doesn\u0027t know which assertThat(Optional) should be used.",
+      "parentUuid": "c554abbe_c26cd8a9",
+      "range": {
+        "startLine": 178,
+        "startChar": 4,
+        "endLine": 178,
+        "endChar": 10
+      },
+      "revId": "9c194f7834a3d93c84b6bdf7f055b64d777d73e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
