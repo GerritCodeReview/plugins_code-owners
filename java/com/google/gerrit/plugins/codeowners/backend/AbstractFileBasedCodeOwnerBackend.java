@@ -28,6 +28,7 @@ import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.update.RetryHelper;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import org.eclipse.jgit.errors.ConfigInvalidException;
@@ -97,6 +98,11 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
     }
+  }
+
+  @Override
+  public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
+    return codeOwnerConfigKey.filePath(defaultFileName);
   }
 
   @Override

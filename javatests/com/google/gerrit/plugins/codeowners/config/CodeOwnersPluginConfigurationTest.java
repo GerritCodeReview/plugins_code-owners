@@ -38,6 +38,7 @@ import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.util.Providers;
+import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
@@ -820,6 +821,11 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
 
     @Override
     public boolean isCodeOwnerConfigFile(NameKey project, String fileName) {
+      throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
       throw new UnsupportedOperationException("not implemented");
     }
   }

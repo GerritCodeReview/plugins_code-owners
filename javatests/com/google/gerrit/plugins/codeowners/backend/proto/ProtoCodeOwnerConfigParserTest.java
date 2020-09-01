@@ -23,11 +23,11 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
-import com.google.protobuf.TextFormat;
 import java.util.Arrays;
 import org.junit.Test;
 
@@ -80,13 +80,17 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
   public void cannotParseCodeOwnerConfigWithInvalidLines() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
-    assertThrows(
-        TextFormat.ParseException.class,
-        () ->
-            codeOwnerConfigParser.parse(
-                TEST_REVISION,
-                codeOwnerConfigKey,
-                "owners_config {\n  owner_sets {\nINVALID_LINE\n  }\n}\n"));
+    CodeOwnerConfigParseException exception =
+        assertThrows(
+            CodeOwnerConfigParseException.class,
+            () ->
+                codeOwnerConfigParser.parse(
+                    TEST_REVISION,
+                    codeOwnerConfigKey,
+                    "owners_config {\n  owner_sets {\nINVALID_LINE\n  }\n}\n"));
+    assertThat(exception.getFullMessage(ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME))
+        .isEqualTo(
+            "invalid code owner config file '/OWNERS_METADATA':\n" + "  4:3: Expected \"{\".");
   }
 
   @Test
