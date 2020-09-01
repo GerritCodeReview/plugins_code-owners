@@ -156,10 +156,14 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
       Optional<String> codeOwnerConfigFileContent =
           getFileIfItExists(JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get());
       if (codeOwnerConfigFileContent.isPresent()) {
-        loadedCodeOwnersConfig =
-            Optional.of(
-                codeOwnerConfigParser.parse(
-                    revision, codeOwnerConfigKey, codeOwnerConfigFileContent.get()));
+        try {
+          loadedCodeOwnersConfig =
+              Optional.of(
+                  codeOwnerConfigParser.parse(
+                      revision, codeOwnerConfigKey, codeOwnerConfigFileContent.get()));
+        } catch (CodeOwnerConfigParseException e) {
+          throw new ConfigInvalidException(e.getFullMessage(defaultFileName), e);
+        }
       }
     }
 

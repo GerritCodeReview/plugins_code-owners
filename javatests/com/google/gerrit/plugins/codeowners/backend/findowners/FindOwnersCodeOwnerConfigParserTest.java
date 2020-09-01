@@ -25,6 +25,7 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
@@ -124,29 +125,39 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
-  public void codeOwnerConfigWithInvalidEmails_invalidEmailsAreIgnored() throws Exception {
-    assertParseAndFormat(
-        getCodeOwnerConfig(EMAIL_1, "@example.com", "admin@", "admin@example@com", EMAIL_2),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig)
-                .hasCodeOwnerSetsThat()
-                .onlyElement()
-                .hasCodeOwnersEmailsThat()
-                .containsExactly(EMAIL_1, EMAIL_2),
-        getCodeOwnerConfig(EMAIL_1, EMAIL_2));
+  public void cannotParseCodeOwnerConfigWithInvalidEmails() throws Exception {
+    CodeOwnerConfigParseException exception =
+        assertThrows(
+            CodeOwnerConfigParseException.class,
+            () ->
+                codeOwnerConfigParser.parse(
+                    TEST_REVISION,
+                    CodeOwnerConfig.Key.create(project, "master", "/"),
+                    getCodeOwnerConfig(
+                        EMAIL_1, "@example.com", "admin@", "admin@example@com", EMAIL_2)));
+    assertThat(exception.getFullMessage(FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME))
+        .isEqualTo(
+            "invalid code owner config file '/OWNERS':\n"
+                + "  invalid line: @example.com\n"
+                + "  invalid line: admin@\n"
+                + "  invalid line: admin@example@com");
   }
 
   @Test
-  public void codeOwnerConfigWithInvalidLines_invalidLinesAreIgnored() throws Exception {
-    assertParseAndFormat(
-        getCodeOwnerConfig(EMAIL_1, "INVALID", "NOT_AN_EMAIL", EMAIL_2),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig)
-                .hasCodeOwnerSetsThat()
-                .onlyElement()
-                .hasCodeOwnersEmailsThat()
-                .containsExactly(EMAIL_1, EMAIL_2),
-        getCodeOwnerConfig(EMAIL_1, EMAIL_2));
+  public void cannotParseCodeOwnerConfigWithInvalidLines() throws Exception {
+    CodeOwnerConfigParseException exception =
+        assertThrows(
+            CodeOwnerConfigParseException.class,
+            () ->
+                codeOwnerConfigParser.parse(
+                    TEST_REVISION,
+                    CodeOwnerConfig.Key.create(project, "master", "/"),
+                    getCodeOwnerConfig(EMAIL_1, "INVALID", "NOT_AN_EMAIL", EMAIL_2)));
+    assertThat(exception.getFullMessage(FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME))
+        .isEqualTo(
+            "invalid code owner config file '/OWNERS':\n"
+                + "  invalid line: INVALID\n"
+                + "  invalid line: NOT_AN_EMAIL");
   }
 
   @Test

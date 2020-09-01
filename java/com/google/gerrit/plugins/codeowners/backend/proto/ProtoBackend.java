@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.proto;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
@@ -42,7 +43,7 @@ public class ProtoBackend extends AbstractFileBasedCodeOwnerBackend {
   public static final String ID = "proto";
 
   /** The name of the files in which {@link CodeOwnerConfig}s are stored. */
-  static final String CODE_OWNER_CONFIG_FILE_NAME = "OWNERS_METADATA";
+  @VisibleForTesting public static final String CODE_OWNER_CONFIG_FILE_NAME = "OWNERS_METADATA";
 
   @Inject
   ProtoBackend(
