@@ -19,6 +19,7 @@ import com.google.gerrit.plugins.codeowners.api.ApiModule;
 import com.google.gerrit.plugins.codeowners.backend.BackendModule;
 import com.google.gerrit.plugins.codeowners.config.ConfigModule;
 import com.google.gerrit.plugins.codeowners.restapi.RestApiModule;
+import com.google.gerrit.plugins.codeowners.validation.ValidationModule;
 
 /** Guice module that registers the extensions of the code-owners plugin. */
 public class Module extends FactoryModule {
@@ -28,5 +29,6 @@ public class Module extends FactoryModule {
     install(new BackendModule());
     install(new ConfigModule());
     install(new RestApiModule());
+    install(new ValidationModule());
   }
 }
