@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c554abbe_c26cd8a9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 178,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-01T13:37:03Z",
+      "side": 1,
+      "message": "is this needed?",
+      "range": {
+        "startLine": 178,
+        "startChar": 4,
+        "endLine": 178,
+        "endChar": 10
+      },
+      "revId": "9c194f7834a3d93c84b6bdf7f055b64d777d73e0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
