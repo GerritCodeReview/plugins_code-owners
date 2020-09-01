@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
@@ -38,7 +39,7 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
   public static final String ID = "find-owners";
 
   /** The name of the files in which {@link CodeOwnerConfig}s are stored. */
-  static final String CODE_OWNER_CONFIG_FILE_NAME = "OWNERS";
+  @VisibleForTesting public static final String CODE_OWNER_CONFIG_FILE_NAME = "OWNERS";
 
   @Inject
   FindOwnersBackend(
