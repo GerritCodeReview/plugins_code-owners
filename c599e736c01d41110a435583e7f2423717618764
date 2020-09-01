@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f6bdedfe_f59ede34",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigReference.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-01T14:58:18Z",
+      "side": 1,
+      "message": "(nit: this restriction is not mentioned in the commit message)\n\nWhy not support short names too? If you\u0027re already supporting project:full-branch-name, I think it would improve the UX alot if short names are also supported.\n\nRE this: I see that when using setBranch, then short name is also supported.",
+      "range": {
+        "startLine": 196,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 0
+      },
+      "revId": "c599e736c01d41110a435583e7f2423717618764",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "efc95dc4_dc7a85e1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-01T14:58:18Z",
+      "side": 1,
+      "message": "\"optional\" would help (also above).\nI was wondering how PROJECT_AND_FILE is no longer needed, but then realised it still exists since BRANCH_NAME is just optional.",
+      "range": {
+        "startLine": 109,
+        "startChar": 6,
+        "endLine": 109,
+        "endChar": 7
+      },
+      "revId": "c599e736c01d41110a435583e7f2423717618764",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cc7fbfd7_b9e88869",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-01T14:58:18Z",
+      "side": 1,
+      "message": "I think this error message is not accurate, since it can also just be an invalid project.\nMaybe just add this to the error message?",
+      "range": {
+        "startLine": 406,
+        "startChar": 13,
+        "endLine": 406,
+        "endChar": 60
+      },
+      "revId": "c599e736c01d41110a435583e7f2423717618764",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
