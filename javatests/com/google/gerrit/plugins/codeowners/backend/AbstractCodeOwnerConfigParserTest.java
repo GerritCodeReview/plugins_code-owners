@@ -260,7 +260,8 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
    * @param codeOwnerConfigAsserter asserter that asserts the parsed code owner config
    */
   protected void assertParseAndFormat(
-      String codeOwnerConfig, CodeOwnerConfigAsserter codeOwnerConfigAsserter) throws IOException {
+      String codeOwnerConfig, CodeOwnerConfigAsserter codeOwnerConfigAsserter)
+      throws IOException, CodeOwnerConfigParseException {
     assertParseAndFormat(codeOwnerConfig, codeOwnerConfigAsserter, codeOwnerConfig);
   }
 
@@ -277,7 +278,7 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
       String codeOwnerConfig,
       CodeOwnerConfigAsserter codeOwnerConfigAsserter,
       String expectedConfig)
-      throws IOException {
+      throws IOException, CodeOwnerConfigParseException {
     // Parse the provided code owner config.
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
