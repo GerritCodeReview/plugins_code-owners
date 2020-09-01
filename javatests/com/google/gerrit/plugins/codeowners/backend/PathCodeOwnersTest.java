@@ -1808,5 +1808,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     public boolean isCodeOwnerConfigFile(NameKey project, String fileName) {
       throw new UnsupportedOperationException("not implemented");
     }
+
+    @Override
+    public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
+      throw new UnsupportedOperationException("not implemented");
+    }
   }
 }
