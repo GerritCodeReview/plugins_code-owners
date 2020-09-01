@@ -141,7 +141,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void formatCodeOwnerProjectConfig_statusNotSetIfEmpty() throws Exception {
+  public void formatCodeOwnerProjectConfig_emptyStatus() throws Exception {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         CodeOwnerProjectConfigJson.format(
             false,
@@ -151,7 +151,9 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
             null);
-    assertThat(codeOwnerProjectConfigInfo.status).isNull();
+    assertThat(codeOwnerProjectConfigInfo.status).isNotNull();
+    assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
+    assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
   }
 
   @Test
