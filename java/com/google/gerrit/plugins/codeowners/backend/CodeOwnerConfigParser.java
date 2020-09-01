@@ -44,11 +44,13 @@ public interface CodeOwnerConfigParser {
    * @param codeOwnerConfigAsString the code owner configuration as string, e.g. the content of the
    *     code owner config file
    * @return the parsed {@link CodeOwnerConfig}
-   * @throws IOException throw is there is an IO error during the parsing
+   * @throws IOException thrown if there is an IO error during the parsing
+   * @throws CodeOwnerConfigParseException thrown if the given code owner configuration string is
+   *     invalid
    */
   CodeOwnerConfig parse(
       ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
-      throws IOException;
+      throws IOException, CodeOwnerConfigParseException;
 
   /**
    * Formats the given code owner config as string.
