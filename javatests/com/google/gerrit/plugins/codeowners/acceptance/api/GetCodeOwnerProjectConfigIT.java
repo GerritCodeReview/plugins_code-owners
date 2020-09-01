@@ -83,7 +83,8 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
-    assertThat(codeOwnerProjectConfigInfo.status).isNull();
+    assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
+    assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.id)
         .isEqualTo(CodeOwnerBackendId.getBackendId(backendConfig.getDefaultBackend().getClass()));
