@@ -21,14 +21,17 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.backend.ChangedFile;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.events.CommitReceivedEvent;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -43,6 +46,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 /** Validates modifications to the code owner config files. */
 @Singleton
@@ -50,12 +55,16 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
 
   @Inject
   CodeOwnerConfigValidator(
-      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration, ChangedFiles changedFiles) {
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      GitRepositoryManager repoManager,
+      ChangedFiles changedFiles) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.repoManager = repoManager;
     this.changedFiles = changedFiles;
   }
 
@@ -75,21 +84,21 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
           changedFiles.compute(receiveEvent.getProjectNameKey(), receiveEvent.commit).stream()
               // filter out deletions (files without new path)
               .filter(changedFile -> changedFile.newPath().isPresent())
-              // map to path
-              .map(changedFile -> changedFile.newPath().get().toString())
               // filter out non code owner config files
               .filter(
-                  filePath ->
+                  changedFile ->
                       codeOwnerBackend.isCodeOwnerConfigFile(
                           receiveEvent.getProjectNameKey(),
-                          Paths.get(filePath).getFileName().toString()))
+                          Paths.get(changedFile.newPath().get().toString())
+                              .getFileName()
+                              .toString()))
               // validate the code owner config files
               .flatMap(
-                  filePath ->
+                  changedFile ->
                       validateCodeOwnerConfig(
                           codeOwnerBackend,
                           receiveEvent.getBranchNameKey(),
-                          filePath,
+                          changedFile,
                           receiveEvent.commit))
               .collect(toImmutableList());
 
@@ -126,18 +135,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
-      String filePathAsString,
+      ChangedFile changedFile,
       ObjectId revision) {
-    Path filePath = Paths.get(filePathAsString);
-    Path folderPath =
-        filePath.getParent() != null
-            ? JgitPath.of(filePath.getParent()).getAsAbsolutePath()
-            : Paths.get("/");
-    String fileName = filePath.getFileName().toString();
-    CodeOwnerConfig.Key codeOwnerConfigKey =
-        CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
-
     try {
+      CodeOwnerConfig.Key codeOwnerConfigKey =
+          createCodeOwnerConfigKey(branchNameKey, changedFile.newPath().get());
       Optional<CodeOwnerConfig> codeOwnerConfig =
           codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
       checkState(
@@ -151,9 +153,60 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
       if (!configInvalidException.isPresent()) {
         throw e;
       }
+
+      // Using error as type means that uploads will be blocked.
+      ValidationMessage.Type validationMessageType = ValidationMessage.Type.ERROR;
+      if (changedFile.oldPath().isPresent()) {
+        Optional<ObjectId> parentRevision = getParentRevision(branchNameKey.project(), revision);
+        if (parentRevision.isPresent()) {
+          try {
+            // Try to load the code owner config from the parent revision to see if it was parseable
+            // there. If yes, the parsing error is introduced by the new commit and we should block
+            // uploading it.
+            CodeOwnerConfig.Key codeOwnerConfigKey =
+                createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
+            codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, parentRevision.get());
+          } catch (StorageException e2) {
+            if (getInvalidConfigCause(e2).isPresent()) {
+              // The code owner config was already non-parseable before, hence we do not need to
+              // block the upload if the code owner config is still non-parseable.
+              // Using warning as type means that uploads are not blocked.
+              validationMessageType = ValidationMessage.Type.WARNING;
+            } else {
+              throw e2;
+            }
+          }
+        }
+      }
+
       return Stream.of(
           new CommitValidationMessage(
-              configInvalidException.get().getMessage(), ValidationMessage.Type.ERROR));
+              configInvalidException.get().getMessage(), validationMessageType));
+    }
+  }
+
+  private CodeOwnerConfig.Key createCodeOwnerConfigKey(BranchNameKey branchNameKey, Path filePath) {
+    Path folderPath =
+        filePath.getParent() != null
+            ? JgitPath.of(filePath.getParent()).getAsAbsolutePath()
+            : Paths.get("/");
+    String fileName = filePath.getFileName().toString();
+    return CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
+  }
+
+  private Optional<ObjectId> getParentRevision(Project.NameKey project, ObjectId revision) {
+    try (Repository repository = repoManager.openRepository(project)) {
+      RevCommit commit = repository.parseCommit(revision);
+      if (commit.getParentCount() == 0) {
+        return Optional.empty();
+      }
+      return Optional.of(commit.getParent(0));
+    } catch (IOException e) {
+      throw new StorageException(
+          String.format(
+              "Failed to retrieve parent commit of commit %s in project %s",
+              revision.name(), project.get()),
+          e);
     }
   }
 
