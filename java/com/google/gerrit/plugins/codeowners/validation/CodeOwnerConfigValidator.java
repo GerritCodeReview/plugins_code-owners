@@ -21,6 +21,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
@@ -29,6 +30,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.events.CommitReceivedEvent;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -43,6 +45,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 /** Validates modifications to the code owner config files. */
 @Singleton
@@ -50,12 +54,16 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
 
   @Inject
   CodeOwnerConfigValidator(
-      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration, ChangedFiles changedFiles) {
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      GitRepositoryManager repoManager,
+      ChangedFiles changedFiles) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.repoManager = repoManager;
     this.changedFiles = changedFiles;
   }
 
@@ -90,7 +98,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
                           codeOwnerBackend,
                           receiveEvent.getBranchNameKey(),
                           filePath,
-                          receiveEvent.commit))
+                          receiveEvent.commit,
+                          true))
               .collect(toImmutableList());
 
       if (validationMessages.stream()
@@ -127,7 +136,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       String filePathAsString,
-      ObjectId revision) {
+      ObjectId revision,
+      boolean deltaValidation) {
     Path filePath = Paths.get(filePathAsString);
     Path folderPath =
         filePath.getParent() != null
@@ -145,15 +155,55 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
           "code owner config %s not found in revision %s",
           codeOwnerConfig,
           revision.name());
-      return validateCodeOwnerConfig(codeOwnerConfig.get());
+      return validateCodeOwnerConfig(codeOwnerConfig.get(), deltaValidation);
     } catch (StorageException e) {
       Optional<ConfigInvalidException> configInvalidException = getInvalidConfigCause(e);
       if (!configInvalidException.isPresent()) {
         throw e;
       }
+
+      // Using error as type means that uploads will be blocked.
+      ValidationMessage.Type validationMessageType = ValidationMessage.Type.ERROR;
+      if (deltaValidation) {
+        Optional<ObjectId> parentRevision = getParentRevision(branchNameKey.project(), revision);
+        if (parentRevision.isPresent()) {
+          try {
+            // Try to load the code owner config from the parent revision to see if it was parseable
+            // there. If yes, the parsing error is introduced by the new commit and we should block
+            // uploading it.
+            codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, parentRevision.get());
+          } catch (StorageException e2) {
+            if (getInvalidConfigCause(e2).isPresent()) {
+              // The code owner config was already non-parseable before, hence we do not need to
+              // block the upload if the code owner config is still non-parseable.
+              // Using warning as type means that uploads are not blocked.
+              validationMessageType = ValidationMessage.Type.WARNING;
+            } else {
+              throw e2;
+            }
+          }
+        }
+      }
+
       return Stream.of(
           new CommitValidationMessage(
-              configInvalidException.get().getMessage(), ValidationMessage.Type.ERROR));
+              configInvalidException.get().getMessage(), validationMessageType));
+    }
+  }
+
+  private Optional<ObjectId> getParentRevision(Project.NameKey project, ObjectId revision) {
+    try (Repository repository = repoManager.openRepository(project)) {
+      RevCommit commit = repository.parseCommit(revision);
+      if (commit.getParentCount() == 0) {
+        return Optional.empty();
+      }
+      return Optional.of(commit.getParent(0));
+    } catch (IOException e) {
+      throw new StorageException(
+          String.format(
+              "Failed to retrieve parent commit of commit %s in project %s",
+              revision.name(), project.get()),
+          e);
     }
   }
 
@@ -167,7 +217,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   }
 
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
-      @SuppressWarnings("unused") CodeOwnerConfig codeOwnerConfig) {
+      @SuppressWarnings("unused") CodeOwnerConfig codeOwnerConfig,
+      @SuppressWarnings("unused") boolean deltaValidation) {
     // TODO(ekempin): Validate the parsed code owner config.
     return Stream.of();
   }

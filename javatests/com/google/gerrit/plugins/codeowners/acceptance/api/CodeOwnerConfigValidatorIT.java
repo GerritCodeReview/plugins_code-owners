@@ -17,11 +17,14 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import org.eclipse.jgit.lib.AnyObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -50,12 +53,45 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void canUploadNonParseableConfigIfItWasAlreadyNonParseable() throws Exception {
+    // disable the code owners functionality so that we can upload an initial code owner config that
+    // is not parseable
+    disableCodeOwnersForProject(project);
+
+    // upload an initial code owner config that is not parseable
+    PushOneCommit.Result r =
+        createChange("Add code owners", getCodeOwnerConfigFileName(), "INVALID");
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // update the code owner config so that it is still not parseable
+    r = createChange("Update code owners", getCodeOwnerConfigFileName(), "STILL INVALID");
+    r.assertOkStatus();
+    r.assertMessage(
+        String.format(
+            "warning: commit %s: invalid code owner config file '/%s':",
+            abbreviateName(r.getCommit()), getCodeOwnerConfigFileName()));
+
+    CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
+    assertThat(codeOwnerBackend.getClass()).isAnyOf(FindOwnersBackend.class, ProtoBackend.class);
+    if (codeOwnerBackend instanceof FindOwnersBackend) {
+      r.assertMessage("invalid line: STILL INVALID");
+    } else if (codeOwnerBackend instanceof ProtoBackend) {
+      r.assertMessage("1:7: expected \"{\"");
+    }
+  }
+
+  @Test
   public void cannotUploadNonParseableConfig() throws Exception {
     PushOneCommit.Result r =
         createChange("Add code owners", getCodeOwnerConfigFileName(), "INVALID");
     r.assertErrorStatus("invalid code owner config files");
     r.assertMessage(
-        String.format("invalid code owner config file '/%s':", getCodeOwnerConfigFileName()));
+        String.format(
+            "error: commit %s: invalid code owner config file '/%s':",
+            abbreviateName(r.getCommit()), getCodeOwnerConfigFileName()));
 
     CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
     assertThat(codeOwnerBackend.getClass()).isAnyOf(FindOwnersBackend.class, ProtoBackend.class);
@@ -75,5 +111,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     }
     throw new IllegalStateException(
         "unknown code owner backend: " + codeOwnerBackend.getClass().getName());
+  }
+
+  private String abbreviateName(AnyObjectId id) throws Exception {
+    return ObjectIds.abbreviateName(id, testRepo.getRevWalk().getObjectReader());
   }
 }
