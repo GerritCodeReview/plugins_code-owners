@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "ec14442a_92396f9f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigReference.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-02T06:35:57Z",
+      "side": 1,
+      "message": "We do support short and full names via the public setBranch method, so in code owner config files you can use both.\n\nI just want that callers that read the branch from CodeOwnerConfigReference (via branch()) do not need to worry about whether they get the short or full name, so for them we guarantee that it\u0027s always the full name. \n\nSince this is an AutoValue we cannot hide the generated setBranch(Optional\u003cString\u003e) method completely (we can only make it package private, but not private). This means there is a small chance that someone in the same package uses this method to set a short branch name. To prevent and detect this, we have this check here.",
+      "parentUuid": "f6bdedfe_f59ede34",
+      "range": {
+        "startLine": 196,
+        "startChar": 0,
+        "endLine": 198,
+        "endChar": 0
+      },
+      "revId": "c599e736c01d41110a435583e7f2423717618764",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "efc95dc4_dc7a85e1",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
         "patchSetId": 4
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "e62deede_d2575c34",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-02T06:35:57Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "efc95dc4_dc7a85e1",
+      "range": {
+        "startLine": 109,
+        "startChar": 6,
+        "endLine": 109,
+        "endChar": 7
+      },
+      "revId": "c599e736c01d41110a435583e7f2423717618764",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "cc7fbfd7_b9e88869",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
         "patchSetId": 4
@@ -59,6 +107,30 @@
       "writtenOn": "2020-09-01T14:58:18Z",
       "side": 1,
       "message": "I think this error message is not accurate, since it can also just be an invalid project.\nMaybe just add this to the error message?",
+      "range": {
+        "startLine": 406,
+        "startChar": 13,
+        "endLine": 406,
+        "endChar": 60
+      },
+      "revId": "c599e736c01d41110a435583e7f2423717618764",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "12fe968d_b250b6c1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-02T06:35:57Z",
+      "side": 1,
+      "message": "Not sure I understand how the project can be invalid if it is not set in codeOwnerConfigReference.\nCan you please explain the issue more?",
+      "parentUuid": "cc7fbfd7_b9e88869",
       "range": {
         "startLine": 406,
         "startChar": 13,
