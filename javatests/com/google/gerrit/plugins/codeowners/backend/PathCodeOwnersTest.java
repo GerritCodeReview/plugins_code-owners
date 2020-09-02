@@ -1241,6 +1241,100 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void importFromOtherBranch() throws Exception {
+    // Create other branch.
+    String otherBranch = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = otherBranch;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // create importing config with global code owner and import with relative path
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS")
+                    .setProject(project)
+                    .setBranch(otherBranch)
+                    .build())
+            .create();
+
+    // create imported config with global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(otherBranch)
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing and the imported code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void importFromOtherProjectAndBranch() throws Exception {
+    Project.NameKey otherProject = projectOperations.newProject().create();
+
+    // Create other branch.
+    String otherBranch = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = otherBranch;
+    branchInput.revision = projectOperations.project(otherProject).getHead("master").name();
+    gApi.projects().name(otherProject.get()).branch(branchInput.ref).create(branchInput);
+
+    // create importing config with global code owner and import with relative path
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS")
+                    .setProject(otherProject)
+                    .setBranch(otherBranch)
+                    .build())
+            .create();
+
+    // create imported config with global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch(otherBranch)
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing and the imported code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
   public void nonResolveablePerFileImportIsIgnored() throws Exception {
     // create importing config with non-resolveable per file import
     CodeOwnerConfig.Key importingCodeOwnerConfigKey =

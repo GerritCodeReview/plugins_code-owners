@@ -103,25 +103,28 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final String EMAIL_LIST =
         "(" + EMAIL_OR_STAR + "(" + COMMA + EMAIL_OR_STAR + ")*)";
 
-    // A Gerrit project name followed by a colon and optional spaces.
+    // Optional name of a Gerrit project followed by a colon and optional spaces.
     private static final String PROJECT_NAME = "([^\\s:]+" + COLON + ")?";
+
+    // Optional name of a branch followed by a colon and optional spaces.
+    private static final String BRANCH_NAME = "([^\\s:]+" + COLON + ")?";
 
     // A relative or absolute file path name without any colon or space character.
     private static final String FILE_PATH = "([^\\s:#]+)";
 
-    private static final String PROJECT_AND_FILE = PROJECT_NAME + FILE_PATH;
+    private static final String PROJECT_BRANCH_AND_FILE = PROJECT_NAME + BRANCH_NAME + FILE_PATH;
 
     private static final String SET_NOPARENT = "set[\\s]+noparent";
 
-    private static final String FILE_DIRECTIVE = "file:[\\s]*" + PROJECT_AND_FILE;
-    private static final String INCLUDE_DIRECTIVE = "include[\\s]+" + PROJECT_AND_FILE;
+    private static final String FILE_DIRECTIVE = "file:[\\s]*" + PROJECT_BRANCH_AND_FILE;
+    private static final String INCLUDE_DIRECTIVE = "include[\\s]+" + PROJECT_BRANCH_AND_FILE;
     private static final String INCLUDE_OR_FILE = "(file:[\\s]*|include[\\s]+)";
 
     // Simple input lines with 0 or 1 sub-pattern.
     private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
     private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL_OR_STAR + EOL);
     private static final Pattern PAT_INCLUDE =
-        Pattern.compile(BOL + INCLUDE_OR_FILE + PROJECT_AND_FILE + EOL);
+        Pattern.compile(BOL + INCLUDE_OR_FILE + PROJECT_BRANCH_AND_FILE + EOL);
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
 
     private static final Pattern PAT_PER_FILE_OWNERS =
@@ -250,13 +253,20 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
               : CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY;
 
       CodeOwnerConfigReference.Builder builder =
-          CodeOwnerConfigReference.builder(importMode, m.group(3).trim());
+          CodeOwnerConfigReference.builder(importMode, m.group(4).trim());
 
       String projectName = m.group(2);
       if (projectName != null && projectName.length() > 1) {
         // PROJECT_NAME ends with ':'
         projectName = projectName.split(COLON, -1)[0].trim();
         builder.setProject(Project.nameKey(projectName));
+
+        String branchName = m.group(3);
+        if (branchName != null && branchName.length() > 1) {
+          // BRANCH_NAME ends with ':'
+          branchName = branchName.split(COLON, -1)[0].trim();
+          builder.setBranch(branchName);
+        }
       }
 
       return builder.build();
@@ -387,6 +397,15 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       // write the project
       if (codeOwnerConfigReference.project().isPresent()) {
         b.append(codeOwnerConfigReference.project().get()).append(':');
+      }
+
+      // write the branch
+      if (codeOwnerConfigReference.branch().isPresent()) {
+        checkState(
+            codeOwnerConfigReference.project().isPresent(),
+            "project is required if branch is specified: %s",
+            codeOwnerConfigReference);
+        b.append(codeOwnerConfigReference.branch().get()).append(':');
       }
 
       // write the file path
