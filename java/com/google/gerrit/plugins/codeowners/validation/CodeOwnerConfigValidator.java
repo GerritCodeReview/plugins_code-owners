@@ -21,6 +21,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFile;
@@ -30,6 +31,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.events.CommitReceivedEvent;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -44,6 +46,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 /** Validates modifications to the code owner config files. */
 @Singleton
@@ -51,12 +55,16 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
 
   @Inject
   CodeOwnerConfigValidator(
-      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration, ChangedFiles changedFiles) {
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      GitRepositoryManager repoManager,
+      ChangedFiles changedFiles) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.repoManager = repoManager;
     this.changedFiles = changedFiles;
   }
 
@@ -183,17 +191,89 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
       // The exception was caused by a ConfigInvalidException. This means loading the code owner
       // config failed because it is not parseable.
 
+      // The validation message type that we will use to report issues. Using error as type means
+      // that the upload will be blocked, using warning as type means that the upload can succeed
+      // and the issues will only be shown as warnings.
+      ValidationMessage.Type validationMessageType;
+
+      // If a previous version of the code owner config exists and the previous version was also
+      // non-parseable we want to allow the upload even if the new version is still non-parseable,
+      // as it is not making anything worse.
+      if (changedFile.oldPath().isPresent()) {
+        // A previous version of the code owner config exists.
+        ObjectId parentRevision =
+            getParentRevision(branchNameKey.project(), revision)
+                // Since there is an old path a parent revision must exist.
+                .orElseThrow(
+                    () ->
+                        new IllegalStateException(
+                            String.format(
+                                "parent revision for revision %s in project %s not found",
+                                revision.name(), branchNameKey.project().get())));
+        try {
+          // Try to load the code owner config from the parent revision to see if it was parseable
+          // there.
+          CodeOwnerConfig.Key baseCodeOwnerConfigKey =
+              createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
+          codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision);
+          // The code owner config at the parent revision is parseable. This means the parsing error
+          // is introduced by the new commit and we should block uploading it, which we achieve by
+          // setting the validation message type to error.
+          validationMessageType = ValidationMessage.Type.ERROR;
+        } catch (StorageException e2) {
+          // Loading the base code owner config has failed.
+          if (getInvalidConfigCause(e2).isPresent()) {
+            // The code owner config was already non-parseable before, hence we do not need to
+            // block the upload if the code owner config is still non-parseable.
+            // Using warning as type means that uploads are not blocked.
+            validationMessageType = ValidationMessage.Type.WARNING;
+          } else {
+            // Propagate any failure that is not related to the contents of the code owner config.
+            throw e2;
+          }
+        }
+      } else {
+        // The code owner config is newly created. Hence the parsing error comes from the commit
+        // that is being pushed and we want to block it from uploading. To do this we set the
+        // validation message type to error.
+        validationMessageType = ValidationMessage.Type.ERROR;
+      }
+
       // Convert the message from the InvalidConfigException into a validation message and return
       // it.
       return Stream.of(
           new CommitValidationMessage(
-              configInvalidException.get().getMessage(), ValidationMessage.Type.ERROR));
+              configInvalidException.get().getMessage(), validationMessageType));
     }
 
     // The code owner config was successfully loaded and parsed.
 
     // Validate the parsed code owner config.
     return validateCodeOwnerConfig(codeOwnerConfig);
+  }
+
+  /**
+   * Returns the first parent of the given revision.
+   *
+   * @param project the project that contains the revision
+   * @param revision the revision for which the first parent should be returned
+   * @return the first parent of the given revision, {@link Optional#empty()} if the given revision
+   *     has no parent
+   */
+  private Optional<ObjectId> getParentRevision(Project.NameKey project, ObjectId revision) {
+    try (Repository repository = repoManager.openRepository(project)) {
+      RevCommit commit = repository.parseCommit(revision);
+      if (commit.getParentCount() == 0) {
+        return Optional.empty();
+      }
+      return Optional.of(commit.getParent(0));
+    } catch (IOException e) {
+      throw new StorageException(
+          String.format(
+              "Failed to retrieve parent commit of commit %s in project %s",
+              revision.name(), project.get()),
+          e);
+    }
   }
 
   /**
