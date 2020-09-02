@@ -140,6 +140,30 @@
       "revId": "c599e736c01d41110a435583e7f2423717618764",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a7bdaceb_bec53490",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 406,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-02T11:17:37Z",
+      "side": 1,
+      "message": "You\u0027re right, this is fine then.",
+      "parentUuid": "12fe968d_b250b6c1",
+      "range": {
+        "startLine": 406,
+        "startChar": 13,
+        "endLine": 406,
+        "endChar": 60
+      },
+      "revId": "c599e736c01d41110a435583e7f2423717618764",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
