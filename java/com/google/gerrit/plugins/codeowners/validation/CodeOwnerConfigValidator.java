@@ -457,6 +457,15 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
    */
   private Optional<CommitValidationMessage> validateCodeOwnerReference(
       Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
+    if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email())) {
+      return Optional.of(
+          new CommitValidationMessage(
+              String.format(
+                  "the domain of the code owner email '%s' in '%s' is not allowed for code owners",
+                  codeOwnerReference.email(), codeOwnerConfigFilePath),
+              ValidationMessage.Type.ERROR));
+    }
+
     // Check if the code owner reference is resolvable.
     if (codeOwnerResolver.resolve(codeOwnerReference).findAny().isPresent()) {
       // The code owner reference was successfully resolved to at least one code owner.
