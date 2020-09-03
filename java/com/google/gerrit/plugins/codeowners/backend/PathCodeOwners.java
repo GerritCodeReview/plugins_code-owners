@@ -45,7 +45,7 @@ import org.eclipse.jgit.lib.ObjectId;
  *
  * <p>Code owners from inherited code owner configs are not considered.
  */
-class PathCodeOwners {
+public class PathCodeOwners {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   @Singleton
@@ -354,7 +354,7 @@ class PathCodeOwners {
     }
   }
 
-  private static CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
+  public static CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       CodeOwnerConfigReference codeOwnerConfigReference) {
     // if the code owner config reference doesn't have a project, the imported code owner config
