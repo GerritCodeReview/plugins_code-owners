@@ -14,11 +14,9 @@
 
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static java.util.stream.Collectors.joining;
 
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
@@ -28,7 +26,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubject;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
@@ -41,87 +38,6 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   @Override
   protected Class<? extends CodeOwnerConfigParser> getCodeOwnerConfigParserClass() {
     return FindOwnersCodeOwnerConfigParser.class;
-  }
-
-  @Override
-  protected String getCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) {
-    StringBuilder b = new StringBuilder();
-    if (codeOwnerConfig.ignoreParentCodeOwners()) {
-      b.append("set noparent\n");
-    }
-
-    codeOwnerConfig
-        .imports()
-        .forEach(
-            codeOwnerConfigReference -> {
-              String keyword;
-              if (codeOwnerConfigReference.importMode().equals(CodeOwnerConfigImportMode.ALL)) {
-                keyword = "include";
-              } else {
-                keyword = "file:";
-              }
-              b.append(
-                  String.format(
-                      "%s %s%s%s\n",
-                      keyword,
-                      codeOwnerConfigReference
-                          .project()
-                          .map(Project.NameKey::get)
-                          .map(projectName -> projectName + ":")
-                          .orElse(""),
-                      codeOwnerConfigReference.branch().map(branch -> branch + ":").orElse(""),
-                      codeOwnerConfigReference.filePath()));
-            });
-
-    // global code owners
-    for (String email :
-        codeOwnerConfig.codeOwnerSets().stream()
-            .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
-            .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
-            .map(CodeOwnerReference::email)
-            .sorted()
-            .distinct()
-            .collect(toImmutableList())) {
-      b.append(email).append('\n');
-    }
-
-    // per-file code owners
-    for (CodeOwnerSet codeOwnerSet :
-        codeOwnerConfig.codeOwnerSets().stream()
-            .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
-            .collect(toImmutableList())) {
-      if (codeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
-        b.append(
-            String.format(
-                "per-file %s=set noparent\n",
-                codeOwnerSet.pathExpressions().stream().sorted().collect(joining(","))));
-      }
-      for (CodeOwnerConfigReference codeOwnerConfigReference : codeOwnerSet.imports()) {
-        b.append(
-            String.format(
-                "per-file %s=file: %s%s%s\n",
-                codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
-                codeOwnerConfigReference
-                    .project()
-                    .map(Project.NameKey::get)
-                    .map(projectName -> projectName + ":")
-                    .orElse(""),
-                codeOwnerConfigReference.branch().map(branch -> branch + ":").orElse(""),
-                codeOwnerConfigReference.filePath()));
-      }
-      if (!codeOwnerSet.codeOwners().isEmpty()) {
-        b.append(
-            String.format(
-                "per-file %s=%s\n",
-                codeOwnerSet.pathExpressions().stream().sorted().collect(joining(",")),
-                codeOwnerSet.codeOwners().stream()
-                    .map(CodeOwnerReference::email)
-                    .sorted()
-                    .collect(joining(","))));
-      }
-    }
-
-    return b.toString();
   }
 
   @Test
