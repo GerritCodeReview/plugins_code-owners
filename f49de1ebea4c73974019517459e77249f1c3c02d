@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "268b1d16_f1363a57",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigScannerTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-03T10:49:32Z",
+      "side": 1,
+      "message": "Existing",
+      "range": {
+        "startLine": 75,
+        "startChar": 47,
+        "endLine": 75,
+        "endChar": 54
+      },
+      "revId": "f49de1ebea4c73974019517459e77249f1c3c02d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
