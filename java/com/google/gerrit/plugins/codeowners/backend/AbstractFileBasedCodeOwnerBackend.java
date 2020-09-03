@@ -99,16 +99,8 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
     }
   }
 
-  /**
-   * Checks whether the given file name is a code owner config file.
-   *
-   * @param project the project in which the code owner config files are stored
-   * @param fileName the name of the file for which it should be checked whether is a code owner
-   *     config file
-   * @return {@code true} if the given file name is a code owner config file, otherwise {@code
-   *     false}
-   */
-  private boolean isCodeOwnerConfigFile(Project.NameKey project, String fileName) {
+  @Override
+  public boolean isCodeOwnerConfigFile(Project.NameKey project, String fileName) {
     requireNonNull(project, "project");
     requireNonNull(fileName, "fileName");
 
