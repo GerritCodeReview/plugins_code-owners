@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -30,8 +31,11 @@ import com.google.gerrit.plugins.codeowners.backend.ChangedFile;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportType;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.events.CommitReceivedEvent;
@@ -40,6 +44,12 @@ import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.permissions.PermissionBackend;
+import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.permissions.ProjectPermission;
+import com.google.gerrit.server.permissions.RefPermission;
+import com.google.gerrit.server.project.ProjectCache;
+import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -51,6 +61,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
@@ -87,6 +98,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
  *       visibility is changed, another code owners backend is configured which now uses a different
  *       syntax or different names for code owner config files)
  *   <li>emails of user may change so that emails in code owner configs can no longer be resolved
+ *   <li>imported code owner config files may get deleted or renamed so that the import references
+ *       can no longer be resolved
  * </ul>
  */
 @Singleton
@@ -97,17 +110,23 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
   private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
+  private final PermissionBackend permissionBackend;
+  private final ProjectCache projectCache;
 
   @Inject
   CodeOwnerConfigValidator(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
       ChangedFiles changedFiles,
-      Provider<CodeOwnerResolver> codeOwnerResolver) {
+      Provider<CodeOwnerResolver> codeOwnerResolver,
+      PermissionBackend permissionBackend,
+      ProjectCache projectCache) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
     this.codeOwnerResolverProvider = codeOwnerResolver;
+    this.permissionBackend = permissionBackend;
+    this.projectCache = projectCache;
   }
 
   @Override
@@ -481,8 +500,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
       CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
-    return validateCodeOwnerReferences(
-        codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig);
+    return Streams.concat(
+        validateCodeOwnerReferences(
+            codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig),
+        validateImports(codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig));
   }
 
   /**
@@ -519,12 +540,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
       Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
     CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get();
     if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email())) {
-      return Optional.of(
-          new CommitValidationMessage(
-              String.format(
-                  "the domain of the code owner email '%s' in '%s' is not allowed for code owners",
-                  codeOwnerReference.email(), codeOwnerConfigFilePath),
-              ValidationMessage.Type.ERROR));
+      return error(
+          String.format(
+              "the domain of the code owner email '%s' in '%s' is not allowed for code owners",
+              codeOwnerReference.email(), codeOwnerConfigFilePath));
     }
 
     // Check if the code owner reference is resolvable.
@@ -538,11 +557,188 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
     // CodeOwerResolver for details). We intentionally return the same generic message in all these
     // cases so that uploaders cannot probe emails for existence (e.g. they cannot add an email and
     // conclude from the error message whether the email exists).
-    return Optional.of(
-        new CommitValidationMessage(
+    return error(
+        String.format(
+            "code owner email '%s' in '%s' cannot be resolved",
+            codeOwnerReference.email(), codeOwnerConfigFilePath));
+  }
+
+  /**
+   * Validates the imports of the given code owner config.
+   *
+   * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
+   *     owner config
+   * @param codeOwnerConfig the code owner config for which the imports should be validated
+   * @return a stream of validation messages that describe issues with the imports, an empty stream
+   *     if there are no issues
+   */
+  private Stream<CommitValidationMessage> validateImports(
+      Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
+    return Streams.concat(
+            codeOwnerConfig.imports().stream()
+                .map(
+                    codeOwnerConfigReference ->
+                        validateCodeOwnerConfigReference(
+                            codeOwnerConfigFilePath,
+                            codeOwnerConfig.key(),
+                            CodeOwnerConfigImportType.GLOBAL,
+                            codeOwnerConfigReference)),
+            codeOwnerConfig.codeOwnerSets().stream()
+                .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
+                .map(
+                    codeOwnerConfigReference ->
+                        validateCodeOwnerConfigReference(
+                            codeOwnerConfigFilePath,
+                            codeOwnerConfig.key(),
+                            CodeOwnerConfigImportType.PER_FILE,
+                            codeOwnerConfigReference)))
+        .filter(Optional::isPresent)
+        .map(Optional::get);
+  }
+
+  /**
+   * Validates a code owner config reference.
+   *
+   * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
+   *     owner config reference
+   * @param keyOfImportingCodeOwnerConfig key of the importing code owner config
+   * @param importType the type of the import
+   * @param codeOwnerConfigReference the code owner config reference that should be validated.
+   * @return a validation message describing the issue with the code owner config reference, {@link
+   *     Optional#empty()} if there is no issue
+   */
+  private Optional<CommitValidationMessage> validateCodeOwnerConfigReference(
+      Path codeOwnerConfigFilePath,
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      CodeOwnerConfigImportType importType,
+      CodeOwnerConfigReference codeOwnerConfigReference) {
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        PathCodeOwners.createKeyForImportedCodeOwnerConfig(
+            keyOfImportingCodeOwnerConfig, codeOwnerConfigReference);
+
+    Optional<ProjectState> projectState = projectCache.get(keyOfImportedCodeOwnerConfig.project());
+    if (!projectState.isPresent() || !isProjectReadable(keyOfImportedCodeOwnerConfig)) {
+      // we intentionally use the same error message for non-existing and non-readable projects so
+      // that uploaders cannot probe for the existence of projects (e.g. deduce from the error
+      // message whether a project exists)
+      return invalidImport(
+          importType,
+          codeOwnerConfigFilePath,
+          String.format("project '%s' not found", keyOfImportedCodeOwnerConfig.project().get()));
+    }
+
+    if (!projectState.get().statePermitsRead()) {
+      return invalidImport(
+          importType,
+          codeOwnerConfigFilePath,
+          String.format(
+              "project '%s' has state '%s' that doesn't permit read",
+              keyOfImportedCodeOwnerConfig.project().get(),
+              projectState.get().getProject().getState().name()));
+    }
+
+    Optional<ObjectId> revision = getRevision(keyOfImportedCodeOwnerConfig);
+    if (!revision.isPresent() || !isBranchReadable(keyOfImportedCodeOwnerConfig)) {
+      // we intentionally use the same error message for non-existing and non-readable branches so
+      // that uploaders cannot probe for the existence of branches (e.g. deduce from the error
+      // message whether a branch exists)
+      return invalidImport(
+          importType,
+          codeOwnerConfigFilePath,
+          String.format(
+              "branch '%s' not found in project '%s'",
+              keyOfImportedCodeOwnerConfig.shortBranchName(),
+              keyOfImportedCodeOwnerConfig.project().get()));
+    }
+
+    CodeOwnerBackend codeOwnerBackend =
+        codeOwnersPluginConfiguration.getBackend(keyOfImportedCodeOwnerConfig.branchNameKey());
+    if (!codeOwnerBackend.isCodeOwnerConfigFile(
+        keyOfImportedCodeOwnerConfig.project(), codeOwnerConfigReference.fileName())) {
+      return invalidImport(
+          importType,
+          codeOwnerConfigFilePath,
+          String.format(
+              "'%s' is not a code owner config file", codeOwnerConfigReference.filePath()));
+    }
+
+    try {
+      if (!codeOwnerBackend
+          .getCodeOwnerConfig(keyOfImportedCodeOwnerConfig, revision.get())
+          .isPresent()) {
+        return invalidImport(
+            importType,
+            codeOwnerConfigFilePath,
             String.format(
-                "code owner email '%s' in '%s' cannot be resolved",
-                codeOwnerReference.email(), codeOwnerConfigFilePath),
-            ValidationMessage.Type.ERROR));
+                "'%s' does not exist (project = %s, branch = %s)",
+                codeOwnerConfigReference.filePath(),
+                keyOfImportedCodeOwnerConfig.branchNameKey().project().get(),
+                keyOfImportedCodeOwnerConfig.branchNameKey().shortName()));
+      }
+    } catch (StorageException storageException) {
+      if (getInvalidConfigCause(storageException).isPresent()) {
+        // The imported code owner config is non-parseable.
+        return invalidImport(
+            importType,
+            codeOwnerConfigFilePath,
+            String.format(
+                "'%s' is not parseable (project = %s, branch = %s)",
+                codeOwnerConfigReference.filePath(),
+                keyOfImportedCodeOwnerConfig.branchNameKey().project().get(),
+                keyOfImportedCodeOwnerConfig.branchNameKey().shortName()));
+      }
+
+      // Propagate any exception that was not caused by the content of the code owner config.
+      throw storageException;
+    }
+
+    // no issue found
+    return Optional.empty();
+  }
+
+  private boolean isProjectReadable(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+    try {
+      return permissionBackend
+          .currentUser()
+          .project(keyOfImportedCodeOwnerConfig.project())
+          .test(ProjectPermission.ACCESS);
+    } catch (PermissionBackendException e) {
+      throw new StorageException(
+          "failed to check read permission for project of imported code owner config", e);
+    }
+  }
+
+  private boolean isBranchReadable(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+    try {
+      return permissionBackend
+          .currentUser()
+          .project(keyOfImportedCodeOwnerConfig.project())
+          .ref(keyOfImportedCodeOwnerConfig.ref())
+          .test(RefPermission.READ);
+    } catch (PermissionBackendException e) {
+      throw new StorageException(
+          "failed to check read permission for branch of imported code owner config", e);
+    }
+  }
+
+  private Optional<ObjectId> getRevision(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+    try (Repository repo = repoManager.openRepository(keyOfImportedCodeOwnerConfig.project())) {
+      return Optional.ofNullable(repo.exactRef(keyOfImportedCodeOwnerConfig.ref()))
+          .map(Ref::getObjectId);
+    } catch (IOException e) {
+      throw new StorageException("failed to read revision of import code owner config", e);
+    }
+  }
+
+  private Optional<CommitValidationMessage> invalidImport(
+      CodeOwnerConfigImportType importType, Path codeOwnerConfigFilePath, String message) {
+    return error(
+        String.format(
+            "invalid %s import in '%s': %s",
+            importType.getType(), codeOwnerConfigFilePath, message));
+  }
+
+  private Optional<CommitValidationMessage> error(String message) {
+    return Optional.of(new CommitValidationMessage(message, ValidationMessage.Type.ERROR));
   }
 }
