@@ -15,15 +15,26 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.TruthJUnit.assume;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.entities.Permission;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.api.projects.ConfigInput;
+import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportType;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
@@ -31,6 +42,7 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import com.google.inject.Inject;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
@@ -40,6 +52,8 @@ import org.junit.Test;
 public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private static final ObjectId TEST_REVISION =
       ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
+  @Inject private ProjectOperations projectOperations;
 
   private BackendConfig backendConfig;
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
@@ -72,6 +86,140 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    r.assertOkStatus();
+    r.assertNotMessage("error");
+    r.assertNotMessage("warning");
+  }
+
+  @Test
+  public void canUploadConfigWithoutIssues_withImport() throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config to be imported.
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+            getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig));
+
+    // Create a code owner config with import and without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addImport(codeOwnerConfigReference)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder()
+                            .addCodeOwnerEmail(admin.email())
+                            .addPathExpression("foo")
+                            .addImport(codeOwnerConfigReference)
+                            .build())
+                    .build()));
+    r.assertOkStatus();
+    r.assertNotMessage("error");
+    r.assertNotMessage("warning");
+  }
+
+  @Test
+  public void canUploadConfigWithoutIssues_withImportFromOtherProject() throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config to be imported.
+    Project.NameKey otherProject = projectOperations.newProject().create();
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(otherProject)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig))
+            .setProject(otherProject)
+            .build();
+
+    // Create a code owner config with import from other project, and without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addImport(codeOwnerConfigReference)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder()
+                            .addCodeOwnerEmail(admin.email())
+                            .addPathExpression("foo")
+                            .addImport(codeOwnerConfigReference)
+                            .build())
+                    .build()));
+    r.assertOkStatus();
+    r.assertNotMessage("error");
+    r.assertNotMessage("warning");
+  }
+
+  @Test
+  public void canUploadConfigWithoutIssues_withImportFromOtherProjectAndBranch() throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config to be imported.
+    String otherBranch = "foo";
+    Project.NameKey otherProject = projectOperations.newProject().branches(otherBranch).create();
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(otherProject)
+            .branch(otherBranch)
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig))
+            .setProject(otherProject)
+            .setBranch(otherBranch)
+            .build();
+
+    // Create a code owner config with import from other project and branch, and without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addImport(codeOwnerConfigReference)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder()
+                            .addCodeOwnerEmail(admin.email())
+                            .addPathExpression("foo")
+                            .addImport(codeOwnerConfigReference)
+                            .build())
                     .build()));
     r.assertOkStatus();
     r.assertNotMessage("error");
@@ -409,6 +557,449 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             abbreviateName(r.getCommit()),
             unknownEmail2,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportFromNonExistingProject() throws Exception {
+    testUploadConfigWithImportFromNonExistingProject(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportFromNonExistingProject() throws Exception {
+    testUploadConfigWithImportFromNonExistingProject(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportFromNonExistingProject(
+      CodeOwnerConfigImportType importType) throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // create a code owner config that imports a code owner config from a non-existing project
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    Project.NameKey nonExistingProject = Project.nameKey("non-existing");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(
+                    CodeOwnerConfig.Key.create(nonExistingProject, "master", "/")))
+            .setProject(nonExistingProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s': project '%s' not found",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            nonExistingProject.get()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportFromNonVisibleProject() throws Exception {
+    testUploadConfigWithImportFromNonVisibleProject(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportFromNonVisibleProject() throws Exception {
+    testUploadConfigWithImportFromNonVisibleProject(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportFromNonVisibleProject(CodeOwnerConfigImportType importType)
+      throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // create a non-visible project with a code owner config file that we try to import
+    Project.NameKey nonVisibleProject =
+        projectOperations.newProject().name(name("non-visible-project")).create();
+    projectOperations
+        .project(nonVisibleProject)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/*").group(REGISTERED_USERS))
+        .update();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(nonVisibleProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create a code owner config that imports a code owner config from a non-visible project
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(
+                    CodeOwnerConfig.Key.create(nonVisibleProject, "master", "/")))
+            .setProject(nonVisibleProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            user,
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s': project '%s' not found",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            nonVisibleProject.get()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportFromHiddenProject() throws Exception {
+    testUploadConfigWithImportFromHiddenProject(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportFromHiddenProject() throws Exception {
+    testUploadConfigWithImportFromHiddenProject(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportFromHiddenProject(CodeOwnerConfigImportType importType)
+      throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // create a hidden project with a code owner config file
+    Project.NameKey hiddenProject =
+        projectOperations.newProject().name(name("hidden-project")).create();
+    ConfigInput configInput = new ConfigInput();
+    configInput.state = ProjectState.HIDDEN;
+    gApi.projects().name(hiddenProject.get()).config(configInput);
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(hiddenProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create a code owner config that imports a code owner config from a hidden project
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(
+                    CodeOwnerConfig.Key.create(hiddenProject, "master", "/")))
+            .setProject(hiddenProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s':"
+                + " project '%s' has state 'hidden' that doesn't permit read",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            hiddenProject.get()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportFromNonExistingBranch() throws Exception {
+    testUploadConfigWithImportFromNonExistingBranch(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportFromNonExistingBranch() throws Exception {
+    testUploadConfigWithImportFromNonExistingBranch(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportFromNonExistingBranch(CodeOwnerConfigImportType importType)
+      throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // create a code owner config that imports a code owner config from a non-existing branch
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    Project.NameKey otherProject = projectOperations.newProject().name(name("other")).create();
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(
+                    CodeOwnerConfig.Key.create(otherProject, "non-existing", "/")))
+            .setProject(otherProject)
+            .setBranch("non-existing")
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s':"
+                + " branch 'non-existing' not found in project '%s'",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            otherProject.get()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportFromNonVisibleBranch() throws Exception {
+    testUploadConfigWithImportFromNonVisibleBranch(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportFromNonVisibleBranch() throws Exception {
+    testUploadConfigWithImportFromNonVisibleBranch(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportFromNonVisibleBranch(CodeOwnerConfigImportType importType)
+      throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+
+    // create a project with a non-visible branch that contains a code owner config file
+    Project.NameKey otherProject =
+        projectOperations.newProject().name(name("non-visible-project")).create();
+    projectOperations
+        .project(otherProject)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/heads/master").group(REGISTERED_USERS))
+        .update();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create a code owner config that imports a code owner config from a non-visible branch
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(CodeOwnerConfig.Key.create(otherProject, "master", "/")))
+            .setProject(otherProject)
+            .setBranch("master")
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            user,
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s':"
+                + " branch 'master' not found in project '%s'",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            otherProject.get()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportOfNonCodeOwnerConfigFile() throws Exception {
+    testUploadConfigWithImportOfNonCodeOwnerConfigFile(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportOfNonCodeOwnerConfigFile() throws Exception {
+    testUploadConfigWithImportOfNonCodeOwnerConfigFile(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportOfNonCodeOwnerConfigFile(
+      CodeOwnerConfigImportType importType) throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // create a code owner config that imports a non code owner config file
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "non-code-owner-config.txt")
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            user,
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s':"
+                + " 'non-code-owner-config.txt' is not a code owner config file",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportOfNonExistingCodeOwnerConfig() throws Exception {
+    testUploadConfigWithImportOfNonExistingCodeOwnerConfig(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportOfNonExistingCodeOwnerConfig() throws Exception {
+    testUploadConfigWithImportOfNonExistingCodeOwnerConfig(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportOfNonExistingCodeOwnerConfig(
+      CodeOwnerConfigImportType importType) throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // create a code owner config that imports a non-existing code owner config
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfig.Key keyOfNonExistingCodeOwnerConfig =
+        CodeOwnerConfig.Key.create(project, "master", "/foo/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(keyOfNonExistingCodeOwnerConfig))
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            user,
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s':"
+                + " '%s' does not exist (project = %s, branch = master)",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            getCodeOwnerConfigFilePath(keyOfNonExistingCodeOwnerConfig),
+            project.get()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportOfNonParseableCodeOwnerConfig() throws Exception {
+    testUploadConfigWithImportOfNonParseableCodeOwnerConfig(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportOfNonParseableCodeOwnerConfig() throws Exception {
+    testUploadConfigWithImportOfNonParseableCodeOwnerConfig(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportOfNonParseableCodeOwnerConfig(
+      CodeOwnerConfigImportType importType) throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        CodeOwnerConfig.Key.create(project, "master", "/foo/");
+
+    // disable the code owners functionality so that we can upload a non-parseable code owner config
+    // that we then try to import
+    disableCodeOwnersForProject(project);
+
+    // upload a non-parseable code owner config that we then try to import
+    PushOneCommit.Result r =
+        createChange(
+            "Add invalid code owner config",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig)).get(),
+            "INVALID");
+    r.assertOkStatus();
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // create a code owner config that imports a non-parseable code owner config
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig))
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            format(codeOwnerConfig));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: invalid %s import in '%s':"
+                + " '%s' is not parseable (project = %s, branch = master)",
+            abbreviateName(r.getCommit()),
+            importType.getType(),
+            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig),
+            project.get()));
+  }
+
+  private CodeOwnerConfig createCodeOwnerConfigWithImport(
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      CodeOwnerConfigImportType importType,
+      CodeOwnerConfigReference codeOwnerConfigReference) {
+    CodeOwnerConfig.Builder codeOwnerConfigBuilder =
+        CodeOwnerConfig.builder(keyOfImportingCodeOwnerConfig, TEST_REVISION);
+    switch (importType) {
+      case GLOBAL:
+        codeOwnerConfigBuilder.addImport(codeOwnerConfigReference);
+        break;
+      case PER_FILE:
+        codeOwnerConfigBuilder.addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("foo")
+                .addImport(codeOwnerConfigReference)
+                .build());
+        break;
+      default:
+        throw new IllegalStateException("unknown import type: " + importType);
+    }
+    return codeOwnerConfigBuilder.build();
   }
 
   private CodeOwnerConfig.Key createCodeOwnerConfigKey(String folderPath) {
