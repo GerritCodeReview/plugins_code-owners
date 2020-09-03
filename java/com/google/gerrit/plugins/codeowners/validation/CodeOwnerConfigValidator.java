@@ -15,10 +15,12 @@
 package com.google.gerrit.plugins.codeowners.validation;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -28,6 +30,8 @@ import com.google.gerrit.plugins.codeowners.backend.ChangedFile;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.events.CommitReceivedEvent;
@@ -57,15 +61,18 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
+  private final CodeOwnerResolver codeOwnerResolver;
 
   @Inject
   CodeOwnerConfigValidator(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
-      ChangedFiles changedFiles) {
+      ChangedFiles changedFiles,
+      CodeOwnerResolver codeOwnerResolver) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
+    this.codeOwnerResolver = codeOwnerResolver;
   }
 
   @Override
@@ -248,8 +255,80 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
 
     // The code owner config was successfully loaded and parsed.
 
+    // We only report new issues as errors. If the same issues already existed in the base version
+    // we just report them as warnings. To know which issues already existed in the base version
+    // we must load it, what we do here, and then run the validation on it.
+    Optional<CodeOwnerConfig> baseCodeOwnerConfig;
+    try {
+      baseCodeOwnerConfig =
+          getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revision);
+    } catch (StorageException e) {
+      if (getInvalidConfigCause(e).isPresent()) {
+        // The base code owner config is non-parseable. Since the update makes the code owner
+        // config parseable, it is a good update even if the code owner config still contains
+        // issues. Hence in this case we downgrade all validation errors in the new version to
+        // warnings so that the update is not blocked.
+        return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig)
+            .map(CodeOwnerConfigValidator::downgradeErrorToWarning);
+      }
+
+      // Propagate any exception that was not caused by the content of the code owner config.
+      throw e;
+    }
+
     // Validate the parsed code owner config.
-    return validateCodeOwnerConfig(codeOwnerConfig);
+    if (baseCodeOwnerConfig.isPresent()) {
+      return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig, baseCodeOwnerConfig.get());
+    }
+    return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig);
+  }
+
+  /**
+   * Create the key for a code owner config from a given file path.
+   *
+   * @param branchNameKey the project and branch of the code owner config
+   * @param filePath the file path of the code owner config
+   * @return the key of the code owner config
+   */
+  private CodeOwnerConfig.Key createCodeOwnerConfigKey(BranchNameKey branchNameKey, Path filePath) {
+    Path folderPath =
+        filePath.getParent() != null
+            ? JgitPath.of(filePath.getParent()).getAsAbsolutePath()
+            : Paths.get("/");
+    String fileName = filePath.getFileName().toString();
+    return CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
+  }
+
+  /**
+   * Loads and returns the base code owner config if it exists.
+   *
+   * <p>Throws a {@link ConfigInvalidException} (wrapped in a {@link StorageException} if the base
+   * code owner config exists, but is not parseable.
+   *
+   * @param codeOwnerBackend the code owner backend from which the base code owner config can be
+   *     loaded
+   * @param branchNameKey the project can branch of the base code owner config
+   * @param changedFile the changed file of the code owner config that contains the path of the base
+   *     code owner config as old path
+   * @param revision the revision of the code owner config for which the base code owner config
+   *     should be loaded
+   * @return the loaded base code owner config, {@link Optional#empty()} if no base code owner
+   *     config exists (e.g. if the code owner config is newly created)
+   */
+  private Optional<CodeOwnerConfig> getBaseCodeOwnerConfig(
+      CodeOwnerBackend codeOwnerBackend,
+      BranchNameKey branchNameKey,
+      ChangedFile changedFile,
+      ObjectId revision) {
+    if (changedFile.oldPath().isPresent()) {
+      Optional<ObjectId> parentRevision = getParentRevision(branchNameKey.project(), revision);
+      if (parentRevision.isPresent()) {
+        CodeOwnerConfig.Key baseCodeOwnerConfigKey =
+            createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
+        return codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision.get());
+      }
+    }
+    return Optional.empty();
   }
 
   /**
@@ -277,20 +356,17 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   }
 
   /**
-   * Create the key for a code owner config from a given file path.
-   *
-   * @param branchNameKey the project and branch of the code owner config
-   * @param filePath the file path of the code owner config
-   * @return the key of the code owner config
+   * Returns a copy of the given commit validation message with type warning if the type the given
+   * commit validation message is error. Otherwise it returns the given commit validation message
+   * unchanged.
    */
-  private static CodeOwnerConfig.Key createCodeOwnerConfigKey(
-      BranchNameKey branchNameKey, Path filePath) {
-    Path folderPath =
-        filePath.getParent() != null
-            ? JgitPath.of(filePath.getParent()).getAsAbsolutePath()
-            : Paths.get("/");
-    String fileName = filePath.getFileName().toString();
-    return CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
+  private static CommitValidationMessage downgradeErrorToWarning(
+      CommitValidationMessage commitValidationMessage) {
+    if (CommitValidationMessage.Type.ERROR.equals(commitValidationMessage.getType())) {
+      return new CommitValidationMessage(
+          commitValidationMessage.getMessage(), ValidationMessage.Type.WARNING);
+    }
+    return commitValidationMessage;
   }
 
   /**
@@ -308,13 +384,95 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   /**
    * Validates the given code owner config and returns validation issues as stream.
    *
+   * <p>Validation errors that exist in both code owner configs are returned as warning (because
+   * they are not newly introduced by the given code owner config).
+   *
+   * @param codeOwnerBackend the code owner backend from which the code owner configs were loaded
+   * @param codeOwnerConfig the code owner config that should be validated
+   * @param baseCodeOwnerConfig the base code owner config
+   * @return a stream of validation messages that describe issues with the code owner config, an
+   *     empty stream if there are no issues
+   */
+  private Stream<CommitValidationMessage> validateCodeOwnerConfig(
+      CodeOwnerBackend codeOwnerBackend,
+      CodeOwnerConfig codeOwnerConfig,
+      CodeOwnerConfig baseCodeOwnerConfig) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    requireNonNull(baseCodeOwnerConfig, "baseCodeOwnerConfig");
+
+    ImmutableSet<CommitValidationMessage> issuesInBaseVersion =
+        validateCodeOwnerConfig(codeOwnerBackend, baseCodeOwnerConfig).collect(toImmutableSet());
+    return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig)
+        .map(
+            commitValidationMessage ->
+                issuesInBaseVersion.contains(commitValidationMessage)
+                    ? downgradeErrorToWarning(commitValidationMessage)
+                    : commitValidationMessage);
+  }
+
+  /**
+   * Validates the given code owner config and returns validation issues as stream.
+   *
+   * @param codeOwnerBackend the code owner backend from which the code owner config was loaded
    * @param codeOwnerConfig the code owner config that should be validated
    * @return a stream of validation messages that describe issues with the code owner config, an
    *     empty stream if there are no issues
    */
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
-      @SuppressWarnings("unused") CodeOwnerConfig codeOwnerConfig) {
-    // TODO(ekempin): Validate the parsed code owner config.
-    return Stream.of();
+      CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    return validateCodeOwnerReferences(
+        codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig);
+  }
+
+  /**
+   * Validates the code owner references of the given code owner config.
+   *
+   * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
+   *     owner references
+   * @param codeOwnerConfig the code owner config for which the code owner references should be
+   *     validated
+   * @return a stream of validation messages that describe issues with the code owner references, an
+   *     empty stream if there are no issues
+   */
+  private Stream<CommitValidationMessage> validateCodeOwnerReferences(
+      Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
+    return codeOwnerConfig.codeOwnerSets().stream()
+        .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+        .map(
+            codeOwnerReference ->
+                validateCodeOwnerReference(codeOwnerConfigFilePath, codeOwnerReference))
+        .filter(Optional::isPresent)
+        .map(Optional::get);
+  }
+
+  /**
+   * Validates a code owner reference.
+   *
+   * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
+   *     owner reference
+   * @param codeOwnerReference the code owner reference that should be validated.
+   * @return a validation message describing the issue with the code owner reference, {@link
+   *     Optional#empty()} if there is no issue
+   */
+  private Optional<CommitValidationMessage> validateCodeOwnerReference(
+      Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
+    // Check if the code owner reference is resolvable.
+    if (codeOwnerResolver.resolve(codeOwnerReference).findAny().isPresent()) {
+      // The code owner reference was successfully resolved to at least one code owner.
+      return Optional.empty();
+    }
+
+    // It was not possible to resolve the code owner reference. Possible reasons: no such account
+    // exists, the code owner is not visible, the email of the code owner is not visible (see
+    // CodeOwerResolver for details). We intentionally return the same generic message in all these
+    // cases so that uploaders cannot probe emails for existence (e.g. they cannot add an email and
+    // conclude from the error message whether the email exists).
+    return Optional.of(
+        new CommitValidationMessage(
+            String.format(
+                "code owner email '%s' in '%s' cannot be resolved",
+                codeOwnerReference.email(), codeOwnerConfigFilePath),
+            ValidationMessage.Type.ERROR));
   }
 }
