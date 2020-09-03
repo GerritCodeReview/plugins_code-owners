@@ -61,4 +61,24 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_FILE_EXTENSION, "bar");
     assertThat(generalConfig.getFileExtension(cfg)).value().isEqualTo("bar");
   }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.allowedEmailDomain",
+      values = {"example.com", "example.net"})
+  public void getConfiguredEmailDomains() throws Exception {
+    assertThat(generalConfig.getAllowedEmailDomains())
+        .containsExactly("example.com", "example.net");
+  }
+
+  @Test
+  public void noEmailDomainsConfigured() throws Exception {
+    assertThat(generalConfig.getAllowedEmailDomains()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "")
+  public void emptyEmailDomainsConfigured() throws Exception {
+    assertThat(generalConfig.getAllowedEmailDomains()).isEmpty();
+  }
 }
