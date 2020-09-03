@@ -297,4 +297,30 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         codeOwnerResolver.get().enforceVisibility(false).resolve(adminCodeOwnerReference);
     assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(admin.id());
   }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.net")
+  public void resolveCodeOwnerReferenceForEmailWithNonAllowedEmailDomain() throws Exception {
+    assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create("foo@example.com")))
+        .isEmpty();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.allowedEmailDomain",
+      values = {"example.com", "example.net"})
+  public void configuredEmailDomainsAreAllowed() throws Exception {
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.com")).isTrue();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.net")).isTrue();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.org")).isFalse();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo")).isFalse();
+  }
+
+  @Test
+  public void allEmailDomainsAreAllowed() throws Exception {
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.com")).isTrue();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.net")).isTrue();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.org")).isTrue();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo")).isTrue();
+  }
 }
