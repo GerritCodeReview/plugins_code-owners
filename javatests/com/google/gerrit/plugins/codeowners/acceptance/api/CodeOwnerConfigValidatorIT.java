@@ -23,27 +23,54 @@ import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigFormatter;
 import org.eclipse.jgit.lib.AnyObjectId;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@code com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator}. */
 public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   private BackendConfig backendConfig;
+  private TestCodeOwnerConfigFormatter testCodeOwnerConfigFormatter;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
+    testCodeOwnerConfigFormatter =
+        plugin.getSysInjector().getInstance(TestCodeOwnerConfigFormatter.class);
   }
 
   @Test
   public void nonCodeOwnerConfigFileIsNotValidated() throws Exception {
     PushOneCommit.Result r = createChange("Add arbitrary file", "arbitrary-file.txt", "INVALID");
     r.assertOkStatus();
+  }
+
+  @Test
+  public void canUploadConfigWithoutIssues() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    r.assertOkStatus();
+    r.assertNotMessage("error");
+    r.assertNotMessage("warning");
   }
 
   @Test
@@ -95,6 +122,96 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     "invalid line: STILL INVALID",
                     ProtoBackend.class,
                     "1:7: expected \"{\""))));
+  }
+
+  @Test
+  public void canUploadConfigWithIssuesIfItWasNonParseableBefore() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload an initial code owner config that
+    // is not parseable
+    disableCodeOwnersForProject(project);
+
+    // upload an initial code owner config that is not parseable
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            "INVALID");
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // update the code owner config so that it is parseable now, but has validation issues
+    String unknownEmail1 = "non-existing-email@example.com";
+    String unknownEmail2 = "another-unknown-email@example.com";
+    r =
+        createChange(
+            "Update code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(
+                            unknownEmail1, admin.email(), unknownEmail2))
+                    .build()));
+    r.assertOkStatus();
+    r.assertMessage(
+        String.format(
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            abbreviateName(r.getCommit()),
+            unknownEmail1,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+    r.assertMessage(
+        String.format(
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            abbreviateName(r.getCommit()),
+            unknownEmail2,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+  }
+
+  @Test
+  public void canUploadConfigWithIssuesIfTheyExistedBefore() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload an initial code owner config that
+    // has issues
+    disableCodeOwnersForProject(project);
+
+    // upload an initial code owner config that has issues (non-resolvable code owners)
+    String unknownEmail = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .build()));
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // update the code owner config so that the validation issue still exists, but no new issue is
+    // introduced
+    r =
+        createChange(
+            "Update code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(unknownEmail, admin.email()))
+                    .build()));
+    r.assertOkStatus();
+    r.assertMessage(
+        String.format(
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            abbreviateName(r.getCommit()),
+            unknownEmail,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
   }
 
   @Test
@@ -159,6 +276,87 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     "invalid line: ALSO-INVALID",
                     ProtoBackend.class,
                     "1:1: expected identifier. found 'ALSO-INVALID'"))));
+  }
+
+  @Test
+  public void cannotUploadConfigWithNonResolvableCodeOwners() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    String unknownEmail1 = "non-existing-email@example.com";
+    String unknownEmail2 = "another-unknown-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(
+                            unknownEmail1, admin.email(), unknownEmail2))
+                    .build()));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            abbreviateName(r.getCommit()),
+            unknownEmail1,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+    r.assertMessage(
+        String.format(
+            "error: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            abbreviateName(r.getCommit()),
+            unknownEmail2,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+  }
+
+  @Test
+  public void cannotUploadConfigWithNewIssues() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload an initial code owner config that
+    // has issues
+    disableCodeOwnersForProject(project);
+
+    // upload an initial code owner config that has issues (non-resolvable code owners)
+    String unknownEmail1 = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail1))
+                    .build()));
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // update the code owner config so that the validation issue still exists and a new issue is
+    // introduced
+    String unknownEmail2 = "another-unknown-email@example.com";
+    r =
+        createChange(
+            "Update code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(unknownEmail1, unknownEmail2))
+                    .build()));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            abbreviateName(r.getCommit()),
+            unknownEmail1,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+    r.assertMessage(
+        String.format(
+            "error: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            abbreviateName(r.getCommit()),
+            unknownEmail2,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
   }
 
   private CodeOwnerConfig.Key createCodeOwnerConfigKey(String folderPath) {
