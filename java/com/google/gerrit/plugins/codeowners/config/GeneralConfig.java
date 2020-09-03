@@ -14,15 +14,19 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Arrays;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
@@ -39,6 +43,7 @@ import org.eclipse.jgit.lib.Config;
  */
 @Singleton
 public class GeneralConfig {
+  @VisibleForTesting public static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
   @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
 
   private final PluginConfig pluginConfigFromGerritConfig;
@@ -64,5 +69,19 @@ public class GeneralConfig {
     }
 
     return Optional.ofNullable(pluginConfigFromGerritConfig.getString(KEY_FILE_EXTENSION));
+  }
+
+  /**
+   * Returns the email domains that are allowed to be used for code owners.
+   *
+   * @return the email domains that are allowed to be used for code owners, an empty set if all
+   *     email domains are allowed (if {@code plugin.code-owners.allowedEmailDomain} is not set or
+   *     set to an empty value)
+   */
+  ImmutableSet<String> getAllowedEmailDomains() {
+    return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_ALLOWED_EMAIL_DOMAIN))
+        .filter(emailDomain -> !Strings.isNullOrEmpty(emailDomain))
+        .distinct()
+        .collect(toImmutableSet());
   }
 }

@@ -32,6 +32,14 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default unset (no file extension is used).
 
+<a id="pluginCodeOwnersAllowedEmailDomain">plugin.@PLUGIN@.allowedEmailDomain</a>
+:       Email domain that allows to assign code ownerships to emails with this
+        domain.\n
+        Can be specified multiple times.\n
+        Code ownerships that are assigned to emails with non-allowed domains are
+        ignored and rejected on push.\n
+        By default unset (all email domains are allowed).
+
 <a id="pluginCodeOwnersRequiredApproval">plugin.@PLUGIN@.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a
         change.\

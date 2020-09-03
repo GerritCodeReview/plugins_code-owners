@@ -18,6 +18,7 @@ import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -92,6 +93,17 @@ public class CodeOwnersPluginConfiguration {
   public Optional<String> getFileExtension(Project.NameKey project) {
     requireNonNull(project, "project");
     return generalConfig.getFileExtension(getPluginConfig(project));
+  }
+
+  /**
+   * Returns the email domains that are allowed to be used for code owners.
+   *
+   * @return the email domains that are allowed to be used for code owners, an empty set if all
+   *     email domains are allowed (if {@code plugin.code-owners.allowedEmailDomain} is not set or
+   *     set to an empty value)
+   */
+  public ImmutableSet<String> getAllowedEmailDomains() {
+    return generalConfig.getAllowedEmailDomains();
   }
 
   /**
