@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4443f430_644b11ee",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-03T13:45:05Z",
+      "side": 1,
+      "message": "Can you move this to l237? Then you don\u0027t even need the boolean.",
+      "range": {
+        "startLine": 155,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 93
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f2455ef1_a1364552",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-03T13:45:05Z",
+      "side": 1,
+      "message": "Extracting everything that relates to bootstrapping to a new method could help code clarity.",
+      "range": {
+        "startLine": 237,
+        "startChar": 8,
+        "endLine": 237,
+        "endChar": 23
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3f50a9f8_f9250ffb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-03T13:45:05Z",
+      "side": 1,
+      "message": "one",
+      "range": {
+        "startLine": 248,
+        "startChar": 20,
+        "endLine": 248,
+        "endChar": 22
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c5daeb16_c8c4303d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-03T13:45:05Z",
+      "side": 1,
+      "message": "one",
+      "range": {
+        "startLine": 252,
+        "startChar": 20,
+        "endLine": 252,
+        "endChar": 22
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7e96ab41_84d39567",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-03T13:45:05Z",
+      "side": 1,
+      "message": "everything in this \"else\" could also be a separate method.",
+      "range": {
+        "startLine": 255,
+        "startChar": 6,
+        "endLine": 255,
+        "endChar": 10
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fea9011d_7a2a7657",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-03T13:45:05Z",
+      "side": 1,
+      "message": "optional:\nimplement a method such that you could do:\nisAccountCodeOwner(Account.Id, Boolean isBootstrapping) which would return true for project owners if bootstrapping is true, and would return normal code owners if it\u0027s false.\n\nIt could also be done with an interface implemented in two ways, one with project owners, and other with code owners.",
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
