@@ -22,6 +22,7 @@ import static java.util.stream.Collectors.joining;
 import com.google.common.base.Splitter;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigFormatter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.function.Function;
@@ -52,21 +53,27 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
 
   protected CodeOwnerConfigParser codeOwnerConfigParser;
 
+  private TestCodeOwnerConfigFormatter testCodeOwnerConfigFormatter;
+
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnerConfigParser = plugin.getSysInjector().getInstance(getCodeOwnerConfigParserClass());
+    testCodeOwnerConfigFormatter =
+        plugin.getSysInjector().getInstance(TestCodeOwnerConfigFormatter.class);
   }
 
   /** Must return the {@link CodeOwnerConfigParser} class that should be tested. */
   protected abstract Class<? extends CodeOwnerConfigParser> getCodeOwnerConfigParserClass();
 
   /**
-   * Must return the expected code owner config string for the given code owner config.
+   * Returns the expected code owner config string for the given code owner config.
    *
    * @param codeOwnerConfig the code owner sets that should be formatted
    * @return the expected code owner config string for the given code owner config
    */
-  protected abstract String getCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig);
+  protected String getCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) {
+    return testCodeOwnerConfigFormatter.format(codeOwnerConfig);
+  }
 
   /**
    * Returns the expected code owner config string for a code owner config with the given

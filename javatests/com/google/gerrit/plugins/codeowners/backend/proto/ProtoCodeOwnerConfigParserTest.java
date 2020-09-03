@@ -26,41 +26,24 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
+import org.eclipse.jgit.lib.Config;
 import org.junit.Test;
 
 /** Tests for {@link ProtoCodeOwnerConfigParser}. */
 public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParserTest {
-  @Override
-  protected Class<? extends CodeOwnerConfigParser> getCodeOwnerConfigParserClass() {
-    return ProtoCodeOwnerConfigParser.class;
+  @ConfigSuite.Default
+  public static Config defaultConfig() {
+    Config cfg = new Config();
+    cfg.setString("plugin", "code-owners", "backend", ProtoBackend.ID);
+    return cfg;
   }
 
   @Override
-  protected String getCodeOwnerConfig(CodeOwnerConfig codeOwnerConfig) {
-    StringBuilder b = new StringBuilder();
-    b.append("owners_config {\n");
-    if (codeOwnerConfig.ignoreParentCodeOwners()) {
-      b.append("  ignore_parent_owners: true\n");
-    }
-    for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
-      if (!codeOwnerSet.codeOwners().isEmpty()) {
-        b.append("  owner_sets {\n");
-        for (String pathExpression : codeOwnerSet.pathExpressions()) {
-          b.append(String.format("    path_expressions: \"%s\"\n", pathExpression));
-        }
-        for (CodeOwnerReference codeOwnerReference : codeOwnerSet.codeOwners()) {
-          b.append(
-              String.format(
-                  "    owners {\n      email: \"%s\"\n    }\n", codeOwnerReference.email()));
-        }
-        b.append("  }\n");
-      }
-    }
-    b.append("}\n");
-    return b.toString();
+  protected Class<? extends CodeOwnerConfigParser> getCodeOwnerConfigParserClass() {
+    return ProtoCodeOwnerConfigParser.class;
   }
 
   @Test
