@@ -62,7 +62,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
-  private final Provider<CodeOwnerResolver> codeOwnerResolver;
+  private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
 
   @Inject
   CodeOwnerConfigValidator(
@@ -73,7 +73,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
-    this.codeOwnerResolver = codeOwnerResolver;
+    this.codeOwnerResolverProvider = codeOwnerResolver;
   }
 
   @Override
@@ -458,8 +458,18 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
    */
   private Optional<CommitValidationMessage> validateCodeOwnerReference(
       Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
+    CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get();
+    if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email())) {
+      return Optional.of(
+          new CommitValidationMessage(
+              String.format(
+                  "the domain of the code owner email '%s' in '%s' is not allowed for code owners",
+                  codeOwnerReference.email(), codeOwnerConfigFilePath),
+              ValidationMessage.Type.ERROR));
+    }
+
     // Check if the code owner reference is resolvable.
-    if (codeOwnerResolver.get().resolve(codeOwnerReference).findAny().isPresent()) {
+    if (codeOwnerResolver.resolve(codeOwnerReference).findAny().isPresent()) {
       // The code owner reference was successfully resolved to at least one code owner.
       return Optional.empty();
     }
