@@ -129,6 +129,19 @@ export class CodeOwnerService {
     });
   }
 
+  areAllFilesApproved() {
+    return this.getStatus().then(({rawStatuses}) => {
+      return !rawStatuses.some(status => {
+        const oldPathStatus = status.old_path_status;
+        const newPathStatus = status.new_path_status;
+        if (newPathStatus.status !== OwnerStatus.APPROVED) {
+          return true;
+        }
+        return oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
+      });
+    });
+  }
+
   /**
    * Gets owner suggestions.
    *

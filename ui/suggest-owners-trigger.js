@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CodeOwnerService, OwnerStatus} from './code-owners-service.js';
+import {CodeOwnerService} from './code-owners-service.js';
 import {ownerState} from './owner-ui-state.js';
 
 export class SuggestOwnersTrigger extends Polymer.Element {
@@ -59,7 +59,7 @@ export class SuggestOwnersTrigger extends Polymer.Element {
           [[computeButtonText(expanded)]]
         </gr-button>
         <span>
-          <a href="https://bugs.chromium.org/p/gerrit/templates/detail?template=code-owners-plugin" target="_blank">
+          <a href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin" target="_blank">
             <iron-icon icon="gr-icons:bug" title="report a problem"></iron-icon>
           </a>
           <a href="https://gerrit-review.googlesource.com/Documentation/plugin-code-owners.html" target="_blank">
@@ -82,16 +82,8 @@ export class SuggestOwnersTrigger extends Polymer.Element {
         this.restApi,
         this.change
     );
-    this.ownerService.getStatus().then(({rawStatuses}) => {
-      const notAllApproved = rawStatuses.some(status => {
-        const oldPathStatus = status.old_path_status;
-        const newPathStatus = status.new_path_status;
-        if (newPathStatus.status !== OwnerStatus.APPROVED) {
-          return true;
-        }
-        return oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
-      });
-      this.hidden = !notAllApproved;
+    this.ownerService.areAllFilesApproved().then(approved => {
+      this.hidden = approved;
     });
   }
 

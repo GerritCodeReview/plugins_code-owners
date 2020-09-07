@@ -276,6 +276,11 @@ export class SuggestOwners extends Polymer.Element {
     this.isLoading = true;
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
 
+    // if all approved, no need to show the container
+    this.ownerService.areAllFilesApproved().then(approved => {
+      this.hidden = approved;
+    });
+
     this.ownerService
         .getSuggestedOwners()
         .then(suggestedOwners => {
