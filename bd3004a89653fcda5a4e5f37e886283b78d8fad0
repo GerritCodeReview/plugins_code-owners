@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "eb2d2bbf_166e35b7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-07T09:48:42Z",
+      "side": 1,
+      "message": "It\u0027s possible, but would be bad for performance as this would lead to scanning the branch for code owner config files once per path, instead of only once in total.",
+      "parentUuid": "4443f430_644b11ee",
+      "range": {
+        "startLine": 155,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 93
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f2455ef1_a1364552",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22384473_0ff3f260",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-07T09:48:42Z",
+      "side": 1,
+      "message": "Good idea. Done.",
+      "parentUuid": "f2455ef1_a1364552",
+      "range": {
+        "startLine": 237,
+        "startChar": 8,
+        "endLine": 237,
+        "endChar": 23
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "4a1fbb85_3ba70a7f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-07T09:48:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3f50a9f8_f9250ffb",
+      "range": {
+        "startLine": 248,
+        "startChar": 20,
+        "endLine": 248,
+        "endChar": 22
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c5daeb16_c8c4303d",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 2
@@ -91,6 +163,30 @@
       "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "339136e1_fd3537b7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 252,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-07T09:48:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c5daeb16_c8c4303d",
+      "range": {
+        "startLine": 252,
+        "startChar": 20,
+        "endLine": 252,
+        "endChar": 22
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -117,6 +213,30 @@
     },
     {
       "key": {
+        "uuid": "38dceef7_ed856635",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 255,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-07T09:48:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7e96ab41_84d39567",
+      "range": {
+        "startLine": 255,
+        "startChar": 6,
+        "endLine": 255,
+        "endChar": 10
+      },
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "fea9011d_7a2a7657",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 2
@@ -131,6 +251,24 @@
       "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d22506d6_dee0529d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 273,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-07T09:48:42Z",
+      "side": 1,
+      "message": "Not sure that an isAccountCodeOwner(Account.Id) method makes much sense here if we already have the account IDs of all code owners as \u0027codeOwnerAccountIds\u0027 available. Would leave it as it is for now.",
+      "parentUuid": "fea9011d_7a2a7657",
+      "revId": "bd3004a89653fcda5a4e5f37e886283b78d8fad0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
