@@ -1180,6 +1180,36 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void importFromNonExistingBranchIsIgnored() throws Exception {
+    // create importing config with global code owner and import from non-existing branch
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS")
+                    .setProject(project)
+                    .setBranch("non-existing")
+                    .build())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+  }
+
+  @Test
   public void importFromOtherProject() throws Exception {
     Project.NameKey otherProject = projectOperations.newProject().create();
 
