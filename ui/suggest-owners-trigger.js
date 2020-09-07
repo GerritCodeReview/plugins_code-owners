@@ -47,8 +47,8 @@ export class SuggestOwnersTrigger extends Polymer.Element {
   static get template() {
     return Polymer.html`
         <style include="shared-styles">
-          iron-icon {
-            padding-left: var(--spacing-m);
+          a {
+            text-decoration: none;
           }
         </style>
         <gr-button
@@ -57,8 +57,15 @@ export class SuggestOwnersTrigger extends Polymer.Element {
           title="Suggest owners for your change"
         >
           [[computeButtonText(expanded)]]
-          <iron-icon icon="gr-icons:info-outline"></iron-icon>
         </gr-button>
+        <span>
+          <a href="https://bugs.chromium.org/p/gerrit/templates/detail?template=code-owners-plugin" target="_blank">
+            <iron-icon icon="gr-icons:bug" title="report a problem"></iron-icon>
+          </a>
+          <a href="https://gerrit-review.googlesource.com/Documentation/plugin-code-owners.html" target="_blank">
+            <iron-icon icon="gr-icons:help-outline" title="read documentation"></iron-icon>
+          </a>
+        </span>
       `;
   }
 
