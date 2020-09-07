@@ -284,6 +284,11 @@ export class SuggestOwners extends Polymer.Element {
             return this.formatSuggestionInfo(suggestion);
           });
 
+          // if empty, hide the component
+          if (!this.suggestedOwners.length) {
+            this.hidden = true;
+          }
+
           // in case `_updateAllChips` called before suggestedOwners ready
           // from onReviewerChange
           this._updateAllChips(this._currentReviewers);
