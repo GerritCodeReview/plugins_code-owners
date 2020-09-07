@@ -276,6 +276,11 @@ export class SuggestOwners extends Polymer.Element {
     this.isLoading = true;
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
 
+    // if all approved, no need to show the container
+    this.ownerService.areAllFilesApproved().then(approved => {
+      this.hidden = approved;
+    });
+
     this.ownerService
         .getSuggestedOwners()
         .then(suggestedOwners => {
@@ -283,11 +288,6 @@ export class SuggestOwners extends Polymer.Element {
           this.suggestedOwners = suggestedOwners.map(suggestion => {
             return this.formatSuggestionInfo(suggestion);
           });
-
-          // if empty, hide the component
-          if (!this.suggestedOwners.length) {
-            this.hidden = true;
-          }
 
           // in case `_updateAllChips` called before suggestedOwners ready
           // from onReviewerChange
