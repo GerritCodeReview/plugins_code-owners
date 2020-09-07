@@ -277,6 +277,15 @@ class PathCodeOwners {
             keyOfImportedCodeOwnerConfig.project().get());
         continue;
       }
+      if (!projectState.get().statePermitsRead()) {
+        logger.atWarning().log(
+            "cannot resolve code owner config %s that is imported by code owner config %s:"
+                + " state of project %s doesn't permit read",
+            keyOfImportedCodeOwnerConfig,
+            importingCodeOwnerConfig.key(),
+            keyOfImportedCodeOwnerConfig.project().get());
+        continue;
+      }
 
       Optional<ObjectId> revision =
           Optional.ofNullable(revisionMap.get(keyOfImportedCodeOwnerConfig.branchNameKey()));
