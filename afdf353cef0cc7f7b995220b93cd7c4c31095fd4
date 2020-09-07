@@ -70,6 +70,30 @@
       "revId": "afdf353cef0cc7f7b995220b93cd7c4c31095fd4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "93d46e8a_cf393ccc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-07T14:45:20Z",
+      "side": 1,
+      "message": "Maybe we should just drop \u0027status\u0027 and move its field into GeneralInfo?",
+      "parentUuid": "4bff51dd_63dc4f4c",
+      "range": {
+        "startLine": 11,
+        "startChar": 4,
+        "endLine": 11,
+        "endChar": 10
+      },
+      "revId": "afdf353cef0cc7f7b995220b93cd7c4c31095fd4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
