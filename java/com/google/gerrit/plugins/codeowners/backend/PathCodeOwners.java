@@ -25,6 +25,8 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.server.project.ProjectCache;
+import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
@@ -48,11 +50,16 @@ class PathCodeOwners {
 
   @Singleton
   public static class Factory {
+    private final ProjectCache projectCache;
     private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
     private final CodeOwners codeOwners;
 
     @Inject
-    Factory(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration, CodeOwners codeOwners) {
+    Factory(
+        ProjectCache projectCache,
+        CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+        CodeOwners codeOwners) {
+      this.projectCache = projectCache;
       this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
       this.codeOwners = codeOwners;
     }
@@ -60,7 +67,11 @@ class PathCodeOwners {
     public PathCodeOwners create(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
       requireNonNull(codeOwnerConfig, "codeOwnerConfig");
       return new PathCodeOwners(
-          codeOwners, codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfig.key()));
+          projectCache,
+          codeOwners,
+          codeOwnerConfig,
+          absolutePath,
+          getMatcher(codeOwnerConfig.key()));
     }
 
     public Optional<PathCodeOwners> create(
@@ -70,7 +81,11 @@ class PathCodeOwners {
           .map(
               codeOwnerConfig ->
                   new PathCodeOwners(
-                      codeOwners, codeOwnerConfig, absolutePath, getMatcher(codeOwnerConfigKey)));
+                      projectCache,
+                      codeOwners,
+                      codeOwnerConfig,
+                      absolutePath,
+                      getMatcher(codeOwnerConfigKey)));
     }
 
     /**
@@ -99,6 +114,7 @@ class PathCodeOwners {
     }
   }
 
+  private final ProjectCache projectCache;
   private final CodeOwners codeOwners;
   private final CodeOwnerConfig codeOwnerConfig;
   private final Path path;
@@ -107,10 +123,12 @@ class PathCodeOwners {
   private CodeOwnerConfig resolvedCodeOwnerConfig;
 
   private PathCodeOwners(
+      ProjectCache projectCache,
       CodeOwners codeOwners,
       CodeOwnerConfig codeOwnerConfig,
       Path path,
       PathExpressionMatcher pathExpressionMatcher) {
+    this.projectCache = requireNonNull(projectCache, "projectCache");
     this.codeOwners = requireNonNull(codeOwners, "codeOwners");
     this.codeOwnerConfig = requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     this.path = requireNonNull(path, "path");
@@ -247,6 +265,18 @@ class PathCodeOwners {
       CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
           createKeyForImportedCodeOwnerConfig(
               importingCodeOwnerConfig.key(), codeOwnerConfigReference);
+
+      Optional<ProjectState> projectState =
+          projectCache.get(keyOfImportedCodeOwnerConfig.project());
+      if (!projectState.isPresent()) {
+        logger.atWarning().log(
+            "cannot resolve code owner config %s that is imported by code owner config %s:"
+                + " project %s not found",
+            keyOfImportedCodeOwnerConfig,
+            importingCodeOwnerConfig.key(),
+            keyOfImportedCodeOwnerConfig.project().get());
+        continue;
+      }
 
       Optional<ObjectId> revision =
           Optional.ofNullable(revisionMap.get(keyOfImportedCodeOwnerConfig.branchNameKey()));
