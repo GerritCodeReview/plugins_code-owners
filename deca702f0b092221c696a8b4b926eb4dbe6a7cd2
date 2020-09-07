@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5ef4e357_96d6fc13",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1079742
+      },
+      "writtenOn": "2020-09-07T12:09:59Z",
+      "side": 1,
+      "message": "LGTM, thanks Tao!",
+      "revId": "deca702f0b092221c696a8b4b926eb4dbe6a7cd2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
