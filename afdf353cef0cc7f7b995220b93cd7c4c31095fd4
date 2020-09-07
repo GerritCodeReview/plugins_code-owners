@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8048968c_a04fd4bc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-07T14:23:11Z",
+      "side": 1,
+      "message": "[optional] is it too late to rename it to \"disabled\" or something similar? I feel that \"status\" is very confusing especially since \"status\" can be empty.",
+      "range": {
+        "startLine": 11,
+        "startChar": 4,
+        "endLine": 11,
+        "endChar": 10
+      },
+      "revId": "afdf353cef0cc7f7b995220b93cd7c4c31095fd4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
