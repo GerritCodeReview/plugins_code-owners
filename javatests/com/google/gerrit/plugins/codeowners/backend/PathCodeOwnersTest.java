@@ -32,6 +32,8 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.api.projects.BranchInput;
+import com.google.gerrit.extensions.api.projects.ConfigInput;
+import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
@@ -1148,6 +1150,109 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().get())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+  }
+
+  @Test
+  public void importFromNonExistingProjectIsIgnored() throws Exception {
+    // create importing config with global code owner and import from non-existing project
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS")
+                    .setProject(Project.nameKey("non-existing"))
+                    .build())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void importFromHiddenProjectIsIgnored() throws Exception {
+    // create a hidden project with a code owner config file
+    Project.NameKey hiddenProject = projectOperations.newProject().name("hidden-project").create();
+    ConfigInput configInput = new ConfigInput();
+    configInput.state = ProjectState.HIDDEN;
+    gApi.projects().name(hiddenProject.get()).config(configInput);
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(hiddenProject)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create importing config with global code owner and import from the hidden project
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/OWNERS")
+                    .setProject(hiddenProject)
+                    .build())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing code owner config, the global code
+    // owners from the imported code owner config are ignored since the project that contains the
+    // code owner config is hidden
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+  }
+
+  @Test
+  public void importFromNonExistingBranchIsIgnored() throws Exception {
+    // create importing config with global code owner and import from non-existing branch
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS")
+                    .setProject(project)
+                    .setBranch("non-existing")
+                    .build())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo/bar/baz.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing code owner config
+    assertThat(pathCodeOwners.get().get())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
   }
 
   @Test

@@ -28,9 +28,6 @@ public class CodeOwnerProjectConfigInfo {
    *
    * <p>Contains information about whether the code owners functionality is disabled for the project
    * or for any branch.
-   *
-   * <p>Not set if the code owners functionality is neither disabled for the project nor for any
-   * branch.
    */
   public CodeOwnersStatusInfo status;
 
