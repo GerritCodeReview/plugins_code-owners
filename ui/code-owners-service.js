@@ -214,7 +214,7 @@ export class CodeOwnerService {
 
       const owners = [...fileOwnersMap[fileInfo.path].owners];
       const ownersKey = owners
-          .map(account => account._account_id)
+          .map(owner => owner.account._account_id)
           .sort()
           .join(',');
       ownersFilesMap.set(
