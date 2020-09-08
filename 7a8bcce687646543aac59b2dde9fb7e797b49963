@@ -39,6 +39,24 @@
       "revId": "7a8bcce687646543aac59b2dde9fb7e797b49963",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee57b058_5adc1abd",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-08T09:04:55Z",
+      "side": 1,
+      "message": "haah already done in ps3",
+      "parentUuid": "88832d22_3b8fc888",
+      "revId": "7a8bcce687646543aac59b2dde9fb7e797b49963",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
