@@ -20,6 +20,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
@@ -66,6 +67,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
  */
 @Singleton
 public class CodeOwnerApprovalCheck {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final PermissionBackend permissionBackend;
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
@@ -100,13 +103,25 @@ public class CodeOwnerApprovalCheck {
    */
   public boolean isSubmittable(ChangeNotes changeNotes) throws IOException {
     requireNonNull(changeNotes, "changeNotes");
-    return !getFileStatuses(changeNotes)
-        .anyMatch(
-            fileStatus ->
-                (fileStatus.newPathStatus().isPresent()
-                        && fileStatus.newPathStatus().get().status() != CodeOwnerStatus.APPROVED)
-                    || (fileStatus.oldPathStatus().isPresent()
-                        && fileStatus.oldPathStatus().get().status() != CodeOwnerStatus.APPROVED));
+    logger.atFine().log(
+        "checking if change %d in project %s is submittable",
+        changeNotes.getChangeId().get(), changeNotes.getProjectName());
+    boolean isSubmittable =
+        !getFileStatuses(changeNotes)
+            .anyMatch(
+                fileStatus ->
+                    (fileStatus.newPathStatus().isPresent()
+                            && fileStatus.newPathStatus().get().status()
+                                != CodeOwnerStatus.APPROVED)
+                        || (fileStatus.oldPathStatus().isPresent()
+                            && fileStatus.oldPathStatus().get().status()
+                                != CodeOwnerStatus.APPROVED));
+    logger.atFine().log(
+        "change %d in project %s %s submittable",
+        changeNotes.getChangeId().get(),
+        changeNotes.getProjectName(),
+        isSubmittable ? "is" : "is not");
+    return isSubmittable;
   }
 
   /**
@@ -137,26 +152,37 @@ public class CodeOwnerApprovalCheck {
    */
   public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes) throws IOException {
     requireNonNull(changeNotes, "changeNotes");
+    logger.atFine().log(
+        "computing file statuses for change %d of project %s",
+        changeNotes.getChangeId().get(), changeNotes.getProjectName());
 
     RequiredApproval requiredApproval =
         codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
+    logger.atFine().log("requiredApproval = %s", requiredApproval);
+
     Optional<RequiredApproval> overrideApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
     boolean hasOverride =
         overrideApproval.isPresent() && hasOverride(overrideApproval.get(), changeNotes);
+    logger.atFine().log("hasOverride = %s (overrideApproval = %s)", hasOverride, overrideApproval);
 
     BranchNameKey branch = changeNotes.getChange().getDest();
     ObjectId revision = getDestBranchRevision(changeNotes.getChange());
+    logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
+
     Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
+    logger.atFine().log("patchSetUploader = %d", patchSetUploader.get());
 
     // If the branch doesn't contain any code owner config file yet, we apply special logic (project
     // owners count as code owners) to allow bootstrapping the code owner configuration in the
     // branch.
     boolean isBootstrapping = !codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(branch);
+    logger.atFine().log("isBootstrapping = %s", isBootstrapping);
 
     ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);
     ImmutableSet<Account.Id> approverAccountIds =
         getApproverAccountIds(requiredApproval, changeNotes);
+    logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
     return changedFiles
         .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId()).stream()
@@ -182,6 +208,8 @@ public class CodeOwnerApprovalCheck {
       boolean hasOverride,
       boolean isBootstrapping,
       ChangedFile changedFile) {
+    logger.atFine().log("computing file status for %s", changedFile);
+
     // Compute the code owner status for the new path, if there is a new path.
     Optional<PathCodeOwnerStatus> newPathStatus =
         changedFile
@@ -202,6 +230,9 @@ public class CodeOwnerApprovalCheck {
     Optional<PathCodeOwnerStatus> oldPathStatus = Optional.empty();
     if (changedFile.isDeletion() || changedFile.isRename()) {
       checkState(changedFile.oldPath().isPresent(), "old path must be present for deletion/rename");
+      logger.atFine().log(
+          "file was %s (old path = %s)",
+          changedFile.isDeletion() ? "deleted" : "renamed", changedFile.oldPath().get());
       oldPathStatus =
           Optional.of(
               getPathCodeOwnerStatus(
@@ -215,7 +246,10 @@ public class CodeOwnerApprovalCheck {
                   changedFile.oldPath().get()));
     }
 
-    return FileCodeOwnerStatus.create(changedFile, newPathStatus, oldPathStatus);
+    FileCodeOwnerStatus fileCodeOwnerStatus =
+        FileCodeOwnerStatus.create(changedFile, newPathStatus, oldPathStatus);
+    logger.atFine().log("fileCodeOwnerStatus = %s", fileCodeOwnerStatus);
+    return fileCodeOwnerStatus;
   }
 
   private PathCodeOwnerStatus getPathCodeOwnerStatus(
@@ -227,7 +261,12 @@ public class CodeOwnerApprovalCheck {
       boolean hasOverride,
       boolean isBootstrapping,
       Path absolutePath) {
+    logger.atFine().log("computing path status for %s", absolutePath);
+
     if (hasOverride) {
+      logger.atFine().log(
+          "the status for path %s is %s since an override is present",
+          absolutePath, CodeOwnerStatus.APPROVED.name());
       return PathCodeOwnerStatus.create(absolutePath, CodeOwnerStatus.APPROVED);
     }
 
@@ -256,6 +295,8 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       Path absolutePath) {
+    logger.atFine().log("computing path status for %s (bootstrapping mode)", absolutePath);
+
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
 
@@ -263,18 +304,30 @@ public class CodeOwnerApprovalCheck {
       // The uploader of the patch set is a project owner and thus a code owner. This means there
       // is an implicit code owner approval from the patch set uploader so that the path is
       // automatically approved.
+      logger.atFine().log(
+          "the status for path %s is %s since the patch set uploader is a project owner",
+          absolutePath, CodeOwnerStatus.APPROVED.name());
       codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
     } else if (approverAccountIds.stream()
         .anyMatch(approverAccountId -> isProjectOwner(branch.project(), approverAccountId))) {
       // At least one of the approvers is a project owner and thus a code owner.
+      logger.atFine().log(
+          "the status for path %s is %s since at least one approvers is a project owner",
+          absolutePath, CodeOwnerStatus.APPROVED.name());
       codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
     } else if (reviewerAccountIds.stream()
         .anyMatch(reviewerAccountId -> isProjectOwner(branch.project(), reviewerAccountId))) {
       // At least one of the reviewers is a project owner and thus a code owner.
+      logger.atFine().log(
+          "the status for path %s is %s since at least one reviewer is a project owner",
+          absolutePath, CodeOwnerStatus.PENDING.name());
       codeOwnerStatus.set(CodeOwnerStatus.PENDING);
     }
 
-    return PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
+    PathCodeOwnerStatus pathCodeOwnerStatus =
+        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
+    logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
+    return pathCodeOwnerStatus;
   }
 
   /**
@@ -288,6 +341,8 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       Path absolutePath) {
+    logger.atFine().log("computing path status for %s (regular mode)", absolutePath);
+
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
 
@@ -298,10 +353,18 @@ public class CodeOwnerApprovalCheck {
         codeOwnerConfig -> {
           ImmutableSet<Account.Id> codeOwnerAccountIds =
               getCodeOwnerAccountIds(codeOwnerConfig, absolutePath);
+          logger.atFine().log(
+              "code owners = %s (code owner config folder path = %s, file name = %s)",
+              codeOwnerAccountIds,
+              codeOwnerConfig.key().folderPath(),
+              codeOwnerConfig.key().fileName().orElse("<default>"));
 
           if (codeOwnerAccountIds.contains(patchSetUploader)) {
             // If the uploader of the patch set owns the path, there is an implicit code owner
             // approval from the patch set uploader so that the path is automatically approved.
+            logger.atFine().log(
+                "the status for path %s is %s since the patch set uploader is a code owner",
+                absolutePath, CodeOwnerStatus.APPROVED.name());
             codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
 
             // We can abort since we already found that the path was approved.
@@ -310,11 +373,19 @@ public class CodeOwnerApprovalCheck {
 
           if (Collections.disjoint(codeOwnerAccountIds, reviewerAccountIds)) {
             // We need to continue to check if any of the higher-level code owners is a reviewer.
+            logger.atFine().log(
+                "None of the code owners is a reviewer, continue checking higher-level code owner configs");
             return true;
           }
 
+          logger.atFine().log(
+              "One of the code owners is a reviewer, the path status is at least %s",
+              CodeOwnerStatus.PENDING.name());
+
           if (Collections.disjoint(codeOwnerAccountIds, approverAccountIds)) {
             // At least one of the code owners is a reviewer on the change.
+            logger.atFine().log(
+                "None of the code owners is an approver, continue checking higher-level code owner configs");
             codeOwnerStatus.set(CodeOwnerStatus.PENDING);
 
             // We need to continue to check if any of the higher-level code owners has approved
@@ -323,22 +394,33 @@ public class CodeOwnerApprovalCheck {
           }
 
           // At least one of the code owners approved the change.
+          logger.atFine().log(
+              "the status for path %s is %s since one of the approvers is a code owner",
+              absolutePath, CodeOwnerStatus.APPROVED.name());
           codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
 
           // We can abort since we already found that the path was approved.
           return false;
         });
 
-    return PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
+    PathCodeOwnerStatus pathCodeOwnerStatus =
+        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
+    logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
+    return pathCodeOwnerStatus;
   }
 
   /** Whether the given account is a project owner of the given project. */
   private boolean isProjectOwner(Project.NameKey project, Account.Id accountId) {
     try {
-      return permissionBackend
-          .absentUser(accountId)
-          .project(project)
-          .test(ProjectPermission.WRITE_CONFIG);
+      boolean isProjectOwner =
+          permissionBackend
+              .absentUser(accountId)
+              .project(project)
+              .test(ProjectPermission.WRITE_CONFIG);
+      if (isProjectOwner) {
+        logger.atFine().log("Account %d is a project owner", accountId.get());
+      }
+      return isProjectOwner;
     } catch (PermissionBackendException e) {
       throw new StorageException(
           String.format(

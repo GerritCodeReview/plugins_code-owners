@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import com.google.common.flogger.FluentLogger;
 import java.nio.file.Path;
 
 /**
@@ -28,6 +29,8 @@ import java.nio.file.Path;
  * </ul>
  */
 public class SimplePathExpressionMatcher implements PathExpressionMatcher {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /** Singleton instance. */
   public static SimplePathExpressionMatcher INSTANCE = new SimplePathExpressionMatcher();
 
@@ -36,7 +39,12 @@ public class SimplePathExpressionMatcher implements PathExpressionMatcher {
 
   @Override
   public boolean matches(String pathExpression, Path relativePath) {
-    return GlobMatcher.INSTANCE.matches(asGlob(pathExpression), relativePath);
+    String glob = asGlob(pathExpression);
+    boolean isMatching = GlobMatcher.INSTANCE.matches(glob, relativePath);
+    logger.atFine().log(
+        "path %s %s matching %s (glob = %s)",
+        relativePath, isMatching ? "is" : "is not", pathExpression, glob);
+    return isMatching;
   }
 
   private static String asGlob(String pathExpression) {
