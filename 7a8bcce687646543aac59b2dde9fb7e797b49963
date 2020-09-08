@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0b8b58a9_704c4e79",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 216,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-08T08:59:30Z",
+      "side": 1,
+      "message": "the owners API changed to use `{account:{}}` instead of `{..account}` before, so here we need to use `account.account` instead",
+      "range": {
+        "startLine": 216,
+        "startChar": 24,
+        "endLine": 216,
+        "endChar": 30
+      },
+      "revId": "7a8bcce687646543aac59b2dde9fb7e797b49963",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
