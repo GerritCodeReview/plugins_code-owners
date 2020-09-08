@@ -52,6 +52,7 @@ export class SuggestOwnersTrigger extends Polymer.Element {
           }
         </style>
         <gr-button
+          link
           on-click="toggleControlContent"
           has-tooltip
           title="Suggest owners for your change"

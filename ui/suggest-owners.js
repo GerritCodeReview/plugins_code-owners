@@ -41,6 +41,7 @@ class OwnerGroupFileList extends Polymer.Element {
       }
       .Renamed {
         background-color: var(--dark-remove-highlight-color);
+        margin: var(--spacing-s) 0;
       }
       </style>
       <ul>
@@ -65,7 +66,7 @@ class OwnerGroupFileList extends Polymer.Element {
 
   computeFilePath(file) {
     const parts = file.path.split('/');
-    return parts.slice(0, parts.length - 2).join('/') + '/';
+    return parts.slice(0, parts.length - 1).join('/') + '/';
   }
 
   computeFileName(file) {
@@ -114,6 +115,9 @@ export class SuggestOwners extends Polymer.Element {
           border-bottom: 1px solid var(--border-color);
           padding: var(--spacing-s) var(--spacing-xs);
         }
+        .suggestion-row:last-of-type {
+          border-bottom: none;
+        }
         .suggestion-row-indicator {
           margin-right: var(--spacing-m);
           visibility: hidden;
@@ -132,11 +136,33 @@ export class SuggestOwners extends Polymer.Element {
           padding-right: var(--spacing-l);
           white-space: nowrap;
         }
+        .group-name-content {
+          display: flex;
+          align-items: center;
+        }
+        .group-name-content .group-name {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
         .group-name-prefix {
+          padding-left: var(--spacing-s);
+          white-space: nowrap;
           color: var(--deemphasized-text-color);
         }
         .suggested-owners {
           flex: 1;
+        }
+        .no-owners-content {
+          line-height: 26px;
+          flex: 1;
+        }
+        .no-owners-content a {
+          padding-left: var(--spacing-s);
+        }
+        .no-owners-content a iron-icon {
+          width: 16px;
+          height: 16px;
         }
         gr-account-label {
           background-color: var(--background-color-tertiary);
@@ -179,22 +205,22 @@ export class SuggestOwners extends Polymer.Element {
               <iron-icon icon="gr-icons:check-circle"></iron-icon>
             </div>
             <div class="suggestion-group-name">
-              <span>
+              <div class="group-name-content">
+                <span class="group-name">
+                  [[suggestion.groupName.name]]
+                </span>
                 <template is="dom-if" if="[[suggestion.groupName.prefix]]">
                   <span class="group-name-prefix">
                     ([[suggestion.groupName.prefix]])
                   </span>
                 </template>
-                <span>
-                  [[suggestion.groupName.name]]
-                </span>
                 <gr-hovercard hidden="[[suggestion.expanded]]">
                   <owner-group-file-list
                     files="[[suggestion.files]]"
                   >
                   </owner-group-file-list>
                 </gr-hovercard>
-              <span>
+              </div>
               <owner-group-file-list
                 hidden="[[!suggestion.expanded]]"
                 files="[[suggestion.files]]"
@@ -205,7 +231,12 @@ export class SuggestOwners extends Polymer.Element {
             </template>
             <template is="dom-if" if="[[!suggestion.error]]">
               <template is="dom-if" if="[[!suggestion.owners.length]]">
-                Owners are not visible to you or no owners found
+                <div class="no-owners-content">
+                  <span>Not found</span>
+                  <a href="https://gerrit-review.googlesource.com/Documentation/plugin-code-owners.html" target="_blank">
+                    <iron-icon icon="gr-icons:help-outline" title="read documentation"></iron-icon>
+                  </a>
+                </div>
               </template>
               <ul class="suggested-owners">
                 <template
@@ -268,17 +299,25 @@ export class SuggestOwners extends Polymer.Element {
     super.connectedCallback();
     ownerState.onExpandSuggestionChange(expanded => {
       this.hidden = !expanded;
+      if (expanded) {
+        // this is more of a hack to grab the focus to the suggested owner
+        // instead of reviewer input to avoid the suggestion dropdown
+        this.async(() => this.focus());
+      }
     });
   }
 
   onInputChanged(restApi, change) {
+    ownerState.expandSuggestion = false;
     if ([restApi, change].includes(undefined)) return;
     this.isLoading = true;
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
 
     // if all approved, no need to show the container
     this.ownerService.areAllFilesApproved().then(approved => {
-      this.hidden = approved;
+      if (approved) {
+        this.hidden = approved;
+      }
     });
 
     this.ownerService
