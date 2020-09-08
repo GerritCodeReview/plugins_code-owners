@@ -18,6 +18,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -44,6 +45,8 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
  */
 @Singleton
 public class ChangedFiles {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final GitRepositoryManager repoManager;
 
   @Inject
@@ -79,17 +82,23 @@ public class ChangedFiles {
       throws IOException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
+    logger.atFine().log(
+        "computing changed files for revision %s in project %s", revision.name(), project);
 
     try (Repository repository = repoManager.openRepository(project);
         RevWalk revWalk = new RevWalk(repository)) {
       RevCommit revCommit = revWalk.parseCommit(revision);
       RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
+      logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
       try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
         diffFormatter.setReader(revWalk.getObjectReader(), repository.getConfig());
         diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
         diffFormatter.setDetectRenames(true);
         List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
-        return diffEntries.stream().map(ChangedFile::create).collect(toImmutableSet());
+        ImmutableSet<ChangedFile> changedFiles =
+            diffEntries.stream().map(ChangedFile::create).collect(toImmutableSet());
+        logger.atFine().log("changed files = %s", changedFiles);
+        return changedFiles;
       }
     }
   }
