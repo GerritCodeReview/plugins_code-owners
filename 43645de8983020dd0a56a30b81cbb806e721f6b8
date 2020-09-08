@@ -22,6 +22,30 @@
       "revId": "43645de8983020dd0a56a30b81cbb806e721f6b8",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "005706ae_b4cae3c2",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-08T13:14:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9c755258_3aa57d65",
+      "range": {
+        "startLine": 44,
+        "startChar": 24,
+        "endLine": 44,
+        "endChar": 28
+      },
+      "revId": "43645de8983020dd0a56a30b81cbb806e721f6b8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
