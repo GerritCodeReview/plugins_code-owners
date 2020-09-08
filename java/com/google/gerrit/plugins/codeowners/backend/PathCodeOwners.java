@@ -150,9 +150,13 @@ public class PathCodeOwners {
    * @return the code owners of the path
    */
   public ImmutableSet<CodeOwnerReference> get() {
-    return resolveCodeOwnerConfig().codeOwnerSets().stream()
-        .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
-        .collect(toImmutableSet());
+    logger.atFine().log("computing path code owners for %s from %s", path, codeOwnerConfig.key());
+    ImmutableSet<CodeOwnerReference> pathCodeOwners =
+        resolveCodeOwnerConfig().codeOwnerSets().stream()
+            .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+            .collect(toImmutableSet());
+    logger.atFine().log("pathCodeOwners = %s", pathCodeOwners);
+    return pathCodeOwners;
   }
 
   /**
@@ -205,6 +209,9 @@ public class PathCodeOwners {
       return this.resolvedCodeOwnerConfig;
     }
 
+    logger.atFine().log(
+        "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key());
+
     CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder =
         CodeOwnerConfig.builder(codeOwnerConfig.key(), codeOwnerConfig.revision());
 
@@ -226,6 +233,7 @@ public class PathCodeOwners {
     // ignoreGlobalAndParentCodeOwners flags again.
     if (getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
         .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)) {
+      logger.atFine().log("remove global code owner sets and set ignoreParentCodeOwners to true");
       resolvedCodeOwnerConfig =
           resolvedCodeOwnerConfig
               .toBuilder()
@@ -238,12 +246,15 @@ public class PathCodeOwners {
     }
 
     this.resolvedCodeOwnerConfig = resolvedCodeOwnerConfig;
+    logger.atFine().log("resolved code owner config = %s", resolvedCodeOwnerConfig);
     return this.resolvedCodeOwnerConfig;
   }
 
   private void resolveImports(
       CodeOwnerConfig importingCodeOwnerConfig,
       CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
+    logger.atFine().log("resolve imports of %s", importingCodeOwnerConfig.key());
+
     // To detect cyclic dependencies we keep track of all seen code owner configs.
     Set<CodeOwnerConfig.Key> seenCodeOwnerConfigs = new HashSet<>();
     seenCodeOwnerConfigs.add(codeOwnerConfig.key());
@@ -265,6 +276,7 @@ public class PathCodeOwners {
       CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
           createKeyForImportedCodeOwnerConfig(
               importingCodeOwnerConfig.key(), codeOwnerConfigReference);
+      logger.atFine().log("import %s", importingCodeOwnerConfig.key());
 
       Optional<ProjectState> projectState =
           projectCache.get(keyOfImportedCodeOwnerConfig.project());
@@ -289,6 +301,9 @@ public class PathCodeOwners {
 
       Optional<ObjectId> revision =
           Optional.ofNullable(revisionMap.get(keyOfImportedCodeOwnerConfig.branchNameKey()));
+      logger.atFine().log(
+          "import from %s",
+          revision.isPresent() ? "revision " + revision.get().name() : "current revision");
 
       Optional<CodeOwnerConfig> mayBeImportedCodeOwnerConfig =
           revision.isPresent()
@@ -307,27 +322,32 @@ public class PathCodeOwners {
 
       CodeOwnerConfig importedCodeOwnerConfig = mayBeImportedCodeOwnerConfig.get();
       CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
+      logger.atFine().log("import mode = %s", importMode.name());
 
       revisionMap.putIfAbsent(
           keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
 
       if (importMode.importIgnoreParentCodeOwners()
           && importedCodeOwnerConfig.ignoreParentCodeOwners()) {
+        logger.atFine().log("import ignoreParentCodeOwners flag");
         resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners();
       }
 
       if (importMode.importGlobalCodeOwnerSets()) {
+        logger.atFine().log("import global code owners");
         getGlobalCodeOwnerSets(importedCodeOwnerConfig)
             .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
       }
 
       if (importMode.importPerFileCodeOwnerSets()) {
+        logger.atFine().log("import per-file code owners");
         getMatchingPerFileCodeOwnerSets(importedCodeOwnerConfig)
             .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
       }
 
       if (importMode.resolveImportsOfImport()
           && seenCodeOwnerConfigs.add(keyOfImportedCodeOwnerConfig)) {
+        logger.atFine().log("resolve imports of imported code owner config");
         Set<CodeOwnerConfigReference> transitiveImports = new HashSet<>();
         transitiveImports.addAll(importedCodeOwnerConfig.imports());
         transitiveImports.addAll(
@@ -339,6 +359,9 @@ public class PathCodeOwners {
           // If only global code owners should be imported, transitive imports should also only
           // import global code owners, no matter which import mode is specified in the imported
           // code owner configs.
+          logger.atFine().log(
+              "import transitive imports with mode %s",
+              CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
           transitiveImports =
               transitiveImports.stream()
                   .map(
@@ -349,6 +372,7 @@ public class PathCodeOwners {
                   .collect(toSet());
         }
 
+        logger.atFine().log("transitive imports = %s", transitiveImports);
         codeOwnerConfigsToImport.addAll(transitiveImports);
       }
     }
