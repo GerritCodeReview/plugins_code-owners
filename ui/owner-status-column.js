@@ -36,12 +36,12 @@ const STATUS_ICON = {
   [STATUS_CODE.ERROR]: 'gr-icons:info-outline',
 };
 const STATUS_TOOLTIP = {
-  [STATUS_CODE.PENDING]: 'Pending approval',
+  [STATUS_CODE.PENDING]: 'Pending file-owner approval',
   [STATUS_CODE.MISSING]: 'Missing file-owner approval',
   [STATUS_CODE.PENDING_OLD_PATH]: 'Pending approval on pre-renamed file',
   [STATUS_CODE.MISSING_OLD_PATH]: 'Missing owner for pre-renamed file',
-  [STATUS_CODE.APPROVED]: 'Approved / Exempted',
-  [STATUS_CODE.ERROR]: 'Fail to fetch status',
+  [STATUS_CODE.APPROVED]: 'Approved by file-owner',
+  [STATUS_CODE.ERROR]: 'Fail to fetch file-owner status',
 };
 
 class BaseEl extends Polymer.Element {
@@ -84,7 +84,7 @@ export class OwnerStatusColumnHeader extends BaseEl {
           width: 3em;
         }
         </style>
-        <div>Owners</div>
+        <div></div>
       `;
   }
 
