@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import com.google.common.flogger.FluentLogger;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
@@ -36,6 +37,8 @@ import java.nio.file.Path;
  * </ul>
  */
 public class GlobMatcher implements PathExpressionMatcher {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /** Singleton instance. */
   public static GlobMatcher INSTANCE = new GlobMatcher();
 
@@ -44,6 +47,9 @@ public class GlobMatcher implements PathExpressionMatcher {
 
   @Override
   public boolean matches(String glob, Path relativePath) {
-    return FileSystems.getDefault().getPathMatcher("glob:" + glob).matches(relativePath);
+    boolean isMatching =
+        FileSystems.getDefault().getPathMatcher("glob:" + glob).matches(relativePath);
+    logger.atFine().log("path %s %s matching %s", relativePath, isMatching ? "is" : "is not", glob);
+    return isMatching;
   }
 }
