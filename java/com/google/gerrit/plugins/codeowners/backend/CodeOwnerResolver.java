@@ -87,6 +87,7 @@ public class CodeOwnerResolver {
    * @return the {@link CodeOwnerResolver} instance for chaining calls
    */
   public CodeOwnerResolver enforceVisibility(boolean enforceVisibility) {
+    logger.atFine().log("enforceVisibility = %s", enforceVisibility);
     this.enforceVisibility = enforceVisibility;
     return this;
   }
@@ -108,6 +109,11 @@ public class CodeOwnerResolver {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
+    logger.atFine().log(
+        "resolving path code owners for %s from code owner config in %s (file name = %s)",
+        absolutePath,
+        codeOwnerConfig.key().folderPath(),
+        codeOwnerConfig.key().fileName().orElse("<default>"));
 
     return pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get().stream()
         .flatMap(this::resolve)
@@ -153,22 +159,33 @@ public class CodeOwnerResolver {
    */
   public Stream<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
     String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
+    logger.atFine().log("resolving code owner reference %s", codeOwnerReference);
 
     if (ALL_USERS_WILDCARD.equals(email)) {
+      logger.atFine().log("resolving all users wildcard");
       return resolveAllUsersWildcard();
     }
 
     if (!isEmailDomainAllowed(email)) {
+      logger.atFine().log("domain of email %s is not allowed");
       return Stream.of();
     }
 
     Optional<AccountState> accountState =
         lookupEmail(email).flatMap(accountId -> lookupAccount(accountId, email));
-    if (!accountState.isPresent() || (enforceVisibility && !isVisible(accountState.get(), email))) {
+    if (!accountState.isPresent()) {
+      logger.atFine().log("no account for email %s", email);
+      return Stream.of();
+    }
+    if (enforceVisibility && !isVisible(accountState.get(), email)) {
+      logger.atFine().log(
+          "account %d or email %s not visible", accountState.get().account().id().get(), email);
       return Stream.of();
     }
 
-    return Stream.of(CodeOwner.create(accountState.get().account().id()));
+    CodeOwner codeOwner = CodeOwner.create(accountState.get().account().id());
+    logger.atFine().log("resolved to code owner %s", codeOwner);
+    return Stream.of(codeOwner);
   }
 
   private Stream<CodeOwner> resolveAllUsersWildcard() {
@@ -304,10 +321,12 @@ public class CodeOwnerResolver {
     int emailAtIndex = email.lastIndexOf('@');
     if (emailAtIndex >= 0 && emailAtIndex < email.length() - 1) {
       String emailDomain = email.substring(emailAtIndex + 1);
+      logger.atFine().log("email domain = %s", emailDomain);
       return allowedEmailDomains.contains(emailDomain);
     }
 
     // email has no domain
+    logger.atFine().log("email %s has no domain", email);
     return false;
   }
 }
