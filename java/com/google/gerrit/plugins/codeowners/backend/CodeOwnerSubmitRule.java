@@ -63,8 +63,13 @@ class CodeOwnerSubmitRule implements SubmitRule {
   public Optional<SubmitRecord> evaluate(ChangeData changeData) {
     try {
       requireNonNull(changeData, "changeData");
+      logger.atFine().log(
+          "running code owner submit rule for change %d of project %s",
+          changeData.getId().get(), changeData.project());
 
       if (codeOwnersPluginConfiguration.isDisabled(changeData.change().getDest())) {
+        logger.atFine().log(
+            "code owners functionality is disabled for branch %s", changeData.change().getDest());
         return Optional.empty();
       }
 

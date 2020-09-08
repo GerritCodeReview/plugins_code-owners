@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -30,6 +31,8 @@ import org.eclipse.jgit.lib.ObjectId;
  */
 @Singleton
 public class CodeOwnerConfigHierarchy {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
   @Inject
@@ -59,6 +62,10 @@ public class CodeOwnerConfigHierarchy {
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
+    logger.atFine().log(
+        "visiting code owner configs for '%s' in branch '%s' in project '%s' (revision = '%s')",
+        absolutePath, branch.shortName(), branch.project(), revision.name());
+
     // Next path in which we look for a code owner configuration. We start at the given path and
     // then go up the parent hierarchy.
     Path ownerConfigFolder = absolutePath;
@@ -67,15 +74,23 @@ public class CodeOwnerConfigHierarchy {
     while (ownerConfigFolder != null) {
       // Read code owner config and invoke the codeOwnerConfigVisitor if the code owner config
       // exists.
+      logger.atFine().log("inspecting code owner config for %s", ownerConfigFolder);
       Optional<PathCodeOwners> pathCodeOwners =
           pathCodeOwnersFactory.create(
               CodeOwnerConfig.Key.create(branch, ownerConfigFolder), revision, absolutePath);
       if (pathCodeOwners.isPresent()) {
+        logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
         boolean visitFurtherCodeOwnerConfigs =
             codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
-        if (!visitFurtherCodeOwnerConfigs || pathCodeOwners.get().ignoreParentCodeOwners()) {
+        boolean ignoreParentCodeOwners = pathCodeOwners.get().ignoreParentCodeOwners();
+        logger.atFine().log(
+            "visitFurtherCodeOwnerConfigs = %s, ignoreParentCodeOwners = %s",
+            visitFurtherCodeOwnerConfigs, ignoreParentCodeOwners);
+        if (!visitFurtherCodeOwnerConfigs || ignoreParentCodeOwners) {
           return;
         }
+      } else {
+        logger.atFine().log("no code owner config found in %s", ownerConfigFolder);
       }
 
       // Continue the loop with the next parent folder.
