@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "59ddfa30_c5d9bb54",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-08T14:46:34Z",
+      "side": 1,
+      "message": "that must be a typo :-)",
+      "range": {
+        "startLine": 161,
+        "startChar": 38,
+        "endLine": 161,
+        "endChar": 39
+      },
+      "revId": "cf13427ce8bd4810fb9a098f754c808548424856",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cec8e935_66d86808",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 164,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-08T14:46:34Z",
+      "side": 1,
+      "message": "Defining icon-sizes in terms of font-size is a bit weird. I would much prefer just saying 16px here. The ideal solution would be to use calc() and line-height to determine the right value, but the line-height situation is also a bit messed up and needs a proper fix, which you probably don\u0027t want to go too deep into. :-) So better stick to \"honest\" fixed values.",
+      "revId": "cf13427ce8bd4810fb9a098f754c808548424856",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
