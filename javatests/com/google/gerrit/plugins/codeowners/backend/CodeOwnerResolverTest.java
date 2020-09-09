@@ -25,6 +25,7 @@ import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
 import com.google.gerrit.server.account.externalids.ExternalId;
@@ -49,6 +50,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private AccountOperations accountOperations;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
+  @Inject private IdentifiedUser.GenericFactory userFactory;
 
   private Provider<CodeOwnerResolver> codeOwnerResolver;
 
@@ -296,6 +298,26 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     Stream<CodeOwner> codeOwner =
         codeOwnerResolver.get().enforceVisibility(false).resolve(adminCodeOwnerReference);
     assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(admin.id());
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  public void codeOwnerVisibilityIsCheckedForGivenAccount() throws Exception {
+    // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
+    // visible to this user since they do not share any group.
+    TestAccount user2 = accountCreator.user2();
+
+    // admin is the current user and can see the account
+    assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(user.email())))
+        .isNotEmpty();
+
+    // user2 cannot see the account
+    assertThat(
+            codeOwnerResolver
+                .get()
+                .forUser(userFactory.create(user2.id()))
+                .resolve(CodeOwnerReference.create(user.email())))
+        .isEmpty();
   }
 
   @Test
