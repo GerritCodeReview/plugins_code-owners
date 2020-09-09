@@ -1,0 +1,165 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b012102b_04387a80",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:43:29Z",
+      "side": 1,
+      "message": "omit, and maybe add \"are\"",
+      "range": {
+        "startLine": 60,
+        "startChar": 20,
+        "endLine": 60,
+        "endChar": 25
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "50eefc99_a90f5ac5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:43:29Z",
+      "side": 1,
+      "message": "Just thinking whether it\u0027s possible to modify any owner config file without getting to this code. I think it\u0027s not possible, but leaving this comment here for you to make sure.",
+      "range": {
+        "startLine": 64,
+        "startChar": 39,
+        "endLine": 64,
+        "endChar": 55
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e70dd321_f10f5f6e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:43:29Z",
+      "side": 1,
+      "message": "can you have a test to verify this works?",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 62
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b76893f3_9bd88bfa",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:43:29Z",
+      "side": 1,
+      "message": "If there are no errors",
+      "range": {
+        "startLine": 105,
+        "startChar": 9,
+        "endLine": 105,
+        "endChar": 14
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "379b3b94_c51f0e21",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:43:29Z",
+      "side": 1,
+      "message": "Isn\u0027t it possible that someone uploads a broken code owner config and then you will get a ParseException whenever trying to read the code owner configs?\n\nCan you make sure that no file that relates to code owner configs is being updated, and if that\u0027s the case, you can just log and ignore? Otherwise, if there is a code owner config file being updated, I don\u0027t think ignoring is safe.\n\n*I guess* that if the plugin configuration is invalid you also can\u0027t modify the code owner config, is that the case?",
+      "range": {
+        "startLine": 111,
+        "startChar": 31,
+        "endLine": 111,
+        "endChar": 67
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0e67d1c6_2753f662",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:43:29Z",
+      "side": 1,
+      "message": "parsable",
+      "range": {
+        "startLine": 167,
+        "startChar": 42,
+        "endLine": 167,
+        "endChar": 51
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53ec193d_3b5eae2c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:43:29Z",
+      "side": 1,
+      "message": "parsable",
+      "range": {
+        "startLine": 217,
+        "startChar": 60,
+        "endLine": 217,
+        "endChar": 69
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
