@@ -300,9 +300,14 @@ export class SuggestOwners extends Polymer.Element {
     ownerState.onExpandSuggestionChange(expanded => {
       this.hidden = !expanded;
       if (expanded) {
-        // this is more of a hack to grab the focus to the suggested owner
-        // instead of reviewer input to avoid the suggestion dropdown
-        this.async(() => this.focus());
+        // this is more of a hack to let reivew input lose focus
+        // to avoid suggestion dropdown
+        // gr-autocomplete has a internal state for tracking focus
+        // that will be canceled if any click happens outside of
+        // it's target
+        // Can not use `this.async` as it's only available in
+        // legacy element mixin which not used in this plugin.
+        Polymer.Async.timeOut.run(() => this.click(), 100);
       }
     });
   }
