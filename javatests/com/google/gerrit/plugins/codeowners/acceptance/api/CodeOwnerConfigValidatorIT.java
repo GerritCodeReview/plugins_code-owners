@@ -18,15 +18,19 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
+import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
+import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -86,6 +90,27 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
     r.assertNotMessage("error");
     r.assertNotMessage("warning");
+  }
+
+  @Test
+  public void canSubmitConfigWithoutIssues() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    r.assertOkStatus();
+
+    // Approve and submit the change.
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
   @Test
@@ -216,16 +241,18 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviateName(r.getCommit()),
             unknownEmail1,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviateName(r.getCommit()),
             unknownEmail2,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
   @Test
@@ -265,10 +292,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviateName(r.getCommit()),
             unknownEmail,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
   @Test
@@ -354,16 +382,18 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertErrorStatus("invalid code owner config files");
     r.assertMessage(
         String.format(
-            "error: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            "error: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviateName(r.getCommit()),
             unknownEmail1,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
     r.assertMessage(
         String.format(
-            "error: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            "error: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviateName(r.getCommit()),
             unknownEmail2,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
   @Test
@@ -431,16 +461,114 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertErrorStatus("invalid code owner config files");
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviateName(r.getCommit()),
             unknownEmail1,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
     r.assertMessage(
         String.format(
-            "error: commit %s: code owner email '%s' in '%s' cannot be resolved",
+            "error: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviateName(r.getCommit()),
             unknownEmail2,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  public void cannotSubmitConfigWithNewIssues() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload a a change with a code owner
+    // config that has issues
+    disableCodeOwnersForProject(project);
+
+    // upload a change with a code owner config that has issues (non-resolvable code owners)
+    String unknownEmail = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .build()));
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // approve the change
+    approve(r.getChangeId());
+
+    // try to submit the change
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %d: invalid code owner config files:\n"
+                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
+                r.getChange().getId().get(),
+                unknownEmail,
+                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  public void cannotSubmitConfigWithCodeOwnersThatAreNotVisibleToThePatchSetUploader()
+      throws Exception {
+    // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
+    // visible to this user since they do not share any group.
+    TestAccount user2 = accountCreator.user2();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload a a change with a code owner
+    // config that has issues
+    disableCodeOwnersForProject(project);
+
+    // upload a change as user2 with a code owner config that contains a code owner that is not
+    // visible to user2
+    PushOneCommit.Result r =
+        createChange(
+            user2,
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            testCodeOwnerConfigFormatter.format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // approve the change
+    approve(r.getChangeId());
+
+    // try to submit the change as admin who can see the code owners in the config, the submit still
+    // fails because it is checked that the uploader (user2) can see the code owners
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %d: invalid code owner config files:\n"
+                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
+                r.getChange().getId().get(),
+                admin.email(),
+                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                identifiedUserFactory.create(user2.id()).getLoggableName()));
   }
 
   @Test
