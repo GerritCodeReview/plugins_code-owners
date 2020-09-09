@@ -31,6 +31,9 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.logging.Metadata;
+import com.google.gerrit.server.logging.TraceContext;
+import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.permissions.PermissionBackend;
@@ -152,51 +155,58 @@ public class CodeOwnerApprovalCheck {
    */
   public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes) throws IOException {
     requireNonNull(changeNotes, "changeNotes");
-    logger.atFine().log(
-        "computing file statuses for change %d of project %s",
-        changeNotes.getChangeId().get(), changeNotes.getProjectName());
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer(
+            "Compute file statuses",
+            Metadata.builder()
+                .projectName(changeNotes.getProjectName().get())
+                .changeId(changeNotes.getChangeId().get())
+                .build())) {
+      RequiredApproval requiredApproval =
+          codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
+      logger.atFine().log("requiredApproval = %s", requiredApproval);
 
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
-    logger.atFine().log("requiredApproval = %s", requiredApproval);
+      Optional<RequiredApproval> overrideApproval =
+          codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
+      boolean hasOverride =
+          overrideApproval.isPresent() && hasOverride(overrideApproval.get(), changeNotes);
+      logger.atFine().log(
+          "hasOverride = %s (overrideApproval = %s)", hasOverride, overrideApproval);
 
-    Optional<RequiredApproval> overrideApproval =
-        codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
-    boolean hasOverride =
-        overrideApproval.isPresent() && hasOverride(overrideApproval.get(), changeNotes);
-    logger.atFine().log("hasOverride = %s (overrideApproval = %s)", hasOverride, overrideApproval);
+      BranchNameKey branch = changeNotes.getChange().getDest();
+      ObjectId revision = getDestBranchRevision(changeNotes.getChange());
+      logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
-    BranchNameKey branch = changeNotes.getChange().getDest();
-    ObjectId revision = getDestBranchRevision(changeNotes.getChange());
-    logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
+      Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
+      logger.atFine().log("patchSetUploader = %d", patchSetUploader.get());
 
-    Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
-    logger.atFine().log("patchSetUploader = %d", patchSetUploader.get());
+      // If the branch doesn't contain any code owner config file yet, we apply special logic
+      // (project
+      // owners count as code owners) to allow bootstrapping the code owner configuration in the
+      // branch.
+      boolean isBootstrapping = !codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(branch);
+      logger.atFine().log("isBootstrapping = %s", isBootstrapping);
 
-    // If the branch doesn't contain any code owner config file yet, we apply special logic (project
-    // owners count as code owners) to allow bootstrapping the code owner configuration in the
-    // branch.
-    boolean isBootstrapping = !codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(branch);
-    logger.atFine().log("isBootstrapping = %s", isBootstrapping);
+      ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);
+      ImmutableSet<Account.Id> approverAccountIds =
+          getApproverAccountIds(requiredApproval, changeNotes);
+      logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
-    ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);
-    ImmutableSet<Account.Id> approverAccountIds =
-        getApproverAccountIds(requiredApproval, changeNotes);
-    logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
-
-    return changedFiles
-        .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId()).stream()
-        .map(
-            changedFile ->
-                getFileStatus(
-                    branch,
-                    revision,
-                    patchSetUploader,
-                    reviewerAccountIds,
-                    approverAccountIds,
-                    hasOverride,
-                    isBootstrapping,
-                    changedFile));
+      return changedFiles
+          .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
+          .stream()
+          .map(
+              changedFile ->
+                  getFileStatus(
+                      branch,
+                      revision,
+                      patchSetUploader,
+                      reviewerAccountIds,
+                      approverAccountIds,
+                      hasOverride,
+                      isBootstrapping,
+                      changedFile));
+    }
   }
 
   private FileCodeOwnerStatus getFileStatus(
