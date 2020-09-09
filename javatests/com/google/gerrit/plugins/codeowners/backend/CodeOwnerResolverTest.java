@@ -299,6 +299,32 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  public void codeOwnerVisibilityIsCheckedForGivenAccount() throws Exception {
+    // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
+    // visible to this user since they do not share any group.
+    TestAccount user2 = accountCreator.user2();
+
+    // admin is the current user and can see the account
+    assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(user.email())))
+        .isNotEmpty();
+    assertThat(
+            codeOwnerResolver
+                .get()
+                .forUser(identifiedUserFactory.create(admin.id()))
+                .resolve(CodeOwnerReference.create(user.email())))
+        .isNotEmpty();
+
+    // user2 cannot see the account
+    assertThat(
+            codeOwnerResolver
+                .get()
+                .forUser(identifiedUserFactory.create(user2.id()))
+                .resolve(CodeOwnerReference.create(user.email())))
+        .isEmpty();
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.net")
   public void resolveCodeOwnerReferenceForEmailWithNonAllowedEmailDomain() throws Exception {
     assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create("foo@example.com")))
