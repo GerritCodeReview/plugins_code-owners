@@ -62,6 +62,11 @@ public class CodeOwnerResolver {
   // Enforce visibility by default.
   private boolean enforceVisibility = true;
 
+  // The account ID of the user that should be used to check the account visibility (whether this
+  // user can see the accounts of the code owners).
+  // If unset, the account of the current user is used.
+  private Account.Id accountId;
+
   @Inject
   CodeOwnerResolver(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
@@ -92,6 +97,19 @@ public class CodeOwnerResolver {
   public CodeOwnerResolver enforceVisibility(boolean enforceVisibility) {
     logger.atFine().log("enforceVisibility = %s", enforceVisibility);
     this.enforceVisibility = enforceVisibility;
+    return this;
+  }
+
+  /**
+   * Sets the account of the user that should be used to check the account visibility (whether this
+   * user can see the accounts of the code owners).
+   *
+   * @param accountId the accoutn ID
+   * @return the {@link CodeOwnerResolver} instance for chaining calls
+   */
+  public CodeOwnerResolver forAccount(Account.Id accountId) {
+    logger.atFine().log("accountId = %d", accountId.get());
+    this.accountId = accountId;
     return this;
   }
 
@@ -199,14 +217,19 @@ public class CodeOwnerResolver {
     try (TraceTimer traceTimer =
         TraceContext.newTimer("Resolve all users wildcard", Metadata.builder().build())) {
       return accounts.all().stream()
-          .filter(
-              accountState ->
-                  !enforceVisibility || accountControlFactory.get().canSee(accountState))
+          .filter(accountState -> !enforceVisibility || canSee(accountState))
           .map(accountState -> CodeOwner.create(accountState.account().id()));
     } catch (IOException e) {
       throw new StorageException(
           String.format("cannot resolve code owner email %s", ALL_USERS_WILDCARD), e);
     }
+  }
+
+  /** Whether the given account can be seen. */
+  private boolean canSee(AccountState accountState) {
+    AccountControl accountControl =
+        accountId != null ? accountControlFactory.get(accountId) : accountControlFactory.get();
+    return accountControl.canSee(accountState);
   }
 
   /**
@@ -273,7 +296,7 @@ public class CodeOwnerResolver {
    *     {@code false}
    */
   private boolean isVisible(AccountState accountState, String email) {
-    if (!accountControlFactory.get().canSee(accountState)) {
+    if (!canSee(accountState)) {
       logger.atFine().log(
           "cannot resolve code owner email %s: account %s is not visible to calling user",
           email, accountState.account().id());
