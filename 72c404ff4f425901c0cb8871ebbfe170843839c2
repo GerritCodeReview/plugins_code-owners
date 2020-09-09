@@ -140,6 +140,30 @@
     },
     {
       "key": {
+        "uuid": "a8d5a954_8337ba91",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T14:45:05Z",
+      "side": 1,
+      "message": "uh, according to wiki, both parseable and parsable are technically correct, but parsable is preferred.\nhttps://en.wiktionary.org/wiki/parsable\n\nAnyway, optional + nit.",
+      "parentUuid": "0e67d1c6_2753f662",
+      "range": {
+        "startLine": 167,
+        "startChar": 42,
+        "endLine": 167,
+        "endChar": 51
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "53ec193d_3b5eae2c",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
         "patchSetId": 9
