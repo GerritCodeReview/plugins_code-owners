@@ -25,6 +25,7 @@ import com.google.gerrit.entities.Account;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.CurrentUser;
+import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountState;
@@ -62,6 +63,11 @@ public class CodeOwnerResolver {
   // Enforce visibility by default.
   private boolean enforceVisibility = true;
 
+  // The the user that should be used to check the account visibility (whether this user can see the
+  // accounts of the code owners).
+  // If unset, the current user is used.
+  private IdentifiedUser user;
+
   @Inject
   CodeOwnerResolver(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
@@ -92,6 +98,19 @@ public class CodeOwnerResolver {
   public CodeOwnerResolver enforceVisibility(boolean enforceVisibility) {
     logger.atFine().log("enforceVisibility = %s", enforceVisibility);
     this.enforceVisibility = enforceVisibility;
+    return this;
+  }
+
+  /**
+   * Sets the user that should be used to check the account visibility (whether this user can see
+   * the accounts of the code owners).
+   *
+   * @param user the user
+   * @return the {@link CodeOwnerResolver} instance for chaining calls
+   */
+  public CodeOwnerResolver forUser(IdentifiedUser user) {
+    logger.atFine().log("user = %d", user.getLoggableName());
+    this.user = user;
     return this;
   }
 
@@ -199,14 +218,19 @@ public class CodeOwnerResolver {
     try (TraceTimer traceTimer =
         TraceContext.newTimer("Resolve all users wildcard", Metadata.builder().build())) {
       return accounts.all().stream()
-          .filter(
-              accountState ->
-                  !enforceVisibility || accountControlFactory.get().canSee(accountState))
+          .filter(accountState -> !enforceVisibility || canSee(accountState))
           .map(accountState -> CodeOwner.create(accountState.account().id()));
     } catch (IOException e) {
       throw new StorageException(
           String.format("cannot resolve code owner email %s", ALL_USERS_WILDCARD), e);
     }
+  }
+
+  /** Whether the given account can be seen. */
+  private boolean canSee(AccountState accountState) {
+    AccountControl accountControl =
+        user != null ? accountControlFactory.get(user) : accountControlFactory.get();
+    return accountControl.canSee(accountState);
   }
 
   /**
@@ -273,7 +297,7 @@ public class CodeOwnerResolver {
    *     {@code false}
    */
   private boolean isVisible(AccountState accountState, String email) {
-    if (!accountControlFactory.get().canSee(accountState)) {
+    if (!canSee(accountState)) {
       logger.atFine().log(
           "cannot resolve code owner email %s: account %s is not visible to calling user",
           email, accountState.account().id());
