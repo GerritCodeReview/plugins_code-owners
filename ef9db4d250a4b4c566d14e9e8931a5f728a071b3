@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ba0ef353_50b8311e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-09T12:23:45Z",
+      "side": 1,
+      "message": "Requires a change in Gerrit core:\nhttps://gerrit-review.googlesource.com/c/gerrit/+/281077",
+      "revId": "ef9db4d250a4b4c566d14e9e8931a5f728a071b3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
