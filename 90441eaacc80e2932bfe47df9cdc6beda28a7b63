@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a8a86b6c_93cbfe7b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/backend/TestCodeOwnerConfigFormatter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-09T15:21:55Z",
+      "side": 1,
+      "message": "Optional: Inject the correct TestCodeOwnerConfigFormatter#format based on backendConfig. Optional since I\u0027m not sure how simple it is.",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 0
+      },
+      "revId": "90441eaacc80e2932bfe47df9cdc6beda28a7b63",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
