@@ -31,6 +31,9 @@ import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.gerrit.server.account.externalids.ExternalIds;
+import com.google.gerrit.server.logging.Metadata;
+import com.google.gerrit.server.logging.TraceContext;
+import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -109,15 +112,20 @@ public class CodeOwnerResolver {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
-    logger.atFine().log(
-        "resolving path code owners for %s from code owner config in %s (file name = %s)",
-        absolutePath,
-        codeOwnerConfig.key().folderPath(),
-        codeOwnerConfig.key().fileName().orElse("<default>"));
 
-    return pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get().stream()
-        .flatMap(this::resolve)
-        .collect(toImmutableSet());
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer(
+            "Resolve path code owners",
+            Metadata.builder()
+                .projectName(codeOwnerConfig.key().project().get())
+                .branchName(codeOwnerConfig.key().ref())
+                .filePath(codeOwnerConfig.key().fileName().orElse("<default>"))
+                .build())) {
+      logger.atFine().log("resolving path code owners for path %s");
+      return pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get().stream()
+          .flatMap(this::resolve)
+          .collect(toImmutableSet());
+    }
   }
 
   /**
@@ -162,7 +170,6 @@ public class CodeOwnerResolver {
     logger.atFine().log("resolving code owner reference %s", codeOwnerReference);
 
     if (ALL_USERS_WILDCARD.equals(email)) {
-      logger.atFine().log("resolving all users wildcard");
       return resolveAllUsersWildcard();
     }
 
@@ -189,7 +196,8 @@ public class CodeOwnerResolver {
   }
 
   private Stream<CodeOwner> resolveAllUsersWildcard() {
-    try {
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer("Resolve all users wildcard", Metadata.builder().build())) {
       return accounts.all().stream()
           .filter(
               accountState ->

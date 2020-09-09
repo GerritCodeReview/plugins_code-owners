@@ -25,6 +25,9 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.server.logging.Metadata;
+import com.google.gerrit.server.logging.TraceContext;
+import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
@@ -209,171 +212,196 @@ public class PathCodeOwners {
       return this.resolvedCodeOwnerConfig;
     }
 
-    logger.atFine().log(
-        "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key());
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer(
+            "Resolve code owner config",
+            Metadata.builder()
+                .projectName(codeOwnerConfig.key().project().get())
+                .filePath(path.toString())
+                .build())) {
+      logger.atFine().log(
+          "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key());
 
-    CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder =
-        CodeOwnerConfig.builder(codeOwnerConfig.key(), codeOwnerConfig.revision());
+      CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder =
+          CodeOwnerConfig.builder(codeOwnerConfig.key(), codeOwnerConfig.revision());
 
-    // Add all data from the importing code owner config.
-    resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners(
-        codeOwnerConfig.ignoreParentCodeOwners());
-    getGlobalCodeOwnerSets(codeOwnerConfig)
-        .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
-    getMatchingPerFileCodeOwnerSets(codeOwnerConfig)
-        .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+      // Add all data from the importing code owner config.
+      resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners(
+          codeOwnerConfig.ignoreParentCodeOwners());
+      getGlobalCodeOwnerSets(codeOwnerConfig)
+          .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+      getMatchingPerFileCodeOwnerSets(codeOwnerConfig)
+          .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
 
-    resolveImports(codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
+      resolveImports(codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
 
-    CodeOwnerConfig resolvedCodeOwnerConfig = resolvedCodeOwnerConfigBuilder.build();
+      CodeOwnerConfig resolvedCodeOwnerConfig = resolvedCodeOwnerConfigBuilder.build();
 
-    // Remove global code owner sets if any per-file code owner set has the
-    // ignoreGlobalAndParentCodeOwners flag set to true.
-    // In this case also set ignoreParentCodeOwners to true, so that we do not need to inspect the
-    // ignoreGlobalAndParentCodeOwners flags again.
-    if (getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
-        .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)) {
-      logger.atFine().log("remove global code owner sets and set ignoreParentCodeOwners to true");
-      resolvedCodeOwnerConfig =
-          resolvedCodeOwnerConfig
-              .toBuilder()
-              .setIgnoreParentCodeOwners()
-              .setCodeOwnerSets(
-                  resolvedCodeOwnerConfig.codeOwnerSets().stream()
-                      .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
-                      .collect(toImmutableSet()))
-              .build();
+      // Remove global code owner sets if any per-file code owner set has the
+      // ignoreGlobalAndParentCodeOwners flag set to true.
+      // In this case also set ignoreParentCodeOwners to true, so that we do not need to inspect the
+      // ignoreGlobalAndParentCodeOwners flags again.
+      if (getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
+          .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)) {
+        logger.atFine().log("remove global code owner sets and set ignoreParentCodeOwners to true");
+        resolvedCodeOwnerConfig =
+            resolvedCodeOwnerConfig
+                .toBuilder()
+                .setIgnoreParentCodeOwners()
+                .setCodeOwnerSets(
+                    resolvedCodeOwnerConfig.codeOwnerSets().stream()
+                        .filter(codeOwnerSet -> !codeOwnerSet.pathExpressions().isEmpty())
+                        .collect(toImmutableSet()))
+                .build();
+      }
+
+      this.resolvedCodeOwnerConfig = resolvedCodeOwnerConfig;
+      logger.atFine().log("resolved code owner config = %s", resolvedCodeOwnerConfig);
+      return this.resolvedCodeOwnerConfig;
     }
-
-    this.resolvedCodeOwnerConfig = resolvedCodeOwnerConfig;
-    logger.atFine().log("resolved code owner config = %s", resolvedCodeOwnerConfig);
-    return this.resolvedCodeOwnerConfig;
   }
 
   private void resolveImports(
       CodeOwnerConfig importingCodeOwnerConfig,
       CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
-    logger.atFine().log("resolve imports of %s", importingCodeOwnerConfig.key());
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer(
+            "Resolve code owner config imports",
+            Metadata.builder()
+                .projectName(codeOwnerConfig.key().project().get())
+                .branchName(codeOwnerConfig.key().ref())
+                .filePath(codeOwnerConfig.key().filePath("<default>").toString())
+                .build())) {
+      // To detect cyclic dependencies we keep track of all seen code owner configs.
+      Set<CodeOwnerConfig.Key> seenCodeOwnerConfigs = new HashSet<>();
+      seenCodeOwnerConfigs.add(codeOwnerConfig.key());
 
-    // To detect cyclic dependencies we keep track of all seen code owner configs.
-    Set<CodeOwnerConfig.Key> seenCodeOwnerConfigs = new HashSet<>();
-    seenCodeOwnerConfigs.add(codeOwnerConfig.key());
+      // To ensure that code owner configs from the same project/branch are imported from the same
+      // revision we keep track of the revisions.
+      Map<BranchNameKey, ObjectId> revisionMap = new HashMap<>();
+      revisionMap.put(codeOwnerConfig.key().branchNameKey(), codeOwnerConfig.revision());
 
-    // To ensure that code owner configs from the same project/branch are imported from the same
-    // revision we keep track of the revisions.
-    Map<BranchNameKey, ObjectId> revisionMap = new HashMap<>();
-    revisionMap.put(codeOwnerConfig.key().branchNameKey(), codeOwnerConfig.revision());
+      Queue<CodeOwnerConfigReference> codeOwnerConfigsToImport = new ArrayDeque<>();
+      codeOwnerConfigsToImport.addAll(importingCodeOwnerConfig.imports());
+      codeOwnerConfigsToImport.addAll(
+          resolvedCodeOwnerConfigBuilder.codeOwnerSets().stream()
+              .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
+              .collect(toImmutableSet()));
 
-    Queue<CodeOwnerConfigReference> codeOwnerConfigsToImport = new ArrayDeque<>();
-    codeOwnerConfigsToImport.addAll(importingCodeOwnerConfig.imports());
-    codeOwnerConfigsToImport.addAll(
-        resolvedCodeOwnerConfigBuilder.codeOwnerSets().stream()
-            .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
-            .collect(toImmutableSet()));
+      while (!codeOwnerConfigsToImport.isEmpty()) {
+        CodeOwnerConfigReference codeOwnerConfigReference = codeOwnerConfigsToImport.poll();
+        CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+            createKeyForImportedCodeOwnerConfig(
+                importingCodeOwnerConfig.key(), codeOwnerConfigReference);
+        try (TraceTimer traceTimer2 =
+            TraceContext.newTimer(
+                "Resolve code owner config import",
+                Metadata.builder()
+                    .projectName(keyOfImportedCodeOwnerConfig.project().get())
+                    .branchName(keyOfImportedCodeOwnerConfig.ref())
+                    .filePath(
+                        keyOfImportedCodeOwnerConfig
+                            .filePath(codeOwnerConfigReference.fileName())
+                            .toString())
+                    .build())) {
+          Optional<ProjectState> projectState =
+              projectCache.get(keyOfImportedCodeOwnerConfig.project());
+          if (!projectState.isPresent()) {
+            logger.atWarning().log(
+                "cannot resolve code owner config %s that is imported by code owner config %s:"
+                    + " project %s not found",
+                keyOfImportedCodeOwnerConfig,
+                importingCodeOwnerConfig.key(),
+                keyOfImportedCodeOwnerConfig.project().get());
+            continue;
+          }
+          if (!projectState.get().statePermitsRead()) {
+            logger.atWarning().log(
+                "cannot resolve code owner config %s that is imported by code owner config %s:"
+                    + " state of project %s doesn't permit read",
+                keyOfImportedCodeOwnerConfig,
+                importingCodeOwnerConfig.key(),
+                keyOfImportedCodeOwnerConfig.project().get());
+            continue;
+          }
 
-    while (!codeOwnerConfigsToImport.isEmpty()) {
-      CodeOwnerConfigReference codeOwnerConfigReference = codeOwnerConfigsToImport.poll();
-      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
-          createKeyForImportedCodeOwnerConfig(
-              importingCodeOwnerConfig.key(), codeOwnerConfigReference);
-      logger.atFine().log("import %s", importingCodeOwnerConfig.key());
-
-      Optional<ProjectState> projectState =
-          projectCache.get(keyOfImportedCodeOwnerConfig.project());
-      if (!projectState.isPresent()) {
-        logger.atWarning().log(
-            "cannot resolve code owner config %s that is imported by code owner config %s:"
-                + " project %s not found",
-            keyOfImportedCodeOwnerConfig,
-            importingCodeOwnerConfig.key(),
-            keyOfImportedCodeOwnerConfig.project().get());
-        continue;
-      }
-      if (!projectState.get().statePermitsRead()) {
-        logger.atWarning().log(
-            "cannot resolve code owner config %s that is imported by code owner config %s:"
-                + " state of project %s doesn't permit read",
-            keyOfImportedCodeOwnerConfig,
-            importingCodeOwnerConfig.key(),
-            keyOfImportedCodeOwnerConfig.project().get());
-        continue;
-      }
-
-      Optional<ObjectId> revision =
-          Optional.ofNullable(revisionMap.get(keyOfImportedCodeOwnerConfig.branchNameKey()));
-      logger.atFine().log(
-          "import from %s",
-          revision.isPresent() ? "revision " + revision.get().name() : "current revision");
-
-      Optional<CodeOwnerConfig> mayBeImportedCodeOwnerConfig =
-          revision.isPresent()
-              ? codeOwners.get(keyOfImportedCodeOwnerConfig, revision.get())
-              : codeOwners.getFromCurrentRevision(keyOfImportedCodeOwnerConfig);
-
-      if (!mayBeImportedCodeOwnerConfig.isPresent()) {
-        logger.atWarning().log(
-            "cannot resolve code owner config %s that is imported by code owner config %s"
-                + " (revision = %s)",
-            keyOfImportedCodeOwnerConfig,
-            importingCodeOwnerConfig.key(),
-            revision.map(ObjectId::name).orElse("current"));
-        continue;
-      }
-
-      CodeOwnerConfig importedCodeOwnerConfig = mayBeImportedCodeOwnerConfig.get();
-      CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
-      logger.atFine().log("import mode = %s", importMode.name());
-
-      revisionMap.putIfAbsent(
-          keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
-
-      if (importMode.importIgnoreParentCodeOwners()
-          && importedCodeOwnerConfig.ignoreParentCodeOwners()) {
-        logger.atFine().log("import ignoreParentCodeOwners flag");
-        resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners();
-      }
-
-      if (importMode.importGlobalCodeOwnerSets()) {
-        logger.atFine().log("import global code owners");
-        getGlobalCodeOwnerSets(importedCodeOwnerConfig)
-            .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
-      }
-
-      if (importMode.importPerFileCodeOwnerSets()) {
-        logger.atFine().log("import per-file code owners");
-        getMatchingPerFileCodeOwnerSets(importedCodeOwnerConfig)
-            .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
-      }
-
-      if (importMode.resolveImportsOfImport()
-          && seenCodeOwnerConfigs.add(keyOfImportedCodeOwnerConfig)) {
-        logger.atFine().log("resolve imports of imported code owner config");
-        Set<CodeOwnerConfigReference> transitiveImports = new HashSet<>();
-        transitiveImports.addAll(importedCodeOwnerConfig.imports());
-        transitiveImports.addAll(
-            importedCodeOwnerConfig.codeOwnerSets().stream()
-                .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
-                .collect(toImmutableSet()));
-
-        if (importMode == CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY) {
-          // If only global code owners should be imported, transitive imports should also only
-          // import global code owners, no matter which import mode is specified in the imported
-          // code owner configs.
+          Optional<ObjectId> revision =
+              Optional.ofNullable(revisionMap.get(keyOfImportedCodeOwnerConfig.branchNameKey()));
           logger.atFine().log(
-              "import transitive imports with mode %s",
-              CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
-          transitiveImports =
-              transitiveImports.stream()
-                  .map(
-                      codeOwnerCfgRef ->
-                          CodeOwnerConfigReference.copyWithNewImportMode(
-                              codeOwnerCfgRef,
-                              CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY))
-                  .collect(toSet());
-        }
+              "import from %s",
+              revision.isPresent() ? "revision " + revision.get().name() : "current revision");
 
-        logger.atFine().log("transitive imports = %s", transitiveImports);
-        codeOwnerConfigsToImport.addAll(transitiveImports);
+          Optional<CodeOwnerConfig> mayBeImportedCodeOwnerConfig =
+              revision.isPresent()
+                  ? codeOwners.get(keyOfImportedCodeOwnerConfig, revision.get())
+                  : codeOwners.getFromCurrentRevision(keyOfImportedCodeOwnerConfig);
+
+          if (!mayBeImportedCodeOwnerConfig.isPresent()) {
+            logger.atWarning().log(
+                "cannot resolve code owner config %s that is imported by code owner config %s"
+                    + " (revision = %s)",
+                keyOfImportedCodeOwnerConfig,
+                importingCodeOwnerConfig.key(),
+                revision.map(ObjectId::name).orElse("current"));
+            continue;
+          }
+
+          CodeOwnerConfig importedCodeOwnerConfig = mayBeImportedCodeOwnerConfig.get();
+          CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
+          logger.atFine().log("import mode = %s", importMode.name());
+
+          revisionMap.putIfAbsent(
+              keyOfImportedCodeOwnerConfig.branchNameKey(), importedCodeOwnerConfig.revision());
+
+          if (importMode.importIgnoreParentCodeOwners()
+              && importedCodeOwnerConfig.ignoreParentCodeOwners()) {
+            logger.atFine().log("import ignoreParentCodeOwners flag");
+            resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners();
+          }
+
+          if (importMode.importGlobalCodeOwnerSets()) {
+            logger.atFine().log("import global code owners");
+            getGlobalCodeOwnerSets(importedCodeOwnerConfig)
+                .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+          }
+
+          if (importMode.importPerFileCodeOwnerSets()) {
+            logger.atFine().log("import per-file code owners");
+            getMatchingPerFileCodeOwnerSets(importedCodeOwnerConfig)
+                .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+          }
+
+          if (importMode.resolveImportsOfImport()
+              && seenCodeOwnerConfigs.add(keyOfImportedCodeOwnerConfig)) {
+            logger.atFine().log("resolve imports of imported code owner config");
+            Set<CodeOwnerConfigReference> transitiveImports = new HashSet<>();
+            transitiveImports.addAll(importedCodeOwnerConfig.imports());
+            transitiveImports.addAll(
+                importedCodeOwnerConfig.codeOwnerSets().stream()
+                    .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
+                    .collect(toImmutableSet()));
+
+            if (importMode == CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY) {
+              // If only global code owners should be imported, transitive imports should also only
+              // import global code owners, no matter which import mode is specified in the imported
+              // code owner configs.
+              logger.atFine().log(
+                  "import transitive imports with mode %s",
+                  CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
+              transitiveImports =
+                  transitiveImports.stream()
+                      .map(
+                          codeOwnerCfgRef ->
+                              CodeOwnerConfigReference.copyWithNewImportMode(
+                                  codeOwnerCfgRef,
+                                  CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY))
+                      .collect(toSet());
+            }
+
+            logger.atFine().log("transitive imports = %s", transitiveImports);
+            codeOwnerConfigsToImport.addAll(transitiveImports);
+          }
+        }
       }
     }
   }
