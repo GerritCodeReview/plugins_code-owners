@@ -33,8 +33,6 @@ export class OwnerRequirementValue extends Polymer.Element {
     return Polymer.html`
         <style include="shared-styles">
         :host {
-          color: var(--deemphasized-text-color);
-
           --gr-button: {
             padding: 0px;
           }
