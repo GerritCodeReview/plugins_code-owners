@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.validation;
 
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
+import com.google.gerrit.server.git.validators.MergeValidationListener;
 import com.google.inject.AbstractModule;
 
 /** Guice module that registers validation extensions of the code-owners plugin. */
@@ -23,5 +24,6 @@ public class ValidationModule extends AbstractModule {
   @Override
   protected void configure() {
     DynamicSet.bind(binder(), CommitValidationListener.class).to(CodeOwnerConfigValidator.class);
+    DynamicSet.bind(binder(), MergeValidationListener.class).to(CodeOwnerConfigValidator.class);
   }
 }
