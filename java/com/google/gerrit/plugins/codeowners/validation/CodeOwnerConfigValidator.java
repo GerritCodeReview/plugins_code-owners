@@ -14,16 +14,17 @@
 
 package com.google.gerrit.plugins.codeowners.validation;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
@@ -38,12 +39,18 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
+import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.PatchSetUtil;
 import com.google.gerrit.server.events.CommitReceivedEvent;
+import com.google.gerrit.server.git.CodeReviewCommit;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.git.validators.MergeValidationException;
+import com.google.gerrit.server.git.validators.MergeValidationListener;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
@@ -103,7 +110,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
  * </ul>
  */
 @Singleton
-public class CodeOwnerConfigValidator implements CommitValidationListener {
+public class CodeOwnerConfigValidator implements CommitValidationListener, MergeValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
@@ -112,6 +119,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
   private final PermissionBackend permissionBackend;
   private final ProjectCache projectCache;
+  private final ChangeNotes.Factory changeNotesFactory;
+  private final PatchSetUtil patchSetUtil;
+  private final IdentifiedUser.GenericFactory userFactory;
 
   @Inject
   CodeOwnerConfigValidator(
@@ -120,60 +130,120 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
       ChangedFiles changedFiles,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       PermissionBackend permissionBackend,
-      ProjectCache projectCache) {
+      ProjectCache projectCache,
+      ChangeNotes.Factory changeNotesFactory,
+      PatchSetUtil patchSetUtil,
+      IdentifiedUser.GenericFactory userFactory) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
     this.codeOwnerResolverProvider = codeOwnerResolver;
     this.permissionBackend = permissionBackend;
     this.projectCache = projectCache;
+    this.changeNotesFactory = changeNotesFactory;
+    this.patchSetUtil = patchSetUtil;
+    this.userFactory = userFactory;
   }
 
   @Override
   public List<CommitValidationMessage> onCommitReceived(CommitReceivedEvent receiveEvent)
       throws CommitValidationException {
-    if (codeOwnersPluginConfiguration.isDisabled(receiveEvent.getBranchNameKey())) {
-      return ImmutableList.of();
+    List<CommitValidationMessage> validationMessages =
+        validateCodeOwnerConfig(
+                receiveEvent.getBranchNameKey(), receiveEvent.commit, receiveEvent.user)
+            .collect(toImmutableList());
+
+    // Throw a CommitValidationException if there are errors to make the upload fail.
+    if (validationMessages.stream()
+        .anyMatch(
+            validationMessage ->
+                ValidationMessage.Type.ERROR.equals(validationMessage.getType()))) {
+      throw new CommitValidationException("invalid code owner config files", validationMessages);
+    }
+
+    // There are no errors. The returned validation messages will be sent to the client, but they
+    // are not causing the upload to fail.
+    return validationMessages;
+  }
+
+  @Override
+  public void onPreMerge(
+      Repository repository,
+      CodeReviewCommit commit,
+      ProjectState projectState,
+      BranchNameKey branchNameKey,
+      PatchSet.Id patchSetId,
+      IdentifiedUser caller)
+      throws MergeValidationException {
+    ChangeNotes changeNotes =
+        changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
+    PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
+    IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
+    List<CommitValidationMessage> validationMessages =
+        validateCodeOwnerConfig(branchNameKey, commit, patchSetUploader).collect(toImmutableList());
+
+    // Throw a MergeValidationException if there are errors to make the submit fail.
+    if (validationMessages.stream()
+        .anyMatch(
+            validationMessage ->
+                ValidationMessage.Type.ERROR.equals(validationMessage.getType()))) {
+      throw new MergeValidationException(getMessage(validationMessages));
+    }
+  }
+
+  /**
+   * Composes a single message out of the given validation messages.
+   *
+   * <p>Expects that at least 1 validation message is provided.
+   *
+   * @param validationMessages the validation messages
+   * @return the composed message
+   */
+  private String getMessage(List<CommitValidationMessage> validationMessages) {
+    checkState(!validationMessages.isEmpty(), "expected at least 1 validation message");
+    StringBuilder msgBuilder = new StringBuilder("invalid code owner config files:");
+    for (CommitValidationMessage msg : validationMessages) {
+      msgBuilder.append("\n  ").append(msg.getType().name()).append(": ").append(msg.getMessage());
+    }
+    return msgBuilder.toString();
+  }
+
+  /**
+   * Validates the code owner config files which are newly added or modified in the given commit.
+   *
+   * @param branchNameKey the project and branch that contains the provided commit or for which the
+   *     commit is being pushed
+   * @param commit the commit for which newly added and modified code owner configs should be
+   *     validated
+   * @param user user for which the code owner visibility checks should be performed
+   * @return a stream of validation messages that describe issues with the code owner config, an
+   *     empty stream if there are no issues
+   */
+  private Stream<CommitValidationMessage> validateCodeOwnerConfig(
+      BranchNameKey branchNameKey, ObjectId commit, IdentifiedUser user) {
+    if (codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
+      return Stream.of();
     }
 
     try {
-      CodeOwnerBackend codeOwnerBackend =
-          codeOwnersPluginConfiguration.getBackend(receiveEvent.getBranchNameKey());
+      CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
 
-      ImmutableList<CommitValidationMessage> validationMessages =
-          // iterate over all changed files
-          changedFiles.compute(receiveEvent.getProjectNameKey(), receiveEvent.commit).stream()
-              // filter out deletions (files without new path)
-              .filter(changedFile -> changedFile.newPath().isPresent())
-              // filter out non code owner config files
-              .filter(
-                  changedFile ->
-                      codeOwnerBackend.isCodeOwnerConfigFile(
-                          receiveEvent.getProjectNameKey(),
-                          Paths.get(changedFile.newPath().get().toString())
-                              .getFileName()
-                              .toString()))
-              // validate the code owner config files
-              .flatMap(
-                  changedFile ->
-                      validateCodeOwnerConfig(
-                          codeOwnerBackend,
-                          receiveEvent.getBranchNameKey(),
-                          changedFile,
-                          receiveEvent.commit))
-              .collect(toImmutableList());
-
-      // Throw a CommitValidationException if there are errors to make the upload fail.
-      if (validationMessages.stream()
-          .anyMatch(
-              validationMessage ->
-                  ValidationMessage.Type.ERROR.equals(validationMessage.getType()))) {
-        throw new CommitValidationException("invalid code owner config files", validationMessages);
-      }
-
-      // There are no errors. The returned validation messages will be sent to the client, but they
-      // are not causing the upload to fail.
-      return validationMessages;
+      return
+      // iterate over all changed files
+      changedFiles.compute(branchNameKey.project(), commit).stream()
+          // filter out deletions (files without new path)
+          .filter(changedFile -> changedFile.newPath().isPresent())
+          // filter out non code owner config files
+          .filter(
+              changedFile ->
+                  codeOwnerBackend.isCodeOwnerConfigFile(
+                      branchNameKey.project(),
+                      Paths.get(changedFile.newPath().get().toString()).getFileName().toString()))
+          // validate the code owner config files
+          .flatMap(
+              changedFile ->
+                  validateCodeOwnerConfig(
+                      user, codeOwnerBackend, branchNameKey, changedFile, commit));
     } catch (InvalidPluginConfigurationException e) {
       // If the code-owners plugin configuration is invalid we cannot get the code owners backend
       // and hence we are not able to detect and validate code owner config files. Instead of
@@ -184,14 +254,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
           String.format(
               "cannot validate code owner config files due to invalid code-owners plugin configuration: %s",
               e.getMessage()));
-      return ImmutableList.of();
+      return Stream.of();
     } catch (IOException e) {
       String errorMessage =
           String.format(
               "failed to validate code owner config files in revision %s (project = %s, branch = %s)",
-              receiveEvent.commit.getName(),
-              receiveEvent.getProjectNameKey(),
-              receiveEvent.getBranchNameKey().branch());
+              commit.getName(), branchNameKey.project(), branchNameKey.branch());
       logger.atSevere().log(errorMessage);
       throw new StorageException(errorMessage, e);
     }
@@ -200,6 +268,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   /**
    * Validates the specified code owner config and returns a stream of validation messages.
    *
+   * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerBackend the code owner backend from which the code owner config can be loaded
    * @param branchNameKey the project and branch of the code owner config
    * @param changedFile the changed file that represents the code owner config
@@ -208,6 +277,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
    *     empty stream if there are no issues
    */
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
+      IdentifiedUser user,
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       ChangedFile changedFile,
@@ -277,7 +347,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
         // config parseable, it is a good update even if the code owner config still contains
         // issues. Hence in this case we downgrade all validation errors in the new version to
         // warnings so that the update is not blocked.
-        return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig)
+        return validateCodeOwnerConfig(user, codeOwnerBackend, codeOwnerConfig)
             .map(CodeOwnerConfigValidator::downgradeErrorToWarning);
       }
 
@@ -287,9 +357,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
 
     // Validate the parsed code owner config.
     if (baseCodeOwnerConfig.isPresent()) {
-      return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig, baseCodeOwnerConfig.get());
+      return validateCodeOwnerConfig(
+          user, codeOwnerBackend, codeOwnerConfig, baseCodeOwnerConfig.get());
     }
-    return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig);
+    return validateCodeOwnerConfig(user, codeOwnerBackend, codeOwnerConfig);
   }
 
   /**
@@ -466,6 +537,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
    * <p>Validation errors that exist in both code owner configs are returned as warning (because
    * they are not newly introduced by the given code owner config).
    *
+   * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerBackend the code owner backend from which the code owner configs were loaded
    * @param codeOwnerConfig the code owner config that should be validated
    * @param baseCodeOwnerConfig the base code owner config
@@ -473,6 +545,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
    *     empty stream if there are no issues
    */
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
+      IdentifiedUser user,
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig codeOwnerConfig,
       CodeOwnerConfig baseCodeOwnerConfig) {
@@ -480,8 +553,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
     requireNonNull(baseCodeOwnerConfig, "baseCodeOwnerConfig");
 
     ImmutableSet<CommitValidationMessage> issuesInBaseVersion =
-        validateCodeOwnerConfig(codeOwnerBackend, baseCodeOwnerConfig).collect(toImmutableSet());
-    return validateCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig)
+        validateCodeOwnerConfig(user, codeOwnerBackend, baseCodeOwnerConfig)
+            .collect(toImmutableSet());
+    return validateCodeOwnerConfig(user, codeOwnerBackend, codeOwnerConfig)
         .map(
             commitValidationMessage ->
                 issuesInBaseVersion.contains(commitValidationMessage)
@@ -492,23 +566,25 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   /**
    * Validates the given code owner config and returns validation issues as stream.
    *
+   * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerBackend the code owner backend from which the code owner config was loaded
    * @param codeOwnerConfig the code owner config that should be validated
    * @return a stream of validation messages that describe issues with the code owner config, an
    *     empty stream if there are no issues
    */
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
-      CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
+      IdentifiedUser user, CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     return Streams.concat(
         validateCodeOwnerReferences(
-            codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig),
+            user, codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig),
         validateImports(codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig));
   }
 
   /**
    * Validates the code owner references of the given code owner config.
    *
+   * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner references
    * @param codeOwnerConfig the code owner config for which the code owner references should be
@@ -517,12 +593,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
    *     empty stream if there are no issues
    */
   private Stream<CommitValidationMessage> validateCodeOwnerReferences(
-      Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
+      IdentifiedUser user, Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.codeOwnerSets().stream()
         .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
         .map(
             codeOwnerReference ->
-                validateCodeOwnerReference(codeOwnerConfigFilePath, codeOwnerReference))
+                validateCodeOwnerReference(user, codeOwnerConfigFilePath, codeOwnerReference))
         .filter(Optional::isPresent)
         .map(Optional::get);
   }
@@ -530,6 +606,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
   /**
    * Validates a code owner reference.
    *
+   * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner reference
    * @param codeOwnerReference the code owner reference that should be validated.
@@ -537,8 +614,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
    *     Optional#empty()} if there is no issue
    */
   private Optional<CommitValidationMessage> validateCodeOwnerReference(
-      Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
-    CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get();
+      IdentifiedUser user, Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
+    CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get().forUser(user);
     if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email())) {
       return error(
           String.format(
@@ -559,8 +636,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener {
     // conclude from the error message whether the email exists).
     return error(
         String.format(
-            "code owner email '%s' in '%s' cannot be resolved",
-            codeOwnerReference.email(), codeOwnerConfigFilePath));
+            "code owner email '%s' in '%s' cannot be resolved for %s",
+            codeOwnerReference.email(), codeOwnerConfigFilePath, user.getLoggableName()));
   }
 
   /**
