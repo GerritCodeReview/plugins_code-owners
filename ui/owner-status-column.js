@@ -56,6 +56,10 @@ class BaseEl extends Polymer.Element {
     const latestPatchset = change.revisions[change.current_revision];
     // only show if its comparing against base
     if (patchRange.basePatchNum !== 'PARENT') return true;
+    // Note: in some special cases, patchNum is undefined on latest patchset like
+    // after publishing the edit, still show for them
+    // TODO: this should be fixed in Gerrit
+    if (patchRange.patchNum === undefined) return false;
     // only show if its latest patchset
     if (`${patchRange.patchNum}` !== `${latestPatchset._number}`) return true;
     return false;
