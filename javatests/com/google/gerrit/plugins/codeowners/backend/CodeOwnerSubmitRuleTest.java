@@ -85,7 +85,10 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     SubmitRecordSubject submitRecordSubject =
         assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
     submitRecordSubject.hasStatusThat().isOk();
-    submitRecordSubject.hasSubmitRequirementsThat().isNull();
+    SubmitRequirementSubject submitRequirementSubject =
+        submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
+    submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
+    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code Owners");
   }
 
   @Test

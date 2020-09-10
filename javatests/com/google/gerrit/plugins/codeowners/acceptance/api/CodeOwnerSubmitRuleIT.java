@@ -184,8 +184,12 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     ChangeInfo changeInfo = gApi.changes().id(changeId).get(ListChangesOption.SUBMITTABLE);
     assertThat(changeInfo.submittable).isTrue();
 
-    // Check that there is no submit requirement.
-    assertThatCollection(changeInfo.requirements).isEmpty();
+    // Check the submit requirement.
+    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+        assertThatCollection(changeInfo.requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
@@ -224,8 +228,12 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Approve by a non-code-owner to satisfy the Code-Review+2 requirement.
     approve(changeId);
 
-    // Check that there is no submit requirement.
-    assertThatCollection(gApi.changes().id(changeId).get().requirements).isEmpty();
+    // Check the submit requirement.
+    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+        assertThatCollection(gApi.changes().id(changeId).get().requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
     gApi.changes().id(changeId).current().submit();

@@ -45,7 +45,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
     }
   }
 
-  private static final SubmitRequirement NOT_READY_SUBMIT_REQUIREMENT =
+  private static final SubmitRequirement SUBMIT_REQUIREMENT =
       SubmitRequirement.builder().setFallbackText("Code Owners").setType("code-owners").build();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
@@ -91,13 +91,14 @@ class CodeOwnerSubmitRule implements SubmitRule {
   private static SubmitRecord ok() {
     SubmitRecord submitRecord = new SubmitRecord();
     submitRecord.status = SubmitRecord.Status.OK;
+    submitRecord.requirements = ImmutableList.of(SUBMIT_REQUIREMENT);
     return submitRecord;
   }
 
   private static SubmitRecord notReady() {
     SubmitRecord submitRecord = new SubmitRecord();
     submitRecord.status = SubmitRecord.Status.NOT_READY;
-    submitRecord.requirements = ImmutableList.of(NOT_READY_SUBMIT_REQUIREMENT);
+    submitRecord.requirements = ImmutableList.of(SUBMIT_REQUIREMENT);
     return submitRecord;
   }
 
