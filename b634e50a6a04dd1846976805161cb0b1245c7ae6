@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "bb845500_d0804421",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 202,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T14:30:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5c2edefe_3fc97dc2",
+      "range": {
+        "startLine": 202,
+        "startChar": 6,
+        "endLine": 202,
+        "endChar": 43
+      },
+      "revId": "b634e50a6a04dd1846976805161cb0b1245c7ae6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e1247dad_c79e3fb2",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
         "patchSetId": 10
@@ -68,6 +92,54 @@
       "revId": "b634e50a6a04dd1846976805161cb0b1245c7ae6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d907a4c0_bc5e9c15",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T14:30:15Z",
+      "side": 1,
+      "message": "I agree that this is not optimal, but I think it\u0027s the best what we can do right now. To do this properly I think Gerrit core should use a RuntimeException to signal an invalid config (instead of using the checked ConfigInvalidException from JGit) and then we could simply catch this exception here. I believe we already decided to migrate to unchecked exceptions, but so far we just didn\u0027t get to it yet.",
+      "parentUuid": "e1247dad_c79e3fb2",
+      "range": {
+        "startLine": 223,
+        "startChar": 17,
+        "endLine": 223,
+        "endChar": 36
+      },
+      "revId": "b634e50a6a04dd1846976805161cb0b1245c7ae6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "4fdd9872_3eaa31eb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T14:30:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "00cbfa73_709d3f95",
+      "range": {
+        "startLine": 223,
+        "startChar": 34,
+        "endLine": 223,
+        "endChar": 36
+      },
+      "revId": "b634e50a6a04dd1846976805161cb0b1245c7ae6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
