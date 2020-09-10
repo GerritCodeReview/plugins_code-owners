@@ -22,6 +22,30 @@
       "revId": "90441eaacc80e2932bfe47df9cdc6beda28a7b63",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b489a093_8dd69021",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/backend/TestCodeOwnerConfigFormatter.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 56,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T15:04:27Z",
+      "side": 1,
+      "message": "This made me realise that I can simply inject the actual formatters (FindCodeOwnerConfigParser and ProtoCodeOwnerConfigParser) into my test class, then this change is no longer needed. Dropping it.",
+      "parentUuid": "a8a86b6c_93cbfe7b",
+      "range": {
+        "startLine": 49,
+        "startChar": 0,
+        "endLine": 56,
+        "endChar": 0
+      },
+      "revId": "90441eaacc80e2932bfe47df9cdc6beda28a7b63",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
