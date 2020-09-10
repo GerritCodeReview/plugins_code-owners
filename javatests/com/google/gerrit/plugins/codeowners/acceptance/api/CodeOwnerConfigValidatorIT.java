@@ -79,6 +79,45 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void canUploadNonParseableConfigIfItWasAlreadyNonParseable() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload an initial code owner config that
+    // is not parseable
+    disableCodeOwnersForProject(project);
+
+    // upload an initial code owner config that is not parseable
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            "INVALID");
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    // update the code owner config so that it is still not parseable
+    r =
+        createChange(
+            "Update code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            "STILL INVALID");
+    r.assertOkStatus();
+    r.assertMessage(
+        String.format(
+            "warning: commit %s: invalid code owner config file '%s':\n  %s",
+            abbreviateName(r.getCommit()),
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            getParsingErrorMessage(
+                ImmutableMap.of(
+                    FindOwnersBackend.class,
+                    "invalid line: STILL INVALID",
+                    ProtoBackend.class,
+                    "1:7: expected \"{\""))));
+  }
+
+  @Test
   public void cannotUploadNonParseableConfig() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
