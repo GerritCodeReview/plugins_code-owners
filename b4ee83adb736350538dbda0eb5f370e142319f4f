@@ -16,6 +16,23 @@
       "revId": "b4ee83adb736350538dbda0eb5f370e142319f4f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1094cd9c_bf8830d0",
+        "filename": "ui/owner-requirement-approved.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-10T09:51:10Z",
+      "side": 1,
+      "message": "this is more of a hack.. due to the table layout used in submit requirements area, the `onwer-requirement-approved` el is always treated as a table-cell.. i could not find a nice way to tweak it to make it work.. and this should be temporary until the change summary redesign, so I decide to go with the hack...",
+      "revId": "b4ee83adb736350538dbda0eb5f370e142319f4f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
