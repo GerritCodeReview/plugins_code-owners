@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.server.IdentifiedUser;
+import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -50,6 +51,20 @@ public interface CodeOwnerBackend {
    */
   Optional<CodeOwnerConfig> getCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision);
+
+  /**
+   * Returns the absolute file path of the specified code owner config.
+   *
+   * <p>This method is useful to resolve the file path if the {@link CodeOwnerConfig.Key#fileName()}
+   * in the code owner config key is not set.
+   *
+   * <p>The specified code owner config may or may not exist.
+   *
+   * @param codeOwnerConfigKey the key of the code owner config for which the file path should be
+   *     returned
+   * @return the absolute file path of the specified code owner config
+   */
+  Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey);
 
   /**
    * Updates/Creates a code owner config.

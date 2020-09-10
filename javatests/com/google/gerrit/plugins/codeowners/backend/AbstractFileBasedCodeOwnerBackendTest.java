@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
@@ -24,6 +25,7 @@ import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 import com.google.gerrit.server.IdentifiedUser;
+import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -423,5 +425,21 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
       // Check that the branch was not created.
       assertThat(repo.exactRef(codeOwnerConfigKey.ref())).isNull();
     }
+  }
+
+  @Test
+  public void getFilePathForCodeOwnerConfigKeyWithoutFileName() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
+        .isEqualTo(Paths.get(codeOwnerConfigKey.folderPath() + getFileName()));
+  }
+
+  @Test
+  public void getFilePathForCodeOwnerConfigKeyWithFileName() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "master", "/", getFileName() + "_foo_bar");
+    assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
+        .isEqualTo(
+            Paths.get(codeOwnerConfigKey.folderPath() + codeOwnerConfigKey.fileName().get()));
   }
 }

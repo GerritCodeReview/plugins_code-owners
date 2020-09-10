@@ -23,6 +23,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
@@ -32,7 +33,7 @@ import com.google.gerrit.plugins.codeowners.backend.proto.OwnersMetadata.OwnersC
 import com.google.gerrit.plugins.codeowners.backend.proto.OwnersMetadata.OwnersMetadataFile;
 import com.google.inject.Singleton;
 import com.google.protobuf.TextFormat;
-import java.io.IOException;
+import com.google.protobuf.TextFormat.ParseException;
 import java.util.Comparator;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -42,30 +43,35 @@ import org.eclipse.jgit.lib.ObjectId;
  *
  * <p>The proto format is defined in {@code proto/owners_metadata.proto}.
  *
- * <p>The parsing fails if the provided string is not a valid text representation of an {@code
- * owners_metadata.proto}.
+ * <p>The parsing fails with a {@link CodeOwnerConfigParseException} if the provided string is not a
+ * valid text representation of an {@code owners_metadata.proto}.
  */
 @Singleton
 class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
   @Override
   public CodeOwnerConfig parse(
       ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
-      throws IOException {
-    return Parser.parse(
-        requireNonNull(revision, "revision"),
-        requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"),
-        Strings.nullToEmpty(codeOwnerConfigAsString));
+      throws CodeOwnerConfigParseException {
+    requireNonNull(revision, "revision");
+    requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+
+    try {
+      return Parser.parse(
+          revision, codeOwnerConfigKey, Strings.nullToEmpty(codeOwnerConfigAsString));
+    } catch (ParseException e) {
+      throw new CodeOwnerConfigParseException(codeOwnerConfigKey, e.getMessage());
+    }
   }
 
   @Override
-  public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws IOException {
+  public String formatAsString(CodeOwnerConfig codeOwnerConfig) throws ParseException {
     return Formatter.formatAsString(requireNonNull(codeOwnerConfig, "codeOwnerConfig"));
   }
 
   private static class Parser {
     static CodeOwnerConfig parse(
         ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
-        throws IOException {
+        throws ParseException {
       OwnersConfig ownersConfig = parseProto(codeOwnerConfigAsString);
       return CodeOwnerConfig.builder(codeOwnerConfigKey, revision)
           .setIgnoreParentCodeOwners(ownersConfig.getIgnoreParentOwners())
@@ -73,7 +79,7 @@ class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
           .build();
     }
 
-    private static OwnersConfig parseProto(String codeOwnerConfigAsString) throws IOException {
+    private static OwnersConfig parseProto(String codeOwnerConfigAsString) throws ParseException {
       return TextFormat.parse(codeOwnerConfigAsString, OwnersMetadataFile.class).getOwnersConfig();
     }
 

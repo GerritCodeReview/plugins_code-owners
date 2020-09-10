@@ -22,15 +22,17 @@ import static java.util.stream.Collectors.joining;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.server.git.ValidationError;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +57,9 @@ import org.eclipse.jgit.lib.ObjectId;
  *   <li>code owner emails: a line can be the email of a code owner
  * </ul>
  *
- * <p>Comment lines and invalid lines silently ignored.
+ * <p>Comment lines are silently ignored.
+ *
+ * <p>Invalid lines cause the parsing to fail and trigger a {@link CodeOwnerConfigParseException}.
  *
  * <p>Comments can appear as separate lines and as appendix for email lines (e.g. using
  * 'foo.bar@example.com # Foo Bar' would be a valid email line).
@@ -75,11 +79,18 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
   @Override
   public CodeOwnerConfig parse(
-      ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
-    return Parser.parse(
-        requireNonNull(revision, "revision"),
-        requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey"),
-        Strings.nullToEmpty(codeOwnerConfigAsString));
+      ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
+      throws CodeOwnerConfigParseException {
+    requireNonNull(revision, "revision");
+    requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+
+    Parser parser = new Parser();
+    CodeOwnerConfig codeOwnerConfig =
+        parser.parse(revision, codeOwnerConfigKey, Strings.nullToEmpty(codeOwnerConfigAsString));
+    if (!parser.getValidationErrors().isEmpty()) {
+      throw new CodeOwnerConfigParseException(codeOwnerConfigKey, parser.getValidationErrors());
+    }
+    return codeOwnerConfig;
   }
 
   @Override
@@ -87,9 +98,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     return Formatter.formatAsString(requireNonNull(codeOwnerConfig, "codeOwnerConfig"));
   }
 
-  private static class Parser {
-    private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
+  private static class Parser implements ValidationError.Sink {
     private static final String COMMA = "[\\s]*,[\\s]*";
 
     // Separator for project and file paths in an include line.
@@ -140,7 +149,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final Pattern PAT_PER_FILE =
         Pattern.compile(BOL + "per-file[\\s]+([^=#]+)=[\\s]*([^#]+)" + EOL);
 
-    static CodeOwnerConfig parse(
+    private List<ValidationError> validationErrors;
+
+    CodeOwnerConfig parse(
         ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
       CodeOwnerConfig.Builder codeOwnerConfigBuilder =
           CodeOwnerConfig.builder(codeOwnerConfigKey, revision);
@@ -161,7 +172,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       return codeOwnerConfigBuilder.build();
     }
 
-    private static void parseLine(
+    private void parseLine(
         CodeOwnerConfig.Builder codeOwnerConfigBuilder,
         CodeOwnerSet.Builder globalCodeOwnerSetBuilder,
         List<CodeOwnerSet> perFileCodeOwnerSets,
@@ -180,7 +191,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       } else if ((codeOwnerConfigReference = parseInclude(line)) != null) {
         codeOwnerConfigBuilder.addImport(codeOwnerConfigReference);
       } else {
-        logger.atInfo().log("Skipping unknown line: %s", line);
+        error(ValidationError.create(String.format("invalid line: %s", line)));
       }
     }
 
@@ -278,6 +289,26 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     private static String removeExtraSpaces(String s) {
       return s.trim().replaceAll("[\\s]+", " ").replaceAll("[\\s]*:[\\s]*", ":");
+    }
+
+    /**
+     * Get the validation errors, if any were discovered during parsing the code owner config file.
+     *
+     * @return list of errors; empty list if there are no errors.
+     */
+    public ImmutableList<ValidationError> getValidationErrors() {
+      if (validationErrors != null) {
+        return ImmutableList.copyOf(validationErrors);
+      }
+      return ImmutableList.of();
+    }
+
+    @Override
+    public void error(ValidationError error) {
+      if (validationErrors == null) {
+        validationErrors = new ArrayList<>(4);
+      }
+      validationErrors.add(error);
     }
   }
 
