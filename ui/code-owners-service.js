@@ -305,6 +305,10 @@ export class CodeOwnerService {
     return resPromise.then(() => ownersMap);
   }
 
+  getProjectConfig() {
+    return this.codeOwnerApi.getProjectConfig(this.change.project);
+  }
+
   static getOwnerService(restApi, change) {
     if (!this.ownerService || this.ownerService.change !== change) {
       this.ownerService = new CodeOwnerService(restApi, change, {

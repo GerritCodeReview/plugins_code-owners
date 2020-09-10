@@ -54,7 +54,7 @@ export class OwnerRequirementValue extends Polymer.Element {
           loading...
         </p>
         <template is="dom-if" if="[[!_isLoading]]">
-          <span>[[_computeStatusText(_statusCount)]]</span>
+          <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
           <template is="dom-if" if="[[!_allApproved]]">
             <gr-button link on-click="_openReplyDialog">
             Suggest owners
@@ -78,6 +78,7 @@ export class OwnerRequirementValue extends Polymer.Element {
         type: Boolean,
         computed: '_computeAllApproved(_statusCount)',
       },
+      _isOverriden: Boolean,
     };
   }
 
@@ -87,9 +88,33 @@ export class OwnerRequirementValue extends Polymer.Element {
     ];
   }
 
-  _updateStatus(ownerService) {
+  _checkIfOverriden() {
+    this.ownerService.getProjectConfig().then(res => {
+      if (!res["override_approval"]) {
+        // no override label configured
+        this._isOverriden = false;
+        return;
+      };
+
+      const overridenLabel = res["override_approval"].label;
+      const overridenValue = res["override_approval"].value;
+
+      if (this.change.labels[overridenLabel]) {
+        const votes = this.change.labels[overridenLabel].all || [];
+        if (votes.find(v => `${v.value}` === `${overridenValue}`)) {
+          this._isOverriden = true;
+          return;
+        }
+      }
+
+      // otherwise always reset it to false
+      this._isOverriden = false;
+    });
+  }
+
+  _updateStatus() {
     this._isLoading = true;
-    return ownerService.getStatus()
+    return this.ownerService.getStatus()
         .then(({rawStatuses}) => {
           this._statusCount = this._getStatusCount(rawStatuses);
         })
@@ -124,7 +149,7 @@ export class OwnerRequirementValue extends Polymer.Element {
         }, {missing: 0, pending: 0});
   }
 
-  _computeStatusText(statusCount) {
+  _computeStatusText(statusCount, isOverriden) {
     const statusText = [];
     if (statusCount.missing) {
       statusText.push(`${statusCount.missing} missing`);
@@ -135,7 +160,7 @@ export class OwnerRequirementValue extends Polymer.Element {
     }
 
     if (!statusText.length) {
-      statusText.push('approved');
+      statusText.push(isOverriden ? 'approved (overriden)' : 'approved');
     }
 
     return statusText.join(', ');
@@ -152,7 +177,8 @@ export class OwnerRequirementValue extends Polymer.Element {
   onInputChanged(restApi, change) {
     if ([restApi, change].includes(undefined)) return;
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
-    this._updateStatus(this.ownerService);
+    this._updateStatus();
+    this._checkIfOverriden();
   }
 
   _openReplyDialog() {
