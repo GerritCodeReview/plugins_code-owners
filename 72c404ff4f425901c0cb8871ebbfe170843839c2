@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "d6a6dcf3_674da0d8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T12:46:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b012102b_04387a80",
+      "range": {
+        "startLine": 60,
+        "startChar": 20,
+        "endLine": 60,
+        "endChar": 25
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "50eefc99_a90f5ac5",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
         "patchSetId": 9
@@ -36,6 +60,30 @@
       "writtenOn": "2020-09-09T14:43:29Z",
       "side": 1,
       "message": "Just thinking whether it\u0027s possible to modify any owner config file without getting to this code. I think it\u0027s not possible, but leaving this comment here for you to make sure.",
+      "range": {
+        "startLine": 64,
+        "startChar": 39,
+        "endLine": 64,
+        "endChar": 55
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d17e98b2_6daf850e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T12:46:35Z",
+      "side": 1,
+      "message": "I\u0027ve actually spent quite some time trying to bypass it, but didn\u0027t succeed (I believe it was possible earlier, but it seems all loopholes were fixed by now). \n\nAnyway, even if it\u0027s possible, with [1] we will do the validation again on submit.\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/281083",
+      "parentUuid": "50eefc99_a90f5ac5",
       "range": {
         "startLine": 64,
         "startChar": 39,
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "56a8d46d_5b4a5587",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T12:46:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e70dd321_f10f5f6e",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 77,
+        "endChar": 62
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b76893f3_9bd88bfa",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
         "patchSetId": 9
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "03a8e0ec_4af36bf4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T12:46:35Z",
+      "side": 1,
+      "message": "At this place we are already sure that there are no errors, since otherwise we would have exited the method above in line 102. Rephrased the comment to make the meaning clearer.",
+      "parentUuid": "b76893f3_9bd88bfa",
+      "range": {
+        "startLine": 105,
+        "startChar": 9,
+        "endLine": 105,
+        "endChar": 14
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "379b3b94_c51f0e21",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
         "patchSetId": 9
@@ -114,6 +210,30 @@
       "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d02f78a4_e1d125e7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 111,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T12:46:35Z",
+      "side": 1,
+      "message": "\u003e Isn\u0027t it possible that someone uploads a broken code owner config and\n\u003e then you will get a ParseException whenever trying to read the code owner configs?\n\nYes, if any of the code owner configs in the repository is invalid, you will get an exception whenever you try to submit a change that touches a file for which this code owner config is relevant. We do our best to prevent the an invalid code owner config file enters the repository but we cannot prevent it in all cases, it will always be best effort only. If it happens the submission for those changes is blocked until the code owner config files are fixed.\n\n\u003e Can you make sure that no file that relates to code owner configs is being updated\n\u003e and if that\u0027s the case, you can just log and ignore?\nNo, only the code owner backend knows which files are code owner config file (e.g. which name they have). If we can\u0027t get the code owner backend, we can\u0027t tell whether a file is a code owner config or not.\n\n\u003e *I guess* that if the plugin configuration is invalid you also can\u0027t modify the code owner config, is that the case?\nIn this case we don\u0027t know which files are code owner config files. So we only have the choice between a) block all uploads or b) allow all uploads. I decided for b) as with this option people can at least upload their changes, only the submission is block until the plugin configuration (and the code owner configs which got broken in the meantime if any) were fixed. This seems to be better than blocking all uploads.\n\nThe situation of a broken plugin configuration is similar to a project owner submitting an invalid prolog rule. The project owner messed up and now change submission is broken. At least with code owners we also validate the plugin configuration (see CodeOwnersPluginConfigValidator) so that the chances of breaking it are smaller.\n\nI clarified in the Javadoc of this class that all validations are best effort only.",
+      "parentUuid": "379b3b94_c51f0e21",
+      "range": {
+        "startLine": 111,
+        "startChar": 31,
+        "endLine": 111,
+        "endChar": 67
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -164,6 +284,30 @@
     },
     {
       "key": {
+        "uuid": "4e1fd2e7_01e076fc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T12:46:35Z",
+      "side": 1,
+      "message": "It seems \u0027parseable\u0027 is more popular in our code base, so I\u0027ll use this spelling.\n\n$ grep -r -i parseable | wc -l\n178\n$ grep -r -i parsable | wc -l\n89\n\nI would not mind if we change of occurrences to \u0027parsable\u0027 one day to be fully consistent.",
+      "parentUuid": "a8d5a954_8337ba91",
+      "range": {
+        "startLine": 167,
+        "startChar": 42,
+        "endLine": 167,
+        "endChar": 51
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "53ec193d_3b5eae2c",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
         "patchSetId": 9
@@ -184,6 +328,30 @@
       "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "994766cd_140e7eba",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-10T12:46:35Z",
+      "side": 1,
+      "message": "see above :)",
+      "parentUuid": "53ec193d_3b5eae2c",
+      "range": {
+        "startLine": 217,
+        "startChar": 60,
+        "endLine": 217,
+        "endChar": 69
+      },
+      "revId": "72c404ff4f425901c0cb8871ebbfe170843839c2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
