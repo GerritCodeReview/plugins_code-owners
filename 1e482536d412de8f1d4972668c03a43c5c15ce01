@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e383a520_76ef66f1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-10T14:13:56Z",
+      "side": 1,
+      "message": "after https://gerrit-review.googlesource.com/c/plugins/code-owners/+/281139, the Code Owners submit requirement will always show so we should show relevant info if its approved or approved with overriden",
+      "revId": "1e482536d412de8f1d4972668c03a43c5c15ce01",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
