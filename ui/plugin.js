@@ -19,6 +19,7 @@ import {SuggestOwners} from './suggest-owners.js';
 import {OwnerStatusColumnContent, OwnerStatusColumnHeader} from './owner-status-column.js';
 import {OwnerRequirementValue} from './owner-requirement.js';
 import {SuggestOwnersTrigger} from './suggest-owners-trigger.js';
+import {OwnerRequirementApproved} from './owner-requirement-approved.js';
 
 Gerrit.install(plugin => {
   const ENABLED_EXPERIMENTS = window.ENABLED_EXPERIMENTS || [];
@@ -67,4 +68,6 @@ Gerrit.install(plugin => {
         view.restApi = restApi;
         view.reporting = reporting;
       });
+
+  plugin.registerCustomComponent('submit-requirements', OwnerRequirementApproved.is);
 });

@@ -91,7 +91,7 @@ export class SuggestOwners extends Polymer.Element {
           border: 1px solid var(--view-background-color);
           border-radius: var(--border-radius);
           box-shadow: var(--elevation-level-1);
-          padding: var(--spacing-m);
+          padding: var(--spacing-s);
           margin: var(--spacing-m) 0;
         }
         p.loading {
@@ -113,7 +113,7 @@ export class SuggestOwners extends Polymer.Element {
           flex-direction: row;
           align-items: flex-start;
           border-bottom: 1px solid var(--border-color);
-          padding: var(--spacing-s) var(--spacing-xs);
+          padding: var(--spacing-s) 0;
         }
         .suggestion-row:last-of-type {
           border-bottom: none;
@@ -156,6 +156,7 @@ export class SuggestOwners extends Polymer.Element {
         .no-owners-content {
           line-height: 26px;
           flex: 1;
+          padding-left: var(--spacing-m);
         }
         .no-owners-content a {
           padding-left: var(--spacing-s);
