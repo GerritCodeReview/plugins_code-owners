@@ -158,7 +158,7 @@ export class OwnerRequirementValue extends Polymer.Element {
     }
 
     if (!statusText.length) {
-      statusText.push(isOverriden ? 'approved (overriden)' : 'approved');
+      statusText.push(isOverriden ? 'Approved (Owners-Override)' : 'Approved');
     }
 
     return statusText.join(', ');
