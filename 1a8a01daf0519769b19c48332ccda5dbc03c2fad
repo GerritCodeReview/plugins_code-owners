@@ -16,6 +16,24 @@
       "revId": "1a8a01daf0519769b19c48332ccda5dbc03c2fad",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "be4a26ad_d460d099",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-11T12:40:21Z",
+      "side": 1,
+      "message": "Removed that part from the code just for now.",
+      "parentUuid": "ae5b5295_3f40e843",
+      "revId": "1a8a01daf0519769b19c48332ccda5dbc03c2fad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
