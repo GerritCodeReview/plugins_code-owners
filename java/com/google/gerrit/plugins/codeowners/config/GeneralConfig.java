@@ -45,6 +45,7 @@ import org.eclipse.jgit.lib.Config;
 public class GeneralConfig {
   @VisibleForTesting public static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
   @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
+  @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
 
   private final PluginConfig pluginConfigFromGerritConfig;
 
@@ -83,5 +84,25 @@ public class GeneralConfig {
         .filter(emailDomain -> !Strings.isNullOrEmpty(emailDomain))
         .distinct()
         .collect(toImmutableSet());
+  }
+
+  /**
+   * Gets the read-only configuration from the given plugin config with fallback to {@code
+   * gerrit.config}.
+   *
+   * <p>The read-only controls whether code owner config files are read-only and all modifications
+   * of code owner config files should be rejected.
+   *
+   * @param pluginConfig the plugin config from which the read-only configuration should be read.
+   * @return whether code owner config files are read-only
+   */
+  boolean getReadOnly(Config pluginConfig) {
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    if (pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY) != null) {
+      return pluginConfig.getBoolean(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, false);
+    }
+
+    return pluginConfigFromGerritConfig.getBoolean(KEY_READ_ONLY, false);
   }
 }
