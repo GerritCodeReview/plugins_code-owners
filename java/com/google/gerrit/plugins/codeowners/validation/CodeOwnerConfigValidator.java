@@ -188,6 +188,14 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               new CommitValidationMessage(
                   "code-owners functionality is disabled", ValidationMessage.Type.HINT)));
     }
+    if (codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(branchNameKey.project())) {
+      return Optional.of(
+          ValidationResult.create(
+              "modifying code owner config files not allowed",
+              new CommitValidationMessage(
+                  "code owner config files are configured to be read-only",
+                  ValidationMessage.Type.ERROR)));
+    }
 
     try {
       CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);

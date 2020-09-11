@@ -32,6 +32,13 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default unset (no file extension is used).
 
+<a id="pluginCodeOwnersReadOnly">plugin.@PLUGIN@.readOnly</a>
+:       Whether code owner config files are read-only.\
+        Can be overridden per project by setting
+        [codeOwners.readOnly](#codeOwnersReadOnly) in
+        `@PLUGIN@.config`.\
+        By default unset `false`.
+
 <a id="pluginCodeOwnersAllowedEmailDomain">plugin.@PLUGIN@.allowedEmailDomain</a>
 :       Email domain that allows to assign code ownerships to emails with this
         domain.\n
@@ -124,6 +131,15 @@ Parameters that are not set for a project are inherited from the parent project.
         `gerrit.config`.\
         If not set, the global setting
         [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
+        `gerrit.config` is used.
+
+<a id="codeOwnersReadOnly">codeOwners.readOnly</a>
+:       Whether code owner config files are read-only.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
+        `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
         `gerrit.config` is used.
 
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>
