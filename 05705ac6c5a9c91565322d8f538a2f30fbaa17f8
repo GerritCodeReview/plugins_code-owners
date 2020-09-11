@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3bb44156_0971c013",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-11T08:04:51Z",
+      "side": 1,
+      "message": "Override zuul as keep getting NODE_FAILURE, this is text change only, should be safe",
+      "revId": "05705ac6c5a9c91565322d8f538a2f30fbaa17f8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
