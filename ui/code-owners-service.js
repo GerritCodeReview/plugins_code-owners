@@ -238,7 +238,7 @@ export class CodeOwnerService {
       groupedItems.push({
         groupName: this.getGroupName(failedFiles),
         files: failedFiles,
-        error: new Error('Failed to fetch owner info'),
+        error: new Error('Failed to fetch code owner info. Try to refresh the page.'),
       });
     }
 
@@ -298,9 +298,9 @@ export class CodeOwnerService {
     }
     const resPromise = Promise.all(batchRequests);
     if (files.length > maxConcurrentRequests) {
-      return resPromise.then(() =>
-        this.batchFetchCodeOwners(files.slice(maxConcurrentRequests), ownersMap)
-      );
+      return resPromise.then(() => {
+        return this.batchFetchCodeOwners(files.slice(maxConcurrentRequests), ownersMap)
+      });
     }
     return resPromise.then(() => ownersMap);
   }
