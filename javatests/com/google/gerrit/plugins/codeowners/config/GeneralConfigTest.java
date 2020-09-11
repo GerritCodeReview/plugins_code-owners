@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_READ_ONLY;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
@@ -80,5 +81,33 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "")
   public void emptyEmailDomainsConfigured() throws Exception {
     assertThat(generalConfig.getAllowedEmailDomains()).isEmpty();
+  }
+
+  @Test
+  public void cannotGetReadOnlyForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> generalConfig.getReadOnly(null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noReadOnlyConfiguration() throws Exception {
+    assertThat(generalConfig.getReadOnly(new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.readOnly", value = "true")
+  public void readOnlyConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getReadOnly(new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.readOnly", value = "true")
+  public void readOnlyConfigurationInPluginConfigOverridesReadOnlyConfigurationInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, "false");
+    assertThat(generalConfig.getReadOnly(cfg)).isFalse();
   }
 }
