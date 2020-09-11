@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fdf751ae_f65bc527",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 688,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T13:21:35Z",
+      "side": 1,
+      "message": "optional: also ensure that you can upload to another (visible) branch in that project.",
+      "range": {
+        "startLine": 688,
+        "startChar": 15,
+        "endLine": 688,
+        "endChar": 61
+      },
+      "revId": "bf790fd4a242b545e8351b9a3fbd5c0659aac244",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
