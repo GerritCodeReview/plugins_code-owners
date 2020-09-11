@@ -22,6 +22,30 @@
       "revId": "271715a9e6d8289f4873b5561477e300aef49e08",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc53e7a8_e1b3d71d",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-11T12:15:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "734f4d9f_ad5ce4b3",
+      "range": {
+        "startLine": 241,
+        "startChar": 26,
+        "endLine": 241,
+        "endChar": 32
+      },
+      "revId": "271715a9e6d8289f4873b5561477e300aef49e08",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
