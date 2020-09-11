@@ -19,7 +19,9 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
+import com.google.auto.value.AutoValue;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
@@ -148,22 +150,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   @Override
   public List<CommitValidationMessage> onCommitReceived(CommitReceivedEvent receiveEvent)
       throws CommitValidationException {
-    List<CommitValidationMessage> validationMessages =
-        validateCodeOwnerConfig(
-                receiveEvent.getBranchNameKey(), receiveEvent.commit, receiveEvent.user)
-            .collect(toImmutableList());
-
-    // Throw a CommitValidationException if there are errors to make the upload fail.
-    if (validationMessages.stream()
-        .anyMatch(
-            validationMessage ->
-                ValidationMessage.Type.ERROR.equals(validationMessage.getType()))) {
-      throw new CommitValidationException("invalid code owner config files", validationMessages);
-    }
-
-    // There are no errors. The returned validation messages will be sent to the client, but they
-    // are not causing the upload to fail.
-    return validationMessages;
+    return validateCodeOwnerConfig(
+            receiveEvent.getBranchNameKey(), receiveEvent.commit, receiveEvent.user)
+        .processForOnCommitReceived();
   }
 
   @Override
@@ -179,60 +168,36 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
     PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
     IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
-    List<CommitValidationMessage> validationMessages =
-        validateCodeOwnerConfig(branchNameKey, commit, patchSetUploader).collect(toImmutableList());
-
-    // Throw a MergeValidationException if there are errors to make the upload fail.
-    if (validationMessages.stream()
-        .anyMatch(
-            validationMessage ->
-                ValidationMessage.Type.ERROR.equals(validationMessage.getType()))) {
-      throw new MergeValidationException(getMessage(validationMessages));
-    }
+    validateCodeOwnerConfig(branchNameKey, commit, patchSetUploader).processForOnPreMerge();
   }
 
-  /**
-   * Composes a single message out of the given validation messages.
-   *
-   * <p>Expects that at least 1 validation message is provided.
-   *
-   * @param validationMessages the validation messages
-   * @return the composed message
-   */
-  private String getMessage(List<CommitValidationMessage> validationMessages) {
-    checkState(!validationMessages.isEmpty(), "expected at least 1 validation message");
-    StringBuilder msgBuilder = new StringBuilder("invalid code owner config files:");
-    for (CommitValidationMessage msg : validationMessages) {
-      msgBuilder.append("\n  ").append(msg.getType().name()).append(": ").append(msg.getMessage());
-    }
-    return msgBuilder.toString();
-  }
-
-  private Stream<CommitValidationMessage> validateCodeOwnerConfig(
+  private ValidationResult validateCodeOwnerConfig(
       BranchNameKey branchNameKey, ObjectId commit, IdentifiedUser user) {
     if (codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
-      return Stream.of();
+      return ValidationResult.createWithoutIssues();
     }
 
     try {
       CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
 
-      return
-      // iterate over all changed files
-      changedFiles.compute(branchNameKey.project(), commit).stream()
-          // filter out deletions (files without new path)
-          .filter(changedFile -> changedFile.newPath().isPresent())
-          // filter out non code owner config files
-          .filter(
-              changedFile ->
-                  codeOwnerBackend.isCodeOwnerConfigFile(
-                      branchNameKey.project(),
-                      Paths.get(changedFile.newPath().get().toString()).getFileName().toString()))
-          // validate the code owner config files
-          .flatMap(
-              changedFile ->
-                  validateCodeOwnerConfig(
-                      user, codeOwnerBackend, branchNameKey, changedFile, commit));
+      return ValidationResult.create(
+          // iterate over all changed files
+          changedFiles.compute(branchNameKey.project(), commit).stream()
+              // filter out deletions (files without new path)
+              .filter(changedFile -> changedFile.newPath().isPresent())
+              // filter out non code owner config files
+              .filter(
+                  changedFile ->
+                      codeOwnerBackend.isCodeOwnerConfigFile(
+                          branchNameKey.project(),
+                          Paths.get(changedFile.newPath().get().toString())
+                              .getFileName()
+                              .toString()))
+              // validate the code owner config files
+              .flatMap(
+                  changedFile ->
+                      validateCodeOwnerConfig(
+                          user, codeOwnerBackend, branchNameKey, changedFile, commit)));
     } catch (InvalidPluginConfigurationException e) {
       // If the code-owners plugin configuration is invalid we cannot get the code owners backend
       // and hence we are not able to detect and validate code owner config files. Instead of
@@ -243,7 +208,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           String.format(
               "cannot validate code owner config files due to invalid code-owners plugin configuration: %s",
               e.getMessage()));
-      return Stream.of();
+      return ValidationResult.createWithoutIssues();
     } catch (IOException e) {
       String errorMessage =
           String.format(
@@ -806,5 +771,94 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
   private Optional<CommitValidationMessage> error(String message) {
     return Optional.of(new CommitValidationMessage(message, ValidationMessage.Type.ERROR));
+  }
+
+  /** The result of validating code owner config files. */
+  @AutoValue
+  public abstract static class ValidationResult {
+    abstract ImmutableList<CommitValidationMessage> validationMessages();
+
+    static ValidationResult createWithoutIssues() {
+      return new AutoValue_CodeOwnerConfigValidator_ValidationResult(ImmutableList.of());
+    }
+
+    static ValidationResult create(CommitValidationMessage validationMessage) {
+      return new AutoValue_CodeOwnerConfigValidator_ValidationResult(
+          ImmutableList.of(validationMessage));
+    }
+
+    static ValidationResult create(Stream<CommitValidationMessage> validationMessages) {
+      return new AutoValue_CodeOwnerConfigValidator_ValidationResult(
+          validationMessages.collect(toImmutableList()));
+    }
+
+    /**
+     * Processes the validation messages for a validation that is done when a commit is received
+     * (e.g. on push).
+     *
+     * <p>Throws a {@link CommitValidationException} if there are errors to make the upload fail.
+     *
+     * <p>If there are no errors the validation messages are returned so that they can be sent to
+     * the client without causing the upload to fail.
+     */
+    List<CommitValidationMessage> processForOnCommitReceived() throws CommitValidationException {
+      if (hasError()) {
+        throw new CommitValidationException(
+            "invalid code owner config files", validationMessages());
+      }
+
+      return validationMessages();
+    }
+
+    /**
+     * Processes the validation messages for a validation that is done on pre-merge (aka on submit).
+     *
+     * <p>Throws a {@link MergeValidationException} if there are errors to make the submit fail.
+     *
+     * <p>If there are no errors the validation messages are logged on fine level so that they show
+     * up in a trace. Returning the message to the user without failing the submit is not possible.
+     */
+    void processForOnPreMerge() throws MergeValidationException {
+      if (hasError()) {
+        throw new MergeValidationException(getMessage(validationMessages()));
+      }
+
+      if (!validationMessages().isEmpty()) {
+        logger.atFine().log(
+            "submitting changes to code owner config files with the following messages: %s",
+            validationMessages());
+      } else {
+        logger.atFine().log("submitting changes to code owner config files, no issues found");
+      }
+    }
+
+    /** Checks whether any of the validation messages is an error. */
+    boolean hasError() {
+      return validationMessages().stream()
+          .anyMatch(
+              validationMessage ->
+                  ValidationMessage.Type.ERROR.equals(validationMessage.getType()));
+    }
+
+    /**
+     * Composes a single message out of the given validation messages.
+     *
+     * <p>Expects that at least 1 validation message is provided.
+     *
+     * @param validationMessages the validation messages
+     * @return the composed message
+     */
+    private String getMessage(List<CommitValidationMessage> validationMessages) {
+      checkState(!validationMessages.isEmpty(), "expected at least 1 validation message");
+      StringBuilder msgBuilder = new StringBuilder("invalid code owner config files:");
+      for (CommitValidationMessage msg : validationMessages) {
+        msgBuilder
+            .append("\n  ")
+            .append(msg.getType().name())
+            .append(": ")
+            .append(msg.getMessage());
+      }
+      return msgBuilder.toString();
+    }
   }
 }
