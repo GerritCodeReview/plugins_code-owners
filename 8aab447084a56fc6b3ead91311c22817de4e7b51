@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "05afb416_bb878437",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-11T12:01:24Z",
+      "side": 1,
+      "message": "screenshot for error : https://imgur.com/a/V1ETfEJ",
+      "revId": "8aab447084a56fc6b3ead91311c22817de4e7b51",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
