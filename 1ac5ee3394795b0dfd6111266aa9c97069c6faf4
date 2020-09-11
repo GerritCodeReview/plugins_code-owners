@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "46396893_671fc647",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-11T12:00:40Z",
+      "side": 1,
+      "message": "I actually copied this code from OpenIdServiceImpl to be sure to have something working 😄\nI think your solution would still not work if the email contains multiple \u0027@\u0027 (this case was not tested so far, but I added it to the tests now). So maybe the current solution is just fine.\n\n\u003e Is there already a test for such an email?\nYeah, it\u0027s covered by the new tests in CodeOwnerResolverTest [1].\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/280579/8/javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+      "parentUuid": "50691d67_edf76369",
+      "range": {
+        "startLine": 304,
+        "startChar": 6,
+        "endLine": 305,
+        "endChar": 65
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2660877b_814d81ef",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/config/GeneralConfigTest.java",
         "patchSetId": 8
@@ -69,6 +93,30 @@
       "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bc990f6c_fd760bd8",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/config/GeneralConfigTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-11T12:00:40Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. I went with \"noEmailDomainsConfigured\" now. Whether no configured email domains mean that all domain are allowed is not relevant for this test.",
+      "parentUuid": "2660877b_814d81ef",
+      "range": {
+        "startLine": 75,
+        "startChar": 14,
+        "endLine": 75,
+        "endChar": 45
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -95,6 +143,30 @@
     },
     {
       "key": {
+        "uuid": "f081bb6b_84399698",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/config/GeneralConfigTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-11T12:00:40Z",
+      "side": 1,
+      "message": "Changed it to \"emptyEmailDomainsConfigured\" now.",
+      "parentUuid": "c3e64902_2be6ea7b",
+      "range": {
+        "startLine": 81,
+        "startChar": 14,
+        "endLine": 81,
+        "endChar": 36
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8fc66051_8064e751",
         "filename": "resources/Documentation/config.md",
         "patchSetId": 8
@@ -115,6 +187,30 @@
       "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "22df51fc_9c17b9c0",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-11T12:00:40Z",
+      "side": 1,
+      "message": "I think singular is correct here since the value is always exactly one domain:\n\n  plugin.code-owners.allowedEmailDomain \u003d example.com\n\nIf you want multiple domains you would need to specify the parameter multiple times:\n\n  plugin.code-owners.allowedEmailDomain \u003d example.com\n  plugin.code-owners.allowedEmailDomain \u003d example.net\n\nI would agree that it should be \"domains\" if the value could contain multiple domains like\n\n    plugin.code-owners.allowedEmailDomain \u003d example.com,example.net\n\nbut that\u0027s not the case.",
+      "parentUuid": "8fc66051_8064e751",
+      "range": {
+        "startLine": 35,
+        "startChar": 76,
+        "endLine": 35,
+        "endChar": 77
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
