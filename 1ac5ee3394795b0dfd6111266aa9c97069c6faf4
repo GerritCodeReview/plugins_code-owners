@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "50691d67_edf76369",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T10:11:15Z",
+      "side": 1,
+      "message": "that will fail if the email has no \u0027@\u0027 though, so you should first check if length \u003d 2.\nIs there already a test for such an email?",
+      "parentUuid": "4fdad60f_cfbbf3e6",
+      "range": {
+        "startLine": 304,
+        "startChar": 6,
+        "endLine": 305,
+        "endChar": 65
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2660877b_814d81ef",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/config/GeneralConfigTest.java",
         "patchSetId": 8
