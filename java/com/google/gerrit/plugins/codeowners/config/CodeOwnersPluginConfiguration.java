@@ -96,6 +96,17 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
+   * Checks whether code owner configs in the given project are read-only.
+   *
+   * @param project the project for it should be checked whether code owner configs are read-only
+   * @return whether code owner configs in the given project are read-only
+   */
+  public boolean areCodeOwnerConfigsReadOnly(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getReadOnly(getPluginConfig(project));
+  }
+
+  /**
    * Returns the email domains that are allowed to be used for code owners.
    *
    * @return the email domains that are allowed to be used for code owners, an empty set if all
