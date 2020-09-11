@@ -22,6 +22,30 @@
       "revId": "cb7bb3d230560d851d51edd5edcdcf335c007a61",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cde6974f_16d03b7f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-11T13:00:14Z",
+      "side": 1,
+      "message": "Yeah, as code owner email this will just be rejected as a non-resolveable email. For this function it\u0027s only important that such an email doesn\u0027t crash it.",
+      "parentUuid": "8c69d69d_ed018c09",
+      "range": {
+        "startLine": 315,
+        "startChar": 61,
+        "endLine": 315,
+        "endChar": 91
+      },
+      "revId": "cb7bb3d230560d851d51edd5edcdcf335c007a61",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
