@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -47,7 +48,8 @@ import org.eclipse.jgit.lib.ObjectId;
  * valid text representation of an {@code owners_metadata.proto}.
  */
 @Singleton
-class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
+@VisibleForTesting
+public class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
   @Override
   public CodeOwnerConfig parse(
       ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
