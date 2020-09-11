@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "3df124cd_5299a273",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T12:55:21Z",
+      "side": 1,
+      "message": "email.split(\"@\") and then verify the result is length 2, and then take the second element should work.\nIt\u0027s fine as is, though.",
+      "parentUuid": "46396893_671fc647",
+      "range": {
+        "startLine": 304,
+        "startChar": 6,
+        "endLine": 305,
+        "endChar": 65
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2660877b_814d81ef",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/config/GeneralConfigTest.java",
         "patchSetId": 8
