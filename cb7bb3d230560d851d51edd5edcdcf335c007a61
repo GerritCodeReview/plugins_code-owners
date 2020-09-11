@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8c69d69d_ed018c09",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 315,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T12:55:21Z",
+      "side": 1,
+      "message": "Are you sure this should be allowed? This looks like an invalid email address to me.\nYou\u0027re testing validity of emails elsewhere though, so maybe this is fine.",
+      "range": {
+        "startLine": 315,
+        "startChar": 61,
+        "endLine": 315,
+        "endChar": 91
+      },
+      "revId": "cb7bb3d230560d851d51edd5edcdcf335c007a61",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
