@@ -272,7 +272,7 @@ export class CodeOwnerService {
    *
    * @param {!Array<string>} files
    */
-  batchFetchCodeOwners(files, ownersMap = {}) {
+  batchFetchCodeOwners(files, ownersMap = {}, fetchedCount = 0) {
     const batchRequests = [];
     const maxConcurrentRequests = this.options.maxConcurrentRequests;
     for (let i = 0; i < maxConcurrentRequests; i++) {
@@ -294,13 +294,15 @@ export class CodeOwnerService {
                   ownersMap[filePath].error = e;
                 })
         );
+        fetchedCount++;
       }
     }
     const resPromise = Promise.all(batchRequests);
     if (files.length > maxConcurrentRequests) {
-      return resPromise.then(() =>
-        this.batchFetchCodeOwners(files.slice(maxConcurrentRequests), ownersMap)
-      );
+      return resPromise.then(() => {
+        if (fetchedCount >= this.options.maxNumFecthedFiles) return ownersMap;
+        return this.batchFetchCodeOwners(files.slice(maxConcurrentRequests), ownersMap, fetchedCount)
+      });
     }
     return resPromise.then(() => ownersMap);
   }
@@ -314,6 +316,12 @@ export class CodeOwnerService {
       this.ownerService = new CodeOwnerService(restApi, change, {
         // Chrome has a limit of 6 connections per host name, and a max of 10 connections.
         maxConcurrentRequests: 6,
+        // Too many requests may result in 409 or DDOS protection
+        // we expect people to add some owners and get their approval first
+        // and then add more (as we only request owners for files not approved yet)
+        // This part will be documented clearly in related doc so users won't be confused
+        // by the result
+        maxNumFecthedFiles: 200,
       });
     }
     return this.ownerService;
