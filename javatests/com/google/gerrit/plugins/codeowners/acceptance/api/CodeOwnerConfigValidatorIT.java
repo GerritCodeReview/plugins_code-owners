@@ -75,7 +75,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   public void nonCodeOwnerConfigFileIsNotValidated() throws Exception {
     PushOneCommit.Result r = createChange("Add arbitrary file", "arbitrary-file.txt", "INVALID");
-    r.assertOkStatus();
+    assertOkWithoutMessages(r);
   }
 
   @Test
@@ -91,9 +91,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
                     .build()));
-    r.assertOkStatus();
-    r.assertNotMessage("error");
-    r.assertNotMessage("warning");
+    assertOkWithHints(r, "code owner config files validated, no issues found");
   }
 
   @Test
@@ -154,9 +152,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                             .addImport(codeOwnerConfigReference)
                             .build())
                     .build()));
-    r.assertOkStatus();
-    r.assertNotMessage("error");
-    r.assertNotMessage("warning");
+    assertOkWithHints(r, "code owner config files validated, no issues found");
   }
 
   @Test
@@ -199,9 +195,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                             .addImport(codeOwnerConfigReference)
                             .build())
                     .build()));
-    r.assertOkStatus();
-    r.assertNotMessage("error");
-    r.assertNotMessage("warning");
+    assertOkWithHints(r, "code owner config files validated, no issues found");
   }
 
   @Test
@@ -246,9 +240,18 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                             .addImport(codeOwnerConfigReference)
                             .build())
                     .build()));
-    r.assertOkStatus();
-    r.assertNotMessage("error");
-    r.assertNotMessage("warning");
+    assertOkWithHints(r, "code owner config files validated, no issues found");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
+  public void canUploadNonParseableConfigIfCodeOwnersPluginConfigurationIsInvalid()
+      throws Exception {
+    PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "INVALID");
+    assertOkWithWarnings(
+        r,
+        "skipping validation of code owner config files",
+        "code-owners plugin configuration is invalid, cannot validate code owner config files");
   }
 
   @Test
@@ -260,7 +263,10 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(createCodeOwnerConfigKey("/"))).get(),
             "INVALID");
-    r.assertOkStatus();
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code-owners functionality is disabled");
   }
 
   @Test
@@ -280,7 +286,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit push =
         pushFactory.create(admin.newIdent(), testRepo, "Delete code owner config", path, "");
     r = push.rm("refs/for/master");
-    r.assertOkStatus();
+    assertOkWithoutMessages(r);
   }
 
   @Test
@@ -308,11 +314,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Update code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
             "STILL INVALID");
-    r.assertOkStatus();
-    r.assertMessage(
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
         String.format(
-            "warning: commit %s: invalid code owner config file '%s':\n  %s",
-            abbreviateName(r.getCommit()),
+            "invalid code owner config file '%s':\n  %s",
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
             getParsingErrorMessage(
                 ImmutableMap.of(
@@ -354,18 +360,16 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                         CodeOwnerSet.createWithoutPathExpressions(
                             unknownEmail1, admin.email(), unknownEmail2))
                     .build()));
-    r.assertOkStatus();
-    r.assertMessage(
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
-            abbreviateName(r.getCommit()),
+            "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail1,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
-            identifiedUserFactory.create(admin.id()).getLoggableName()));
-    r.assertMessage(
+            identifiedUserFactory.create(admin.id()).getLoggableName()),
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
-            abbreviateName(r.getCommit()),
+            "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail2,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -405,11 +409,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     .addCodeOwnerSet(
                         CodeOwnerSet.createWithoutPathExpressions(unknownEmail, admin.email()))
                     .build()));
-    r.assertOkStatus();
-    r.assertMessage(
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
-            abbreviateName(r.getCommit()),
+            "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -424,11 +428,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
             "INVALID");
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid code owner config file '%s':\n  %s",
-            abbreviateName(r.getCommit()),
+            "invalid code owner config file '%s':\n  %s",
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
             getParsingErrorMessage(
                 ImmutableMap.of(
@@ -454,22 +458,20 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                 JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey2)).get(),
                 "ALSO-INVALID"));
     PushOneCommit.Result r = push.to("refs/for/master");
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid code owner config file '%s':\n  %s",
-            abbreviateName(r.getCommit()),
+            "invalid code owner config file '%s':\n  %s",
             getCodeOwnerConfigFilePath(codeOwnerConfigKey1),
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
                     "invalid line: INVALID",
                     ProtoBackend.class,
-                    "1:8: expected \"{\""))));
-    r.assertMessage(
+                    "1:8: expected \"{\""))),
         String.format(
-            "error: commit %s: invalid code owner config file '%s':\n  %s",
-            abbreviateName(r.getCommit()),
+            "invalid code owner config file '%s':\n  %s",
             getCodeOwnerConfigFilePath(codeOwnerConfigKey2),
             getParsingErrorMessage(
                 ImmutableMap.of(
@@ -495,18 +497,16 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                         CodeOwnerSet.createWithoutPathExpressions(
                             unknownEmail1, admin.email(), unknownEmail2))
                     .build()));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
-            abbreviateName(r.getCommit()),
+            "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail1,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
-            identifiedUserFactory.create(admin.id()).getLoggableName()));
-    r.assertMessage(
+            identifiedUserFactory.create(admin.id()).getLoggableName()),
         String.format(
-            "error: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
-            abbreviateName(r.getCommit()),
+            "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail2,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -529,14 +529,12 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                         CodeOwnerSet.createWithoutPathExpressions(
                             emailWithNonAllowedDomain, admin.email()))
                     .build()));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: the domain of the code owner email '%s' in '%s' is not allowed for"
-                + " code owners",
-            abbreviateName(r.getCommit()),
-            emailWithNonAllowedDomain,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            "the domain of the code owner email '%s' in '%s' is not allowed for" + " code owners",
+            emailWithNonAllowedDomain, getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
   }
 
   @Test
@@ -574,21 +572,30 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     .addCodeOwnerSet(
                         CodeOwnerSet.createWithoutPathExpressions(unknownEmail1, unknownEmail2))
                     .build()));
-    r.assertErrorStatus("invalid code owner config files");
+
+    String abbreviatedCommit = abbreviateName(r.getCommit());
+    r.assertErrorStatus(
+        String.format("commit %s: %s", abbreviatedCommit, "invalid code owner config files"));
+    r.assertMessage(
+        String.format(
+            "error: commit %s: %s",
+            abbreviatedCommit,
+            String.format(
+                "code owner email '%s' in '%s' cannot be resolved for %s",
+                unknownEmail2,
+                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                identifiedUserFactory.create(admin.id()).getLoggableName())));
+
+    // the pre-existing issue is returned as warning
     r.assertMessage(
         String.format(
             "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
-            abbreviateName(r.getCommit()),
+            abbreviatedCommit,
             unknownEmail1,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
-    r.assertMessage(
-        String.format(
-            "error: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
-            abbreviateName(r.getCommit()),
-            unknownEmail2,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
-            identifiedUserFactory.create(admin.id()).getLoggableName()));
+
+    r.assertNotMessage("hint");
   }
 
   @Test
@@ -721,11 +728,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s': project '%s' not found",
-            abbreviateName(r.getCommit()),
+            "invalid %s import in '%s': project '%s' not found",
             importType.getType(),
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             nonExistingProject.get()));
@@ -781,11 +788,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s': project '%s' not found",
-            abbreviateName(r.getCommit()),
+            "invalid %s import in '%s': project '%s' not found",
             importType.getType(),
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             nonVisibleProject.get()));
@@ -838,12 +845,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s':"
-                + " project '%s' has state 'hidden' that doesn't permit read",
-            abbreviateName(r.getCommit()),
+            "invalid %s import in '%s': project '%s' has state 'hidden' that doesn't permit read",
             importType.getType(),
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             hiddenProject.get()));
@@ -884,12 +890,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s':"
-                + " branch 'non-existing' not found in project '%s'",
-            abbreviateName(r.getCommit()),
+            "invalid %s import in '%s': branch 'non-existing' not found in project '%s'",
             importType.getType(),
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             otherProject.get()));
@@ -946,12 +951,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s':"
-                + " branch 'master' not found in project '%s'",
-            abbreviateName(r.getCommit()),
+            "invalid %s import in '%s': branch 'master' not found in project '%s'",
             importType.getType(),
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             otherProject.get()));
@@ -988,14 +992,13 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s':"
+            "invalid %s import in '%s':"
                 + " 'non-code-owner-config.txt' is not a code owner config file",
-            abbreviateName(r.getCommit()),
-            importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)));
+            importType.getType(), getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)));
   }
 
   @Test
@@ -1032,12 +1035,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s':"
-                + " '%s' does not exist (project = %s, branch = master)",
-            abbreviateName(r.getCommit()),
+            "invalid %s import in '%s': '%s' does not exist (project = %s, branch = master)",
             importType.getType(),
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             getCodeOwnerConfigFilePath(keyOfNonExistingCodeOwnerConfig),
@@ -1095,12 +1097,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
             format(codeOwnerConfig));
-    r.assertErrorStatus("invalid code owner config files");
-    r.assertMessage(
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
         String.format(
-            "error: commit %s: invalid %s import in '%s':"
-                + " '%s' is not parseable (project = %s, branch = master)",
-            abbreviateName(r.getCommit()),
+            "invalid %s import in '%s': '%s' is not parseable (project = %s, branch = master)",
             importType.getType(),
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig),
@@ -1160,5 +1161,45 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private String abbreviateName(AnyObjectId id) throws Exception {
     return ObjectIds.abbreviateName(id, testRepo.getRevWalk().getObjectReader());
+  }
+
+  private static void assertOkWithoutMessages(PushOneCommit.Result pushResult) {
+    pushResult.assertOkStatus();
+    pushResult.assertNotMessage("error");
+    pushResult.assertNotMessage("warning");
+    pushResult.assertNotMessage("hint");
+  }
+
+  private void assertOkWithHints(PushOneCommit.Result pushResult, String... hints)
+      throws Exception {
+    pushResult.assertOkStatus();
+    for (String hint : hints) {
+      pushResult.assertMessage(
+          String.format("hint: commit %s: %s", abbreviateName(pushResult.getCommit()), hint));
+    }
+    pushResult.assertNotMessage("error");
+    pushResult.assertNotMessage("warning");
+  }
+
+  private void assertOkWithWarnings(PushOneCommit.Result pushResult, String... warnings)
+      throws Exception {
+    pushResult.assertOkStatus();
+    for (String warning : warnings) {
+      pushResult.assertMessage(
+          String.format("warning: commit %s: %s", abbreviateName(pushResult.getCommit()), warning));
+    }
+    pushResult.assertNotMessage("error");
+    pushResult.assertNotMessage("hint");
+  }
+
+  private void assertErrorWithMessages(
+      PushOneCommit.Result pushResult, String summaryMessage, String... errors) throws Exception {
+    String abbreviatedCommit = abbreviateName(pushResult.getCommit());
+    pushResult.assertErrorStatus(String.format("commit %s: %s", abbreviatedCommit, summaryMessage));
+    for (String error : errors) {
+      pushResult.assertMessage(String.format("error: commit %s: %s", abbreviatedCommit, error));
+    }
+    pushResult.assertNotMessage("warning");
+    pushResult.assertNotMessage("hint");
   }
 }
