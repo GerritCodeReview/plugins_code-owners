@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountControl;
@@ -46,6 +47,7 @@ public class CodeOwnerResolver {
 
   @VisibleForTesting public static final String ALL_USERS_WILDCARD = "*";
 
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final PermissionBackend permissionBackend;
   private final Provider<CurrentUser> currentUser;
   private final ExternalIds externalIds;
@@ -59,6 +61,7 @@ public class CodeOwnerResolver {
 
   @Inject
   CodeOwnerResolver(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       PermissionBackend permissionBackend,
       Provider<CurrentUser> currentUser,
       ExternalIds externalIds,
@@ -66,6 +69,7 @@ public class CodeOwnerResolver {
       Accounts accounts,
       AccountControl.Factory accountControlFactory,
       PathCodeOwners.Factory pathCodeOwnersFactory) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
     this.externalIds = externalIds;
@@ -120,6 +124,8 @@ public class CodeOwnerResolver {
    * <p>Code owners that cannot be resolved are filtered out:
    *
    * <ul>
+   *   <li>Emails that have a non-allowed email domain (see config parameter {@code
+   *       plugin.code-owners.allowedEmailDomain}).
    *   <li>Emails for which no account exists: If no account exists, we cannot return any account.
    *       It's fine to filter them out as it just means nobody can claim the ownership that was
    *       assigned for this email.
@@ -150,6 +156,10 @@ public class CodeOwnerResolver {
 
     if (ALL_USERS_WILDCARD.equals(email)) {
       return resolveAllUsersWildcard();
+    }
+
+    if (!isEmailDomainAllowed(email)) {
+      return Stream.of();
     }
 
     Optional<AccountState> accountState =
@@ -274,5 +284,30 @@ public class CodeOwnerResolver {
     }
 
     return true;
+  }
+
+  /**
+   * Whether the domain of the given email is allowed for code owners.
+   *
+   * @param email the email for which the domain should be checked
+   * @return {@code true} if the domain of the given email is allowed for code owners, otherwise
+   *     {@code false}
+   */
+  public boolean isEmailDomainAllowed(String email) {
+    ImmutableSet<String> allowedEmailDomains =
+        codeOwnersPluginConfiguration.getAllowedEmailDomains();
+    if (allowedEmailDomains.isEmpty()) {
+      // all domains are allowed
+      return true;
+    }
+
+    int emailAtIndex = email.lastIndexOf('@');
+    if (emailAtIndex >= 0 && emailAtIndex < email.length() - 1) {
+      String emailDomain = email.substring(emailAtIndex + 1);
+      return allowedEmailDomains.contains(emailDomain);
+    }
+
+    // email has no domain
+    return false;
   }
 }

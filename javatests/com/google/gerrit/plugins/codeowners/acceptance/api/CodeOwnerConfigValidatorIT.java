@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -330,6 +331,33 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "error: commit %s: code owner email '%s' in '%s' cannot be resolved",
             abbreviateName(r.getCommit()),
             unknownEmail2,
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.com")
+  public void cannotUploadConfigThatAssignsCodeOwnershipToAnEmailWithANonAllowedEmailDomain()
+      throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    String emailWithNonAllowedDomain = "foo@example.net";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(
+                            emailWithNonAllowedDomain, admin.email()))
+                    .build()));
+    r.assertErrorStatus("invalid code owner config files");
+    r.assertMessage(
+        String.format(
+            "error: commit %s: the domain of the code owner email '%s' in '%s' is not allowed for"
+                + " code owners",
+            abbreviateName(r.getCommit()),
+            emailWithNonAllowedDomain,
             getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
   }
 
