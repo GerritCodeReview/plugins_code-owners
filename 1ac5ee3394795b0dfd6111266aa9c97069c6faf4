@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4fdad60f_cfbbf3e6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T10:07:40Z",
+      "side": 1,
+      "message": "nit: email.split(\"@\", 2)[1] will give you the domain.",
+      "range": {
+        "startLine": 304,
+        "startChar": 6,
+        "endLine": 305,
+        "endChar": 65
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2660877b_814d81ef",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/config/GeneralConfigTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T10:07:40Z",
+      "side": 1,
+      "message": "maybe better: noEmailDomainsConfiguredButAllAllowed",
+      "range": {
+        "startLine": 75,
+        "startChar": 14,
+        "endLine": 75,
+        "endChar": 45
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c3e64902_2be6ea7b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/config/GeneralConfigTest.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T10:07:40Z",
+      "side": 1,
+      "message": "maybe better: emptyEmailDomainsConfiguredButAllAllowed?",
+      "range": {
+        "startLine": 81,
+        "startChar": 14,
+        "endLine": 81,
+        "endChar": 36
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8fc66051_8064e751",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 8
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-11T10:07:40Z",
+      "side": 1,
+      "message": "should this be \"domains\" (in plural)?",
+      "range": {
+        "startLine": 35,
+        "startChar": 76,
+        "endLine": 35,
+        "endChar": 77
+      },
+      "revId": "1ac5ee3394795b0dfd6111266aa9c97069c6faf4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
