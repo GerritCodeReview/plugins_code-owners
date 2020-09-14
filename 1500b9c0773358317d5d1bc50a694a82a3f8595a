@@ -46,6 +46,30 @@
       "revId": "1500b9c0773358317d5d1bc50a694a82a3f8595a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "25e7b09d_83fc9a9c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T14:56:39Z",
+      "side": 1,
+      "message": "Right - so since for user2, admin is not visible, what would happen if you do:\n\nrequestScopeOperations.setUser(user2);\ncodeOwnerResolver..forUser(admin).resolve();\n\nI guess it should say \"admin is non resolveable for user2\", and that\u0027s a good test to ensure that you can\u0027t just use \"admin\" to see all the users that you want (especially if you can\u0027t see admin).\n\nAnother case, what if user2 can see admin; admin can see user1; user2 can\u0027t see user1:\nWill the above lines of code allow user2 to see user1 if they do \"forUser(admin)\" in between. although user2 can\u0027t see user1?\n\nIs that more clear now?",
+      "parentUuid": "c93541ad_027f3afb",
+      "range": {
+        "startLine": 303,
+        "startChar": 14,
+        "endLine": 303,
+        "endChar": 57
+      },
+      "revId": "1500b9c0773358317d5d1bc50a694a82a3f8595a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
