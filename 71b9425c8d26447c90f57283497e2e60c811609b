@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a90e46e_824281a7",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 640,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T16:08:03Z",
+      "side": 1,
+      "message": "another test:\ncanSubmitConfigWithCodeOwnersThatAreNotVisibleToTheSubmitterButVisibleToTheUploader",
+      "range": {
+        "startLine": 640,
+        "startChar": 14,
+        "endLine": 640,
+        "endChar": 84
+      },
+      "revId": "71b9425c8d26447c90f57283497e2e60c811609b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
