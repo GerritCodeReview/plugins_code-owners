@@ -121,6 +121,7 @@ export class SuggestOwners extends Polymer.Element {
         .suggestion-row-indicator {
           margin-right: var(--spacing-m);
           visibility: hidden;
+          line-height: 26px;
         }
         .suggestion-row-indicator[visible] {
           visibility: visible;
