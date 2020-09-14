@@ -2,6 +2,23 @@
   "comments": [
     {
       "key": {
+        "uuid": "fc138468_af0a9566",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T13:26:46Z",
+      "side": 1,
+      "message": "sg, thanks",
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "26066d34_13b3854b",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 7
