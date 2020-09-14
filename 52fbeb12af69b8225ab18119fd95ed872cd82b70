@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "26066d34_13b3854b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T12:53:41Z",
+      "side": 1,
+      "message": "in many places here it looks like you\u0027re assuming your variables are non-empty.\nSince the purpose is to trace it better, I think validating that those variables are actually not-empty before calling this would be a good idea (some can probably be skipped, up to you which ones can be skipped).\n\nI think this comment applies just to project and changeId, which you could just say that are unlikely to be invalid especially when they come from changeNotes.",
+      "range": {
+        "startLine": 162,
+        "startChar": 33,
+        "endLine": 163,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
