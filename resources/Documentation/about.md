@@ -12,5 +12,8 @@ for other teams as well.
 
 # Alternatives
 
-Similar functionality is provided by the find-owners plugin and the owners
+Similar functionality is provided by the
+[find-owners](https://gerrit-review.googlesource.com/admin/repos/plugins/find-owners)
+plugin and the
+[owners](https://gerrit-review.googlesource.com/admin/repos/plugins/owners)
 plugin.
