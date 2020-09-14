@@ -36,12 +36,12 @@ const STATUS_ICON = {
   [STATUS_CODE.ERROR]: 'gr-icons:info-outline',
 };
 const STATUS_TOOLTIP = {
-  [STATUS_CODE.PENDING]: 'Pending file-owner approval',
-  [STATUS_CODE.MISSING]: 'Missing file-owner approval',
-  [STATUS_CODE.PENDING_OLD_PATH]: 'Pending approval on pre-renamed file',
-  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing owner for pre-renamed file',
-  [STATUS_CODE.APPROVED]: 'Approved by file-owner',
-  [STATUS_CODE.ERROR]: 'Failed to fetch file-owner status',
+  [STATUS_CODE.PENDING]: 'Pending code owner approval',
+  [STATUS_CODE.MISSING]: 'Missing code owner approval',
+  [STATUS_CODE.PENDING_OLD_PATH]: 'Pending code owner approval on pre-renamed file',
+  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing code owner approval on pre-renamed file',
+  [STATUS_CODE.APPROVED]: 'Approved by code owner',
+  [STATUS_CODE.ERROR]: 'Failed to fetch code owner status',
 };
 
 class BaseEl extends Polymer.Element {
