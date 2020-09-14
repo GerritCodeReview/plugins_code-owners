@@ -22,6 +22,30 @@
       "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "94b9e19c_a2b480ca",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-14T12:58:50Z",
+      "side": 1,
+      "message": "I do check in l.157 that changeNotes is not null, anything else you think should be checked before?",
+      "parentUuid": "26066d34_13b3854b",
+      "range": {
+        "startLine": 162,
+        "startChar": 33,
+        "endLine": 163,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
