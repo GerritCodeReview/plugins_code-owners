@@ -167,7 +167,7 @@ public class CodeOwnerResolver {
     }
 
     if (!isEmailDomainAllowed(email)) {
-      logger.atFine().log("domain of email %s is not allowed");
+      logger.atFine().log("domain of email %s is not allowed", email);
       return Stream.of();
     }
 
