@@ -73,6 +73,30 @@
     },
     {
       "key": {
+        "uuid": "c86cf4a1_73652771",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-14T13:24:48Z",
+      "side": 1,
+      "message": "Ah, ok, understood. I think it\u0027s fine if this statement fails if we get an invalid ChangeNotes instance for which project or change are not set. I\u0027m pretty sure this was already a problem before this change and the code below would have failed in this.",
+      "parentUuid": "d4719d4b_4186909c",
+      "range": {
+        "startLine": 162,
+        "startChar": 33,
+        "endLine": 163,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "30a153de_3a9047cb",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
         "patchSetId": 7
@@ -93,6 +117,30 @@
       "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b614af40_ae4aa211",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-14T13:24:48Z",
+      "side": 1,
+      "message": "It\u0027s very unlikely, since the project is derived from BranchNameKey (which must be present, since it\u0027s a non-nullable field in an AutoValue class) and you cannot create a BranchNameKey with a null project name.",
+      "parentUuid": "30a153de_3a9047cb",
+      "range": {
+        "startLine": 120,
+        "startChar": 51,
+        "endLine": 120,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -119,6 +167,30 @@
     },
     {
       "key": {
+        "uuid": "47f700e9_11850df8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSubmitRule.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-14T13:24:48Z",
+      "side": 1,
+      "message": "It\u0027s okay (and actually wanted) to fail, if Gerrit core provides us such an invalid ChangeData object.",
+      "parentUuid": "7995e41c_a8ba02f4",
+      "range": {
+        "startLine": 74,
+        "startChar": 42,
+        "endLine": 74,
+        "endChar": 49
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f5bc5b22_61b93e80",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
         "patchSetId": 7
@@ -139,6 +211,30 @@
       "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8ee8a721_0cac76de",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-14T13:24:48Z",
+      "side": 1,
+      "message": "see the other comment about the same :)",
+      "parentUuid": "f5bc5b22_61b93e80",
+      "range": {
+        "startLine": 219,
+        "startChar": 51,
+        "endLine": 219,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
