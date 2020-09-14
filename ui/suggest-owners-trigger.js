@@ -47,8 +47,14 @@ export class SuggestOwnersTrigger extends Polymer.Element {
   static get template() {
     return Polymer.html`
         <style include="shared-styles">
+          :host {
+            display: flex;
+          }
           a {
             text-decoration: none;
+          }
+          gr-button {
+            --padding: var(--spacing-xs) var(--spacing-s);
           }
         </style>
         <gr-button
