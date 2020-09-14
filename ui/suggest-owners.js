@@ -153,10 +153,14 @@ export class SuggestOwners extends Polymer.Element {
         .suggested-owners {
           flex: 1;
         }
+        .fetch-error-content,
         .no-owners-content {
           line-height: 26px;
           flex: 1;
           padding-left: var(--spacing-m);
+        }
+        .fetch-error-content {
+          color: var(--error-text-color);
         }
         .no-owners-content a {
           padding-left: var(--spacing-s);
@@ -231,7 +235,9 @@ export class SuggestOwners extends Polymer.Element {
               ></owner-group-file-list>
             </div>
             <template is="dom-if" if="[[suggestion.error]]">
-              [[suggestion.error]]
+              <div class="fetch-error-content">
+                [[suggestion.error]]
+              </div>
             </template>
             <template is="dom-if" if="[[!suggestion.error]]">
               <template is="dom-if" if="[[!suggestion.owners.length]]">
@@ -352,7 +358,7 @@ export class SuggestOwners extends Polymer.Element {
     const res = {};
     res.groupName = suggestion.groupName;
     res.files = suggestion.files.slice();
-    res.owners = suggestion.owners.map(owner => {
+    res.owners = (suggestion.owners || []).map(owner => {
       const updatedOwner = {...owner};
       const reviewers = this.change.reviewers.REVIEWER;
       if (
@@ -363,6 +369,7 @@ export class SuggestOwners extends Polymer.Element {
       }
       return updatedOwner;
     });
+    res.error = suggestion.error;
     return res;
   }
 
