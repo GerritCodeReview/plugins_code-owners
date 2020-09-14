@@ -46,6 +46,99 @@
       "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d4719d4b_4186909c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T13:06:56Z",
+      "side": 1,
+      "message": "changeNotes.getProjectName(), changeNotes.getChangeId().\n\nAdded a few more comments with those places.\nAnyway, you are in fact checking that changeNotes/changeData/codeOwnerKey is not null, but I\u0027m worried about the slight possibility that those entities are not completely valid and then project/id might be empty.\n\nI may be exaggerating though, so optional :-)",
+      "parentUuid": "94b9e19c_a2b480ca",
+      "range": {
+        "startLine": 162,
+        "startChar": 33,
+        "endLine": 163,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "30a153de_3a9047cb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T13:06:56Z",
+      "side": 1,
+      "message": "also here what are the chances this could be empty?",
+      "range": {
+        "startLine": 120,
+        "startChar": 51,
+        "endLine": 120,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7995e41c_a8ba02f4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSubmitRule.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T13:06:56Z",
+      "side": 1,
+      "message": "same here (and next line).",
+      "range": {
+        "startLine": 74,
+        "startChar": 42,
+        "endLine": 74,
+        "endChar": 49
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f5bc5b22_61b93e80",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T13:06:56Z",
+      "side": 1,
+      "message": "same here",
+      "range": {
+        "startLine": 219,
+        "startChar": 51,
+        "endLine": 219,
+        "endChar": 58
+      },
+      "revId": "52fbeb12af69b8225ab18119fd95ed872cd82b70",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
