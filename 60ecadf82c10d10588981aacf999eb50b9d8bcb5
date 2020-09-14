@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "56a896d0_acc0a0d0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 211,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-14T16:08:03Z",
+      "side": 1,
+      "message": "nit: a little strange that all methods below have java docs except this one. Maybe something short here would be good.",
+      "range": {
+        "startLine": 211,
+        "startChar": 42,
+        "endLine": 211,
+        "endChar": 65
+      },
+      "revId": "60ecadf82c10d10588981aacf999eb50b9d8bcb5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
