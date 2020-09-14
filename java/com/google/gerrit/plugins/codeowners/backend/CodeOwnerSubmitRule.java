@@ -23,6 +23,9 @@ import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.server.logging.Metadata;
+import com.google.gerrit.server.logging.TraceContext;
+import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.rules.SubmitRule;
@@ -63,17 +66,22 @@ class CodeOwnerSubmitRule implements SubmitRule {
   public Optional<SubmitRecord> evaluate(ChangeData changeData) {
     try {
       requireNonNull(changeData, "changeData");
-      logger.atFine().log(
-          "running code owner submit rule for change %d of project %s",
-          changeData.getId().get(), changeData.project());
 
-      if (codeOwnersPluginConfiguration.isDisabled(changeData.change().getDest())) {
-        logger.atFine().log(
-            "code owners functionality is disabled for branch %s", changeData.change().getDest());
-        return Optional.empty();
+      try (TraceTimer traceTimer =
+          TraceContext.newTimer(
+              "Run code owner submit rule",
+              Metadata.builder()
+                  .projectName(changeData.project().get())
+                  .changeId(changeData.getId().get())
+                  .build())) {
+        if (codeOwnersPluginConfiguration.isDisabled(changeData.change().getDest())) {
+          logger.atFine().log(
+              "code owners functionality is disabled for branch %s", changeData.change().getDest());
+          return Optional.empty();
+        }
+
+        return Optional.of(getSubmitRecord(changeData.notes()));
       }
-
-      return Optional.of(getSubmitRecord(changeData.notes()));
     } catch (Throwable t) {
       String errorMessage = "Failed to evaluate code owner statuses";
       if (changeData != null) {
