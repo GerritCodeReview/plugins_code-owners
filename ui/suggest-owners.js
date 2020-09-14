@@ -17,6 +17,8 @@
 import {CodeOwnerService} from './code-owners-service.js';
 import {ownerState} from './owner-ui-state.js';
 
+const SUGGESTION_POLLING_INTERVAL = 1000;
+
 class OwnerGroupFileList extends Polymer.Element {
   static get is() {
     return 'owner-group-file-list';
@@ -197,9 +199,9 @@ export class SuggestOwners extends Polymer.Element {
       </style>
       <p class="loading" hidden="[[!isLoading]]">
         <span class="loadingSpin"></span>
-        loading...
+        ([[progressText]]) loading owners for all files not approved yet, may take a while if your change has a lot files ...
       </p>
-      <ul class="suggestion-container" hidden="[[isLoading]]">
+      <ul class="suggestion-container">
         <template
           is="dom-repeat"
           items="[[suggestedOwners]]"
@@ -336,18 +338,41 @@ export class SuggestOwners extends Polymer.Element {
       }
     });
 
+    if (this._suggestionsTimer) {
+      clearInterval(this._suggestionsTimer);
+    }
+
+    this._suggestionsTimer = setInterval(() => {
+      this._pollingSuggestions();
+    }, SUGGESTION_POLLING_INTERVAL);
+
+    // poll immediately to kick start the fetching
+    this._pollingSuggestions();
+  }
+
+  _pollingSuggestions() {
     this.ownerService
         .getSuggestedOwners()
-        .then(suggestedOwners => {
-          this.isLoading = false;
-          this.suggestedOwners = suggestedOwners.map(suggestion => {
-            return this.formatSuggestionInfo(suggestion);
-          });
+        .then(res => {
+          if (res.finished) {
+            clearInterval(this._suggestionsTimer);
+          }
+          this.progressText = res.progress;
+          this.isLoading = !res.finished;
+
+          this._updateSuggestions(res.suggestions);
 
           // in case `_updateAllChips` called before suggestedOwners ready
           // from onReviewerChange
           this._updateAllChips(this._currentReviewers);
         });
+  }
+
+  _updateSuggestions(suggestions) {
+    // update group names and files, no modification on owners or error
+    this.suggestedOwners = suggestions.map(suggestion => {
+      return this.formatSuggestionInfo(suggestion);
+    });
   }
 
   onReviewerChange(reviewers) {
