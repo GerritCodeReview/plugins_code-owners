@@ -20,7 +20,7 @@ Parameters that are not set for a project are inherited from the parent project.
         [Backends](backends.html) page.\
         By default `find-owners`.
 
-<a id="pluginCodeOwnersExtension">plugin.@PLUGIN@.fileExtension</a>
+<a id="pluginCodeOwnersFileExtension">plugin.@PLUGIN@.fileExtension</a>
 :       The file extension that should be used for code owner config files.\
         Allows to use different owner configurations for upstream and internal
         in the same repository. E.g. if upstream uses `OWNERS` code owner config
