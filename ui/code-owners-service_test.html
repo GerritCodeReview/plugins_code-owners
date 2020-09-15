@@ -9,25 +9,25 @@
 
 <script type="module">
   import '../test/common-test-setup.js';
-  import { CodeOwnerService } from './code-owners-service.js';
+  import {CodeOwnerService} from './code-owners-service.js';
 
   suite('code owners service tests', () => {
     let sandbox;
     const fakeRestApi = {
       get() {
         return Promise.resolve({});
-      }
+      },
     };
     const fakeChange = {
       project: 'test',
       branch: 'main',
       _number: '123',
       revisions: {
-        "a": {
-          _number: 1
+        a: {
+          _number: 1,
         },
       },
-      current_revision: "a"
+      current_revision: 'a',
     };
 
     let codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, fakeChange);

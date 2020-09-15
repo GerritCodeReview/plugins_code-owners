@@ -4,7 +4,7 @@
     "browser": true,
     "scripts": {
         "test": "polymer serve",
-        "eslint": "../../node_modules/eslint/bin/eslint.js --ext .html,.js ./gr-checks/",
+        "eslint": "../../node_modules/eslint/bin/eslint.js --ext .html,.js ./ui/",
         "eslintfix": "npm run eslint -- --fix",
         "wct-test": "npm i && npx bower i && npx polymer test -l chrome"
     },
