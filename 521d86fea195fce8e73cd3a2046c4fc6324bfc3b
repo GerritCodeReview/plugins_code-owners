@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d4e3e794_dd98d6f8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T13:05:08Z",
+      "side": 1,
+      "message": "preview at: https://gerrit.googlesource.com/plugins/code-owners/+/refs/changes/48/281548/1/resources/Documentation/how-to-use.md",
+      "revId": "521d86fea195fce8e73cd3a2046c4fc6324bfc3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
