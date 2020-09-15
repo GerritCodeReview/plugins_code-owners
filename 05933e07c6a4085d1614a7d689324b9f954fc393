@@ -90,6 +90,24 @@
     },
     {
       "key": {
+        "uuid": "6c847bc1_41004aca",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T10:55:30Z",
+      "side": 1,
+      "message": "\u003e `init` is only called in constructor\n\nThat is not true, see getStatus().",
+      "parentUuid": "bba8d975_aa5da1c3",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "d7fd5494_5e039ff9",
         "filename": "ui/code-owners-service.js",
         "patchSetId": 2
