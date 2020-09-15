@@ -16,6 +16,24 @@
       "revId": "b89e68a31dd981a727667b08b94f2968b40848fb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c77872c1_77b73fb4",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 5
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T14:20:50Z",
+      "side": 1,
+      "message": "I was mostly worried about the check in line 179:\n\n  if (this._fetchStatus \u003d\u003d\u003d FetchStatus.NOT_STARTED) {\n\nDo you have to change that to ||ABORT? Otherwise this re-init will get you stuck?",
+      "parentUuid": "0c20447d_c9243f07",
+      "revId": "b89e68a31dd981a727667b08b94f2968b40848fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
