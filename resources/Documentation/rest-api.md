@@ -360,5 +360,6 @@ action.
 
 ---
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Back to [@PLUGIN@ documentation index](index.html)
 
+Part of [Gerrit Code Review](../../../Documentation/index.html)

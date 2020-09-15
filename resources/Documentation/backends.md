@@ -12,4 +12,8 @@ The following code owner backends are supported:
    is why this backend is experimental for now and should not be used in
    production.
 
+---
+
+Back to [@PLUGIN@ documentation index](index.html)
+
 Part of [Gerrit Code Review](../../../Documentation/index.html)

@@ -171,5 +171,9 @@ Parameters that are not set for a project are inherited from the parent project.
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
         `gerrit.config` is used.
 
+---
+
+Back to [@PLUGIN@ documentation index](index.html)
+
 Part of [Gerrit Code Review](../../../Documentation/index.html)
 

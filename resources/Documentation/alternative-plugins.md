@@ -6,6 +6,8 @@ plugin and the
 [owners](https://gerrit-review.googlesource.com/admin/repos/plugins/owners)
 plugin.
 
-[Back to @PLUGIN@ documentation index](index.html)
+---
+
+Back to [@PLUGIN@ documentation index](index.html)
 
 Part of [Gerrit Code Review](../../../Documentation/index.html)
