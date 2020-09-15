@@ -1,0 +1,95 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c33a3a92_33f4a2a0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T07:19:04Z",
+      "side": 1,
+      "message": "code-owners needs tests",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1bde8769_ff488e48",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T07:19:04Z",
+      "side": 1,
+      "message": "Does it make sense to also init _fetchStatus here?\n\n  this._fetchStatus \u003d FetchStatus.NOT_STARTED;",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d7fd5494_5e039ff9",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T07:19:04Z",
+      "side": 1,
+      "message": "Why is code owners not typescript? It would help a lot with regards to readability.",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "98245aae_50957519",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T07:19:04Z",
+      "side": 1,
+      "message": "Nit: I find reduce() difficult to justify here. Maybe this is more readable?\n\nconst pending \u003d [];\nconst missing \u003d [];\nfor(const [file, fileStatus] of codeOwnerStatusMap.entries()) {\n  if (fileStatus.status \u003d\u003d\u003d OwnerStatus.INSUFFICIENT_REVIEWERS) {\n    missing.push(file);\n  } else if (fileStatus.status \u003d\u003d\u003d OwnerStatus.PENDING) {\n    pending.push(file);\n  }\n}",
+      "range": {
+        "startLine": 205,
+        "startChar": 68,
+        "endLine": 205,
+        "endChar": 74
+      },
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bd3b686f_529cad02",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T07:19:04Z",
+      "side": 1,
+      "message": "If you want to leave this in, then maybe add \"code-owners\" or something that makes this more identifiable.",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
