@@ -342,7 +342,7 @@ export class CodeOwnerService {
    */
   _batchFetchCodeOwners(files) {
     if (this._fetchStatus === FetchStatus.ABORT) {
-      return resPromise.then(() => this._fetchedOwners);
+      return Promise.resolve(this._fetchedOwners);
     }
 
     const batchRequests = [];

@@ -9,14 +9,70 @@
 
 <script type="module">
   import '../test/common-test-setup.js';
-  import {CodeOwnerService} from './code-owners-service.js';
+  import { CodeOwnerService } from './code-owners-service.js';
 
   suite('code owners service tests', () => {
     let sandbox;
+    let codeOwnersService;
     const fakeRestApi = {
       get() {
         return Promise.resolve({});
       },
+    };
+    const getApiStub = sinon.stub(fakeRestApi, 'get');
+    getApiStub.returns(Promise.resolve({}));
+    const fakeStatus = {
+      // fake data with fake files
+      patch_set_number: 1,
+      file_code_owner_statuses: [
+        {
+          new_path_status: {
+            path: "a.js",
+            status: "INSUFFICIENT_REVIEWERS"
+          }
+        },
+        {
+          new_path_status: {
+            path: "b.js",
+            status: "INSUFFICIENT_REVIEWERS"
+          }
+        },
+        {
+          new_path_status: {
+            path: "c.ts",
+            status: "INSUFFICIENT_REVIEWERS"
+          }
+        },
+        {
+          change_type: "RENAMED",
+          old_path_status: {
+            path: "d.ts",
+            status: "INSUFFICIENT_REVIEWERS"
+          },
+          new_path_status: {
+            path: "d_edit.ts",
+            status: "INSUFFICIENT_REVIEWERS"
+          }
+        },
+        {
+          new_path_status: {
+            path: "e.ts",
+            status: "PENDING"
+          }
+        },
+        {
+          new_path_status: {
+            path: "f.ts",
+            status: "PENDING"
+          }
+        },
+        {
+          new_path_status: {
+            path: "g.ts",
+            status: "PENDING"
+          }
+        }
+      ]
     };
     const fakeChange = {
       project: 'test',
@@ -30,10 +86,11 @@
       current_revision: 'a',
     };
 
-    let codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, fakeChange);
+    getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve(fakeStatus));
 
     setup(done => {
       sandbox = sinon.sandbox.create();
+      getApiStub.reset();
       codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, fakeChange);
       flush(done);
     });
@@ -42,6 +99,24 @@
 
     test('same change should return the same instance through getOwnerService', () => {
       assert.equal(CodeOwnerService.getOwnerService(fakeRestApi, fakeChange), codeOwnersService);
+    });
+
+    test('return a new instance when change changed', () => {
+      assert.notEqual(CodeOwnerService.getOwnerService(fakeRestApi, { ...fakeChange }), codeOwnersService);
+    });
+
+    test('should fetch status after init', () => {
+      assert.isTrue(getApiStub.calledOnce);
+      assert.equal(getApiStub.lastCall.args[0], `/changes/${fakeChange._number}/code_owners.status`);
+    });
+
+    test('getSuggestion should kickoff the fetch', done => {
+      codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, { ...fakeChange });
+      codeOwnersService.getSuggestedOwners().then(r => {
+        // 6 requests for getting file owners + 1 status call
+        assert.equal(getApiStub.callCount, 7);
+        done();
+      });
     });
   });
 </script>
