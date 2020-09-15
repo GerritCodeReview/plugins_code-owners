@@ -22,6 +22,30 @@
       "revId": "2fb4df1425024c94f1f2b499536e0e3f4208d67f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "70224ddd_30cb1236",
+        "filename": "resources/Documentation/how-to-use.md",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T13:29:43Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6c300cad_8882a619",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 1
+      },
+      "revId": "2fb4df1425024c94f1f2b499536e0e3f4208d67f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
