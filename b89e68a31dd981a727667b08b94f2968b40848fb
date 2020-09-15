@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "0c20447d_c9243f07",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 5
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T11:14:06Z",
+      "side": 1,
+      "message": "abort will set the status to ABORT which will be used to terminate pending requests. `init` as I mentioned has nothing to do with the fetches, so no need to set NOT_READY in there.",
+      "revId": "b89e68a31dd981a727667b08b94f2968b40848fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
