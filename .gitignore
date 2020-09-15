@@ -1,0 +1,5 @@
+bower_components
+.vscode
+web-component-tester
+node_modules
+
