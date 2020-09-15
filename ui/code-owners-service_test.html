@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+
+<script src="/node_modules/@webcomponents/webcomponentsjs/custom-elements-es5-adapter.js"></script>
+<script src="../node_modules/@webcomponents/webcomponentsjs/webcomponents-loader.js"></script>
+<script src="../bower_components/web-component-tester/browser.js"></script>
+
+<title>code owners service test</title>
+
+<script type="module">
+  import '../test/common-test-setup.js';
+  import { CodeOwnerService } from './code-owners-service.js';
+
+  suite('code owners service tests', () => {
+    let sandbox;
+    const fakeRestApi = {
+      get() {
+        return Promise.resolve({});
+      }
+    };
+    const fakeChange = {
+      project: 'test',
+      branch: 'main',
+      _number: '123',
+      revisions: {
+        "a": {
+          _number: 1
+        },
+      },
+      current_revision: "a"
+    };
+
+    let codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, fakeChange);
+
+    setup(done => {
+      sandbox = sinon.sandbox.create();
+      codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, fakeChange);
+      flush(done);
+    });
+
+    teardown(() => { sandbox.restore(); });
+
+    test('same change should return the same instance through getOwnerService', () => {
+      assert.equal(CodeOwnerService.getOwnerService(fakeRestApi, fakeChange), codeOwnersService);
+    });
+  });
+</script>

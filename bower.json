@@ -1,0 +1,14 @@
+{
+    "name": "code-owners",
+    "license": "http://www.apache.org/licenses/LICENSE-2.0",
+    "devDependencies": {
+        "es6-promise": "^3.3.1",
+        "chai": "^4.2.0",
+        "mocha": "^6.2.2",
+        "web-component-tester": "^6.5.1"
+    },
+    "private": true,
+    "resolutions": {
+        "chai": "^4.0.0"
+    }
+}
