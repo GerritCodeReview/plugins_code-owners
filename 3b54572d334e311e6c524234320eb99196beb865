@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "529166b1_2c3fbeb9",
+        "filename": "package.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T11:11:20Z",
+      "side": 1,
+      "message": "to run the test, `npx polymer test -l chrome` is enough. Add the `npm i \u0026\u0026 npx bower i` is to make sure all dependencies needed for testing are installed. This is used due to feedback from people not familiar with npm \u0026 bower.",
+      "parentUuid": "60f2dc40_d5544592",
+      "revId": "3b54572d334e311e6c524234320eb99196beb865",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2b227f88_8fd6589f",
         "filename": "test/index.html",
         "patchSetId": 1
@@ -33,6 +51,24 @@
       "revId": "3b54572d334e311e6c524234320eb99196beb865",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fbafaf62_eeea53bb",
+        "filename": "test/index.html",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T11:11:20Z",
+      "side": 1,
+      "message": "similar reason to ts, we don\u0027t have plugins using karma yet, personally speaking, I think it would be better to come up with a plan to move all of them to karma once for all, especially what rules we should export from polygerrit to help that process, instead of defining duplicated build rules and common test set ups etc separately for every plugin. And the migration to karma is pretty easy.",
+      "parentUuid": "2b227f88_8fd6589f",
+      "revId": "3b54572d334e311e6c524234320eb99196beb865",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
