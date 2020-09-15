@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "60f2dc40_d5544592",
+        "filename": "package.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T10:48:26Z",
+      "side": 1,
+      "message": "Is this how to run the tests?",
+      "revId": "3b54572d334e311e6c524234320eb99196beb865",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2b227f88_8fd6589f",
+        "filename": "test/index.html",
+        "patchSetId": 1
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T10:48:26Z",
+      "side": 1,
+      "message": "Why WCT instead of Karma?",
+      "revId": "3b54572d334e311e6c524234320eb99196beb865",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
