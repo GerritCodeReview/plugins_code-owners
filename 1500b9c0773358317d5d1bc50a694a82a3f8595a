@@ -70,6 +70,30 @@
       "revId": "1500b9c0773358317d5d1bc50a694a82a3f8595a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "3aad13ac_e2938ef6",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-15T07:00:09Z",
+      "side": 1,
+      "message": "\u003e Right - so since for user2, admin is not visible, what would happen if you do:\n\u003e\n\u003e requestScopeOperations.setUser(user2);\nThis sets the current user to \u0027user2\u0027.\n\n\u003e codeOwnerResolver..forUser(admin).resolve();\nThis tells the codeOwnerResolver to use \u0027admin\u0027 for the permission checks, instead of using the current user (\u0027user2\u0027), which would be used if forUser(...) was not called.\n\n\u003e I guess it should say \"admin is non resolveable for user2\", and that\u0027s a good test\n\u003e to ensure that you can\u0027t just use \"admin\" to see all the users that you want\n\u003e (especially if you can\u0027t see admin).\nNo, the intention here is that it\u0027s really impersonating the admin user. You are right that using the forUser(...) method may reveal the existence of the \u0027admin\u0027 user to the current user (\u0027user2\u0027), when \u0027user2\u0027 cannot see \u0027admin\u0027. Callers of the forUser method must be aware of this. It\u0027s not that the \u0027user2\u0027 can invoke this method to find out about the \u0027admin\u0027 user, it\u0027s rather similar to IdentifiedUser.GenericFactory which also allows you to lookup any user even if they are not visible to the calling user. It\u0027s the calling code that needs to ensure that no user information is leaked.\n\nOur intended use of this method (see follow-up change) is to execute exactly the same code owner config validation on submit that was done when this change was uploaded. E.g. when admin uploads a change, the validation is run from the perspective of the admin user. Anyone who can see the change now knows that the admin user exists (since it\u0027s shown as change owner and uploader), even if the admin account is not visible otherwise. When you can see the change, you also see the contents of the code owner config files in it. Since you know that these files have been successfully validated on upload, you know that all referenced accounts in it exist, even if they are not visible to you. This means repeating the validation on submit from the perspective of the admin user will not reveal any new non-visible accounts to you. The accounts have been revealed to you at the moment when the admin user decides to add them as code owner. Since code owner config files are stored in the repository, everyone who can see the repository can see them and knows about the code owners accounts, even if they are not visible to them. This problem is discussed in the design doc and the conclusion was that this is OK and in practice you would only make people code owner that have contributed at least one commit, and hence their email is anyway already visible through the git history (e.g. as git committer).\n\n\u003e Another case, what if user2 can see admin; admin can see user1; user2 can\u0027t see user1:\n\u003e Will the above lines of code allow user2 to see user1 if they do \"forUser(admin)\" in between.\n\u003e although user2 can\u0027t see user1?\nYes, user1 would be resolved, since admin can see user1, independent of whether the current user (user2) can see user1.\nIt\u0027s not \"allowing\" user2 to see user1, since user2 cannot trigger this code for random users, but we will call this method only for users which are anyway already exposed.\n\n\u003e Is that more clear now?\nYes :)\n\nI\u0027ve updated the javadoc of the forUser method to make it clearer.\nLet me know if it\u0027s still not clear enough.",
+      "parentUuid": "25e7b09d_83fc9a9c",
+      "range": {
+        "startLine": 303,
+        "startChar": 14,
+        "endLine": 303,
+        "endChar": 57
+      },
+      "revId": "1500b9c0773358317d5d1bc50a694a82a3f8595a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
