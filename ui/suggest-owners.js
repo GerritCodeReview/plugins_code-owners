@@ -246,7 +246,7 @@ export class SuggestOwners extends Polymer.Element {
               <template is="dom-if" if="[[!suggestion.owners.length]]">
                 <div class="no-owners-content">
                   <span>Not found</span>
-                  <a href="https://gerrit-review.googlesource.com/Documentation/plugin-code-owners.html" target="_blank">
+                  <a href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md#no-code-owners-found" target="_blank">
                     <iron-icon icon="gr-icons:help-outline" title="read documentation"></iron-icon>
                   </a>
                 </div>
