@@ -88,14 +88,14 @@ export class OwnerRequirementValue extends Polymer.Element {
 
   _checkIfOverriden() {
     this.ownerService.getProjectConfig().then(res => {
-      if (!res["override_approval"]) {
+      if (!res['override_approval']) {
         // no override label configured
         this._isOverriden = false;
         return;
-      };
+      }
 
-      const overridenLabel = res["override_approval"].label;
-      const overridenValue = res["override_approval"].value;
+      const overridenLabel = res['override_approval'].label;
+      const overridenValue = res['override_approval'].value;
 
       if (this.change.labels[overridenLabel]) {
         const votes = this.change.labels[overridenLabel].all || [];
