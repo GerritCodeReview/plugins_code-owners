@@ -34,6 +34,24 @@
       "revId": "b89e68a31dd981a727667b08b94f2968b40848fb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a10537db_1cccf3d2",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 5
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T14:30:47Z",
+      "side": 1,
+      "message": "that\u0027s a valid point. it could happen if not on the latest patchset, and I certainly need it to trigger fetching when getSuggestedOwners called.\n\nAdded, will also make sure I add test cases for this one. Thanks!",
+      "parentUuid": "c77872c1_77b73fb4",
+      "revId": "b89e68a31dd981a727667b08b94f2968b40848fb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
