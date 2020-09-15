@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "52ce0d59_7a9ae0a3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-09-15T14:21:58Z",
+      "side": 1,
+      "message": "Maybe Edwin can grant the +2? I have not looked very closely.",
+      "revId": "b8f28006e55c60428e5a933c10d5c381f414e989",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
