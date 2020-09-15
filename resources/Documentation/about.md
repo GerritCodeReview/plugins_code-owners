@@ -9,11 +9,3 @@ Android teams at Google. This means some of the functionality and design
 decisons are driven by Google-specific use-cases. Nonetheless the support for
 code owners is pretty generic and configurable so that it should be suitable
 for other teams as well.
-
-# Alternatives
-
-Similar functionality is provided by the
-[find-owners](https://gerrit-review.googlesource.com/admin/repos/plugins/find-owners)
-plugin and the
-[owners](https://gerrit-review.googlesource.com/admin/repos/plugins/owners)
-plugin.
