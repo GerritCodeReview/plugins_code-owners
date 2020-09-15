@@ -1,4 +1,4 @@
-# @PLUGIN@ - Backends
+# Backends
 
 The following code owner backends are supported:
 

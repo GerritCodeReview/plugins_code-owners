@@ -1,4 +1,4 @@
-# @PLUGIN@ - Configuration
+# Configuration
 
 The global configuration of the @PLUGIN@ plugin is stored in the `gerrit.config`
 file in the `plugin.@PLUGIN@` subsection.

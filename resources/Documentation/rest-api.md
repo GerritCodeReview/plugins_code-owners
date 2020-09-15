@@ -1,4 +1,4 @@
-# @PLUGIN@ - REST API
+# REST API
 
 This page describes the code owners REST endpoints that are added by the
 @PLUGIN@ plugin.
