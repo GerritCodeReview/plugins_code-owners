@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "05c7cf48_bfbf5ef2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T07:25:59Z",
+      "side": 1,
+      "message": "agree, I am adding some already, not sent yet",
+      "parentUuid": "c33a3a92_33f4a2a0",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "1bde8769_ff488e48",
         "filename": "ui/code-owners-service.js",
         "patchSetId": 2
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "bba8d975_aa5da1c3",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T07:25:59Z",
+      "side": 1,
+      "message": "`init` is only called in constructor, the status is set there. this is more like to avoid long functions in constructor. And `_fetchStatus` is for fetching owners, fetching status has nothing to do with that.",
+      "parentUuid": "1bde8769_ff488e48",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d7fd5494_5e039ff9",
         "filename": "ui/code-owners-service.js",
         "patchSetId": 2
@@ -50,6 +86,24 @@
       "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7738cc7b_4141f3c9",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T07:25:59Z",
+      "side": 1,
+      "message": "I started with js since its upstream, we don\u0027t have all proper types for plugin and polyfills etc yet, and the toolchain is another problem that will consume more time to investigate (how it should work with gerrit\u0027s workspace etc), so it will be part of the overall effort when move all plugin to ts.",
+      "parentUuid": "d7fd5494_5e039ff9",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -76,6 +130,30 @@
     },
     {
       "key": {
+        "uuid": "3a1d53b6_d081363f",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T07:25:59Z",
+      "side": 1,
+      "message": "hmm that\u0027s pretty much what `reduce` is doing ? I thought `reduce` is the best way if you want to loop over each item and reformat them into a single  object.",
+      "parentUuid": "98245aae_50957519",
+      "range": {
+        "startLine": 205,
+        "startChar": 68,
+        "endLine": 205,
+        "endChar": 74
+      },
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "bd3b686f_529cad02",
         "filename": "ui/code-owners-service.js",
         "patchSetId": 2
@@ -90,6 +168,24 @@
       "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed7a40fc_f09b1eda",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 376,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-15T07:25:59Z",
+      "side": 1,
+      "message": "ah no its for debugging only",
+      "parentUuid": "bd3b686f_529cad02",
+      "revId": "05933e07c6a4085d1614a7d689324b9f954fc393",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
