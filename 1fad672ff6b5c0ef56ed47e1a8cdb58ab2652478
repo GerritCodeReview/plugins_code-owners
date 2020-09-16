@@ -22,6 +22,30 @@
       "revId": "1fad672ff6b5c0ef56ed47e1a8cdb58ab2652478",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae6a2783_a794cef9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/StatusConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:03:35Z",
+      "side": 1,
+      "message": "If there is an invalid entry, then there was the intention to override the global setting, so it\u0027s better to fall back to safe default, than falling back to the global setting.",
+      "parentUuid": "5d015c0a_55b0fccd",
+      "range": {
+        "startLine": 147,
+        "startChar": 45,
+        "endLine": 148,
+        "endChar": 19
+      },
+      "revId": "1fad672ff6b5c0ef56ed47e1a8cdb58ab2652478",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
