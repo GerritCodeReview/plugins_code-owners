@@ -1,4 +1,4 @@
-# @PLUGIN@ - REST API
+# REST API
 
 This page describes the code owners REST endpoints that are added by the
 @PLUGIN@ plugin.
@@ -360,5 +360,6 @@ action.
 
 ---
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Back to [@PLUGIN@ documentation index](index.html)
 
+Part of [Gerrit Code Review](../../../Documentation/index.html)

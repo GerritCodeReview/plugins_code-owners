@@ -1,4 +1,4 @@
-# @PLUGIN@ - Configuration
+# Configuration
 
 The global configuration of the @PLUGIN@ plugin is stored in the `gerrit.config`
 file in the `plugin.@PLUGIN@` subsection.
@@ -29,7 +29,7 @@ Parameters that are not set for a project are inherited from the parent project.
         [Backends](backends.html) page.\
         By default `find-owners`.
 
-<a id="pluginCodeOwnersExtension">plugin.@PLUGIN@.fileExtension</a>
+<a id="pluginCodeOwnersFileExtension">plugin.@PLUGIN@.fileExtension</a>
 :       The file extension that should be used for code owner config files.\
         Allows to use different owner configurations for upstream and internal
         in the same repository. E.g. if upstream uses `OWNERS` code owner config
@@ -41,12 +41,19 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default unset (no file extension is used).
 
+<a id="pluginCodeOwnersReadOnly">plugin.@PLUGIN@.readOnly</a>
+:       Whether code owner config files are read-only.\
+        Can be overridden per project by setting
+        [codeOwners.readOnly](#codeOwnersReadOnly) in
+        `@PLUGIN@.config`.\
+        By default unset `false`.
+
 <a id="pluginCodeOwnersAllowedEmailDomain">plugin.@PLUGIN@.allowedEmailDomain</a>
 :       Email domain that allows to assign code ownerships to emails with this
-        domain.\n
-        Can be specified multiple times.\n
+        domain.\
+        Can be specified multiple times.\
         Code ownerships that are assigned to emails with non-allowed domains are
-        ignored and rejected on push.\n
+        ignored and rejected on push.\
         By default unset (all email domains are allowed).
 
 <a id="pluginCodeOwnersRequiredApproval">plugin.@PLUGIN@.requiredApproval</a>
@@ -137,6 +144,15 @@ Parameters that are not set for a project are inherited from the parent project.
         [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
         `gerrit.config` is used.
 
+<a id="codeOwnersReadOnly">codeOwners.readOnly</a>
+:       Whether code owner config files are read-only.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
+        `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
+        `gerrit.config` is used.
+
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a
         change.\
@@ -165,6 +181,10 @@ Parameters that are not set for a project are inherited from the parent project.
         If not set, the global setting
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
         `gerrit.config` is used.
+
+---
+
+Back to [@PLUGIN@ documentation index](index.html)
 
 Part of [Gerrit Code Review](../../../Documentation/index.html)
 
