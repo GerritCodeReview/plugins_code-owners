@@ -33,18 +33,23 @@ class OwnerGroupFileList extends Polymer.Element {
   static get template() {
     return Polymer.html`
       <style include="shared-styles">
-      span {
-        display: inline-block;
-        border-radius: var(--border-radius);
-        margin-left: var(--spacing-s);
-        padding: 0 var(--spacing-m);
-        color: var(--primary-text-color);
-        font-size: var(--font-size-small);
-      }
-      .Renamed {
-        background-color: var(--dark-remove-highlight-color);
-        margin: var(--spacing-s) 0;
-      }
+        :host {
+          display: block;
+          max-height: 500px;
+          overflow: auto;
+        }
+        span {
+          display: inline-block;
+          border-radius: var(--border-radius);
+          margin-left: var(--spacing-s);
+          padding: 0 var(--spacing-m);
+          color: var(--primary-text-color);
+          font-size: var(--font-size-small);
+        }
+        .Renamed {
+          background-color: var(--dark-remove-highlight-color);
+          margin: var(--spacing-s) 0;
+        }
       </style>
       <ul>
         <template
@@ -341,6 +346,7 @@ export class SuggestOwners extends Polymer.Element {
           }, SUGGESTION_POLLING_INTERVAL);
 
           // poll immediately to kick start the fetching
+          this.reporting.reportLifeCycle('owners-suggestions-fetching-start');
           this._pollingSuggestions();
         }
       }
@@ -375,6 +381,7 @@ export class SuggestOwners extends Polymer.Element {
           if (res.finished) {
             clearInterval(this._suggestionsTimer);
             this._suggestionsTimer = null;
+            this.reporting.reportLifeCycle('owners-suggestions-fetching-finished');
           }
           this.progressText = res.progress;
           this.isLoading = !res.finished;
