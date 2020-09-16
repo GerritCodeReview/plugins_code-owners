@@ -8,7 +8,8 @@ to only apply to a subset of files in a directory (e.g. see
 Which syntax is used depends on the used code owner backend:
 
 * [find-owners](backend-find-owners.html) backend: uses [globs](#globs)
-* `proto` backend: uses [simple path expressions](#simplePathExpressions)
+* [proto](backend-proto.html) backend: uses
+  [simple path expressions](#simplePathExpressions)
 
 ## <a id="globs">Globs
 
