@@ -9,7 +9,7 @@
 
 <script type="module">
   import '../test/common-test-setup.js';
-  import { CodeOwnerService } from './code-owners-service.js';
+  import {CodeOwnerService} from './code-owners-service.js';
 
   suite('code owners service tests', () => {
     let sandbox;
@@ -27,52 +27,52 @@
       file_code_owner_statuses: [
         {
           new_path_status: {
-            path: "a.js",
-            status: "INSUFFICIENT_REVIEWERS"
-          }
+            path: 'a.js',
+            status: 'INSUFFICIENT_REVIEWERS',
+          },
         },
         {
           new_path_status: {
-            path: "b.js",
-            status: "INSUFFICIENT_REVIEWERS"
-          }
+            path: 'b.js',
+            status: 'INSUFFICIENT_REVIEWERS',
+          },
         },
         {
           new_path_status: {
-            path: "c.ts",
-            status: "INSUFFICIENT_REVIEWERS"
-          }
+            path: 'c.ts',
+            status: 'INSUFFICIENT_REVIEWERS',
+          },
         },
         {
-          change_type: "RENAMED",
+          change_type: 'RENAMED',
           old_path_status: {
-            path: "d.ts",
-            status: "INSUFFICIENT_REVIEWERS"
+            path: 'd.ts',
+            status: 'INSUFFICIENT_REVIEWERS',
           },
           new_path_status: {
-            path: "d_edit.ts",
-            status: "INSUFFICIENT_REVIEWERS"
-          }
+            path: 'd_edit.ts',
+            status: 'INSUFFICIENT_REVIEWERS',
+          },
         },
         {
           new_path_status: {
-            path: "e.ts",
-            status: "PENDING"
-          }
+            path: 'e.ts',
+            status: 'PENDING',
+          },
         },
         {
           new_path_status: {
-            path: "f.ts",
-            status: "PENDING"
-          }
+            path: 'f.ts',
+            status: 'PENDING',
+          },
         },
         {
           new_path_status: {
-            path: "g.ts",
-            status: "PENDING"
-          }
-        }
-      ]
+            path: 'g.ts',
+            status: 'PENDING',
+          },
+        },
+      ],
     };
     const fakeChange = {
       project: 'test',
@@ -86,36 +86,107 @@
       current_revision: 'a',
     };
 
-    getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve(fakeStatus));
-
-    setup(done => {
+    setup(() => {
       sandbox = sinon.sandbox.create();
       getApiStub.reset();
-      codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, fakeChange);
-      flush(done);
     });
 
     teardown(() => { sandbox.restore(); });
 
-    test('same change should return the same instance through getOwnerService', () => {
-      assert.equal(CodeOwnerService.getOwnerService(fakeRestApi, fakeChange), codeOwnersService);
+    suite('basic api request tests', () => {
+      setup(done => {
+        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve(fakeStatus));
+        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange});
+        flush(done);
+      });
+
+      test('same change should return the same instance through getOwnerService', () => {
+        assert.equal(
+            CodeOwnerService.getOwnerService(fakeRestApi, fakeChange),
+            CodeOwnerService.getOwnerService(fakeRestApi, fakeChange)
+        );
+      });
+
+      test('return a new instance when change changed', () => {
+        assert.notEqual(
+            CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange}),
+            CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange})
+        );
+      });
+
+      test('should fetch status after init', () => {
+        assert.isTrue(getApiStub.calledOnce);
+        assert.equal(getApiStub.lastCall.args[0], `/changes/${fakeChange._number}/code_owners.status`);
+      });
+
+      test('getSuggestion should kickoff the fetch', done => {
+        codeOwnersService.getSuggestedOwners().then(r => {
+          // 6 requests for getting file owners + 1 status call
+          assert.equal(getApiStub.callCount, 7);
+          assert.equal(r.finished, false);
+          done();
+        });
+      });
+
+      test('approved status calculation', done => {
+        codeOwnersService.areAllFilesApproved().then(approved => {
+          assert.equal(approved, false);
+          done();
+        });
+      });
     });
 
-    test('return a new instance when change changed', () => {
-      assert.notEqual(CodeOwnerService.getOwnerService(fakeRestApi, { ...fakeChange }), codeOwnersService);
-    });
+    suite('all approved case', () => {
+      setup(done => {
+        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve({
+          // fake data with fake files
+          patch_set_number: 1,
+          file_code_owner_statuses: [
+            {
+              new_path_status: {
+                path: 'a.js',
+                status: 'APPROVED',
+              },
+            },
+            {
+              new_path_status: {
+                path: 'b.js',
+                status: 'APPROVED',
+              },
+            },
+            {
+              old_path_status: {
+                path: 'd.js',
+                status: 'APPROVED',
+              },
+              change_type: 'DELETED',
+            },
+          ],
+        }));
 
-    test('should fetch status after init', () => {
-      assert.isTrue(getApiStub.calledOnce);
-      assert.equal(getApiStub.lastCall.args[0], `/changes/${fakeChange._number}/code_owners.status`);
-    });
+        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange});
+        flush(done);
+      });
 
-    test('getSuggestion should kickoff the fetch', done => {
-      codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, { ...fakeChange });
-      codeOwnersService.getSuggestedOwners().then(r => {
-        // 6 requests for getting file owners + 1 status call
-        assert.equal(getApiStub.callCount, 7);
-        done();
+      test('getSuggestion and finished in first batch', done => {
+        codeOwnersService.getSuggestedOwners().then(r => {
+          // 1 status call
+          assert.equal(getApiStub.callCount, 1);
+          // initially false as getSuggestedOwners is synchrously
+          assert.equal(r.finished, false);
+          flushAsynchronousOperations();
+          codeOwnersService.getSuggestedOwners().then(nR => {
+            assert.equal(nR.finished, true);
+            done();
+          });
+        });
+      });
+
+      test('approved status calculation', done => {
+        codeOwnersService.areAllFilesApproved().then(approved => {
+          assert.equal(approved, true);
+          done();
+        });
       });
     });
   });

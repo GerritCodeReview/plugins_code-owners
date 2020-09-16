@@ -150,10 +150,9 @@ export class CodeOwnerService {
       return !rawStatuses.some(status => {
         const oldPathStatus = status.old_path_status;
         const newPathStatus = status.new_path_status;
-        if (newPathStatus.status !== OwnerStatus.APPROVED) {
-          return true;
-        }
-        return oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
+        // For deleted files, no new_path_status exists
+        return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED)
+          || oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
       });
     });
   }
@@ -161,7 +160,7 @@ export class CodeOwnerService {
   /**
    * Gets owner suggestions.
    *
-   * @returns {
+   * @returns {{
    *  finished?: boolean,
    *  progress?: string,
    *  suggestions: Array<{
@@ -173,7 +172,7 @@ export class CodeOwnerService {
    *    owners?: Array,
    *    files: Array,
    *  }>
-   * }
+   * }}
    */
   getSuggestedOwners() {
     // In case its aborted due to outdated patches
