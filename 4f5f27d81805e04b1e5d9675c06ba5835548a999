@@ -1,0 +1,533 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "8140216d_63a73574",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "5. the code owner config file validation was skipped because the code owner config functionality is disabled",
+      "range": {
+        "startLine": 197,
+        "startChar": 9,
+        "endLine": 200,
+        "endChar": 90
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "13414eca_af26e49b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 221,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "1. the code owner config file validation doesn\u0027t need to run because the commit doesn\u0027t touch code owner config files",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "579ceef8_6bd18afe",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "6. the code owner config file validation couldn\u0027t run (due to an invalid plugin configuration)",
+      "range": {
+        "startLine": 245,
+        "startChar": 11,
+        "endLine": 248,
+        "endChar": 67
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "308b2cab_15d8c271",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "2. the code owner config file validation run and no issues were found",
+      "range": {
+        "startLine": 836,
+        "startChar": 41,
+        "endLine": 836,
+        "endChar": 54
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8bac6ca7_7f0c7ca2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 836,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "3. the code owner config file validation run and only warnings were found (getValidationMessageTypeForSummaryMessage makes it a warning)\n\n4. the code owner config file validation run and errors were found (getValidationMessageTypeForSummaryMessage makes it an error)",
+      "range": {
+        "startLine": 836,
+        "startChar": 57,
+        "endLine": 836,
+        "endChar": 68
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "3eaeef38_aff252a2",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "1. the code owner config file validation doesn\u0027t need to run because the commit doesn\u0027t touch code owner config files",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "d5b0bd2f_30926037",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "2. the code owner config file validation run and no issues were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f487b4ba_8912208b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "2. the code owner config file validation run and no issues were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c5ff75fe_9d52231d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 201,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "2. the code owner config file validation run and no issues were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "09b9e414_88331f91",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 246,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "2. the code owner config file validation run and no issues were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7b947d86_affe3f9e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 257,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "6. the code owner config file validation couldn\u0027t run (due to an invalid plugin configuration)",
+      "range": {
+        "startLine": 256,
+        "startChar": 7,
+        "endLine": 257,
+        "endChar": 96
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "52a6afdc_f3875b83",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "5. the code owner config file validation was skipped because the code owner config functionality is disabled",
+      "range": {
+        "startLine": 271,
+        "startChar": 7,
+        "endLine": 272,
+        "endChar": 49
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "089d8ba9_180d6c8d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "1. the code owner config file validation doesn\u0027t need to run because the commit doesn\u0027t touch code owner config files",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "f637bd15_f11ee409",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 322,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "3. the code owner config file validation run and only warnings were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0198610d_f24c1ae1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "3. the code owner config file validation run and only warnings were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a6709c08_17b0d0c0",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 417,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "3. the code owner config file validation run and only warnings were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "c4eaa545_8e21b1f9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 436,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "8f02ec3c_d8e22f9d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "865b3067_1d283bef",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 503,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "99cc5c70_a7062eb3",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 535,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a79442e5_b2c7dd3f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 581,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "012c88ea_2ca71683",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 775,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7e16441e_f62435cd",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 833,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0bba29f0_66fb9a6a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 892,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "0a08e62e_00823604",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 937,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b153d05d_908c4fd9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 998,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "b7eec87e_19f4b3f9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1039,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bd7e5978_59d97607",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1082,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "80278fb7_966e8624",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 1144,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:01:06Z",
+      "side": 1,
+      "message": "4. the code owner config file validation run and errors were found",
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
