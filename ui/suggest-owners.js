@@ -196,10 +196,22 @@ export class SuggestOwners extends Polymer.Element {
         gr-hovercard {
           max-width: 800px;
         }
+        .loading {
+          display: flex;
+          align-content: center;
+          align-items: center;
+          justify-content: center;
+          padding: var(--spacing-m);
+        }
+        .loadingSpin {
+          width: 18px;
+          height: 18px;
+          margin-right: var(--spacing-m);
+        }
       </style>
       <p class="loading" hidden="[[!isLoading]]">
         <span class="loadingSpin"></span>
-        ([[progressText]]) loading owners for all files not approved yet, may take a while if your change has a lot files ...
+        [[progressText]]
       </p>
       <ul class="suggestion-container">
         <template

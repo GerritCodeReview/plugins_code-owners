@@ -152,7 +152,7 @@ export class CodeOwnerService {
         const newPathStatus = status.new_path_status;
         // For deleted files, no new_path_status exists
         return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED)
-          || oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
+          || (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
       });
     });
   }
@@ -191,7 +191,9 @@ export class CodeOwnerService {
       return {
         finished: this._fetchStatus === FetchStatus.FINISHED,
         status: this._fetchStatus,
-        progress: this._totalFetchCount === 0 ? undefined: `${this._fetchedOwners.size}/${this._totalFetchCount}`,
+        progress: this._totalFetchCount === 0 ?
+          `Loading suggested owners ...` :
+          `${this._fetchedOwners.size} out of ${this._totalFetchCount} files have returned suggested owners.`,
         suggestions: this._groupFilesByOwners(codeOwnerStatusMap),
       };
     });

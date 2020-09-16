@@ -38,10 +38,16 @@ export class OwnerRequirementValue extends Polymer.Element {
           }
         }
         p.loading {
-          text-align: center;
+          display: flex;
+          align-content: center;
+          align-items: center;
+          justify-content: center;
         }
         .loadingSpin {
           display: inline-block;
+          margin-right: var(--spacing-m);
+          width: 18px;
+          height: 18px;
         }
         gr-button {
           padding-left: var(--spacing-m);
@@ -49,7 +55,7 @@ export class OwnerRequirementValue extends Polymer.Element {
         </style>
         <p class="loading" hidden="[[!_isLoading]]">
           <span class="loadingSpin"></span>
-          loading...
+          Loading status ...
         </p>
         <template is="dom-if" if="[[!_isLoading]]">
           <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
