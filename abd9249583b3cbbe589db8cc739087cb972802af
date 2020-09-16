@@ -39,6 +39,30 @@
       "revId": "abd9249583b3cbbe589db8cc739087cb972802af",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b85f99d3_6079865f",
+        "filename": "ui/owner-requirement.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1086906
+      },
+      "writtenOn": "2020-09-16T09:01:52Z",
+      "side": 1,
+      "message": "`{missing: xx, pending: xxx}`, we can add more if you need more",
+      "parentUuid": "e9df40e8_5094ae33",
+      "range": {
+        "startLine": 123,
+        "startChar": 15,
+        "endLine": 123,
+        "endChar": 35
+      },
+      "revId": "abd9249583b3cbbe589db8cc739087cb972802af",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
