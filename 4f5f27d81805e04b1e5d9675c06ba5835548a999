@@ -151,6 +151,30 @@
     },
     {
       "key": {
+        "uuid": "970a28bd_0982056a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:33:16Z",
+      "side": 1,
+      "message": "I have no strong preference here. A mini advantage of the current solution is that it iterates over the validation messages only once. Leaving it as is to avoid rebasing :)",
+      "parentUuid": "2d638561_60ebbe13",
+      "range": {
+        "startLine": 910,
+        "startChar": 13,
+        "endLine": 910,
+        "endChar": 75
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "3eaeef38_aff252a2",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
         "patchSetId": 5
