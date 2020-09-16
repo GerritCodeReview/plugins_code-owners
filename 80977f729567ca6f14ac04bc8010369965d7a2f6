@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "f9e85547_2c4170f1",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1074328
+      },
+      "writtenOn": "2020-09-16T09:20:21Z",
+      "side": 1,
+      "message": "I guess this uses type\u003d\"INTERACTION\"? Maybe type\u003d\"PERFORMANCE\" would be more appropriate?",
+      "range": {
+        "startLine": 367,
+        "startChar": 27,
+        "endLine": 367,
+        "endChar": 44
+      },
+      "revId": "80977f729567ca6f14ac04bc8010369965d7a2f6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
