@@ -187,10 +187,11 @@ files in the directory:
 ```
 \
 The access grant applies only to the files that are matched by the given path
-expressions. The path expressions are globs and can match absolute paths or
-paths relative to the directory of the `OWNERS` file, but they can only match
-files in the directory of the `OWNERS` file and its subdirectories. Multiple
-path expressions can be specified as a comma-separated list.
+expressions. The path expressions are [globs](path-expressions.html#globs) and
+can match absolute paths or paths relative to the directory of the `OWNERS`
+file, but they can only match files in the directory of the `OWNERS` file and
+its subdirectories. Multiple path expressions can be specified as a
+comma-separated list.
 
 In the example below, Jana Roe, John Doe and the code owners that are inherited
 from parent `OWNERS` files are code owners of all files that are contained in
