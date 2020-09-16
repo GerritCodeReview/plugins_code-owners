@@ -152,7 +152,7 @@ export class CodeOwnerService {
         const newPathStatus = status.new_path_status;
         // For deleted files, no new_path_status exists
         return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED)
-          || oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED;
+          || (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
       });
     });
   }

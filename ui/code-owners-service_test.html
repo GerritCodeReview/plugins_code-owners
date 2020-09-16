@@ -124,7 +124,10 @@
           // 6 requests for getting file owners + 1 status call
           assert.equal(getApiStub.callCount, 7);
           assert.equal(r.finished, false);
-          done();
+          flush(() => {
+            assert.equal(getApiStub.callCount, 9);
+            done();
+          });
         });
       });
 
@@ -174,7 +177,6 @@
           assert.equal(getApiStub.callCount, 1);
           // initially false as getSuggestedOwners is synchrously
           assert.equal(r.finished, false);
-          flushAsynchronousOperations();
           codeOwnersService.getSuggestedOwners().then(nR => {
             assert.equal(nR.finished, true);
             done();
@@ -186,6 +188,47 @@
         codeOwnersService.areAllFilesApproved().then(approved => {
           assert.equal(approved, true);
           done();
+        });
+      });
+    });
+
+    suite('abort', () => {
+      let resolver;
+      setup(done => {
+        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve(fakeStatus));
+
+        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange});
+        flush(done);
+      });
+
+      test('abort should abort pending requests', done => {
+        codeOwnersService.getSuggestedOwners().then(r => {
+          // 6 requests for getting file owners + 1 status call
+          assert.equal(getApiStub.callCount, 7);
+          assert.equal(r.finished, false);
+          codeOwnersService.abort();
+          flush(() => {
+            // should still at 7 since aborted
+            assert.equal(getApiStub.callCount, 7);
+            done();
+          });
+        });
+      });
+
+      test('getSuggestedOwners should restart if aborted', done => {
+        codeOwnersService.abort();
+        codeOwnersService.getSuggestedOwners().then(r => {
+          // 6 requests for getting file owners + 1 status call
+          assert.equal(getApiStub.callCount, 7);
+          assert.equal(r.finished, false);
+          codeOwnersService.abort();
+          flush(() => {
+            codeOwnersService.getSuggestedOwners().then(r => {
+              // should at 13 since restarted
+              assert.equal(getApiStub.callCount, 13);
+              done();
+            });
+          });
         });
       });
     });
