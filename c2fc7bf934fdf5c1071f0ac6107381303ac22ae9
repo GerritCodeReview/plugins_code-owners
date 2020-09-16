@@ -22,6 +22,30 @@
       "revId": "c2fc7bf934fdf5c1071f0ac6107381303ac22ae9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "07409a96_64ca4b54",
+        "filename": "resources/Documentation/backend-find-owners.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-16T14:51:22Z",
+      "side": 1,
+      "message": "It\u0027s not a problem. Then this code owner will simply be filtered out when code owners are computed/suggested.\n\nWe will still offer a REST endpoint to validate all code owner config files in a branch (not implemented yet), this way project owners can find such issues in existing code owner config files and fix them.",
+      "parentUuid": "289b5531_3c328a4d",
+      "range": {
+        "startLine": 74,
+        "startChar": 75,
+        "endLine": 75,
+        "endChar": 74
+      },
+      "revId": "c2fc7bf934fdf5c1071f0ac6107381303ac22ae9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
