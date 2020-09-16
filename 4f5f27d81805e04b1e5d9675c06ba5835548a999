@@ -111,6 +111,29 @@
     },
     {
       "key": {
+        "uuid": "2d638561_60ebbe13",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 910,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-16T14:18:47Z",
+      "side": 1,
+      "message": "optional:\nif(validationMessages().stream().filter(..ERROR).findAny()) return ERROR;\nif(validationMessages().stream().filter(..WARNING).findAny()) return WARNING;\nreturn HINT;\n\nOptional since I\u0027m not sure it really makes the code cleaner :)",
+      "range": {
+        "startLine": 910,
+        "startChar": 13,
+        "endLine": 910,
+        "endChar": 75
+      },
+      "revId": "4f5f27d81805e04b1e5d9675c06ba5835548a999",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "3eaeef38_aff252a2",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
         "patchSetId": 5
