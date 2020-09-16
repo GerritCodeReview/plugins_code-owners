@@ -11,6 +11,15 @@ Parameters that are not set for a project are inherited from the parent project.
 
 # <a id="globalConfiguration">Global configuration in gerrit.config</a>
 
+<a id="pluginCodeOwnersDisabled">plugin.@PLUGIN@.disabled</a>
+:       Whether the code owners functionality is disabled for the project.\
+        If `true` submitting changes doesn't require code owner approvals.\
+        This allows projects to opt-out of the code owners functionality.\
+        Can be overridden per project by setting
+        [codeOwners.disabled](#codeOwnersDisabled) in
+        `@PLUGIN@.config`.\
+        By default `false`.
+
 <a id="pluginCodeOwnersBackend">plugin.@PLUGIN@.backend</a>
 :       The code owners backend that should be used.\
         Can be overridden per project by setting
@@ -76,6 +85,9 @@ Parameters that are not set for a project are inherited from the parent project.
 :       Whether the code owners functionality is disabled for the project.\
         If `true` submitting changes doesn't require code owner approvals.\
         This allows projects to opt-out of the code owners functionality.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.disabled](#pluginCodeOwnersDisabled) in
+        `gerrit.config`.\
         By default `false`.
 
 <a id="codeOwnersDisabledBranch">codeOwners.disabledBranch</a>

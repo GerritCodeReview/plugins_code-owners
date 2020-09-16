@@ -23,6 +23,8 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.server.config.PluginConfig;
+import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
@@ -58,10 +60,12 @@ public class StatusConfig {
   @VisibleForTesting public static final String KEY_DISABLED_BRANCH = "disabledBranch";
 
   private final String pluginName;
+  private final PluginConfig pluginConfigFromGerritConfig;
 
   @Inject
-  StatusConfig(@PluginName String pluginName) {
+  StatusConfig(@PluginName String pluginName, PluginConfigFactory pluginConfigFactory) {
     this.pluginName = pluginName;
+    this.pluginConfigFromGerritConfig = pluginConfigFactory.getFromGerritConfig(pluginName);
   }
 
   /**
@@ -119,7 +123,11 @@ public class StatusConfig {
   }
 
   /**
-   * Checks whether the given plugin config disables the code owners functionality for the project.
+   * Checks whether the code owners functionality is disabled for the given project.
+   *
+   * <p>The disabled configuration is read from the given plugin config. If it doesn't contain any
+   * disabled configuration the disabled configuration is read from the plugin configuration in
+   * {@code gerrit.config}.
    *
    * @param pluginConfig the plugin config from which the disabled configuration should be read
    * @param project the project to which the plugin config belongs
@@ -130,15 +138,32 @@ public class StatusConfig {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(project, "project");
 
+    String disabledString = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_DISABLED);
+    if (disabledString != null) {
+      // a value for KEY_DISABLED is set on project-level
+      try {
+        return pluginConfig.getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+      } catch (IllegalArgumentException e) {
+        // if the configuration is invalid we assume that the code owners functionality is not
+        // disabled, this is safe as it's the more restrictive choice
+        logger.atWarning().withCause(e).log(
+            "Disabled value '%s' that is configured for project %s in %s.config (parameter"
+                + " %s.%s) is invalid.",
+            disabledString, project, pluginName, SECTION_CODE_OWNERS, KEY_DISABLED);
+        return false;
+      }
+    }
+
+    // there is no project-level configuration for KEY_DISABLED, check if it's set in gerrit.config
     try {
-      return pluginConfig.getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+      return pluginConfigFromGerritConfig.getBoolean(KEY_DISABLED, false);
     } catch (IllegalArgumentException e) {
       // if the configuration is invalid we assume that the code owners functionality is not
       // disabled, this is safe as it's the more restrictive choice
       logger.atWarning().withCause(e).log(
           "Disabled value '%s' that is configured for project %s in %s.config (parameter"
               + " %s.%s) is invalid.",
-          pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_DISABLED),
+          pluginConfigFromGerritConfig.getString(KEY_DISABLED),
           project,
           pluginName,
           SECTION_CODE_OWNERS,

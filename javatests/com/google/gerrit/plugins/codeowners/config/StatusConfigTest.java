@@ -22,6 +22,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -72,6 +73,30 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void isDisabledForProject_invalidValueIsIgnored() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "invalid");
+    assertThat(statusConfig.isDisabledForProject(cfg, project)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
+  public void isDisabledForProjectIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(statusConfig.isDisabledForProject(new Config(), project)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
+  public void disabledConfigurationInPluginConfigOverridesDisabledConfigurationInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+    assertThat(statusConfig.isDisabledForProject(cfg, project)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.disabled", value = "INVALID")
+  public void isDisabledForProject_invalidValueInGerritConfigIsIgnored() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "invalid");
     assertThat(statusConfig.isDisabledForProject(cfg, project)).isFalse();
