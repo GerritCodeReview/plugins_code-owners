@@ -117,7 +117,7 @@ public class CodeOwnerResolver {
    * @return the {@link CodeOwnerResolver} instance for chaining calls
    */
   public CodeOwnerResolver forUser(IdentifiedUser user) {
-    logger.atFine().log("user = %d", user.getLoggableName());
+    logger.atFine().log("user = %s", user.getLoggableName());
     this.user = user;
     return this;
   }
@@ -148,7 +148,7 @@ public class CodeOwnerResolver {
                 .branchName(codeOwnerConfig.key().ref())
                 .filePath(codeOwnerConfig.key().fileName().orElse("<default>"))
                 .build())) {
-      logger.atFine().log("resolving path code owners for path %s");
+      logger.atFine().log("resolving path code owners for path %s", absolutePath);
       return pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get().stream()
           .flatMap(this::resolve)
           .collect(toImmutableSet());
