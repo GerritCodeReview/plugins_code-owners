@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "289b5531_3c328a4d",
+        "filename": "resources/Documentation/backend-find-owners.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-16T14:47:19Z",
+      "side": 1,
+      "message": "Just wondering, have you considered the case where we run InactiveUsers? Or a user sets himself as inactive?\nif that makes the OWNERS file invalid, that might be a problem.",
+      "range": {
+        "startLine": 74,
+        "startChar": 75,
+        "endLine": 75,
+        "endChar": 74
+      },
+      "revId": "c2fc7bf934fdf5c1071f0ac6107381303ac22ae9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
