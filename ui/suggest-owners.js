@@ -329,6 +329,7 @@ export class SuggestOwners extends Polymer.Element {
           }, SUGGESTION_POLLING_INTERVAL);
 
           // poll immediately to kick start the fetching
+          this.reporting.reportInteraction('owners-suggestions-fetching-start');
           this._pollingSuggestions();
         }
       }
@@ -363,6 +364,7 @@ export class SuggestOwners extends Polymer.Element {
           if (res.finished) {
             clearInterval(this._suggestionsTimer);
             this._suggestionsTimer = null;
+            this.reporting.reportInteraction('owners-suggestions-fetching-finished');
           }
           this.progressText = res.progress;
           this.isLoading = !res.finished;
