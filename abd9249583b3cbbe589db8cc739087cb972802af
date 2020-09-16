@@ -63,6 +63,30 @@
       "revId": "abd9249583b3cbbe589db8cc739087cb972802af",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "415cb416_de4e0e37",
+        "filename": "ui/owner-requirement.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1074328
+      },
+      "writtenOn": "2020-09-16T09:04:25Z",
+      "side": 1,
+      "message": "Could you also add \"approved\" for easy reference?",
+      "parentUuid": "b85f99d3_6079865f",
+      "range": {
+        "startLine": 123,
+        "startChar": 15,
+        "endLine": 123,
+        "endChar": 35
+      },
+      "revId": "abd9249583b3cbbe589db8cc739087cb972802af",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
