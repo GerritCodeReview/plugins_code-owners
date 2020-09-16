@@ -74,8 +74,7 @@ Parameters that are not set for a project are inherited from the parent project.
 
 <a id="codeOwnersDisabled">codeOwners.disabled</a>
 :       Whether the code owners functionality is disabled for the project.\
-        If `true` the code owners API is disabled and submitting changes doesn't
-        require code owner approvals.\
+        If `true` submitting changes doesn't require code owner approvals.\
         This allows projects to opt-out of the code owners functionality.\
         By default `false`.
 
