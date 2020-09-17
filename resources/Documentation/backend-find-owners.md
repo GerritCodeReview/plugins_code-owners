@@ -204,6 +204,12 @@ owner of the `docs.config` file and all `*.md` files in this directory.
   per-file docs.config,*.md=richard.roe@example.com
 ```
 \
+**NOTE:** It is discouraged to use path expressions that explicitly name
+subdirectories such as `my-subdir/**` as they will break when the subdirectory
+gets renamed/moved. Instead prefer to define these code owners in
+`my-subdir/OWNERS` so that the code owners for the subdirectory stay intact when
+the subdirectory gets renamed/moved.
+
 To grant per-file code ownership to more than one user multiple [user
 emails](#userEmails) can be specified as comma-separated list, or an external
 `OWNERS` file can be referenced via the [file](#fileKeyword) keyword.
