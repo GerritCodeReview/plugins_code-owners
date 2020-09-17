@@ -46,6 +46,30 @@
       "revId": "c2fc7bf934fdf5c1071f0ac6107381303ac22ae9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "7fa134fd_1e7289a5",
+        "filename": "resources/Documentation/backend-find-owners.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-17T13:00:47Z",
+      "side": 1,
+      "message": "\u003e It\u0027s not a problem. Then this code owner will simply be filtered out\n\u003e when code owners are computed/suggested.\nActually we didn\u0027t do this yet, but we should.\nFix: https://gerrit-review.googlesource.com/c/plugins/code-owners/+/281803",
+      "parentUuid": "07409a96_64ca4b54",
+      "range": {
+        "startLine": 74,
+        "startChar": 75,
+        "endLine": 75,
+        "endChar": 74
+      },
+      "revId": "c2fc7bf934fdf5c1071f0ac6107381303ac22ae9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
