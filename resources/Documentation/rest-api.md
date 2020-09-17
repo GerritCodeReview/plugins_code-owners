@@ -110,6 +110,8 @@ setting),
 * are referenced by non-visible secondary emails
 * not resolvable (emails for which no Gerrit account exists) or
 * ambiguous (the same email is assigned to multiple accounts)
+* are referenced by an email with a disallowed domain (see
+  [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
 
 are omitted from the result.
 
