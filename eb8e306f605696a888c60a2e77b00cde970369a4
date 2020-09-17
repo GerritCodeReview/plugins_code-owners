@@ -46,6 +46,30 @@
       "revId": "eb8e306f605696a888c60a2e77b00cde970369a4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "ca223347_c4e9bf37",
+        "filename": "resources/Documentation/backend-proto.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-17T13:10:51Z",
+      "side": 1,
+      "message": "Oh, this is actually the reason for the same empty title in backend-find-owners.md. In this case nobody links to this anchor, so I may as well drop it.",
+      "parentUuid": "cec9738e_cd2ca6e2",
+      "range": {
+        "startLine": 17,
+        "startChar": 40,
+        "endLine": 17,
+        "endChar": 41
+      },
+      "revId": "eb8e306f605696a888c60a2e77b00cde970369a4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
