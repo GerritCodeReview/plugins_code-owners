@@ -104,6 +104,7 @@ specified branch.
 
 Code owners that are
 
+* inactive
 * not visible to the calling user (according to
 [accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
 setting),
