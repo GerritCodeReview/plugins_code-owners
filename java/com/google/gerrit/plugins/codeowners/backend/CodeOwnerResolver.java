@@ -211,6 +211,10 @@ public class CodeOwnerResolver {
       logger.atFine().log("no account for email %s", email);
       return Stream.of();
     }
+    if (!accountState.get().account().isActive()) {
+      logger.atFine().log("account for email %s is inactive", email);
+      return Stream.of();
+    }
     if (enforceVisibility && !isVisible(accountState.get(), email)) {
       logger.atFine().log(
           "account %d or email %s not visible", accountState.get().account().id().get(), email);

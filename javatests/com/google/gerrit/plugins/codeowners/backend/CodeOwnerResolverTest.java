@@ -158,6 +158,12 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void resolveCodeOwnerReferenceForInactiveUser() throws Exception {
+    accountOperations.account(user.id()).forUpdate().inactive().update();
+    assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(user.email()))).isEmpty();
+  }
+
+  @Test
   @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
   public void resolveCodeOwnerReferenceForNonVisibleAccount() throws Exception {
     TestAccount user2 = accountCreator.user2();
