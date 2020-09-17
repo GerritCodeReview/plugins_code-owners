@@ -391,6 +391,20 @@ export class CodeOwnerService {
     return this.codeOwnerApi.getProjectConfig(this.change.project);
   }
 
+  isCodeOwnerEnabled() {
+    return this.getProjectConfig().then(config => {
+      if (config.status && config.status.disabled) {
+        return false;
+      }
+      if (config.status
+          && config.status.disabled_branches
+          && config.status.disabled_branches.includes(this.change.branch)) {
+        return false;
+      }
+      return true;
+    });
+  }
+
   static getOwnerService(restApi, change) {
     if (!this.ownerService || this.ownerService.change !== change) {
       this.ownerService = new CodeOwnerService(restApi, change, {

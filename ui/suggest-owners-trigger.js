@@ -89,9 +89,15 @@ export class SuggestOwnersTrigger extends Polymer.Element {
         this.restApi,
         this.change
     );
-    this.ownerService.areAllFilesApproved().then(approved => {
-      this.hidden = approved;
-    });
+
+    Promise.all([this.ownerService.isCodeOwnerEnabled(), this.ownerService.areAllFilesApproved()])
+        .then(([enabled, approved]) => {
+          if (enabled) {
+            this.hidden = approved;
+          } else {
+            this.hidden = true;
+          }
+        });
   }
 
   toggleControlContent() {
