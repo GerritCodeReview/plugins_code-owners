@@ -66,7 +66,8 @@ class CodeOwnerApi {
    */
   listOwnersForPath(project, branch, path) {
     return this.restApi.get(
-        `/projects/${project}/branches/${branch}/` +
+        `/projects/${encodeURIComponent(project)}/` +
+        `branches/${encodeURIComponent(branch)}/` +
         `code_owners/${encodeURIComponent(path)}?limit=5&o=DETAILS`
     );
   }
@@ -81,7 +82,9 @@ class CodeOwnerApi {
    */
   getConfigForPath(project, branch, path) {
     return this.restApi.get(
-        `/projects/${project}/branches/${branch}/code_owners.config/${path}`
+        `/projects/${encodeURIComponent(project)}/` +
+        `branches/${encodeURIComponent(branch)}/` +
+        `code_owners.config/${encodeURIComponent(path)}`
     );
   }
 
@@ -93,7 +96,7 @@ class CodeOwnerApi {
    */
   getProjectConfig(project) {
     return this.restApi.get(
-        `/projects/${project}/code_owners.project_config`
+        `/projects/${encodeURIComponent(project)}/code_owners.project_config`
     );
   }
 }
