@@ -105,7 +105,8 @@ import org.eclipse.jgit.revwalk.RevCommit;
  * <ul>
  *   <li>configuration parameters that are relevant for the validation are changed (e.g. the account
  *       visibility is changed, another code owners backend is configured which now uses a different
- *       syntax or different names for code owner config files)
+ *       syntax or different names for code owner config files, or the file extension for code owner
+ *       config file is set/changed)
  *   <li>emails of user may change so that emails in code owner configs can no longer be resolved
  *   <li>imported code owner config files may get deleted or renamed so that the import references
  *       can no longer be resolved
