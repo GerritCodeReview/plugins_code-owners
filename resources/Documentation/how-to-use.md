@@ -1,4 +1,4 @@
-## Intro
+# Intro
 
 The Code-Owners plugin is currently in development. We are testing code-owners on some hosts on googlesource.com right now. If you build your Gerrit from master, you can enable it by enabling the code-owners plugin and adding OWNERS info to your code base.
 
@@ -174,7 +174,7 @@ A code owner of this file has been added to the change but have not voted yet.
 
 **Approved by code owner**
 
-A code owner of this file has approved the change. You can also see this icon if you are a code-owner of the file as in this case the file is implicitly approved by you. 
+A code owner of this file has approved the change. You can also see this icon if you are a code-owner of the file as in this case the file is implicitly approved by you.
 
 ![approved owner tooltip](./tooltip-approved-owner.png "Tooltip for approved status")
 
