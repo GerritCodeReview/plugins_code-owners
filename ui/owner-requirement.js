@@ -88,7 +88,7 @@ export class OwnerRequirementValue extends Polymer.Element {
 
   static get observers() {
     return [
-      'onInputChanged(restApi, change)',
+      'onInputChanged(restApi, change, reporting)',
     ];
   }
 
@@ -118,9 +118,18 @@ export class OwnerRequirementValue extends Polymer.Element {
 
   _updateStatus() {
     this._isLoading = true;
+    this.reporting.reportLifeCycle('owners-submit-requirement-summary-start');
+
     return this.ownerService.getStatus()
         .then(({rawStatuses}) => {
           this._statusCount = this._getStatusCount(rawStatuses);
+
+          // Send a metric with overall summary when code owners submit
+          // requirement shown and finished fetching status
+          this.reporting.reportLifeCycle(
+              'owners-submit-requirement-summary-shown',
+              {...this._statusCount}
+          );
         })
         .finally(() => {
           this._isLoading = false;
@@ -148,9 +157,11 @@ export class OwnerRequirementValue extends Polymer.Element {
             } else if (this._isPending(oldPathStatus.status)) {
               prev.pending ++;
             }
+          } else {
+            prev.approved ++;
           }
           return prev;
-        }, {missing: 0, pending: 0});
+        }, {missing: 0, pending: 0, approved: 0});
   }
 
   _computeStatusText(statusCount, isOverriden) {
@@ -178,8 +189,8 @@ export class OwnerRequirementValue extends Polymer.Element {
     return status === OwnerStatus.PENDING;
   }
 
-  onInputChanged(restApi, change) {
-    if ([restApi, change].includes(undefined)) return;
+  onInputChanged(restApi, change, reporting) {
+    if ([restApi, change, reporting].includes(undefined)) return;
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
     this._updateStatus();
     this._checkIfOverriden();
@@ -195,10 +206,7 @@ export class OwnerRequirementValue extends Polymer.Element {
     );
     ownerState.expandSuggestion = true;
 
-    this.reporting.reportInteraction(
-        'suggest-owners-from-submit-requirement',
-        {...this._statusCount}
-    );
+    this.reporting.reportInteraction('suggest-owners-from-submit-requirement');
   }
 }
 
