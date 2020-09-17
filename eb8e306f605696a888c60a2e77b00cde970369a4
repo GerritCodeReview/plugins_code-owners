@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7f309788_b7f6ce7e",
+        "filename": "resources/Documentation/backend-proto.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-17T13:06:16Z",
+      "side": 1,
+      "message": "Missing the title here (Code owner config file extension)",
+      "range": {
+        "startLine": 17,
+        "startChar": 40,
+        "endLine": 17,
+        "endChar": 41
+      },
+      "revId": "eb8e306f605696a888c60a2e77b00cde970369a4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
