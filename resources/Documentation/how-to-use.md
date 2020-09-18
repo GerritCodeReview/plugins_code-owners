@@ -2,8 +2,6 @@
 
 The Code-Owners plugin is currently in development. We are testing code-owners on some hosts on googlesource.com right now. If you build your Gerrit from master, you can enable it by enabling the code-owners plugin and adding OWNERS info to your code base.
 
-During dogfooding, the plugin’s UI will be behind an experiment flag, you will need to append `?experiment=UiFeature__plugin_code_owners` to enable it since it is disabled by default.
-
 The Code-Owner plugin is an open-source plugin and maintained by the Gerrit team at Google to replace find-owners plugin.
 
 ### Bug report / Feedback

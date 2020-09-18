@@ -21,12 +21,6 @@ import {OwnerRequirementValue} from './owner-requirement.js';
 import {SuggestOwnersTrigger} from './suggest-owners-trigger.js';
 
 Gerrit.install(plugin => {
-  const ENABLED_EXPERIMENTS = window.ENABLED_EXPERIMENTS || [];
-  if (!ENABLED_EXPERIMENTS.includes('UiFeature__plugin_code_owners')) {
-    // Disable if experiment UiFeature__plugin_code_owners is disabled
-    return;
-  }
-
   const restApi = plugin.restApi();
   const reporting = plugin.reporting();
 
