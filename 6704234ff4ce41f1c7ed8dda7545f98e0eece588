@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "69e2e9c3_830a6f34",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1113292
+      },
+      "writtenOn": "2020-09-18T15:31:13Z",
+      "side": 1,
+      "message": "IMHO, I prefer the change owner over the uploader. When a change is submitted, the commit will use the change owner as the author, rather than the uploader of the final patchset. Therefore calculating ownership from the change owner feels more natural. Like uploader, change owner is also difficult to forge（the uploader of the initial patchset of a change). For the potential exploit you mentioned, as long as the add patch set permission is blocked[1], this won\u0027t be a concern. \n\nConsider the following case: some external contributor created a change for wrong branch. After some significant amount of time on waiting for the change owner to act, one of the maintainer who is the fallback owner of the entire codebase decided to rebase the change to the correct one on the Web UI, and the owner approval is granted implicitly.\n\nAlso consider the case where a file is owned by a single user, and that user submits a change to modify the file. Later, a bot comes in to update the commit message (say link the commit to some external services), and the implicit owner approval is lost until the user to self approve the change for owner approval or push another patchset.\n\n[1] https://gerrit-review.googlesource.com/Documentation/access-control.html#category_add_patch_set",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 22
+      },
+      "revId": "6704234ff4ce41f1c7ed8dda7545f98e0eece588",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae8ebfa0_4246be01",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1113292
+      },
+      "writtenOn": "2020-09-18T15:31:13Z",
+      "side": 1,
+      "message": "Is there a design doc or tracking issue for this?",
+      "revId": "6704234ff4ce41f1c7ed8dda7545f98e0eece588",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
