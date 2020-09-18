@@ -66,10 +66,10 @@ export class SuggestOwnersTrigger extends Polymer.Element {
           [[computeButtonText(expanded)]]
         </gr-button>
         <span>
-          <a href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin" target="_blank">
+          <a on-click="_reportBugClick" href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin" target="_blank">
             <iron-icon icon="gr-icons:bug" title="report a problem"></iron-icon>
           </a>
-          <a href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md" target="_blank">
+          <a on-click="_reportDocClick" href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md" target="_blank">
             <iron-icon icon="gr-icons:help-outline" title="read documentation"></iron-icon>
           </a>
         </span>
@@ -110,6 +110,14 @@ export class SuggestOwnersTrigger extends Polymer.Element {
 
   computeButtonText(expanded) {
     return expanded ? 'Hide owners' : 'Suggest owners';
+  }
+
+  _reportDocClick() {
+    this.reporting.reportInteraction('code-owners-doc-click');
+  }
+
+  _reportBugClick() {
+    this.reporting.reportInteraction('code-owners-bug-click');
   }
 }
 

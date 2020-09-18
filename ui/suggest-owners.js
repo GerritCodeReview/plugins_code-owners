@@ -263,7 +263,7 @@ export class SuggestOwners extends Polymer.Element {
               <template is="dom-if" if="[[!suggestion.owners.length]]">
                 <div class="no-owners-content">
                   <span>Not found</span>
-                  <a href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md#no-code-owners-found" target="_blank">
+                  <a on-click="_reportDocClick" href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md#no-code-owners-found" target="_blank">
                     <iron-icon icon="gr-icons:help-outline" title="read documentation"></iron-icon>
                   </a>
                 </div>
@@ -381,7 +381,12 @@ export class SuggestOwners extends Polymer.Element {
           if (res.finished) {
             clearInterval(this._suggestionsTimer);
             this._suggestionsTimer = null;
-            this.reporting.reportLifeCycle('owners-suggestions-fetching-finished');
+            const reportDetails = res.suggestions.reduce((details, cur) => {
+              details.totalGroups++;
+              details.stats.push([cur.files.length, cur.owners ? cur.owners.length : 0]);
+              return details;
+            }, {totalGroups: 0, stats: []});
+            this.reporting.reportLifeCycle('owners-suggestions-fetching-finished', reportDetails);
           }
           this.progressText = res.progress;
           this.isLoading = !res.finished;
@@ -494,6 +499,10 @@ export class SuggestOwners extends Polymer.Element {
 
   isSelected(owner) {
     return owner.selected;
+  }
+
+  _reportDocClick() {
+    this.reporting.reportInteraction('code-owners-doc-click', {section: 'no owners found'});
   }
 }
 
