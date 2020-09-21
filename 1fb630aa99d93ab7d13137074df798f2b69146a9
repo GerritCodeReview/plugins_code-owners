@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fd15efb2_467d8d01",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 5
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T12:33:51Z",
+      "side": 1,
+      "message": "nice, very detailed.\n",
+      "revId": "1fb630aa99d93ab7d13137074df798f2b69146a9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a738c2e3_835ab609",
+        "filename": "resources/Documentation/setup-guide.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 45,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T12:33:51Z",
+      "side": 1,
+      "message": "omit the \\ ?\nHere and after \"branch\"",
+      "range": {
+        "startLine": 45,
+        "startChar": 15,
+        "endLine": 45,
+        "endChar": 16
+      },
+      "revId": "1fb630aa99d93ab7d13137074df798f2b69146a9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc6e923f_d3df5531",
+        "filename": "resources/Documentation/setup-guide.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T12:33:51Z",
+      "side": 1,
+      "message": "This is a little difficult to read, can you split this to its own sentence (or even 2 sentences)?",
+      "range": {
+        "startLine": 43,
+        "startChar": 49,
+        "endLine": 47,
+        "endChar": 40
+      },
+      "revId": "1fb630aa99d93ab7d13137074df798f2b69146a9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "057754a1_081ee438",
+        "filename": "resources/Documentation/setup-guide.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 228,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T12:33:51Z",
+      "side": 1,
+      "message": "privileged",
+      "range": {
+        "startLine": 228,
+        "startChar": 59,
+        "endLine": 228,
+        "endChar": 69
+      },
+      "revId": "1fb630aa99d93ab7d13137074df798f2b69146a9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
