@@ -172,6 +172,18 @@ using the `include` keyword also imports `per-file` rules and any
 is used without any ':' between the keyword and the file path (e.g.
 `include /path/to/OWNERS`).
 
+#### <a id="groups">Groups
+
+Groups are not supported in `OWNERS` files and assigning code ownership to them
+is not possible.
+
+Instead of using a group you may define a set of users in an `OWNERS` file with
+a prefix (`<prefix>_OWNERS`) or an extension (`OWNERS_<extension>`) and then
+import it into other `OWNERS` files via the [file](#fileKeyword) keyword or the
+[include](#includeKeyword) keyword. By using a prefix or extension for the
+`OWNERS` file it is only interpreted when it is imported into another `OWNERS`
+file, but otherwise it has no effect.
+
 ### <a id="restrictionPrefixes">Restriction Prefixes
 
 All restriction prefixes should be put at the start of a line, before an

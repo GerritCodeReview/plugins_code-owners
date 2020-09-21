@@ -7,3 +7,6 @@ touched files are covered by approvals from code owners.
 
 Also see resources/Documentation/about.md
 
+IMPORTANT: Before installing/enabling the plugin follow the instructions from
+the setup guide, see resources/Documentation/setup-guide.md
+
