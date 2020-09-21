@@ -42,7 +42,7 @@ The plugin provides suggestions of owners for the directory or files that you ar
 
 The Code-owners plugin suggests a maximum of 5 closest owners based on their score. The owner score is calculated based on the distance of owners to the files.
 
-## Add owners to your change
+## <a id="addCodeOwnersAsReviewers">Add owners to your change
 
 1. To add owners of the files in your change, click on Suggest owners next to the Code-Owners submit requirement.
 
