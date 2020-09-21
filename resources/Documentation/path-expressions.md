@@ -22,6 +22,8 @@ Globs support the following wildcards:
 * `[a-c]`: matches one character from the range given in the bracket
 * `{html,htm}`: matches either of the 2 expressions, `html` or `htm`
 
+See [below](#examples) for examples.
+
 ## <a id="simplePathExpressions">Simple path expressions
 
 Simple path expressions use the following wildcards:
@@ -29,7 +31,9 @@ Simple path expressions use the following wildcards:
 * `*`: matches any string that does not include slashes
 * `...`: matches any string, including slashes
 
-### Examples
+See [below](#examples) for examples.
+
+## <a id="examples">Examples
 
 | To Match | Glob | Simple Path Expression |
 | -------- | ---- | ---------------------- |
