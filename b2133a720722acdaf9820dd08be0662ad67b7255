@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5d353c28_e7610178",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T13:31:11Z",
+      "side": 1,
+      "message": "In both of those of points, you can also link to the examples (examples for both per file and per subdirectory are below).",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 1
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "207a83ec_bdb62cf1",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T13:31:11Z",
+      "side": 1,
+      "message": "Describe how to do that.\nI see that it\u0027s described in #exemptFiles, clarify that you\u0027re explaining it there.",
+      "range": {
+        "startLine": 58,
+        "startChar": 26,
+        "endLine": 58,
+        "endChar": 72
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "889591f6_d25e9c3d",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T13:31:11Z",
+      "side": 1,
+      "message": "same as above.",
+      "range": {
+        "startLine": 118,
+        "startChar": 37,
+        "endLine": 119,
+        "endChar": 8
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c072a5c6_6c4b65c6",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-21T13:31:11Z",
+      "side": 1,
+      "message": "maybe add an example with this keyword too.",
+      "range": {
+        "startLine": 177,
+        "startChar": 1,
+        "endLine": 177,
+        "endChar": 8
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
