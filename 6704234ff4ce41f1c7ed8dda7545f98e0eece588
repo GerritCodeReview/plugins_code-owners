@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3b474849_23673228",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-21T06:53:26Z",
+      "side": 1,
+      "message": "\u003e For the potential exploit you mentioned, as long as the add patch set permission is\n\u003e blocked[1], this won\u0027t be a concern. \nIt has to be secure with any permission configuration, we cannot assume that the add patch set permission is blocked.\n\n\u003e Consider the following case: some external contributor created a change for wrong branch.\nThis seems to be a rather rare case.\n\n\u003e After some significant amount of time on waiting for the change owner to act, one of the \n\u003e maintainer who is the fallback owner of the entire codebase decided to rebase the change to\n\u003e the correct one on the Web UI, and the owner approval is granted implicitly.\n\nThis is a good point. The maintainer needs to be aware of this. Maybe we should rather have no implicit approvals at all? I might add a configuration option to turn implicit approvals off.\n\n\u003e Also consider the case where a file is owned by a single user, and that user submits a change\n\u003e to modify the file. Later, a bot comes in to update the commit message (say link the commit to \n\u003e some external services), and the implicit owner approval is lost until the user to self approve \n\u003e the change for owner approval or push another patchset.\n\nYes, in this case the change owner would need to self-approve, which doesn\u0027t seem to be a big deal.",
+      "parentUuid": "69e2e9c3_830a6f34",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 22
+      },
+      "revId": "6704234ff4ce41f1c7ed8dda7545f98e0eece588",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ae8ebfa0_4246be01",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 11
@@ -36,6 +60,24 @@
       "writtenOn": "2020-09-18T15:31:13Z",
       "side": 1,
       "message": "Is there a design doc or tracking issue for this?",
+      "revId": "6704234ff4ce41f1c7ed8dda7545f98e0eece588",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "36844f57_408517e7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-21T06:53:26Z",
+      "side": 1,
+      "message": "Yes, we have a design doc for the code owner functionality, but it\u0027s internal to Google (if you are a Googler please send me an internal email and I can share it with you).",
+      "parentUuid": "ae8ebfa0_4246be01",
       "revId": "6704234ff4ce41f1c7ed8dda7545f98e0eece588",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
