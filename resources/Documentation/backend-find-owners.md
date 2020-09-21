@@ -20,6 +20,11 @@ config files](config.html#codeOwnersFileExtension) configured. In this case the
 code owners are defined in `OWNERS.<file-extension>` files and `OWNERS` files
 are ignored.
 
+## <a id="cookbook">Cookbook
+
+A cookbook with examples of `OWNERS` files for various use cases can be found
+[here](backend-find-owners-cookbook.html).
+
 ## <a id="syntax">Syntax
 
 An `OWNERS` file is a set of lines which are order-independent. Each line can be
