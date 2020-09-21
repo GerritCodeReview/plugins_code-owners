@@ -1,8 +1,10 @@
-The @PLUGIN@ plugin provides support for defining code owners for directories
-and files in a repository/branch.
+The @PLUGIN@ plugin provides support for defining
+[code owners](user-guide.html#codeOwners) for directories and files in a
+repository/branch.
 
 If the @PLUGIN@ plugin is enabled, changes can only be submitted if all
-touched files are covered by approvals from code owners.
+touched files are covered by [approvals](user-guide.html#codeOwnerApproval) from
+code owners.
 
 **IMPORTANT:** Before installing/enabling the plugin, or enabling the code
 owners functionality for further projects, follow the instructions from the
