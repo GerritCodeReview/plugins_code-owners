@@ -11,6 +11,10 @@ The following code owner backends are supported:
   final yet and backwards incompatible changes are likely to happen. This is why
   this backend is experimental for now and should not be used in production.
 
+Which backend is used can be
+[configured](setup-guide.html#configureCodeOwnersBackend) globally, per
+repository or per branch.
+
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)
