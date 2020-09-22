@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "b71eda5b_fa2091d2",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-22T12:33:55Z",
+      "side": 1,
+      "message": "Good idea. done.",
+      "parentUuid": "5d353c28_e7610178",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 1
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "207a83ec_bdb62cf1",
         "filename": "resources/Documentation/backend-find-owners-cookbook.md",
         "patchSetId": 4
@@ -45,6 +69,30 @@
       "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "efa5292c_aee91814",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-22T12:33:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "207a83ec_bdb62cf1",
+      "range": {
+        "startLine": 58,
+        "startChar": 26,
+        "endLine": 58,
+        "endChar": 72
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "6640bd36_90511ccb",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-22T12:33:55Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "889591f6_d25e9c3d",
+      "range": {
+        "startLine": 118,
+        "startChar": 37,
+        "endLine": 119,
+        "endChar": 8
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c072a5c6_6c4b65c6",
         "filename": "resources/Documentation/backend-find-owners-cookbook.md",
         "patchSetId": 4
@@ -91,6 +163,30 @@
       "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "202177ec_8ac643af",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-22T12:33:55Z",
+      "side": 1,
+      "message": "Good point. Done. Only the include keyword is not supported in combination with per-file line. I corrected this here now, and added the example for include a bit further below.",
+      "parentUuid": "c072a5c6_6c4b65c6",
+      "range": {
+        "startLine": 177,
+        "startChar": 1,
+        "endLine": 177,
+        "endChar": 8
+      },
+      "revId": "b2133a720722acdaf9820dd08be0662ad67b7255",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
