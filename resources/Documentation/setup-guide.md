@@ -323,9 +323,9 @@ defines the code owners for the project/branch explicitly.
 
 **NOTE:** It's recommended to add the initial code owner configuration only
 after enabling the code owners functionality so that the code owner
-configuration is validated on upload, which prevents submitting an invalid code
-owner config that may block the submission of all changes (e.g. if it is not
-parseable).
+configuration is [validated](validation.html) on upload, which prevents
+submitting an invalid code owner config that may block the submission of all
+changes (e.g. if it is not parseable).
 
 ### <a id="faq">FAQ's
 
