@@ -32,8 +32,9 @@ To create/edit code owner config files, clone the repository, edit the code
 owner config files locally and then push the new commit to the remote repository
 in Gerrit. This the same as creating/editing any other source files.
 
-On push Gerrit validates any code owner config file that is touched by the new
-commits. Commits that make code owner config files invalid are rejected.
+On push Gerrit [validates](validation.html) any code owner config file that is
+touched by the new commits. Commits that make code owner config files invalid
+are rejected.
 
 **NOTE:** There is no dedicated editor for code owner config files in the Gerrit
 UI.
