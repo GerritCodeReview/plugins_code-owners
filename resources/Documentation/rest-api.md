@@ -109,9 +109,9 @@ Code owners that are
 [accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
 setting),
 * are referenced by non-visible secondary emails
-* not resolvable (emails for which no Gerrit account exists) or
+* not resolvable (emails for which no Gerrit account exists)
 * ambiguous (the same email is assigned to multiple accounts)
-* are referenced by an email with a disallowed domain (see
+* referenced by an email with a disallowed domain (see
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
 
 are omitted from the result.
