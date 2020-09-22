@@ -60,7 +60,7 @@ Parameters that are not set for a project are inherited from the parent project.
 :       Approval that is required from code owners to approve the files in a
         change.\
         The required approval must be specified in the format
-        "<label-name>+<label-value>".\
+        "\<label-name\>+\<label-value\>".\
         The configured label must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
@@ -72,7 +72,7 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="pluginCodeOwnersOverrideApproval">plugin.@PLUGIN@.overrideApproval</a>
 :       Approval that is required to override the code owners submit check.\
         The override approval must be specified in the format
-        "<label-name>+<label-value>".\
+        "\<label-name\>+\<label-value\>".\
         The configured label must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
@@ -157,7 +157,7 @@ Parameters that are not set for a project are inherited from the parent project.
 :       Approval that is required from code owners to approve the files in a
         change.\
         The required approval must be specified in the format
-        "<label-name>+<label-value>".\
+        "\<label-name\>+\<label-value\>".\
         The configured label must exist for all projects for which this setting
         applies (all child projects that have code owners enabled and for which
         this setting is not overridden).\
@@ -171,7 +171,7 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="codeOwnersOverrideApproval">codeOwners.overrideApproval</a>
 :       Approval that is required to override the code owners submit check.\
         The override approval must be specified in the format
-        "<label-name>+<label-value>".\
+        "\<label-name\>+\<label-value\>".\
         The configured label must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
