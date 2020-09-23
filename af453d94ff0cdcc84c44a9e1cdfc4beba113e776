@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7b622519_c64fdbaa",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-23T13:45:22Z",
+      "side": 1,
+      "message": ". For",
+      "range": {
+        "startLine": 7,
+        "startChar": 67,
+        "endLine": 7,
+        "endChar": 72
+      },
+      "revId": "af453d94ff0cdcc84c44a9e1cdfc4beba113e776",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "23f9aaba_ac8da143",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-23T13:45:22Z",
+      "side": 1,
+      "message": ",",
+      "range": {
+        "startLine": 35,
+        "startChar": 7,
+        "endLine": 35,
+        "endChar": 8
+      },
+      "revId": "af453d94ff0cdcc84c44a9e1cdfc4beba113e776",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d0eb6453_e198b1bd",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-23T13:45:22Z",
+      "side": 1,
+      "message": "suitable",
+      "range": {
+        "startLine": 100,
+        "startChar": 63,
+        "endLine": 100,
+        "endChar": 71
+      },
+      "revId": "af453d94ff0cdcc84c44a9e1cdfc4beba113e776",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
