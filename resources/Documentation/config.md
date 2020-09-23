@@ -28,7 +28,14 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         The supported code owner backends are listed at the
         [Backends](backends.html) page.\
-        By default `find-owners`.
+        By default `find-owners`.\
+        \
+        **NOTE:** Be careful with changing this parameter as it invalidates all
+        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        E.g. by changing the backend code owner configurations may now be read
+        from different files, or even worse from the same files but with another
+        syntax so that the existing code owner config files can no longer be
+        parsed.
 
 <a id="pluginCodeOwnersFileExtension">plugin.@PLUGIN@.fileExtension</a>
 :       The file extension that should be used for code owner config files.\
@@ -117,7 +124,14 @@ Parameters that are not set for a project are inherited from the parent project.
         [Backends](backends.html) page.\
         If not set, the global setting
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`\
-        is used.
+        is used.\
+        \
+        **NOTE:** Be careful with changing this parameter as it invalidates all
+        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        E.g. by changing the backend code owner configurations may now be read
+        from different files, or even worse from the same files but with another
+        syntax so that the existing code owner config files can no longer be
+        parsed.
 
 <a id="codeOwnersBranchBackend">codeOwners.\<branch\>.backend</a>
 :       The code owners backend that should be used for this branch.\
@@ -128,7 +142,14 @@ Parameters that are not set for a project are inherited from the parent project.
         The supported code owner backends are listed at the
         [Backends](backends.html) page.\
         If not set, the project level configuration
-        [codeOwners.backend](#codeOwnersBackend) is used.
+        [codeOwners.backend](#codeOwnersBackend) is used.\
+        \
+        **NOTE:** Be careful with changing this parameter as it invalidates all
+        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        E.g. by changing the backend code owner configurations may now be read
+        from different files, or even worse from the same files but with another
+        syntax so that the existing code owner config files can no longer be
+        parsed.
 
 <a id="codeOwnersFileExtension">codeOwners.fileExtension</a>
 :       The file extension that should be used for the code owner config files
