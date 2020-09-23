@@ -58,8 +58,8 @@ If a code owner uploads a change/patch set, an approval of the owned files is
 always implicitly assumed. This means if a code owner only touches files that
 they own, no approval from other code owners is required.
 
-For files that are renamed/moved Gerrit requires a code owner approval for the
-old and the new path of the files.
+For files that are [renamed/moved](#renames) Gerrit requires a code owner
+approval for the old and the new path of the files.
 
 If code owner approvals are missing, it is possible to submit the change with a
 [code owner override](#codeOwnerOverride), but this should only be done in
@@ -123,6 +123,32 @@ the score:
   defines the code owner from the owned path.\
   The smaller the distance the better we consider the code owner as
   reviewer/approver for the path.
+
+## <a id="renames">Renames
+
+When files/folders get renamed, their code owner configuration should stay
+intact. Renaming a file/folder should normally not result in a situation where
+the code owner configuration for this file/folder no longer applies, because it
+was renamed.
+
+Mostly this is not a problem because [code owner config
+files](#codeOwnerConfigFiles) are stored inside the folders to which they apply.
+This means, if a folder gets renamed, the code owner config files in it still
+apply.
+
+However if a file/folder is renamed for which specific code owners are defined
+via [path expressions](path-expressions.html), it is possible that the code
+ownership changes. For example, this can happen if the old name is matched by
+a path expression that makes user A a code owner, but the new name is only
+matched by another path expression that makes user B a code owner. E.g. '*.md'
+is owned by user A, '*.txt' is owned by user B and 'config.md' is renamed to
+'config.txt'. In this case it is the responsibility of the author doing the
+rename and the current code owners to ensure that the file/folder has the proper
+code owners at the new path. This is why for files that are renamed Gerrit
+requires a code owner approval for the old and the new path of the files (also
+see [code owner approval](#codeOwnerApproval) section). Also this is the reason
+why [matching subfolders via path expressions is
+discouraged](backend-find-owners.html#doNotUsePathExpressionsForSubdirectories).
 
 ---
 

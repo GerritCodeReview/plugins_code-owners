@@ -224,6 +224,7 @@ owner of the `docs.config` file and all `*.md` files in this directory.
   per-file docs.config,*.md=richard.roe@example.com
 ```
 \
+##### <a id="doNotUsePathExpressionsForSubdirectories">
 **NOTE:** It is discouraged to use path expressions that explicitly name
 subdirectories such as `my-subdir/**` as they will break when the subdirectory
 gets renamed/moved. Instead prefer to define these code owners in
