@@ -58,6 +58,12 @@ If a code owner uploads a change/patch set, an approval of the owned files is
 always implicitly assumed. This means if a code owner only touches files that
 they own, no approval from other code owners is required.
 
+**NOTE:** Code owners need to be aware of their implicit approval when they
+upload new patch sets for other users (e.g. if a contributor pushes a change to
+a wrong branch and a code owner helps them to get it rebased onto the correct
+branch, the rebased change has implicit approvals from the code owner, since the
+code owner is the uploader).
+
 For files that are [renamed/moved](#renames) Gerrit requires a code owner
 approval for the old and the new path of the files.
 
