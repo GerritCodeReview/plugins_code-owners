@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "95860e0a_34adffbf",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-23T13:51:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7b622519_c64fdbaa",
+      "range": {
+        "startLine": 7,
+        "startChar": 67,
+        "endLine": 7,
+        "endChar": 72
+      },
+      "revId": "af453d94ff0cdcc84c44a9e1cdfc4beba113e776",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "23f9aaba_ac8da143",
         "filename": "resources/Documentation/user-guide.md",
         "patchSetId": 2
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9dbebe8c_eed23b2a",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-23T13:51:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "23f9aaba_ac8da143",
+      "range": {
+        "startLine": 35,
+        "startChar": 7,
+        "endLine": 35,
+        "endChar": 8
+      },
+      "revId": "af453d94ff0cdcc84c44a9e1cdfc4beba113e776",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d0eb6453_e198b1bd",
         "filename": "resources/Documentation/user-guide.md",
         "patchSetId": 2
@@ -68,6 +116,30 @@
       "revId": "af453d94ff0cdcc84c44a9e1cdfc4beba113e776",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c914ddc3_0032f7e5",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-23T13:51:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0eb6453_e198b1bd",
+      "range": {
+        "startLine": 100,
+        "startChar": 63,
+        "endLine": 100,
+        "endChar": 71
+      },
+      "revId": "af453d94ff0cdcc84c44a9e1cdfc4beba113e776",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
