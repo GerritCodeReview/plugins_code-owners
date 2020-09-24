@@ -102,17 +102,18 @@ Lists the accounts that are code owners of a file or folder in a branch.
 The code owners are computed from the owner configuration at the tip of the
 specified branch.
 
-Code owners that are
+Code owners that
 
-* inactive
-* not visible to the calling user (according to
+* are inactive
+* are not visible to the calling user (according to
 [accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
 setting)
 * are referenced by non-visible secondary emails
-* not resolvable (emails for which no Gerrit account exists)
-* ambiguous (the same email is assigned to multiple accounts)
-* referenced by an email with a disallowed domain (see
+* are not resolvable (emails for which no Gerrit account exists)
+* are ambiguous (the same email is assigned to multiple accounts)
+* are referenced by an email with a disallowed domain (see
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
+* do not have read access to the branch
 
 are omitted from the result.
 

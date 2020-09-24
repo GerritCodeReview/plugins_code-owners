@@ -15,10 +15,12 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -35,6 +37,7 @@ import com.google.gerrit.server.account.AccountLoader;
 import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.permissions.RefPermission;
 import com.google.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -50,6 +53,8 @@ import org.kohsuke.args4j.Option;
  * or a revision of a change.
  */
 public abstract class AbstractGetCodeOwnersForPath {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   @VisibleForTesting public static final int DEFAULT_LIMIT = 10;
 
   private final PermissionBackend permissionBackend;
@@ -117,7 +122,7 @@ public abstract class AbstractGetCodeOwnersForPath {
         codeOwnerConfig -> {
           ImmutableSet<CodeOwner> pathCodeOwners =
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
-          codeOwners.addAll(pathCodeOwners);
+          codeOwners.addAll(filterOutCodeOwnersThatCannotSeeTheBranch(rsrc, pathCodeOwners));
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
           pathCodeOwners.forEach(
               localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
@@ -134,6 +139,46 @@ public abstract class AbstractGetCodeOwnersForPath {
         codeOwnerJsonFactory
             .create(getFillOptions())
             .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+  }
+
+  /**
+   * Filters out code owners that cannot see the branch.
+   *
+   * <p>Code owners that cannot see the branch cannot approve paths in this branch. Hence returning
+   * them to the client is not useful.
+   */
+  private ImmutableSet<CodeOwner> filterOutCodeOwnersThatCannotSeeTheBranch(
+      AbstractPathResource rsrc, ImmutableSet<CodeOwner> codeOwners) {
+    ImmutableSet<CodeOwner> filteredCodeOwners =
+        codeOwners.stream()
+            .filter(codeOwner -> isVisibleTo(rsrc, codeOwner))
+            .collect(toImmutableSet());
+    if (!codeOwners.equals(filteredCodeOwners)) {
+      logger.atFine().log(
+          "filtered out code owners that cannot see the branch %s:"
+              + " all code owners = %s, filtered code owners = %s",
+          rsrc.getBranch().branch(), codeOwners, filteredCodeOwners);
+    }
+    return filteredCodeOwners;
+  }
+
+  /** Whether the given resource is visible to the given code owner. */
+  private boolean isVisibleTo(AbstractPathResource rsrc, CodeOwner codeOwner) {
+    // We always check for the visibility of the branch.
+    // This is also correct for the GetCodeOwnersForPathInChange subclass where branch is the
+    // destination branch of the change. For changes the intention of the visibility check is to
+    // check whether the code owner could be added as reviewer to the change. For this it is
+    // important whether the destination branch is visible to the code owner, rather than whether
+    // the change is visible to the code owner. E.g. private changes are not visible to other users
+    // unless they are added as a reviewer. This means, for private changes we want to suggest code
+    // owners that cannot see the change, since adding them as a reviewer is possible. By adding the
+    // code owner as a reviewer to the private change, the change becomes visible to them. This
+    // behavior is consistent with the suggest reviewer implementation (see
+    // SuggestChangeReviewers#getVisibility(ChangeControl).
+    return permissionBackend
+        .absentUser(codeOwner.accountId())
+        .ref(rsrc.getBranch())
+        .testOrFalse(RefPermission.READ);
   }
 
   private void parseHexOptions() throws BadRequestException {

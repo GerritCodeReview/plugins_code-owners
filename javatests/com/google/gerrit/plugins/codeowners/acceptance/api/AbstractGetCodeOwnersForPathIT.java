@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
@@ -25,7 +26,10 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.AccountGroup;
+import com.google.gerrit.entities.Permission;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
@@ -58,6 +62,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private AccountOperations accountOperations;
   @Inject private GroupOperations groupOperations;
+  @Inject private ProjectOperations projectOperations;
 
   private TestPathExpressions testPathExpressions;
 
@@ -398,6 +403,37 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     assertThat(queryCodeOwners("/foo/bar/baz.md"))
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user3.id());
+  }
+
+  @Test
+  public void codeOwnersThatCannotSeeTheBranchAreFilteredOut() throws Exception {
+    // Create a code owner config with 2 code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Check that both code owners are suggested.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
+
+    // Block read access for 'user'.
+    AccountGroup.UUID blockedGroupUuid = groupOperations.newGroup().addMember(user.id()).create();
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(block(Permission.READ).ref("refs/heads/master").group(blockedGroupUuid))
+        .update();
+
+    // Expect that 'user' is filtered out now.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
   }
 
   @Test

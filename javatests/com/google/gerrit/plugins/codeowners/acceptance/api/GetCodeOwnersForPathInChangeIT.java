@@ -22,7 +22,9 @@ import static java.util.stream.Collectors.toMap;
 
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.restapi.BadRequestException;
+import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
@@ -43,6 +45,7 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnersForPathInChangeRestIT}.
  */
 public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPathIT {
+  @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
 
   private String changeId;
@@ -144,5 +147,31 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 queryCodeOwners(
                     getCodeOwnersApi().query().forRevision(revision.name()), "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("specifying revision is not supported");
+  }
+
+  @Test
+  public void getCodeOwnersForPrivateChange() throws Exception {
+    // Define 'user' as code owner.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Make the change private.
+    gApi.changes().id(changeId).setPrivate(true, null);
+
+    // Check that 'user' cannot set the private change.
+    requestScopeOperations.setApiUser(user.id());
+    assertThrows(ResourceNotFoundException.class, () -> gApi.changes().id(changeId).get());
+
+    // Check that 'user' is anyway suggested as code owner for the file in the private change since
+    // by adding 'user' as reviewer the change would get visible to 'user'.
+    requestScopeOperations.setApiUser(admin.id());
+    List<CodeOwnerInfo> codeOwnerInfos =
+        codeOwnersApiFactory.change(changeId, "current").query().get(TEST_PATHS.get(0));
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(user.id());
   }
 }

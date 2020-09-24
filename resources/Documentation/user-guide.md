@@ -112,17 +112,18 @@ owners for the files in the change and lets you pick which of them should be
 added as reviewers (how this looks in the UI is shown in the
 [intro](how-to-use.html#addCodeOwnersAsReviewers) page).
 
-When suggesting code owners for a file, Gerrit filters out code owners that are
+When suggesting code owners for a file, Gerrit filters out code owners that:
 
-* inactive
-* not visible to you (according to
+* are inactive
+* are not visible to you (according to
 [accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
 setting),
 * are referenced by non-visible secondary emails
-* not resolvable (emails for which no Gerrit account exists)
-* ambiguous (the same email is assigned to multiple accounts)
-* referenced by an email with a disallowed domain (see
+* are not resolvable (emails for which no Gerrit account exists)
+* are ambiguous (the same email is assigned to multiple accounts)
+* are referenced by an email with a disallowed domain (see
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
+* do not have read access to the destination branch of the change
 
 The suggested code owners are sorted by score, so that the best suitable code
 owners appear first. The following criteria are taken into account for computing
