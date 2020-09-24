@@ -713,7 +713,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotGetFileExtensionForNullBranch() throws Exception {
+  public void cannotGetFileExtensionForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class, () -> codeOwnersPluginConfiguration.getFileExtension(null));
