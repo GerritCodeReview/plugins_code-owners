@@ -338,8 +338,7 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 
 | Field Name       |          | Description |
 | ---------------- | -------- | ----------- |
-| `file_extension` | optional | The file extension that is used for the code
-owner config files in this project. Not set if no file extension is used.
+| `file_extension` | optional | The file extension that is used for the code owner config files in this project. Not set if no file extension is used.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path
