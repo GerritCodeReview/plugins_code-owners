@@ -308,10 +308,9 @@ public class CodeOwnersPluginConfiguration {
       }
     } catch (InvalidPluginConfigurationException e) {
       logger.atWarning().withCause(e).log(
-          String.format(
-              "Ignoring invalid override approval configuration for project %s."
-                  + " Overrides are disabled.",
-              project.get()));
+          "Ignoring invalid override approval configuration for project %s."
+              + " Overrides are disabled.",
+          project.get());
     }
 
     return Optional.empty();
