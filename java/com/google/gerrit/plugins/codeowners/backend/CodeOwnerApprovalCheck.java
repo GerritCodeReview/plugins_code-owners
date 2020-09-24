@@ -36,6 +36,7 @@ import com.google.gerrit.server.logging.TraceContext;
 import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
+import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
@@ -104,7 +105,8 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the change notes
    * @return whether the given change has sufficient code owner approvals to be submittable
    */
-  public boolean isSubmittable(ChangeNotes changeNotes) throws IOException {
+  public boolean isSubmittable(ChangeNotes changeNotes)
+      throws IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     logger.atFine().log(
         "checking if change %d in project %s is submittable",
@@ -153,7 +155,8 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the notes of the change for which the current code owner statuses should be
    *     returned
    */
-  public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes) throws IOException {
+  public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes)
+      throws IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (TraceTimer traceTimer =
         TraceContext.newTimer(

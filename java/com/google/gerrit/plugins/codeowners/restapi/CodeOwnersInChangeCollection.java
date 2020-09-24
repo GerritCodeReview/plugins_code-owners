@@ -28,6 +28,7 @@ import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInChangeCollection.PathResource;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import com.google.inject.TypeLiteral;
@@ -67,7 +68,7 @@ public class CodeOwnersInChangeCollection
 
   @Override
   public PathResource parse(RevisionResource revisionResource, IdString id)
-      throws RestApiException, IOException {
+      throws RestApiException, IOException, PatchListNotAvailableException {
     // Check if the file exists in the revision only after creating the path resource. This way we
     // get a more specific error response for invalid paths ('400 Bad Request' instead of a '404 Not
     // Found').
@@ -99,7 +100,7 @@ public class CodeOwnersInChangeCollection
 
   private void checkThatFileExists(
       RevisionResource revisionResource, PathResource pathResource, IdString id)
-      throws RestApiException, IOException {
+      throws RestApiException, IOException, PatchListNotAvailableException {
     if (!changedFiles.compute(revisionResource).stream()
         .anyMatch(
             changedFile ->

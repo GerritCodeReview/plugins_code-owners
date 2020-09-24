@@ -14,14 +14,22 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.Patch;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.client.DiffPreferencesInfo.Whitespace;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.patch.PatchListCache;
+import com.google.gerrit.server.patch.PatchListKey;
+import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -48,10 +56,17 @@ public class ChangedFiles {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final GitRepositoryManager repoManager;
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final PatchListCache patchListCache;
 
   @Inject
-  public ChangedFiles(GitRepositoryManager repoManager) {
+  public ChangedFiles(
+      GitRepositoryManager repoManager,
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      PatchListCache patchListCache) {
     this.repoManager = repoManager;
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.patchListCache = patchListCache;
   }
 
   /**
@@ -62,8 +77,11 @@ public class ChangedFiles {
    * @param revisionResource the revision resource for which the changed files should be computed
    * @return the files that have been changed in the given revision
    * @throws IOException thrown if the computation fails due to an I/O error
+   * @throws PatchListNotAvailableException thrown if getting the patch list for a merge commit
+   *     against the auto merge failed
    */
-  public ImmutableSet<ChangedFile> compute(RevisionResource revisionResource) throws IOException {
+  public ImmutableSet<ChangedFile> compute(RevisionResource revisionResource)
+      throws IOException, PatchListNotAvailableException {
     requireNonNull(revisionResource, "revisionResource");
     return compute(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
   }
@@ -77,9 +95,11 @@ public class ChangedFiles {
    * @param revision the revision for which the changed files should be computed
    * @return the files that have been changed in the given revision
    * @throws IOException thrown if the computation fails due to an I/O error
+   * @throws PatchListNotAvailableException thrown if getting the patch list for a merge commit
+   *     against the auto merge failed
    */
   public ImmutableSet<ChangedFile> compute(Project.NameKey project, ObjectId revision)
-      throws IOException {
+      throws IOException, PatchListNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
     logger.atFine().log(
@@ -88,8 +108,16 @@ public class ChangedFiles {
     try (Repository repository = repoManager.openRepository(project);
         RevWalk revWalk = new RevWalk(repository)) {
       RevCommit revCommit = revWalk.parseCommit(revision);
+
+      if (revCommit.getParentCount() > 1
+          && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(
+              codeOwnersPluginConfiguration.getMergeCommitStrategy(project))) {
+        return computeByComparingAgainstAutoMerge(project, revCommit);
+      }
+
       RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
       logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
+
       try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
         diffFormatter.setReader(revWalk.getObjectReader(), repository.getConfig());
         diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
@@ -101,5 +129,32 @@ public class ChangedFiles {
         return changedFiles;
       }
     }
+  }
+
+  /**
+   * Computes the changed files by comparing the given merge commit against the auto merge.
+   *
+   * <p>Since computing the auto merge is expensive, we do not compute it and diff against it on our
+   * own, but rather ask the patch list cache for it.
+   *
+   * @param project the project that contains the merge commit
+   * @param mergeCommit the merge commit for which the changed files should be computed
+   * @return the changed files for the given merge commit
+   */
+  private ImmutableSet<ChangedFile> computeByComparingAgainstAutoMerge(
+      Project.NameKey project, RevCommit mergeCommit) throws PatchListNotAvailableException {
+    checkState(
+        mergeCommit.getParentCount() > 1, "expected %s to be a merge commit", mergeCommit.name());
+
+    // for merge commits the default base is the auto merge commit
+    PatchListKey patchListKey =
+        PatchListKey.againstDefaultBase(mergeCommit, Whitespace.IGNORE_NONE);
+
+    return patchListCache.get(patchListKey, project).getPatches().stream()
+        .filter(
+            patchListEntry ->
+                patchListEntry.getNewName() == null || !Patch.isMagic(patchListEntry.getNewName()))
+        .map(ChangedFile::create)
+        .collect(toImmutableSet());
   }
 }

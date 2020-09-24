@@ -24,6 +24,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
@@ -104,6 +105,17 @@ public class CodeOwnersPluginConfiguration {
   public boolean areCodeOwnerConfigsReadOnly(Project.NameKey project) {
     requireNonNull(project, "project");
     return generalConfig.getReadOnly(getPluginConfig(project));
+  }
+
+  /**
+   * Gets the merge commit strategy for the given project.
+   *
+   * @param project the project for which the merge commit strategy should be retrieved
+   * @return the merge commit strategy for the given project
+   */
+  public MergeCommitStrategy getMergeCommitStrategy(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getMergeCommitStrategy(project, getPluginConfig(project));
   }
 
   /**

@@ -18,7 +18,12 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.Patch;
 import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.server.patch.PatchListEntry;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -32,8 +37,16 @@ import org.eclipse.jgit.diff.DiffEntry.ChangeType;
  */
 @AutoValue
 public abstract class ChangedFile {
-  /** The diff entry. */
-  abstract DiffEntry diffEntry();
+  private static final ImmutableMap<Patch.ChangeType, ChangeType> CHANGE_TYPE =
+      Maps.immutableEnumMap(
+          new ImmutableMap.Builder<Patch.ChangeType, ChangeType>()
+              .put(Patch.ChangeType.ADDED, ChangeType.ADD)
+              .put(Patch.ChangeType.MODIFIED, ChangeType.MODIFY)
+              .put(Patch.ChangeType.DELETED, ChangeType.DELETE)
+              .put(Patch.ChangeType.RENAMED, ChangeType.RENAME)
+              .put(Patch.ChangeType.COPIED, ChangeType.COPY)
+              .put(Patch.ChangeType.REWRITE, ChangeType.MODIFY)
+              .build());
 
   /**
    * The new path of the file.
@@ -42,9 +55,19 @@ public abstract class ChangedFile {
    *
    * <p>If set, the new path is returned as absolute path.
    */
-  public Optional<Path> newPath() {
-    return convertPath(diffEntry().getNewPath());
-  }
+  public abstract Optional<Path> newPath();
+
+  /**
+   * The old path of the file.
+   *
+   * <p>Not set if the file was newly added
+   *
+   * <p>If set, the old path is returned as absolute path.
+   */
+  public abstract Optional<Path> oldPath();
+
+  /** Gets the change type. */
+  public abstract ChangeType changeType();
 
   /**
    * Whether the file has the given path as new path.
@@ -59,17 +82,6 @@ public abstract class ChangedFile {
   }
 
   /**
-   * The old path of the file.
-   *
-   * <p>Not set if the file was newly added
-   *
-   * <p>If set, the old path is returned as absolute path.
-   */
-  public Optional<Path> oldPath() {
-    return convertPath(diffEntry().getOldPath());
-  }
-
-  /**
    * Whether the file has the given path as old path.
    *
    * @param absolutePath an absolute path for which it should be checked if it matches the old path
@@ -81,19 +93,27 @@ public abstract class ChangedFile {
     return oldPath().isPresent() && oldPath().get().equals(absolutePath);
   }
 
-  /** Gets the change type. */
-  public ChangeType changeType() {
-    return diffEntry().getChangeType();
-  }
-
   /** Whether the file was renamed. */
   public boolean isRename() {
-    return diffEntry().getChangeType() == ChangeType.RENAME;
+    return changeType() == ChangeType.RENAME;
   }
 
   /** Whether the file was deleted. */
   public boolean isDeletion() {
-    return diffEntry().getChangeType() == ChangeType.DELETE;
+    return changeType() == ChangeType.DELETE;
+  }
+
+  /**
+   * Creates a {@link ChangedFile} instance from a {@link DiffEntry}.
+   *
+   * @param diffEntry the diff entry
+   */
+  public static ChangedFile create(DiffEntry diffEntry) {
+    requireNonNull(diffEntry, "diffEntry");
+    return new AutoValue_ChangedFile(
+        convertPathFromDiffEntryPath(diffEntry.getNewPath()),
+        convertPathFromDiffEntryPath(diffEntry.getOldPath()),
+        diffEntry.getChangeType());
   }
 
   /**
@@ -102,7 +122,7 @@ public abstract class ChangedFile {
    * <p>{@link DiffEntry} is using {@code /dev/null} if a path doesn't exist. If the given path is
    * {@code /dev/null} {@link Optional#empty} is returned.
    */
-  private static Optional<Path> convertPath(String path) {
+  private static Optional<Path> convertPathFromDiffEntryPath(String path) {
     if (DiffEntry.DEV_NULL.equals(path)) {
       return Optional.empty();
     }
@@ -110,12 +130,26 @@ public abstract class ChangedFile {
   }
 
   /**
-   * Creates a {@link ChangedFile} instance.
+   * Creates a {@link ChangedFile} instance from a {@link PatchListEntry}.
    *
-   * @param diffEntry the diff entry
+   * @param patchListEntry the patch list entry
    */
-  public static ChangedFile create(DiffEntry diffEntry) {
-    requireNonNull(diffEntry, "diffEntry");
-    return new AutoValue_ChangedFile(diffEntry);
+  public static ChangedFile create(PatchListEntry patchListEntry) {
+    requireNonNull(patchListEntry, "patchListEntry");
+
+    return new AutoValue_ChangedFile(
+        convertPathFromPatchListEntry(patchListEntry.getNewName()),
+        convertPathFromPatchListEntry(patchListEntry.getOldName()),
+        CHANGE_TYPE.get(patchListEntry.getChangeType()));
+  }
+
+  /**
+   * Converts the given string path to an absolute path.
+   *
+   * <p>{@link PatchListEntry} is using {@code null} if a path doesn't exist. If the given path is
+   * {@code null} {@link Optional#empty} is returned.
+   */
+  private static Optional<Path> convertPathFromPatchListEntry(@Nullable String path) {
+    return Optional.ofNullable(path).map(newName -> JgitPath.of(newName).getAsAbsolutePath());
   }
 }

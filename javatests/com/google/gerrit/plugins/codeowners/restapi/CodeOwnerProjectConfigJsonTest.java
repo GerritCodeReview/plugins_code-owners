@@ -24,6 +24,7 @@ import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
@@ -103,6 +104,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             true,
             ImmutableList.of(),
             "foo",
+            MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(
                 BranchNameKey.create(project, "master"),
@@ -114,6 +116,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isTrue();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
+    assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
     assertThat(codeOwnerProjectConfigInfo.backend.id)
         .isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch)
@@ -132,6 +136,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             true,
             ImmutableList.of(BranchNameKey.create(project, "master")),
             null,
+            MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
@@ -147,6 +152,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             false,
             ImmutableList.of(),
             null,
+            MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
@@ -163,6 +169,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             false,
             ImmutableList.of(BranchNameKey.create(project, "master")),
             null,
+            MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
@@ -184,6 +191,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
                     false,
                     null,
                     null,
+                    MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
                     CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
                     ImmutableMap.of(),
                     requiredApproval,
@@ -203,6 +211,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
                     false,
                     ImmutableList.of(),
                     null,
+                    MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
                     null,
                     ImmutableMap.of(),
                     requiredApproval,
@@ -222,6 +231,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
                     false,
                     ImmutableList.of(),
                     null,
+                    MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
                     CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
                     null,
                     requiredApproval,
@@ -239,6 +249,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
                     false,
                     ImmutableList.of(),
                     null,
+                    MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
                     CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
                     ImmutableMap.of(),
                     null,
@@ -253,6 +264,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             false,
             ImmutableList.of(),
             null,
+            MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
@@ -267,11 +279,32 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
             false,
             ImmutableList.of(),
             null,
+            MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION,
             CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
             ImmutableMap.of(),
             RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2),
             null);
     assertThat(codeOwnerProjectConfigInfo.general).isNotNull();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
+  }
+
+  @Test
+  public void cannotFormatCodeOwnerProjectConfigForNullMergeCommitStrategy() throws Exception {
+    RequiredApproval requiredApproval =
+        RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2);
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                CodeOwnerProjectConfigJson.format(
+                    false,
+                    ImmutableList.of(),
+                    null,
+                    null,
+                    CodeOwnerBackendId.FIND_OWNERS.getBackendId(),
+                    ImmutableMap.of(),
+                    requiredApproval,
+                    null));
+    assertThat(npe).hasMessageThat().isEqualTo("mergeCommitStrategy");
   }
 }

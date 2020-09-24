@@ -17,12 +17,19 @@ package com.google.gerrit.plugins.codeowners.config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_READ_ONLY;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
+import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.project.ProjectLevelConfig;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -109,5 +116,130 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, "false");
     assertThat(generalConfig.getReadOnly(cfg)).isFalse();
+  }
+
+  @Test
+  public void cannotGetMergeCommitStrategyForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> generalConfig.getMergeCommitStrategy(project, null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void cannotGetMergeCommitStrategyForNullProjectName() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getMergeCommitStrategy(null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void noMergeCommitStrategyConfigured() throws Exception {
+    assertThat(generalConfig.getMergeCommitStrategy(project, new Config()))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void mergeCommitStrategyIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getMergeCommitStrategy(project, new Config()))
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void mergeCommitStrategyInPluginConfigOverridesMergeCommitStrategyInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        null,
+        KEY_MERGE_COMMIT_STRATEGY,
+        MergeCommitStrategy.ALL_CHANGED_FILES.name());
+    assertThat(generalConfig.getMergeCommitStrategy(project, cfg))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void invalidMergeCommitStrategyInPluginConfigIsIgnored() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
+    assertThat(generalConfig.getMergeCommitStrategy(project, cfg))
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "INVALID")
+  public void invalidMergeCommitStrategyInGerritConfigIsIgnored() throws Exception {
+    assertThat(generalConfig.getMergeCommitStrategy(project, new Config()))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  public void cannotValidateProjectLevelConfigWithNullFileName() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.validateProjectLevelConfig(
+                    null, new ProjectLevelConfig.Bare("code-owners.config")));
+    assertThat(npe).hasMessageThat().isEqualTo("fileName");
+  }
+
+  @Test
+  public void cannotValidateProjectLevelConfigWithForNullProjectLevelConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.validateProjectLevelConfig("code-owners.config", null));
+    assertThat(npe).hasMessageThat().isEqualTo("projectLevelConfig");
+  }
+
+  @Test
+  public void validateEmptyProjectLevelConfig() throws Exception {
+    ImmutableList<CommitValidationMessage> commitValidationMessage =
+        generalConfig.validateProjectLevelConfig(
+            "code-owners.config", new ProjectLevelConfig.Bare("code-owners.config"));
+    assertThat(commitValidationMessage).isEmpty();
+  }
+
+  @Test
+  public void validateValidProjectLevelConfig() throws Exception {
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig()
+        .setString(
+            SECTION_CODE_OWNERS,
+            null,
+            KEY_MERGE_COMMIT_STRATEGY,
+            MergeCommitStrategy.ALL_CHANGED_FILES.name());
+    ImmutableList<CommitValidationMessage> commitValidationMessage =
+        generalConfig.validateProjectLevelConfig("code-owners.config", cfg);
+    assertThat(commitValidationMessage).isEmpty();
+  }
+
+  @Test
+  public void validateInvalidProjectLevelConfig_invalidMergeCommitStrategy() throws Exception {
+    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
+    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
+    ImmutableList<CommitValidationMessage> commitValidationMessages =
+        generalConfig.validateProjectLevelConfig("code-owners.config", cfg);
+    assertThat(commitValidationMessages).hasSize(1);
+    CommitValidationMessage commitValidationMessage =
+        Iterables.getOnlyElement(commitValidationMessages);
+    assertThat(commitValidationMessage.getType()).isEqualTo(ValidationMessage.Type.ERROR);
+    assertThat(commitValidationMessage.getMessage())
+        .isEqualTo(
+            "Merge commit strategy 'INVALID' that is configured in code-owners.config"
+                + " (parameter codeOwners.mergeCommitStrategy) is invalid.");
   }
 }

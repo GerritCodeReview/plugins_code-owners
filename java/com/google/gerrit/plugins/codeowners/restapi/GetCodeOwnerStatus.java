@@ -24,6 +24,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalCheck;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.server.change.ChangeResource;
+import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -60,7 +61,8 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
 
   @Override
   public Response<CodeOwnerStatusInfo> apply(ChangeResource changeResource)
-      throws RestApiException, IOException, PermissionBackendException {
+      throws RestApiException, IOException, PermissionBackendException,
+          PatchListNotAvailableException {
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
         codeOwnerApprovalCheck.getFileStatuses(changeResource.getNotes()).collect(toImmutableSet());
     return Response.ok(
