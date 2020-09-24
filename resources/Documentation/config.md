@@ -94,6 +94,52 @@ Parameters that are not set for a project are inherited from the parent project.
 :       Whether experimental REST endpoints are enabled.\
         By default `false`.
 
+<a id="pluginCodeOwnersMergeCommitStrategy">plugin.@PLUGIN@.mergeCommitStrategy</a>
+:       Strategy that defines for merge commits which files require code owner
+        approvals.\
+        \
+        Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION`.\
+        \
+        `ALL_CHANGED_FILES`:\
+        All files which differ between the merge commmit that is being reviewed
+        and its first parent commit (which is the HEAD of the destination
+        branch) require code owner approvals.\
+        Using this strategy is the safest option, but requires code owners to
+        also approve files which have been merged automatically.\
+        Using this strategy makes sense if the code owners differ between
+        branches and the code owners in one branch don't trust what the code
+        owners in other branches have approved, or if there are branches that do
+        not require code owner approvals at all.\
+        \
+        `FILES_WITH_CONFLICT_RESOLUTION`:\
+        Only files which differ between the merge commmit that is being reviewed
+        and the auto merge commit (the result of automatically merging the 2
+        parent commits, may contain Git conflict markers) require code owner
+        approvals.\
+        Using this strategy means that files that have been merged automatically
+        and for which no manual conflict resolution has been done do not require
+        code owner approval.\
+        Using this strategy is only recommended, if all branches require code
+        owner approvals and if the code owners in all branches are trusted. If
+        this is not the case, it is recommended to use the `ALL_CHANGED_FILES`
+        strategy instead.\
+        *Example*: If this strategy is used and there is a branch that doesn't
+        require code owner approvals (e.g. a user sandbox branch or an
+        experimental branch) the code owners check can be bypassed by:\
+        a) setting the branch that doesn't require code owner approvals to the
+        same commit as the main branch that does require code owner approvals\
+        b) making a change in the branch that doesn't require code owner
+        approvals\
+        c) merging this change back into the main branch that does require code
+        owner approvals\
+        d) since it's a clean merge, all files are merged automatically and no
+        code owner approval is required\
+        \
+        Can be overridden per project by setting
+        [codeOwners.mergeCommitStrategy](#codeOwnersMergeCommitStrategy) in
+        `@PLUGIN@.config`.\
+        By default `ALL_CHANGED_FILES`.
+
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
 <a id="codeOwnersDisabled">codeOwners.disabled</a>
@@ -203,6 +249,19 @@ Parameters that are not set for a project are inherited from the parent project.
         If not set, the global setting
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
         `gerrit.config` is used.
+
+<a id="codeOwnersMergeCommitStrategy">codeOwners.mergeCommitStrategy</a>
+:       Strategy that defines for merge commits which files require code owner
+        approvals.\
+        Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION`
+        (see [plugin.@PLUGIN@.mergeCommitStrategy](#pluginCodeOwnersMergeCommitStrategy)
+        for an explanation of these values).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.mergeCommitStrategy](#pluginCodeOwnersMergeCommitStrategy)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.mergeCommitStrategy](#pluginCodeOwnersMergeCommitStrategy)
+        in `gerrit.config` is used.
 
 ---
 

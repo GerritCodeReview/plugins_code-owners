@@ -81,6 +81,7 @@ public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> 
             codeOwnersPluginConfiguration
                 .getFileExtension(projectResource.getNameKey())
                 .orElse(null),
+            codeOwnersPluginConfiguration.getMergeCommitStrategy(projectResource.getNameKey()),
             backendId,
             backendIdsPerBranch,
             requiredApproval,

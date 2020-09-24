@@ -21,10 +21,12 @@ import static com.google.gerrit.acceptance.GitUtil.pushHead;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
@@ -303,6 +305,45 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
                     + " codeOwners.%s) is invalid: Invalid format, expected"
                     + " '<label-name>+<label-value>'.",
                 OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL));
+  }
+
+  @Test
+  public void configureMergeCommitStrategy() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setEnum(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
+        MergeCommitStrategy.ALL_CHANGED_FILES);
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  public void cannotSetInvalidMergeCommitStrategy() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
+        "INVALID");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            "Merge commit strategy 'INVALID' that is configured in code-owners.config"
+                + " (parameter codeOwners.mergeCommitStrategy) is invalid.");
   }
 
   private void fetchRefsMetaConfig() throws Exception {

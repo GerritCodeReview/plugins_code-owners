@@ -29,6 +29,7 @@ import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
@@ -50,6 +51,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
   private final ProjectCache projectCache;
   private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
+  private final GeneralConfig generalConfig;
   private final StatusConfig statusConfig;
   private final BackendConfig backendConfig;
   private final RequiredApprovalConfig requiredApprovalConfig;
@@ -61,6 +63,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       ProjectCache projectCache,
       GitRepositoryManager repoManager,
       ChangedFiles changedFiles,
+      GeneralConfig generalConfig,
       StatusConfig statusConfig,
       BackendConfig backendConfig,
       RequiredApprovalConfig requiredApprovalConfig,
@@ -69,6 +72,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
     this.projectCache = projectCache;
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
+    this.generalConfig = generalConfig;
     this.statusConfig = statusConfig;
     this.backendConfig = backendConfig;
     this.requiredApprovalConfig = requiredApprovalConfig;
@@ -93,7 +97,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       ProjectLevelConfig.Bare cfg = loadConfig(project, fileName, receiveEvent.commit);
       validateConfig(projectState, fileName, cfg);
       return ImmutableList.of();
-    } catch (IOException e) {
+    } catch (IOException | PatchListNotAvailableException e) {
       String errorMessage =
           String.format(
               "failed to validate file %s for revision %s in ref %s of project %s",
@@ -111,7 +115,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
    * @param fileName the name of the file
    */
   private boolean isFileChanged(Project.NameKey project, ObjectId revision, String fileName)
-      throws IOException {
+      throws IOException, PatchListNotAvailableException {
     return changedFiles.compute(project, revision).stream()
         .anyMatch(changedFile -> changedFile.hasNewPath(JgitPath.of(fileName).getAsAbsolutePath()));
   }
@@ -152,6 +156,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       throws CommitValidationException {
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
     validationMessages.addAll(backendConfig.validateProjectLevelConfig(fileName, cfg));
+    validationMessages.addAll(generalConfig.validateProjectLevelConfig(fileName, cfg));
     validationMessages.addAll(statusConfig.validateProjectLevelConfig(fileName, cfg));
     requiredApprovalConfig
         .validateProjectLevelConfig(projectState, fileName, cfg)

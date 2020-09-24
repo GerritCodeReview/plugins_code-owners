@@ -29,6 +29,7 @@ import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
@@ -83,6 +84,8 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
+    assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
@@ -102,6 +105,15 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
+  }
+
+  @Test
+  public void getConfigWithConfiguredMergeCommitStrategy() throws Exception {
+    configureMergeCommitStrategy(project, MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
   }
 
   @Test
@@ -201,6 +213,11 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
     setConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+  }
+
+  private void configureMergeCommitStrategy(
+      Project.NameKey project, MergeCommitStrategy mergeCommitStrategy) throws Exception {
+    setConfig(project, null, GeneralConfig.KEY_MERGE_COMMIT_STRATEGY, mergeCommitStrategy.name());
   }
 
   private void configureDisabledBranch(Project.NameKey project, String disabledBranch)

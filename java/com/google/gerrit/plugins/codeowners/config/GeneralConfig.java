@@ -20,13 +20,22 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
+import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
@@ -43,15 +52,60 @@ import org.eclipse.jgit.lib.Config;
  */
 @Singleton
 public class GeneralConfig {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   @VisibleForTesting public static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
   @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
   @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
+  @VisibleForTesting public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
 
+  private final String pluginName;
   private final PluginConfig pluginConfigFromGerritConfig;
 
   @Inject
   GeneralConfig(@PluginName String pluginName, PluginConfigFactory pluginConfigFactory) {
+    this.pluginName = pluginName;
     this.pluginConfigFromGerritConfig = pluginConfigFactory.getFromGerritConfig(pluginName);
+  }
+
+  /**
+   * Validates the backend configuration in the given project level configuration.
+   *
+   * @param fileName the name of the config file
+   * @param projectLevelConfig the project level plugin configuration
+   * @return list of validation messages for validation errors, empty list if there are no
+   *     validation errors
+   */
+  ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
+      String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
+    requireNonNull(fileName, "fileName");
+    requireNonNull(projectLevelConfig, "projectLevelConfig");
+
+    List<CommitValidationMessage> validationMessages = new ArrayList<>();
+
+    try {
+      projectLevelConfig
+          .getConfig()
+          .getEnum(
+              SECTION_CODE_OWNERS,
+              null,
+              KEY_MERGE_COMMIT_STRATEGY,
+              MergeCommitStrategy.ALL_CHANGED_FILES);
+    } catch (IllegalArgumentException e) {
+      validationMessages.add(
+          new CommitValidationMessage(
+              String.format(
+                  "Merge commit strategy '%s' that is configured in %s (parameter %s.%s) is invalid.",
+                  projectLevelConfig
+                      .getConfig()
+                      .getString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY),
+                  fileName,
+                  SECTION_CODE_OWNERS,
+                  KEY_MERGE_COMMIT_STRATEGY),
+              ValidationMessage.Type.ERROR));
+    }
+
+    return ImmutableList.copyOf(validationMessages);
   }
 
   /**
@@ -104,5 +158,52 @@ public class GeneralConfig {
     }
 
     return pluginConfigFromGerritConfig.getBoolean(KEY_READ_ONLY, false);
+  }
+
+  /**
+   * Gets the merge commit strategy from the given plugin config with fallback to {@code
+   * gerrit.config}.
+   *
+   * <p>The merge commit strategy defines for merge commits which files require code owner
+   * approvals.
+   *
+   * @param project the name of the project for which the merge commit strategy should be read
+   * @param pluginConfig the plugin config from which the merge commit strategy should be read
+   * @return the merge commit strategy that should be used
+   */
+  MergeCommitStrategy getMergeCommitStrategy(Project.NameKey project, Config pluginConfig) {
+    requireNonNull(project, "project");
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    String mergeCommitStrategyString =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY);
+    if (mergeCommitStrategyString != null) {
+      try {
+        return pluginConfig.getEnum(
+            SECTION_CODE_OWNERS,
+            null,
+            KEY_MERGE_COMMIT_STRATEGY,
+            MergeCommitStrategy.ALL_CHANGED_FILES);
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().log(
+            "Ignoring invalid value %s for merge commit stategy in '%s.config' of project %s."
+                + " Falling back to global config or default value.",
+            mergeCommitStrategyString, pluginName, project.get());
+      }
+    }
+
+    try {
+      return pluginConfigFromGerritConfig.getEnum(
+          KEY_MERGE_COMMIT_STRATEGY, MergeCommitStrategy.ALL_CHANGED_FILES);
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().log(
+          "Ignoring invalid value %s for merge commit stategy in gerrit.config (parameter plugin.%s.%s)."
+              + " Falling back to default value $s.",
+          pluginConfigFromGerritConfig.getString(KEY_MERGE_COMMIT_STRATEGY),
+          pluginName,
+          KEY_MERGE_COMMIT_STRATEGY,
+          MergeCommitStrategy.ALL_CHANGED_FILES);
+      return MergeCommitStrategy.ALL_CHANGED_FILES;
+    }
   }
 }

@@ -27,4 +27,7 @@ public class GeneralInfo {
    * <p>Unset if no file extension is used.
    */
   public String fileExtension;
+
+  /** Strategy that defines for merge commits which files require code owner approvals. */
+  public MergeCommitStrategy mergeCommitStrategy;
 }

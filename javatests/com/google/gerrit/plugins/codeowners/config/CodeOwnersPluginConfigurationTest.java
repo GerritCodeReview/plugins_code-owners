@@ -30,6 +30,7 @@ import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl
 import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
@@ -752,6 +753,59 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).value().isEqualTo("bar");
   }
 
+  @Test
+  public void cannotGetMergeCommitStrategyForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnersPluginConfiguration.getMergeCommitStrategy(null));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void getMergeCommitStrategyIfNoneIsConfigured() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void getMergeCommitStrategyIfNoneIsConfiguredOnProjectLevel() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void mergeCommitStrategyOnProjectLevelOverridesGlobalMergeCommitStrategy()
+      throws Exception {
+    configureMergeCommitStrategy(project, MergeCommitStrategy.ALL_CHANGED_FILES);
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void mergeCommitStrategyIsInheritedFromParentProject() throws Exception {
+    configureMergeCommitStrategy(allProjects, MergeCommitStrategy.ALL_CHANGED_FILES);
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  public void inheritedMergeCommitStrategyCanBeOverridden() throws Exception {
+    configureMergeCommitStrategy(allProjects, MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    configureMergeCommitStrategy(project, MergeCommitStrategy.ALL_CHANGED_FILES);
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
     setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, disabled);
   }
@@ -793,6 +847,12 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
     setCodeOwnersConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+  }
+
+  private void configureMergeCommitStrategy(
+      Project.NameKey project, MergeCommitStrategy mergeCommitStrategy) throws Exception {
+    setCodeOwnersConfig(
+        project, null, GeneralConfig.KEY_MERGE_COMMIT_STRATEGY, mergeCommitStrategy.name());
   }
 
   private AutoCloseable registerTestBackend() {

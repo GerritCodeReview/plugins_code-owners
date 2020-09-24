@@ -27,6 +27,7 @@ import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
 import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.rules.SubmitRule;
 import com.google.inject.Inject;
@@ -96,7 +97,8 @@ class CodeOwnerSubmitRule implements SubmitRule {
     }
   }
 
-  private SubmitRecord getSubmitRecord(ChangeNotes changeNotes) throws IOException {
+  private SubmitRecord getSubmitRecord(ChangeNotes changeNotes)
+      throws IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     return codeOwnerApprovalCheck.isSubmittable(changeNotes) ? ok() : notReady();
   }

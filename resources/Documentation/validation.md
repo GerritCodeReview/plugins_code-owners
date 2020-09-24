@@ -139,6 +139,8 @@ For the [code-owner.config](config.html#projectLevelConfigFile) in the
   range that covers the specified voting value, it's currently not possible to
   add the definition of this label in the same commit but it must be present
   before)
+* the [codeOwners.mergeCommitStrategy](config.html#codeOwnersMergeCommitStrategy)
+  configuration is valid
 
 ---
 
