@@ -198,7 +198,7 @@ public class GeneralConfig {
     } catch (IllegalArgumentException e) {
       logger.atWarning().log(
           "Ignoring invalid value %s for merge commit stategy in gerrit.config (parameter plugin.%s.%s)."
-              + " Falling back to default value $s.",
+              + " Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_MERGE_COMMIT_STRATEGY),
           pluginName,
           KEY_MERGE_COMMIT_STRATEGY,
