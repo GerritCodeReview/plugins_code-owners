@@ -15,16 +15,19 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.extensions.restapi.RestApiException;
+import java.util.List;
 
 /**
- * Project-level Java API of the code-owners plugin.
+ * Branch-level Java API of the code-owners plugin.
  *
- * <p>To create an instance for a project use {@link ProjectCodeOwnersFactory}.
+ * <p>To create an instance for a branch use {@link ProjectCodeOwners#branch(String)}.
  */
-public interface ProjectCodeOwners {
-  /** Returns the code owner project configuration. */
-  CodeOwnerProjectConfigInfo getConfig() throws RestApiException;
+public interface BranchCodeOwners {
+  /** Create a request to retrieve code owner config files from the branch. */
+  CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException;
 
-  /** Returns the branch-level code owners API for the given branch. */
-  BranchCodeOwners branch(String branchName) throws RestApiException;
+  abstract class CodeOwnerConfigFilesRequest {
+    /** Executes the request and retrieves the paths of the requested code owner config file */
+    public abstract List<String> paths() throws RestApiException;
+  }
 }
