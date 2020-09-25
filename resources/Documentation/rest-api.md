@@ -114,6 +114,7 @@ setting)
 * are referenced by an email with a disallowed domain (see
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
 * do not have read access to the branch
+* are service users (members of the `Service Users` group)
 
 are omitted from the result.
 

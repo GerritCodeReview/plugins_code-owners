@@ -124,6 +124,7 @@ setting),
 * are referenced by an email with a disallowed domain (see
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
 * do not have read access to the destination branch of the change
+* are service users (members of the `Service Users` group)
 
 The suggested code owners are sorted by score, so that the best suitable code
 owners appear first. The following criteria are taken into account for computing

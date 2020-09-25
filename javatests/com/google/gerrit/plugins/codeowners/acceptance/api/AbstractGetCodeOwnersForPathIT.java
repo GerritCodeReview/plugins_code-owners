@@ -406,6 +406,39 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   }
 
   @Test
+  public void codeOwnersThatAreServiceUsersAreFilteredOut() throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+
+    // Create a code owner config with 2 code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(serviceUser.email())
+        .create();
+
+    // Check that both code owners are suggested.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), serviceUser.id());
+
+    // Make 'serviceUser' a service user.
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+
+    // Expect that 'serviceUser' is filtered out now.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+  }
+
+  @Test
   public void codeOwnersThatCannotSeeTheBranchAreFilteredOut() throws Exception {
     // Create a code owner config with 2 code owners.
     codeOwnerConfigOperations
