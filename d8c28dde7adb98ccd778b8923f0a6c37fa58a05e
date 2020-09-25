@@ -52,6 +52,24 @@
       "revId": "d8c28dde7adb98ccd778b8923f0a6c37fa58a05e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "a63aa33e_fa7ec303",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-25T14:17:56Z",
+      "side": 1,
+      "message": "Ah, good to know! I wasn\u0027t sure about this!",
+      "parentUuid": "eab97329_67250851",
+      "revId": "d8c28dde7adb98ccd778b8923f0a6c37fa58a05e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
