@@ -34,6 +34,24 @@
       "revId": "d8c28dde7adb98ccd778b8923f0a6c37fa58a05e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eab97329_67250851",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-25T14:10:15Z",
+      "side": 1,
+      "message": "You\u0027re also quite lucky that specifically your host for dogfooding already has all the bots in that service users group :-)",
+      "parentUuid": "eb61ffac_374a4f27",
+      "revId": "d8c28dde7adb98ccd778b8923f0a6c37fa58a05e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
