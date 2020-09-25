@@ -16,6 +16,24 @@
       "revId": "d8c28dde7adb98ccd778b8923f0a6c37fa58a05e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "eb61ffac_374a4f27",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-25T14:07:40Z",
+      "side": 1,
+      "message": "It\u0027s great that there is an API to detect service users now so that such changes are simple :)",
+      "parentUuid": "eb5b3d4f_dde21fdb",
+      "revId": "d8c28dde7adb98ccd778b8923f0a6c37fa58a05e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
