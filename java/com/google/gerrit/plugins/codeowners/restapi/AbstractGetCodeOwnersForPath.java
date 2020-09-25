@@ -34,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
+import com.google.gerrit.server.account.ServiceUserClassifier;
 import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -60,6 +61,7 @@ public abstract class AbstractGetCodeOwnersForPath {
   private final PermissionBackend permissionBackend;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
+  private final ServiceUserClassifier serviceUserClassifier;
   private final CodeOwnerJson.Factory codeOwnerJsonFactory;
   private final EnumSet<ListAccountsOption> options;
   private final Set<String> hexOptions;
@@ -94,10 +96,12 @@ public abstract class AbstractGetCodeOwnersForPath {
       PermissionBackend permissionBackend,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
+      ServiceUserClassifier serviceUserClassifier,
       CodeOwnerJson.Factory codeOwnerJsonFactory) {
     this.permissionBackend = permissionBackend;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
+    this.serviceUserClassifier = serviceUserClassifier;
     this.codeOwnerJsonFactory = codeOwnerJsonFactory;
     this.options = EnumSet.noneOf(ListAccountsOption.class);
     this.hexOptions = new HashSet<>();
@@ -122,7 +126,7 @@ public abstract class AbstractGetCodeOwnersForPath {
         codeOwnerConfig -> {
           ImmutableSet<CodeOwner> pathCodeOwners =
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
-          codeOwners.addAll(filterOutCodeOwnersThatCannotSeeTheBranch(rsrc, pathCodeOwners));
+          codeOwners.addAll(filterCodeOwners(rsrc, pathCodeOwners));
           int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
           pathCodeOwners.forEach(
               localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
@@ -142,24 +146,40 @@ public abstract class AbstractGetCodeOwnersForPath {
   }
 
   /**
-   * Filters out code owners that cannot see the branch.
+   * Filters out code owners that should not be suggested.
    *
-   * <p>Code owners that cannot see the branch cannot approve paths in this branch. Hence returning
-   * them to the client is not useful.
+   * <p>The following code owners are filtered out:
+   *
+   * <ul>
+   *   <li>code owners that cannot see the branch: Code owners that cannot see the branch cannot
+   *       approve paths in this branch. Hence returning them to the client is not useful.
+   *   <li>code owners that are service users: Requesting a code owner approval from a service user
+   *       normally doesn't make sense since they will not react to review requests.
+   * </ul>
    */
-  private ImmutableSet<CodeOwner> filterOutCodeOwnersThatCannotSeeTheBranch(
+  private ImmutableSet<CodeOwner> filterCodeOwners(
       AbstractPathResource rsrc, ImmutableSet<CodeOwner> codeOwners) {
-    ImmutableSet<CodeOwner> filteredCodeOwners =
-        codeOwners.stream()
-            .filter(codeOwner -> isVisibleTo(rsrc, codeOwner))
-            .collect(toImmutableSet());
-    if (!codeOwners.equals(filteredCodeOwners)) {
-      logger.atFine().log(
-          "filtered out code owners that cannot see the branch %s:"
-              + " all code owners = %s, filtered code owners = %s",
-          rsrc.getBranch().branch(), codeOwners, filteredCodeOwners);
-    }
-    return filteredCodeOwners;
+    return codeOwners.stream()
+        .filter(
+            codeOwner -> {
+              if (isVisibleTo(rsrc, codeOwner)) {
+                return true;
+              }
+              logger.atFine().log(
+                  "Filtering out %s because this code owner cannot see the branch %s",
+                  codeOwner, rsrc.getBranch().branch());
+              return false;
+            })
+        .filter(
+            codeOwner -> {
+              if (!isServiceUser(codeOwner)) {
+                return true;
+              }
+              logger.atFine().log(
+                  "Filtering out %s because this code owner is a service user", codeOwner);
+              return false;
+            })
+        .collect(toImmutableSet());
   }
 
   /** Whether the given resource is visible to the given code owner. */
@@ -179,6 +199,11 @@ public abstract class AbstractGetCodeOwnersForPath {
         .absentUser(codeOwner.accountId())
         .ref(rsrc.getBranch())
         .testOrFalse(RefPermission.READ);
+  }
+
+  /** Whether the given code owner is a service user. */
+  private boolean isServiceUser(CodeOwner codeOwner) {
+    return serviceUserClassifier.isServiceUser(codeOwner.accountId());
   }
 
   private void parseHexOptions() throws BadRequestException {

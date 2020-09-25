@@ -20,6 +20,7 @@ import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.server.account.ServiceUserClassifier;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
@@ -41,8 +42,14 @@ public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
       PermissionBackend permissionBackend,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
+      ServiceUserClassifier serviceUserClassifier,
       CodeOwnerJson.Factory codeOwnerJsonFactory) {
-    super(permissionBackend, codeOwnerConfigHierarchy, codeOwnerResolver, codeOwnerJsonFactory);
+    super(
+        permissionBackend,
+        codeOwnerConfigHierarchy,
+        codeOwnerResolver,
+        serviceUserClassifier,
+        codeOwnerJsonFactory);
   }
 
   @Override
