@@ -25,5 +25,6 @@ public class ApiModule extends FactoryModule {
     factory(CodeOwnersInChangeImpl.Factory.class);
     factory(ChangeCodeOwnersImpl.Factory.class);
     factory(ProjectCodeOwnersImpl.Factory.class);
+    factory(BranchCodeOwnersImpl.Factory.class);
   }
 }

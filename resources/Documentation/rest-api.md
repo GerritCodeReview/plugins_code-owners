@@ -58,6 +58,42 @@ entity is returned that describes the code owner project configuration.
 
 ## <a id="branch-endpoints">Branch Endpoints
 
+### <a id="list-code-owner-config-files">List Code Owner Config Files
+_'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.config_files/'_
+
+Lists the code owner config files in a branch.
+
+This REST endpoint scans all code owner config files in the branch and it is
+expected that it can take a long time if the branch contains many files. This is
+why this REST endpoint must not be used in any critical paths where performance
+matters.
+
+#### Request
+
+```
+  GET /projects/foo%2Fbar/branches/master/code_owners.config_files HTTP/1.0
+```
+
+As response the paths of the code owner config files are returned as a list. The
+result also includes code owner config that use name prefixes
+('\<prefix\>_OWNERS') or name extensions ('OWNERS_\<extension\>').
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  [
+    "/OWNERS",
+    "/foo/OWNERS",
+    "/foo/bar/baz/OWNERS",
+    "/foo/bar/baz/OWNERS_BUILD"
+  ]
+```
+
 ### <a id="get-code-owner-config">[EXPERIMENTAL] Get Code Owner Config
 _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.config/[\{path\}](#path)'_
 

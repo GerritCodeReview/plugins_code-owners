@@ -37,20 +37,41 @@ import org.junit.Test;
  * extend {@link AbstractCodeOwnersIT}.
  */
 public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
+  private static final ImmutableList<RestCall> CHANGE_ENDPOINTS =
+      ImmutableList.of(RestCall.get("/changes/%s/code-owners~code_owners.status"));
+
+  private static final ImmutableList<RestCall> PROJECT_ENDPOINTS =
+      ImmutableList.of(RestCall.get("/projects/%s/code-owners~code_owners.project_config"));
+
+  private static final ImmutableList<RestCall> BRANCH_ENDPOINTS =
+      ImmutableList.of(
+          RestCall.get("/projects/%s/branches/%s/code-owners~code_owners.config_files"));
+
   private static final ImmutableList<RestCall> BRANCH_CODE_OWNER_CONFIGS_ENDPOINTS =
       ImmutableList.of(RestCall.get("/projects/%s/branches/%s/code-owners~code_owners.config/%s"));
 
   private static final ImmutableList<RestCall> BRANCH_CODE_OWNERS_ENDPOINTS =
       ImmutableList.of(RestCall.get("/projects/%s/branches/%s/code-owners~code_owners/%s"));
 
-  private static final ImmutableList<RestCall> CHANGE_CODE_OWNERS_ENDPOINTS =
-      ImmutableList.of(RestCall.get("/changes/%s/code-owners~code_owners.status"));
-
   private static final ImmutableList<RestCall> REVISION_CODE_OWNERS_ENDPOINTS =
       ImmutableList.of(RestCall.get("/changes/%s/revisions/%s/code-owners~code_owners/%s"));
 
-  private static final ImmutableList<RestCall> PROJECT_CODE_OWNERS_ENDPOINTS =
-      ImmutableList.of(RestCall.get("/projects/%s/code-owners~code_owners.project_config"));
+  @Test
+  public void changeEndpoints() throws Exception {
+    String changeId = createChange().getChangeId();
+    RestApiCallHelper.execute(adminRestSession, CHANGE_ENDPOINTS, urlEncode(changeId));
+  }
+
+  @Test
+  public void projectEndpoints() throws Exception {
+    RestApiCallHelper.execute(adminRestSession, PROJECT_ENDPOINTS, urlEncode(project.get()));
+  }
+
+  @Test
+  public void branchEndpoints() throws Exception {
+    RestApiCallHelper.execute(
+        adminRestSession, BRANCH_ENDPOINTS, urlEncode(project.get()), "master");
+  }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
@@ -74,12 +95,6 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void changeCodeOwnersEndpoints() throws Exception {
-    String changeId = createChange().getChangeId();
-    RestApiCallHelper.execute(adminRestSession, CHANGE_CODE_OWNERS_ENDPOINTS, urlEncode(changeId));
-  }
-
-  @Test
   public void revisionCodeOwnersEndpoints() throws Exception {
     String filePath = "foo/bar.baz";
     String changeId = createChange("Test Change", filePath, "file content").getChangeId();
@@ -89,12 +104,6 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
         urlEncode(changeId),
         urlEncode("current"),
         urlEncode(filePath));
-  }
-
-  @Test
-  public void projectCodeOwnersEndpoints() throws Exception {
-    RestApiCallHelper.execute(
-        adminRestSession, PROJECT_CODE_OWNERS_ENDPOINTS, urlEncode(project.get()));
   }
 
   private static String urlEncode(String decoded) {

@@ -16,9 +16,12 @@ package com.google.gerrit.plugins.codeowners.api;
 
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
+import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerProjectConfig;
+import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.project.ProjectResource;
+import com.google.gerrit.server.restapi.project.BranchesCollection;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -28,15 +31,32 @@ public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
     ProjectCodeOwnersImpl create(ProjectResource projectResource);
   }
 
+  private final BranchesCollection branchesCollection;
+  private final BranchCodeOwnersImpl.Factory branchCodeOwnersApi;
   private final GetCodeOwnerProjectConfig getCodeOwnerProjectConfig;
   private final ProjectResource projectResource;
 
   @Inject
   public ProjectCodeOwnersImpl(
+      BranchesCollection branchesCollection,
+      BranchCodeOwnersImpl.Factory branchCodeOwnersApi,
       GetCodeOwnerProjectConfig getCodeOwnerProjectConfig,
       @Assisted ProjectResource projectResource) {
+    this.branchesCollection = branchesCollection;
+    this.branchCodeOwnersApi = branchCodeOwnersApi;
     this.getCodeOwnerProjectConfig = getCodeOwnerProjectConfig;
     this.projectResource = projectResource;
+  }
+
+  @Override
+  public BranchCodeOwners branch(String branchName) throws RestApiException {
+    try {
+      BranchResource branchResource =
+          branchesCollection.parse(projectResource, IdString.fromDecoded(branchName));
+      return branchCodeOwnersApi.create(branchResource);
+    } catch (Exception e) {
+      throw asRestApiException("Cannot get branch code owners API", e);
+    }
   }
 
   @Override
