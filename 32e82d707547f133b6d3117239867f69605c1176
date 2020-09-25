@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9482e7fc_32c27da1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-25T14:00:07Z",
+      "side": 1,
+      "message": "I think private changes are completely disabled on all hosts except ours, fyi.\nGood to think long term, though.",
+      "range": {
+        "startLine": 13,
+        "startChar": 24,
+        "endLine": 14,
+        "endChar": 15
+      },
+      "revId": "32e82d707547f133b6d3117239867f69605c1176",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
