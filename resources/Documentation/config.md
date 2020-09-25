@@ -54,7 +54,7 @@ Parameters that are not set for a project are inherited from the parent project.
         Can be overridden per project by setting
         [codeOwners.readOnly](#codeOwnersReadOnly) in
         `@PLUGIN@.config`.\
-        By default unset `false`.
+        By default `false`.
 
 <a id="pluginCodeOwnersAllowedEmailDomain">plugin.@PLUGIN@.allowedEmailDomain</a>
 :       Email domain that allows to assign code ownerships to emails with this
