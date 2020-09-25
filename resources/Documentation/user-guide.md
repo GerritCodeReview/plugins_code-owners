@@ -156,6 +156,27 @@ see [code owner approval](#codeOwnerApproval) section). Also this is the reason
 why [matching subfolders via path expressions is
 discouraged](backend-find-owners.html#doNotUsePathExpressionsForSubdirectories).
 
+## <a id="mergeCommits">Merge commits
+
+By default, changes for merge commits require code owner approvals for all files
+that differ between the merge commit that is being reviewed and the tip of the
+destination branch (the first parent commit). This includes all files that have
+been touched in other branches and that are now being integrated into the
+destination branch (regardless of whether there was a conflict resolution or
+whether the auto-merge succeeded without conflicts). To see these files in the
+change screen, `Parent 1` needs to be selected as base for the comparison
+(instead of the `Auto Merge` that is selected as base by default).
+
+By [configuration](config.html#codeOwnersMergeCommitStrategy) it is possible,
+that changes for merge commits only require code owner approvals for files that
+differ between the merge commit that is being reviewed and the `Auto Merge`. In
+this case, code owners only need to approve the files for which a conflict
+resolution was done. These are the files that are shown in the change screen
+when `Auto Merge` is selected as base. Using this configuration makes sense if
+all branches require code owner approvals and the code owners of all branches
+are trusted, as it prevents that code owners need to approve the same changes
+multiple times, but for different branches.
+
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)
