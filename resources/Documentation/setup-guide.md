@@ -304,6 +304,13 @@ Example `gerrit.config` configuration with restricted email domains:
 Other optional configuration parameters are described in the [config
 documentation](config.html).
 
+Examples (not an exhaustive list):
+
+* [Merge commit strategy](config.html#codeOwnersMergeCommitStrategy) that
+  decides which files of merge commits require code owner approvals
+* [File extension](config.html#codeOwnersFileExtension) that should be used for
+  code owner config files.
+
 ### <a id="configureCodeOwners">9. Add an initial code owner configuration at root level
 
 By enabling the code owners functionality, a code owner approval from code
