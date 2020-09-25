@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c09a163d_ad5fba4e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/GeneralConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-25T09:44:29Z",
+      "side": 1,
+      "message": "Which enum value is used as default here, doesn\u0027t really matter. But it\u0027s better for readability to use the same value that we use as default in the other places too.",
+      "revId": "748b63a9fc602ad0fcb42113244be18ac3ac17bb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    }
+  ]
+}
