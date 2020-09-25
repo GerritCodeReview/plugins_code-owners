@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "c56cca48_f7a883f9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 118,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-25T09:44:29Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. I like it. Done.",
+      "parentUuid": "e4ec4d87_24ea8638",
+      "range": {
+        "startLine": 118,
+        "startChar": 6,
+        "endLine": 118,
+        "endChar": 15
+      },
+      "revId": "0b11664c4308fc1b4a4061308f3624c3e59cb680",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "d3f1b51b_b31402bd",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ChangedFileTest.java",
         "patchSetId": 1
@@ -48,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "54f89de0_d0357ad3",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ChangedFileTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-25T09:44:29Z",
+      "side": 1,
+      "message": "I know, but it was already missing before, so I guess it\u0027s okay if it\u0027s still missing.\nAdded this to my low prio todo list to come back to this later.",
+      "parentUuid": "d3f1b51b_b31402bd",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 28
+      },
+      "revId": "0b11664c4308fc1b4a4061308f3624c3e59cb680",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e87f0a7a_87cf16a5",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ChangedFileTest.java",
         "patchSetId": 1
@@ -68,6 +116,30 @@
       "revId": "0b11664c4308fc1b4a4061308f3624c3e59cb680",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "061d9fd7_2325123c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ChangedFileTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-25T09:44:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e87f0a7a_87cf16a5",
+      "range": {
+        "startLine": 66,
+        "startChar": 58,
+        "endLine": 66,
+        "endChar": 63
+      },
+      "revId": "0b11664c4308fc1b4a4061308f3624c3e59cb680",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
