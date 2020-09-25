@@ -39,6 +39,9 @@ are rejected.
 **NOTE:** There is no dedicated editor for code owner config files in the Gerrit
 UI.
 
+**NOTE:** It is the responsibility of the project owners to maintain the code
+owner config files (e.g. take care to remove code owners that leave the team).
+
 ## <a id="codeOwnerApproval">Code owner approval
 
 For a change to be submittable Gerrit requires that all files that are touched
