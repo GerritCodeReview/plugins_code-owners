@@ -386,8 +386,14 @@ enabled for all branches of the project):
 ```
   )]}'
   {
-    "general": {},
-    "status": {},
+    "general": {
+      "merge_commit_strategy": "ALL_CHANGED_FILES",
+    },
+    "status": {
+      "disabled_branches": [
+        "refs/meta/config"
+      ]
+    },
     "backend": {
       "id": "find-owners"
     },

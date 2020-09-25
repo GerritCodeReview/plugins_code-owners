@@ -31,6 +31,14 @@ entity is returned that describes the code owner project configuration.
 
   )]}'
   {
+    "general": {
+      "merge_commit_strategy": "ALL_CHANGED_FILES"
+    },
+    "status": {
+      "disabled_branches": [
+        "refs/meta/config"
+      ]
+    },
     "backend": {
       "id": "find-owners",
       "ids_by_branch": {
