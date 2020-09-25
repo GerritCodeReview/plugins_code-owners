@@ -19,7 +19,8 @@ The following configuration steps are recommended:
 6. [Configure code owner overrides](#configureCodeOwnerOverrides)
 7. [Configure allowed email domains](#configureAllowedEmailDomains)
 8. [Optional Configuration](#optionalConfiguration)
-9. [Add an initial code owner configuration at root level](#configureCodeOwners)
+9. [Stop using the find-owners Prolog submit rule](#stopUsingFindOwners)
+10. [Add an initial code owner configuration at root level](#configureCodeOwners)
 
 FAQ's:
 
@@ -311,7 +312,18 @@ Examples (not an exhaustive list):
 * [File extension](config.html#codeOwnersFileExtension) that should be used for
   code owner config files.
 
-### <a id="configureCodeOwners">9. Add an initial code owner configuration at root level
+### <a id="stopUsingFindOwners">9.Stop using the find-owners Prolog submit rule
+
+This section can be skipped if you haven't used the `find-owners` plugin so far.
+
+The `find-owners` plugin comes with a Prolog submit rules that prevents the
+submission of changes that have insufficient code owner approvals. With the
+`code-owners` plugin this is now being checked by a submit rule that is
+implemented in Java. Hence the Prolog submit rule from the `find-owners` plugin
+is no longer needed and you should stop using it before you start using the
+`code-owners` plugin.
+
+### <a id="configureCodeOwners">10. Add an initial code owner configuration at root level
 
 By enabling the code owners functionality, a code owner approval from code
 owners will be required for submitting changes.
