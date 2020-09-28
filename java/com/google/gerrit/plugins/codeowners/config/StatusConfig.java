@@ -161,13 +161,9 @@ public class StatusConfig {
       // if the configuration is invalid we assume that the code owners functionality is not
       // disabled, this is safe as it's the more restrictive choice
       logger.atWarning().withCause(e).log(
-          "Disabled value '%s' that is configured for project %s in %s.config (parameter"
-              + " %s.%s) is invalid.",
-          pluginConfigFromGerritConfig.getString(KEY_DISABLED),
-          project,
-          pluginName,
-          SECTION_CODE_OWNERS,
-          KEY_DISABLED);
+          "Disabled value '%s' that is configured in gerrit.config (parameter plugin.%s.%s)"
+              + " is invalid.",
+          pluginConfigFromGerritConfig.getString(KEY_DISABLED), pluginName, KEY_DISABLED);
       return false;
     }
   }
