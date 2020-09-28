@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "2c996a36_b4f98bfa",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1113292
+      },
+      "writtenOn": "2020-09-28T14:55:36Z",
+      "side": 1,
+      "message": "Is there a way to continue this conversation in a mail list or move to a bug tracker?\n\n\u003e It has to be secure with any permission configuration, we cannot assume that the add patch set permission is blocked.\n\nTrue. I really don\u0027t like the fact that the add patch set permission is default to Registered Users, which creates all these problems at first place.\n\nAssuming that permission is default, do you think using change owner a better choice over patchset uploader?",
+      "parentUuid": "3b474849_23673228",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 22
+      },
+      "revId": "6704234ff4ce41f1c7ed8dda7545f98e0eece588",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ae8ebfa0_4246be01",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 11
