@@ -86,6 +86,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+    assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isNull();
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
@@ -203,6 +204,14 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getConfigWithConfiguredOverrideApproval() throws Exception {
+    configureImplicitApprovals(project);
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isTrue();
+  }
+
+  @Test
+  public void getConfigWithEnabledImplicitApprovals() throws Exception {
     configureOverrideApproval(project, "Code-Review+2");
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
@@ -242,6 +251,10 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   private void configureOverrideApproval(Project.NameKey project, String overrideApproval)
       throws Exception {
     setConfig(project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, overrideApproval);
+  }
+
+  private void configureImplicitApprovals(Project.NameKey project) throws Exception {
+    setConfig(project, null, GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS, "true");
   }
 
   private void setConfig(Project.NameKey project, String subsection, String key, String value)

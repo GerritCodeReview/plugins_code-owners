@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_READ_ONLY;
@@ -241,5 +242,36 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         .isEqualTo(
             "Merge commit strategy 'INVALID' that is configured in code-owners.config"
                 + " (parameter codeOwners.mergeCommitStrategy) is invalid.");
+  }
+
+  @Test
+  public void cannotGetEnableImplicitApprovalsForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> generalConfig.getEnableImplicitApprovals(null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noEnableImplicitApprovalsConfiguration() throws Exception {
+    assertThat(generalConfig.getEnableImplicitApprovals(new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void
+      enableImplicitApprovalsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.getEnableImplicitApprovals(new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void
+      enableImplicitApprovalsConfigurationInPluginConfigOverridesEnableImplicitApprovalsConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS, "false");
+    assertThat(generalConfig.getEnableImplicitApprovals(cfg)).isFalse();
   }
 }

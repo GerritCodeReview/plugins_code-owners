@@ -180,8 +180,12 @@ public class CodeOwnerApprovalCheck {
       ObjectId revision = getDestBranchRevision(changeNotes.getChange());
       logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
+      boolean enableImplicitApprovalFromUploader =
+          codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName());
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
-      logger.atFine().log("patchSetUploader = %d", patchSetUploader.get());
+      logger.atFine().log(
+          "patchSetUploader = %d, implicit approval from uploader is %s",
+          patchSetUploader.get(), enableImplicitApprovalFromUploader ? "enabled" : "disabled");
 
       // If the branch doesn't contain any code owner config file yet, we apply special logic
       // (project
@@ -203,6 +207,7 @@ public class CodeOwnerApprovalCheck {
                   getFileStatus(
                       branch,
                       revision,
+                      enableImplicitApprovalFromUploader,
                       patchSetUploader,
                       reviewerAccountIds,
                       approverAccountIds,
@@ -215,6 +220,7 @@ public class CodeOwnerApprovalCheck {
   private FileCodeOwnerStatus getFileStatus(
       BranchNameKey branch,
       ObjectId revision,
+      boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
@@ -232,6 +238,7 @@ public class CodeOwnerApprovalCheck {
                     getPathCodeOwnerStatus(
                         branch,
                         revision,
+                        enableImplicitApprovalFromUploader,
                         patchSetUploader,
                         reviewerAccountIds,
                         approverAccountIds,
@@ -251,6 +258,7 @@ public class CodeOwnerApprovalCheck {
               getPathCodeOwnerStatus(
                   branch,
                   revision,
+                  enableImplicitApprovalFromUploader,
                   patchSetUploader,
                   reviewerAccountIds,
                   approverAccountIds,
@@ -268,6 +276,7 @@ public class CodeOwnerApprovalCheck {
   private PathCodeOwnerStatus getPathCodeOwnerStatus(
       BranchNameKey branch,
       ObjectId revision,
+      boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
@@ -285,9 +294,15 @@ public class CodeOwnerApprovalCheck {
 
     return isBootstrapping
         ? getPathCodeOwnerStatusBootstrappingMode(
-            branch, patchSetUploader, reviewerAccountIds, approverAccountIds, absolutePath)
+            branch,
+            enableImplicitApprovalFromUploader,
+            patchSetUploader,
+            reviewerAccountIds,
+            approverAccountIds,
+            absolutePath)
         : getPathCodeOwnerStatusRegularMode(
             branch,
+            enableImplicitApprovalFromUploader,
             patchSetUploader,
             revision,
             reviewerAccountIds,
@@ -304,6 +319,7 @@ public class CodeOwnerApprovalCheck {
    */
   private PathCodeOwnerStatus getPathCodeOwnerStatusBootstrappingMode(
       BranchNameKey branch,
+      boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
@@ -313,7 +329,7 @@ public class CodeOwnerApprovalCheck {
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
 
-    if (isProjectOwner(branch.project(), patchSetUploader)) {
+    if (enableImplicitApprovalFromUploader && isProjectOwner(branch.project(), patchSetUploader)) {
       // The uploader of the patch set is a project owner and thus a code owner. This means there
       // is an implicit code owner approval from the patch set uploader so that the path is
       // automatically approved.
@@ -349,6 +365,7 @@ public class CodeOwnerApprovalCheck {
    */
   private PathCodeOwnerStatus getPathCodeOwnerStatusRegularMode(
       BranchNameKey branch,
+      boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ObjectId revision,
       ImmutableSet<Account.Id> reviewerAccountIds,
@@ -372,7 +389,8 @@ public class CodeOwnerApprovalCheck {
               codeOwnerConfig.key().folderPath(),
               codeOwnerConfig.key().fileName().orElse("<default>"));
 
-          if (codeOwnerAccountIds.contains(patchSetUploader)) {
+          if (enableImplicitApprovalFromUploader
+              && codeOwnerAccountIds.contains(patchSetUploader)) {
             // If the uploader of the patch set owns the path, there is an implicit code owner
             // approval from the patch set uploader so that the path is automatically approved.
             logger.atFine().log(

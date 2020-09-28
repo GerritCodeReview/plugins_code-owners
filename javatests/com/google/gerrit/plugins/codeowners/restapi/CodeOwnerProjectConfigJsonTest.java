@@ -146,6 +146,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     when(codeOwnersPluginConfiguration.getFileExtension(project)).thenReturn(Optional.of("foo"));
     when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
         .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
     when(codeOwnersPluginConfiguration.getRequiredApproval(project))
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
     when(codeOwnersPluginConfiguration.getOverrideApproval(project))
@@ -161,6 +162,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isTrue();
     assertThat(codeOwnerProjectConfigInfo.backend.id)
         .isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch)

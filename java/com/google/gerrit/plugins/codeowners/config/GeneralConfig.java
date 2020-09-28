@@ -59,6 +59,9 @@ public class GeneralConfig {
   @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
   @VisibleForTesting public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
 
+  @VisibleForTesting
+  public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
+
   private final String pluginName;
   private final PluginConfig pluginConfigFromGerritConfig;
 
@@ -205,5 +208,22 @@ public class GeneralConfig {
           MergeCommitStrategy.ALL_CHANGED_FILES);
       return MergeCommitStrategy.ALL_CHANGED_FILES;
     }
+  }
+
+  /**
+   * Gets whether an implicit code owner approval from the last uploader is assumed from the given
+   * plugin config with fallback to {@code gerrit.config}.
+   *
+   * @param pluginConfig the plugin config from which the configuration should be read.
+   * @return whether an implicit code owner approval from the last uploader is assumed
+   */
+  boolean getEnableImplicitApprovals(Config pluginConfig) {
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    return pluginConfig.getBoolean(
+        SECTION_CODE_OWNERS,
+        null,
+        KEY_ENABLE_IMPLICIT_APPROVALS,
+        pluginConfigFromGerritConfig.getBoolean(KEY_ENABLE_IMPLICIT_APPROVALS, false));
   }
 }

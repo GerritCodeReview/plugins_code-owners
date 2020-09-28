@@ -307,6 +307,8 @@ documentation](config.html).
 
 Examples (not an exhaustive list):
 
+* Whether [an implicit code owner approval from the last uploader is
+  assumed](config.html#codeOwnersEnableImplicitApprovals)
 * [Merge commit strategy](config.html#codeOwnersMergeCommitStrategy) that
   decides which files of merge commits require code owner approvals
 * [File extension](config.html#codeOwnersFileExtension) that should be used for

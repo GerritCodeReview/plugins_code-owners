@@ -586,7 +586,18 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getStatusForFileAddition_implicitlyApprovedByPatchSetUploader() throws Exception {
+  public void getStatusForFileAddition_noImplicitApprovalByPatchSetUploader() throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnGetStatusForFileAddition(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void getStatusForFileAddition_withImplicitApprovalByPatchSetUploader() throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnGetStatusForFileAddition(true);
+  }
+
+  private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileAddition(
+      boolean implicitApprovalsEnabled) throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -609,14 +620,29 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .hasNewPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
 
   @Test
-  public void getStatusForFileModification_implicitlyApprovedByPatchSetUploader() throws Exception {
+  public void getStatusForFileModification_noImplicitApprovalByPatchSetUploader() throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnGetStatusForFileModification(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void getStatusForFileModification_withImplicitApprovalByPatchSetUploader()
+      throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnGetStatusForFileModification(true);
+  }
+
+  private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileModification(
+      boolean implicitApprovalsEnabled) throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -641,14 +667,28 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .hasNewPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
 
   @Test
-  public void getStatusForFileDeletion_implicitlyApprovedByPatchSetUploader() throws Exception {
+  public void getStatusForFileDeletion_noImplicitApprovalByPatchSetUploader() throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnGetStatusForFileDeletion(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void getStatusForFileDeletion_withImplicitApprovalByPatchSetUploader() throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnGetStatusForFileDeletion(true);
+  }
+
+  private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileDeletion(
+      boolean implicitApprovalsEnabled) throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -671,14 +711,29 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .hasOldPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isDeletion();
   }
 
   @Test
-  public void getStatusForFileRename_implicitlyApprovedOldPathByPatchSetUploader()
+  public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnOldPath()
       throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnOldPath()
+      throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(true);
+  }
+
+  private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
+      boolean implicitApprovalsEnabled) throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -707,14 +762,29 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .hasOldPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasChangedFile().isRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
 
   @Test
-  public void getStatusForFileRename_implicitlyApprovedNewPathByPatchSetUploader()
+  public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnNewPath()
       throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnNewPath()
+      throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(true);
+  }
+
+  private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
+      boolean implicitApprovalsEnabled) throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -737,7 +807,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .hasNewPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(oldPath);
     fileCodeOwnerStatusSubject
         .hasOldPathStatus()
@@ -749,6 +822,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void getStatusForFileAddition_noImplicitlyApprovalByChangeOwner() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -779,6 +853,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void getStatusForFileAddition_noImplicitlyApprovalByPreviousPatchSetUploader()
       throws Exception {
     TestAccount user2 = accountCreator.user2();
@@ -1104,7 +1179,18 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void bootstrappingGetStatus_implicitlyApprovedByPatchSetUploader() throws Exception {
+  public void bootstrappingGetStatus_noImplicitApprovalByPatchSetUploader() throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void bootstrappingGetStatus_withImplicitApprovalByPatchSetUploader() throws Exception {
+    testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(true);
+  }
+
+  private void testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(
+      boolean implicitApprovalsEnabled) throws Exception {
     // since no code owner config exists we are entering the bootstrapping code path in
     // CodeOwnerApprovalCheck
 
@@ -1126,13 +1212,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .hasNewPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void bootstrappingGetStatus_noImplicitlyApprovalByChangeOwner() throws Exception {
     // since no code owner config exists we are entering the bootstrapping code path in
     // CodeOwnerApprovalCheck
