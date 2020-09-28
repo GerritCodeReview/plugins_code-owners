@@ -61,6 +61,21 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default unset (no file extension is used).
 
+<a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplictApprovals</a>
+:       Whether an implicit code owner approval from the last uploader is
+        assumed.\
+        If enabled, code owners need to be aware of their implicit approval when
+        they upload new patch sets for other users (e.g. if a contributor pushes
+        a change to a wrong branch and a code owner helps them to get it rebased
+        onto the correct branch, the rebased change has implicit approvals from
+        the code owner, since the code owner is the uploader).\
+        If implicit code owner approvals are disabled, code owners can still
+        self-approve their own changes by voting on the change.\
+        Can be overridden per project by setting
+        [codeOwners.enableImplictApprovals](#codeOwnersEnableImplicitApprovals)
+        in `@PLUGIN@.config`.\
+        By default `false`.
+
 <a id="pluginCodeOwnersReadOnly">plugin.@PLUGIN@.readOnly</a>
 :       Whether code owner config files are read-only.\
         Can be overridden per project by setting
@@ -223,6 +238,23 @@ Parameters that are not set for a project are inherited from the parent project.
         If not set, the global setting
         [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
         `gerrit.config` is used.
+
+<a id="codeOwnersEnableImplicitApprovals">codeOwners.enableImplicitApprovals</a>
+:       Whether an implicit code owner approval from the last uploader is
+        assumed.\
+        If enabled, code owners need to be aware of their implicit approval when
+        they upload new patch sets for other users (e.g. if a contributor pushes
+        a change to a wrong branch and a code owner helps them to get it rebased
+        onto the correct branch, the rebased change has implicit approvals from
+        the code owner, since the code owner is the uploader).\
+        If implicit code owner approvals are disabled, code owners can still
+        self-approve their own changes by voting on the change.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersenableImplicitApprovals)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersenableImplicitApprovals)
+        in `gerrit.config` is used.
 
 <a id="codeOwnersReadOnly">codeOwners.readOnly</a>
 :       Whether code owner config files are read-only.\

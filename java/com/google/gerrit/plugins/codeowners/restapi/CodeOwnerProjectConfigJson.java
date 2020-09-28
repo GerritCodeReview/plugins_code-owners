@@ -74,6 +74,8 @@ public class CodeOwnerProjectConfigJson {
         codeOwnersPluginConfiguration.getFileExtension(projectName).orElse(null);
     generalInfo.mergeCommitStrategy =
         codeOwnersPluginConfiguration.getMergeCommitStrategy(projectName);
+    generalInfo.implicitApprovals =
+        codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(projectName) ? true : null;
     return generalInfo;
   }
 

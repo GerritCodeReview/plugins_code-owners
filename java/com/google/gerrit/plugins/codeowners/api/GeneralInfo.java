@@ -30,4 +30,11 @@ public class GeneralInfo {
 
   /** Strategy that defines for merge commits which files require code owner approvals. */
   public MergeCommitStrategy mergeCommitStrategy;
+
+  /**
+   * Whether an implicit code owner approval from the last uploader is assumed.
+   *
+   * <p>Not set, if {@code false}.
+   */
+  public Boolean implicitApprovals;
 }
