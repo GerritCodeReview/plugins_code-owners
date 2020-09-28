@@ -14,29 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.ImmutableMap.toImmutableMap;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.project.ProjectResource;
-import com.google.gerrit.server.restapi.project.ListBranches;
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 /**
  * REST endpoint that gets the code owner project configuration.
@@ -46,15 +32,11 @@ import java.util.stream.Stream;
  */
 @Singleton
 public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> {
-  private final Provider<ListBranches> listBranches;
-  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final CodeOwnerProjectConfigJson codeOwnerProjectConfigJson;
 
   @Inject
-  public GetCodeOwnerProjectConfig(
-      Provider<ListBranches> listBranches,
-      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
-    this.listBranches = listBranches;
-    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+  public GetCodeOwnerProjectConfig(CodeOwnerProjectConfigJson codeOwnerProjectConfigJson) {
+    this.codeOwnerProjectConfigJson = codeOwnerProjectConfigJson;
   }
 
   @Override
@@ -62,56 +44,6 @@ public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> 
       throws RestApiException, PermissionBackendException, IOException {
     projectResource.getProjectState().checkStatePermitsRead();
 
-    boolean isDisabled = codeOwnersPluginConfiguration.isDisabled(projectResource.getNameKey());
-    ImmutableList<BranchNameKey> disabledBranches = getDisabledBranches(projectResource);
-
-    String backendId =
-        CodeOwnerBackendId.getBackendId(
-            codeOwnersPluginConfiguration.getBackend(projectResource.getNameKey()).getClass());
-    ImmutableMap<BranchNameKey, String> backendIdsPerBranch =
-        getBackendIdsPerBranch(projectResource);
-
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(projectResource.getNameKey());
-    Optional<RequiredApproval> overrideApproval =
-        codeOwnersPluginConfiguration.getOverrideApproval(projectResource.getNameKey());
-    return Response.ok(
-        CodeOwnerProjectConfigJson.format(
-            isDisabled,
-            disabledBranches,
-            codeOwnersPluginConfiguration
-                .getFileExtension(projectResource.getNameKey())
-                .orElse(null),
-            codeOwnersPluginConfiguration.getMergeCommitStrategy(projectResource.getNameKey()),
-            backendId,
-            backendIdsPerBranch,
-            requiredApproval,
-            overrideApproval.orElse(null)));
-  }
-
-  private ImmutableList<BranchNameKey> getDisabledBranches(ProjectResource projectResource)
-      throws RestApiException, PermissionBackendException, IOException {
-    return branches(projectResource)
-        .filter(codeOwnersPluginConfiguration::isDisabled)
-        .collect(toImmutableList());
-  }
-
-  private ImmutableMap<BranchNameKey, String> getBackendIdsPerBranch(
-      ProjectResource projectResource)
-      throws RestApiException, PermissionBackendException, IOException {
-    return branches(projectResource)
-        .collect(
-            toImmutableMap(
-                Function.identity(),
-                branchNameKey ->
-                    CodeOwnerBackendId.getBackendId(
-                        codeOwnersPluginConfiguration.getBackend(branchNameKey).getClass())));
-  }
-
-  private Stream<BranchNameKey> branches(ProjectResource projectResource)
-      throws RestApiException, IOException, PermissionBackendException {
-    return listBranches.get().apply(projectResource).value().stream()
-        .filter(branchInfo -> !"HEAD".equals(branchInfo.ref))
-        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref));
+    return Response.ok(codeOwnerProjectConfigJson.format(projectResource));
   }
 }
