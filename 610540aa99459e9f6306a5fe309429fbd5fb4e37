@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "4a1e58ed_27a14448",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerProjectConfigJsonTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-28T12:24:20Z",
+      "side": 1,
+      "message": "plural? Either way this comment is a little unclear.",
+      "range": {
+        "startLine": 108,
+        "startChar": 82,
+        "endLine": 109,
+        "endChar": 52
+      },
+      "revId": "610540aa99459e9f6306a5fe309429fbd5fb4e37",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
