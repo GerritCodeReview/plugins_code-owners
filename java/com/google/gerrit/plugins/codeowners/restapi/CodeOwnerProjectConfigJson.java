@@ -23,81 +23,108 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.GeneralInfo;
-import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
+import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.project.ProjectResource;
+import com.google.gerrit.server.restapi.project.ListBranches;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import java.io.IOException;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
+@Singleton
 public class CodeOwnerProjectConfigJson {
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final Provider<ListBranches> listBranches;
 
-  static CodeOwnerProjectConfigInfo format(
-      boolean isDisabled,
-      ImmutableList<BranchNameKey> disabledBranches,
-      @Nullable String fileExtension,
-      MergeCommitStrategy mergeCommitStrategy,
-      String backendId,
-      ImmutableMap<BranchNameKey, String> backendIdsPerBranch,
-      RequiredApproval requiredApproval,
-      @Nullable RequiredApproval overrideApproval) {
+  @Inject
+  CodeOwnerProjectConfigJson(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      Provider<ListBranches> listBranches) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.listBranches = listBranches;
+  }
+
+  CodeOwnerProjectConfigInfo format(ProjectResource projectResource)
+      throws RestApiException, PermissionBackendException, IOException {
     CodeOwnerProjectConfigInfo info = new CodeOwnerProjectConfigInfo();
-    info.general = formatGeneralInfo(fileExtension, mergeCommitStrategy);
-    info.status = formatStatusInfo(isDisabled, disabledBranches);
-    info.backend = formatBackendInfo(backendId, backendIdsPerBranch);
-    info.requiredApproval = formatRequiredApprovalInfo(requiredApproval);
-    info.overrideApproval =
-        overrideApproval != null ? formatRequiredApprovalInfo(overrideApproval) : null;
+    info.general = formatGeneralInfo(projectResource.getNameKey());
+    info.status = formatStatusInfo(projectResource);
+    info.backend = formatBackendInfo(projectResource);
+    info.requiredApproval = formatRequiredApprovalInfo(projectResource.getNameKey());
+    info.overrideApproval = formatOverrideApprovalInfo(projectResource.getNameKey());
     return info;
   }
 
-  @VisibleForTesting
-  static GeneralInfo formatGeneralInfo(
-      @Nullable String fileExtension, MergeCommitStrategy mergeCommitStrategy) {
-    requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
-
+  private GeneralInfo formatGeneralInfo(Project.NameKey projectName) {
     GeneralInfo generalInfo = new GeneralInfo();
-    generalInfo.fileExtension = fileExtension;
-    generalInfo.mergeCommitStrategy = mergeCommitStrategy;
+    generalInfo.fileExtension =
+        codeOwnersPluginConfiguration.getFileExtension(projectName).orElse(null);
+    generalInfo.mergeCommitStrategy =
+        codeOwnersPluginConfiguration.getMergeCommitStrategy(projectName);
     return generalInfo;
   }
 
   @VisibleForTesting
-  static CodeOwnersStatusInfo formatStatusInfo(
-      boolean isDisabled, ImmutableList<BranchNameKey> disabledBranches) {
-    requireNonNull(disabledBranches, "disabledBranches");
-
+  CodeOwnersStatusInfo formatStatusInfo(ProjectResource projectResource)
+      throws RestApiException, PermissionBackendException, IOException {
     CodeOwnersStatusInfo info = new CodeOwnersStatusInfo();
-    info.disabled = isDisabled ? true : null;
-    if (!isDisabled && !disabledBranches.isEmpty()) {
-      info.disabledBranches =
-          disabledBranches.stream().map(BranchNameKey::branch).collect(toImmutableList());
+    info.disabled =
+        codeOwnersPluginConfiguration.isDisabled(projectResource.getNameKey()) ? true : null;
+
+    if (info.disabled == null) {
+      ImmutableList<BranchNameKey> disabledBranches = getDisabledBranches(projectResource);
+      if (!disabledBranches.isEmpty()) {
+        info.disabledBranches =
+            disabledBranches.stream().map(BranchNameKey::branch).collect(toImmutableList());
+      }
     }
     return info;
   }
 
   @VisibleForTesting
-  static BackendInfo formatBackendInfo(
-      String backendId, ImmutableMap<BranchNameKey, String> backendIdsPerBranch) {
-    requireNonNull(backendId, "backendId");
-    requireNonNull(backendIdsPerBranch, "backendIdsPerBranch");
-
+  BackendInfo formatBackendInfo(ProjectResource projectResource)
+      throws RestApiException, PermissionBackendException, IOException {
     BackendInfo info = new BackendInfo();
-    info.id = backendId;
+    info.id =
+        CodeOwnerBackendId.getBackendId(
+            codeOwnersPluginConfiguration.getBackend(projectResource.getNameKey()).getClass());
 
     ImmutableMap<String, String> idsByBranch =
-        backendIdsPerBranch.entrySet().stream()
-            .filter(e -> !e.getValue().equals(backendId))
+        getBackendIdsPerBranch(projectResource).entrySet().stream()
+            .filter(e -> !e.getValue().equals(info.id))
             .collect(toImmutableMap(e -> e.getKey().branch(), Map.Entry::getValue));
     info.idsByBranch = !idsByBranch.isEmpty() ? idsByBranch : null;
 
     return info;
   }
 
+  private RequiredApprovalInfo formatRequiredApprovalInfo(Project.NameKey projectName) {
+    return formatRequiredApproval(codeOwnersPluginConfiguration.getRequiredApproval(projectName));
+  }
+
+  @Nullable
+  private RequiredApprovalInfo formatOverrideApprovalInfo(Project.NameKey projectName) {
+    return codeOwnersPluginConfiguration
+        .getOverrideApproval(projectName)
+        .map(CodeOwnerProjectConfigJson::formatRequiredApproval)
+        .orElse(null);
+  }
+
   @VisibleForTesting
-  static RequiredApprovalInfo formatRequiredApprovalInfo(RequiredApproval requiredApproval) {
+  static RequiredApprovalInfo formatRequiredApproval(RequiredApproval requiredApproval) {
     requireNonNull(requiredApproval, "requiredApproval");
 
     RequiredApprovalInfo info = new RequiredApprovalInfo();
@@ -106,10 +133,29 @@ public class CodeOwnerProjectConfigJson {
     return info;
   }
 
-  /**
-   * Private constructor to prevent instantiation of this class.
-   *
-   * <p>The class only contains static methods, hence the class never needs to be instantiated.
-   */
-  private CodeOwnerProjectConfigJson() {}
+  private ImmutableList<BranchNameKey> getDisabledBranches(ProjectResource projectResource)
+      throws RestApiException, PermissionBackendException, IOException {
+    return branches(projectResource)
+        .filter(codeOwnersPluginConfiguration::isDisabled)
+        .collect(toImmutableList());
+  }
+
+  private ImmutableMap<BranchNameKey, String> getBackendIdsPerBranch(
+      ProjectResource projectResource)
+      throws RestApiException, PermissionBackendException, IOException {
+    return branches(projectResource)
+        .collect(
+            toImmutableMap(
+                Function.identity(),
+                branchNameKey ->
+                    CodeOwnerBackendId.getBackendId(
+                        codeOwnersPluginConfiguration.getBackend(branchNameKey).getClass())));
+  }
+
+  private Stream<BranchNameKey> branches(ProjectResource projectResource)
+      throws RestApiException, IOException, PermissionBackendException {
+    return listBranches.get().apply(projectResource).value().stream()
+        .filter(branchInfo -> !"HEAD".equals(branchInfo.ref))
+        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref));
+  }
 }
