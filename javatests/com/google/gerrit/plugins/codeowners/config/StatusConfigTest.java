@@ -192,6 +192,32 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/heads/master")
+  public void isDisabledForBranchIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/heads/master")
+  public void
+      disabledBranchConfigurationInPluginConfigOverridesDisabledBranchConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "");
+    assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "^refs/heads/[")
+  public void isDisabledForBranch_invalidValueInGerritConfigIsIgnored() throws Exception {
+    assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
   public void cannotValidateProjectLevelConfigWithNullFileName() throws Exception {
     NullPointerException npe =
         assertThrows(
