@@ -154,8 +154,8 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="codeOwnersDisabledBranch">codeOwners.disabledBranch</a>
 :       An exact ref, a ref pattern or a regular expression to disable the code
         owners functionality for the matched branches.\
-        For matched branches the code owners API is disabled and submitting
-        changes doesn't require code owner approvals.\
+        For matched branches submitting changes doesn't require code owner
+        approvals.\
         This allows branches to opt-out of the code owners functionality.\
         Can be set multiple times.\
         By default unset.
