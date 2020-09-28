@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "6f106bfe_75e1e13e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/BranchCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-28T12:45:01Z",
+      "side": 1,
+      "message": "You are right that with the current functionality we could just return the paths directly from the codeOwnerConfigFiles() and then not have this class:\n\n  List\u003cString\u003e codeOwnerConfigFiles();\n\nHowever having this class allows us to add parameters to this REST endpoint later without breaking the API. E.g. in a follow-up change we want to add an optional email parameter that limits the returned code owner config files to those that contain the given email. If we do not have the CodeOwnerConfigFilesRequest class, we would need to add a new method for this (due to backwards compatibility we should not change the existing \u0027List\u003cString\u003e codeOwnerConfigFiles()\u0027 method although that\u0027s not really relevant for the code-owners plugin at this stage):\n\n  List\u003cString\u003e codeOwnerConfigFiles();\n  List\u003cString\u003e codeOwnerConfigFiles(String email);\n\nThis would mean adding a new method for each new parameter and then you couldn\u0027t combine parameters.\n\nHaving the CodeOwnerConfigFilesRequest we can simply add setters for every new parameter to the CodeOwnerConfigFilesRequest class:\n\n  CodeOwnerConfigFilesRequest codeOwnerConfigFiles()\n\n  abstract class CodeOwnerConfigFilesRequest {\n    private String email;\n\n    CodeOwnerConfigFilesRequest setEmail(String email) {\n      this.email \u003d email;\n      return this;\n    }\n\n    public abstract List\u003cString\u003e paths();\n  }\n\nHaving such inner classes for Request object is an established pattern in other Gerrit API classes.\n\nBut I should have mentioned this reasoning in the commit message. I have done it now :)",
+      "parentUuid": "951be6df_4d032441",
+      "range": {
+        "startLine": 29,
+        "startChar": 17,
+        "endLine": 29,
+        "endChar": 44
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f6afdc54_b00b7b58",
         "filename": "java/com/google/gerrit/plugins/codeowners/api/BranchCodeOwners.java",
         "patchSetId": 1
@@ -45,6 +69,30 @@
       "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac7bc790_918afd61",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/BranchCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-28T12:45:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f6afdc54_b00b7b58",
+      "range": {
+        "startLine": 31,
+        "startChar": 33,
+        "endLine": 31,
+        "endChar": 41
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     },
     {
       "key": {
@@ -71,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "78334bbd_b6aff448",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/ProjectCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-28T12:45:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cbd8f97f_dce6f493",
+      "range": {
+        "startLine": 28,
+        "startChar": 6,
+        "endLine": 28,
+        "endChar": 12
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "c00559fa_bda3c103",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnerConfigFilesIT.java",
         "patchSetId": 1
@@ -94,6 +166,30 @@
     },
     {
       "key": {
+        "uuid": "a99fa290_7ae19e1c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnerConfigFilesIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-28T12:45:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c00559fa_bda3c103",
+      "range": {
+        "startLine": 128,
+        "startChar": 49,
+        "endLine": 128,
+        "endChar": 50
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2ac9e249_2a146c45",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnerConfigFilesIT.java",
         "patchSetId": 1
@@ -114,6 +210,30 @@
       "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ae81f560_2b8bd4c3",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnerConfigFilesIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-28T12:45:01Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2ac9e249_2a146c45",
+      "range": {
+        "startLine": 169,
+        "startChar": 19,
+        "endLine": 169,
+        "endChar": 21
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
