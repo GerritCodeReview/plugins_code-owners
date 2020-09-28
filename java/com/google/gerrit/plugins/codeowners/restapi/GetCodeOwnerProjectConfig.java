@@ -36,6 +36,7 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * REST endpoint that gets the code owner project configuration.
@@ -90,8 +91,7 @@ public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> 
 
   private ImmutableList<BranchNameKey> getDisabledBranches(ProjectResource projectResource)
       throws RestApiException, PermissionBackendException, IOException {
-    return listBranches.get().apply(projectResource).value().stream()
-        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref))
+    return branches(projectResource)
         .filter(codeOwnersPluginConfiguration::isDisabled)
         .collect(toImmutableList());
   }
@@ -99,13 +99,19 @@ public class GetCodeOwnerProjectConfig implements RestReadView<ProjectResource> 
   private ImmutableMap<BranchNameKey, String> getBackendIdsPerBranch(
       ProjectResource projectResource)
       throws RestApiException, PermissionBackendException, IOException {
-    return listBranches.get().apply(projectResource).value().stream()
-        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref))
+    return branches(projectResource)
         .collect(
             toImmutableMap(
                 Function.identity(),
                 branchNameKey ->
                     CodeOwnerBackendId.getBackendId(
                         codeOwnersPluginConfiguration.getBackend(branchNameKey).getClass())));
+  }
+
+  private Stream<BranchNameKey> branches(ProjectResource projectResource)
+      throws RestApiException, IOException, PermissionBackendException {
+    return listBranches.get().apply(projectResource).value().stream()
+        .filter(branchInfo -> !"HEAD".equals(branchInfo.ref))
+        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref));
   }
 }
