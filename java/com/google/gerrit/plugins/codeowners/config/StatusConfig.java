@@ -182,26 +182,53 @@ public class StatusConfig {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(branch, "branch");
 
-    for (String refPattern :
-        pluginConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
+    String disabledBranches =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH);
+    if (disabledBranches != null) {
+      // a value for KEY_DISABLED_BRANCH is set on project-level
+      return isDisabledForBranch(
+          pluginConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH),
+          branch.branch(),
+          "Disabled branch '%s' that is configured for project "
+              + branch.project()
+              + " in "
+              + pluginName
+              + ".config (parameter "
+              + SECTION_CODE_OWNERS
+              + "."
+              + KEY_DISABLED_BRANCH
+              + ") is invalid.");
+    }
+
+    // there is no project-level configuration for KEY_DISABLED_BRANCH, check if it's set in
+    // gerrit.config
+    return isDisabledForBranch(
+        pluginConfigFromGerritConfig.getStringList(KEY_DISABLED_BRANCH),
+        branch.branch(),
+        "Disabled branch '%s' that is configured for in gerrit.config (parameter plugin."
+            + pluginName
+            + "."
+            + KEY_DISABLED_BRANCH
+            + ") is invalid.");
+  }
+
+  private boolean isDisabledForBranch(
+      String[] refPatternList, String branch, String warningMsgForInvalidRefPattern) {
+    for (String refPattern : refPatternList) {
       if (refPattern == null) {
         continue;
       }
       try {
-        if (RefPatternMatcher.getMatcher(refPattern).match(branch.branch(), null)) {
+        if (RefPatternMatcher.getMatcher(refPattern).match(branch, null)) {
           return true;
         }
       } catch (PatternSyntaxException e) {
-        // if the configuration is invalid we ignore it, this is safe since it means we disable the
-        // code owners functionality for less branches and not disabling the code owners
+        // if the configuration is invalid we ignore it, this is safe since it means we disable
+        // the code owners functionality for less branches and not disabling the code owners
         // functionality is the more restrictive choice
-        logger.atWarning().withCause(e).log(
-            "Disabled branch '%s' that is configured for project %s in %s.config (parameter"
-                + " %s.%s) is invalid.",
-            refPattern, branch.project(), pluginName, SECTION_CODE_OWNERS, KEY_DISABLED_BRANCH);
+        logger.atWarning().withCause(e).log(warningMsgForInvalidRefPattern, refPattern);
       }
     }
-
     return false;
   }
 }
