@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "951be6df_4d032441",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/BranchCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-28T12:07:44Z",
+      "side": 1,
+      "message": "Do we really need this class? I feel that just having \"paths\" inside BranchCodeOwners is easier to read.",
+      "range": {
+        "startLine": 29,
+        "startChar": 17,
+        "endLine": 29,
+        "endChar": 44
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f6afdc54_b00b7b58",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/BranchCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 31,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-28T12:07:44Z",
+      "side": 1,
+      "message": "I think \"get\" is reserved mostly for methods that don\u0027t do anything other than read a variable.\nHow about just \"paths()\"?",
+      "range": {
+        "startLine": 31,
+        "startChar": 33,
+        "endLine": 31,
+        "endChar": 41
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cbd8f97f_dce6f493",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/ProjectCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-28T12:07:44Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 28,
+        "startChar": 6,
+        "endLine": 28,
+        "endChar": 12
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c00559fa_bda3c103",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnerConfigFilesIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-28T12:07:44Z",
+      "side": 1,
+      "message": "Exetensions in plural (to be consistent with prefixes in plural)",
+      "range": {
+        "startLine": 128,
+        "startChar": 49,
+        "endLine": 128,
+        "endChar": 50
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "2ac9e249_2a146c45",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnerConfigFilesIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 169,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-28T12:07:44Z",
+      "side": 1,
+      "message": "non?",
+      "range": {
+        "startLine": 169,
+        "startChar": 19,
+        "endLine": 169,
+        "endChar": 21
+      },
+      "revId": "2a6b7cfab790a41675b1a6d655c7cadec20c276a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
