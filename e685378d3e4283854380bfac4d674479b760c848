@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "85e0d902_33cb1e02",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/StatusConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 198,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-28T13:11:46Z",
+      "side": 1,
+      "message": "\u003e duplicated, can you extract to a method?\n\nNot that easily, because \"continue\" wouldn\u0027t work in the method.\n\n\u003e I think you can also extract the log below with the for loop\n\u003e (the only difference is the list of string being looped), but that\u0027s up to you.\n\nThis works, but also the warning message is different and must be passed in then. Done.",
+      "parentUuid": "7993be45_a51856f1",
+      "range": {
+        "startLine": 191,
+        "startChar": 8,
+        "endLine": 198,
+        "endChar": 44
+      },
+      "revId": "e685378d3e4283854380bfac4d674479b760c848",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "00c90d77_bb8b9b38",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/config/StatusConfigTest.java",
         "patchSetId": 2
@@ -45,6 +69,30 @@
       "revId": "e685378d3e4283854380bfac4d674479b760c848",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e9538a09_106027a5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/config/StatusConfigTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 215,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-28T13:11:46Z",
+      "side": 1,
+      "message": "Good idea. Done.",
+      "parentUuid": "00c90d77_bb8b9b38",
+      "range": {
+        "startLine": 215,
+        "startChar": 14,
+        "endLine": 215,
+        "endChar": 69
+      },
+      "revId": "e685378d3e4283854380bfac4d674479b760c848",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
