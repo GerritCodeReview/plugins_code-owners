@@ -65,7 +65,6 @@ public class CodeOwnerProjectConfigJson {
   }
 
   @VisibleForTesting
-  @Nullable
   static CodeOwnersStatusInfo formatStatusInfo(
       boolean isDisabled, ImmutableList<BranchNameKey> disabledBranches) {
     requireNonNull(disabledBranches, "disabledBranches");
