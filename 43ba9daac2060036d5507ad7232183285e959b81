@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "7c6a8f17_c094dbb5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-29T13:43:45Z",
+      "side": 1,
+      "message": "I think endpoints such as \"List Code Owners for path\" should also return the global code owners.\nWDYT?",
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6ea52632_a542cb5b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-29T13:43:45Z",
+      "side": 1,
+      "message": "these else ifs are becoming hard to read. As an optional follow-up, you could split some things here into methods.",
+      "range": {
+        "startLine": 358,
+        "startChar": 6,
+        "endLine": 358,
+        "endChar": 13
+      },
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "bc6d049b_7155d4ab",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-29T13:43:45Z",
+      "side": 1,
+      "message": "is a global code owner?",
+      "range": {
+        "startLine": 360,
+        "startChar": 42,
+        "endLine": 360,
+        "endChar": 55
+      },
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
