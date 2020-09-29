@@ -25,6 +25,7 @@ import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.ServiceUserClassifier;
 import com.google.gerrit.server.change.IncludedInResolver;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -65,6 +66,7 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
   @Inject
   GetCodeOwnersForPathInBranch(
       PermissionBackend permissionBackend,
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ServiceUserClassifier serviceUserClassifier,
@@ -72,6 +74,7 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
       GitRepositoryManager repoManager) {
     super(
         permissionBackend,
+        codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
         serviceUserClassifier,

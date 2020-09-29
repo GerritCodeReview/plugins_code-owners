@@ -630,4 +630,95 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
     assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
   }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "global.owner@example.com")
+  public void getGlobalCodeOwners() throws Exception {
+    TestAccount globalOwner =
+        accountCreator.create("global_owner", "global.owner@example.com", "Global Owner", null);
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(globalOwner.id());
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"global.owner1@example.com", "global.owner2@example.com"})
+  public void getWithGlobalCodeOwnersAndLimit() throws Exception {
+    TestAccount globalOwner1 =
+        accountCreator.create(
+            "global_owner_1", "global.owner1@example.com", "Global Owner 1", null);
+    TestAccount globalOwner2 =
+        accountCreator.create(
+            "global_owner_2", "global.owner2@example.com", "Global Owner 2", null);
+
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // get code owners with different limits
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(1);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them we get when the limit is 1
+    assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isAnyOf(user.id(), user2.id());
+
+    codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id());
+
+    codeOwnerInfos = getCodeOwnersApi().query().withLimit(3).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    codeOwnerInfos = getCodeOwnersApi().query().withLimit(4).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(4);
+    // the order of the first 2 code owners is random
+    assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isAnyOf(user.id(), user2.id());
+    assertThatList(codeOwnerInfos).element(1).hasAccountIdThat().isAnyOf(user.id(), user2.id());
+    assertThatList(codeOwnerInfos).element(2).hasAccountIdThat().isEqualTo(admin.id());
+    // the order of the global code owners is random
+    assertThatList(codeOwnerInfos)
+        .element(3)
+        .hasAccountIdThat()
+        .isAnyOf(globalOwner1.id(), globalOwner2.id());
+
+    codeOwnerInfos = getCodeOwnersApi().query().withLimit(5).get("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id(), globalOwner1.id(), globalOwner2.id());
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "service.user@example.com")
+  public void globalCodeOwnersThatAreServiceUsersAreFilteredOut() throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+    assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
+  }
 }
