@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "2aecd540_987961f8",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1113292
+      },
+      "writtenOn": "2020-09-29T08:33:36Z",
+      "side": 1,
+      "message": "If feels confusing if ignoreSelfApproval is enabled for Code-Review label while being able to self approval for ownership (though it will just work).\n\nI think this need to be covered in the doc, maybe suggesting using a separate no-op Label for that purpose?",
+      "range": {
+        "startLine": 73,
+        "startChar": 8,
+        "endLine": 73,
+        "endChar": 21
+      },
+      "revId": "4158f6c74256892f523757e28bd94aa37d2577a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
