@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "cfb12dd0_ab07d8e7",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-29T13:53:54Z",
+      "side": 1,
+      "message": "\u003e I think endpoints such as \"List Code Owners for path\" should also return the\n\u003e global code owners.\n\u003e WDYT?\n\nYes, I also noticed this after pushing. That\u0027s an oversight that I will address in follow-up change (normally I would do it in this change, but since we need this change rather urgently, I think a follow-up change is better).",
+      "parentUuid": "29471fbe_ea6fe65c",
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "6ea52632_a542cb5b",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 1
@@ -48,6 +66,30 @@
       "writtenOn": "2020-09-29T13:43:45Z",
       "side": 1,
       "message": "these else ifs are becoming hard to read. As an optional follow-up, you could split some things here into methods.",
+      "range": {
+        "startLine": 358,
+        "startChar": 6,
+        "endLine": 358,
+        "endChar": 13
+      },
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "e8588423_2074c728",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-29T13:53:54Z",
+      "side": 1,
+      "message": "You\u0027re right. Will check if this can be improved by a separate change.",
+      "parentUuid": "6ea52632_a542cb5b",
       "range": {
         "startLine": 358,
         "startChar": 6,
@@ -80,6 +122,30 @@
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "d05cf441_b65a5334",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 360,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-29T13:53:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "bc6d049b_7155d4ab",
+      "range": {
+        "startLine": 360,
+        "startChar": 42,
+        "endLine": 360,
+        "endChar": 55
+      },
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
