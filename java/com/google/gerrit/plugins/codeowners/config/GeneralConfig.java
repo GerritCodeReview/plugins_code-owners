@@ -26,6 +26,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -58,6 +59,7 @@ public class GeneralConfig {
   @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
   @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
   @VisibleForTesting public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
+  @VisibleForTesting public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
 
   @VisibleForTesting
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
@@ -226,5 +228,27 @@ public class GeneralConfig {
     }
 
     return pluginConfigFromGerritConfig.getBoolean(KEY_ENABLE_IMPLICIT_APPROVALS, false);
+  }
+
+  /**
+   * Gets the users which are configured as global code owners from the given plugin config with
+   * fallback to {@code gerrit.config}.
+   *
+   * @param pluginConfig the plugin config from which the global code owners should be read.
+   * @return the users which are configured as global code owners
+   */
+  ImmutableSet<CodeOwnerReference> getGlobalCodeOwners(Config pluginConfig) {
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    if (pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_GLOBAL_CODE_OWNER) != null) {
+      return Arrays.stream(
+              pluginConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_GLOBAL_CODE_OWNER))
+          .map(CodeOwnerReference::create)
+          .collect(toImmutableSet());
+    }
+
+    return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_GLOBAL_CODE_OWNER))
+        .map(CodeOwnerReference::create)
+        .collect(toImmutableSet());
   }
 }

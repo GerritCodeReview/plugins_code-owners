@@ -76,6 +76,19 @@ Parameters that are not set for a project are inherited from the parent project.
         in `@PLUGIN@.config`.\
         By default `false`.
 
+<a id="pluginCodeOwnersGlobalCodeOwner">plugin.@PLUGIN@.globalCodeOwner</a>
+:       The email of a user that should be a code owner globally across all
+        branches.\
+        If global code owners should be omitted in the code owner suggestion
+        (e.g. because they are bots and cannot react to review requests), they
+        can be added to the `Service Users` group (since members of this group
+        are not suggested as code owners).\
+        Can be specified multiple time to set multiple global code owners.\
+        Can be overridden per project by setting
+        [codeOwners.globalCodeOwner](#codeOwnersGlobalCodeOwner) in
+        `@PLUGIN@.config`.\
+        By default unset (no global code owners).
+
 <a id="pluginCodeOwnersReadOnly">plugin.@PLUGIN@.readOnly</a>
 :       Whether code owner config files are read-only.\
         Can be overridden per project by setting
@@ -255,6 +268,21 @@ Parameters that are not set for a project are inherited from the parent project.
         If not set, the global setting
         [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersenableImplicitApprovals)
         in `gerrit.config` is used.
+
+<a id="codeOwnersGlobalCodeOwner">codeOwners.globalCodeOwner</a>
+:       The email of a user that should be a code owner globally across all
+        branches.\
+        If global code owners should be omitted in the code owner suggestion
+        (e.g. because they are bots and cannot react to review requests), they
+        can be added to the `Service Users` group (since members of this group
+        are not suggested as code owners).\
+        Can be specified multiple time to set multiple global code owners.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.globalCodeOwner](#pluginCodeOwnersGlobalCodeOwner) in
+        `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.globalCodeOwner](#pluginCodeOwnersGlobalCodeOwner) in
+        `gerrit.config` is used.
 
 <a id="codeOwnersReadOnly">codeOwners.readOnly</a>
 :       Whether code owner config files are read-only.\
