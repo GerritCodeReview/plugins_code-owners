@@ -21,6 +21,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -32,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
 import com.google.gerrit.server.account.ServiceUserClassifier;
@@ -59,6 +61,7 @@ public abstract class AbstractGetCodeOwnersForPath {
   @VisibleForTesting public static final int DEFAULT_LIMIT = 10;
 
   private final PermissionBackend permissionBackend;
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final ServiceUserClassifier serviceUserClassifier;
@@ -94,11 +97,13 @@ public abstract class AbstractGetCodeOwnersForPath {
 
   protected AbstractGetCodeOwnersForPath(
       PermissionBackend permissionBackend,
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ServiceUserClassifier serviceUserClassifier,
       CodeOwnerJson.Factory codeOwnerJsonFactory) {
     this.permissionBackend = permissionBackend;
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.serviceUserClassifier = serviceUserClassifier;
@@ -112,9 +117,14 @@ public abstract class AbstractGetCodeOwnersForPath {
     parseHexOptions();
     validateLimit();
 
-    // The maximal possible distance. This is the distance that applies to code owners that are
-    // defined in the root code owner configuration.
-    int maxDistance = rsrc.getPath().getNameCount();
+    // The distance that applies to code owners that are defined in the root code owner
+    // configuration.
+    int rootDistance = rsrc.getPath().getNameCount();
+
+    // The maximal possible distance. This is the distance that applies to global code owners and is
+    // by 1 greater than the distance that applies to code owners that are defined in the root code
+    // owner configuration.
+    int maxDistance = rootDistance + 1;
 
     CodeOwnerScoring.Builder distanceScoring = CodeOwnerScore.DISTANCE.createScoring(maxDistance);
 
@@ -127,7 +137,7 @@ public abstract class AbstractGetCodeOwnersForPath {
           ImmutableSet<CodeOwner> pathCodeOwners =
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
           codeOwners.addAll(filterCodeOwners(rsrc, pathCodeOwners));
-          int distance = maxDistance - codeOwnerConfig.key().folderPath().getNameCount();
+          int distance = rootDistance - codeOwnerConfig.key().folderPath().getNameCount();
           pathCodeOwners.forEach(
               localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
@@ -139,10 +149,27 @@ public abstract class AbstractGetCodeOwnersForPath {
           return codeOwners.size() < limit;
         });
 
+    if (codeOwners.size() < limit) {
+      ImmutableSet<CodeOwner> globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
+      globalCodeOwners.forEach(
+          codeOwner -> distanceScoring.putValueForCodeOwner(codeOwner, maxDistance));
+      codeOwners.addAll(filterCodeOwners(rsrc, globalCodeOwners));
+    }
+
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
             .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+  }
+
+  private ImmutableSet<CodeOwner> getGlobalCodeOwners(Project.NameKey projectName) {
+    ImmutableSet<CodeOwner> globalCodeOwners =
+        codeOwnerResolver
+            .get()
+            .resolve(codeOwnersPluginConfiguration.getGlobalCodeOwners(projectName))
+            .collect(toImmutableSet());
+    logger.atFine().log("including global code owners = %s", globalCodeOwners);
+    return globalCodeOwners;
   }
 
   /**
