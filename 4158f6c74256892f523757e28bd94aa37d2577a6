@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "a325b993_5a20576f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/GeneralConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-29T13:11:35Z",
+      "side": 1,
+      "message": "you can remove the if condition, and replace this \"false\" with the gerritConfig one.",
+      "range": {
+        "startLine": 225,
+        "startChar": 68,
+        "endLine": 225,
+        "endChar": 73
+      },
+      "revId": "4158f6c74256892f523757e28bd94aa37d2577a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "2aecd540_987961f8",
         "filename": "resources/Documentation/config.md",
         "patchSetId": 1
@@ -43,6 +66,23 @@
         "endLine": 73,
         "endChar": 21
       },
+      "revId": "4158f6c74256892f523757e28bd94aa37d2577a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ca443555_526643cb",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-29T13:11:35Z",
+      "side": 1,
+      "message": "When unset, false.",
       "revId": "4158f6c74256892f523757e28bd94aa37d2577a6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
