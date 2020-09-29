@@ -97,6 +97,30 @@
     },
     {
       "key": {
+        "uuid": "894c1901_f1025f06",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 11
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-29T08:07:15Z",
+      "side": 1,
+      "message": "\u003e\u003e After some significant amount of time on waiting for the change owner to act, one of the \n\u003e\u003e maintainer who is the fallback owner of the entire codebase decided to rebase the change to\n\u003e\u003e the correct one on the Web UI, and the owner approval is granted implicitly.\n\u003e\n\u003e This is a good point. The maintainer needs to be aware of this.\n\nI\u0027ve now documented this case in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/282236\n\n\u003e Maybe we should rather have no\n\u003e implicit approvals at all? I might add a configuration option to turn implicit approvals off.\n\nDone in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/282776\n\n\u003e Is there a way to continue this conversation in a mail list or move to a bug tracker?\n\nYes, filing bugs in Monorail at https://bugs.chromium.org/p/gerrit/issues/entry?template\u003dcode-owners-plugin is fine.\n\n\u003e Assuming that permission is default, do you think using change owner a better choice\n\u003e over patchset uploader?\n\nNo, I think it\u0027s too easy to misconfigure this and then there is a way to bypass the code owners check, which would be bad. But in the end it matters what the Chrome and Android teams want here, and so far they didn\u0027t have this request. Personally I dislike implicit approvals, since it also makes later auditing harder (e.g. if there is a change that was merged without code owner approvals you may be surprised how this was possible and then you have to remember that there may have been implicit approvals, because back then the uploader or change owner may have been a code owner so that the change was approved implicitly).",
+      "parentUuid": "231f9e04_01b29e7f",
+      "range": {
+        "startLine": 18,
+        "startChar": 0,
+        "endLine": 18,
+        "endChar": 22
+      },
+      "revId": "6704234ff4ce41f1c7ed8dda7545f98e0eece588",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ae8ebfa0_4246be01",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 11
