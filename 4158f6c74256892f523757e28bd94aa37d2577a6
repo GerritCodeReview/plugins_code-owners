@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "3e8f41fc_426786db",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/GeneralConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-29T13:32:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a325b993_5a20576f",
+      "range": {
+        "startLine": 225,
+        "startChar": 68,
+        "endLine": 225,
+        "endChar": 73
+      },
+      "revId": "4158f6c74256892f523757e28bd94aa37d2577a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "2aecd540_987961f8",
         "filename": "resources/Documentation/config.md",
         "patchSetId": 1
@@ -86,6 +110,24 @@
       "revId": "4158f6c74256892f523757e28bd94aa37d2577a6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1c3b9119_798a3b15",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-29T13:32:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca443555_526643cb",
+      "revId": "4158f6c74256892f523757e28bd94aa37d2577a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
