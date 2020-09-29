@@ -630,4 +630,27 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
     assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
   }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "global.owner@example.com")
+  public void getGlobalCodeOwners() throws Exception {
+    TestAccount globalOwner =
+        accountCreator.create("global_owner", "global.owner@example.com", "Global Owner", null);
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(globalOwner.id());
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "service.user@example.com")
+  public void globalCodeOwnersThatAreServiceUsersAreFilteredOut() throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+    assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
+  }
 }
