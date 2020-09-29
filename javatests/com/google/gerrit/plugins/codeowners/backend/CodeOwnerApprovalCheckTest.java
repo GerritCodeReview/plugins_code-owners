@@ -16,13 +16,16 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowLabel;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThatStream;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
@@ -45,6 +48,7 @@ import org.junit.Test;
 public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Inject private ChangeNotes.Factory changeNotesFactory;
   @Inject private RequestScopeOperations requestScopeOperations;
+  @Inject private ProjectOperations projectOperations;
 
   private CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
@@ -885,6 +889,158 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
     fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void approvedByGlobalCodeOwner() throws Exception {
+    TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    // let the bot approve the change
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allowLabel("Code-Review").ref("refs/heads/*").group(REGISTERED_USERS).range(-2, +2))
+        .update();
+    requestScopeOperations.setApiUser(bot.id());
+    approve(changeId);
+
+    requestScopeOperations.setApiUser(admin.id());
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void globalCodeOwner_noImplicitApproval() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwner(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void globalCodeOwner_withImplicitApproval() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwner(true);
+  }
+
+  private void testImplicitlyApprovedByGlobalCodeOwner(boolean implicitApprovalsEnabled)
+      throws Exception {
+    TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(bot, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void bootstrapping_approvedByGlobalCodeOwner() throws Exception {
+    TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    // let the bot approve the change
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allowLabel("Code-Review").ref("refs/heads/*").group(REGISTERED_USERS).range(-2, +2))
+        .update();
+    requestScopeOperations.setApiUser(bot.id());
+    approve(changeId);
+
+    requestScopeOperations.setApiUser(admin.id());
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void bootstrapping_globalCodeOwner_noImplicitApproval() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwnerOnBootstrapping(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void bootstrapping_globalCodeOwner_withImplicitApproval() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwnerOnBootstrapping(true);
+  }
+
+  private void testImplicitlyApprovedByGlobalCodeOwnerOnBootstrapping(
+      boolean implicitApprovalsEnabled) throws Exception {
+    TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(bot, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
   }
 
   @Test

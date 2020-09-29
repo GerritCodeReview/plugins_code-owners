@@ -43,6 +43,7 @@ import com.google.inject.Provider;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /** Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s. */
@@ -153,6 +154,18 @@ public class CodeOwnerResolver {
           .flatMap(this::resolve)
           .collect(toImmutableSet());
     }
+  }
+
+  /**
+   * Resolves the given {@link CodeOwnerReference}s to {@link CodeOwner}s.
+   *
+   * @param codeOwnerReferences the code owner references that should be resolved
+   * @return the {@link CodeOwner} for the given code owner references
+   * @see #resolve(CodeOwnerReference)
+   */
+  public Stream<CodeOwner> resolve(Set<CodeOwnerReference> codeOwnerReferences) {
+    requireNonNull(codeOwnerReferences, "codeOwnerReferences");
+    return codeOwnerReferences.stream().flatMap(this::resolve);
   }
 
   /**

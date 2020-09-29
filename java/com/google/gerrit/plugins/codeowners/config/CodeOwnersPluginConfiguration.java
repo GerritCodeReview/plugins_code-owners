@@ -26,6 +26,7 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.project.ProjectCache;
@@ -127,6 +128,17 @@ public class CodeOwnersPluginConfiguration {
   public boolean areImplicitApprovalsEnabled(Project.NameKey project) {
     requireNonNull(project, "project");
     return generalConfig.getEnableImplicitApprovals(getPluginConfig(project));
+  }
+
+  /**
+   * Gets the global code owners of the given project.
+   *
+   * @param project the project for which the global code owners should be returned
+   * @return the global code owners of the given project
+   */
+  public ImmutableSet<CodeOwnerReference> getGlobalCodeOwners(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getGlobalCodeOwners(getPluginConfig(project));
   }
 
   /**
