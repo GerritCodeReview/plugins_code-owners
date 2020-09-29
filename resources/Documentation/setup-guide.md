@@ -307,6 +307,7 @@ documentation](config.html).
 
 Examples (not an exhaustive list):
 
+* [Global code owners](config.html#codeOwnersGlobalCodeOwner)
 * Whether [an implicit code owner approval from the last uploader is
   assumed](config.html#codeOwnersEnableImplicitApprovals)
 * [Merge commit strategy](config.html#codeOwnersMergeCommitStrategy) that

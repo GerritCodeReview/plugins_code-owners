@@ -187,6 +187,16 @@ public class CodeOwnerApprovalCheck {
           "patchSetUploader = %d, implicit approval from uploader is %s",
           patchSetUploader.get(), enableImplicitApprovalFromUploader ? "enabled" : "disabled");
 
+      ImmutableSet<Account.Id> globalCodeOwnerAccountIds =
+          codeOwnerResolver
+              .get()
+              .enforceVisibility(false)
+              .resolve(
+                  codeOwnersPluginConfiguration.getGlobalCodeOwners(changeNotes.getProjectName()))
+              .map(CodeOwner::accountId)
+              .collect(toImmutableSet());
+      logger.atFine().log("global code owner accounts = %s", globalCodeOwnerAccountIds);
+
       // If the branch doesn't contain any code owner config file yet, we apply special logic
       // (project
       // owners count as code owners) to allow bootstrapping the code owner configuration in the
@@ -207,6 +217,7 @@ public class CodeOwnerApprovalCheck {
                   getFileStatus(
                       branch,
                       revision,
+                      globalCodeOwnerAccountIds,
                       enableImplicitApprovalFromUploader,
                       patchSetUploader,
                       reviewerAccountIds,
@@ -220,6 +231,7 @@ public class CodeOwnerApprovalCheck {
   private FileCodeOwnerStatus getFileStatus(
       BranchNameKey branch,
       ObjectId revision,
+      ImmutableSet<Account.Id> globalCodeOwnerAccountIds,
       boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
@@ -238,6 +250,7 @@ public class CodeOwnerApprovalCheck {
                     getPathCodeOwnerStatus(
                         branch,
                         revision,
+                        globalCodeOwnerAccountIds,
                         enableImplicitApprovalFromUploader,
                         patchSetUploader,
                         reviewerAccountIds,
@@ -258,6 +271,7 @@ public class CodeOwnerApprovalCheck {
               getPathCodeOwnerStatus(
                   branch,
                   revision,
+                  globalCodeOwnerAccountIds,
                   enableImplicitApprovalFromUploader,
                   patchSetUploader,
                   reviewerAccountIds,
@@ -276,6 +290,7 @@ public class CodeOwnerApprovalCheck {
   private PathCodeOwnerStatus getPathCodeOwnerStatus(
       BranchNameKey branch,
       ObjectId revision,
+      ImmutableSet<Account.Id> globalCodeOwnerAccountIds,
       boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
@@ -295,6 +310,7 @@ public class CodeOwnerApprovalCheck {
     return isBootstrapping
         ? getPathCodeOwnerStatusBootstrappingMode(
             branch,
+            globalCodeOwnerAccountIds,
             enableImplicitApprovalFromUploader,
             patchSetUploader,
             reviewerAccountIds,
@@ -302,6 +318,7 @@ public class CodeOwnerApprovalCheck {
             absolutePath)
         : getPathCodeOwnerStatusRegularMode(
             branch,
+            globalCodeOwnerAccountIds,
             enableImplicitApprovalFromUploader,
             patchSetUploader,
             revision,
@@ -319,6 +336,7 @@ public class CodeOwnerApprovalCheck {
    */
   private PathCodeOwnerStatus getPathCodeOwnerStatusBootstrappingMode(
       BranchNameKey branch,
+      ImmutableSet<Account.Id> globalCodeOwnerAccountIds,
       boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
@@ -335,6 +353,20 @@ public class CodeOwnerApprovalCheck {
       // automatically approved.
       logger.atFine().log(
           "the status for path %s is %s since the patch set uploader is a project owner",
+          absolutePath, CodeOwnerStatus.APPROVED.name());
+      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+    } else if (enableImplicitApprovalFromUploader
+        && globalCodeOwnerAccountIds.contains(patchSetUploader)) {
+      // If the uploader of the patch set owns the path, there is an implicit code owner
+      // approval from the patch set uploader so that the path is automatically approved.
+      logger.atFine().log(
+          "the status for path %s is %s since the patch set uploader is a global code owner",
+          absolutePath, CodeOwnerStatus.APPROVED.name());
+      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+    } else if (!Collections.disjoint(approverAccountIds, globalCodeOwnerAccountIds)) {
+      // At least one of the global code owners approved the change.
+      logger.atFine().log(
+          "the status for path %s is %s since at least one global code owner approved it",
           absolutePath, CodeOwnerStatus.APPROVED.name());
       codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
     } else if (approverAccountIds.stream()
@@ -365,6 +397,7 @@ public class CodeOwnerApprovalCheck {
    */
   private PathCodeOwnerStatus getPathCodeOwnerStatusRegularMode(
       BranchNameKey branch,
+      ImmutableSet<Account.Id> globalCodeOwnerAccountIds,
       boolean enableImplicitApprovalFromUploader,
       Account.Id patchSetUploader,
       ObjectId revision,
@@ -376,63 +409,81 @@ public class CodeOwnerApprovalCheck {
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
 
-    codeOwnerConfigHierarchy.visit(
-        branch,
-        revision,
-        absolutePath,
-        codeOwnerConfig -> {
-          ImmutableSet<Account.Id> codeOwnerAccountIds =
-              getCodeOwnerAccountIds(codeOwnerConfig, absolutePath);
-          logger.atFine().log(
-              "code owners = %s (code owner config folder path = %s, file name = %s)",
-              codeOwnerAccountIds,
-              codeOwnerConfig.key().folderPath(),
-              codeOwnerConfig.key().fileName().orElse("<default>"));
+    if (enableImplicitApprovalFromUploader
+        && globalCodeOwnerAccountIds.contains(patchSetUploader)) {
+      // If the uploader of the patch set owns the path, there is an implicit code owner
+      // approval from the patch set uploader so that the path is automatically approved.
+      logger.atFine().log(
+          "the status for path %s is %s since the patch set uploader is a global code owner",
+          absolutePath, CodeOwnerStatus.APPROVED.name());
+      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+    } else if (!Collections.disjoint(approverAccountIds, globalCodeOwnerAccountIds)) {
+      // At least one of the global code owners approved the change.
+      logger.atFine().log(
+          "the status for path %s is %s since at least one global code owner approved it",
+          absolutePath, CodeOwnerStatus.APPROVED.name());
+      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+    }
 
-          if (enableImplicitApprovalFromUploader
-              && codeOwnerAccountIds.contains(patchSetUploader)) {
-            // If the uploader of the patch set owns the path, there is an implicit code owner
-            // approval from the patch set uploader so that the path is automatically approved.
+    if (!CodeOwnerStatus.APPROVED.equals(codeOwnerStatus.get())) {
+      codeOwnerConfigHierarchy.visit(
+          branch,
+          revision,
+          absolutePath,
+          codeOwnerConfig -> {
+            ImmutableSet<Account.Id> codeOwnerAccountIds =
+                getCodeOwnerAccountIds(codeOwnerConfig, absolutePath);
             logger.atFine().log(
-                "the status for path %s is %s since the patch set uploader is a code owner",
+                "code owners = %s (code owner config folder path = %s, file name = %s)",
+                codeOwnerAccountIds,
+                codeOwnerConfig.key().folderPath(),
+                codeOwnerConfig.key().fileName().orElse("<default>"));
+
+            if (enableImplicitApprovalFromUploader
+                && codeOwnerAccountIds.contains(patchSetUploader)) {
+              // If the uploader of the patch set owns the path, there is an implicit code owner
+              // approval from the patch set uploader so that the path is automatically approved.
+              logger.atFine().log(
+                  "the status for path %s is %s since the patch set uploader is a code owner",
+                  absolutePath, CodeOwnerStatus.APPROVED.name());
+              codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+
+              // We can abort since we already found that the path was approved.
+              return false;
+            }
+
+            if (Collections.disjoint(codeOwnerAccountIds, reviewerAccountIds)) {
+              // We need to continue to check if any of the higher-level code owners is a reviewer.
+              logger.atFine().log(
+                  "None of the code owners is a reviewer, continue checking higher-level code owner configs");
+              return true;
+            }
+
+            logger.atFine().log(
+                "One of the code owners is a reviewer, the path status is at least %s",
+                CodeOwnerStatus.PENDING.name());
+
+            if (Collections.disjoint(codeOwnerAccountIds, approverAccountIds)) {
+              // At least one of the code owners is a reviewer on the change.
+              logger.atFine().log(
+                  "None of the code owners is an approver, continue checking higher-level code owner configs");
+              codeOwnerStatus.set(CodeOwnerStatus.PENDING);
+
+              // We need to continue to check if any of the higher-level code owners has approved
+              // the change.
+              return true;
+            }
+
+            // At least one of the code owners approved the change.
+            logger.atFine().log(
+                "the status for path %s is %s since one of the approvers is a code owner",
                 absolutePath, CodeOwnerStatus.APPROVED.name());
             codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
 
             // We can abort since we already found that the path was approved.
             return false;
-          }
-
-          if (Collections.disjoint(codeOwnerAccountIds, reviewerAccountIds)) {
-            // We need to continue to check if any of the higher-level code owners is a reviewer.
-            logger.atFine().log(
-                "None of the code owners is a reviewer, continue checking higher-level code owner configs");
-            return true;
-          }
-
-          logger.atFine().log(
-              "One of the code owners is a reviewer, the path status is at least %s",
-              CodeOwnerStatus.PENDING.name());
-
-          if (Collections.disjoint(codeOwnerAccountIds, approverAccountIds)) {
-            // At least one of the code owners is a reviewer on the change.
-            logger.atFine().log(
-                "None of the code owners is an approver, continue checking higher-level code owner configs");
-            codeOwnerStatus.set(CodeOwnerStatus.PENDING);
-
-            // We need to continue to check if any of the higher-level code owners has approved
-            // the change.
-            return true;
-          }
-
-          // At least one of the code owners approved the change.
-          logger.atFine().log(
-              "the status for path %s is %s since one of the approvers is a code owner",
-              absolutePath, CodeOwnerStatus.APPROVED.name());
-          codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
-
-          // We can abort since we already found that the path was approved.
-          return false;
-        });
+          });
+    }
 
     PathCodeOwnerStatus pathCodeOwnerStatus =
         PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());

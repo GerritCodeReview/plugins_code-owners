@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_READ_ONLY;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -28,6 +29,7 @@ import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
@@ -273,5 +275,41 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS, "false");
     assertThat(generalConfig.getEnableImplicitApprovals(cfg)).isFalse();
+  }
+
+  @Test
+  public void cannotGetGlobalCodeOwnersForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> generalConfig.getGlobalCodeOwners(null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noGlobalCodeOwners() throws Exception {
+    assertThat(generalConfig.getGlobalCodeOwners(new Config())).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void globalCodeOwnersAreRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getGlobalCodeOwners(new Config()))
+        .containsExactly(
+            CodeOwnerReference.create("bot1@example.com"),
+            CodeOwnerReference.create("bot2@example.com"));
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void globalCodeOnwersInPluginConfigOverrideGlobalCodeOwnersInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_GLOBAL_CODE_OWNER, "bot3@example.com");
+    assertThat(generalConfig.getGlobalCodeOwners(cfg))
+        .containsExactly(CodeOwnerReference.create("bot3@example.com"));
   }
 }

@@ -19,6 +19,7 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.asse
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.hasAccountId;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
@@ -34,6 +35,7 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.nio.file.Paths;
+import java.util.Set;
 import java.util.stream.Stream;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
@@ -61,8 +63,16 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotResolveNullToCodeOwner() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwnerResolver.get().resolve(null));
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerResolver.get().resolve((CodeOwnerReference) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
+
+    npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerResolver.get().resolve((Set<CodeOwnerReference>) null));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReferences");
   }
 
   @Test
@@ -362,5 +372,18 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo")).isTrue();
     assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.com@example.org"))
         .isTrue();
+  }
+
+  @Test
+  public void resolveCodeOwnerReferences() throws Exception {
+    assertThat(
+            codeOwnerResolver
+                .get()
+                .resolve(
+                    ImmutableSet.of(
+                        CodeOwnerReference.create(admin.email()),
+                        CodeOwnerReference.create(user.email()))))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
   }
 }
