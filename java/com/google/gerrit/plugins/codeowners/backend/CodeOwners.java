@@ -16,10 +16,12 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.base.Throwables;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Optional;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
 
 /**
@@ -68,5 +70,17 @@ public class CodeOwners {
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, null);
+  }
+
+  /**
+   * Checks whether the given exception was caused by a non-parseable code owner config ({@link
+   * ConfigInvalidException}). If yes, the {@link ConfigInvalidException} is returned. If no, {@link
+   * Optional#empty()} is returned.
+   */
+  public static Optional<ConfigInvalidException> getInvalidConfigCause(Exception e) {
+    return Throwables.getCausalChain(e).stream()
+        .filter(t -> t instanceof ConfigInvalidException)
+        .map(t -> (ConfigInvalidException) t)
+        .findFirst();
   }
 }

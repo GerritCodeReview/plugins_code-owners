@@ -86,7 +86,8 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
             codeOwnerConfigs.add(codeOwnerConfigPath);
           }
           return true;
-        });
+        },
+        CodeOwnerConfigScanner.ignoreInvalidCodeOwnerConfigFiles());
     return Response.ok(
         codeOwnerConfigs.build().stream().map(Path::toString).collect(toImmutableList()));
   }

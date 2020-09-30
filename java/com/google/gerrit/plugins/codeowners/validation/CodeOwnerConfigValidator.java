@@ -17,10 +17,10 @@ package com.google.gerrit.plugins.codeowners.validation;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidConfigCause;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
@@ -520,18 +520,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           commitValidationMessage.getMessage(), ValidationMessage.Type.WARNING);
     }
     return commitValidationMessage;
-  }
-
-  /**
-   * Checks whether the given exception was caused by a non-parseable code owner config ({@link
-   * ConfigInvalidException}). If yes, the {@link ConfigInvalidException} is returned. If no, {@link
-   * Optional#empty()} is returned.
-   */
-  private static Optional<ConfigInvalidException> getInvalidConfigCause(Exception e) {
-    return Throwables.getCausalChain(e).stream()
-        .filter(t -> t instanceof ConfigInvalidException)
-        .map(t -> (ConfigInvalidException) t)
-        .findFirst();
   }
 
   /**
