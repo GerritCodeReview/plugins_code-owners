@@ -15,18 +15,22 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.nio.file.Path;
 import java.util.List;
+import org.kohsuke.args4j.Option;
 
 /**
  * REST endpoint that lists the code owner config files in a branch.
@@ -38,10 +42,21 @@ import java.util.List;
  * branch. This means the expected performance of this REST endpoint is rather low and it should not
  * be used in any critical path where performance matters.
  */
-@Singleton
 public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigScanner codeOwnerConfigScanner;
+
+  private String email;
+
+  @Option(
+      name = "--email",
+      metaVar = "EMAIL",
+      usage = "limits the returned code owner config files to those that contain this email")
+  public void setEmail(@Nullable String email) {
+    this.email = email;
+  }
 
   @Inject
   public GetCodeOwnerConfigFiles(
@@ -56,13 +71,46 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(resource.getBranchKey());
     ImmutableList.Builder<Path> codeOwnerConfigs = ImmutableList.builder();
+
+    if (email != null) {
+      logger.atFine().log(
+          "limiting the returned code owner config files to those that contain the email %s",
+          email);
+    }
+
     codeOwnerConfigScanner.visit(
         resource.getBranchKey(),
         codeOwnerConfig -> {
-          codeOwnerConfigs.add(codeOwnerBackend.getFilePath(codeOwnerConfig.key()));
+          Path codeOwnerConfigPath = codeOwnerBackend.getFilePath(codeOwnerConfig.key());
+          if (email == null || containsEmail(codeOwnerConfig, codeOwnerConfigPath, email)) {
+            codeOwnerConfigs.add(codeOwnerConfigPath);
+          }
           return true;
         });
     return Response.ok(
         codeOwnerConfigs.build().stream().map(Path::toString).collect(toImmutableList()));
+  }
+
+  /**
+   * Checks whether the given code owner config contains the given email.
+   *
+   * @param codeOwnerConfig the code owner config for which it should be checked if it contains the
+   *     email
+   * @param codeOwnerConfigPath the path of the code owner config
+   * @param email the email
+   * @return whether the given code owner config contains the given email
+   */
+  private boolean containsEmail(
+      CodeOwnerConfig codeOwnerConfig, Path codeOwnerConfigPath, String email) {
+    requireNonNull(email, "email");
+    boolean containsEmail =
+        codeOwnerConfig.codeOwnerSets().stream()
+            .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
+            .anyMatch(codeOwnerReference -> email.equals(codeOwnerReference.email()));
+    if (!containsEmail) {
+      logger.atFine().log(
+          "Filtering out %s since it doesn't contain the email", codeOwnerConfigPath);
+    }
+    return containsEmail;
   }
 }

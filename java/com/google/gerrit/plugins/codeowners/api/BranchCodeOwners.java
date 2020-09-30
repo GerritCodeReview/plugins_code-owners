@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.util.List;
 
@@ -27,6 +28,24 @@ public interface BranchCodeOwners {
   CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException;
 
   abstract class CodeOwnerConfigFilesRequest {
+    private String email;
+
+    /**
+     * Limits the returned code owner config files to those that contain the given email.
+     *
+     * @param email the email that should appear in the returned code owner config files
+     */
+    public CodeOwnerConfigFilesRequest withEmail(String email) {
+      this.email = email;
+      return this;
+    }
+
+    /** Returns the email that should appear in the returned code owner config files/ */
+    @Nullable
+    public String getEmail() {
+      return email;
+    }
+
     /** Executes the request and retrieves the paths of the requested code owner config file */
     public abstract List<String> paths() throws RestApiException;
   }

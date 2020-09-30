@@ -16,9 +16,11 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
@@ -175,6 +177,107 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .project(project)
                 .branch("master")
                 .codeOwnerConfigFiles()
+                .paths())
+        .isEmpty();
+  }
+
+  @Test
+  public void filterByEmail() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+    TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey1 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey2 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey3 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/bar/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression("foo")
+                    .addCodeOwnerEmail(user.email())
+                    .build())
+            .create();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey4 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/baz/")
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey5 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/xyz/")
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user2.email())
+            .create();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .withEmail(admin.email())
+                .paths())
+        .containsExactly(
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey2),
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey4),
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey5))
+        .inOrder();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .withEmail(user.email())
+                .paths())
+        .containsExactly(
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey1),
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey3),
+            getCodeOwnerConfigFilePath(codeOwnerConfigKey4))
+        .inOrder();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .withEmail(user2.email())
+                .paths())
+        .containsExactly(getCodeOwnerConfigFilePath(codeOwnerConfigKey5));
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .withEmail(user3.email())
                 .paths())
         .isEmpty();
   }

@@ -18,6 +18,7 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigFiles;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import java.util.List;
 
@@ -27,13 +28,14 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
     BranchCodeOwnersImpl create(BranchResource branchResource);
   }
 
-  private final GetCodeOwnerConfigFiles getCodeOwnerConfigFiles;
+  private final Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider;
   private final BranchResource branchResource;
 
   @Inject
   public BranchCodeOwnersImpl(
-      GetCodeOwnerConfigFiles getCodeOwnerConfigFiles, @Assisted BranchResource branchResource) {
-    this.getCodeOwnerConfigFiles = getCodeOwnerConfigFiles;
+      Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider,
+      @Assisted BranchResource branchResource) {
+    this.getCodeOwnerConfigFilesProvider = getCodeOwnerConfigFilesProvider;
     this.branchResource = branchResource;
   }
 
@@ -42,6 +44,8 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
     return new CodeOwnerConfigFilesRequest() {
       @Override
       public List<String> paths() throws RestApiException {
+        GetCodeOwnerConfigFiles getCodeOwnerConfigFiles = getCodeOwnerConfigFilesProvider.get();
+        getCodeOwnerConfigFiles.setEmail(getEmail());
         return getCodeOwnerConfigFiles.apply(branchResource).value();
       }
     };
