@@ -14,7 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Project-level Java API of the code-owners plugin.
@@ -24,6 +27,19 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 public interface ProjectCodeOwners {
   /** Returns the code owner project configuration. */
   CodeOwnerProjectConfigInfo getConfig() throws RestApiException;
+
+  /** Create a request to check the code owner config files in the project. */
+  CheckCodeOwnerConfigFilesRequest checkCodeOwnerConfigFiles() throws RestApiException;
+
+  /** Request to check code owner config files. */
+  abstract class CheckCodeOwnerConfigFilesRequest {
+    /**
+     * Executes the request to check the code owner config files and retrieves the result of the
+     * validation.
+     */
+    public abstract Map<String, Map<String, List<ConsistencyProblemInfo>>> check()
+        throws RestApiException;
+  }
 
   /** Returns the branch-level code owners API for the given branch. */
   BranchCodeOwners branch(String branchName) throws RestApiException;

@@ -130,7 +130,8 @@ public class CodeOwnerConfigScanner {
           }
 
           // The code owner config is invalid and cannot be parsed.
-          invalidCodeOwnerConfigCallback.onInvalidCodeOwnerConfig(folderPath.resolve(fileName));
+          invalidCodeOwnerConfigCallback.onInvalidCodeOwnerConfig(
+              folderPath.resolve(fileName), configInvalidException.get());
           continue;
         }
 
@@ -181,11 +182,7 @@ public class CodeOwnerConfigScanner {
    * config files.
    */
   public static InvalidCodeOwnerConfigCallback ignoreInvalidCodeOwnerConfigFiles() {
-    return new InvalidCodeOwnerConfigCallback() {
-      @Override
-      public void onInvalidCodeOwnerConfig(Path codeOwnerConfigFilePath) {
+    return (codeOwnerConfigFilePath, configInvalidException) ->
         logger.atFine().log("ignoring invalid code owner config file %s", codeOwnerConfigFilePath);
-      }
-    };
   }
 }
