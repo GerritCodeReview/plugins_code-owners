@@ -344,8 +344,7 @@ public class CodeOwnerApprovalCheck {
       Path absolutePath) {
     logger.atFine().log("computing path status for %s (bootstrapping mode)", absolutePath);
 
-    AtomicReference<CodeOwnerStatus> codeOwnerStatus =
-        new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    CodeOwnerStatus codeOwnerStatus = CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
 
     if (enableImplicitApprovalFromUploader && isProjectOwner(branch.project(), patchSetUploader)) {
       // The uploader of the patch set is a project owner and thus a code owner. This means there
@@ -354,7 +353,7 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log(
           "the status for path %s is %s since the patch set uploader is a project owner",
           absolutePath, CodeOwnerStatus.APPROVED.name());
-      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+      codeOwnerStatus = CodeOwnerStatus.APPROVED;
     } else if (enableImplicitApprovalFromUploader
         && globalCodeOwnerAccountIds.contains(patchSetUploader)) {
       // If the uploader of the patch set is a global code owner, there is an implicit code owner
@@ -362,31 +361,31 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log(
           "the status for path %s is %s since the patch set uploader is a global code owner",
           absolutePath, CodeOwnerStatus.APPROVED.name());
-      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+      codeOwnerStatus = CodeOwnerStatus.APPROVED;
     } else if (!Collections.disjoint(approverAccountIds, globalCodeOwnerAccountIds)) {
       // At least one of the global code owners approved the change.
       logger.atFine().log(
           "the status for path %s is %s since at least one global code owner approved it",
           absolutePath, CodeOwnerStatus.APPROVED.name());
-      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+      codeOwnerStatus = CodeOwnerStatus.APPROVED;
     } else if (approverAccountIds.stream()
         .anyMatch(approverAccountId -> isProjectOwner(branch.project(), approverAccountId))) {
       // At least one of the approvers is a project owner and thus a code owner.
       logger.atFine().log(
           "the status for path %s is %s since at least one approvers is a project owner",
           absolutePath, CodeOwnerStatus.APPROVED.name());
-      codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+      codeOwnerStatus = CodeOwnerStatus.APPROVED;
     } else if (reviewerAccountIds.stream()
         .anyMatch(reviewerAccountId -> isProjectOwner(branch.project(), reviewerAccountId))) {
       // At least one of the reviewers is a project owner and thus a code owner.
       logger.atFine().log(
           "the status for path %s is %s since at least one reviewer is a project owner",
           absolutePath, CodeOwnerStatus.PENDING.name());
-      codeOwnerStatus.set(CodeOwnerStatus.PENDING);
+      codeOwnerStatus = CodeOwnerStatus.PENDING;
     }
 
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
+        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus);
     logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
     return pathCodeOwnerStatus;
   }
