@@ -68,6 +68,13 @@ expected that it can take a long time if the branch contains many files. This is
 why this REST endpoint must not be used in any critical paths where performance
 matters.
 
+The following request parameters can be specified:
+
+| Field Name  |          | Description |
+| ----------- | -------- | ----------- |
+| `email`     | optional | Code owner email that must appear in the returned
+code owner config files.
+
 #### Request
 
 ```
