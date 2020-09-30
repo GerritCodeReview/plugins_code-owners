@@ -85,6 +85,8 @@ As response the paths of the code owner config files are returned as a list. The
 result also includes code owner config that use name prefixes
 ('\<prefix\>_OWNERS') or name extensions ('OWNERS_\<extension\>').
 
+Non-parseable code owner config files are omitted from the response.
+
 #### Response
 
 ```
