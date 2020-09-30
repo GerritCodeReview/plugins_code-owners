@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "84532e13_ae2ffd82",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-09-30T07:46:00Z",
+      "side": 1,
+      "message": "Done in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/282693",
+      "parentUuid": "db69c4bb_e7842e30",
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "6ea52632_a542cb5b",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 1
