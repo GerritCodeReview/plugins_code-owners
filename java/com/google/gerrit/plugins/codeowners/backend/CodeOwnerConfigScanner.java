@@ -15,8 +15,10 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidConfigCause;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
@@ -30,6 +32,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -40,6 +43,8 @@ import org.eclipse.jgit.treewalk.filter.TreeFilter;
 /** Class to scan a branch for code owner config files. */
 @Singleton
 public class CodeOwnerConfigScanner {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
 
@@ -66,7 +71,8 @@ public class CodeOwnerConfigScanner {
         codeOwnerConfig -> {
           found.set(true);
           return false;
-        });
+        },
+        ignoreInvalidCodeOwnerConfigFiles());
     return found.get();
   }
 
@@ -77,9 +83,13 @@ public class CodeOwnerConfigScanner {
    *     visited
    * @param codeOwnerConfigVisitor the callback that is invoked for each code owner config file
    */
-  public void visit(BranchNameKey branchNameKey, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
+  public void visit(
+      BranchNameKey branchNameKey,
+      CodeOwnerConfigVisitor codeOwnerConfigVisitor,
+      InvalidCodeOwnerConfigCallback invalidCodeOwnerConfigCallback) {
     requireNonNull(branchNameKey, "branchNameKey");
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
+    requireNonNull(invalidCodeOwnerConfigCallback, "invalidCodeOwnerConfigCallback");
 
     CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
 
@@ -107,8 +117,23 @@ public class CodeOwnerConfigScanner {
         String fileName = filePath.getFileName().toString();
         CodeOwnerConfig.Key codeOwnerConfigKey =
             CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
-        Optional<CodeOwnerConfig> codeOwnerConfig =
-            codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
+        Optional<CodeOwnerConfig> codeOwnerConfig;
+
+        try {
+          codeOwnerConfig = codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
+        } catch (StorageException storageException) {
+          Optional<ConfigInvalidException> configInvalidException =
+              getInvalidConfigCause(storageException);
+          if (!configInvalidException.isPresent()) {
+            // Propagate any failure that is not related to the contents of the code owner config.
+            throw storageException;
+          }
+
+          // The code owner config is invalid and cannot be parsed.
+          invalidCodeOwnerConfigCallback.onInvalidCodeOwnerConfig(folderPath.resolve(fileName));
+          continue;
+        }
+
         checkState(codeOwnerConfig.isPresent(), "code owner config %s not found", codeOwnerConfig);
         boolean visitFurtherCodeOwnerConfigFiles =
             codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
@@ -147,6 +172,19 @@ public class CodeOwnerConfigScanner {
       @Override
       public TreeFilter clone() {
         return this;
+      }
+    };
+  }
+
+  /**
+   * Returns an {@link InvalidCodeOwnerConfigCallback} instance that ignores invalid code owner
+   * config files.
+   */
+  public static InvalidCodeOwnerConfigCallback ignoreInvalidCodeOwnerConfigFiles() {
+    return new InvalidCodeOwnerConfigCallback() {
+      @Override
+      public void onInvalidCodeOwnerConfig(Path codeOwnerConfigFilePath) {
+        logger.atFine().log("ignoring invalid code owner config file %s", codeOwnerConfigFilePath);
       }
     };
   }

@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -24,6 +25,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -182,6 +184,28 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void getCodeOwnerConfigFilesIfInvalidCodeOwnerConfigFilesExist() throws Exception {
+    createInvalidCodeOwnerConfig(getCodeOwnerConfigFileName());
+
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .paths())
+        .containsExactly(getCodeOwnerConfigFilePath(codeOwnerConfigKey));
+  }
+
+  @Test
   public void filterByEmail() throws Exception {
     TestAccount user2 = accountCreator.user2();
     TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
@@ -294,5 +318,15 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
       return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
     }
     throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
+  }
+
+  private void createInvalidCodeOwnerConfig(String path) throws Exception {
+    disableCodeOwnersForProject(project);
+    String changeId =
+        createChange("Add invalid code owners file", JgitPath.of(path).get(), "INVALID")
+            .getChangeId();
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
   }
 }

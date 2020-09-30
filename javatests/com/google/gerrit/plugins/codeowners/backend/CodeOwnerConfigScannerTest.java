@@ -23,8 +23,11 @@ import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import java.nio.file.Paths;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -44,6 +47,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   @Rule public final MockitoRule mockito = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Mock private CodeOwnerConfigVisitor visitor;
+  @Mock private InvalidCodeOwnerConfigCallback invalidCodeOwnerConfigCallback;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
   private CodeOwnerConfigScanner codeOwnerConfigScanner;
@@ -58,7 +62,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotVisitCodeOwnerConfigsForNullBranch() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwnerConfigScanner.visit(null, visitor));
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerConfigScanner.visit(null, visitor, invalidCodeOwnerConfigCallback));
     assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
   }
 
@@ -67,8 +73,20 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     BranchNameKey branchNameKey = BranchNameKey.create(project, "master");
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> codeOwnerConfigScanner.visit(branchNameKey, null));
+            NullPointerException.class,
+            () ->
+                codeOwnerConfigScanner.visit(branchNameKey, null, invalidCodeOwnerConfigCallback));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
+  }
+
+  @Test
+  public void cannotVisitCodeOwnerConfigsWithNullCallback() throws Exception {
+    BranchNameKey branchNameKey = BranchNameKey.create(project, "master");
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerConfigScanner.visit(branchNameKey, visitor, null));
+    assertThat(npe).hasMessageThat().isEqualTo("invalidCodeOwnerConfigCallback");
   }
 
   @Test
@@ -77,7 +95,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> codeOwnerConfigScanner.visit(branchNameKey, visitor));
+            () ->
+                codeOwnerConfigScanner.visit(
+                    branchNameKey, visitor, invalidCodeOwnerConfigCallback));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -89,6 +109,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   public void visitorNotInvokedIfNoCodeOwnerConfigFilesExists() throws Exception {
     visit();
     verifyZeroInteractions(visitor);
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -112,6 +133,48 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
 
     visit();
     verifyZeroInteractions(visitor);
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+  }
+
+  @Test
+  public void visitorNotInvokedForInvalidCodeOwnerConfigFiles() throws Exception {
+    createInvalidCodeOwnerConfig("/OWNERS");
+
+    visit();
+    verifyZeroInteractions(visitor);
+
+    // Verify that we received the expected callbacks for the invalid code onwer config.
+    Mockito.verify(invalidCodeOwnerConfigCallback).onInvalidCodeOwnerConfig(Paths.get("/OWNERS"));
+    verifyNoMoreInteractions(invalidCodeOwnerConfigCallback);
+  }
+
+  @Test
+  public void visitorInvokedForValidCodeOwnerConfigFilesEvenIfInvalidCodeOwnerConfigFileExist()
+      throws Exception {
+    createInvalidCodeOwnerConfig("/OWNERS");
+
+    // Create a valid code owner config file.
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .fileName("OWNERS")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit();
+
+    // Verify that we received the expected callbacks.
+    Mockito.verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+
+    // Verify that we received the expected callbacks for the invalid code onwer config.
+    Mockito.verify(invalidCodeOwnerConfigCallback).onInvalidCodeOwnerConfig(Paths.get("/OWNERS"));
+    verifyNoMoreInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -200,6 +263,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     Mockito.verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -249,6 +314,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -297,6 +364,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -324,7 +393,37 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .isTrue();
   }
 
+  @Test
+  public void containsACodeOwnerConfigFile_invalidCodeOwnerConfigFileExists() throws Exception {
+    createInvalidCodeOwnerConfig("/OWNERS");
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .fileName("OWNERS")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    assertThat(
+            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
+                BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
   private void visit() {
-    codeOwnerConfigScanner.visit(BranchNameKey.create(project, "master"), visitor);
+    codeOwnerConfigScanner.visit(
+        BranchNameKey.create(project, "master"), visitor, invalidCodeOwnerConfigCallback);
+  }
+
+  private void createInvalidCodeOwnerConfig(String path) throws Exception {
+    disableCodeOwnersForProject(project);
+    String changeId =
+        createChange("Add invalid code owners file", JgitPath.of(path).get(), "INVALID")
+            .getChangeId();
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
   }
 }
