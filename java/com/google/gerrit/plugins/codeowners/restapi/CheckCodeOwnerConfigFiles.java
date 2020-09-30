@@ -1,0 +1,170 @@
+// Copyright (C) 2020 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package com.google.gerrit.plugins.codeowners.restapi;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Multimaps;
+import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
+import com.google.gerrit.extensions.common.Input;
+import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.extensions.restapi.Response;
+import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.extensions.restapi.RestModifyView;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
+import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator;
+import com.google.gerrit.server.CurrentUser;
+import com.google.gerrit.server.git.validators.CommitValidationMessage;
+import com.google.gerrit.server.permissions.PermissionBackend;
+import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.permissions.ProjectPermission;
+import com.google.gerrit.server.project.ProjectResource;
+import com.google.gerrit.server.restapi.project.ListBranches;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+/**
+ * REST endpoint that checks/validates the code owner config files in a project.
+ *
+ * <p>This REST endpoint handles {@code POST
+ * /projects/<project-name>/branches/<branch-name>/code_owners.check_config} requests.
+ *
+ * <p>The implementation of this REST endpoint iterates over all code owner config files in the
+ * project. This means the expected performance of this REST endpoint is rather low and it should
+ * not be used in any critical path where performance matters.
+ */
+@Singleton
+public class CheckCodeOwnerConfigFiles implements RestModifyView<ProjectResource, Input> {
+  private final CurrentUser currentUser;
+  private final PermissionBackend permissionBackend;
+  private final Provider<ListBranches> listBranches;
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final CodeOwnerConfigScanner codeOwnerConfigScanner;
+  private final CodeOwnerConfigValidator codeOwnerConfigValidator;
+
+  @Inject
+  public CheckCodeOwnerConfigFiles(
+      CurrentUser currentUser,
+      PermissionBackend permissionBackend,
+      Provider<ListBranches> listBranches,
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerConfigScanner codeOwnerConfigScanner,
+      CodeOwnerConfigValidator codeOwnerConfigValidator) {
+    this.currentUser = currentUser;
+    this.permissionBackend = permissionBackend;
+    this.listBranches = listBranches;
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.codeOwnerConfigScanner = codeOwnerConfigScanner;
+    this.codeOwnerConfigValidator = codeOwnerConfigValidator;
+  }
+
+  @Override
+  public Response<Map<String, Map<String, List<ConsistencyProblemInfo>>>> apply(
+      ProjectResource projectResource, Input input)
+      throws RestApiException, PermissionBackendException, IOException {
+    if (!currentUser.isIdentifiedUser()) {
+      throw new AuthException("Authentication required");
+    }
+
+    // This REST endpoint requires the caller to be a project owner.
+    permissionBackend
+        .currentUser()
+        .project(projectResource.getNameKey())
+        .check(ProjectPermission.WRITE_CONFIG);
+
+    ImmutableMap.Builder<String, Map<String, List<ConsistencyProblemInfo>>> resultsByBranchBuilder =
+        ImmutableMap.builder();
+    branches(projectResource)
+        .filter(branchNameKey -> !codeOwnersPluginConfiguration.isDisabled(branchNameKey))
+        .forEach(
+            branchNameKey ->
+                resultsByBranchBuilder.put(branchNameKey.branch(), checkBranch(branchNameKey)));
+    return Response.ok(resultsByBranchBuilder.build());
+  }
+
+  private Stream<BranchNameKey> branches(ProjectResource projectResource)
+      throws RestApiException, IOException, PermissionBackendException {
+    return listBranches.get().apply(projectResource).value().stream()
+        .filter(branchInfo -> !"HEAD".equals(branchInfo.ref))
+        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref));
+  }
+
+  private Map<String, List<ConsistencyProblemInfo>> checkBranch(BranchNameKey branchNameKey) {
+    ListMultimap<String, ConsistencyProblemInfo> problemsByPath = LinkedListMultimap.create();
+    CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
+    codeOwnerConfigScanner.visit(
+        branchNameKey,
+        codeOwnerConfig -> {
+          problemsByPath.putAll(
+              codeOwnerBackend.getFilePath(codeOwnerConfig.key()).toString(),
+              checkCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig));
+          return true;
+        },
+        (codeOwnerConfigFilePath, configInvalidException) -> {
+          problemsByPath.put(
+              codeOwnerConfigFilePath.toString(),
+              new ConsistencyProblemInfo(
+                  ConsistencyProblemInfo.Status.ERROR, configInvalidException.getMessage()));
+        });
+
+    return Multimaps.asMap(problemsByPath);
+  }
+
+  private ImmutableList<ConsistencyProblemInfo> checkCodeOwnerConfig(
+      CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
+    return codeOwnerConfigValidator
+        .validateCodeOwnerConfig(currentUser.asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
+        .map(this::createConsistencyProblemInfo)
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(toImmutableList());
+  }
+
+  private Optional<ConsistencyProblemInfo> createConsistencyProblemInfo(
+      CommitValidationMessage commitValidationMessage) {
+    switch (commitValidationMessage.getType()) {
+      case ERROR:
+        return Optional.of(
+            new ConsistencyProblemInfo(
+                ConsistencyProblemInfo.Status.ERROR, commitValidationMessage.getMessage()));
+      case WARNING:
+        return Optional.of(
+            new ConsistencyProblemInfo(
+                ConsistencyProblemInfo.Status.WARNING, commitValidationMessage.getMessage()));
+      case HINT:
+      case OTHER:
+        return Optional.empty();
+    }
+
+    throw new IllegalStateException(
+        String.format(
+            "unknown message type %s for message %s",
+            commitValidationMessage.getType(), commitValidationMessage.getMessage()));
+  }
+}

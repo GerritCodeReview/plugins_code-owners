@@ -16,14 +16,19 @@ package com.google.gerrit.plugins.codeowners.api;
 
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
+import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
+import com.google.gerrit.extensions.common.Input;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFiles;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerProjectConfig;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.project.ProjectResource;
 import com.google.gerrit.server.restapi.project.BranchesCollection;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import java.util.List;
+import java.util.Map;
 
 /** Implementation of the {@link ProjectCodeOwners} API. */
 public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
@@ -34,6 +39,7 @@ public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
   private final BranchesCollection branchesCollection;
   private final BranchCodeOwnersImpl.Factory branchCodeOwnersApi;
   private final GetCodeOwnerProjectConfig getCodeOwnerProjectConfig;
+  private final CheckCodeOwnerConfigFiles checkCodeOwnerConfigFiles;
   private final ProjectResource projectResource;
 
   @Inject
@@ -41,10 +47,12 @@ public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
       BranchesCollection branchesCollection,
       BranchCodeOwnersImpl.Factory branchCodeOwnersApi,
       GetCodeOwnerProjectConfig getCodeOwnerProjectConfig,
+      CheckCodeOwnerConfigFiles checkCodeOwnerConfigFiles,
       @Assisted ProjectResource projectResource) {
     this.branchesCollection = branchesCollection;
     this.branchCodeOwnersApi = branchCodeOwnersApi;
     this.getCodeOwnerProjectConfig = getCodeOwnerProjectConfig;
+    this.checkCodeOwnerConfigFiles = checkCodeOwnerConfigFiles;
     this.projectResource = projectResource;
   }
 
@@ -66,5 +74,20 @@ public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
     } catch (Exception e) {
       throw asRestApiException("Cannot get code owner project config", e);
     }
+  }
+
+  @Override
+  public CheckCodeOwnerConfigFilesRequest checkCodeOwnerConfigFiles() throws RestApiException {
+    return new CheckCodeOwnerConfigFilesRequest() {
+      @Override
+      public Map<String, Map<String, List<ConsistencyProblemInfo>>> check()
+          throws RestApiException {
+        try {
+          return checkCodeOwnerConfigFiles.apply(projectResource, new Input()).value();
+        } catch (Exception e) {
+          throw asRestApiException("Cannot check code owner config files", e);
+        }
+      }
+    };
   }
 }

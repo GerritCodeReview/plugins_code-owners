@@ -349,6 +349,11 @@ configuration is [validated](validation.html) on upload, which prevents
 submitting an invalid code owner config that may block the submission of all
 changes (e.g. if it is not parseable).
 
+**NOTE** If the repository contains pre-existing code owner config files, it is
+recommended to validate them via the [Check code owners files REST
+endpoint](rest-api.html#check-code-owner-config-files) and fix the reported
+issues.
+
 ### <a id="faq">FAQ's
 
 ##### <a id="updateCodeOwnersConfig">How to update the code-owners.config file for a project

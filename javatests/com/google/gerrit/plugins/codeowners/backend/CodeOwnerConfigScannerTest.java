@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -28,6 +29,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import java.nio.file.Paths;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -144,7 +146,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     verifyZeroInteractions(visitor);
 
     // Verify that we received the expected callbacks for the invalid code onwer config.
-    Mockito.verify(invalidCodeOwnerConfigCallback).onInvalidCodeOwnerConfig(Paths.get("/OWNERS"));
+    Mockito.verify(invalidCodeOwnerConfigCallback)
+        .onInvalidCodeOwnerConfig(eq(Paths.get("/OWNERS")), any(ConfigInvalidException.class));
     verifyNoMoreInteractions(invalidCodeOwnerConfigCallback);
   }
 
@@ -173,7 +176,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     verifyNoMoreInteractions(visitor);
 
     // Verify that we received the expected callbacks for the invalid code onwer config.
-    Mockito.verify(invalidCodeOwnerConfigCallback).onInvalidCodeOwnerConfig(Paths.get("/OWNERS"));
+    Mockito.verify(invalidCodeOwnerConfigCallback)
+        .onInvalidCodeOwnerConfig(eq(Paths.get("/OWNERS")), any(ConfigInvalidException.class));
     verifyNoMoreInteractions(invalidCodeOwnerConfigCallback);
   }
 

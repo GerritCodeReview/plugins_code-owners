@@ -56,6 +56,68 @@ entity is returned that describes the code owner project configuration.
   }
 ```
 
+### <a id="check-code-owner-config-files">Check Code Owner Config Files
+_'POST /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/code_owners.check_config'_
+
+Checks/validates the code owner config files in a project.
+
+Requires that the caller is an owner of the project.
+
+No validation is done for branches for which the code owner functionality is
+[disabled](config.html#codeOwnersDisabledBranch).
+
+As a response a map is returned that maps a branch name to a map that maps an
+owner configuration file path to a list of
+[ConsistencyProblemInfo](../../../Documentation/rest-api-config.html#consistency-problem-info)
+entities.
+
+Code owner config files that have no issues are omitted from the response.
+
+#### Request
+
+```
+  POST /projects/foo%2Fbar/code_owners.check_config HTTP/1.0
+```
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "refs/heads/master": {
+      "/OWNERS": [
+        {
+          "status": "ERROR",
+          "message": "code owner email 'foo@example.com' in '/OWNERS' cannot be resolved for John Doe"
+        },
+        {
+          "status": "ERROR",
+          "message": "code owner email 'bar@example.com' in '/OWNERS' cannot be resolved for John Doe"
+        }
+      ],
+      "/foo/OWNERS": [
+        {
+          "status": "ERROR",
+          "message": "invalid global import in '/foo/OWNERS': '/not-a-code-owner-config' is not a code owner config file"
+        }
+      ]
+    },
+    "refs/heads/stable-1.0" {},
+    "refs/heads/stable-1.1" {
+      "/foo/OWNERS": [
+        {
+          "status": "ERROR",
+          "message": "invalid global import in '/foo/OWNERS': '/not-a-code-owner-config' is not a code owner config file"
+        }
+      ]
+    }
+  }
+```
+
 ## <a id="branch-endpoints">Branch Endpoints
 
 ### <a id="list-code-owner-config-files">List Code Owner Config Files

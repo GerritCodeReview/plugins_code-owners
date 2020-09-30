@@ -9,7 +9,9 @@ The code owners functionality relies on the validity of the following:
   configuration of the `@PLUGIN@` plugin
 
 To reduce the risk that these files become invalid, they are validated when
-they are modified and invalid modifications are rejected.
+they are modified and invalid modifications are rejected. In addition code owner
+config files in a repository can be validated on demand by the [Check code
+owners files REST endpoint](rest-api.html#check-code-owner-config-files).
 
 **NOTE:** Most configuration issues are gracefully handled and do not break the
 code owners functionality (e.g. non-resolveable code owners or non-resolveable
