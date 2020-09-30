@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "90eb725f_3fa41c0e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-09-30T14:29:17Z",
+      "side": 1,
+      "message": "maybe for such a case you would want to randomize the returned global code owners, or choose ordering for them to be returned based on some scoring (maybe even delegate to \"suggest reviewers\" and take some combination, but that probably has some latency issues).",
+      "parentUuid": "99b94105_52a3d30d",
+      "range": {
+        "startLine": 148,
+        "startChar": 17,
+        "endLine": 148,
+        "endChar": 23
+      },
+      "revId": "ea571caaf4a4b1cd27b1665cb8d547e1db1e1fab",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "24722e76_9d006418",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
         "patchSetId": 1
