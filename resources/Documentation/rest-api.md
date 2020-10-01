@@ -63,8 +63,13 @@ Checks/validates the code owner config files in a project.
 
 Requires that the caller is an owner of the project.
 
+Input options can be set in the request body as a
+[CheckCodeOwnerConfigFilesInput](#check-code-owner-config-files-input) entity.
+
 No validation is done for branches for which the code owner functionality is
-[disabled](config.html#codeOwnersDisabledBranch).
+[disabled](config.html#codeOwnersDisabledBranch), unless
+`validate_disabled_branches` is set to `true` in the
+[input](#check-code-owner-config-files-input).
 
 As a response a map is returned that maps a branch name to a map that maps an
 owner configuration file path to a list of
@@ -367,6 +372,16 @@ The `BackendInfo` entity describes the code owner backend configuration.
 | --------------- | -------- | ----------- |
 | `id`            || ID of the code owner backend that is configured for the project.
 | `ids_by_branch` | optional | IDs of the code owner backends that are configured for individual branches as map of full branch names to code owner backend IDs. Only contains entries for branches for which a code owner backend is configured that differs from the backend that is configured for the project (see `id` field). Configurations for non-existing and non-visible branches are omitted. Not set if no branch specific backend configuration is returned.
+
+---
+
+### <a id="check-code-owner-config-files-input"> CheckCodeOwnerConfigFilesInput
+The `CheckCodeOwnerConfigFilesInput` allows to set options for the [Check Code
+Owner Config Files REST endpoint](#check-code-owner-config-files).
+
+| Field Name                   |          | Description |
+| ---------------------------- | -------- | ----------- |
+| `validate_disabled_branches` | optional | Whether code owner config files in branches for which the code owners functionality should be validated too. By default unset, `false`.
 
 ---
 

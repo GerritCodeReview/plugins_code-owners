@@ -33,6 +33,34 @@ public interface ProjectCodeOwners {
 
   /** Request to check code owner config files. */
   abstract class CheckCodeOwnerConfigFilesRequest {
+    private boolean validateDisabledBranches;
+
+    /**
+     * Includes code owner config files in branches for which the code owners functionality is
+     * disabled into the validation.
+     */
+    public CheckCodeOwnerConfigFilesRequest validateDisabledBranches() {
+      return validateDisabledBranches(true);
+    }
+
+    /**
+     * Sets whether code owner config files in branches for which the code owners functionality is
+     * disabled should be validated.
+     */
+    public CheckCodeOwnerConfigFilesRequest validateDisabledBranches(
+        boolean validateDisabledBranches) {
+      this.validateDisabledBranches = validateDisabledBranches;
+      return this;
+    }
+
+    /**
+     * Whether code owner config files in branches for which the code owners functionality is
+     * disabled should be validated.
+     */
+    public boolean isValidateDisabledBranches() {
+      return validateDisabledBranches;
+    }
+
     /**
      * Executes the request to check the code owner config files and retrieves the result of the
      * validation.
