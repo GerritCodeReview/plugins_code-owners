@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import java.util.List;
+
 /**
  * The input for the {@link com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFiles}
  * REST endpoint.
@@ -26,4 +28,14 @@ public class CheckCodeOwnerConfigFilesInput {
    * <p>By default unset, {@code false}.
    */
   public Boolean validateDisabledBranches;
+
+  /**
+   * Branches for which code owner config files should be validated.
+   *
+   * <p>The {@code refs/heads/} prefix may be omitted.
+   *
+   * <p>By default unset, which means that code owner config files in all branches should be
+   * validated.
+   */
+  public List<String> branches;
 }

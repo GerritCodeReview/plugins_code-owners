@@ -382,6 +382,7 @@ Owner Config Files REST endpoint](#check-code-owner-config-files).
 | Field Name                   |          | Description |
 | ---------------------------- | -------- | ----------- |
 | `validate_disabled_branches` | optional | Whether code owner config files in branches for which the code owners functionality is disabled should be validated too. By default unset, `false`.
+| `branches`                   | optional | List of branches for which code owner config files should be validated. The `refs/heads/` prefix may be omitted. By default unset, which means that code owner config files in all branches should be validated.
 
 ---
 
