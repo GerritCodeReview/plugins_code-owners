@@ -24,8 +24,11 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
+import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.extensions.restapi.UnprocessableEntityException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
@@ -207,6 +210,86 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                                         + " resolved for admin",
                                     getCodeOwnerConfigFilePath(keyOfInvalidConfig2))))),
             "refs/meta/config", ImmutableMap.of());
+  }
+
+  @Test
+  public void validateSpecifiedBranches() throws Exception {
+    gApi.projects().name(project.get()).branch("stable-1.0").create(new BranchInput());
+    gApi.projects().name(project.get()).branch("stable-1.1").create(new BranchInput());
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .checkCodeOwnerConfigFiles()
+                .setBranches(ImmutableList.of("refs/heads/stable-1.0", "refs/heads/stable-1.1"))
+                .check())
+        .containsExactly(
+            "refs/heads/stable-1.0", ImmutableMap.of(),
+            "refs/heads/stable-1.1", ImmutableMap.of());
+  }
+
+  @Test
+  public void validateSpecifiedBranches_shortNames() throws Exception {
+    gApi.projects().name(project.get()).branch("stable-1.0").create(new BranchInput());
+    gApi.projects().name(project.get()).branch("stable-1.1").create(new BranchInput());
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .checkCodeOwnerConfigFiles()
+                .setBranches(ImmutableList.of("stable-1.0", "stable-1.1"))
+                .check())
+        .containsExactly(
+            "refs/heads/stable-1.0", ImmutableMap.of(),
+            "refs/heads/stable-1.1", ImmutableMap.of());
+  }
+
+  @Test
+  public void cannotValidateNonExistingBranch() throws Exception {
+    UnprocessableEntityException exception =
+        assertThrows(
+            UnprocessableEntityException.class,
+            () ->
+                projectCodeOwnersApiFactory
+                    .project(project)
+                    .checkCodeOwnerConfigFiles()
+                    .setBranches(ImmutableList.of("refs/heads/non-existing"))
+                    .check());
+    assertThat(exception).hasMessageThat().isEqualTo("branch refs/heads/non-existing not found");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/meta/config")
+  public void cannotValidateDisabledBranchWithoutEnablingValidationForDisabledBranches()
+      throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                projectCodeOwnersApiFactory
+                    .project(project)
+                    .checkCodeOwnerConfigFiles()
+                    .setBranches(ImmutableList.of("refs/meta/config"))
+                    .check());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "code owners functionality for branch refs/meta/config is disabled,"
+                + " set 'validate_disabled_braches' in the input to 'true' if code owner config"
+                + " files in this branch should be validated");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/meta/config")
+  public void validateSpecifiedBranchThatIsDisabled() throws Exception {
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .checkCodeOwnerConfigFiles()
+                .validateDisabledBranches()
+                .setBranches(ImmutableList.of("refs/meta/config"))
+                .check())
+        .containsExactly("refs/meta/config", ImmutableMap.of());
   }
 
   private ConsistencyProblemInfo error(String message) {
