@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.api;
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
-import com.google.gerrit.extensions.common.Input;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFiles;
@@ -83,7 +82,9 @@ public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
       public Map<String, Map<String, List<ConsistencyProblemInfo>>> check()
           throws RestApiException {
         try {
-          return checkCodeOwnerConfigFiles.apply(projectResource, new Input()).value();
+          CheckCodeOwnerConfigFilesInput input = new CheckCodeOwnerConfigFilesInput();
+          input.validateDisabledBranches = isValidateDisabledBranches();
+          return checkCodeOwnerConfigFiles.apply(projectResource, input).value();
         } catch (Exception e) {
           throw asRestApiException("Cannot check code owner config files", e);
         }

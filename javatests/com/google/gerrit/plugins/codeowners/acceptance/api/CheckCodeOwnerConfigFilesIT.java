@@ -85,6 +85,20 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/meta/config")
+  public void validateDisabledBranches() throws Exception {
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .checkCodeOwnerConfigFiles()
+                .validateDisabledBranches()
+                .check())
+        .containsExactly(
+            "refs/heads/master", ImmutableMap.of(),
+            "refs/meta/config", ImmutableMap.of());
+  }
+
+  @Test
   public void noIssuesInCodeOwnerConfigFile() throws Exception {
     // Create some code owner config files.
     codeOwnerConfigOperations
