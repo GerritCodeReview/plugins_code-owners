@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "69e83ee6_bd262f01",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-01T08:33:03Z",
+      "side": 1,
+      "message": "Limiting, randomising and sorting is already handled below by the sortAndLimit call in line 154 :)\n\nHowever by not setting any distance score for global code owners, by default we used 0 as distance score for them. This is the same distance score that we use for code owners that are defined in the root folder and hence the order between root owners and global owners was random. To make sure that root owners are always returned before global owners, I\u0027ve increased the max distance range by 1 now, so that global code owners get 0 and root code owners get 1, and the order between them is fixed now.",
+      "parentUuid": "90eb725f_3fa41c0e",
+      "range": {
+        "startLine": 148,
+        "startChar": 17,
+        "endLine": 148,
+        "endChar": 23
+      },
+      "revId": "ea571caaf4a4b1cd27b1665cb8d547e1db1e1fab",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "24722e76_9d006418",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
         "patchSetId": 1
@@ -63,6 +87,24 @@
       "revId": "ea571caaf4a4b1cd27b1665cb8d547e1db1e1fab",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80145c50_8d490a4d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 634,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-01T08:33:03Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "24722e76_9d006418",
+      "revId": "ea571caaf4a4b1cd27b1665cb8d547e1db1e1fab",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
