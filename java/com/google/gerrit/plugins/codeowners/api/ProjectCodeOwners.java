@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.common.collect.ImmutableList;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.util.List;
@@ -34,6 +36,7 @@ public interface ProjectCodeOwners {
   /** Request to check code owner config files. */
   abstract class CheckCodeOwnerConfigFilesRequest {
     private boolean validateDisabledBranches;
+    private ImmutableList<String> branches;
 
     /**
      * Includes code owner config files in branches for which the code owners functionality is
@@ -59,6 +62,22 @@ public interface ProjectCodeOwners {
      */
     public boolean isValidateDisabledBranches() {
       return validateDisabledBranches;
+    }
+
+    /** Sets the branches for which code owner config files should be validated. */
+    public CheckCodeOwnerConfigFilesRequest setBranches(List<String> branches) {
+      this.branches = ImmutableList.copyOf(branches);
+      return this;
+    }
+
+    /**
+     * Gets the branches for which code owner config files should be validated.
+     *
+     * <p>Returns {@code null} if no branches have been set.
+     */
+    @Nullable
+    public ImmutableList<String> getBranches() {
+      return branches;
     }
 
     /**
