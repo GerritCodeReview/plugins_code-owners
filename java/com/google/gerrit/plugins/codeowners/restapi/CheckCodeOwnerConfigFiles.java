@@ -21,13 +21,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
-import com.google.gerrit.extensions.common.Input;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestModifyView;
+import com.google.gerrit.plugins.codeowners.api.CheckCodeOwnerConfigFilesInput;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
@@ -60,7 +61,10 @@ import java.util.stream.Stream;
  * not be used in any critical path where performance matters.
  */
 @Singleton
-public class CheckCodeOwnerConfigFiles implements RestModifyView<ProjectResource, Input> {
+public class CheckCodeOwnerConfigFiles
+    implements RestModifyView<ProjectResource, CheckCodeOwnerConfigFilesInput> {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final CurrentUser currentUser;
   private final PermissionBackend permissionBackend;
   private final Provider<ListBranches> listBranches;
@@ -86,7 +90,7 @@ public class CheckCodeOwnerConfigFiles implements RestModifyView<ProjectResource
 
   @Override
   public Response<Map<String, Map<String, List<ConsistencyProblemInfo>>>> apply(
-      ProjectResource projectResource, Input input)
+      ProjectResource projectResource, CheckCodeOwnerConfigFilesInput input)
       throws RestApiException, PermissionBackendException, IOException {
     if (!currentUser.isIdentifiedUser()) {
       throw new AuthException("Authentication required");
@@ -98,10 +102,17 @@ public class CheckCodeOwnerConfigFiles implements RestModifyView<ProjectResource
         .project(projectResource.getNameKey())
         .check(ProjectPermission.WRITE_CONFIG);
 
+    logger.atFine().log(
+        "checking code owner config files for project %s (validateDisabledBranches = %s)",
+        projectResource.getNameKey(), input.validateDisabledBranches);
+
     ImmutableMap.Builder<String, Map<String, List<ConsistencyProblemInfo>>> resultsByBranchBuilder =
         ImmutableMap.builder();
     branches(projectResource)
-        .filter(branchNameKey -> !codeOwnersPluginConfiguration.isDisabled(branchNameKey))
+        .filter(
+            branchNameKey ->
+                validateDisabledBranches(input)
+                    || !codeOwnersPluginConfiguration.isDisabled(branchNameKey))
         .forEach(
             branchNameKey ->
                 resultsByBranchBuilder.put(branchNameKey.branch(), checkBranch(branchNameKey)));
@@ -166,5 +177,9 @@ public class CheckCodeOwnerConfigFiles implements RestModifyView<ProjectResource
         String.format(
             "unknown message type %s for message %s",
             commitValidationMessage.getType(), commitValidationMessage.getMessage()));
+  }
+
+  private static boolean validateDisabledBranches(CheckCodeOwnerConfigFilesInput input) {
+    return input.validateDisabledBranches != null && input.validateDisabledBranches;
   }
 }
