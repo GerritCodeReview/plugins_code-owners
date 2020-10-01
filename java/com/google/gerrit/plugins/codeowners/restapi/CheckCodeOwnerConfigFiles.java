@@ -15,18 +15,23 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.AuthException;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestModifyView;
+import com.google.gerrit.extensions.restapi.UnprocessableEntityException;
 import com.google.gerrit.plugins.codeowners.api.CheckCodeOwnerConfigFilesInput;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -47,7 +52,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * REST endpoint that checks/validates the code owner config files in a project.
@@ -99,9 +103,14 @@ public class CheckCodeOwnerConfigFiles
         .project(projectResource.getNameKey())
         .check(ProjectPermission.WRITE_CONFIG);
 
+    ImmutableSet<BranchNameKey> branches = branches(projectResource);
+
+    validateInput(projectResource.getNameKey(), branches, input);
+
     ImmutableMap.Builder<String, Map<String, List<ConsistencyProblemInfo>>> resultsByBranchBuilder =
         ImmutableMap.builder();
-    branches(projectResource)
+    branches.stream()
+        .filter(branchNameKey -> shouldValidateBranch(input, branchNameKey))
         .filter(
             branchNameKey ->
                 validateDisabledBranches(input)
@@ -112,11 +121,12 @@ public class CheckCodeOwnerConfigFiles
     return Response.ok(resultsByBranchBuilder.build());
   }
 
-  private Stream<BranchNameKey> branches(ProjectResource projectResource)
+  private ImmutableSet<BranchNameKey> branches(ProjectResource projectResource)
       throws RestApiException, IOException, PermissionBackendException {
     return listBranches.get().apply(projectResource).value().stream()
         .filter(branchInfo -> !"HEAD".equals(branchInfo.ref))
-        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref));
+        .map(branchInfo -> BranchNameKey.create(projectResource.getNameKey(), branchInfo.ref))
+        .collect(toImmutableSet());
   }
 
   private Map<String, List<ConsistencyProblemInfo>> checkBranch(BranchNameKey branchNameKey) {
@@ -170,6 +180,38 @@ public class CheckCodeOwnerConfigFiles
         String.format(
             "unknown message type %s for message %s",
             commitValidationMessage.getType(), commitValidationMessage.getMessage()));
+  }
+
+  private void validateInput(
+      Project.NameKey projectName,
+      ImmutableSet<BranchNameKey> branches,
+      CheckCodeOwnerConfigFilesInput input)
+      throws RestApiException {
+    if (input.branches != null) {
+      for (String branchName : input.branches) {
+        BranchNameKey branchNameKey = BranchNameKey.create(projectName, branchName);
+        if (!branches.contains(branchNameKey)) {
+          throw new UnprocessableEntityException(String.format("branch %s not found", branchName));
+        }
+
+        if ((input.validateDisabledBranches == null || !input.validateDisabledBranches)
+            && codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
+          throw new BadRequestException(
+              String.format(
+                  "code owners functionality for branch %s is disabled,"
+                      + " set 'validate_disabled_braches' in the input to 'true' if code owner"
+                      + " config files in this branch should be validated",
+                  branchName));
+        }
+      }
+    }
+  }
+
+  private static boolean shouldValidateBranch(
+      CheckCodeOwnerConfigFilesInput input, BranchNameKey branchNameKey) {
+    return input.branches == null
+        || input.branches.contains(branchNameKey.branch())
+        || input.branches.contains(branchNameKey.shortName());
   }
 
   private static boolean validateDisabledBranches(CheckCodeOwnerConfigFilesInput input) {

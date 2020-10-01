@@ -84,6 +84,7 @@ public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
         try {
           CheckCodeOwnerConfigFilesInput input = new CheckCodeOwnerConfigFilesInput();
           input.validateDisabledBranches = isValidateDisabledBranches();
+          input.branches = getBranches();
           return checkCodeOwnerConfigFiles.apply(projectResource, input).value();
         } catch (Exception e) {
           throw asRestApiException("Cannot check code owner config files", e);
