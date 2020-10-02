@@ -123,6 +123,12 @@ export class CodeOwnerService {
    * Initial fetches.
    */
   init() {
+    this.accountPromise = this.restApi.getLoggedIn().then(loggedIn => {
+      if (!loggedIn) {
+        return undefined;
+      }
+      return this.restApi.getAccount();
+    });
     this.statusPromise = this.codeOwnerApi
         .listOwnerStatus(this.change._number)
         .then(res => {
@@ -134,6 +140,57 @@ export class CodeOwnerService {
             rawStatuses: res.file_code_owner_statuses,
           };
         });
+
+  }
+
+  /**
+   * Returns the role of the current user. The returned value reflects the
+   * role of the user at the time when the change is loaded.
+   * For example, if a user removes itself from a reviewer, the returned
+   * role 'REVIEWER' remains unchanged until the change view is reloaded.
+   */
+  getLoggedInUserInitialRole() {
+    return this.accountPromise.then((account) => {
+      if (!account) {
+        return 'ANONYMOUS';
+      }
+      const change = this.change;
+      if (
+        change.revisions &&
+        change.current_revision &&
+        change.revisions[change.current_revision]
+      ) {
+        const commit = change.revisions[change.current_revision].commit;
+        if (
+            commit &&
+            commit.author &&
+            account.email &&
+            commit.author.email === account.email
+        ) {
+          return 'AUTHOR';
+        }
+      }
+      if(change.owner._account_id === account._account_id) {
+        return 'CHANGE_OWNER';
+      }
+      if(change.reviewers) {
+        if(this._accountInReviewers(change.reviewers.REVIEWER, account)) {
+          return 'REVIEWER';
+        } else if (this._accountInReviewers(change.reviewers.CC, account)) {
+          return 'CC';
+        } else if (this._accountInReviewers(change.reviewers.REMOVED, account)) {
+          return 'REMOVED_REVIEWER';
+        }
+      }
+      return 'OTHER';
+    })
+  }
+
+  _accountInReviewers(reviwers, account) {
+    if(!reviwers) {
+      return false;
+    }
+    return reviwers.some(reviewer => reviewer._account_id === account._account_id);
   }
 
   getStatus() {
