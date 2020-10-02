@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.api;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
+import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.util.List;
 import java.util.Map;
@@ -109,4 +110,25 @@ public interface ProjectCodeOwners {
 
   /** Returns the branch-level code owners API for the given branch. */
   BranchCodeOwners branch(String branchName) throws RestApiException;
+
+  /**
+   * A default implementation which allows source compatibility when adding new methods to the
+   * interface.
+   */
+  class NotImplemented implements ProjectCodeOwners {
+    @Override
+    public CodeOwnerProjectConfigInfo getConfig() throws RestApiException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public CheckCodeOwnerConfigFilesRequest checkCodeOwnerConfigFiles() throws RestApiException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public BranchCodeOwners branch(String branchName) throws RestApiException {
+      throw new NotImplementedException();
+    }
+  }
 }
