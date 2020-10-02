@@ -90,13 +90,18 @@ export class SuggestOwnersTrigger extends Polymer.Element {
         this.change
     );
 
-    Promise.all([this.ownerService.isCodeOwnerEnabled(), this.ownerService.areAllFilesApproved()])
-        .then(([enabled, approved]) => {
+    Promise.all([
+      this.ownerService.isCodeOwnerEnabled(),
+      this.ownerService.areAllFilesApproved(),
+      this.ownerService.getLoggedInUserRole()
+    ])
+        .then(([enabled, approved, userRole]) => {
           if (enabled) {
             this.hidden = approved;
           } else {
             this.hidden = true;
           }
+          this._userRole = userRole;
         });
   }
 
@@ -105,6 +110,7 @@ export class SuggestOwnersTrigger extends Polymer.Element {
     ownerState.expandSuggestion = this.expanded;
     this.reporting.reportInteraction('toggle-suggest-owners', {
       expanded: this.expanded,
+      user_role: this._userRole ? this._userRole : 'UNKNOWN',
     });
   }
 
