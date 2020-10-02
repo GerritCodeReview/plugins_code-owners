@@ -46,6 +46,30 @@
       "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "0c8d78b7_82c6641a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-02T13:46:38Z",
+      "side": 1,
+      "message": "Added a test for this here. Will make a separate change to cover this for the other REST endpoints.",
+      "parentUuid": "dbd30514_f05d3498",
+      "range": {
+        "startLine": 248,
+        "startChar": 14,
+        "endLine": 248,
+        "endChar": 45
+      },
+      "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": false
     }
   ]
 }
