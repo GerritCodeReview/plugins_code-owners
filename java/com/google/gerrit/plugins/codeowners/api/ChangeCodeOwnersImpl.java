@@ -16,9 +16,12 @@ package com.google.gerrit.plugins.codeowners.api;
 
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
+import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus;
 import com.google.gerrit.server.change.ChangeResource;
+import com.google.gerrit.server.change.RevisionResource;
+import com.google.gerrit.server.restapi.change.Revisions;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
@@ -28,12 +31,19 @@ public class ChangeCodeOwnersImpl implements ChangeCodeOwners {
     ChangeCodeOwnersImpl create(ChangeResource changeResource);
   }
 
+  private final Revisions revisions;
+  private final RevisionCodeOwnersImpl.Factory revisionCodeOwnersApi;
   private final ChangeResource changeResource;
   private final GetCodeOwnerStatus getCodeOwnerStatus;
 
   @Inject
   public ChangeCodeOwnersImpl(
-      GetCodeOwnerStatus getCodeOwnerStatus, @Assisted ChangeResource changeResource) {
+      Revisions revisions,
+      RevisionCodeOwnersImpl.Factory revisionCodeOwnersApi,
+      GetCodeOwnerStatus getCodeOwnerStatus,
+      @Assisted ChangeResource changeResource) {
+    this.revisions = revisions;
+    this.revisionCodeOwnersApi = revisionCodeOwnersApi;
     this.getCodeOwnerStatus = getCodeOwnerStatus;
     this.changeResource = changeResource;
   }
@@ -44,6 +54,16 @@ public class ChangeCodeOwnersImpl implements ChangeCodeOwners {
       return getCodeOwnerStatus.apply(changeResource).value();
     } catch (Exception e) {
       throw asRestApiException("Cannot get code owner status", e);
+    }
+  }
+
+  @Override
+  public RevisionCodeOwners revision(String id) throws RestApiException {
+    try {
+      RevisionResource revisionResource = revisions.parse(changeResource, IdString.fromDecoded(id));
+      return revisionCodeOwnersApi.create(revisionResource);
+    } catch (Exception e) {
+      throw asRestApiException("Cannot get revision code owners API", e);
     }
   }
 }

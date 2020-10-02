@@ -305,7 +305,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @return a stream of validation messages that describe issues with the code owner config, an
    *     empty stream if there are no issues
    */
-  private Stream<CommitValidationMessage> validateCodeOwnerConfig(
+  public Stream<CommitValidationMessage> validateCodeOwnerConfig(
       IdentifiedUser user,
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
