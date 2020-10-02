@@ -61,4 +61,4 @@ Gerrit.install(plugin => {
         view.restApi = restApi;
         view.reporting = reporting;
       });
-});
+}, undefined, import.meta.url);
