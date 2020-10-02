@@ -37,6 +37,7 @@ public interface ProjectCodeOwners {
   abstract class CheckCodeOwnerConfigFilesRequest {
     private boolean validateDisabledBranches;
     private ImmutableList<String> branches;
+    private String path;
 
     /**
      * Includes code owner config files in branches for which the code owners functionality is
@@ -78,6 +79,24 @@ public interface ProjectCodeOwners {
     @Nullable
     public ImmutableList<String> getBranches() {
       return branches;
+    }
+
+    /**
+     * Sets a glob that limits the validation to code owner config files that have a path that
+     * matches this glob.
+     */
+    public CheckCodeOwnerConfigFilesRequest setPath(String path) {
+      this.path = path;
+      return this;
+    }
+
+    /**
+     * Gets the glob that limits the validation to code owner config files that have a path that
+     * matches this glob.
+     */
+    @Nullable
+    public String getPath() {
+      return path;
     }
 
     /**
