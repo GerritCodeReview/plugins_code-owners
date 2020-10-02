@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.util.List;
 
@@ -48,5 +49,16 @@ public interface BranchCodeOwners {
 
     /** Executes the request and retrieves the paths of the requested code owner config file */
     public abstract List<String> paths() throws RestApiException;
+  }
+
+  /**
+   * A default implementation which allows source compatibility when adding new methods to the
+   * interface.
+   */
+  class NotImplemented implements BranchCodeOwners {
+    @Override
+    public CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException {
+      throw new NotImplementedException();
+    }
   }
 }
