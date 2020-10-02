@@ -353,6 +353,61 @@ change's destination branch.
 This REST endpoint has the exact same request and response format as the
 [REST endpoint to list code owners for a path in a branch](#list-code-owners-for-path-in-branch).
 
+### <a id="check-code-owner-config-files-in-revision">Check Code Owner Config Files In Revision
+_'POST /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners.check_config'_
+
+Checks/validates the code owner config files in a revision that have been
+modified.
+
+The validation is performed from the perspective of the uploader, so that the
+validation is exactly the same as the validation that will be done on submit.
+
+Input options can be set in the request body as a
+[CheckCodeOwnerConfigFilesInRevisionInput](#check-code-owner-config-files-in-revision-input)
+entity.
+
+As a response a map is returned that that maps an owner configuration file path
+to a list of
+[ConsistencyProblemInfo](../../../Documentation/rest-api-config.html#consistency-problem-info)
+entities.
+
+Code owner config files that were not modified in the revision are omitted from
+the response.
+
+#### Request
+
+```
+  POST /changes/20187/revisions/current/code_owners.check_config HTTP/1.0
+```
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "/OWNERS": [
+      {
+        "status": "ERROR",
+        "message": "code owner email 'foo@example.com' in '/OWNERS' cannot be resolved for John Doe"
+      },
+      {
+        "status": "ERROR",
+        "message": "code owner email 'bar@example.com' in '/OWNERS' cannot be resolved for John Doe"
+      }
+    ],
+    "/foo/OWNERS": [
+      {
+        "status": "ERROR",
+        "message": "invalid global import in '/foo/OWNERS': '/not-a-code-owner-config' is not a code owner config file"
+      }
+    ]
+  }
+```
+
 ## <a id="ids"> IDs
 
 ### <a id="path"> \{path\}
@@ -384,6 +439,16 @@ Owner Config Files REST endpoint](#check-code-owner-config-files).
 | `validate_disabled_branches` | optional | Whether code owner config files in branches for which the code owners functionality is disabled should be validated too. By default unset, `false`.
 | `branches`                   | optional | List of branches for which code owner config files should be validated. The `refs/heads/` prefix may be omitted. By default unset, which means that code owner config files in all branches should be validated.
 | `path`                       | optional | Glob that limits the validation to code owner config files that have a path that matches this glob. By default unset, which means that all code owner config files should be validated.
+
+---
+
+### <a id="check-code-owner-config-files-in-revision-input"> CheckCodeOwnerConfigFilesInRevisionInput
+The `CheckCodeOwnerConfigFilesInRevisionInput` allows to set options for the
+[Check Code Owner Config Files In Revision REST endpoint](#check-code-owner-config-files-in-revision).
+
+| Field Name                   |          | Description |
+| ---------------------------- | -------- | ----------- |
+| `path`                       | optional | Glob that limits the validation to code owner config files that have a path that matches this glob. By default unset, which means that all modified code owner config files should be validated.
 
 ---
 

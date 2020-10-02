@@ -38,6 +38,7 @@ import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import com.google.inject.Inject;
 import java.nio.file.Path;
+import java.util.Map;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Config;
@@ -209,6 +210,19 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     TestRepository<InMemoryRepository> testRepo = cloneProject(project, testAccount);
     PushOneCommit push =
         pushFactory.create(testAccount.newIdent(), testRepo, subject, fileName, content);
+    return push.to("refs/for/master");
+  }
+
+  /**
+   * Creates a new change for the given test account.
+   *
+   * @param subject the subject of the new change
+   * @param files map of the file names to file contents
+   * @return the push result
+   */
+  protected PushOneCommit.Result createChange(String subject, Map<String, String> files)
+      throws Exception {
+    PushOneCommit push = pushFactory.create(admin.newIdent(), testRepo, subject, files);
     return push.to("refs/for/master");
   }
 }
