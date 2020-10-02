@@ -123,6 +123,12 @@ export class CodeOwnerService {
    * Initial fetches.
    */
   init() {
+    this.accountPromise = this.restApi.getLoggedIn().then(loggedIn => {
+      if (!loggedIn) {
+        return undefined;
+      }
+      return this.restApi.getAccount();
+    });
     this.statusPromise = this.codeOwnerApi
         .listOwnerStatus(this.change._number)
         .then(res => {
@@ -134,7 +140,84 @@ export class CodeOwnerService {
             rawStatuses: res.file_code_owner_statuses,
           };
         });
+
   }
+
+  getLoggedInUserRole() {
+    return this.accountPromise.then((account) => {
+      if (!account) {
+        return 'OTHER';
+      }
+
+      if (
+        change.revisions &&
+        change.current_revision &&
+        change.revisions[change.current_revision]
+      ) {
+        const commit = change.revisions[change.current_revision].commit;
+        if (
+            commit &&
+            commit.author &&
+            account.email &&
+            commit.author.email === account.email
+        ) {
+          return 'AUTHOR';
+        }
+      }
+      if(change.owner._account_id === account._account_id) {
+        return 'CHANGE_OWNER';
+      }
+      if(change.reviewers) {
+        if(_accountInReviewers(change.reviewers.REVIEWER, account)) {
+          return 'REVIEWER';
+        } else if (this._accountInReviewers(change.reviewers.CC, account)) {
+          return 'CC';
+        } else if (this._accountInReviewers(change.reviewer.REMOVED, account)) {
+          return 'REMOVED';
+        }
+      }
+      return 'OTHER';
+    })
+  }
+
+  _accountInReviewers(reviwers, account) {
+    if(!reviwers) {
+      return false;
+    }
+    return reviwers(reviewer => reviewer._account_id === account._account_id);
+  }
+
+  _getNonOwnerRole(change, role) {
+    if (!change || !change.current_revision ||
+        !change.revisions[change.current_revision]) {
+      return null;
+    }
+
+    const rev = change.revisions[change.current_revision];
+    if (!rev) { return null; }
+
+    if (role === this._CHANGE_ROLE.UPLOADER &&
+        rev.uploader &&
+        change.owner._account_id !== rev.uploader._account_id) {
+      return rev.uploader;
+    }
+
+    if (role === this._CHANGE_ROLE.AUTHOR &&
+        rev.commit && rev.commit.author &&
+        change.owner.email !== rev.commit.author.email) {
+      return rev.commit.author;
+    }
+
+    if (role === this._CHANGE_ROLE.COMMITTER &&
+        rev.commit && rev.commit.committer &&
+        change.owner.email !== rev.commit.committer.email) {
+      return rev.commit.committer;
+    }
+
+    return null;
+  }
+
+
 
   getStatus() {
     return this.statusPromise.then(res => {
