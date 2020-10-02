@@ -38,4 +38,12 @@ public class CheckCodeOwnerConfigFilesInput {
    * validated.
    */
   public List<String> branches;
+
+  /**
+   * Glob that limits the validation to code owner config files that have a path that matches this
+   * glob.
+   *
+   * <p>By default unset, which means that all code owner config files should be validated.
+   */
+  public String path;
 }

@@ -19,6 +19,7 @@ import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalid
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
@@ -28,6 +29,7 @@ import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -82,16 +84,39 @@ public class CodeOwnerConfigScanner {
    * @param branchNameKey the project and branch for which the code owner config files should be
    *     visited
    * @param codeOwnerConfigVisitor the callback that is invoked for each code owner config file
+   * @param invalidCodeOwnerConfigCallback callback that is invoked for invalid code owner config
+   *     files
    */
   public void visit(
       BranchNameKey branchNameKey,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor,
       InvalidCodeOwnerConfigCallback invalidCodeOwnerConfigCallback) {
+    visit(branchNameKey, codeOwnerConfigVisitor, invalidCodeOwnerConfigCallback, null);
+  }
+
+  /**
+   * Visits all code owner config files in the given project and branch.
+   *
+   * @param branchNameKey the project and branch for which the code owner config files should be
+   *     visited
+   * @param codeOwnerConfigVisitor the callback that is invoked for each code owner config file
+   * @param invalidCodeOwnerConfigCallback callback that is invoked for invalid code owner config
+   *     files
+   * @param pathGlob optional Java NIO glob that the paths of code owner config files must match
+   */
+  public void visit(
+      BranchNameKey branchNameKey,
+      CodeOwnerConfigVisitor codeOwnerConfigVisitor,
+      InvalidCodeOwnerConfigCallback invalidCodeOwnerConfigCallback,
+      @Nullable String pathGlob) {
     requireNonNull(branchNameKey, "branchNameKey");
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
     requireNonNull(invalidCodeOwnerConfigCallback, "invalidCodeOwnerConfigCallback");
 
     CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
+    logger.atFine().log(
+        "scanning code owner files in branch %s of project %s (path glob = %s)",
+        branchNameKey.branch(), branchNameKey.project(), pathGlob);
 
     try (Repository repository = repoManager.openRepository(branchNameKey.project());
         RevWalk rw = new RevWalk(repository);
@@ -106,7 +131,8 @@ public class CodeOwnerConfigScanner {
       RevCommit revision = rw.parseCommit(ref.getObjectId());
       treeWalk.addTree(revision.getTree());
       treeWalk.setRecursive(true);
-      treeWalk.setFilter(createCodeOwnerConfigFilter(codeOwnerBackend, branchNameKey.project()));
+      treeWalk.setFilter(
+          createCodeOwnerConfigFilter(codeOwnerBackend, branchNameKey.project(), pathGlob));
 
       while (treeWalk.next()) {
         Path filePath = Paths.get(treeWalk.getPathString());
@@ -151,9 +177,16 @@ public class CodeOwnerConfigScanner {
     }
   }
 
-  /** Creates a {@link TreeFilter} that matches code owner config files in the given project. */
+  /**
+   * Creates a {@link TreeFilter} that matches code owner config files in the given project.
+   *
+   * @param codeOwnerBackend the code owner backend that is being used
+   * @param project the name of the project in which code owner config files should be matched
+   * @param pathGlob optional Java NIO glob that the paths of code owner config files must match
+   * @return the created {@link TreeFilter}
+   */
   private static TreeFilter createCodeOwnerConfigFilter(
-      CodeOwnerBackend codeOwnerBackend, Project.NameKey project) {
+      CodeOwnerBackend codeOwnerBackend, Project.NameKey project, @Nullable String pathGlob) {
     return new TreeFilter() {
       @Override
       public boolean shouldBeRecursive() {
@@ -164,6 +197,14 @@ public class CodeOwnerConfigScanner {
       public boolean include(TreeWalk walker) throws IOException {
         if (walker.isSubtree()) {
           walker.enterSubtree();
+          return false;
+        }
+        if (pathGlob != null
+            && !FileSystems.getDefault()
+                .getPathMatcher("glob:" + pathGlob)
+                .matches(JgitPath.of(walker.getPathString()).getAsAbsolutePath())) {
+          logger.atFine().log(
+              "%s filtered out because it doesn't match the path glob", walker.getPathString());
           return false;
         }
         String fileName = Paths.get(walker.getPathString()).getFileName().toString();

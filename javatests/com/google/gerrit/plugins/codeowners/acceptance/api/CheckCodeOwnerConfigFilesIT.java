@@ -317,6 +317,135 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .containsExactly("refs/meta/config", ImmutableMap.of());
   }
 
+  @Test
+  public void validateExactFile() throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // Create some code owner config files with issues.
+    CodeOwnerConfig.Key keyOfInvalidConfig1 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addImport(
+                CodeOwnerConfigReference.create(
+                    CodeOwnerConfigImportMode.ALL, "/not-a-code-owner-config"))
+            .create();
+
+    CodeOwnerConfig.Key keyOfInvalidConfig2 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/bar/")
+            .addCodeOwnerEmail("unknown1@example.com")
+            .addCodeOwnerEmail("unknown2@example.com")
+            .create();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .checkCodeOwnerConfigFiles()
+                .setBranches(ImmutableList.of("master"))
+                .setPath(getCodeOwnerConfigFilePath(keyOfInvalidConfig1))
+                .check())
+        .containsExactly(
+            "refs/heads/master",
+            ImmutableMap.of(
+                getCodeOwnerConfigFilePath(keyOfInvalidConfig1),
+                ImmutableList.of(
+                    error(
+                        String.format(
+                            "invalid global import in '%s': '/not-a-code-owner-config' is"
+                                + " not a code owner config file",
+                            getCodeOwnerConfigFilePath(keyOfInvalidConfig1))))));
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .checkCodeOwnerConfigFiles()
+                .setBranches(ImmutableList.of("master"))
+                .setPath(getCodeOwnerConfigFilePath(keyOfInvalidConfig2))
+                .check())
+        .containsExactly(
+            "refs/heads/master",
+            ImmutableMap.of(
+                getCodeOwnerConfigFilePath(keyOfInvalidConfig2),
+                ImmutableList.of(
+                    error(
+                        String.format(
+                            "code owner email 'unknown1@example.com' in '%s' cannot be"
+                                + " resolved for admin",
+                            getCodeOwnerConfigFilePath(keyOfInvalidConfig2))),
+                    error(
+                        String.format(
+                            "code owner email 'unknown2@example.com' in '%s' cannot be"
+                                + " resolved for admin",
+                            getCodeOwnerConfigFilePath(keyOfInvalidConfig2))))));
+  }
+
+  @Test
+  public void validateFilesMatchingGlob() throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    // Create some code owner config files with issues.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addImport(
+            CodeOwnerConfigReference.create(
+                CodeOwnerConfigImportMode.ALL, "/not-a-code-owner-config"))
+        .create();
+
+    CodeOwnerConfig.Key keyOfInvalidConfig2 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail("unknown1@example.com")
+            .create();
+
+    CodeOwnerConfig.Key keyOfInvalidConfig3 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/bar/")
+            .addCodeOwnerEmail("unknown2@example.com")
+            .create();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .checkCodeOwnerConfigFiles()
+                .setBranches(ImmutableList.of("master"))
+                .setPath("/foo/**")
+                .check())
+        .containsExactly(
+            "refs/heads/master",
+            ImmutableMap.of(
+                getCodeOwnerConfigFilePath(keyOfInvalidConfig2),
+                ImmutableList.of(
+                    error(
+                        String.format(
+                            "code owner email 'unknown1@example.com' in '%s' cannot be"
+                                + " resolved for admin",
+                            getCodeOwnerConfigFilePath(keyOfInvalidConfig2)))),
+                getCodeOwnerConfigFilePath(keyOfInvalidConfig3),
+                ImmutableList.of(
+                    error(
+                        String.format(
+                            "code owner email 'unknown2@example.com' in '%s' cannot be"
+                                + " resolved for admin",
+                            getCodeOwnerConfigFilePath(keyOfInvalidConfig3))))));
+  }
+
   private ConsistencyProblemInfo error(String message) {
     return new ConsistencyProblemInfo(ConsistencyProblemInfo.Status.ERROR, message);
   }

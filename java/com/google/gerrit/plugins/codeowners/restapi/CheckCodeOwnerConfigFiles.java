@@ -108,8 +108,8 @@ public class CheckCodeOwnerConfigFiles
 
     logger.atFine().log(
         "checking code owner config files for project %s"
-            + " (validateDisabledBranches = %s, branches = %s)",
-        projectResource.getNameKey(), input.validateDisabledBranches, input.branches);
+            + " (validateDisabledBranches = %s, branches = %s, path = %s)",
+        projectResource.getNameKey(), input.validateDisabledBranches, input.branches, input.path);
 
     ImmutableSet<BranchNameKey> branches = branches(projectResource);
 
@@ -125,7 +125,8 @@ public class CheckCodeOwnerConfigFiles
                     || !codeOwnersPluginConfiguration.isDisabled(branchNameKey))
         .forEach(
             branchNameKey ->
-                resultsByBranchBuilder.put(branchNameKey.branch(), checkBranch(branchNameKey)));
+                resultsByBranchBuilder.put(
+                    branchNameKey.branch(), checkBranch(input.path, branchNameKey)));
     return Response.ok(resultsByBranchBuilder.build());
   }
 
@@ -137,7 +138,8 @@ public class CheckCodeOwnerConfigFiles
         .collect(toImmutableSet());
   }
 
-  private Map<String, List<ConsistencyProblemInfo>> checkBranch(BranchNameKey branchNameKey) {
+  private Map<String, List<ConsistencyProblemInfo>> checkBranch(
+      String pathGlob, BranchNameKey branchNameKey) {
     ListMultimap<String, ConsistencyProblemInfo> problemsByPath = LinkedListMultimap.create();
     CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
     codeOwnerConfigScanner.visit(
@@ -153,7 +155,8 @@ public class CheckCodeOwnerConfigFiles
               codeOwnerConfigFilePath.toString(),
               new ConsistencyProblemInfo(
                   ConsistencyProblemInfo.Status.ERROR, configInvalidException.getMessage()));
-        });
+        },
+        pathGlob);
 
     return Multimaps.asMap(problemsByPath);
   }
