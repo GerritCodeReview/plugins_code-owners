@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6ca789cf_ab7bbff3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwnerConfigFiles.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-02T12:46:26Z",
+      "side": 1,
+      "message": "Should this be a separate Info entity?\nmap of map doesn\u0027t look great.",
+      "range": {
+        "startLine": 88,
+        "startChar": 30,
+        "endLine": 88,
+        "endChar": 71
+      },
+      "revId": "3d489e2028c0cc4dad4dfdfabd1f4128d2dd9784",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6d250313_408e6601",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwnerConfigFiles.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 99,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-02T12:46:26Z",
+      "side": 1,
+      "message": "Is that permission the closest one to \"project owner\"?",
+      "range": {
+        "startLine": 99,
+        "startChar": 33,
+        "endLine": 99,
+        "endChar": 45
+      },
+      "revId": "3d489e2028c0cc4dad4dfdfabd1f4128d2dd9784",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
