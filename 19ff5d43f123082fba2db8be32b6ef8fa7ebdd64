@@ -22,6 +22,30 @@
       "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dbd30514_f05d3498",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-02T13:27:32Z",
+      "side": 1,
+      "message": "Yeah, I thought about adding tests for non-visible branches (here and for other REST endpoints) and have it somewhere on my todo list. The reason why I omitted them for now is that our REST endpoints delegate to the ListBranches REST endpoint to list the branches and this class is taking care for us to filter out non-visible branches and has its own test coverage. So my preference would be to add these tests later, but don\u0027t mind much. In this case the REST endpoint is anyway only accessible by project owners, which can see all branches (at least they can change the permissions to make them visible to themselves).",
+      "parentUuid": "ba4b15c7_c7cd4f4c",
+      "range": {
+        "startLine": 248,
+        "startChar": 14,
+        "endLine": 248,
+        "endChar": 45
+      },
+      "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
     }
   ]
 }
