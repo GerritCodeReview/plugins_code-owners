@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6794f46f_99e1dfe9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwnerConfigFiles.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 129,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-02T13:21:00Z",
+      "side": 1,
+      "message": "clearer if you only put the path here, without the rest of the input.",
+      "range": {
+        "startLine": 129,
+        "startChar": 56,
+        "endLine": 129,
+        "endChar": 61
+      },
+      "revId": "eb55aebb668c40b418da36ca9a2043b533bdf908",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
+      "unresolved": true
+    }
+  ]
+}
