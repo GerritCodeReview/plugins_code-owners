@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b11e93ee_e7a1184a",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 149,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2020-10-05T11:29:10Z",
+      "side": 1,
+      "message": "super nitty but probably should be \"removes themselves as a reviewer\"",
+      "range": {
+        "startLine": 149,
+        "startChar": 28,
+        "endLine": 149,
+        "endChar": 42
+      },
+      "revId": "a2df140b8a3564611fd157d1360dc2e14836ff6d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1120745f_23dfdf46",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2020-10-05T11:29:10Z",
+      "side": 1,
+      "message": "Perhaps create an Enum for all the roles so there is one place where all the possible roles are listed. I am also curious to see all possible values/ where these are coming from.",
+      "range": {
+        "startLine": 155,
+        "startChar": 16,
+        "endLine": 155,
+        "endChar": 25
+      },
+      "revId": "a2df140b8a3564611fd157d1360dc2e14836ff6d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1c03a701_80ee165b",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 189,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2020-10-05T11:29:10Z",
+      "side": 1,
+      "message": "typo: reviewers",
+      "range": {
+        "startLine": 189,
+        "startChar": 22,
+        "endLine": 189,
+        "endChar": 30
+      },
+      "revId": "a2df140b8a3564611fd157d1360dc2e14836ff6d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ec5145d6_229d0116",
+        "filename": "ui/owner-requirement.js",
+        "patchSetId": 3
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2020-10-05T11:29:10Z",
+      "side": 1,
+      "message": "by mistake?",
+      "range": {
+        "startLine": 151,
+        "startChar": 24,
+        "endLine": 151,
+        "endChar": 27
+      },
+      "revId": "a2df140b8a3564611fd157d1360dc2e14836ff6d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
