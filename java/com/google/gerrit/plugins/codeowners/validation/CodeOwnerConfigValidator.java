@@ -45,6 +45,7 @@ import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.PatchSetUtil;
 import com.google.gerrit.server.events.CommitReceivedEvent;
 import com.google.gerrit.server.git.CodeReviewCommit;
+import com.google.gerrit.server.git.CodeReviewCommit.CodeReviewRevWalk;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
@@ -178,6 +179,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   @Override
   public void onPreMerge(
       Repository repository,
+      CodeReviewRevWalk revWalk,
       CodeReviewCommit commit,
       ProjectState projectState,
       BranchNameKey branchNameKey,
