@@ -52,6 +52,9 @@ import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.MergeValidationException;
 import com.google.gerrit.server.git.validators.MergeValidationListener;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.logging.Metadata;
+import com.google.gerrit.server.logging.TraceContext;
+import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
@@ -152,13 +155,24 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   @Override
   public List<CommitValidationMessage> onCommitReceived(CommitReceivedEvent receiveEvent)
       throws CommitValidationException {
-    Optional<ValidationResult> validationResult =
-        validateCodeOwnerConfig(
-            receiveEvent.getBranchNameKey(), receiveEvent.commit, receiveEvent.user);
-    if (!validationResult.isPresent()) {
-      return ImmutableList.of();
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer(
+            "Validate code owner config files on commit received",
+            Metadata.builder()
+                .projectName(receiveEvent.project.getName())
+                .commit(receiveEvent.commit.name())
+                .branchName(receiveEvent.refName)
+                .username(receiveEvent.user.getLoggableName())
+                .build())) {
+      Optional<ValidationResult> validationResult =
+          validateCodeOwnerConfig(
+              receiveEvent.getBranchNameKey(), receiveEvent.commit, receiveEvent.user);
+      if (!validationResult.isPresent()) {
+        return ImmutableList.of();
+      }
+      logger.atFine().log("validation result = %s", validationResult.get());
+      return validationResult.get().processForOnCommitReceived();
     }
-    return validationResult.get().processForOnCommitReceived();
   }
 
   @Override
@@ -170,14 +184,26 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       PatchSet.Id patchSetId,
       IdentifiedUser caller)
       throws MergeValidationException {
-    ChangeNotes changeNotes =
-        changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
-    PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
-    IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
-    Optional<ValidationResult> validationResult =
-        validateCodeOwnerConfig(branchNameKey, commit, patchSetUploader);
-    if (validationResult.isPresent()) {
-      validationResult.get().processForOnPreMerge();
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer(
+            "Validate code owner config files on pre merge",
+            Metadata.builder()
+                .projectName(branchNameKey.project().get())
+                .commit(commit.name())
+                .branchName(branchNameKey.branch())
+                .username(caller.getLoggableName())
+                .patchSetId(patchSetId.get())
+                .build())) {
+      ChangeNotes changeNotes =
+          changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
+      PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
+      IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
+      Optional<ValidationResult> validationResult =
+          validateCodeOwnerConfig(branchNameKey, commit, patchSetUploader);
+      if (validationResult.isPresent()) {
+        logger.atFine().log("validation result = %s", validationResult.get());
+        validationResult.get().processForOnPreMerge();
+      }
     }
   }
 
@@ -498,7 +524,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       if (commit.getParentCount() == 0) {
         return Optional.empty();
       }
-      return Optional.of(commit.getParent(0));
+      RevCommit firstParent = commit.getParent(0);
+      logger.atFine().log(
+          "first parent of %s in %s is %s", revision.name(), project.get(), firstParent.name());
+      return Optional.of(firstParent);
     } catch (IOException e) {
       throw new StorageException(
           String.format(
