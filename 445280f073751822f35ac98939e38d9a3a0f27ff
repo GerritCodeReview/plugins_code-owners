@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "58de695d_348f1a03",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-06T12:36:13Z",
+      "side": 1,
+      "message": "Ups, copy-paste mistake.\n\nDone.",
+      "parentUuid": "7871c23f_066a38f4",
+      "range": {
+        "startLine": 217,
+        "startChar": 30,
+        "endLine": 217,
+        "endChar": 52
+      },
+      "revId": "445280f073751822f35ac98939e38d9a3a0f27ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2ac95dd1_ddea714e",
@@ -47,6 +71,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "93bf8ade_ddfe376b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesInRevisionIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-06T12:36:13Z",
+      "side": 1,
+      "message": "This REST endpoint is invoked for a patch set that is specified by the user. The change of the patch set belongs to exactly one branch. If for this one branch the code owners functionality is disabled we can either:\n\na) reject the request\nb) do the validation as if the code owners functionality was enabled\nc) return an empty result\n\nI think filtering out branches only makes sense if there is more than one branch.\n\nI implemented b) rather than a) because:\n\n* it matches the user expectation better (the user asked us to validate\n  the code owner config files in this patch set, so let\u0027s just do this)\n* it allows us to use/test this REST endpoint on changes when the code owners\n  functionality is not enabled yet (this is consistent with our general strategy\n  to enable all code owner REST endpoints even if the code owners functionality\n  is disabled)\n\nc) is bad because an empty result could be interpreted as \"all files in the change were found to be valid\" or \"the change doesn\u0027t contain any code owners files\" where it actually is \"we didn\u0027t run the validation because the code owners functionality is disabled\" (that would be confusing).\n\nAdded this motivation in the commit message.",
+      "parentUuid": "2ac95dd1_ddea714e",
+      "range": {
+        "startLine": 109,
+        "startChar": 14,
+        "endLine": 109,
+        "endChar": 79
+      },
+      "revId": "445280f073751822f35ac98939e38d9a3a0f27ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8a05e5d3_1b0fb655",
@@ -60,6 +108,30 @@
       "writtenOn": "2020-10-06T08:30:33Z",
       "side": 1,
       "message": "similar test for deletions may be needed here too.",
+      "range": {
+        "startLine": 229,
+        "startChar": 14,
+        "endLine": 229,
+        "endChar": 60
+      },
+      "revId": "445280f073751822f35ac98939e38d9a3a0f27ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "be1f0841_e9d8c53c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesInRevisionIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-06T12:36:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8a05e5d3_1b0fb655",
       "range": {
         "startLine": 229,
         "startChar": 14,
