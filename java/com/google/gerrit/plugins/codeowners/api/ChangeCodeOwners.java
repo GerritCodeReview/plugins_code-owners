@@ -26,6 +26,19 @@ public interface ChangeCodeOwners {
   /** Returns the code owner status for the files in the change. */
   CodeOwnerStatusInfo getCodeOwnerStatus() throws RestApiException;
 
+  /** Returns the revision-level code owners API for the current revision. */
+  default RevisionCodeOwners current() throws RestApiException {
+    return revision("current");
+  }
+
+  /** Returns the revision-level code owners API for the given revision. */
+  default RevisionCodeOwners revision(int id) throws RestApiException {
+    return revision(Integer.toString(id));
+  }
+
+  /** Returns the revision-level code owners API for the given revision. */
+  RevisionCodeOwners revision(String id) throws RestApiException;
+
   /**
    * A default implementation which allows source compatibility when adding new methods to the
    * interface.
@@ -33,6 +46,11 @@ public interface ChangeCodeOwners {
   class NotImplemented implements ChangeCodeOwners {
     @Override
     public CodeOwnerStatusInfo getCodeOwnerStatus() {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public RevisionCodeOwners revision(String id) throws RestApiException {
       throw new NotImplementedException();
     }
   }

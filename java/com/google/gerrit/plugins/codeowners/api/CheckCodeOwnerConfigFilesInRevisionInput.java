@@ -14,18 +14,16 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.config.FactoryModule;
-
-/** Guice module that binds the Java extension API for the code-owners plugin. */
-public class ApiModule extends FactoryModule {
-  @Override
-  protected void configure() {
-    factory(CodeOwnerConfigsInBranchImpl.Factory.class);
-    factory(CodeOwnersInBranchImpl.Factory.class);
-    factory(CodeOwnersInChangeImpl.Factory.class);
-    factory(ChangeCodeOwnersImpl.Factory.class);
-    factory(RevisionCodeOwnersImpl.Factory.class);
-    factory(ProjectCodeOwnersImpl.Factory.class);
-    factory(BranchCodeOwnersImpl.Factory.class);
-  }
+/**
+ * The input for the {@link
+ * com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFilesInRevision} REST endpoint.
+ */
+public class CheckCodeOwnerConfigFilesInRevisionInput {
+  /**
+   * Glob that limits the validation to code owner config files that have a path that matches this
+   * glob.
+   *
+   * <p>By default unset, which means that all code owner config files should be validated.
+   */
+  public String path;
 }

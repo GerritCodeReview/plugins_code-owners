@@ -40,6 +40,10 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
   private static final ImmutableList<RestCall> CHANGE_ENDPOINTS =
       ImmutableList.of(RestCall.get("/changes/%s/code-owners~code_owners.status"));
 
+  private static final ImmutableList<RestCall> REVISION_ENDPOINTS =
+      ImmutableList.of(
+          RestCall.post("/changes/%s/revisions/current/code-owners~code_owners.check_config"));
+
   private static final ImmutableList<RestCall> PROJECT_ENDPOINTS =
       ImmutableList.of(
           RestCall.get("/projects/%s/code-owners~code_owners.project_config"),
@@ -62,6 +66,12 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
   public void changeEndpoints() throws Exception {
     String changeId = createChange().getChangeId();
     RestApiCallHelper.execute(adminRestSession, CHANGE_ENDPOINTS, urlEncode(changeId));
+  }
+
+  @Test
+  public void revisionEndpoints() throws Exception {
+    String changeId = createChange().getChangeId();
+    RestApiCallHelper.execute(adminRestSession, REVISION_ENDPOINTS, urlEncode(changeId));
   }
 
   @Test

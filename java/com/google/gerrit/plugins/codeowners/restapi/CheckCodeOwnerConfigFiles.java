@@ -165,13 +165,13 @@ public class CheckCodeOwnerConfigFiles
       CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfigValidator
         .validateCodeOwnerConfig(currentUser.asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
-        .map(this::createConsistencyProblemInfo)
+        .map(CheckCodeOwnerConfigFiles::createConsistencyProblemInfo)
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(toImmutableList());
   }
 
-  private Optional<ConsistencyProblemInfo> createConsistencyProblemInfo(
+  public static Optional<ConsistencyProblemInfo> createConsistencyProblemInfo(
       CommitValidationMessage commitValidationMessage) {
     switch (commitValidationMessage.getType()) {
       case ERROR:
