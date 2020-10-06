@@ -37,6 +37,19 @@ const FetchStatus = {
 };
 
 /**
+ * @enum
+ */
+const UserRole = {
+  ANONYMOUS: 'ANONYMOUS',
+  AUTHOR: 'AUTHOR',
+  CHANGE_OWNER: 'CHANGE_OWNER',
+  REVIEWER: 'REVIEWER',
+  CC: 'CC',
+  REMOVED_REVIEWER: 'REMOVED_REVIEWER',
+  OTHER: 'OTHER',
+}
+
+/**
  * Responsible for communicating with the rest-api
  *
  * @see resources/Documentation/rest-api.md
@@ -123,6 +136,12 @@ export class CodeOwnerService {
    * Initial fetches.
    */
   init() {
+    this.accountPromise = this.restApi.getLoggedIn().then(loggedIn => {
+      if (!loggedIn) {
+        return undefined;
+      }
+      return this.restApi.getAccount();
+    });
     this.statusPromise = this.codeOwnerApi
         .listOwnerStatus(this.change._number)
         .then(res => {
@@ -134,6 +153,57 @@ export class CodeOwnerService {
             rawStatuses: res.file_code_owner_statuses,
           };
         });
+
+  }
+
+  /**
+   * Returns the role of the current user. The returned value reflects the
+   * role of the user at the time when the change is loaded.
+   * For example, if a user removes themselves as a reviewer, the returned
+   * role 'REVIEWER' remains unchanged until the change view is reloaded.
+   */
+  getLoggedInUserInitialRole() {
+    return this.accountPromise.then((account) => {
+      if (!account) {
+        return UserRole.ANONYMOUS;
+      }
+      const change = this.change;
+      if (
+        change.revisions &&
+        change.current_revision &&
+        change.revisions[change.current_revision]
+      ) {
+        const commit = change.revisions[change.current_revision].commit;
+        if (
+            commit &&
+            commit.author &&
+            account.email &&
+            commit.author.email === account.email
+        ) {
+          return UserRole.AUTHOR;
+        }
+      }
+      if(change.owner._account_id === account._account_id) {
+        return UserRole.CHANGE_OWNER;
+      }
+      if(change.reviewers) {
+        if(this._accountInReviewers(change.reviewers.REVIEWER, account)) {
+          return UserRole.REVIEWER;
+        } else if (this._accountInReviewers(change.reviewers.CC, account)) {
+          return UserRole.CC;
+        } else if (this._accountInReviewers(change.reviewers.REMOVED, account)) {
+          return UserRole.REMOVED_REVIEWER;
+        }
+      }
+      return UserRole.OTHER;
+    })
+  }
+
+  _accountInReviewers(reviewers, account) {
+    if(!reviewers) {
+      return false;
+    }
+    return reviewers.some(reviewer => reviewer._account_id === account._account_id);
   }
 
   getStatus() {

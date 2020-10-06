@@ -123,13 +123,14 @@ export class OwnerRequirementValue extends Polymer.Element {
     return this.ownerService.getStatus()
         .then(({rawStatuses}) => {
           this._statusCount = this._getStatusCount(rawStatuses);
-
-          // Send a metric with overall summary when code owners submit
-          // requirement shown and finished fetching status
-          this.reporting.reportLifeCycle(
-              'owners-submit-requirement-summary-shown',
-              {...this._statusCount}
-          );
+          this.ownerService.getLoggedInUserInitialRole().then(role => {
+            // Send a metric with overall summary when code owners submit
+            // requirement shown and finished fetching status
+            this.reporting.reportLifeCycle(
+                'owners-submit-requirement-summary-shown',
+                {...this._statusCount, user_role: role}
+            );
+          });
         })
         .finally(() => {
           this._isLoading = false;
@@ -205,8 +206,10 @@ export class OwnerRequirementValue extends Polymer.Element {
         })
     );
     ownerState.expandSuggestion = true;
-
-    this.reporting.reportInteraction('suggest-owners-from-submit-requirement');
+    this.ownerService.getLoggedInUserInitialRole().then(role => {
+      this.reporting.reportInteraction(
+          'suggest-owners-from-submit-requirement', {user_role: role});
+    });
   }
 }
 
