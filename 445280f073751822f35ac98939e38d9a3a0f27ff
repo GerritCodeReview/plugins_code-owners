@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7871c23f_066a38f4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-06T08:30:33Z",
+      "side": 1,
+      "message": "That\u0027s confusing, since you\u0027re currently always assigning \"admin\" as the owner.",
+      "range": {
+        "startLine": 217,
+        "startChar": 30,
+        "endLine": 217,
+        "endChar": 52
+      },
+      "revId": "445280f073751822f35ac98939e38d9a3a0f27ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2ac95dd1_ddea714e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesInRevisionIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-06T08:30:33Z",
+      "side": 1,
+      "message": "why is there an error if this functionality is disabled? Maybe the endpoint should filter such branches?",
+      "range": {
+        "startLine": 109,
+        "startChar": 14,
+        "endLine": 109,
+        "endChar": 79
+      },
+      "revId": "445280f073751822f35ac98939e38d9a3a0f27ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8a05e5d3_1b0fb655",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesInRevisionIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-06T08:30:33Z",
+      "side": 1,
+      "message": "similar test for deletions may be needed here too.",
+      "range": {
+        "startLine": 229,
+        "startChar": 14,
+        "endLine": 229,
+        "endChar": 60
+      },
+      "revId": "445280f073751822f35ac98939e38d9a3a0f27ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
