@@ -62,6 +62,30 @@
       },
       "revId": "40eac76957438b6edc668f8067e32f10af079582",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c3f90a0e_5a9e1007",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 297,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-07T12:00:14Z",
+      "side": 1,
+      "message": "Good catch. I bet this is broken so that the validation is also disabled for submission now :(",
+      "parentUuid": "c5d75fdf_c1f791ee",
+      "range": {
+        "startLine": 297,
+        "startChar": 14,
+        "endLine": 297,
+        "endChar": 32
+      },
+      "revId": "40eac76957438b6edc668f8067e32f10af079582",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
