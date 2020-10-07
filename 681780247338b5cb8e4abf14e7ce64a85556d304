@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99f92068_a31d2785",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-07T07:22:37Z",
+      "side": 1,
+      "message": "The CI was switched to Java 11 and is now broken for the code-owners plugin. Hence voting Verified+1 manually.",
+      "revId": "681780247338b5cb8e4abf14e7ce64a85556d304",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
