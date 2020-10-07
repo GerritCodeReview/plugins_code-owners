@@ -35,6 +35,7 @@ import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.PersonIdent;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * Base class for all {@link CodeOwnerBackend}'s that store {@link CodeOwnerConfig}'s in files
@@ -90,10 +91,21 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       return Optional.empty();
     }
 
+    return loadCodeOwnerConfigFile(codeOwnerConfigKey, fileName, revision)
+        .getLoadedCodeOwnerConfig();
+  }
+
+  private CodeOwnerConfigFile loadCodeOwnerConfigFile(
+      CodeOwnerConfig.Key codeOwnerConfigKey, String fileName, @Nullable ObjectId revision) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
-      return CodeOwnerConfigFile.load(
-              fileName, codeOwnerConfigParser, repository, revision, codeOwnerConfigKey)
-          .getLoadedCodeOwnerConfig();
+      if (revision == null) {
+        return CodeOwnerConfigFile.loadCurrent(
+            fileName, codeOwnerConfigParser, repository, codeOwnerConfigKey);
+      }
+      try (RevWalk revWalk = new RevWalk(repository)) {
+        return CodeOwnerConfigFile.load(
+            fileName, codeOwnerConfigParser, revWalk, revision, codeOwnerConfigKey);
+      }
     } catch (IOException | ConfigInvalidException e) {
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
@@ -182,11 +194,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       CodeOwnerConfigFile codeOwnerConfigFile =
-          CodeOwnerConfigFile.load(
+          CodeOwnerConfigFile.loadCurrent(
                   getFileName(codeOwnerConfigKey.project()),
                   codeOwnerConfigParser,
                   repository,
-                  null,
                   codeOwnerConfigKey)
               .setCodeOwnerConfigUpdate(codeOwnerConfigUpdate);
 
