@@ -293,6 +293,23 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  public void validationDisabled() throws Exception {
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(createCodeOwnerConfigKey("/"))).get(),
+            format(
+                CodeOwnerConfig.builder(createCodeOwnerConfigKey("/"), TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+  }
+
+  @Test
   public void noValidationOnDeletionOfConfig() throws Exception {
     // Disable the code owners functionality so that we can upload an invalid config that we can
     // delete afterwards.

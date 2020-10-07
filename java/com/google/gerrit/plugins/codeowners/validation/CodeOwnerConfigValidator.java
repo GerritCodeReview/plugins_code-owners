@@ -234,6 +234,14 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevWalk revWalk,
       RevCommit revCommit,
       IdentifiedUser user) {
+    if (!codeOwnersPluginConfiguration.validateCodeOwnerConfigsOnCommitReceived(
+        branchNameKey.project())) {
+      return Optional.of(
+          ValidationResult.create(
+              "skipping validation of code owner config files",
+              new CommitValidationMessage(
+                  "code owners config validation is disabled", ValidationMessage.Type.HINT)));
+    }
     if (codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
       return Optional.of(
           ValidationResult.create(

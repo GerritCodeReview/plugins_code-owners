@@ -58,6 +58,11 @@ public class GeneralConfig {
   @VisibleForTesting public static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
   @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
   @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
+
+  @VisibleForTesting
+  public static final String KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED =
+      "enableValidationOnCommitReceived";
+
   @VisibleForTesting public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
   @VisibleForTesting public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
 
@@ -163,6 +168,26 @@ public class GeneralConfig {
     }
 
     return pluginConfigFromGerritConfig.getBoolean(KEY_READ_ONLY, false);
+  }
+
+  /**
+   * Gets the enable validation on commit received configuration from the given plugin config with
+   * fallback to {@code gerrit.config}.
+   *
+   * <p>The enable validation on commit received controls whether code owner config files should be
+   * validated when a commit is received.
+   *
+   * @param pluginConfig the plugin config from which the read-only configuration should be read.
+   * @return whether code owner config files should be validated when a commit is received
+   */
+  boolean enableValidationOnCommitReceived(Config pluginConfig) {
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    return pluginConfig.getBoolean(
+        SECTION_CODE_OWNERS,
+        null,
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+        pluginConfigFromGerritConfig.getBoolean(KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, true));
   }
 
   /**
