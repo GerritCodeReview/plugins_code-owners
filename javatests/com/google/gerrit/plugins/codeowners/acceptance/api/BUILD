@@ -25,8 +25,10 @@ java_library(
     srcs = glob(["Abstract*.java"]),
     deps = [
         "//java/com/google/gerrit/acceptance:framework-lib",
+        "//java/com/google/gerrit/common:server",
         "//java/com/google/gerrit/entities",
         "//java/com/google/gerrit/extensions:api",
+        "//java/com/google/gerrit/server",
         "//lib:guava",
         "//lib/guice",
         "//plugins/code-owners:code-owners__plugin",

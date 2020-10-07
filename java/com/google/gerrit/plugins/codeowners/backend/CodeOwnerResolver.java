@@ -29,7 +29,6 @@ import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountState;
-import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.gerrit.server.account.externalids.ExternalIds;
 import com.google.gerrit.server.logging.Metadata;
@@ -44,6 +43,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 /** Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s. */
@@ -57,7 +57,6 @@ public class CodeOwnerResolver {
   private final Provider<CurrentUser> currentUser;
   private final ExternalIds externalIds;
   private final AccountCache accountCache;
-  private final Accounts accounts;
   private final AccountControl.Factory accountControlFactory;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
@@ -76,7 +75,6 @@ public class CodeOwnerResolver {
       Provider<CurrentUser> currentUser,
       ExternalIds externalIds,
       AccountCache accountCache,
-      Accounts accounts,
       AccountControl.Factory accountControlFactory,
       PathCodeOwners.Factory pathCodeOwnersFactory) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -84,7 +82,6 @@ public class CodeOwnerResolver {
     this.currentUser = currentUser;
     this.externalIds = externalIds;
     this.accountCache = accountCache;
-    this.accounts = accounts;
     this.accountControlFactory = accountControlFactory;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
   }
@@ -123,6 +120,12 @@ public class CodeOwnerResolver {
     return this;
   }
 
+  /** Whether the given code owner reference can be resolved. */
+  public boolean isResolvable(CodeOwnerReference codeOwnerReference) {
+    CodeOwnerResolverResult result = resolve(ImmutableSet.of(codeOwnerReference));
+    return !result.codeOwners().isEmpty() || result.ownedByAllUsers();
+  }
+
   /**
    * Resolves the code owners from the given code owner config for the given path from {@link
    * CodeOwnerReference}s to a {@link CodeOwner}s.
@@ -135,7 +138,7 @@ public class CodeOwnerResolver {
    *     absolute; can be the path of a file or folder; the path may or may not exist
    * @return the resolved code owners
    */
-  public ImmutableSet<CodeOwner> resolvePathCodeOwners(
+  public CodeOwnerResolverResult resolvePathCodeOwners(
       CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
@@ -150,9 +153,7 @@ public class CodeOwnerResolver {
                 .filePath(codeOwnerConfig.key().fileName().orElse("<default>"))
                 .build())) {
       logger.atFine().log("resolving path code owners for path %s", absolutePath);
-      return pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get().stream()
-          .flatMap(this::resolve)
-          .collect(toImmutableSet());
+      return resolve(pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get());
     }
   }
 
@@ -163,9 +164,22 @@ public class CodeOwnerResolver {
    * @return the {@link CodeOwner} for the given code owner references
    * @see #resolve(CodeOwnerReference)
    */
-  public Stream<CodeOwner> resolve(Set<CodeOwnerReference> codeOwnerReferences) {
+  public CodeOwnerResolverResult resolve(Set<CodeOwnerReference> codeOwnerReferences) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
-    return codeOwnerReferences.stream().flatMap(this::resolve);
+    AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
+    ImmutableSet<CodeOwner> codeOwners =
+        codeOwnerReferences.stream()
+            .filter(
+                codeOwnerReference -> {
+                  if (ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
+                    ownedByAllUsers.set(true);
+                    return false;
+                  }
+                  return true;
+                })
+            .flatMap(this::resolve)
+            .collect(toImmutableSet());
+    return CodeOwnerResolverResult.create(codeOwners, ownedByAllUsers.get());
   }
 
   /**
@@ -201,17 +215,17 @@ public class CodeOwnerResolver {
    *       all accounts
    * </ul>
    *
+   * <p>This method does not resolve {@link CodeOwnerReference}s that assign the code ownership to
+   * all user by using {@link #ALL_USERS_WILDCARD} as email.
+   *
    * @param codeOwnerReference the code owner reference that should be resolved
    * @return the {@link CodeOwner} for the code owner reference if it was resolved, otherwise {@link
    *     Optional#empty()}
    */
+  @VisibleForTesting
   public Stream<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
     String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
     logger.atFine().log("resolving code owner reference %s", codeOwnerReference);
-
-    if (ALL_USERS_WILDCARD.equals(email)) {
-      return resolveAllUsersWildcard();
-    }
 
     if (!isEmailDomainAllowed(email)) {
       logger.atFine().log("domain of email %s is not allowed", email);
@@ -237,18 +251,6 @@ public class CodeOwnerResolver {
     CodeOwner codeOwner = CodeOwner.create(accountState.get().account().id());
     logger.atFine().log("resolved to code owner %s", codeOwner);
     return Stream.of(codeOwner);
-  }
-
-  private Stream<CodeOwner> resolveAllUsersWildcard() {
-    try (TraceTimer traceTimer =
-        TraceContext.newTimer("Resolve all users wildcard", Metadata.builder().build())) {
-      return accounts.all().stream()
-          .filter(accountState -> !enforceVisibility || canSee(accountState))
-          .map(accountState -> CodeOwner.create(accountState.account().id()));
-    } catch (IOException e) {
-      throw new StorageException(
-          String.format("cannot resolve code owner email %s", ALL_USERS_WILDCARD), e);
-    }
   }
 
   /** Whether the given account can be seen. */
