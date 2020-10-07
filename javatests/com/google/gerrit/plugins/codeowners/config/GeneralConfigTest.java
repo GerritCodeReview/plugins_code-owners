@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
@@ -119,6 +120,37 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, "false");
     assertThat(generalConfig.getReadOnly(cfg)).isFalse();
+  }
+
+  @Test
+  public void cannotGetEnableValidationOnCommitReceivedForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> generalConfig.enableValidationOnCommitReceived(null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noEnableValidationOnCommitReceivedConfiguration() throws Exception {
+    assertThat(generalConfig.enableValidationOnCommitReceived(new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  public void
+      enableValidationOnCommitReceivedConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.enableValidationOnCommitReceived(new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  public void
+      enableValidationOnCommitReceivedConfigurationInPluginConfigOverridesEnableValidationOnCommitReceivedConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "true");
+    assertThat(generalConfig.enableValidationOnCommitReceived(cfg)).isTrue();
   }
 
   @Test

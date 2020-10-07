@@ -293,6 +293,46 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  public void onReceiveCommitValidationDisabled() throws Exception {
+    // upload a change with a code owner config that has issues (non-resolvable code owners)
+    String unknownEmail = "non-existing-email@example.com";
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .build()));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+
+    // approve the change
+    approve(r.getChangeId());
+
+    // try to submit the change, we expect that this fails since the validation on submit is enabled
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %d: invalid code owner config files:\n"
+                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
+                r.getChange().getId().get(),
+                unknownEmail,
+                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
   public void noValidationOnDeletionOfConfig() throws Exception {
     // Disable the code owners functionality so that we can upload an invalid config that we can
     // delete afterwards.

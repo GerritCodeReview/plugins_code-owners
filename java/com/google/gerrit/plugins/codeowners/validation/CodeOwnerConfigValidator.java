@@ -167,13 +167,24 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .branchName(receiveEvent.refName)
                 .username(receiveEvent.user.getLoggableName())
                 .build())) {
-      Optional<ValidationResult> validationResult =
-          validateCodeOwnerConfig(
-              receiveEvent.getBranchNameKey(),
-              receiveEvent.repoConfig,
-              receiveEvent.revWalk,
-              receiveEvent.commit,
-              receiveEvent.user);
+      Optional<ValidationResult> validationResult;
+      if (!codeOwnersPluginConfiguration.validateCodeOwnerConfigsOnCommitReceived(
+          receiveEvent.getProjectNameKey())) {
+        validationResult =
+            Optional.of(
+                ValidationResult.create(
+                    "skipping validation of code owner config files",
+                    new CommitValidationMessage(
+                        "code owners config validation is disabled", ValidationMessage.Type.HINT)));
+      } else {
+        validationResult =
+            validateCodeOwnerConfig(
+                receiveEvent.getBranchNameKey(),
+                receiveEvent.repoConfig,
+                receiveEvent.revWalk,
+                receiveEvent.commit,
+                receiveEvent.user);
+      }
       if (!validationResult.isPresent()) {
         return ImmutableList.of();
       }
