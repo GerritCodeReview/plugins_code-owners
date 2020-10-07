@@ -20,7 +20,6 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubjec
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
-import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
@@ -35,6 +34,7 @@ import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -533,17 +533,21 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfigFile loadCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey)
       throws IOException, ConfigInvalidException {
-    return loadCodeOwnerConfig(codeOwnerConfigKey, null);
+    try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
+      return CodeOwnerConfigFile.loadCurrent(
+          CODE_OWNER_CONFIG_FILE_NAME, CODE_OWNER_CONFIG_PARSER, repository, codeOwnerConfigKey);
+    }
   }
 
   private CodeOwnerConfigFile loadCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision)
+      CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision)
       throws IOException, ConfigInvalidException {
-    try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
+    try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project());
+        RevWalk revWalk = new RevWalk(repository)) {
       return CodeOwnerConfigFile.load(
           CODE_OWNER_CONFIG_FILE_NAME,
           CODE_OWNER_CONFIG_PARSER,
-          repository,
+          revWalk,
           revision,
           codeOwnerConfigKey);
     }

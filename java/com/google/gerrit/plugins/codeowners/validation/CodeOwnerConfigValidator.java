@@ -74,10 +74,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * Validates modifications to the code owner config files.
@@ -167,7 +169,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .build())) {
       Optional<ValidationResult> validationResult =
           validateCodeOwnerConfig(
-              receiveEvent.getBranchNameKey(), receiveEvent.commit, receiveEvent.user);
+              receiveEvent.getBranchNameKey(),
+              receiveEvent.repoConfig,
+              receiveEvent.revWalk,
+              receiveEvent.commit,
+              receiveEvent.user);
       if (!validationResult.isPresent()) {
         return ImmutableList.of();
       }
@@ -201,7 +207,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
       IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
       Optional<ValidationResult> validationResult =
-          validateCodeOwnerConfig(branchNameKey, commit, patchSetUploader);
+          validateCodeOwnerConfig(
+              branchNameKey, repository.getConfig(), revWalk, commit, patchSetUploader);
       if (validationResult.isPresent()) {
         logger.atFine().log("validation result = %s", validationResult.get());
         validationResult.get().processForOnPreMerge();
@@ -214,14 +221,19 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *
    * @param branchNameKey the project and branch that contains the provided commit or for which the
    *     commit is being pushed
-   * @param commit the commit for which newly added and modified code owner configs should be
+   * @param revWalk the rev walk that should be used to load revCommit
+   * @param revCommit the commit for which newly added and modified code owner configs should be
    *     validated
    * @param user user for which the code owner visibility checks should be performed
    * @return the validation result, {@link Optional#empty()} if no validation is performed because
    *     the given commit doesn't contain newly added or modified code owner configs
    */
   private Optional<ValidationResult> validateCodeOwnerConfig(
-      BranchNameKey branchNameKey, ObjectId commit, IdentifiedUser user) {
+      BranchNameKey branchNameKey,
+      Config repoConfig,
+      RevWalk revWalk,
+      RevCommit revCommit,
+      IdentifiedUser user) {
     if (codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
       return Optional.of(
           ValidationResult.create(
@@ -242,7 +254,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
 
       ImmutableList<ChangedFile> modifiedCodeOwnerConfigFiles =
-          changedFiles.compute(branchNameKey.project(), commit).stream()
+          changedFiles.compute(branchNameKey.project(), repoConfig, revWalk, revCommit).stream()
               // filter out deletions (files without new path)
               .filter(changedFile -> changedFile.newPath().isPresent())
               // filter out non code owner config files
@@ -266,7 +278,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   .flatMap(
                       changedFile ->
                           validateCodeOwnerConfig(
-                              user, codeOwnerBackend, branchNameKey, changedFile, commit))));
+                              user,
+                              codeOwnerBackend,
+                              branchNameKey,
+                              changedFile,
+                              revWalk,
+                              revCommit))));
     } catch (InvalidPluginConfigurationException e) {
       // If the code-owners plugin configuration is invalid we cannot get the code owners backend
       // and hence we are not able to detect and validate code owner config files. Instead of
@@ -290,7 +307,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           String.format(
               "failed to validate code owner config files in revision %s"
                   + " (project = %s, branch = %s)",
-              commit.getName(), branchNameKey.project(), branchNameKey.branch());
+              revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
       logger.atSevere().log(errorMessage);
       throw new StorageException(errorMessage, e);
     }
@@ -303,7 +320,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param codeOwnerBackend the code owner backend from which the code owner config can be loaded
    * @param branchNameKey the project and branch of the code owner config
    * @param changedFile the changed file that represents the code owner config
-   * @param revision the revision from which the code owner config should be loaded
+   * @param revWalk the rev walk that should be used to load revCommit
+   * @param revCommit the commit from which the code owner config should be loaded
    * @return a stream of validation messages that describe issues with the code owner config, an
    *     empty stream if there are no issues
    */
@@ -312,11 +330,14 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       ChangedFile changedFile,
-      ObjectId revision) {
+      RevWalk revWalk,
+      RevCommit revCommit) {
+    requireNonNull(user, "user");
     requireNonNull(codeOwnerBackend, "codeOwnerBackend");
     requireNonNull(branchNameKey, "branchNameKey");
     requireNonNull(changedFile, "changedFile");
-    requireNonNull(revision, "revision");
+    requireNonNull(revWalk, "revWalk");
+    requireNonNull(revCommit, "revCommit");
 
     if (!changedFile.newPath().isPresent()) {
       // The code owner config file was deleted. Hence we do not need to do any validation.
@@ -331,7 +352,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           createCodeOwnerConfigKey(branchNameKey, changedFile.newPath().get());
       codeOwnerConfig =
           codeOwnerBackend
-              .getCodeOwnerConfig(codeOwnerConfigKey, revision)
+              .getCodeOwnerConfig(codeOwnerConfigKey, revWalk, revCommit)
               // We already know that the path exists, so either the code owner config is
               // successfully loaded (this case) or the loading fails with an exception because the
               // code owner config is not parseable (catch block below), but it cannot happen that
@@ -341,7 +362,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                       new IllegalStateException(
                           String.format(
                               "code owner config %s not found in revision %s",
-                              codeOwnerConfigKey, revision.name())));
+                              codeOwnerConfigKey, revCommit.name())));
     } catch (StorageException storageException) {
       // Loading the code owner config has failed.
       Optional<ConfigInvalidException> configInvalidException =
@@ -360,7 +381,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           new CommitValidationMessage(
               configInvalidException.get().getMessage(),
               getValidationMessageTypeForParsingError(
-                  codeOwnerBackend, branchNameKey, changedFile, revision)));
+                  codeOwnerBackend, branchNameKey, changedFile, revWalk, revCommit)));
     }
 
     // The code owner config was successfully loaded and parsed.
@@ -371,7 +392,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     Optional<CodeOwnerConfig> baseCodeOwnerConfig;
     try {
       baseCodeOwnerConfig =
-          getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revision);
+          getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revWalk, revCommit);
     } catch (StorageException storageException) {
       if (getInvalidConfigCause(storageException).isPresent()) {
         // The base code owner config is non-parseable. Since the update makes the code owner
@@ -421,7 +442,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param branchNameKey the project and branch of the base code owner config
    * @param changedFile the changed file of the code owner config that contains the path of the base
    *     code owner config as old path
-   * @param revision the revision of the code owner config for which the base code owner config
+   * @param revWalk rev walk that should be used to load the base code owner config
+   * @param revCommit the commit of the code owner config for which the base code owner config
    *     should be loaded
    * @return the loaded base code owner config, {@link Optional#empty()} if no base code owner
    *     config exists (e.g. if the code owner config is newly created)
@@ -430,13 +452,15 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       ChangedFile changedFile,
-      ObjectId revision) {
+      RevWalk revWalk,
+      RevCommit revCommit) {
     if (changedFile.oldPath().isPresent()) {
-      Optional<ObjectId> parentRevision = getParentRevision(branchNameKey.project(), revision);
+      Optional<ObjectId> parentRevision = getParentRevision(branchNameKey.project(), revCommit);
       if (parentRevision.isPresent()) {
         CodeOwnerConfig.Key baseCodeOwnerConfigKey =
             createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
-        return codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision.get());
+        return codeOwnerBackend.getCodeOwnerConfig(
+            baseCodeOwnerConfigKey, revWalk, parentRevision.get());
       }
     }
     return Optional.empty();
@@ -462,7 +486,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param codeOwnerBackend the code owner backend from which the code owner config can be loaded
    * @param branchNameKey the project and branch of the code owner config
    * @param changedFile the changed file that represents the code owner config
-   * @param revision the revision from which the code owner config should be loaded
+   * @param revWalk rev walk that should be used to load the code owner config
+   * @param revCommit the commit from which the code owner config should be loaded
    * @return the {@link com.google.gerrit.server.git.validators.ValidationMessage.Type} (ERROR or
    *     WARNING) that should be used for parsing error of a code owner config file
    */
@@ -470,25 +495,26 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       ChangedFile changedFile,
-      ObjectId revision) {
+      RevWalk revWalk,
+      RevCommit revCommit) {
     //
     if (changedFile.oldPath().isPresent()) {
       // A previous version of the code owner config exists.
       ObjectId parentRevision =
-          getParentRevision(branchNameKey.project(), revision)
+          getParentRevision(branchNameKey.project(), revCommit)
               // Since there is an old path a parent revision must exist.
               .orElseThrow(
                   () ->
                       new IllegalStateException(
                           String.format(
                               "parent revision for revision %s in project %s not found",
-                              revision.name(), branchNameKey.project().get())));
+                              revCommit.name(), branchNameKey.project().get())));
       try {
         // Try to load the code owner config from the parent revision to see if it was parseable
         // there.
         CodeOwnerConfig.Key baseCodeOwnerConfigKey =
             createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
-        codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision);
+        codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, revWalk, parentRevision);
         // The code owner config at the parent revision is parseable. This means the parsing error
         // is introduced by the new commit and we should block uploading it, which we achieve by
         // setting the validation message type to error.
@@ -516,27 +542,18 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * Returns the first parent of the given revision.
    *
    * @param project the project that contains the revision
-   * @param revision the revision for which the first parent should be returned
+   * @param revCommit the commit for which the first parent should be returned
    * @return the first parent of the given revision, {@link Optional#empty()} if the given revision
    *     has no parent
    */
-  private Optional<ObjectId> getParentRevision(Project.NameKey project, ObjectId revision) {
-    try (Repository repository = repoManager.openRepository(project)) {
-      RevCommit commit = repository.parseCommit(revision);
-      if (commit.getParentCount() == 0) {
-        return Optional.empty();
-      }
-      RevCommit firstParent = commit.getParent(0);
-      logger.atFine().log(
-          "first parent of %s in %s is %s", revision.name(), project.get(), firstParent.name());
-      return Optional.of(firstParent);
-    } catch (IOException e) {
-      throw new StorageException(
-          String.format(
-              "Failed to retrieve parent commit of commit %s in project %s",
-              revision.name(), project.get()),
-          e);
+  private Optional<ObjectId> getParentRevision(Project.NameKey project, RevCommit revCommit) {
+    if (revCommit.getParentCount() == 0) {
+      return Optional.empty();
     }
+    RevCommit firstParent = revCommit.getParent(0);
+    logger.atFine().log(
+        "first parent of %s in %s is %s", revCommit.name(), project.get(), firstParent.name());
+    return Optional.of(firstParent);
   }
 
   /**

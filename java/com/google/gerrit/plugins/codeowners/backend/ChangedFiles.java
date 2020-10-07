@@ -37,6 +37,7 @@ import java.util.List;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -102,21 +103,32 @@ public class ChangedFiles {
       throws IOException, PatchListNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
-    logger.atFine().log(
-        "computing changed files for revision %s in project %s", revision.name(), project);
 
     try (Repository repository = repoManager.openRepository(project);
         RevWalk revWalk = new RevWalk(repository)) {
       RevCommit revCommit = revWalk.parseCommit(revision);
-
-      if (revCommit.getParentCount() > 1
-          && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(
-              codeOwnersPluginConfiguration.getMergeCommitStrategy(project))) {
-        return computeByComparingAgainstAutoMerge(project, revCommit);
-      }
-
-      return computeByComparingAgainstFirstParent(repository, revWalk, revCommit);
+      return compute(project, repository.getConfig(), revWalk, revCommit);
     }
+  }
+
+  public ImmutableSet<ChangedFile> compute(
+      Project.NameKey project, Config repoConfig, RevWalk revWalk, RevCommit revCommit)
+      throws IOException, PatchListNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(repoConfig, "repoConfig");
+    requireNonNull(revWalk, "revWalk");
+    requireNonNull(revCommit, "revCommit");
+
+    logger.atFine().log(
+        "computing changed files for revision %s in project %s", revCommit.name(), project);
+
+    if (revCommit.getParentCount() > 1
+        && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(
+            codeOwnersPluginConfiguration.getMergeCommitStrategy(project))) {
+      return computeByComparingAgainstAutoMerge(project, revCommit);
+    }
+
+    return computeByComparingAgainstFirstParent(repoConfig, revWalk, revCommit);
   }
 
   /**
@@ -151,18 +163,18 @@ public class ChangedFiles {
    *
    * <p>The computation also works if the commit doesn't have any parent.
    *
-   * @param repository the repository
+   * @param repoConfig the repository configuration
    * @param revWalk the rev walk
    * @param revCommit the commit for which the changed files should be computed
    * @return the changed files for the given commit
    */
   private ImmutableSet<ChangedFile> computeByComparingAgainstFirstParent(
-      Repository repository, RevWalk revWalk, RevCommit revCommit) throws IOException {
+      Config repoConfig, RevWalk revWalk, RevCommit revCommit) throws IOException {
     RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
     logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
 
     try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
-      diffFormatter.setReader(revWalk.getObjectReader(), repository.getConfig());
+      diffFormatter.setReader(revWalk.getObjectReader(), repoConfig);
       diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
       diffFormatter.setDetectRenames(true);
       List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
