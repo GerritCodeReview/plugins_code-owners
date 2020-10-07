@@ -29,9 +29,12 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
+import com.google.gerrit.extensions.common.ChangeInput;
+import com.google.gerrit.extensions.common.MergeInput;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.JgitPath;
@@ -1165,6 +1168,36 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
             getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig),
             project.get()));
+  }
+
+  @Test
+  public void validateMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
+    // Create another branch.
+    String branchName = "stable";
+    gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
+
+    // Create a code owner config file in the other branch.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branchName)
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Create a change that merges the other branch into master. The code owner config files in the
+    // created merge commit will be validated. This only works if CodeOwnerConfigValidator uses the
+    // same RevWalk instance that inserted the new merge commit. If it doesn't, the create change
+    // call below would fail with a MissingObjectException.
+    ChangeInput changeInput = new ChangeInput();
+    changeInput.project = project.get();
+    changeInput.branch = "master";
+    changeInput.subject = "A change";
+    changeInput.status = ChangeStatus.NEW;
+    MergeInput mergeInput = new MergeInput();
+    mergeInput.source = gApi.projects().name(project.get()).branch(branchName).get().revision;
+    changeInput.merge = mergeInput;
+    gApi.changes().create(changeInput);
   }
 
   private CodeOwnerConfig createCodeOwnerConfigWithImport(

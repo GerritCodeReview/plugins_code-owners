@@ -120,6 +120,7 @@ public class CheckCodeOwnerConfigFilesInRevision
                                   codeOwnerBackend,
                                   revisionResource.getChange().getDest(),
                                   changedFile,
+                                  rw,
                                   commit)
                               .map(CheckCodeOwnerConfigFiles::createConsistencyProblemInfo)
                               .filter(Optional::isPresent)
