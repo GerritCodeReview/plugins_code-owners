@@ -74,7 +74,9 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
   @Override
   public final Optional<CodeOwnerConfig> getCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
+      CodeOwnerConfig.Key codeOwnerConfigKey,
+      @Nullable RevWalk revWalk,
+      @Nullable ObjectId revision) {
     String fileName =
         codeOwnerConfigKey.fileName().orElse(getFileName(codeOwnerConfigKey.project()));
 
@@ -91,20 +93,33 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       return Optional.empty();
     }
 
-    return loadCodeOwnerConfigFile(codeOwnerConfigKey, fileName, revision)
+    return loadCodeOwnerConfigFile(codeOwnerConfigKey, fileName, revWalk, revision)
         .getLoadedCodeOwnerConfig();
   }
 
   private CodeOwnerConfigFile loadCodeOwnerConfigFile(
-      CodeOwnerConfig.Key codeOwnerConfigKey, String fileName, @Nullable ObjectId revision) {
+      CodeOwnerConfig.Key codeOwnerConfigKey,
+      String fileName,
+      @Nullable RevWalk revWalk,
+      @Nullable ObjectId revision) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       if (revision == null) {
         return CodeOwnerConfigFile.loadCurrent(
             fileName, codeOwnerConfigParser, repository, codeOwnerConfigKey);
       }
-      try (RevWalk revWalk = new RevWalk(repository)) {
+
+      boolean closeRevWalk = false;
+      if (revWalk == null) {
+        closeRevWalk = true;
+        revWalk = new RevWalk(repository);
+      }
+      try {
         return CodeOwnerConfigFile.load(
             fileName, codeOwnerConfigParser, revWalk, revision, codeOwnerConfigKey);
+      } finally {
+        if (closeRevWalk) {
+          revWalk.close();
+        }
       }
     } catch (IOException | ConfigInvalidException e) {
       throw new StorageException(
