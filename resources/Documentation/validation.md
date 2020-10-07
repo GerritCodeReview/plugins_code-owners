@@ -32,6 +32,8 @@ No validation is done when:
   plugin gets installed/enabled, it is possible that invalid configuration files
   already exist in the repository)
 * updates happen behind Gerrit's back (e.g. pushes that bypass Gerrit)
+* the validation is disabled in the
+  [plugin configuration](config.html#codeOwnersEnableValidationOnCommitReceived).
 
 In addition for [code owner config files](user-guide.html#codeOwnerConfigFiles)
 no validation is done when:

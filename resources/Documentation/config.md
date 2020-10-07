@@ -96,6 +96,18 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default `false`.
 
+<a id="pluginCodeOwnersEnableValidationOnCommitReceived">plugin.@PLUGIN@.enableValidationOnCommitReceived</a>
+:       Whether code owner config files are validated when a commit is
+        received.\
+        If enabled, the upload of commits that contain invalid code owner config
+        files is rejected.\
+        Should only be disabled if there is bot that validates the code owner
+        config files in open changes as part of a pre-submit validation.\
+        Can be overridden per project by setting
+        [codeOwners.enableValidationOnCommitReceived](#codeOwnersEnableValidationOnCommitReceived)
+        in `@PLUGIN@.config`.\
+        By default `true`.
+
 <a id="pluginCodeOwnersAllowedEmailDomain">plugin.@PLUGIN@.allowedEmailDomain</a>
 :       Email domain that allows to assign code ownerships to emails with this
         domain.\
@@ -292,6 +304,20 @@ Parameters that are not set for a project are inherited from the parent project.
         If not set, the global setting
         [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
         `gerrit.config` is used.
+
+<a id="codeOwnersEnableValidationOnCommitReceived">codeOwners.enableValidationOnCommitReceived</a>
+:       Whether code owner config files are validated when a commit is
+        received.\
+        If enabled, the upload of commits that contain invalid code owner config
+        files is rejected.\
+        Should only be disabled if there is bot that validates the code owner
+        config files in open changes as part of a pre-submit validation.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
+        in `gerrit.config` is used.
 
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a
