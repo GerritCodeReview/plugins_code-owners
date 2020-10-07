@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -26,6 +27,8 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.server.account.AccountControl;
+import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.ServiceUserClassifier;
 import com.google.gerrit.server.change.IncludedInResolver;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -65,6 +68,9 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
 
   @Inject
   GetCodeOwnersForPathInBranch(
+      AccountVisibility accountVisibility,
+      Accounts accounts,
+      AccountControl.Factory accountControlFactory,
       PermissionBackend permissionBackend,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
@@ -73,6 +79,9 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
       CodeOwnerJson.Factory codeOwnerJsonFactory,
       GitRepositoryManager repoManager) {
     super(
+        accountVisibility,
+        accounts,
+        accountControlFactory,
         permissionBackend,
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,

@@ -16,7 +16,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSubject.hasAccountId;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
@@ -90,53 +89,12 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void resolveCodeOwnerReferenceForStarAsEmail() throws Exception {
-    TestAccount user2 = accountCreator.user2();
+  public void cannotResolveCodeOwnerReferenceForStarAsEmail() throws Exception {
     Stream<CodeOwner> codeOwner =
         codeOwnerResolver
             .get()
             .resolve(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
-    assertThat(codeOwner)
-        .comparingElementsUsing(hasAccountId())
-        .containsExactly(admin.id(), user.id(), user2.id());
-  }
-
-  @Test
-  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
-  public void resolveCodeOwnerReferenceForStarAsEmailChecksAccountVisibility() throws Exception {
-    // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
-    // visible to this user since they do not share any group.
-    TestAccount user2 = accountCreator.user2();
-
-    // Set user2 as current user.
-    requestScopeOperations.setApiUser(user2.id());
-
-    Stream<CodeOwner> codeOwner =
-        codeOwnerResolver
-            .get()
-            .resolve(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
-    assertThat(codeOwner).comparingElementsUsing(hasAccountId()).containsExactly(user2.id());
-  }
-
-  @Test
-  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
-  public void nonVisibleCodeOwnerCanBeResolvedForStarAsEmailIfVisibilityIsNotEnforced()
-      throws Exception {
-    // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
-    // visible to this user since they do not share any group.
-    TestAccount user2 = accountCreator.user2();
-
-    // Set user2 as current user.
-    requestScopeOperations.setApiUser(user2.id());
-
-    Stream<CodeOwner> codeOwner =
-        codeOwnerResolver
-            .get()
-            .enforceVisibility(false)
-            .resolve(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
-    assertThat(codeOwner)
-        .comparingElementsUsing(hasAccountId())
-        .containsExactly(admin.id(), user.id(), user2.id());
+    assertThat(codeOwner).isEmpty();
   }
 
   @Test
@@ -222,9 +180,10 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .build();
-    assertThat(
-            codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
-        .isEmpty();
+    CodeOwnerResolverResult result =
+        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwners()).isEmpty();
+    assertThat(result.ownedByAllUsers()).isFalse();
   }
 
   @Test
@@ -233,10 +192,25 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
-    assertThat(
-            codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
-        .comparingElementsUsing(hasAccountId())
-        .containsExactly(admin.id(), user.id());
+
+    CodeOwnerResolverResult result =
+        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
+    assertThat(result.ownedByAllUsers()).isFalse();
+  }
+
+  @Test
+  public void resolvePathCodeOwnersWhenStarIsUsedAsEmail() throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.createWithoutPathExpressions(CodeOwnerResolver.ALL_USERS_WILDCARD))
+            .build();
+
+    CodeOwnerResolverResult result =
+        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwnersAccountIds()).isEmpty();
+    assertThat(result.ownedByAllUsers()).isTrue();
   }
 
   @Test
@@ -247,10 +221,10 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                 CodeOwnerSet.createWithoutPathExpressions(
                     admin.email(), "non-existing@example.com"))
             .build();
-    assertThat(
-            codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md")))
-        .comparingElementsUsing(hasAccountId())
-        .containsExactly(admin.id());
+    CodeOwnerResolverResult result =
+        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
+    assertThat(result.ownedByAllUsers()).isFalse();
   }
 
   @Test
@@ -376,14 +350,27 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
   @Test
   public void resolveCodeOwnerReferences() throws Exception {
+    CodeOwnerResolverResult result =
+        codeOwnerResolver
+            .get()
+            .resolve(
+                ImmutableSet.of(
+                    CodeOwnerReference.create(admin.email()),
+                    CodeOwnerReference.create(user.email())));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
+    assertThat(result.ownedByAllUsers()).isFalse();
+  }
+
+  @Test
+  public void isResolvable() throws Exception {
+    assertThat(codeOwnerResolver.get().isResolvable(CodeOwnerReference.create(admin.email())))
+        .isTrue();
+  }
+
+  @Test
+  public void isNotResolvable() throws Exception {
     assertThat(
-            codeOwnerResolver
-                .get()
-                .resolve(
-                    ImmutableSet.of(
-                        CodeOwnerReference.create(admin.email()),
-                        CodeOwnerReference.create(user.email()))))
-        .comparingElementsUsing(hasAccountId())
-        .containsExactly(admin.id(), user.id());
+            codeOwnerResolver.get().isResolvable(CodeOwnerReference.create("unknown@example.com")))
+        .isFalse();
   }
 }
