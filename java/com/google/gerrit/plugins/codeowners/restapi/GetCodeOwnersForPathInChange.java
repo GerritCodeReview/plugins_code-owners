@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestReadView;
@@ -21,6 +22,8 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.server.account.AccountControl;
+import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.ServiceUserClassifier;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -40,6 +43,9 @@ public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
     implements RestReadView<CodeOwnersInChangeCollection.PathResource> {
   @Inject
   GetCodeOwnersForPathInChange(
+      AccountVisibility accountVisibility,
+      Accounts accounts,
+      AccountControl.Factory accountControlFactory,
       PermissionBackend permissionBackend,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
@@ -47,6 +53,9 @@ public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
       ServiceUserClassifier serviceUserClassifier,
       CodeOwnerJson.Factory codeOwnerJsonFactory) {
     super(
+        accountVisibility,
+        accounts,
+        accountControlFactory,
         permissionBackend,
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
