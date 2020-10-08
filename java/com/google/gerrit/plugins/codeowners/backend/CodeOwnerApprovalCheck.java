@@ -353,7 +353,8 @@ public class CodeOwnerApprovalCheck {
         enableImplicitApprovalFromUploader,
         patchSetUploader)) {
       codeOwnerStatus = CodeOwnerStatus.APPROVED;
-    } else if (isPendingBootstrappingMode(branch.project(), absolutePath, reviewerAccountIds)) {
+    } else if (isPendingBootstrappingMode(
+        branch.project(), absolutePath, globalCodeOwnerAccountIds, reviewerAccountIds)) {
       codeOwnerStatus = CodeOwnerStatus.PENDING;
     }
 
@@ -420,7 +421,10 @@ public class CodeOwnerApprovalCheck {
   }
 
   private boolean isPendingBootstrappingMode(
-      Project.NameKey projectName, Path absolutePath, ImmutableSet<Account.Id> reviewerAccountIds) {
+      Project.NameKey projectName,
+      Path absolutePath,
+      ImmutableSet<Account.Id> globalCodeOwnerAccountIds,
+      ImmutableSet<Account.Id> reviewerAccountIds) {
     if (reviewerAccountIds.stream()
         .anyMatch(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))) {
       // At least one of the reviewers is a project owner and thus a code owner.
@@ -428,7 +432,11 @@ public class CodeOwnerApprovalCheck {
       return true;
     }
 
-    // TODO: check if a global code owner is a reviewer
+    if (isPending(absolutePath, globalCodeOwnerAccountIds, reviewerAccountIds)) {
+      // At least one of the reviewers is a global code owner.
+      logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
+      return true;
+    }
 
     return false;
   }
@@ -462,7 +470,10 @@ public class CodeOwnerApprovalCheck {
     } else {
       logger.atFine().log("%s was not approved by a global code owner", absolutePath);
 
-      // TODO check if a global code owner is a reviewer
+      if (isPending(absolutePath, globalCodeOwnerAccountIds, reviewerAccountIds)) {
+        logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
+        codeOwnerStatus.set(CodeOwnerStatus.PENDING);
+      }
 
       codeOwnerConfigHierarchy.visit(
           branch,
