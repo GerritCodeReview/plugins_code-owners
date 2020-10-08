@@ -1018,6 +1018,66 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void globalCodeOwnerAsReviewer() throws Exception {
+    testGlobalCodeOwnerAsReviewer(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void globalCodeOwnerAsReviewer_bootstrappingMode() throws Exception {
+    testGlobalCodeOwnerAsReviewer(true);
+  }
+
+  private void testGlobalCodeOwnerAsReviewer(boolean bootstrappingMode) throws Exception {
+    // Create a bot user that is a global code owner.
+    TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
+
+    if (!bootstrappingMode) {
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      codeOwnerConfigOperations
+          .newCodeOwnerConfig()
+          .project(project)
+          .branch("master")
+          .folderPath("/foo/")
+          .addCodeOwnerEmail(admin.email())
+          .create();
+    }
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the status of the file is INSUFFICIENT_REVIEWERS.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add the bot approve as reviewer.
+    gApi.changes().id(changeId).addReviewer(bot.email());
+
+    // Check that the status of the file is PENDING now.
+    requestScopeOperations.setApiUser(admin.id());
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.PENDING);
+  }
+
+  @Test
   public void parentCodeOwnerConfigsAreConsidered() throws Exception {
     TestAccount user2 = accountCreator.user2();
     TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
