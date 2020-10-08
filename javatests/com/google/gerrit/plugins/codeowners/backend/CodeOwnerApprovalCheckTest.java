@@ -894,17 +894,29 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void approvedByGlobalCodeOwner() throws Exception {
+    testApprovedByGlobalCodeOwner(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void approvedByGlobalCodeOwner_bootstrappingMode() throws Exception {
+    testApprovedByGlobalCodeOwner(true);
+  }
+
+  private void testApprovedByGlobalCodeOwner(boolean bootstrappingMode) throws Exception {
     // Create a bot user that is a global code owner.
     TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
 
-    // Create a code owner config file so that we are not in the bootstrapping mode.
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(admin.email())
-        .create();
+    if (!bootstrappingMode) {
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      codeOwnerConfigOperations
+          .newCodeOwnerConfig()
+          .project(project)
+          .branch("master")
+          .folderPath("/foo/")
+          .addCodeOwnerEmail(admin.email())
+          .create();
+    }
 
     // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -948,27 +960,42 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void globalCodeOwner_noImplicitApproval() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(false);
+    testImplicitlyApprovedByGlobalCodeOwner(false, false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void globalCodeOwner_withImplicitApproval() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(true);
+    testImplicitlyApprovedByGlobalCodeOwner(true, false);
   }
 
-  private void testImplicitlyApprovedByGlobalCodeOwner(boolean implicitApprovalsEnabled)
-      throws Exception {
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void globalCodeOwner_noImplicitApproval_bootstrappingMode() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwner(false, true);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void globalCodeOwner_withImplicitApproval_bootstrappingMode() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwner(true, true);
+  }
+
+  private void testImplicitlyApprovedByGlobalCodeOwner(
+      boolean implicitApprovalsEnabled, boolean bootstrappingMode) throws Exception {
     TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(admin.email())
-        .create();
+    if (!bootstrappingMode) {
+      codeOwnerConfigOperations
+          .newCodeOwnerConfig()
+          .project(project)
+          .branch("master")
+          .folderPath("/foo/")
+          .addCodeOwnerEmail(admin.email())
+          .create();
+    }
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
