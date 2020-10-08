@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "7c6a8f17_c094dbb5",
         "filename": "/PATCHSET_LEVEL",
@@ -14,10 +15,10 @@
       "side": 1,
       "message": "I think endpoints such as \"List Code Owners for path\" should also return the global code owners.\nWDYT?",
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": true
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "29471fbe_ea6fe65c",
         "filename": "/PATCHSET_LEVEL",
@@ -32,10 +33,10 @@
       "message": "Maybe that would just be an overload of unnecessary information, in which case it should probably be documented.",
       "parentUuid": "7c6a8f17_c094dbb5",
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": true
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "cfb12dd0_ab07d8e7",
         "filename": "/PATCHSET_LEVEL",
@@ -50,10 +51,10 @@
       "message": "\u003e I think endpoints such as \"List Code Owners for path\" should also return the\n\u003e global code owners.\n\u003e WDYT?\n\nYes, I also noticed this after pushing. That\u0027s an oversight that I will address in follow-up change (normally I would do it in this change, but since we need this change rather urgently, I think a follow-up change is better).",
       "parentUuid": "29471fbe_ea6fe65c",
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": true
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "db69c4bb_e7842e30",
         "filename": "/PATCHSET_LEVEL",
@@ -68,10 +69,10 @@
       "message": "Ack",
       "parentUuid": "cfb12dd0_ab07d8e7",
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": false
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "84532e13_ae2ffd82",
         "filename": "/PATCHSET_LEVEL",
@@ -86,10 +87,10 @@
       "message": "Done in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/282693",
       "parentUuid": "db69c4bb_e7842e30",
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": false
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "6ea52632_a542cb5b",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
@@ -109,10 +110,10 @@
         "endChar": 13
       },
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": false
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "e8588423_2074c728",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
@@ -133,10 +134,34 @@
         "endChar": 13
       },
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": false
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3f93ae2e_7646d4d7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 358,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-08T09:01:42Z",
+      "side": 1,
+      "message": "Done in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/284022",
+      "parentUuid": "e8588423_2074c728",
+      "range": {
+        "startLine": 358,
+        "startChar": 6,
+        "endLine": 358,
+        "endChar": 13
+      },
+      "revId": "43ba9daac2060036d5507ad7232183285e959b81",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
       "key": {
         "uuid": "bc6d049b_7155d4ab",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
@@ -156,10 +181,10 @@
         "endChar": 55
       },
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": true
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "d05cf441_b65a5334",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
@@ -180,8 +205,7 @@
         "endChar": 55
       },
       "revId": "43ba9daac2060036d5507ad7232183285e959b81",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": false
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
