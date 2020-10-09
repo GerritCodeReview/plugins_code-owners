@@ -22,6 +22,7 @@ import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -241,6 +242,74 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     } else {
       fail("expected merge commit strategy: " + mergeCommitStrategy);
     }
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "ALL_CHANGED_FILES")
+  public void computeForMergeChangeThatContainsADeletedFileAsConflictResolution_allChangedFiles()
+      throws Exception {
+    testComputeForMergeChangeThatContainsADeletedFileAsConflictResolution();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void
+      computeForMergeChangeThatContainsADeletedFileAsConflictResolution_filesWithConflictResolution()
+          throws Exception {
+    testComputeForMergeChangeThatContainsADeletedFileAsConflictResolution();
+  }
+
+  private void testComputeForMergeChangeThatContainsADeletedFileAsConflictResolution()
+      throws Exception {
+    String file = "foo/a.txt";
+
+    // Create a base change.
+    Change.Id baseChange =
+        changeOperations.newChange().branch("master").file(file).content("base content").create();
+    approveAndSubmit(baseChange);
+
+    // Create another branch
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create a change in master that touches file1.
+    Change.Id changeInMaster =
+        changeOperations.newChange().branch("master").file(file).content("master content").create();
+    approveAndSubmit(changeInMaster);
+
+    // Create a change in the other branch and that deleted file1.
+    PushOneCommit push =
+        pushFactory.create(admin.newIdent(), testRepo, "Change Deleting A File", file, "");
+    Result r = push.rm("refs/for/master");
+    r.assertOkStatus();
+    approveAndSubmit(r.getChange().getId());
+
+    // Create a merge change with resolving the conflict on file between the edit in master and the
+    // deletion in the other branch by deleting the file.
+    Change.Id mergeChange =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .mergeOf()
+            .tipOfBranch("master")
+            .and()
+            .tipOfBranch(branchName)
+            .file(file)
+            .delete()
+            .create();
+
+    ImmutableSet<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(Integer.toString(mergeChange.get())));
+    ImmutableSet<String> oldPaths =
+        changedFilesSet.stream()
+            .map(changedFile -> JgitPath.of(changedFile.oldPath().get()).get())
+            .collect(toImmutableSet());
+    assertThat(oldPaths).containsExactly(file);
   }
 
   private void approveAndSubmit(Change.Id changeId) throws Exception {
