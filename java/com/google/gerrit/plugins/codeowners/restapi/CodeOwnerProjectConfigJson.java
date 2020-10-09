@@ -76,6 +76,8 @@ public class CodeOwnerProjectConfigJson {
         codeOwnersPluginConfiguration.getMergeCommitStrategy(projectName);
     generalInfo.implicitApprovals =
         codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(projectName) ? true : null;
+    generalInfo.overrideInfoUrl =
+        codeOwnersPluginConfiguration.getOverrideInfoUrl(projectName).orElse(null);
     return generalInfo;
   }
 

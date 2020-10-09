@@ -545,6 +545,7 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | `file_extension` | optional | The file extension that is used for the code owner config files in this project. Not set if no file extension is used.
 | `merge_commit_strategy` || Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
 | `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.html#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
+| `override_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to request a code owner override.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path

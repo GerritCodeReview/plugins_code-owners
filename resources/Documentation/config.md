@@ -61,6 +61,16 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default unset (no file extension is used).
 
+<a id="pluginCodeOwnersOverrideInfoUrl">plugin.@PLUGIN@.overrideInfoUrl</a>
+:       A URL for a page that provides host-specific information about how to
+        request a code owner override.\
+        The frontend displays a link to this page on the change screen so that
+        users can discover the override instructions easily.\
+        Can be overridden per project by setting
+        [codeOwners.overrideInfoUrl](#codeOwnersFileExtension) in
+        `@PLUGIN@.config`.\
+        By default unset (no override info URL).
+
 <a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplictApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
@@ -262,6 +272,18 @@ Parameters that are not set for a project are inherited from the parent project.
         `gerrit.config`.\
         If not set, the global setting
         [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
+        `gerrit.config` is used.
+
+<a id="codeOwnersOverrideInfoUrl">codeOwners.overrideInfoUrl</a>
+:       A URL for a page that provides project-specific information about how to
+        request a code owner override.\
+        The frontend displays a link to this page on the change screen so that
+        users can discover the override instructions easily.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.overrideInfoUrl](#pluginCodeOwnersOverrideInfoUrl) in
+        `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.overrideInfoUrl](#pluginCodeOwnersOverrideInfoUrl) in
         `gerrit.config` is used.
 
 <a id="codeOwnersEnableImplicitApprovals">codeOwners.enableImplicitApprovals</a>
