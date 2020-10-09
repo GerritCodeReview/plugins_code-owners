@@ -74,7 +74,7 @@ public class CodeOwnerConfigScanner {
           found.set(true);
           return false;
         },
-        ignoreInvalidCodeOwnerConfigFiles());
+        (codeOwnerConfigFilePath, configInvalidException) -> found.set(true));
     return found.get();
   }
 
