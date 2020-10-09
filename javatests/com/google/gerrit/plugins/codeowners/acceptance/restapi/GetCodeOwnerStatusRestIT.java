@@ -19,8 +19,13 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.extensions.restapi.IdString;
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -36,6 +41,13 @@ import org.junit.Test;
  * extend {@link AbstractCodeOwnersIT}.
  */
 public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
+  private BackendConfig backendConfig;
+
+  @Before
+  public void setUpCodeOwnersPlugin() throws Exception {
+    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
+  }
+
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
   public void cannotGetStatusIfPluginConfigurationIsInvalid() throws Exception {
@@ -50,5 +62,35 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
             "Invalid configuration of the code-owners plugin. Code owner backend"
                 + " 'non-existing-backend' that is configured in gerrit.config (parameter"
                 + " plugin.code-owners.backend) not found.");
+  }
+
+  @Test
+  public void cannotGetStatusIfCodeOwnerConfigIsInvalid() throws Exception {
+    String filePath = getCodeOwnerConfigFilePath(createCodeOwnerConfigKey("/"));
+    disableCodeOwnersForProject(project);
+    String changeId =
+        createChange("Add code owners", JgitPath.of(filePath).get(), "INVALID").getChangeId();
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+
+    String changeId2 = createChange().getChangeId();
+    RestResponse r =
+        adminRestSession.get(
+            String.format("/changes/%s/code_owners.status", IdString.fromDecoded(changeId2)));
+    r.assertConflict();
+    assertThat(r.getEntityContent())
+        .contains(
+            String.format(
+                "invalid code owner config file %s (project = %s, branch = refs/heads/master)",
+                filePath, project.get()));
+  }
+
+  private CodeOwnerConfig.Key createCodeOwnerConfigKey(String folderPath) {
+    return CodeOwnerConfig.Key.create(project, "master", folderPath);
+  }
+
+  private String getCodeOwnerConfigFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
+    return backendConfig.getDefaultBackend().getFilePath(codeOwnerConfigKey).toString();
   }
 }

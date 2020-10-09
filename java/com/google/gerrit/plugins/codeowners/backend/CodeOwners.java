@@ -77,7 +77,7 @@ public class CodeOwners {
    * ConfigInvalidException}). If yes, the {@link ConfigInvalidException} is returned. If no, {@link
    * Optional#empty()} is returned.
    */
-  public static Optional<ConfigInvalidException> getInvalidConfigCause(Exception e) {
+  public static Optional<ConfigInvalidException> getInvalidConfigCause(Throwable e) {
     return Throwables.getCausalChain(e).stream()
         .filter(t -> t instanceof ConfigInvalidException)
         .map(t -> (ConfigInvalidException) t)
