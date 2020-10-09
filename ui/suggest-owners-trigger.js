@@ -22,6 +22,11 @@ export class SuggestOwnersTrigger extends Polymer.Element {
     return 'suggest-owners-trigger';
   }
 
+  constructor(props) {
+    super(props);
+    this.expandSuggestionStateUnsubscriber = undefined;
+  }
+
   static get properties() {
     return {
       change: Object,
@@ -78,9 +83,18 @@ export class SuggestOwnersTrigger extends Polymer.Element {
 
   connectedCallback() {
     super.connectedCallback();
-    ownerState.onExpandSuggestionChange(expanded => {
-      this.expanded = expanded;
-    });
+    this.expandSuggestionStateUnsubscriber = ownerState
+        .onExpandSuggestionChange(expanded => {
+          this.expanded = expanded;
+        });
+  }
+
+  disconnnectedCallback() {
+    super.disconnectedCallback();
+    if (this.expandSuggestionStateUnsubscriber) {
+      this.expandSuggestionStateUnsubscriber();
+      this.expandSuggestionStateUnsubscriber = undefined;
+    }
   }
 
   onInputChanged(restApi, change) {
