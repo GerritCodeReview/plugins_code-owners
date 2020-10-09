@@ -416,6 +416,16 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .isTrue();
   }
 
+  @Test
+  public void containsOnlyInvalidCodeOwnerConfigFiles() throws Exception {
+    createInvalidCodeOwnerConfig("/OWNERS");
+
+    assertThat(
+            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
+                BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
   private void visit() {
     codeOwnerConfigScanner.visit(
         BranchNameKey.create(project, "master"), visitor, invalidCodeOwnerConfigCallback);
