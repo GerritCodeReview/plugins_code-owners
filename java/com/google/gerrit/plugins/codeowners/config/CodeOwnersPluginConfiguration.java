@@ -154,6 +154,17 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
+   * Gets the override info URL that is configured for the given project.
+   *
+   * @param project the project for which the configured override info URL should be returned
+   * @return the override info URL that is configured for the given project
+   */
+  public Optional<String> getOverrideInfoUrl(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getOverrideInfoUrl(getPluginConfig(project));
+  }
+
+  /**
    * Returns the email domains that are allowed to be used for code owners.
    *
    * @return the email domains that are allowed to be used for code owners, an empty set if all
