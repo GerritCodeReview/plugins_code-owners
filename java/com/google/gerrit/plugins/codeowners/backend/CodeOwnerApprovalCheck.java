@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
@@ -27,6 +26,7 @@ import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
@@ -106,7 +106,7 @@ public class CodeOwnerApprovalCheck {
    * @return whether the given change has sufficient code owner approvals to be submittable
    */
   public boolean isSubmittable(ChangeNotes changeNotes)
-      throws IOException, PatchListNotAvailableException {
+      throws ResourceConflictException, IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     logger.atFine().log(
         "checking if change %d in project %s is submittable",
@@ -156,7 +156,7 @@ public class CodeOwnerApprovalCheck {
    *     returned
    */
   public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes)
-      throws IOException, PatchListNotAvailableException {
+      throws ResourceConflictException, IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (TraceTimer traceTimer =
         TraceContext.newTimer(
@@ -625,16 +625,18 @@ public class CodeOwnerApprovalCheck {
    *
    * <p>This is the revision from which the code owner configs should be read when computing code
    * owners for the files that are touched in the change.
+   *
+   * @throws ResourceConflictException thrown if the destination branch is not found, e.g. when the
+   *     branch got deleted after the change was created
    */
-  private ObjectId getDestBranchRevision(Change change) throws IOException {
+  private ObjectId getDestBranchRevision(Change change)
+      throws IOException, ResourceConflictException {
     try (Repository repository = repoManager.openRepository(change.getProject());
         RevWalk rw = new RevWalk(repository)) {
       Ref ref = repository.exactRef(change.getDest().branch());
-      checkNotNull(
-          ref,
-          "branch %s in repository %s not found",
-          change.getDest().branch(),
-          change.getProject().get());
+      if (ref == null) {
+        throw new ResourceConflictException("destination branch not found");
+      }
       return rw.parseCommit(ref.getObjectId());
     }
   }
