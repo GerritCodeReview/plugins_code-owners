@@ -69,6 +69,8 @@ public class GeneralConfig {
   @VisibleForTesting
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
 
+  @VisibleForTesting public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
+
   private final String pluginName;
   private final PluginConfig pluginConfigFromGerritConfig;
 
@@ -274,5 +276,26 @@ public class GeneralConfig {
     return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_GLOBAL_CODE_OWNER))
         .map(CodeOwnerReference::create)
         .collect(toImmutableSet());
+  }
+
+  /**
+   * Gets an URL that leads to an information page about overrides.
+   *
+   * <p>The URL is retrieved from the given plugin config, with fallback to the {@code
+   * gerrit.config}.
+   *
+   * @param pluginConfig the plugin config from which the override info URL should be read.
+   * @return URL that leads to an information page about overrides, {@link Optional#empty()} if no
+   *     such URL is configured
+   */
+  Optional<String> getOverrideInfoUrl(Config pluginConfig) {
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    String fileExtension = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_OVERRIDE_INFO_URL);
+    if (fileExtension != null) {
+      return Optional.of(fileExtension);
+    }
+
+    return Optional.ofNullable(pluginConfigFromGerritConfig.getString(KEY_OVERRIDE_INFO_URL));
   }
 }
