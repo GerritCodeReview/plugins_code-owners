@@ -22,13 +22,17 @@ import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSu
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
+import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
@@ -1846,6 +1850,24 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
           .hasStatusThat()
           .isEqualTo(CodeOwnerStatus.APPROVED);
     }
+  }
+
+  @Test
+  public void getStatus_branchDeleted() throws Exception {
+    String branchName = "tempBranch";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    String changeId = createChange("refs/for/" + branchName).getChangeId();
+
+    DeleteBranchesInput input = new DeleteBranchesInput();
+    input.branches = ImmutableList.of(branchName);
+    gApi.projects().name(project.get()).deleteBranches(input);
+
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId)));
+    assertThat(exception).hasMessageThat().isEqualTo("destination branch not found");
   }
 
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
