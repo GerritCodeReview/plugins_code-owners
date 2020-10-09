@@ -18,6 +18,9 @@
       get() {
         return Promise.resolve({});
       },
+      getLoggedIn() {
+        return Promise.resolve(undefined);
+      },
     };
     const getApiStub = sinon.stub(fakeRestApi, 'get');
     getApiStub.returns(Promise.resolve({}));
