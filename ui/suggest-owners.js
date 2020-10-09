@@ -24,6 +24,11 @@ class OwnerGroupFileList extends Polymer.Element {
     return 'owner-group-file-list';
   }
 
+  constructor() {
+    super();
+    this.expandSuggestionStateUnsubscriber = undefined;
+  }
+
   static get properties() {
     return {
       files: Array,
@@ -327,30 +332,40 @@ export class SuggestOwners extends Polymer.Element {
 
   connectedCallback() {
     super.connectedCallback();
-    ownerState.onExpandSuggestionChange(expanded => {
-      this.hidden = !expanded;
-      if (expanded) {
-        // this is more of a hack to let reivew input lose focus
-        // to avoid suggestion dropdown
-        // gr-autocomplete has a internal state for tracking focus
-        // that will be canceled if any click happens outside of
-        // it's target
-        // Can not use `this.async` as it's only available in
-        // legacy element mixin which not used in this plugin.
-        Polymer.Async.timeOut.run(() => this.click(), 100);
+    this.expandSuggestionStateUnsubscriber = ownerState
+        .onExpandSuggestionChange(expanded => {
+          this.hidden = !expanded;
+          if (expanded) {
+            // this is more of a hack to let reivew input lose focus
+            // to avoid suggestion dropdown
+            // gr-autocomplete has a internal state for tracking focus
+            // that will be canceled if any click happens outside of
+            // it's target
+            // Can not use `this.async` as it's only available in
+            // legacy element mixin which not used in this plugin.
+            Polymer.Async.timeOut.run(() => this.click(), 100);
 
-        // start fetching suggestions
-        if (!this._suggestionsTimer) {
-          this._suggestionsTimer = setInterval(() => {
-            this._pollingSuggestions();
-          }, SUGGESTION_POLLING_INTERVAL);
+            // start fetching suggestions
+            if (!this._suggestionsTimer) {
+              this._suggestionsTimer = setInterval(() => {
+                this._pollingSuggestions();
+              }, SUGGESTION_POLLING_INTERVAL);
 
-          // poll immediately to kick start the fetching
-          this.reporting.reportLifeCycle('owners-suggestions-fetching-start');
-          this._pollingSuggestions();
-        }
-      }
-    });
+              // poll immediately to kick start the fetching
+              this.reporting
+                  .reportLifeCycle('owners-suggestions-fetching-start');
+              this._pollingSuggestions();
+            }
+          }
+        });
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this.expandSuggestionStateUnsubscriber) {
+      this.expandSuggestionStateUnsubscriber();
+      this.expandSuggestionStateUnsubscriber = undefined;
+    }
   }
 
   onInputChanged(restApi, change) {
