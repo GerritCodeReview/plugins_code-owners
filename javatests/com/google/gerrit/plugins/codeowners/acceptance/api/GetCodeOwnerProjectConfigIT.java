@@ -87,6 +87,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isNull();
+    assertThat(codeOwnerProjectConfigInfo.general.overrideInfoUrl).isNull();
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
     assertThat(codeOwnerProjectConfigInfo.backend.idsByBranch).isNull();
@@ -106,6 +107,15 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
+  }
+
+  @Test
+  public void getConfigWithConfiguredOverrideInfoUrl() throws Exception {
+    configureOverrideInfoUrl(project, "http://foo.example.com");
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.general.overrideInfoUrl)
+        .isEqualTo("http://foo.example.com");
   }
 
   @Test
@@ -222,6 +232,11 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
     setConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+  }
+
+  private void configureOverrideInfoUrl(Project.NameKey project, String overrideInfoUrl)
+      throws Exception {
+    setConfig(project, null, GeneralConfig.KEY_OVERRIDE_INFO_URL, overrideInfoUrl);
   }
 
   private void configureMergeCommitStrategy(
