@@ -137,6 +137,15 @@ public abstract class ChangedFile {
   public static ChangedFile create(PatchListEntry patchListEntry) {
     requireNonNull(patchListEntry, "patchListEntry");
 
+    if (patchListEntry.getChangeType() == Patch.ChangeType.DELETED) {
+      // For deletions PatchListEntry sets the old path as new name and the old name is unset (see
+      // PatchListEntry constructor). This means to get the old path we need to read the new name.
+      return new AutoValue_ChangedFile(
+          Optional.empty(),
+          convertPathFromPatchListEntry(patchListEntry.getNewName()),
+          CHANGE_TYPE.get(patchListEntry.getChangeType()));
+    }
+
     return new AutoValue_ChangedFile(
         convertPathFromPatchListEntry(patchListEntry.getNewName()),
         convertPathFromPatchListEntry(patchListEntry.getOldName()),
