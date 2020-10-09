@@ -121,9 +121,17 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
           revWalk.close();
         }
       }
-    } catch (IOException | ConfigInvalidException e) {
+    } catch (IOException e) {
       throw new StorageException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
+    } catch (ConfigInvalidException e) {
+      throw new StorageException(
+          String.format(
+              "invalid code owner config file %s (project = %s, branch = %s)",
+              codeOwnerConfigKey.filePath(defaultFileName),
+              codeOwnerConfigKey.project(),
+              codeOwnerConfigKey.branchNameKey().branch()),
+          e);
     }
   }
 
