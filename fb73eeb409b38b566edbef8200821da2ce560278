@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "48deff31_e817b19a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 433,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T08:51:21Z",
+      "side": 1,
+      "message": "Right. I fixed it here and made a new change to fix the other occurrences of this in this file:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/284192",
+      "parentUuid": "d74c7433_b311824a",
+      "range": {
+        "startLine": 433,
+        "startChar": 6,
+        "endLine": 433,
+        "endChar": 10
+      },
+      "revId": "fb73eeb409b38b566edbef8200821da2ce560278",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "157ef464_e0c2c045",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-10-12T08:10:49Z",
       "side": 1,
       "message": "let the bot approve and verify that now the status is approved?",
+      "range": {
+        "startLine": 1078,
+        "startChar": 0,
+        "endLine": 1078,
+        "endChar": 3
+      },
+      "revId": "fb73eeb409b38b566edbef8200821da2ce560278",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a92dd62f_6cf2f7c5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1078,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T08:51:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "157ef464_e0c2c045",
       "range": {
         "startLine": 1078,
         "startChar": 0,
