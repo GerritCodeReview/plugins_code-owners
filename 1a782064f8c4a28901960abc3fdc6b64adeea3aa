@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "61b9ea48_0bebba41",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T10:20:38Z",
+      "side": 1,
+      "message": "Hmm, good question. Maybe we could, but I think I would rather not do this at this point, since resolving the code owners that are explicitly mentioned can lead to a better code owner suggestion when we include the explicitly mentioned code owners + a random set of users, rather than just a random set of users.\n\nBut doing this is something that we could still consider later, at least for the other caller which is CodeOwnerApprovalCheck. I\u0027ll think a bit about this and then follow-up later.",
+      "parentUuid": "cb7ef4ea_f8dc5223",
+      "range": {
+        "startLine": 180,
+        "startChar": 13,
+        "endLine": 180,
+        "endChar": 34
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "3355ac57_590148b8",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
         "patchSetId": 2
@@ -37,6 +61,30 @@
       "writtenOn": "2020-10-12T09:01:44Z",
       "side": 1,
       "message": "in the commit message you said it\u0027s 3 times. Which one did you intend?",
+      "range": {
+        "startLine": 359,
+        "startChar": 23,
+        "endLine": 359,
+        "endChar": 24
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bd80470b_2aec207d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T10:20:38Z",
+      "side": 1,
+      "message": "both are intended :) \n\n1. the factor 2 is always applied to account for users that are filtered out by filterCodeOwners (e.g. service users).\n2. the factor 3 is only applied for SAME_GROUP and VISIBLE_GROUP to account for users that are filtered out because they are not visible\n\nI\u0027ve updated the commit message to mention 1. too.",
+      "parentUuid": "3355ac57_590148b8",
       "range": {
         "startLine": 359,
         "startChar": 23,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "098bf17c_c90c5bc9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T10:20:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5a87043_683fe559",
+      "range": {
+        "startLine": 388,
+        "startChar": 23,
+        "endLine": 388,
+        "endChar": 29
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "21e1cac6_1d69056d",
@@ -83,6 +155,30 @@
       "writtenOn": "2020-10-12T09:01:44Z",
       "side": 1,
       "message": "now I\u0027m confused; isn\u0027t this 6*limit now? (as you called this method with 2*limit and now you\u0027re doing 3*)",
+      "range": {
+        "startLine": 389,
+        "startChar": 80,
+        "endLine": 389,
+        "endChar": 81
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c7eaac6_85693961",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T10:20:38Z",
+      "side": 1,
+      "message": "yes, it\u0027s intended, see comment above.",
+      "parentUuid": "21e1cac6_1d69056d",
       "range": {
         "startLine": 389,
         "startChar": 80,
@@ -116,6 +212,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0184dd0_42937ffb",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T10:20:38Z",
+      "side": 1,
+      "message": "I added some assertions to cover this.",
+      "parentUuid": "e8ecfde2_d332c1c0",
+      "range": {
+        "startLine": 876,
+        "startChar": 0,
+        "endLine": 876,
+        "endChar": 3
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2cb208df_b9056b77",
@@ -129,6 +249,30 @@
       "writtenOn": "2020-10-12T09:01:44Z",
       "side": 1,
       "message": "here and below: inline comments",
+      "range": {
+        "startLine": 1272,
+        "startChar": 73,
+        "endLine": 1272,
+        "endChar": 85
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "160f58de_692c2480",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1272,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T10:20:38Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2cb208df_b9056b77",
       "range": {
         "startLine": 1272,
         "startChar": 73,
