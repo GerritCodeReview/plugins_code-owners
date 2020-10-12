@@ -894,8 +894,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void approvedByGlobalCodeOwner() throws Exception {
+    // Create a bot user that is a global code owner.
     TestAccount bot = accountCreator.create("bot", "bot@example.com", "Bot", null);
 
+    // Create a code owner config file so that we are not in the bootstrapping mode.
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -904,11 +906,25 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .addCodeOwnerEmail(admin.email())
         .create();
 
+    // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
-        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
 
-    // let the bot approve the change
+    // Verify that the file is not approved yet.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Let the bot approve the change.
     projectOperations
         .project(project)
         .forUpdate()
@@ -917,11 +933,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(bot.id());
     approve(changeId);
 
+    // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
         .hasNewPathStatus()
