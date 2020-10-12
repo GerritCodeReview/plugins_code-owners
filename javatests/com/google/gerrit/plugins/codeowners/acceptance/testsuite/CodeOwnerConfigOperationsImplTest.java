@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth8;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations.PerCodeOwnerConfigOperations;
@@ -578,6 +579,64 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("code owner config %s does not exist", codeOwnerConfigKey));
+  }
+
+  @Test
+  public void getJGitFilePath() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath())
+        .isEqualTo("foo/OWNERS");
+  }
+
+  @Test
+  public void getFilePath() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath())
+        .isEqualTo("/foo/OWNERS");
+  }
+
+  @Test
+  public void getJGitFilePath_nonExistingCodeOwnerConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/foo/");
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath())
+        .isEqualTo("foo/OWNERS");
+  }
+
+  @Test
+  public void getFilePath_nonExistingCodeOwnerConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/foo/");
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath())
+        .isEqualTo("/foo/OWNERS");
+  }
+
+  @Test
+  public void getJGitFilePath_nonExistingProject() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("non-existing"), "master", "/foo/");
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath())
+        .isEqualTo("foo/OWNERS");
+  }
+
+  @Test
+  public void getFilePath_nonExistingProject() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("non-existing"), "master", "/foo/");
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath())
+        .isEqualTo("/foo/OWNERS");
   }
 
   private CodeOwnerConfig getCodeOwnerConfigFromServer(CodeOwnerConfig.Key codeOwnerConfigKey) {

@@ -22,8 +22,8 @@ import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,11 +41,12 @@ import org.junit.Test;
  * extend {@link AbstractCodeOwnersIT}.
  */
 public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
-  private BackendConfig backendConfig;
+  private CodeOwnerConfigOperations codeOwnerConfigOperations;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
+    codeOwnerConfigOperations =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
   }
 
   @Test
@@ -66,7 +67,8 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
 
   @Test
   public void cannotGetStatusIfCodeOwnerConfigIsInvalid() throws Exception {
-    String filePath = getCodeOwnerConfigFilePath(createCodeOwnerConfigKey("/"));
+    String filePath =
+        codeOwnerConfigOperations.codeOwnerConfig(createCodeOwnerConfigKey("/")).getFilePath();
     disableCodeOwnersForProject(project);
     String changeId =
         createChange("Add code owners", JgitPath.of(filePath).get(), "INVALID").getChangeId();
@@ -88,9 +90,5 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfig.Key createCodeOwnerConfigKey(String folderPath) {
     return CodeOwnerConfig.Key.create(project, "master", folderPath);
-  }
-
-  private String getCodeOwnerConfigFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    return backendConfig.getDefaultBackend().getFilePath(codeOwnerConfigKey).toString();
   }
 }
