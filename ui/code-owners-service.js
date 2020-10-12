@@ -142,18 +142,29 @@ export class CodeOwnerService {
       }
       return this.restApi.getAccount();
     });
-    this.statusPromise = this.codeOwnerApi
-        .listOwnerStatus(this.change._number)
-        .then(res => {
-          return {
-            patchsetNumber: res.patch_set_number,
-            codeOwnerStatusMap: this._formatStatuses(
-                res.file_code_owner_statuses
-            ),
-            rawStatuses: res.file_code_owner_statuses,
-          };
-        });
 
+    this.statusPromise = this.isCodeOwnerEnabled().then(enabled => {
+      if (!enabled) {
+        return {
+          patchsetNumber: 0,
+          enabled: false,
+          codeOwnerStatusMap: new Map(),
+          rawStatuses: [],
+        };
+      }
+      return this.codeOwnerApi
+          .listOwnerStatus(this.change._number)
+          .then(res => {
+            return {
+              enabled: true,
+              patchsetNumber: res.patch_set_number,
+              codeOwnerStatusMap: this._formatStatuses(
+                  res.file_code_owner_statuses
+              ),
+              rawStatuses: res.file_code_owner_statuses,
+            };
+          });
+    });
   }
 
   /**
@@ -163,7 +174,7 @@ export class CodeOwnerService {
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
   getLoggedInUserInitialRole() {
-    return this.accountPromise.then((account) => {
+    return this.accountPromise.then(account => {
       if (!account) {
         return UserRole.ANONYMOUS;
       }
@@ -175,19 +186,19 @@ export class CodeOwnerService {
       ) {
         const commit = change.revisions[change.current_revision].commit;
         if (
-            commit &&
-            commit.author &&
-            account.email &&
-            commit.author.email === account.email
+          commit &&
+          commit.author &&
+          account.email &&
+          commit.author.email === account.email
         ) {
           return UserRole.AUTHOR;
         }
       }
-      if(change.owner._account_id === account._account_id) {
+      if (change.owner._account_id === account._account_id) {
         return UserRole.CHANGE_OWNER;
       }
-      if(change.reviewers) {
-        if(this._accountInReviewers(change.reviewers.REVIEWER, account)) {
+      if (change.reviewers) {
+        if (this._accountInReviewers(change.reviewers.REVIEWER, account)) {
           return UserRole.REVIEWER;
         } else if (this._accountInReviewers(change.reviewers.CC, account)) {
           return UserRole.CC;
@@ -200,7 +211,7 @@ export class CodeOwnerService {
   }
 
   _accountInReviewers(reviewers, account) {
-    if(!reviewers) {
+    if (!reviewers) {
       return false;
     }
     return reviewers.some(reviewer => reviewer._account_id === account._account_id);
@@ -208,7 +219,7 @@ export class CodeOwnerService {
 
   getStatus() {
     return this.statusPromise.then(res => {
-      if (!this.isOnLatestPatchset(res.patchsetNumber)) {
+      if (res.enabled && !this.isOnLatestPatchset(res.patchsetNumber)) {
         // status is outdated, abort and re-init
         this.abort();
         this.init();
@@ -395,15 +406,6 @@ export class CodeOwnerService {
     };
   }
 
-  /**
-   * Returns a promise with whether status is for latest patchset or not.
-   */
-  isStatusOnLatestPatchset() {
-    return this.statusPromise.then(({patch_set_id}) => {
-      return this.isOnLatestPatchset(patch_set_id);
-    });
-  }
-
   isOnLatestPatchset(patchsetId) {
     const latestRevision = this.change.revisions[this.change.current_revision];
     return `${latestRevision._number}` === `${patchsetId}`;
@@ -458,7 +460,11 @@ export class CodeOwnerService {
   }
 
   getProjectConfig() {
-    return this.codeOwnerApi.getProjectConfig(this.change.project);
+    if (!this.getProjectConfigPromise) {
+      this.getProjectConfigPromise =
+          this.codeOwnerApi.getProjectConfig(this.change.project);
+    }
+    return this.getProjectConfigPromise;
   }
 
   isCodeOwnerEnabled() {
