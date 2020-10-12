@@ -37,4 +37,10 @@ public class GeneralInfo {
    * <p>Not set, if {@code false}.
    */
   public Boolean implicitApprovals;
+
+  /**
+   * Optional URL for a page that provides project/host-specific information about how to request a
+   * code owner override.
+   */
+  public String overrideInfoUrl;
 }

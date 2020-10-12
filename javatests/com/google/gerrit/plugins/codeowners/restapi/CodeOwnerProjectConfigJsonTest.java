@@ -144,6 +144,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "stable-2.10")))
         .thenReturn(protoBackend);
     when(codeOwnersPluginConfiguration.getFileExtension(project)).thenReturn(Optional.of("foo"));
+    when(codeOwnersPluginConfiguration.getOverrideInfoUrl(project))
+        .thenReturn(Optional.of("http://foo.example.com"));
     when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
         .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
     when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
@@ -160,6 +162,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isTrue();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
+    assertThat(codeOwnerProjectConfigInfo.general.overrideInfoUrl)
+        .isEqualTo("http://foo.example.com");
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
     assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isTrue();

@@ -21,6 +21,7 @@ import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENAB
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_READ_ONLY;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
@@ -343,5 +344,35 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_GLOBAL_CODE_OWNER, "bot3@example.com");
     assertThat(generalConfig.getGlobalCodeOwners(cfg))
         .containsExactly(CodeOwnerReference.create("bot3@example.com"));
+  }
+
+  @Test
+  public void cannotGetOverrideInfoUrlForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(NullPointerException.class, () -> generalConfig.getOverrideInfoUrl(null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noOverrideInfoUrlConfigured() throws Exception {
+    assertThat(generalConfig.getOverrideInfoUrl(new Config())).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideInfoUrl", value = "http://foo.example.com")
+  public void overrideInfoIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getOverrideInfoUrl(new Config()))
+        .value()
+        .isEqualTo("http://foo.example.com");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideInfoUrl", value = "http://foo.example.com")
+  public void overrideInfoUrlInPluginConfigOverridesOverrideInfoUrlInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_OVERRIDE_INFO_URL, "http://bar.example.com");
+    assertThat(generalConfig.getOverrideInfoUrl(cfg)).value().isEqualTo("http://bar.example.com");
   }
 }
