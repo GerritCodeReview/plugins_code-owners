@@ -22,6 +22,30 @@
       },
       "revId": "e1d6035b97da2f71c1ae184032b93fac85a7d133",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ec1d92b3_dba8dc36",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T10:18:24Z",
+      "side": 1,
+      "message": "Yes. Thanks for suggesting a better phrasing! Updated the commit message.",
+      "parentUuid": "4c4b5fc8_2ca6e162",
+      "range": {
+        "startLine": 8,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 37
+      },
+      "revId": "e1d6035b97da2f71c1ae184032b93fac85a7d133",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
