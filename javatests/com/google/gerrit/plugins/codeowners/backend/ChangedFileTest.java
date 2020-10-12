@@ -316,8 +316,14 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
 
   private void setupPatchListEntry(
       @Nullable String newPath, @Nullable String oldPath, Patch.ChangeType changeType) {
-    when(patchListEntry.getNewName()).thenReturn(newPath);
-    when(patchListEntry.getOldName()).thenReturn(oldPath);
-    when(patchListEntry.getChangeType()).thenReturn(changeType);
+    if (Patch.ChangeType.DELETED == changeType) {
+      // for deletions PatchListEntry sets the oldPath as new name
+      when(patchListEntry.getNewName()).thenReturn(oldPath);
+      when(patchListEntry.getChangeType()).thenReturn(changeType);
+    } else {
+      when(patchListEntry.getNewName()).thenReturn(newPath);
+      when(patchListEntry.getOldName()).thenReturn(oldPath);
+      when(patchListEntry.getChangeType()).thenReturn(changeType);
+    }
   }
 }

@@ -22,13 +22,17 @@ import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSu
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
+import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
@@ -892,6 +896,136 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void approvedByAnyoneWhenEveryoneIsCodeOwner() throws Exception {
+    // Create a code owner config file that makes everyone a code owner.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // Create a change.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is not approved yet (the change owner is a code owner, but
+    // implicit approvals are disabled).
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add an approval by a user that is a code owner only through the global code ownership.
+    approve(changeId);
+
+    // Check that the file is approved now.
+    requestScopeOperations.setApiUser(admin.id());
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  public void everyoneIsCodeOwner_noImplicitApproval() throws Exception {
+    testImplicitlyApprovedWhenEveryoneIsCodeOwner(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void everyoneIsCodeOwner_withImplicitApproval() throws Exception {
+    testImplicitlyApprovedWhenEveryoneIsCodeOwner(true);
+  }
+
+  private void testImplicitlyApprovedWhenEveryoneIsCodeOwner(boolean implicitApprovalsEnabled)
+      throws Exception {
+    // Create a code owner config file that makes everyone a code owner.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // Create a change as a user that is a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  public void anyReviewerWhenEveryoneIsCodeOwner() throws Exception {
+    // Create a code owner config file that makes everyone a code owner.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // Create a change as a user that is a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    // Verify that the status of the file is INSUFFICIENT_REVIEWERS (since there is no implicit
+    // approval by default).
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add a user as reviewer that is a code owner.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Check that the status of the file is PENDING now.
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.PENDING);
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void approvedByGlobalCodeOwner() throws Exception {
     testApprovedByGlobalCodeOwner(false);
@@ -1111,6 +1245,198 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void approvedByAnyoneWhenEveryoneIsGlobalCodeOwner() throws Exception {
+    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void approvedByAnyoneWhenEveryoneIsGlobalCodeOwner_bootstrappingMode() throws Exception {
+    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(true);
+  }
+
+  private void testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
+      throws Exception {
+    if (!bootstrappingMode) {
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      codeOwnerConfigOperations
+          .newCodeOwnerConfig()
+          .project(project)
+          .branch("master")
+          .folderPath("/foo/")
+          .addCodeOwnerEmail(user.email())
+          .create();
+    }
+
+    // Create a change.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is not approved yet (the change owner is a global code owner, but
+    // implicit approvals are disabled).
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add an approval by a user that is a code owner only through the global code ownership.
+    approve(changeId);
+
+    // Check that the file is approved now.
+    requestScopeOperations.setApiUser(admin.id());
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void everyoneIsGlobalCodeOwner_noImplicitApproval() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
+        /** implicitApprovalsEnabled = */
+        false,
+        /** bootstrappingMode = */
+        false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void everyoneIsGlobalCodeOwner_withImplicitApproval() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
+        /** implicitApprovalsEnabled = */
+        true,
+        /** bootstrappingMode = */
+        false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void everyoneIsGlobalCodeOwner_noImplicitApproval_bootstrappingMode() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
+        /** implicitApprovalsEnabled = */
+        false,
+        /** bootstrappingMode = */
+        true);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void everyoneIsGlobalCodeOwner_withImplicitApproval_bootstrappingMode() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
+        /** implicitApprovalsEnabled = */
+        true,
+        /** bootstrappingMode = */
+        true);
+  }
+
+  private void testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
+      boolean implicitApprovalsEnabled, boolean bootstrappingMode) throws Exception {
+    if (!bootstrappingMode) {
+      codeOwnerConfigOperations
+          .newCodeOwnerConfig()
+          .project(project)
+          .branch("master")
+          .folderPath("/foo/")
+          .addCodeOwnerEmail(user.email())
+          .create();
+    }
+
+    // Create a change as a user that is a code owner only through the global code ownership.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(
+            implicitApprovalsEnabled
+                ? CodeOwnerStatus.APPROVED
+                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void anyReviewerWhenEveryoneIsGlobalCodeOwner() throws Exception {
+    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(false);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void anyReviewerWhenEveryoneIsGlobalCodeOwner_bootstrappingMode() throws Exception {
+    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(true);
+  }
+
+  private void testAnyReviewerWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
+      throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    if (!bootstrappingMode) {
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      codeOwnerConfigOperations
+          .newCodeOwnerConfig()
+          .project(project)
+          .branch("master")
+          .folderPath("/foo/")
+          .addCodeOwnerEmail(user2.email())
+          .create();
+    }
+
+    // Create a change as a user that is a code owner only through the global code ownership.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    // Verify that the status of the file is INSUFFICIENT_REVIEWERS (since there is no implicit
+    // approval by default).
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add a user as reviewer that is a code owner only through the global code ownership.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Check that the status of the file is PENDING now.
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.PENDING);
   }
 
   @Test
@@ -1524,6 +1850,24 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
           .hasStatusThat()
           .isEqualTo(CodeOwnerStatus.APPROVED);
     }
+  }
+
+  @Test
+  public void getStatus_branchDeleted() throws Exception {
+    String branchName = "tempBranch";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    String changeId = createChange("refs/for/" + branchName).getChangeId();
+
+    DeleteBranchesInput input = new DeleteBranchesInput();
+    input.branches = ImmutableList.of(branchName);
+    gApi.projects().name(project.get()).deleteBranches(input);
+
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId)));
+    assertThat(exception).hasMessageThat().isEqualTo("destination branch not found");
   }
 
   private ChangeNotes getChangeNotes(String changeId) throws Exception {

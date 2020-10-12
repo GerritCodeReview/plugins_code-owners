@@ -674,7 +674,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
 
     // Check if the code owner reference is resolvable.
-    if (codeOwnerResolver.resolve(codeOwnerReference).findAny().isPresent()) {
+    if (codeOwnerResolver.isResolvable(codeOwnerReference)) {
       // The code owner reference was successfully resolved to at least one code owner.
       return Optional.empty();
     }

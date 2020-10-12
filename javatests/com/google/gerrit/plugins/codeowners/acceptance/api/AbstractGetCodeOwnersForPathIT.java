@@ -15,10 +15,12 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -28,6 +30,7 @@ import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.common.data.GlobalCapability;
 import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.extensions.client.ListAccountsOption;
@@ -720,5 +723,179 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addMember(serviceUser.id())
         .update();
     assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "ALL")
+  public void getAllUsersAsCodeOwners_allVisible() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // Add a code owner config that makes all users code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id(), admin.id());
+
+    // Query code owners with a limit.
+    codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(2);
+    assertThatList(codeOwnerInfos)
+        .element(0)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id(), admin.id());
+    assertThatList(codeOwnerInfos)
+        .element(1)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id(), admin.id());
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  public void getAllUsersAsCodeOwners_sameGroupVisibility() throws Exception {
+    // Create 2 accounts that share a group.
+    TestAccount user2 = accountCreator.user2();
+    TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
+    groupOperations.newGroup().addMember(user2.id()).addMember(user3.id()).create();
+
+    // Add a code owner config that makes all users code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // user can only see itself
+    requestScopeOperations.setApiUser(user.id());
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(user.id());
+
+    // user2 can see user3 and itself
+    requestScopeOperations.setApiUser(user2.id());
+    codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id(), user3.id());
+
+    // admin can see all users
+    requestScopeOperations.setApiUser(admin.id());
+    codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id(), user3.id());
+
+    // Query code owners with a limit, user2 can see user3 and itself
+    requestScopeOperations.setApiUser(user2.id());
+    codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(1);
+    assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isAnyOf(user2.id(), user3.id());
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "VISIBLE_GROUP")
+  public void getAllUsersAsCodeOwners_visibleGroupVisibility() throws Exception {
+    // create a group that until contains user
+    AccountGroup.UUID userGroup = groupOperations.newGroup().addMember(user.id()).create();
+
+    // create user2 account and a group that only contains user2, but which is visible to user
+    // (since user owns the group)
+    TestAccount user2 = accountCreator.user2();
+    groupOperations.newGroup().addMember(user2.id()).ownerGroupUuid(userGroup).create();
+
+    // create user3 account and a group that only contains user3, but which is visible to all users
+    TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
+    groupOperations.newGroup().addMember(user3.id()).visibleToAll(true).create();
+
+    // Add a code owner config that makes all users code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // user can only see itself, user2 (because user is owner of a group that contains user2) and
+    // user3 (because user3 is member of a group that is visible to all users)
+    requestScopeOperations.setApiUser(user.id());
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id(), user3.id());
+
+    // user2 can see user3 and itself
+    requestScopeOperations.setApiUser(user2.id());
+    codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id(), user3.id());
+
+    // admin can see all users
+    requestScopeOperations.setApiUser(admin.id());
+    codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id(), user3.id());
+
+    // Query code owners with a limit, user2 can see user3 and itself
+    requestScopeOperations.setApiUser(user2.id());
+    codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(1);
+    assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isAnyOf(user2.id(), user3.id());
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "NONE")
+  public void getAllUsersAsCodeOwners_noneVisible() throws Exception {
+    accountCreator.user2();
+
+    // Add a code owner config that makes all users code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // Use user, since admin is allowed to view all accounts.
+    requestScopeOperations.setApiUser(user.id());
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "NONE")
+  public void getAllUsersAsCodeOwners_withViewAllAccounts() throws Exception {
+    // Allow all users to view all accounts.
+    projectOperations
+        .allProjectsForUpdate()
+        .add(allowCapability(GlobalCapability.VIEW_ALL_ACCOUNTS).group(REGISTERED_USERS))
+        .update();
+
+    TestAccount user2 = accountCreator.user2();
+
+    // Add a code owner config that makes all users code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
   }
 }

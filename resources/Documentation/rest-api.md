@@ -340,6 +340,11 @@ The code owner statuses are returned as a
   }
 ```
 
+If the destination branch of a change no longer exists (e.g. because it was
+deleted), `409 Conflict` is returned. Since the code owners are retrieved from
+the destination branch, computing the code owner status is not possible, if the
+destination branch is missing.
+
 ## <a id="revision-endpoints"> Revision Endpoints
 
 ### <a id="list-code-owners-for-path-in-change"> List Code Owners for path in change
