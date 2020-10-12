@@ -391,7 +391,9 @@ public class CodeOwnerApprovalCheck {
           "%s was implicitly approved by the patch set uploader who is a project owner",
           absolutePath);
       return true;
-    } else if (globalCodeOwnerAccountIds.contains(patchSetUploader)) {
+    }
+
+    if (globalCodeOwnerAccountIds.contains(patchSetUploader)) {
       // If the uploader of the patch set is a global code owner, there is an implicit code owner
       // approval from the patch set uploader so that the path is automatically approved.
       logger.atFine().log(
@@ -399,6 +401,7 @@ public class CodeOwnerApprovalCheck {
           absolutePath);
       return true;
     }
+
     return false;
   }
 
@@ -411,12 +414,15 @@ public class CodeOwnerApprovalCheck {
       // At least one of the global code owners approved the change.
       logger.atFine().log("%s was approved by a global code owner", absolutePath);
       return true;
-    } else if (approverAccountIds.stream()
+    }
+
+    if (approverAccountIds.stream()
         .anyMatch(approverAccountId -> isProjectOwner(projectName, approverAccountId))) {
       // At least one of the approvers is a project owner and thus a code owner.
       logger.atFine().log("%s was approved by a project owner", absolutePath);
       return true;
     }
+
     return false;
   }
 
@@ -527,11 +533,14 @@ public class CodeOwnerApprovalCheck {
       // approval from the patch set uploader so that the path is automatically approved.
       logger.atFine().log("%s was implicitly approved by the patch set uploader", absolutePath);
       return true;
-    } else if (!Collections.disjoint(approverAccountIds, codeOwnerAccountIds)) {
+    }
+
+    if (!Collections.disjoint(approverAccountIds, codeOwnerAccountIds)) {
       // At least one of the global code owners approved the change.
       logger.atFine().log("%s was explicitly approved by a code owner", absolutePath);
       return true;
     }
+
     return false;
   }
 
