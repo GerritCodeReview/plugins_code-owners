@@ -1,6 +1,7 @@
 {
   "comments": [
     {
+      "unresolved": true,
       "key": {
         "uuid": "ba4b15c7_c7cd4f4c",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
@@ -20,10 +21,10 @@
         "endChar": 45
       },
       "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": true
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": true,
       "key": {
         "uuid": "dbd30514_f05d3498",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
@@ -44,10 +45,10 @@
         "endChar": 45
       },
       "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": true
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
       "key": {
         "uuid": "0c8d78b7_82c6641a",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
@@ -68,8 +69,31 @@
         "endChar": 45
       },
       "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
-      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153",
-      "unresolved": false
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d365f260_44a66e7f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 248,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T07:00:09Z",
+      "side": 1,
+      "message": "\u003e Actually, maybe that test is needed for the normal case, too.\n\nDone in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/284187\n\nI also checked that non-visible branches are also covered by the tests for the GetCodeOwnerProjectConfig REST endpoint:\nGetCodeOwnerProjectConfigIT#branchSpecificBackendIsOmittedForNonVisibleBranch",
+      "parentUuid": "0c8d78b7_82c6641a",
+      "range": {
+        "startLine": 248,
+        "startChar": 14,
+        "endLine": 248,
+        "endChar": 45
+      },
+      "revId": "19ff5d43f123082fba2db8be32b6ef8fa7ebdd64",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
