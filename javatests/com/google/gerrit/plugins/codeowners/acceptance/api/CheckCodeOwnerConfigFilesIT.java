@@ -25,11 +25,11 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
-import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -89,7 +89,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   @Test
   public void nonVisibleBranchesAreSkipped() throws Exception {
     String branchName = "non-visible";
-    gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
+    createBranch(BranchNameKey.create(project, branchName));
 
     projectOperations
         .project(project)
@@ -236,8 +236,8 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void validateSpecifiedBranches() throws Exception {
-    gApi.projects().name(project.get()).branch("stable-1.0").create(new BranchInput());
-    gApi.projects().name(project.get()).branch("stable-1.1").create(new BranchInput());
+    createBranch(BranchNameKey.create(project, "stable-1.0"));
+    createBranch(BranchNameKey.create(project, "stable-1.1"));
 
     assertThat(
             projectCodeOwnersApiFactory
@@ -252,8 +252,8 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void validateSpecifiedBranches_shortNames() throws Exception {
-    gApi.projects().name(project.get()).branch("stable-1.0").create(new BranchInput());
-    gApi.projects().name(project.get()).branch("stable-1.1").create(new BranchInput());
+    createBranch(BranchNameKey.create(project, "stable-1.0"));
+    createBranch(BranchNameKey.create(project, "stable-1.1"));
 
     assertThat(
             projectCodeOwnersApiFactory
