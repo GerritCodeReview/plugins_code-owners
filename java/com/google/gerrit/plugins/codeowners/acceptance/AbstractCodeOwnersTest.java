@@ -137,6 +137,10 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "true");
   }
 
+  protected void enableCodeOwnersForProject(Project.NameKey project) throws Exception {
+    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+  }
+
   protected void setCodeOwnersConfig(
       Project.NameKey project, String subsection, String key, String value) throws Exception {
     Config codeOwnersConfig = new Config();

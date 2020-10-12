@@ -816,10 +816,6 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
   }
 
-  private void enableCodeOwnersForProject(Project.NameKey project) throws Exception {
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
-  }
-
   private void enableCodeOwnersForAllBranches(Project.NameKey project) throws Exception {
     setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, "");
   }
