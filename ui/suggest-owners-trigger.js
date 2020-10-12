@@ -104,19 +104,21 @@ export class SuggestOwnersTrigger extends Polymer.Element {
         this.change
     );
 
-    Promise.all([
-      this.ownerService.isCodeOwnerEnabled(),
-      this.ownerService.areAllFilesApproved(),
-      this.ownerService.getLoggedInUserInitialRole()
-    ])
-        .then(([enabled, approved, userRole]) => {
-          if (enabled) {
-            this.hidden = approved;
-          } else {
-            this.hidden = true;
-          }
-          this._userRole = userRole;
-        });
+    this.ownerService.isCodeOwnerEnabled().then(enabled => {
+      if (!enabled) {
+        // TODO: network errors also hide the plugin (enabled is not true).
+        // We should process such errors correctly
+        this.hidden = true;
+        return;
+      }
+      Promise.all([
+        this.ownerService.areAllFilesApproved(),
+        this.ownerService.getLoggedInUserInitialRole(),
+      ]).then(([approved, userRole]) => {
+        this.hidden = approved;
+        this._userRole = userRole;
+      });
+    });
   }
 
   toggleControlContent() {

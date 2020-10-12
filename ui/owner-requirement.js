@@ -121,7 +121,10 @@ export class OwnerRequirementValue extends Polymer.Element {
     this.reporting.reportLifeCycle('owners-submit-requirement-summary-start');
 
     return this.ownerService.getStatus()
-        .then(({rawStatuses}) => {
+        .then(({enabled, rawStatuses}) => {
+          if (!enabled) {
+            rawStatuses = [];
+          }
           this._statusCount = this._getStatusCount(rawStatuses);
           this.ownerService.getLoggedInUserInitialRole().then(role => {
             // Send a metric with overall summary when code owners submit
