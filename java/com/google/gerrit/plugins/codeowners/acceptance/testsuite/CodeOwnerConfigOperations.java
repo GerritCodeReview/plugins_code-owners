@@ -91,6 +91,24 @@ public interface CodeOwnerConfigOperations {
     CodeOwnerConfig get();
 
     /**
+     * Retrieves the file path of the code owner config.
+     *
+     * <p>Works regardless of the code owner config exists.
+     *
+     * @return the file path of the code owner config
+     */
+    String getFilePath();
+
+    /**
+     * Retrieves the absolute file path of the code owner config.
+     *
+     * <p>Works regardless of the code owner config exists.
+     *
+     * @return the absolute file path of the code owner config
+     */
+    String getAbsoluteFilePath();
+
+    /**
      * Starts the fluent chain to update a code owner config. The returned builder can be used to
      * specify how the attributes of the code owner config should be modified. To update the code
      * owner config for real, {@link TestCodeOwnerConfigUpdate.Builder#update()} must be called.

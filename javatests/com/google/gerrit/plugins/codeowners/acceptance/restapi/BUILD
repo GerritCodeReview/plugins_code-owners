@@ -16,6 +16,7 @@ acceptance_tests(
         "//javatests/com/google/gerrit/acceptance/rest/util",
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
 )
