@@ -22,6 +22,30 @@
       },
       "revId": "2f0fb26b16df7499ba834f828caf0638e7a75f77",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "55b7caee_96e1d16d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 963,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-12T08:49:37Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "c2c1fffa_df04f309",
+      "range": {
+        "startLine": 963,
+        "startChar": 44,
+        "endLine": 963,
+        "endChar": 56
+      },
+      "revId": "2f0fb26b16df7499ba834f828caf0638e7a75f77",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
