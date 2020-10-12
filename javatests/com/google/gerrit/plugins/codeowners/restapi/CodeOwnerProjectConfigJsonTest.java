@@ -22,7 +22,6 @@ import static org.mockito.Mockito.when;
 
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.LabelType;
-import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
@@ -92,7 +91,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void formatBackendIds() throws Exception {
-    gApi.projects().name(project.get()).branch("stable-2.10").create(new BranchInput());
+    createBranch(BranchNameKey.create(project, "stable-2.10"));
 
     when(codeOwnersPluginConfiguration.getBackend(project)).thenReturn(findOwnersBackend);
     when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
@@ -132,7 +131,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatCodeOwnerProjectConfig() throws Exception {
     createOwnersOverrideLabel();
-    gApi.projects().name(project.get()).branch("stable-2.10").create(new BranchInput());
+    createBranch(BranchNameKey.create(project, "stable-2.10"));
 
     when(codeOwnersPluginConfiguration.isDisabled(project)).thenReturn(true);
     when(codeOwnersPluginConfiguration.getBackend(project)).thenReturn(findOwnersBackend);
