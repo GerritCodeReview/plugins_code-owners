@@ -353,7 +353,8 @@ public class CodeOwnerApprovalCheck {
         enableImplicitApprovalFromUploader,
         patchSetUploader)) {
       codeOwnerStatus = CodeOwnerStatus.APPROVED;
-    } else if (isPendingBootstrappingMode(branch.project(), absolutePath, reviewerAccountIds)) {
+    } else if (isPendingBootstrappingMode(
+        branch.project(), absolutePath, globalCodeOwnerAccountIds, reviewerAccountIds)) {
       codeOwnerStatus = CodeOwnerStatus.PENDING;
     }
 
@@ -390,7 +391,9 @@ public class CodeOwnerApprovalCheck {
           "%s was implicitly approved by the patch set uploader who is a project owner",
           absolutePath);
       return true;
-    } else if (globalCodeOwnerAccountIds.contains(patchSetUploader)) {
+    }
+
+    if (globalCodeOwnerAccountIds.contains(patchSetUploader)) {
       // If the uploader of the patch set is a global code owner, there is an implicit code owner
       // approval from the patch set uploader so that the path is automatically approved.
       logger.atFine().log(
@@ -398,6 +401,7 @@ public class CodeOwnerApprovalCheck {
           absolutePath);
       return true;
     }
+
     return false;
   }
 
@@ -410,17 +414,23 @@ public class CodeOwnerApprovalCheck {
       // At least one of the global code owners approved the change.
       logger.atFine().log("%s was approved by a global code owner", absolutePath);
       return true;
-    } else if (approverAccountIds.stream()
+    }
+
+    if (approverAccountIds.stream()
         .anyMatch(approverAccountId -> isProjectOwner(projectName, approverAccountId))) {
       // At least one of the approvers is a project owner and thus a code owner.
       logger.atFine().log("%s was approved by a project owner", absolutePath);
       return true;
     }
+
     return false;
   }
 
   private boolean isPendingBootstrappingMode(
-      Project.NameKey projectName, Path absolutePath, ImmutableSet<Account.Id> reviewerAccountIds) {
+      Project.NameKey projectName,
+      Path absolutePath,
+      ImmutableSet<Account.Id> globalCodeOwnerAccountIds,
+      ImmutableSet<Account.Id> reviewerAccountIds) {
     if (reviewerAccountIds.stream()
         .anyMatch(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))) {
       // At least one of the reviewers is a project owner and thus a code owner.
@@ -428,7 +438,11 @@ public class CodeOwnerApprovalCheck {
       return true;
     }
 
-    // TODO: check if a global code owner is a reviewer
+    if (isPending(absolutePath, globalCodeOwnerAccountIds, reviewerAccountIds)) {
+      // At least one of the reviewers is a global code owner.
+      logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
+      return true;
+    }
 
     return false;
   }
@@ -462,7 +476,10 @@ public class CodeOwnerApprovalCheck {
     } else {
       logger.atFine().log("%s was not approved by a global code owner", absolutePath);
 
-      // TODO check if a global code owner is a reviewer
+      if (isPending(absolutePath, globalCodeOwnerAccountIds, reviewerAccountIds)) {
+        logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
+        codeOwnerStatus.set(CodeOwnerStatus.PENDING);
+      }
 
       codeOwnerConfigHierarchy.visit(
           branch,
@@ -516,11 +533,14 @@ public class CodeOwnerApprovalCheck {
       // approval from the patch set uploader so that the path is automatically approved.
       logger.atFine().log("%s was implicitly approved by the patch set uploader", absolutePath);
       return true;
-    } else if (!Collections.disjoint(approverAccountIds, codeOwnerAccountIds)) {
+    }
+
+    if (!Collections.disjoint(approverAccountIds, codeOwnerAccountIds)) {
       // At least one of the global code owners approved the change.
       logger.atFine().log("%s was explicitly approved by a code owner", absolutePath);
       return true;
     }
+
     return false;
   }
 
