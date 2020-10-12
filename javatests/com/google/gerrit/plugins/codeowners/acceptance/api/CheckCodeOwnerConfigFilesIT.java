@@ -27,6 +27,7 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -83,6 +84,22 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .containsExactly(
             "refs/heads/master", ImmutableMap.of(),
             "refs/meta/config", ImmutableMap.of());
+  }
+
+  @Test
+  public void nonVisibleBranchesAreSkipped() throws Exception {
+    String branchName = "non-visible";
+    gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
+
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(block(Permission.READ).ref(RefNames.fullName(branchName)).group(REGISTERED_USERS))
+        .update();
+
+    assertThat(checkCodeOwnerConfigFilesIn(project))
+        .containsExactly(
+            "refs/heads/master", ImmutableMap.of(), "refs/meta/config", ImmutableMap.of());
   }
 
   @Test
