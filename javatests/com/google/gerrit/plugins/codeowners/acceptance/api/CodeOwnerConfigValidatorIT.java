@@ -27,9 +27,9 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
@@ -1213,7 +1213,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   public void validateMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
     // Create another branch.
     String branchName = "stable";
-    gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
+    createBranch(BranchNameKey.create(project, branchName));
 
     // Create a code owner config file in the other branch.
     codeOwnerConfigOperations

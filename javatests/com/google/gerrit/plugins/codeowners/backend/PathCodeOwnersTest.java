@@ -31,7 +31,6 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.Project.NameKey;
-import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -1302,14 +1301,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Create other branches in project.
     String branchName = "foo";
-    BranchInput branchInput = new BranchInput();
-    branchInput.ref = branchName;
-    branchInput.revision = projectOperations.project(project).getHead("master").name();
-    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+    createBranch(BranchNameKey.create(project, branchName));
 
     // Create other branches in other project.
-    branchInput.revision = projectOperations.project(otherProject).getHead("master").name();
-    gApi.projects().name(otherProject.get()).branch(branchInput.ref).create(branchInput);
+    createBranch(BranchNameKey.create(otherProject, branchName));
 
     // create importing config with global code owner and import with relative path
     CodeOwnerConfig.Key rootCodeOwnerConfigKey =
@@ -1351,10 +1346,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   public void importFromOtherBranch() throws Exception {
     // Create other branch.
     String otherBranch = "foo";
-    BranchInput branchInput = new BranchInput();
-    branchInput.ref = otherBranch;
-    branchInput.revision = projectOperations.project(project).getHead("master").name();
-    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+    createBranch(BranchNameKey.create(project, otherBranch));
 
     // create importing config with global code owner and import with relative path
     CodeOwnerConfig.Key rootCodeOwnerConfigKey =
@@ -1399,10 +1391,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Create other branch.
     String otherBranch = "foo";
-    BranchInput branchInput = new BranchInput();
-    branchInput.ref = otherBranch;
-    branchInput.revision = projectOperations.project(otherProject).getHead("master").name();
-    gApi.projects().name(otherProject.get()).branch(branchInput.ref).create(branchInput);
+    createBranch(BranchNameKey.create(otherProject, otherBranch));
 
     // create importing config with global code owner and import with relative path
     CodeOwnerConfig.Key rootCodeOwnerConfigKey =
