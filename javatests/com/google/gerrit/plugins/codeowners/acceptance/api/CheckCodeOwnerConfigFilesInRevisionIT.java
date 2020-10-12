@@ -85,7 +85,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
 
   private void testCodeOwnerConfigFileWithoutIssues() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-    String codeOwnerConfigPath = getCodeOwnerConfigFilePath(codeOwnerConfigKey);
+    String codeOwnerConfigPath =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath();
     String changeId =
         createChange(
                 "Add code owners",
@@ -112,7 +113,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
 
   private void testNonParseableCodeOwnerConfigFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-    String codeOwnerConfigPath = getCodeOwnerConfigFilePath(codeOwnerConfigKey);
+    String codeOwnerConfigPath =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath();
 
     disableCodeOwnersForProject(project);
     String changeId =
@@ -149,7 +151,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
 
   private void testCodeOwnerConfigFileWithIssues() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-    String codeOwnerConfigPath = getCodeOwnerConfigFilePath(codeOwnerConfigKey);
+    String codeOwnerConfigPath =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath();
     String unknownEmail1 = "non-existing-email@example.com";
     String unknownEmail2 = "another-unknown-email@example.com";
 
@@ -190,7 +193,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
     TestAccount user2 = accountCreator.user2();
 
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-    String codeOwnerConfigPath = getCodeOwnerConfigFilePath(codeOwnerConfigKey);
+    String codeOwnerConfigPath =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath();
 
     // Upload the change as user2 who cannot see 'admin' and 'user'.
     disableCodeOwnersForProject(project);
@@ -229,7 +233,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
   public void nonModifiedCodeOwnerConfigFilesAreNotValidated() throws Exception {
     // Create a code owner config file with issues in the repository.
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-    String codeOwnerConfigPath = getCodeOwnerConfigFilePath(codeOwnerConfigKey);
+    String codeOwnerConfigPath =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath();
     String unknownEmail1 = "non-existing-email@example.com";
     String unknownEmail2 = "another-unknown-email@example.com";
     disableCodeOwnersForProject(project);
@@ -250,7 +255,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
 
     // Create a change that adds another code owner config file without issues.
     CodeOwnerConfig.Key codeOwnerConfigKey2 = createCodeOwnerConfigKey("/foo/");
-    String codeOwnerConfigPath2 = getCodeOwnerConfigFilePath(codeOwnerConfigKey2);
+    String codeOwnerConfigPath2 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getAbsoluteFilePath();
     String changeId2 =
         createChange(
                 "Add code owners",
@@ -267,7 +273,8 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
   @Test
   public void deletedCodeOwnerConfigFilesAreNotValidated() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-    String codeOwnerConfigPath = getCodeOwnerConfigFilePath(codeOwnerConfigKey);
+    String codeOwnerConfigPath =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath();
     disableCodeOwnersForProject(project);
     String changeId = createChangeWithFileDeletion(codeOwnerConfigPath);
     setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
@@ -278,8 +285,10 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
   public void validateExactFile() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey1 = createCodeOwnerConfigKey("/");
     CodeOwnerConfig.Key codeOwnerConfigKey2 = createCodeOwnerConfigKey("/foo/");
-    String codeOwnerConfigPath1 = getCodeOwnerConfigFilePath(codeOwnerConfigKey1);
-    String codeOwnerConfigPath2 = getCodeOwnerConfigFilePath(codeOwnerConfigKey2);
+    String codeOwnerConfigPath1 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getAbsoluteFilePath();
+    String codeOwnerConfigPath2 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getAbsoluteFilePath();
     String unknownEmail1 = "non-existing-email@example.com";
     String unknownEmail2 = "another-unknown-email@example.com";
 
@@ -327,9 +336,12 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
     CodeOwnerConfig.Key codeOwnerConfigKey1 = createCodeOwnerConfigKey("/");
     CodeOwnerConfig.Key codeOwnerConfigKey2 = createCodeOwnerConfigKey("/foo/");
     CodeOwnerConfig.Key codeOwnerConfigKey3 = createCodeOwnerConfigKey("/foo/bar/");
-    String codeOwnerConfigPath1 = getCodeOwnerConfigFilePath(codeOwnerConfigKey1);
-    String codeOwnerConfigPath2 = getCodeOwnerConfigFilePath(codeOwnerConfigKey2);
-    String codeOwnerConfigPath3 = getCodeOwnerConfigFilePath(codeOwnerConfigKey3);
+    String codeOwnerConfigPath1 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getAbsoluteFilePath();
+    String codeOwnerConfigPath2 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getAbsoluteFilePath();
+    String codeOwnerConfigPath3 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey3).getAbsoluteFilePath();
     String unknownEmail1 = "non-existing-email@example.com";
     String unknownEmail2 = "another-unknown-email@example.com";
     String unknownEmail3 = "yet-another-unknown-email@example.com";
@@ -401,10 +413,6 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
 
   private CodeOwnerConfig.Key createCodeOwnerConfigKey(String folderPath) {
     return CodeOwnerConfig.Key.create(project, "master", folderPath);
-  }
-
-  private String getCodeOwnerConfigFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    return backendConfig.getDefaultBackend().getFilePath(codeOwnerConfigKey).toString();
   }
 
   private String format(CodeOwnerConfig codeOwnerConfig) throws Exception {

@@ -37,7 +37,6 @@ import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.MergeInput;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
-import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -91,7 +90,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
@@ -107,7 +106,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
@@ -140,13 +139,15 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.create(
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-            getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig));
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                .getAbsoluteFilePath());
 
     // Create a code owner config with import and without issues.
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addImport(codeOwnerConfigReference)
@@ -181,7 +182,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getAbsoluteFilePath())
             .setProject(otherProject)
             .build();
 
@@ -189,7 +192,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addImport(codeOwnerConfigReference)
@@ -225,7 +228,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getAbsoluteFilePath())
             .setProject(otherProject)
             .setBranch(otherBranch)
             .build();
@@ -234,7 +239,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addImport(codeOwnerConfigReference)
@@ -266,7 +271,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(createCodeOwnerConfigKey("/"))).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(createCodeOwnerConfigKey("/")).getFilePath(),
             "INVALID");
     assertOkWithHints(
         r,
@@ -280,7 +285,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(createCodeOwnerConfigKey("/"))).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(createCodeOwnerConfigKey("/")).getFilePath(),
             format(
                 CodeOwnerConfig.builder(createCodeOwnerConfigKey("/"), TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
@@ -300,7 +305,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
@@ -327,7 +332,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 unknownEmail,
-                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
@@ -337,7 +342,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     // delete afterwards.
     disableCodeOwnersForProject(project);
 
-    String path = JgitPath.of(getCodeOwnerConfigFilePath(createCodeOwnerConfigKey("/"))).get();
+    String path =
+        codeOwnerConfigOperations.codeOwnerConfig(createCodeOwnerConfigKey("/")).getFilePath();
     PushOneCommit.Result r = createChange("Add code owners", path, "INVALID");
     r.assertOkStatus();
 
@@ -363,7 +369,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             "INVALID");
     r.assertOkStatus();
 
@@ -374,14 +380,14 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r =
         createChange(
             "Update code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             "STILL INVALID");
     assertOkWithWarnings(
         r,
         "invalid code owner config files",
         String.format(
             "invalid code owner config file '%s':\n  %s",
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -402,7 +408,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             "INVALID");
     r.assertOkStatus();
 
@@ -415,7 +421,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r =
         createChange(
             "Update code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(
@@ -428,12 +434,12 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail1,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()),
         String.format(
             "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail2,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
@@ -450,7 +456,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
@@ -465,7 +471,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r =
         createChange(
             "Update code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(
@@ -477,7 +483,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
@@ -488,14 +494,14 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             "INVALID");
     assertErrorWithMessages(
         r,
         "invalid code owner config files",
         String.format(
             "invalid code owner config file '%s':\n  %s",
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -515,9 +521,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             testRepo,
             "Add code owners",
             ImmutableMap.of(
-                JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey1)).get(),
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
                 "INVALID",
-                JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey2)).get(),
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
                 "ALSO-INVALID"));
     PushOneCommit.Result r = push.to("refs/for/master");
     assertErrorWithMessages(
@@ -525,7 +531,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         "invalid code owner config files",
         String.format(
             "invalid code owner config file '%s':\n  %s",
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey1),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getAbsoluteFilePath(),
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -534,7 +540,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     "1:8: expected \"{\""))),
         String.format(
             "invalid code owner config file '%s':\n  %s",
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey2),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getAbsoluteFilePath(),
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -552,7 +558,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(
@@ -565,12 +571,12 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail1,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()),
         String.format(
             "code owner email '%s' in '%s' cannot be resolved for %s",
             unknownEmail2,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
@@ -584,7 +590,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(
@@ -596,7 +602,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         "invalid code owner config files",
         String.format(
             "the domain of the code owner email '%s' in '%s' is not allowed for" + " code owners",
-            emailWithNonAllowedDomain, getCodeOwnerConfigFilePath(codeOwnerConfigKey)));
+            emailWithNonAllowedDomain,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath()));
   }
 
   @Test
@@ -612,7 +619,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail1))
@@ -628,7 +635,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r =
         createChange(
             "Update code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(
@@ -645,7 +652,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             String.format(
                 "code owner email '%s' in '%s' cannot be resolved for %s",
                 unknownEmail2,
-                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName())));
 
     // the pre-existing issue is returned as warning
@@ -654,7 +661,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviatedCommit,
             unknownEmail1,
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
 
     r.assertNotMessage("hint");
@@ -673,7 +680,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
@@ -700,7 +707,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 unknownEmail,
-                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
@@ -724,7 +731,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             user2,
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
@@ -752,7 +759,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 admin.email(),
-                getCodeOwnerConfigFilePath(codeOwnerConfigKey),
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getAbsoluteFilePath(),
                 identifiedUserFactory.create(user2.id()).getLoggableName()));
   }
 
@@ -771,7 +778,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(codeOwnerConfigKey)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(user.email()))
@@ -816,8 +823,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(
-                    CodeOwnerConfig.Key.create(nonExistingProject, "master", "/")))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonExistingProject, "master", "/"))
+                    .getAbsoluteFilePath())
             .setProject(nonExistingProject)
             .build();
     CodeOwnerConfig codeOwnerConfig =
@@ -827,7 +835,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -835,7 +843,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s': project '%s' not found",
             importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
             nonExistingProject.get()));
   }
 
@@ -875,8 +885,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(
-                    CodeOwnerConfig.Key.create(nonVisibleProject, "master", "/")))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonVisibleProject, "master", "/"))
+                    .getAbsoluteFilePath())
             .setProject(nonVisibleProject)
             .build();
     CodeOwnerConfig codeOwnerConfig =
@@ -887,7 +898,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             user,
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -895,7 +906,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s': project '%s' not found",
             importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
             nonVisibleProject.get()));
   }
 
@@ -933,8 +946,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(
-                    CodeOwnerConfig.Key.create(hiddenProject, "master", "/")))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(hiddenProject, "master", "/"))
+                    .getAbsoluteFilePath())
             .setProject(hiddenProject)
             .build();
     CodeOwnerConfig codeOwnerConfig =
@@ -944,7 +958,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -952,7 +966,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s': project '%s' has state 'hidden' that doesn't permit read",
             importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
             hiddenProject.get()));
   }
 
@@ -977,8 +993,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(
-                    CodeOwnerConfig.Key.create(otherProject, "non-existing", "/")))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(otherProject, "non-existing", "/"))
+                    .getAbsoluteFilePath())
             .setProject(otherProject)
             .setBranch("non-existing")
             .build();
@@ -989,7 +1006,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -997,7 +1014,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s': branch 'non-existing' not found in project '%s'",
             importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
             otherProject.get()));
   }
 
@@ -1038,7 +1057,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(CodeOwnerConfig.Key.create(otherProject, "master", "/")))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(otherProject, "master", "/"))
+                    .getAbsoluteFilePath())
             .setProject(otherProject)
             .setBranch("master")
             .build();
@@ -1050,7 +1071,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             user,
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -1058,7 +1079,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s': branch 'master' not found in project '%s'",
             importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
             otherProject.get()));
   }
 
@@ -1091,7 +1114,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             user,
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -1099,7 +1122,10 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s':"
                 + " 'non-code-owner-config.txt' is not a code owner config file",
-            importType.getType(), getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)));
+            importType.getType(),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath()));
   }
 
   @Test
@@ -1124,7 +1150,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(keyOfNonExistingCodeOwnerConfig))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfNonExistingCodeOwnerConfig)
+                    .getAbsoluteFilePath())
             .build();
     CodeOwnerConfig codeOwnerConfig =
         createCodeOwnerConfigWithImport(
@@ -1134,7 +1162,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             user,
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -1142,8 +1170,12 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s': '%s' does not exist (project = %s, branch = master)",
             importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
-            getCodeOwnerConfigFilePath(keyOfNonExistingCodeOwnerConfig),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfNonExistingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
             project.get()));
   }
 
@@ -1173,7 +1205,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     PushOneCommit.Result r =
         createChange(
             "Add invalid code owner config",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath(),
             "INVALID");
     r.assertOkStatus();
     approve(r.getChangeId());
@@ -1187,7 +1219,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
-                getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig))
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getAbsoluteFilePath())
             .build();
     CodeOwnerConfig codeOwnerConfig =
         createCodeOwnerConfigWithImport(
@@ -1196,7 +1230,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r =
         createChange(
             "Add code owners",
-            JgitPath.of(getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig)).get(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             format(codeOwnerConfig));
     assertErrorWithMessages(
         r,
@@ -1204,8 +1238,12 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         String.format(
             "invalid %s import in '%s': '%s' is not parseable (project = %s, branch = master)",
             importType.getType(),
-            getCodeOwnerConfigFilePath(keyOfImportingCodeOwnerConfig),
-            getCodeOwnerConfigFilePath(keyOfImportedCodeOwnerConfig),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getAbsoluteFilePath(),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                .getAbsoluteFilePath(),
             project.get()));
   }
 
@@ -1264,10 +1302,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private CodeOwnerConfig.Key createCodeOwnerConfigKey(String folderPath) {
     return CodeOwnerConfig.Key.create(project, "master", folderPath);
-  }
-
-  private String getCodeOwnerConfigFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    return backendConfig.getDefaultBackend().getFilePath(codeOwnerConfigKey).toString();
   }
 
   private String format(CodeOwnerConfig codeOwnerConfig) throws Exception {
