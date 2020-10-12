@@ -27,7 +27,6 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
-import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import java.nio.file.Paths;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.junit.TestRepository;
@@ -438,6 +437,6 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
             .getChangeId();
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
   }
 }
