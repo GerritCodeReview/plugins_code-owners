@@ -188,6 +188,8 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 CodeOwnerConfigReference.create(
                     CodeOwnerConfigImportMode.ALL, "/not-a-code-owner-config"))
             .create();
+    String pathOfInvalidConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfInvalidConfig1).getAbsoluteFilePath();
 
     CodeOwnerConfig.Key keyOfInvalidConfig2 =
         codeOwnerConfigOperations
@@ -198,6 +200,8 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
             .addCodeOwnerEmail("unknown1@example.com")
             .addCodeOwnerEmail("unknown2@example.com")
             .create();
+    String pathOfInvalidConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfInvalidConfig2).getAbsoluteFilePath();
 
     // Also create a code owner config files without issues.
     codeOwnerConfigOperations
@@ -212,25 +216,29 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .containsExactly(
             "refs/heads/master",
                 ImmutableMap.of(
-                    getCodeOwnerConfigFilePath(keyOfInvalidConfig1),
-                        ImmutableList.of(
-                            error(
-                                String.format(
-                                    "invalid global import in '%s': '/not-a-code-owner-config' is"
-                                        + " not a code owner config file",
-                                    getCodeOwnerConfigFilePath(keyOfInvalidConfig1)))),
-                    getCodeOwnerConfigFilePath(keyOfInvalidConfig2),
-                        ImmutableList.of(
-                            error(
-                                String.format(
-                                    "code owner email 'unknown1@example.com' in '%s' cannot be"
-                                        + " resolved for admin",
-                                    getCodeOwnerConfigFilePath(keyOfInvalidConfig2))),
-                            error(
-                                String.format(
-                                    "code owner email 'unknown2@example.com' in '%s' cannot be"
-                                        + " resolved for admin",
-                                    getCodeOwnerConfigFilePath(keyOfInvalidConfig2))))),
+                    pathOfInvalidConfig1,
+                    ImmutableList.of(
+                        error(
+                            String.format(
+                                "invalid global import in '%s': '/not-a-code-owner-config' is"
+                                    + " not a code owner config file",
+                                codeOwnerConfigOperations
+                                    .codeOwnerConfig(keyOfInvalidConfig1)
+                                    .getAbsoluteFilePath()))),
+                    pathOfInvalidConfig2,
+                    ImmutableList.of(
+                        error(
+                            String.format(
+                                "code owner email 'unknown1@example.com' in '%s' cannot be"
+                                    + " resolved for admin",
+                                codeOwnerConfigOperations
+                                    .codeOwnerConfig(keyOfInvalidConfig2)
+                                    .getAbsoluteFilePath())),
+                        error(
+                            String.format(
+                                "code owner email 'unknown2@example.com' in '%s' cannot be"
+                                    + " resolved for admin",
+                                pathOfInvalidConfig2)))),
             "refs/meta/config", ImmutableMap.of());
   }
 
@@ -350,6 +358,8 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 CodeOwnerConfigReference.create(
                     CodeOwnerConfigImportMode.ALL, "/not-a-code-owner-config"))
             .create();
+    String pathOfInvalidConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfInvalidConfig1).getAbsoluteFilePath();
 
     CodeOwnerConfig.Key keyOfInvalidConfig2 =
         codeOwnerConfigOperations
@@ -360,47 +370,49 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
             .addCodeOwnerEmail("unknown1@example.com")
             .addCodeOwnerEmail("unknown2@example.com")
             .create();
+    String pathOfInvalidConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfInvalidConfig2).getAbsoluteFilePath();
 
     assertThat(
             projectCodeOwnersApiFactory
                 .project(project)
                 .checkCodeOwnerConfigFiles()
                 .setBranches(ImmutableList.of("master"))
-                .setPath(getCodeOwnerConfigFilePath(keyOfInvalidConfig1))
+                .setPath(pathOfInvalidConfig1)
                 .check())
         .containsExactly(
             "refs/heads/master",
             ImmutableMap.of(
-                getCodeOwnerConfigFilePath(keyOfInvalidConfig1),
+                pathOfInvalidConfig1,
                 ImmutableList.of(
                     error(
                         String.format(
                             "invalid global import in '%s': '/not-a-code-owner-config' is"
                                 + " not a code owner config file",
-                            getCodeOwnerConfigFilePath(keyOfInvalidConfig1))))));
+                            pathOfInvalidConfig1)))));
 
     assertThat(
             projectCodeOwnersApiFactory
                 .project(project)
                 .checkCodeOwnerConfigFiles()
                 .setBranches(ImmutableList.of("master"))
-                .setPath(getCodeOwnerConfigFilePath(keyOfInvalidConfig2))
+                .setPath(pathOfInvalidConfig2)
                 .check())
         .containsExactly(
             "refs/heads/master",
             ImmutableMap.of(
-                getCodeOwnerConfigFilePath(keyOfInvalidConfig2),
+                pathOfInvalidConfig2,
                 ImmutableList.of(
                     error(
                         String.format(
                             "code owner email 'unknown1@example.com' in '%s' cannot be"
                                 + " resolved for admin",
-                            getCodeOwnerConfigFilePath(keyOfInvalidConfig2))),
+                            pathOfInvalidConfig2)),
                     error(
                         String.format(
                             "code owner email 'unknown2@example.com' in '%s' cannot be"
                                 + " resolved for admin",
-                            getCodeOwnerConfigFilePath(keyOfInvalidConfig2))))));
+                            pathOfInvalidConfig2)))));
   }
 
   @Test
@@ -427,6 +439,8 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/")
             .addCodeOwnerEmail("unknown1@example.com")
             .create();
+    String pathOfInvalidConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfInvalidConfig2).getAbsoluteFilePath();
 
     CodeOwnerConfig.Key keyOfInvalidConfig3 =
         codeOwnerConfigOperations
@@ -436,6 +450,8 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/bar/")
             .addCodeOwnerEmail("unknown2@example.com")
             .create();
+    String pathOfInvalidConfig3 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfInvalidConfig3).getAbsoluteFilePath();
 
     assertThat(
             projectCodeOwnersApiFactory
@@ -447,20 +463,22 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .containsExactly(
             "refs/heads/master",
             ImmutableMap.of(
-                getCodeOwnerConfigFilePath(keyOfInvalidConfig2),
+                pathOfInvalidConfig2,
                 ImmutableList.of(
                     error(
                         String.format(
                             "code owner email 'unknown1@example.com' in '%s' cannot be"
                                 + " resolved for admin",
-                            getCodeOwnerConfigFilePath(keyOfInvalidConfig2)))),
-                getCodeOwnerConfigFilePath(keyOfInvalidConfig3),
+                            pathOfInvalidConfig2))),
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfInvalidConfig3)
+                    .getAbsoluteFilePath(),
                 ImmutableList.of(
                     error(
                         String.format(
                             "code owner email 'unknown2@example.com' in '%s' cannot be"
                                 + " resolved for admin",
-                            getCodeOwnerConfigFilePath(keyOfInvalidConfig3))))));
+                            pathOfInvalidConfig3)))));
   }
 
   private ConsistencyProblemInfo error(String message) {
@@ -470,10 +488,6 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   private Map<String, Map<String, List<ConsistencyProblemInfo>>> checkCodeOwnerConfigFilesIn(
       Project.NameKey projectName) throws RestApiException {
     return projectCodeOwnersApiFactory.project(projectName).checkCodeOwnerConfigFiles().check();
-  }
-
-  private String getCodeOwnerConfigFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    return backendConfig.getDefaultBackend().getFilePath(codeOwnerConfigKey).toString();
   }
 
   private String getCodeOwnerConfigFileName() {
