@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cb7ef4ea_f8dc5223",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-12T09:01:44Z",
+      "side": 1,
+      "message": "Can you skip it when ownedByAllUsers is set to true?",
+      "range": {
+        "startLine": 180,
+        "startChar": 13,
+        "endLine": 180,
+        "endChar": 34
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3355ac57_590148b8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-12T09:01:44Z",
+      "side": 1,
+      "message": "in the commit message you said it\u0027s 3 times. Which one did you intend?",
+      "range": {
+        "startLine": 359,
+        "startChar": 23,
+        "endLine": 359,
+        "endChar": 24
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e5a87043_683fe559",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 388,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-12T09:01:44Z",
+      "side": 1,
+      "message": "afford",
+      "range": {
+        "startLine": 388,
+        "startChar": 23,
+        "endLine": 388,
+        "endChar": 29
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "21e1cac6_1d69056d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 389,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-12T09:01:44Z",
+      "side": 1,
+      "message": "now I\u0027m confused; isn\u0027t this 6*limit now? (as you called this method with 2*limit and now you\u0027re doing 3*)",
+      "range": {
+        "startLine": 389,
+        "startChar": 80,
+        "endLine": 389,
+        "endChar": 81
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e8ecfde2_d332c1c0",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 876,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-12T09:01:44Z",
+      "side": 1,
+      "message": "some tests for the \"best effort\" and ensuring the limit holds, may be a good idea.\nI realize such tests may be annoying to do, though, so don\u0027t spend too much time on it.",
+      "range": {
+        "startLine": 876,
+        "startChar": 0,
+        "endLine": 876,
+        "endChar": 3
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2cb208df_b9056b77",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1272,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-12T09:01:44Z",
+      "side": 1,
+      "message": "here and below: inline comments",
+      "range": {
+        "startLine": 1272,
+        "startChar": 73,
+        "endLine": 1272,
+        "endChar": 85
+      },
+      "revId": "1a782064f8c4a28901960abc3fdc6b64adeea3aa",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
