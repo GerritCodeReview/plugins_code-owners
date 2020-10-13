@@ -37,6 +37,17 @@ const FetchStatus = {
 };
 
 /**
+ * Specifies status for a change. The same as ChangeStatus enum in gerrit
+ *
+ * @enum
+ */
+const ChangeStatus = {
+  ABANDONED: 'ABANDONED',
+  MERGED: 'MERGED',
+  NEW: 'NEW',
+}
+
+/**
  * @enum
  */
 const UserRole = {
@@ -47,7 +58,7 @@ const UserRole = {
   CC: 'CC',
   REMOVED_REVIEWER: 'REMOVED_REVIEWER',
   OTHER: 'OTHER',
-}
+};
 
 /**
  * Responsible for communicating with the rest-api
@@ -468,6 +479,10 @@ export class CodeOwnerService {
   }
 
   isCodeOwnerEnabled() {
+    if (this.change.status == ChangeStatus.ABANDONED ||
+        this.change.status === ChangeStatus.MERGED) {
+      return Promise.resolve(false);
+    }
     return this.getProjectConfig().then(config => {
       if (config.status && config.status.disabled) {
         return false;
