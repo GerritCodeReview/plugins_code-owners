@@ -52,6 +52,9 @@ export class OwnerRequirementValue extends Polymer.Element {
         gr-button {
           padding-left: var(--spacing-m);
         }
+        a {
+            text-decoration: none;
+          }
         </style>
         <p class="loading" hidden="[[!_isLoading]]">
           <span class="loadingSpin"></span>
@@ -59,6 +62,11 @@ export class OwnerRequirementValue extends Polymer.Element {
         </p>
         <template is="dom-if" if="[[!_isLoading]]">
           <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
+          <template is="dom-if" if="[[_overrideInfoUrl]]">
+            <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]" target="_blank">
+              <iron-icon icon="gr-icons:help-outline" title="Documentation for overriding code owners"></iron-icon>
+            </a>
+          </template>
           <template is="dom-if" if="[[!_allApproved]]">
             <gr-button link on-click="_openReplyDialog">
             Suggest owners
@@ -77,12 +85,16 @@ export class OwnerRequirementValue extends Polymer.Element {
       ownerService: Object,
 
       _statusCount: Object,
-      _isLoading: Boolean,
+      _isLoading: {
+        type: Boolean,
+        value: true,
+      },
       _allApproved: {
         type: Boolean,
         computed: '_computeAllApproved(_statusCount)',
       },
       _isOverriden: Boolean,
+      _overrideInfoUrl: String,
     };
   }
 
@@ -135,6 +147,14 @@ export class OwnerRequirementValue extends Polymer.Element {
         .finally(() => {
           this._isLoading = false;
         });
+  }
+
+  _updateOverrideInfoUrl() {
+    this.ownerService.getProjectConfig().then(config => {
+      this._overrideInfoUrl = config.general && config.general.override_info_url
+        ?
+        config.general.override_info_url : '';
+    });
   }
 
   _computeAllApproved(statusCount) {
@@ -195,6 +215,7 @@ export class OwnerRequirementValue extends Polymer.Element {
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
     this._updateStatus();
     this._checkIfOverriden();
+    this._updateOverrideInfoUrl();
   }
 
   _openReplyDialog() {
