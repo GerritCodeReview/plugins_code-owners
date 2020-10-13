@@ -27,9 +27,9 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
@@ -50,7 +50,6 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwn
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import com.google.inject.Inject;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
@@ -343,7 +342,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // delete the invalid code owner config file
     PushOneCommit push =
@@ -369,7 +368,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // update the code owner config so that it is still not parseable
     r =
@@ -408,7 +407,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // update the code owner config so that it is parseable now, but has validation issues
     String unknownEmail1 = "non-existing-email@example.com";
@@ -459,7 +458,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // update the code owner config so that the validation issue still exists, but no new issue is
     // introduced
@@ -621,7 +620,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // update the code owner config so that the validation issue still exists and a new issue is
     // introduced
@@ -682,7 +681,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // approve the change
     approve(r.getChangeId());
@@ -733,7 +732,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // approve the change
     approve(r.getChangeId());
@@ -1181,7 +1180,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     gApi.changes().id(r.getChangeId()).current().submit();
 
     // re-enable the code owners functionality for the project
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // create a code owner config that imports a non-parseable code owner config
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
@@ -1214,7 +1213,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   public void validateMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
     // Create another branch.
     String branchName = "stable";
-    gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
+    createBranch(BranchNameKey.create(project, branchName));
 
     // Create a code owner config file in the other branch.
     codeOwnerConfigOperations

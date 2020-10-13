@@ -22,8 +22,8 @@ import static com.google.gerrit.truth.OptionalSubject.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.Truth8;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations.PerCodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -113,7 +113,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   @Test
   public void specifiedBranchIsRespectedForCodeOwnerConfigCreation() throws Exception {
     String branchName = "foo";
-    gApi.projects().name(project.get()).branch(branchName).create(new BranchInput());
+    createBranch(BranchNameKey.create(project, branchName));
 
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
