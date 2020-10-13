@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ad49fa9_968d00b1",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-10-13T11:00:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2a15f983_eb35c20b",
+      "range": {
+        "startLine": 48,
+        "startChar": 0,
+        "endLine": 48,
+        "endChar": 1
+      },
+      "revId": "038b12edd20ec5dddccaaee771774053aa2d7114",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3698d4f0_c31dc4db",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-10-13T09:47:13Z",
       "side": 1,
       "message": "\u003d\u003d\u003d",
+      "range": {
+        "startLine": 482,
+        "startChar": 27,
+        "endLine": 482,
+        "endChar": 29
+      },
+      "revId": "038b12edd20ec5dddccaaee771774053aa2d7114",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6b7da276_6bf27e41",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 482,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-10-13T11:00:49Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3698d4f0_c31dc4db",
       "range": {
         "startLine": 482,
         "startChar": 27,
