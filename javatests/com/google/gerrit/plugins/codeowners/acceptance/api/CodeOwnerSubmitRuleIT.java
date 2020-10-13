@@ -194,6 +194,13 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
     assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+
+    // Check the submit requirement.
+    submitRequirementInfoSubject =
+        assertThatCollection(gApi.changes().id(changeId).get().requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
   }
 
   @Test
@@ -238,5 +245,12 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
     assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+
+    // Check the submit requirement.
+    submitRequirementInfoSubject =
+        assertThatCollection(gApi.changes().id(changeId).get().requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
   }
 }
