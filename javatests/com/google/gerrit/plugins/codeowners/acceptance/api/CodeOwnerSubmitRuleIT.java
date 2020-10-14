@@ -56,6 +56,28 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "INVALID")
+  public void changeIsSubmittableIfCodeOwnersFuctionalityIsDisabled_invalidPluginConfig()
+      throws Exception {
+    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+
+    // Approve by a non-code-owner.
+    approve(changeId);
+
+    // Check the submittable flag.
+    ChangeInfo changeInfo = gApi.changes().id(changeId).get(ListChangesOption.SUBMITTABLE);
+    assertThat(changeInfo.submittable).isTrue();
+
+    // Check that there is no submit requirement.
+    assertThat(changeInfo.requirements).isEmpty();
+
+    // Submit the change.
+    gApi.changes().id(changeId).current().submit();
+    assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
   public void changeWithInsufficentReviewersIsNotSubmittable() throws Exception {
     // create arbitrary code owner config to avoid entering the bootstrapping code path in
     // CodeOwnerApprovalCheck
