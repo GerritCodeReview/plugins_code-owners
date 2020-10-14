@@ -51,4 +51,26 @@ public class GetCodeOwnerProjectConfigRestIT extends AbstractCodeOwnersTest {
                 + " 'non-existing-backend' that is configured in gerrit.config (parameter"
                 + " plugin.code-owners.backend) not found.");
   }
+
+  @Test
+  public void cannotGetStatusIfPluginConfigurationIsInvalid_defaultRequiredApprovalConfigIsInvalid()
+      throws Exception {
+    // Delete the Code-Review label which is required as code owner approval by default.
+    gApi.projects().name(allProjects.get()).label("Code-Review").delete();
+
+    RestResponse r =
+        adminRestSession.get(
+            String.format(
+                "/projects/%s/code_owners.project_config", IdString.fromDecoded(project.get())));
+    r.assertConflict();
+    assertThat(r.getEntityContent())
+        .contains(
+            String.format(
+                "Invalid configuration of the code-owners plugin. The default required approval"
+                    + " 'Code-Review+1' that is used for project %s is not valid:"
+                    + " Default label Code-Review doesn't exist for project %s."
+                    + " Please configure a valid required approval in code-owners.config"
+                    + " (parameter codeOwners.requiredApproval).",
+                project.get(), project.get()));
+  }
 }

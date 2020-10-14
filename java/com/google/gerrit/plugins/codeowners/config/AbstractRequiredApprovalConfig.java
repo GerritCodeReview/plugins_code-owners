@@ -38,7 +38,8 @@ import org.eclipse.jgit.lib.Config;
  * parent projects.
  */
 abstract class AbstractRequiredApprovalConfig {
-  private final String pluginName;
+  protected final String pluginName;
+
   private final PluginConfigFactory pluginConfigFactory;
 
   AbstractRequiredApprovalConfig(
