@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.server.schema.AllProjectsInput.getDefaultCodeReviewLabel;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.gerrit.entities.BranchNameKey;
@@ -133,7 +134,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel();
     createBranch(BranchNameKey.create(project, "stable-2.10"));
 
-    when(codeOwnersPluginConfiguration.isDisabled(project)).thenReturn(true);
+    when(codeOwnersPluginConfiguration.isDisabled(project)).thenReturn(false);
+    when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(false);
     when(codeOwnersPluginConfiguration.getBackend(project)).thenReturn(findOwnersBackend);
     when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
         .thenReturn(findOwnersBackend);
@@ -158,7 +160,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         codeOwnerProjectConfigJson.format(createProjectResource());
-    assertThat(codeOwnerProjectConfigInfo.status.disabled).isTrue();
+    assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
     assertThat(codeOwnerProjectConfigInfo.general.overrideInfoUrl)

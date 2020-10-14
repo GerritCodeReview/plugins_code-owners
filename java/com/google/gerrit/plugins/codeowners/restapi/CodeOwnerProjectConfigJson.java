@@ -60,11 +60,13 @@ public class CodeOwnerProjectConfigJson {
   CodeOwnerProjectConfigInfo format(ProjectResource projectResource)
       throws RestApiException, PermissionBackendException, IOException {
     CodeOwnerProjectConfigInfo info = new CodeOwnerProjectConfigInfo();
-    info.general = formatGeneralInfo(projectResource.getNameKey());
     info.status = formatStatusInfo(projectResource);
-    info.backend = formatBackendInfo(projectResource);
-    info.requiredApproval = formatRequiredApprovalInfo(projectResource.getNameKey());
-    info.overrideApproval = formatOverrideApprovalInfo(projectResource.getNameKey());
+    if (!codeOwnersPluginConfiguration.isDisabled(projectResource.getNameKey())) {
+      info.general = formatGeneralInfo(projectResource.getNameKey());
+      info.backend = formatBackendInfo(projectResource);
+      info.requiredApproval = formatRequiredApprovalInfo(projectResource.getNameKey());
+      info.overrideApproval = formatOverrideApprovalInfo(projectResource.getNameKey());
+    }
     return info;
   }
 
