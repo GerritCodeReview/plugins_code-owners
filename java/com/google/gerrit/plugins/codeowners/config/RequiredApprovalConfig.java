@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
+import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.PluginConfigFactory;
@@ -54,6 +56,21 @@ public class RequiredApprovalConfig extends AbstractRequiredApprovalConfig {
   }
 
   RequiredApproval createDefault(ProjectState projectState) throws IllegalStateException {
-    return RequiredApproval.createDefault(projectState, DEFAULT_LABEL, DEFAULT_VALUE);
+    try {
+      return RequiredApproval.createDefault(projectState, DEFAULT_LABEL, DEFAULT_VALUE);
+    } catch (IllegalStateException | IllegalArgumentException e) {
+      throw new InvalidPluginConfigurationException(
+          pluginName,
+          String.format(
+              "The default required approval '%s+%d' that is used for project %s is not valid: %s"
+                  + " Please configure a valid required approval in %s.config (parameter %s.%s).",
+              DEFAULT_LABEL,
+              DEFAULT_VALUE,
+              projectState.getName(),
+              e.getMessage(),
+              pluginName,
+              SECTION_CODE_OWNERS,
+              getConfigKey()));
+    }
   }
 }
