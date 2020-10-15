@@ -30,6 +30,7 @@ import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFile;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
@@ -168,9 +169,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .branchName(receiveEvent.refName)
                 .username(receiveEvent.user.getLoggableName())
                 .build())) {
+      CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
+          codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
+              receiveEvent.getProjectNameKey());
+      logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
       Optional<ValidationResult> validationResult;
-      if (!codeOwnersPluginConfiguration.validateCodeOwnerConfigsOnCommitReceived(
-          receiveEvent.getProjectNameKey())) {
+      if (!codeOwnerConfigValidationPolicy.runValidation()) {
         validationResult =
             Optional.of(
                 ValidationResult.create(
@@ -178,19 +182,38 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                     new CommitValidationMessage(
                         "code owners config validation is disabled", ValidationMessage.Type.HINT)));
       } else {
-        validationResult =
-            validateCodeOwnerConfig(
-                receiveEvent.getBranchNameKey(),
-                receiveEvent.repoConfig,
-                receiveEvent.revWalk,
-                receiveEvent.commit,
-                receiveEvent.user);
+        try {
+          validationResult =
+              validateCodeOwnerConfig(
+                  receiveEvent.getBranchNameKey(),
+                  receiveEvent.repoConfig,
+                  receiveEvent.revWalk,
+                  receiveEvent.commit,
+                  receiveEvent.user);
+        } catch (RuntimeException e) {
+          if (!codeOwnerConfigValidationPolicy.isDryRun()) {
+            throw e;
+          }
+
+          // The validation was executed as dry-run and failures during the validation should not
+          // cause an error. Hence we swallow the exception here.
+          logger.atFine().withCause(e).log(
+              "ignoring failure during validation of code owner config files in revision %s"
+                  + " (project = %s, branch = %s) because the validation was performed as dry-run",
+              receiveEvent.commit.getName(),
+              receiveEvent.getBranchNameKey().project(),
+              receiveEvent.getBranchNameKey().branch());
+          validationResult = Optional.empty();
+        }
       }
       if (!validationResult.isPresent()) {
         return ImmutableList.of();
       }
+
       logger.atFine().log("validation result = %s", validationResult.get());
-      return validationResult.get().processForOnCommitReceived();
+      return validationResult
+          .get()
+          .processForOnCommitReceived(codeOwnerConfigValidationPolicy.isDryRun());
     }
   }
 
@@ -918,8 +941,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
      * <p>If there are no errors the validation messages are returned so that they can be sent to
      * the client without causing the upload to fail.
      */
-    List<CommitValidationMessage> processForOnCommitReceived() throws CommitValidationException {
-      if (hasError()) {
+    List<CommitValidationMessage> processForOnCommitReceived(boolean dryRun)
+        throws CommitValidationException {
+      if (!dryRun && hasError()) {
         throw new CommitValidationException(summaryMessage(), validationMessages());
       }
 

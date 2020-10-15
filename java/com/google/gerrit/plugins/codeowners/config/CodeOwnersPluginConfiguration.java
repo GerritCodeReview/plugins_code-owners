@@ -24,6 +24,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
@@ -115,9 +116,11 @@ public class CodeOwnersPluginConfiguration {
    *     validated when a commit is received
    * @return whether code owner configs should be validated when a commit is received
    */
-  public boolean validateCodeOwnerConfigsOnCommitReceived(Project.NameKey project) {
+  public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived(
+      Project.NameKey project) {
     requireNonNull(project, "project");
-    return generalConfig.enableValidationOnCommitReceived(getPluginConfig(project));
+    return generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
+        project, getPluginConfig(project));
   }
 
   /**

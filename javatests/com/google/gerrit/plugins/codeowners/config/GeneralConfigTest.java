@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -124,16 +125,31 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotGetEnableValidationOnCommitReceivedForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                    null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
   public void cannotGetEnableValidationOnCommitReceivedForNullPluginConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> generalConfig.enableValidationOnCommitReceived(null));
+            NullPointerException.class,
+            () -> generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(project, null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
   public void noEnableValidationOnCommitReceivedConfiguration() throws Exception {
-    assertThat(generalConfig.enableValidationOnCommitReceived(new Config())).isTrue();
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                project, new Config()))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 
   @Test
@@ -141,7 +157,10 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void
       enableValidationOnCommitReceivedConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
           throws Exception {
-    assertThat(generalConfig.enableValidationOnCommitReceived(new Config())).isFalse();
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                project, new Config()))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
   }
 
   @Test
@@ -151,7 +170,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
           throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "true");
-    assertThat(generalConfig.enableValidationOnCommitReceived(cfg)).isTrue();
+    assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(project, cfg))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 
   @Test

@@ -107,10 +107,13 @@ Parameters that are not set for a project are inherited from the parent project.
         By default `false`.
 
 <a id="pluginCodeOwnersEnableValidationOnCommitReceived">plugin.@PLUGIN@.enableValidationOnCommitReceived</a>
-:       Whether code owner config files are validated when a commit is
-        received.\
-        If enabled, the upload of commits that contain invalid code owner config
-        files is rejected.\
+:       Policy for validating code owner config files when a commit is received.
+        Allowed values are `true` (the code owner config file validation is
+        enabled and the upload of invalid code owner config files is rejected),
+        `false` (the code owner config file validation is disabled, invalid code
+        owner config files are not rejected) and `dry_run` (code owner config
+        files are validated, but invalid code owner config files are not
+        rejected).\
         Should only be disabled if there is bot that validates the code owner
         config files in open changes as part of a pre-submit validation.\
         Can be overridden per project by setting
@@ -328,10 +331,13 @@ Parameters that are not set for a project are inherited from the parent project.
         `gerrit.config` is used.
 
 <a id="codeOwnersEnableValidationOnCommitReceived">codeOwners.enableValidationOnCommitReceived</a>
-:       Whether code owner config files are validated when a commit is
-        received.\
-        If enabled, the upload of commits that contain invalid code owner config
-        files is rejected.\
+:       Policy for validating code owner config files when a commit is received.
+        Allowed values are `true` (the code owner config file validation is
+        enabled and the upload of invalid code owner config files is rejected),
+        `false` (the code owner config file validation is disabled, invalid code
+        owner config files are not rejected) and `dry_run` (code owner config
+        files are validated, but invalid code owner config files are not
+        rejected).\
         Should only be disabled if there is bot that validates the code owner
         config files in open changes as part of a pre-submit validation.\
         Overrides the global setting

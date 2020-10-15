@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.server.config.PluginConfig;
@@ -182,14 +183,41 @@ public class GeneralConfig {
    * @param pluginConfig the plugin config from which the read-only configuration should be read.
    * @return whether code owner config files should be validated when a commit is received
    */
-  boolean enableValidationOnCommitReceived(Config pluginConfig) {
+  CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived(
+      Project.NameKey project, Config pluginConfig) {
+    requireNonNull(project, "project");
     requireNonNull(pluginConfig, "pluginConfig");
 
-    return pluginConfig.getBoolean(
-        SECTION_CODE_OWNERS,
-        null,
-        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
-        pluginConfigFromGerritConfig.getBoolean(KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, true));
+    String codeOwnerConfigValidationPolicyString =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED);
+    if (codeOwnerConfigValidationPolicyString != null) {
+      try {
+        return pluginConfig.getEnum(
+            SECTION_CODE_OWNERS,
+            null,
+            KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+            CodeOwnerConfigValidationPolicy.TRUE);
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().log(
+            "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
+                + " of project %s. Falling back to global config or default value.",
+            codeOwnerConfigValidationPolicyString, pluginName, project.get());
+      }
+    }
+
+    try {
+      return pluginConfigFromGerritConfig.getEnum(
+          KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, CodeOwnerConfigValidationPolicy.TRUE);
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().log(
+          "Ignoring invalid value %s for the code owner config validation policy in gerrit.config"
+              + " (parameter plugin.%s.%s). Falling back to default value %s.",
+          pluginConfigFromGerritConfig.getString(KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED),
+          pluginName,
+          KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+          CodeOwnerConfigValidationPolicy.TRUE);
+      return CodeOwnerConfigValidationPolicy.TRUE;
+    }
   }
 
   /**
