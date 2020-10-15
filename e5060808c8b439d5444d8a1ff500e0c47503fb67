@@ -187,6 +187,30 @@
       },
       "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e8e1b41e_cc005c3c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-15T09:37:51Z",
+      "side": 1,
+      "message": "woops, easy to miss.",
+      "parentUuid": "3e4a2b2d_d0c8e274",
+      "range": {
+        "startLine": 595,
+        "startChar": 20,
+        "endLine": 595,
+        "endChar": 30
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
