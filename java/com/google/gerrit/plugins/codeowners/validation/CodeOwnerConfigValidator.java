@@ -30,6 +30,7 @@ import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFile;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
@@ -264,8 +265,23 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     try {
       CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
 
+      // For merge commits, always do the comparison against the destination branch
+      // (MergeCommitStrategy.ALL_CHANGED_FILES). Doing the comparison against the auto-merge
+      // (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION) is not possible because the auto-merge
+      // is loaded via the PatchListCache to which we cannot pass the rev walk which should be used
+      // to load the newly created merge commit and hence trying to load it from PatchListCache
+      // would fail with a missing object exception. This is why we use
+      // MergeCommitStrategy.ALL_CHANGED_FILES here even if
+      // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
       ImmutableList<ChangedFile> modifiedCodeOwnerConfigFiles =
-          changedFiles.compute(branchNameKey.project(), repoConfig, revWalk, revCommit).stream()
+          changedFiles
+              .compute(
+                  branchNameKey.project(),
+                  repoConfig,
+                  revWalk,
+                  revCommit,
+                  MergeCommitStrategy.ALL_CHANGED_FILES)
+              .stream()
               // filter out deletions (files without new path)
               .filter(changedFile -> changedFile.newPath().isPresent())
               // filter out non code owner config files

@@ -1211,6 +1211,20 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void validateMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
+    testValidateMergeCommitCreatedViaTheCreateChangeRestApi();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void
+      validateMergeCommitCreatedViaTheCreateChangeRestApi_FilesWithConflictResolutionAsMergeCommitStrategy()
+          throws Exception {
+    testValidateMergeCommitCreatedViaTheCreateChangeRestApi();
+  }
+
+  private void testValidateMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
     // Create another branch.
     String branchName = "stable";
     createBranch(BranchNameKey.create(project, branchName));

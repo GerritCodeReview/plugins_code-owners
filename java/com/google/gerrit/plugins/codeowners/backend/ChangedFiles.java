@@ -114,17 +114,32 @@ public class ChangedFiles {
   public ImmutableSet<ChangedFile> compute(
       Project.NameKey project, Config repoConfig, RevWalk revWalk, RevCommit revCommit)
       throws IOException, PatchListNotAvailableException {
+    return compute(
+        project,
+        repoConfig,
+        revWalk,
+        revCommit,
+        codeOwnersPluginConfiguration.getMergeCommitStrategy(project));
+  }
+
+  public ImmutableSet<ChangedFile> compute(
+      Project.NameKey project,
+      Config repoConfig,
+      RevWalk revWalk,
+      RevCommit revCommit,
+      MergeCommitStrategy mergeCommitStrategy)
+      throws IOException, PatchListNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(repoConfig, "repoConfig");
     requireNonNull(revWalk, "revWalk");
     requireNonNull(revCommit, "revCommit");
+    requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
 
     logger.atFine().log(
         "computing changed files for revision %s in project %s", revCommit.name(), project);
 
     if (revCommit.getParentCount() > 1
-        && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(
-            codeOwnersPluginConfiguration.getMergeCommitStrategy(project))) {
+        && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
       return computeByComparingAgainstAutoMerge(project, revCommit);
     }
 
