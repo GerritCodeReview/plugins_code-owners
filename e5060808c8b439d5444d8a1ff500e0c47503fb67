@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8fa37fbc_bf002b4f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperations.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-15T09:34:51Z",
+      "side": 1,
+      "message": "I agree. Done.",
+      "parentUuid": "73d5d442_bad165ff",
+      "range": {
+        "startLine": 96,
+        "startChar": 16,
+        "endLine": 96,
+        "endChar": 29
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4dc03151_faad77e1",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-10-15T08:36:33Z",
       "side": 1,
       "message": "getAbsoluteFilePath?",
+      "range": {
+        "startLine": 88,
+        "startChar": 14,
+        "endLine": 88,
+        "endChar": 25
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "30534c2a_1f0fcf60",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwners.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-15T09:34:51Z",
+      "side": 1,
+      "message": "I would keep it as \"getFilePath\" as this matches the name of the CodeOwnerBackend#getFilePath method, for which this method is just a wrapper.\n\nWe could consider renaming CodeOwnerBackend#getFilePath too, but that would mean that we should be consistent and include \"absolute\" in all methods that return absolute paths. That would mean renaming more methods (e.g. ChangeFile.newPath(), ChangeFile.oldPath()) and I\u0027m not sure this is worth the effort, given that all paths in the code owners plugin are absolute paths, except when they are passed into the JGit API.\n\nI think, what is confusing and maybe why you asked about this, is that CodeOwnerConfigOperations.getFilePath (non-absolute path) doesn\u0027t match with CodeOwners.getFilePath (absolute path). I addressed this by renaming the methods in CodeOwnerConfigOperations (getFilePath -\u003e getJgitFilePath, getAbsoluteFilePath -\u003e getFilePath).",
+      "parentUuid": "4dc03151_faad77e1",
       "range": {
         "startLine": 88,
         "startChar": 14,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e26db1d1_65844226",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-15T09:34:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e892e764_818f8692",
+      "range": {
+        "startLine": 225,
+        "startChar": 32,
+        "endLine": 227,
+        "endChar": 58
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d15c63b1_66578dcb",
@@ -83,6 +155,30 @@
       "writtenOn": "2020-10-15T08:36:33Z",
       "side": 1,
       "message": "can you have a test with a file path that is not the same as the absolute file path?",
+      "range": {
+        "startLine": 595,
+        "startChar": 20,
+        "endLine": 595,
+        "endChar": 30
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e4a2b2d_d0c8e274",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-15T09:34:51Z",
+      "side": 1,
+      "message": "Not sure I understand. This path already differs from the absolute file path, since it doesn\u0027t start with \u0027/\u0027.",
+      "parentUuid": "d15c63b1_66578dcb",
       "range": {
         "startLine": 595,
         "startChar": 20,
