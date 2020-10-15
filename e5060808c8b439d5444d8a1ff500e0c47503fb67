@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "73d5d442_bad165ff",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperations.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-15T08:36:33Z",
+      "side": 1,
+      "message": "nit: this is a strange phrase, not really grammatical.",
+      "range": {
+        "startLine": 96,
+        "startChar": 16,
+        "endLine": 96,
+        "endChar": 29
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4dc03151_faad77e1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwners.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-15T08:36:33Z",
+      "side": 1,
+      "message": "getAbsoluteFilePath?",
+      "range": {
+        "startLine": 88,
+        "startChar": 14,
+        "endLine": 88,
+        "endChar": 25
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e892e764_818f8692",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerConfigFilesIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 227,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-15T08:36:33Z",
+      "side": 1,
+      "message": "can this (and below with \u00272\u0027) just be pathOfInvalidConfig1?",
+      "range": {
+        "startLine": 225,
+        "startChar": 32,
+        "endLine": 227,
+        "endChar": 58
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d15c63b1_66578dcb",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/testsuite/CodeOwnerConfigOperationsImplTest.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 595,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-15T08:36:33Z",
+      "side": 1,
+      "message": "can you have a test with a file path that is not the same as the absolute file path?",
+      "range": {
+        "startLine": 595,
+        "startChar": 20,
+        "endLine": 595,
+        "endChar": 30
+      },
+      "revId": "e5060808c8b439d5444d8a1ff500e0c47503fb67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
