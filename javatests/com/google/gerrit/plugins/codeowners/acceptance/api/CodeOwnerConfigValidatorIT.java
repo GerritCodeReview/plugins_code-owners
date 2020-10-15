@@ -280,6 +280,30 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "dry_run")
+  public void canUploadNonParseableConfigIfValidationIsDoneAsDryRun() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            "INVALID");
+    assertOkWithErrors(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid code owner config file '%s':\n  %s",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            getParsingErrorMessage(
+                ImmutableMap.of(
+                    FindOwnersBackend.class,
+                    "invalid line: INVALID",
+                    ProtoBackend.class,
+                    "1:8: expected \"{\""))));
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.readOnly", value = "true")
   public void cannotUploadConfigIfConfigsAreConfiguredToBeReadOnly() throws Exception {
     PushOneCommit.Result r =
@@ -711,6 +735,67 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                 unknownEmail,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "dry_run")
+  public void canUploadConfigWithNewIssuesIfValidationIsDoneAsDryRun() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // upload an initial code owner config that has issues (non-resolvable code owners)
+    String unknownEmail1 = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail1))
+                    .build()));
+    assertOkWithErrors(
+        r,
+        String.format(
+            "code owner email '%s' in '%s' cannot be resolved for %s",
+            unknownEmail1,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+    r.assertOkStatus();
+
+    // update the code owner config so that the validation issue still exists and a new issue is
+    // introduced
+    String unknownEmail2 = "another-unknown-email@example.com";
+    r =
+        createChange(
+            "Update code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(unknownEmail1, unknownEmail2))
+                    .build()));
+
+    String abbreviatedCommit = abbreviateName(r.getCommit());
+    r.assertOkStatus();
+    r.assertMessage(
+        String.format(
+            "error: commit %s: %s",
+            abbreviatedCommit,
+            String.format(
+                "code owner email '%s' in '%s' cannot be resolved for %s",
+                unknownEmail2,
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+                identifiedUserFactory.create(admin.id()).getLoggableName())));
+
+    // the pre-existing issue is returned as warning
+    r.assertMessage(
+        String.format(
+            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
+            abbreviatedCommit,
+            unknownEmail1,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+
+    r.assertNotMessage("hint");
   }
 
   @Test
@@ -1362,6 +1447,17 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     }
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
+  }
+
+  private void assertOkWithErrors(PushOneCommit.Result pushResult, String... errors)
+      throws Exception {
+    pushResult.assertOkStatus();
+    for (String error : errors) {
+      pushResult.assertMessage(
+          String.format("error: commit %s: %s", abbreviateName(pushResult.getCommit()), error));
+    }
+    pushResult.assertNotMessage("warning");
+    pushResult.assertNotMessage("hint");
   }
 
   private void assertOkWithWarnings(PushOneCommit.Result pushResult, String... warnings)
