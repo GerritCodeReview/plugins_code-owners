@@ -319,7 +319,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               "failed to validate code owner config files in revision %s"
                   + " (project = %s, branch = %s)",
               revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
-      logger.atSevere().log(errorMessage);
+      logger.atSevere().withCause(e).log(errorMessage);
       throw new StorageException(errorMessage, e);
     }
   }
