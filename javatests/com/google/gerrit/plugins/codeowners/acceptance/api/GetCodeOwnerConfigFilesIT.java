@@ -88,9 +88,9 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .codeOwnerConfigFiles()
                 .paths())
         .containsExactly(
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey1),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey2),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey3))
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey3).getFilePath())
         .inOrder();
   }
 
@@ -123,8 +123,8 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .codeOwnerConfigFiles()
                 .paths())
         .containsExactly(
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey2),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey1))
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath())
         .inOrder();
   }
 
@@ -157,8 +157,8 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .codeOwnerConfigFiles()
                 .paths())
         .containsExactly(
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey1),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey2))
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath())
         .inOrder();
   }
 
@@ -202,7 +202,8 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .branch("master")
                 .codeOwnerConfigFiles()
                 .paths())
-        .containsExactly(getCodeOwnerConfigFilePath(codeOwnerConfigKey));
+        .containsExactly(
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
   }
 
   @Test
@@ -269,9 +270,9 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .withEmail(admin.email())
                 .paths())
         .containsExactly(
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey2),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey4),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey5))
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey4).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey5).getFilePath())
         .inOrder();
 
     assertThat(
@@ -282,9 +283,9 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .withEmail(user.email())
                 .paths())
         .containsExactly(
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey1),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey3),
-            getCodeOwnerConfigFilePath(codeOwnerConfigKey4))
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey3).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey4).getFilePath())
         .inOrder();
 
     assertThat(
@@ -294,7 +295,8 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .codeOwnerConfigFiles()
                 .withEmail(user2.email())
                 .paths())
-        .containsExactly(getCodeOwnerConfigFilePath(codeOwnerConfigKey5));
+        .containsExactly(
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey5).getFilePath());
 
     assertThat(
             projectCodeOwnersApiFactory
@@ -304,10 +306,6 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .withEmail(user3.email())
                 .paths())
         .isEmpty();
-  }
-
-  private String getCodeOwnerConfigFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    return backendConfig.getDefaultBackend().getFilePath(codeOwnerConfigKey).toString();
   }
 
   private String getCodeOwnerConfigFileName() {

@@ -16,15 +16,19 @@ package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
+import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.server.ServerInitiated;
+import com.google.gerrit.server.project.ProjectCache;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import java.nio.file.Path;
 import java.util.Optional;
 
 /**
@@ -36,12 +40,19 @@ import java.util.Optional;
 public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations {
   private final CodeOwners codeOwners;
   private final Provider<CodeOwnersUpdate> codeOwnersUpdate;
+  private final ProjectCache projectCache;
+  private final BackendConfig backendConfig;
 
   @Inject
   CodeOwnerConfigOperationsImpl(
-      CodeOwners codeOwners, @ServerInitiated Provider<CodeOwnersUpdate> codeOwnersUpdate) {
+      CodeOwners codeOwners,
+      @ServerInitiated Provider<CodeOwnersUpdate> codeOwnersUpdate,
+      ProjectCache projectCache,
+      BackendConfig backendConfig) {
     this.codeOwners = codeOwners;
     this.codeOwnersUpdate = codeOwnersUpdate;
+    this.projectCache = projectCache;
+    this.backendConfig = backendConfig;
   }
 
   @Override
@@ -111,6 +122,26 @@ public class CodeOwnerConfigOperationsImpl implements CodeOwnerConfigOperations 
               () ->
                   new IllegalStateException(
                       String.format("code owner config %s does not exist", codeOwnerConfigKey)));
+    }
+
+    @Override
+    public String getJGitFilePath() {
+      return JgitPath.of(filePath()).get();
+    }
+
+    @Override
+    public String getFilePath() {
+      return filePath().toString();
+    }
+
+    private Path filePath() {
+      if (projectCache.get(codeOwnerConfigKey.project()).isPresent()) {
+        return codeOwners.getFilePath(codeOwnerConfigKey);
+      }
+
+      // if the project doesn't exist, use the backend which is configured on host level to compute
+      // the file path
+      return backendConfig.getDefaultBackend().getFilePath(codeOwnerConfigKey);
     }
 
     @Override
