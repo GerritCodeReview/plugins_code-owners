@@ -14,33 +14,23 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidConfigCause;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
-import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
-import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.jgit.errors.ConfigInvalidException;
-import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.treewalk.TreeWalk;
-import org.eclipse.jgit.treewalk.filter.TreeFilter;
 
 /** Class to scan a branch for code owner config files. */
 @Singleton
@@ -120,33 +110,13 @@ public class CodeOwnerConfigScanner {
 
     try (Repository repository = repoManager.openRepository(branchNameKey.project());
         RevWalk rw = new RevWalk(repository);
-        TreeWalk treeWalk = new TreeWalk(repository)) {
-      Ref ref = repository.exactRef(branchNameKey.branch());
-      checkState(
-          ref != null,
-          "branch %s of project %s not found",
-          branchNameKey.branch(),
-          branchNameKey.project());
-
-      RevCommit revision = rw.parseCommit(ref.getObjectId());
-      treeWalk.addTree(revision.getTree());
-      treeWalk.setRecursive(true);
-      treeWalk.setFilter(
-          createCodeOwnerConfigFilter(codeOwnerBackend, branchNameKey.project(), pathGlob));
-
+        CodeOwnerConfigTreeWalk treeWalk =
+            new CodeOwnerConfigTreeWalk(
+                codeOwnerBackend, branchNameKey, repository, rw, pathGlob)) {
       while (treeWalk.next()) {
-        Path filePath = Paths.get(treeWalk.getPathString());
-        Path folderPath =
-            filePath.getParent() != null
-                ? JgitPath.of(filePath.getParent()).getAsAbsolutePath()
-                : Paths.get("/");
-        String fileName = filePath.getFileName().toString();
-        CodeOwnerConfig.Key codeOwnerConfigKey =
-            CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
-        Optional<CodeOwnerConfig> codeOwnerConfig;
-
+        CodeOwnerConfig codeOwnerConfig;
         try {
-          codeOwnerConfig = codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
+          codeOwnerConfig = treeWalk.getCodeOwnerConfig();
         } catch (StorageException storageException) {
           Optional<ConfigInvalidException> configInvalidException =
               getInvalidConfigCause(storageException);
@@ -157,14 +127,11 @@ public class CodeOwnerConfigScanner {
 
           // The code owner config is invalid and cannot be parsed.
           invalidCodeOwnerConfigCallback.onInvalidCodeOwnerConfig(
-              folderPath.resolve(fileName), configInvalidException.get());
+              treeWalk.getFilePath(), configInvalidException.get());
           continue;
         }
 
-        checkState(
-            codeOwnerConfig.isPresent(), "code owner config %s not found", codeOwnerConfigKey);
-        boolean visitFurtherCodeOwnerConfigFiles =
-            codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
+        boolean visitFurtherCodeOwnerConfigFiles = codeOwnerConfigVisitor.visit(codeOwnerConfig);
         if (!visitFurtherCodeOwnerConfigFiles) {
           break;
         }
@@ -176,47 +143,6 @@ public class CodeOwnerConfigScanner {
               branchNameKey.branch(), branchNameKey.project()),
           e);
     }
-  }
-
-  /**
-   * Creates a {@link TreeFilter} that matches code owner config files in the given project.
-   *
-   * @param codeOwnerBackend the code owner backend that is being used
-   * @param project the name of the project in which code owner config files should be matched
-   * @param pathGlob optional Java NIO glob that the paths of code owner config files must match
-   * @return the created {@link TreeFilter}
-   */
-  private static TreeFilter createCodeOwnerConfigFilter(
-      CodeOwnerBackend codeOwnerBackend, Project.NameKey project, @Nullable String pathGlob) {
-    return new TreeFilter() {
-      @Override
-      public boolean shouldBeRecursive() {
-        return true;
-      }
-
-      @Override
-      public boolean include(TreeWalk walker) throws IOException {
-        if (walker.isSubtree()) {
-          walker.enterSubtree();
-          return false;
-        }
-        if (pathGlob != null
-            && !FileSystems.getDefault()
-                .getPathMatcher("glob:" + pathGlob)
-                .matches(JgitPath.of(walker.getPathString()).getAsAbsolutePath())) {
-          logger.atFine().log(
-              "%s filtered out because it doesn't match the path glob", walker.getPathString());
-          return false;
-        }
-        String fileName = Paths.get(walker.getPathString()).getFileName().toString();
-        return codeOwnerBackend.isCodeOwnerConfigFile(project, fileName);
-      }
-
-      @Override
-      public TreeFilter clone() {
-        return this;
-      }
-    };
   }
 
   /**
