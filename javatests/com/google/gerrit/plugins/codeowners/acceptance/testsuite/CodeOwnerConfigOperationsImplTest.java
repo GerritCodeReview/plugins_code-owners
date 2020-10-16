@@ -639,6 +639,58 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .isEqualTo("/foo/OWNERS");
   }
 
+  @Test
+  public void getContent() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent())
+        .isEqualTo(admin.email() + "\n");
+  }
+
+  @Test
+  public void getContent_nonExistingCodeOwnerConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/foo/");
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("code owner config %s does not exist", codeOwnerConfigKey));
+  }
+
+  @Test
+  public void getContent_nonExistingBranch() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, "non-existing", "/foo/");
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("code owner config %s does not exist", codeOwnerConfigKey));
+  }
+
+  @Test
+  public void getContent_nonExistingProject() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(Project.nameKey("non-existing"), "master", "/foo/");
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("code owner config %s does not exist", codeOwnerConfigKey));
+  }
+
   private CodeOwnerConfig getCodeOwnerConfigFromServer(CodeOwnerConfig.Key codeOwnerConfigKey) {
     return codeOwners
         .getFromCurrentRevision(codeOwnerConfigKey)
