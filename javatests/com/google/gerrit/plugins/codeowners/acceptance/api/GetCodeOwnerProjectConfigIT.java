@@ -19,7 +19,6 @@ import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.b
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Permission;
@@ -135,24 +134,6 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isTrue();
     assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
-    assertThat(codeOwnerProjectConfigInfo.general).isNull();
-    assertThat(codeOwnerProjectConfigInfo.backend).isNull();
-    assertThat(codeOwnerProjectConfigInfo.requiredApproval).isNull();
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval).isNull();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
-  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "INVALID")
-  public void getConfigForDisabledProject_invalidPluginConfig() throws Exception {
-    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
-        projectCodeOwnersApiFactory.project(project).getConfig();
-    assertThat(codeOwnerProjectConfigInfo.status.disabled).isTrue();
-    assertThat(codeOwnerProjectConfigInfo.status.disabledBranches).isNull();
-    assertThat(codeOwnerProjectConfigInfo.general).isNull();
-    assertThat(codeOwnerProjectConfigInfo.backend).isNull();
-    assertThat(codeOwnerProjectConfigInfo.requiredApproval).isNull();
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval).isNull();
   }
 
   @Test

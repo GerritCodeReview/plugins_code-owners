@@ -484,11 +484,11 @@ configuration.
 
 | Field Name |          | Description |
 | ---------- | -------- | ----------- |
-| `general`  | optional | The general code owners configuration as [GeneralInfo](#general-info) entity. Not set if `status.disabled` is `true`.
+| `general`  || The general code owners configuration as [GeneralInfo](#general-info) entity.
 | `status`   | optional | The code owner status configuration as [CodeOwnersStatusInfo](#code-owners-status-info) entity. Contains information about whether the code owners functionality is disabled for the project or for any branch.
-| `backend`  | optional | The code owner backend configuration as [BackendInfo](#backend-info) entity. Not set if `status.disabled` is `true`.
-| `required_approval` | optional | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval. Not set if `status.disabled` is `true`.
-| `override_approval` | optional | The approval that is required to override the code owners submit check as [RequiredApprovalInfo](#required-approval-info) entity. If unset, overriding the code owners submit check is disabled. Not set if `status.disabled` is `true`.
+| `backend`  || The code owner backend configuration as [BackendInfo](#backend-info) entity.
+| `required_approval` || The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval.
+| `override_approval` | optional | The approval that is required to override the code owners submit check as [RequiredApprovalInfo](#required-approval-info) entity. If unset, overriding the code owners submit check is disabled.
 
 ---
 
