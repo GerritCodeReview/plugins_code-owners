@@ -185,7 +185,7 @@ public class CodeOwnerConfigScanner {
    * @param pathGlob optional Java NIO glob that the paths of code owner config files must match
    * @return the created {@link TreeFilter}
    */
-  private static TreeFilter createCodeOwnerConfigFilter(
+  public static TreeFilter createCodeOwnerConfigFilter(
       CodeOwnerBackend codeOwnerBackend, Project.NameKey project, @Nullable String pathGlob) {
     return new TreeFilter() {
       @Override
