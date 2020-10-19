@@ -1346,7 +1346,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
       name = "plugin.code-owners.mergeCommitStrategy",
       value = "FILES_WITH_CONFLICT_RESOLUTION")
   public void
-      validateMergeCommitCreatedViaTheCreateChangeRestApi_FilesWithConflictResolutionAsMergeCommitStrategy()
+      validateMergeCommitCreatedViaTheCreateChangeRestApi_filesWithConflictResolutionAsMergeCommitStrategy()
           throws Exception {
     testValidateMergeCommitCreatedViaTheCreateChangeRestApi();
   }
