@@ -19,6 +19,7 @@ import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerBranchConfig;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigFiles;
+import com.google.gerrit.plugins.codeowners.restapi.RenameEmail;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -33,15 +34,18 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
 
   private final GetCodeOwnerBranchConfig getCodeOwnerBranchConfig;
   private final Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider;
+  private final RenameEmail renameEmail;
   private final BranchResource branchResource;
 
   @Inject
   public BranchCodeOwnersImpl(
       GetCodeOwnerBranchConfig getCodeOwnerBranchConfig,
       Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider,
+      RenameEmail renameEmail,
       @Assisted BranchResource branchResource) {
     this.getCodeOwnerConfigFilesProvider = getCodeOwnerConfigFilesProvider;
     this.getCodeOwnerBranchConfig = getCodeOwnerBranchConfig;
+    this.renameEmail = renameEmail;
     this.branchResource = branchResource;
   }
 
@@ -65,5 +69,15 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
         return getCodeOwnerConfigFiles.apply(branchResource).value();
       }
     };
+  }
+
+  @Override
+  public RenameEmailResultInfo renameEmailInCodeOwnerConfigFiles(RenameEmailInput input)
+      throws RestApiException {
+    try {
+      return renameEmail.apply(branchResource, input).value();
+    } catch (Exception e) {
+      throw asRestApiException("Cannot rename email", e);
+    }
   }
 }

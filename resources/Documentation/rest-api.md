@@ -214,6 +214,70 @@ Non-parseable code owner config files are omitted from the response, unless the
   ]
 ```
 
+### <a id="rename-email-in-code-owner-config-files">Rename Email In Code Owner Config Files
+_'POST /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.rename/'_
+
+Renames an email in all code owner config files in the branch.
+
+The old and new email must be specified in the request body as
+[RenameEmailInput](#rename-email-input).
+
+The old and new email must both belong to the same Gerrit account.
+
+All updates are done atomically within one commit. The calling user will be the
+author of this commit.
+
+Requires that the calling user is a project owner
+([Owner](../../../Documentation/access-control.html#category_owner) permission
+on ‘refs/*’) or has
+[direct push](../../../Documentation/access-control.html#category_push)
+permissions for the branch.
+
+#### Request
+
+```
+  POST /projects/foo%2Fbar/branches/master/code_owners.rename HTTP/1.0
+```
+
+#### Response
+
+As response a [RenameEmailResultInfo](#rename-email-result-info) entity is
+returned.
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "commit": {
+      "commit": "",
+      "parents": [
+        {
+          "commit": "1efe2c9d8f352483781e772f35dc586a69ff5646",
+          "subject": "Fix Foo Bar"
+        }
+      ],
+      "author": {
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "date": "2020-03-30 18:08:08.000000000",
+        "tz": -420
+      },
+      "committer": {
+        "name": "Gerrit Code Review",
+        "email": "no-reply@gerritcodereview.com",
+        "date": "2020-03-30 18:08:08.000000000",
+        "tz": -420
+      },
+      "subject": "Rename email in code owner config files",
+      "message": "Rename email in code owner config files"
+    }
+  }
+```
+
+
 ### <a id="get-code-owner-config">[EXPERIMENTAL] Get Code Owner Config
 _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.config/[\{path\}](#path)'_
 
@@ -630,6 +694,27 @@ in a change.
 | ------------------ | ----------- |
 | `path` | The path to which the code owner status applies.
 | `status` | The code owner status for the path. Can be 'INSUFFICIENT_REVIEWERS' (the path needs a code owner approval, but none of its code owners is currently a reviewer of the change), `PENDING` (a code owner of this path has been added as reviewer, but no code owner approval for this path has been given yet) or `APPROVED` (the path has been approved by a code owner or a code owners override is present).
+
+---
+
+### <a id="rename-email-input"> RenameEmailInput
+The `RenameEmailInput` entity specifies how an email should be renamed.
+
+| Field Name  |          | Description |
+| ----------- | -------- | ----------- |
+| `message`   | optional | Commit message that should be used for the commit that renames the email in the code owner config files.
+| `old_email` || The old email that should be replaced with the new email.
+| `new_email` || The new email that should be used to replace the old email.
+
+---
+
+### <a id="rename-email-result-info"> RenameEmailResultInfo
+The `RenameEmailResultInfo` entity describes the result of the rename email REST
+endpoint.
+
+| Field Name  |          | Description |
+| ----------- | -------- | ----------- |
+| `commit`    | optional | The commit that did the email rename. Not set, if no update was necessary.
 
 ---
 

@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -96,6 +97,35 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) {
     return Formatter.formatAsString(requireNonNull(codeOwnerConfig, "codeOwnerConfig"));
+  }
+
+  public static String replaceEmail(
+      String codeOwnerConfigFileContent, String oldEmail, String newEmail) {
+    requireNonNull(codeOwnerConfigFileContent, "codeOwnerConfigFileContent");
+    requireNonNull(oldEmail, "oldEmail");
+    requireNonNull(newEmail, "newEmail");
+
+    String charsThatCanAppearBeforeOrAfterEmail = "[\\s=,#]";
+    Pattern pattern =
+        Pattern.compile(
+            "(^|.*"
+                + charsThatCanAppearBeforeOrAfterEmail
+                + "+)"
+                + "("
+                + Pattern.quote(oldEmail)
+                + ")"
+                + "($|"
+                + charsThatCanAppearBeforeOrAfterEmail
+                + "+.*)");
+
+    List<String> updatedLines = new ArrayList<>();
+    for (String line : Splitter.onPattern("\\R").split(codeOwnerConfigFileContent)) {
+      while (pattern.matcher(line).matches()) {
+        line = pattern.matcher(line).replaceAll("$1" + newEmail + "$3");
+      }
+      updatedLines.add(line);
+    }
+    return Joiner.on("\n").join(updatedLines);
   }
 
   private static class Parser implements ValidationError.Sink {
