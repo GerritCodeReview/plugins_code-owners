@@ -69,7 +69,7 @@ public class CheckCodeOwnerConfigFiles
     implements RestModifyView<ProjectResource, CheckCodeOwnerConfigFilesInput> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final CurrentUser currentUser;
+  private final Provider<CurrentUser> currentUser;
   private final PermissionBackend permissionBackend;
   private final Provider<ListBranches> listBranches;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
@@ -78,7 +78,7 @@ public class CheckCodeOwnerConfigFiles
 
   @Inject
   public CheckCodeOwnerConfigFiles(
-      CurrentUser currentUser,
+      Provider<CurrentUser> currentUser,
       PermissionBackend permissionBackend,
       Provider<ListBranches> listBranches,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
@@ -96,7 +96,7 @@ public class CheckCodeOwnerConfigFiles
   public Response<Map<String, Map<String, List<ConsistencyProblemInfo>>>> apply(
       ProjectResource projectResource, CheckCodeOwnerConfigFilesInput input)
       throws RestApiException, PermissionBackendException, IOException {
-    if (!currentUser.isIdentifiedUser()) {
+    if (!currentUser.get().isIdentifiedUser()) {
       throw new AuthException("Authentication required");
     }
 
@@ -164,7 +164,8 @@ public class CheckCodeOwnerConfigFiles
   private ImmutableList<ConsistencyProblemInfo> checkCodeOwnerConfig(
       CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfigValidator
-        .validateCodeOwnerConfig(currentUser.asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
+        .validateCodeOwnerConfig(
+            currentUser.get().asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
         .map(CheckCodeOwnerConfigFiles::createConsistencyProblemInfo)
         .filter(Optional::isPresent)
         .map(Optional::get)
