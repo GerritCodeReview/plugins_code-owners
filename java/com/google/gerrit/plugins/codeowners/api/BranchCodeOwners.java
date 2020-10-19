@@ -51,6 +51,10 @@ public interface BranchCodeOwners {
     public abstract List<String> paths() throws RestApiException;
   }
 
+  /** Renames an email in the code owner config files of the branch. */
+  RenameEmailResultInfo renameEmailInCodeOwnerConfigFiles(RenameEmailInput input)
+      throws RestApiException;
+
   /**
    * A default implementation which allows source compatibility when adding new methods to the
    * interface.
@@ -58,6 +62,12 @@ public interface BranchCodeOwners {
   class NotImplemented implements BranchCodeOwners {
     @Override
     public CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public RenameEmailResultInfo renameEmailInCodeOwnerConfigFiles(RenameEmailInput input)
+        throws RestApiException {
       throw new NotImplementedException();
     }
   }
