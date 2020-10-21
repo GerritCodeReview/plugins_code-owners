@@ -154,7 +154,7 @@ public class CheckCodeOwnerConfigFiles
           problemsByPath.put(
               codeOwnerConfigFilePath.toString(),
               new ConsistencyProblemInfo(
-                  ConsistencyProblemInfo.Status.ERROR, configInvalidException.getMessage()));
+                  ConsistencyProblemInfo.Status.FATAL, configInvalidException.getMessage()));
         },
         pathGlob);
 

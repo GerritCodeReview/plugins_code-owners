@@ -126,7 +126,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
         .containsExactly(
             codeOwnerConfigPath,
             ImmutableList.of(
-                error(
+                fatal(
                     String.format(
                         "invalid code owner config file '%s':\n  %s",
                         codeOwnerConfigPath,
@@ -396,6 +396,10 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                     String.format(
                         "code owner email '%s' in '%s' cannot be" + " resolved for admin",
                         unknownEmail3, codeOwnerConfigPath3))));
+  }
+
+  private ConsistencyProblemInfo fatal(String message) {
+    return new ConsistencyProblemInfo(ConsistencyProblemInfo.Status.FATAL, message);
   }
 
   private ConsistencyProblemInfo error(String message) {

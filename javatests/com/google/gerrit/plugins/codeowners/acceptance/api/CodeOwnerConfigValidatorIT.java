@@ -319,7 +319,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
             "INVALID");
-    assertOkWithErrors(
+    assertOkWithFatals(
         r,
         "invalid code owner config files",
         String.format(
@@ -552,7 +552,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
             "INVALID");
-    assertErrorWithMessages(
+    assertFatalWithMessages(
         r,
         "invalid code owner config files",
         String.format(
@@ -582,7 +582,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getJGitFilePath(),
                 "ALSO-INVALID"));
     PushOneCommit.Result r = push.to("refs/for/master");
-    assertErrorWithMessages(
+    assertFatalWithMessages(
         r,
         "invalid code owner config files",
         String.format(
@@ -1481,6 +1481,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private static void assertOkWithoutMessages(PushOneCommit.Result pushResult) {
     pushResult.assertOkStatus();
+    pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
     pushResult.assertNotMessage("hint");
@@ -1493,8 +1494,21 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
       pushResult.assertMessage(
           String.format("hint: commit %s: %s", abbreviateName(pushResult.getCommit()), hint));
     }
+    pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
+  }
+
+  private void assertOkWithFatals(PushOneCommit.Result pushResult, String... errors)
+      throws Exception {
+    pushResult.assertOkStatus();
+    for (String error : errors) {
+      pushResult.assertMessage(
+          String.format("fatal: commit %s: %s", abbreviateName(pushResult.getCommit()), error));
+    }
+    pushResult.assertNotMessage("error");
+    pushResult.assertNotMessage("warning");
+    pushResult.assertNotMessage("hint");
   }
 
   private void assertOkWithErrors(PushOneCommit.Result pushResult, String... errors)
@@ -1504,6 +1518,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
       pushResult.assertMessage(
           String.format("error: commit %s: %s", abbreviateName(pushResult.getCommit()), error));
     }
+    pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("warning");
     pushResult.assertNotMessage("hint");
   }
@@ -1515,6 +1530,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
       pushResult.assertMessage(
           String.format("warning: commit %s: %s", abbreviateName(pushResult.getCommit()), warning));
     }
+    pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("hint");
   }
@@ -1526,6 +1542,19 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     for (String error : errors) {
       pushResult.assertMessage(String.format("error: commit %s: %s", abbreviatedCommit, error));
     }
+    pushResult.assertNotMessage("fatal");
+    pushResult.assertNotMessage("warning");
+    pushResult.assertNotMessage("hint");
+  }
+
+  private void assertFatalWithMessages(
+      PushOneCommit.Result pushResult, String summaryMessage, String... errors) throws Exception {
+    String abbreviatedCommit = abbreviateName(pushResult.getCommit());
+    pushResult.assertErrorStatus(String.format("commit %s: %s", abbreviatedCommit, summaryMessage));
+    for (String error : errors) {
+      pushResult.assertMessage(String.format("fatal: commit %s: %s", abbreviatedCommit, error));
+    }
+    pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
     pushResult.assertNotMessage("hint");
   }
