@@ -517,11 +517,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   }
 
   /**
-   * Returns the {@link com.google.gerrit.server.git.validators.ValidationMessage.Type} (ERROR or
+   * Returns the {@link com.google.gerrit.server.git.validators.ValidationMessage.Type} (FATAL or
    * WARNING) that should be used for a parsing error of the code owner config file (specified as
    * {@code changedFile}).
    *
-   * <p>If {@link com.google.gerrit.server.git.validators.ValidationMessage.Type#ERROR} is returned
+   * <p>If {@link com.google.gerrit.server.git.validators.ValidationMessage.Type#FATAL} is returned
    * the upload will be blocked, if {@link
    * com.google.gerrit.server.git.validators.ValidationMessage.Type#WARNING} is returned the upload
    * can succeed and the parsing error will only be shown as warning.
@@ -531,7 +531,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * it is not making anything worse. Hence in this case the parsing error should be returned as
    * {@link com.google.gerrit.server.git.validators.ValidationMessage.Type#WARNING}, whereas a new
    * parsing error should be returned as {@link
-   * com.google.gerrit.server.git.validators.ValidationMessage.Type#ERROR}.
+   * com.google.gerrit.server.git.validators.ValidationMessage.Type#FATAL}.
    *
    * @param codeOwnerBackend the code owner backend from which the code owner config can be loaded
    * @param branchNameKey the project and branch of the code owner config
@@ -567,8 +567,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, revWalk, parentRevision);
         // The code owner config at the parent revision is parseable. This means the parsing error
         // is introduced by the new commit and we should block uploading it, which we achieve by
-        // setting the validation message type to error.
-        return ValidationMessage.Type.ERROR;
+        // setting the validation message type to fatal.
+        return ValidationMessage.Type.FATAL;
       } catch (StorageException storageException) {
         // Loading the base code owner config has failed.
         if (getInvalidConfigCause(storageException).isPresent()) {
@@ -584,8 +584,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
     // The code owner config is newly created. Hence the parsing error comes from the commit
     // that is being pushed and we want to block it from uploading. To do this we set the
-    // validation message type to error.
-    return ValidationMessage.Type.ERROR;
+    // validation message type to fatal.
+    return ValidationMessage.Type.FATAL;
   }
 
   /**
@@ -608,12 +608,13 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
   /**
    * Returns a copy of the given commit validation message with type warning if the type the given
-   * commit validation message is error. Otherwise it returns the given commit validation message
-   * unchanged.
+   * commit validation message is fatal or error. Otherwise it returns the given commit validation
+   * message unchanged.
    */
   private static CommitValidationMessage downgradeErrorToWarning(
       CommitValidationMessage commitValidationMessage) {
-    if (CommitValidationMessage.Type.ERROR.equals(commitValidationMessage.getType())) {
+    if (CommitValidationMessage.Type.FATAL.equals(commitValidationMessage.getType())
+        || CommitValidationMessage.Type.ERROR.equals(commitValidationMessage.getType())) {
       return new CommitValidationMessage(
           commitValidationMessage.getMessage(), ValidationMessage.Type.WARNING);
     }
@@ -977,7 +978,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       return validationMessages().stream()
           .anyMatch(
               validationMessage ->
-                  ValidationMessage.Type.ERROR.equals(validationMessage.getType()));
+                  ValidationMessage.Type.FATAL.equals(validationMessage.getType())
+                      || ValidationMessage.Type.ERROR.equals(validationMessage.getType()));
     }
 
     private ImmutableList<CommitValidationMessage> validationMessagesWithIncludedSummaryMessage() {
@@ -995,6 +997,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
      * <p>The following validation message type will be returned:
      *
      * <ul>
+     *   <li>FATAL: if any of the validation message has type fatal
      *   <li>ERROR: if any of the validation message has type error
      *   <li>WARNING: if any of the validation message has type warning and none has type error
      *   <li>HINT: otherwise
@@ -1005,6 +1008,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
       if (!validationMessages().isEmpty()) {
         for (CommitValidationMessage validationMessage : validationMessages()) {
+          if (ValidationMessage.Type.FATAL.equals(validationMessage.getType())) {
+            validationMessageType = ValidationMessage.Type.FATAL;
+            break;
+          }
           if (ValidationMessage.Type.ERROR.equals(validationMessage.getType())) {
             validationMessageType = ValidationMessage.Type.ERROR;
             break;

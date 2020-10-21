@@ -159,7 +159,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 ImmutableMap.of(
                     codeOwnerConfigPath,
                     ImmutableList.of(
-                        error(
+                        fatal(
                             String.format(
                                 "invalid code owner config file '%s':\n  %s",
                                 codeOwnerConfigPath,
@@ -473,6 +473,10 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                             "code owner email 'unknown2@example.com' in '%s' cannot be"
                                 + " resolved for admin",
                             pathOfInvalidConfig3)))));
+  }
+
+  private ConsistencyProblemInfo fatal(String message) {
+    return new ConsistencyProblemInfo(ConsistencyProblemInfo.Status.FATAL, message);
   }
 
   private ConsistencyProblemInfo error(String message) {
