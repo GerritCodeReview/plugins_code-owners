@@ -51,6 +51,7 @@ public class RevisionCodeOwnersImpl implements RevisionCodeOwners {
           CheckCodeOwnerConfigFilesInRevisionInput input =
               new CheckCodeOwnerConfigFilesInRevisionInput();
           input.path = getPath();
+          input.verbosity = getVerbosity();
           return checkCodeOwnerConfigFilesInRevision.apply(revisionResource, input).value();
         } catch (Exception e) {
           throw asRestApiException("Cannot check code owner config files", e);

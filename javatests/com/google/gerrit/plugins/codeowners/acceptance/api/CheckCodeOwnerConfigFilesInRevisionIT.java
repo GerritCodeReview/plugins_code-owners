@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
@@ -33,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.eclipse.jgit.lib.ObjectId;
@@ -396,6 +398,97 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                     String.format(
                         "code owner email '%s' in '%s' cannot be" + " resolved for admin",
                         unknownEmail3, codeOwnerConfigPath3))));
+  }
+
+  @Test
+  public void allIssuesAreReturnedIfNoLevelIsSpecified() throws Exception {
+    testIssuesAreFilteredByVerbosity(
+        /** verbosity */
+        null);
+  }
+
+  @Test
+  public void allIssuesAreReturnedIfLevelIsSetToWarning() throws Exception {
+    testIssuesAreFilteredByVerbosity(ConsistencyProblemInfo.Status.WARNING);
+  }
+
+  @Test
+  public void onlyFatalAndErrorIssuesAreReturnedIfLevelIsSetToError() throws Exception {
+    testIssuesAreFilteredByVerbosity(ConsistencyProblemInfo.Status.ERROR);
+  }
+
+  @Test
+  public void onlyFatalIssuesAreReturnedIfLevelIsSetToFatal() throws Exception {
+    testIssuesAreFilteredByVerbosity(ConsistencyProblemInfo.Status.FATAL);
+  }
+
+  private void testIssuesAreFilteredByVerbosity(@Nullable ConsistencyProblemInfo.Status verbosity)
+      throws Exception {
+    CodeOwnerConfig.Key keyOfNonParseableCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    String pathOfNonParseableCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfNonParseableCodeOwnerConfig).getFilePath();
+
+    CodeOwnerConfig.Key keyOfInvalidCodeOwnerConfig = createCodeOwnerConfigKey("/foo/");
+    String pathOfInvalidCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfInvalidCodeOwnerConfig).getFilePath();
+    String unknownEmail = "unknown@example.com";
+
+    // create a change with a) a non-parseable code owner config that will be reported as fatal and
+    // b) an invalid code owner config with an unknown email that will be reported as error
+    // (there is currently nothing that triggers a warning)
+    disableCodeOwnersForProject(project);
+    String changeId =
+        createChange(
+                "Add code owners",
+                ImmutableMap.of(
+                    JgitPath.of(pathOfNonParseableCodeOwnerConfig).get(),
+                    "INVALID",
+                    JgitPath.of(pathOfInvalidCodeOwnerConfig).get(),
+                    format(
+                        CodeOwnerConfig.builder(keyOfInvalidCodeOwnerConfig, TEST_REVISION)
+                            .addCodeOwnerSet(
+                                CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                            .build())))
+            .getChangeId();
+    enableCodeOwnersForProject(project);
+
+    Map<String, List<ConsistencyProblemInfo>> expectedIssues = new HashMap<>();
+    // the fatal issue is always expected
+    expectedIssues.put(
+        pathOfNonParseableCodeOwnerConfig,
+        ImmutableList.of(
+            fatal(
+                String.format(
+                    "invalid code owner config file '%s':\n  %s",
+                    pathOfNonParseableCodeOwnerConfig,
+                    getParsingErrorMessage(
+                        ImmutableMap.of(
+                            FindOwnersBackend.class,
+                            "invalid line: INVALID",
+                            ProtoBackend.class,
+                            "1:8: Expected \"{\"."))))));
+    if (verbosity == null
+        || ConsistencyProblemInfo.Status.ERROR.equals(verbosity)
+        || ConsistencyProblemInfo.Status.WARNING.equals(verbosity)) {
+      expectedIssues.put(
+          pathOfInvalidCodeOwnerConfig,
+          ImmutableList.of(
+              error(
+                  String.format(
+                      "code owner email '%s' in '%s' cannot be" + " resolved for admin",
+                      unknownEmail, pathOfInvalidCodeOwnerConfig))));
+    } else {
+      expectedIssues.put(pathOfInvalidCodeOwnerConfig, ImmutableList.of());
+    }
+
+    Map<String, List<ConsistencyProblemInfo>> result =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .checkCodeOwnerConfigFiles()
+            .setVerbosity(verbosity)
+            .check();
+    assertThat(result).isEqualTo(expectedIssues);
   }
 
   private ConsistencyProblemInfo fatal(String message) {

@@ -86,6 +86,7 @@ public class ProjectCodeOwnersImpl implements ProjectCodeOwners {
           input.validateDisabledBranches = isValidateDisabledBranches();
           input.branches = getBranches();
           input.path = getPath();
+          input.verbosity = getVerbosity();
           return checkCodeOwnerConfigFiles.apply(projectResource, input).value();
         } catch (Exception e) {
           throw asRestApiException("Cannot check code owner config files", e);
