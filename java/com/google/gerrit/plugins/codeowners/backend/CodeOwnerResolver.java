@@ -377,6 +377,10 @@ public class CodeOwnerResolver {
       return true;
     }
 
+    if (email.equals(ALL_USERS_WILDCARD)) {
+      return true;
+    }
+
     int emailAtIndex = email.lastIndexOf('@');
     if (emailAtIndex >= 0 && emailAtIndex < email.length() - 1) {
       String emailDomain = email.substring(emailAtIndex + 1);
