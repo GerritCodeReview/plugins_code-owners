@@ -154,7 +154,7 @@ public class CheckCodeOwnerConfigFiles
           problemsByPath.put(
               codeOwnerConfigFilePath.toString(),
               new ConsistencyProblemInfo(
-                  ConsistencyProblemInfo.Status.ERROR, configInvalidException.getMessage()));
+                  ConsistencyProblemInfo.Status.FATAL, configInvalidException.getMessage()));
         },
         pathGlob);
 
@@ -175,6 +175,10 @@ public class CheckCodeOwnerConfigFiles
   public static Optional<ConsistencyProblemInfo> createConsistencyProblemInfo(
       CommitValidationMessage commitValidationMessage) {
     switch (commitValidationMessage.getType()) {
+      case FATAL:
+        return Optional.of(
+            new ConsistencyProblemInfo(
+                ConsistencyProblemInfo.Status.FATAL, commitValidationMessage.getMessage()));
       case ERROR:
         return Optional.of(
             new ConsistencyProblemInfo(
