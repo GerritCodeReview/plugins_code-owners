@@ -44,7 +44,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
@@ -588,7 +587,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
             .getChangeId();
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
   }
 
   private String getParsingErrorMessage(

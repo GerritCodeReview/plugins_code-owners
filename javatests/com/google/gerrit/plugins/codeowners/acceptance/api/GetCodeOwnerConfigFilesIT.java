@@ -25,7 +25,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -325,6 +324,6 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
             .getChangeId();
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
   }
 }

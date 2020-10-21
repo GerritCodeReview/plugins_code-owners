@@ -33,7 +33,6 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwn
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +121,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
     String changeId =
         createChange("Add code owners", JgitPath.of(codeOwnerConfigPath).get(), "INVALID")
             .getChangeId();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     assertThat(checkCodeOwnerConfigFilesIn(changeId))
         .containsExactly(
@@ -170,7 +169,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                                 unknownEmail1, admin.email(), unknownEmail2))
                         .build()))
             .getChangeId();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     Map<String, List<ConsistencyProblemInfo>> problemsByPath =
         checkCodeOwnerConfigFilesIn(changeId);
@@ -211,7 +210,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                             CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
                         .build()))
             .getChangeId();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // The validation request is done by 'admin' which can see 'admin' and 'user', however the
     // validation is performed from the perspective of the uploader which is 'user2' and 'user2'
@@ -253,7 +252,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
             .getChangeId();
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     // Create a change that adds another code owner config file without issues.
     CodeOwnerConfig.Key codeOwnerConfigKey2 = createCodeOwnerConfigKey("/foo/");
@@ -279,7 +278,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath();
     disableCodeOwnersForProject(project);
     String changeId = createChangeWithFileDeletion(codeOwnerConfigPath);
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
     assertThat(checkCodeOwnerConfigFilesIn(changeId)).isEmpty();
   }
 
@@ -314,7 +313,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                                     unknownEmail2, admin.email()))
                             .build())))
             .getChangeId();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     Map<String, List<ConsistencyProblemInfo>> problemsByPath =
         changeCodeOwnersApiFactory
@@ -375,7 +374,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                                     unknownEmail3, admin.email()))
                             .build())))
             .getChangeId();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     Map<String, List<ConsistencyProblemInfo>> problemsByPath =
         changeCodeOwnersApiFactory

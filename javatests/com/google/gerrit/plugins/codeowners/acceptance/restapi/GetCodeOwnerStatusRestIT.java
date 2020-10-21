@@ -24,7 +24,6 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -74,7 +73,7 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
         createChange("Add code owners", JgitPath.of(filePath).get(), "INVALID").getChangeId();
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, "false");
+    enableCodeOwnersForProject(project);
 
     String changeId2 = createChange().getChangeId();
     RestResponse r =
