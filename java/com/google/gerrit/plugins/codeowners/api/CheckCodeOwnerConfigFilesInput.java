@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import java.util.List;
 
 /**
@@ -46,4 +47,19 @@ public class CheckCodeOwnerConfigFilesInput {
    * <p>By default unset, which means that all code owner config files should be validated.
    */
   public String path;
+
+  /**
+   * Level that controls which code owner config file issues are returned.
+   *
+   * <p>The following values are supported:
+   *
+   * <ul>
+   *   <li>{@code FATAL}: only fatal issues are returned
+   *   <li>{@code ERROR}: only fatal and error issues are returned
+   *   <li>{@code WARNING}: all issues (warning, error and fatal) are returned
+   * </ul>
+   *
+   * <p>If unset, {@code WARNING} is used.
+   */
+  public ConsistencyProblemInfo.Status verbosity;
 }
