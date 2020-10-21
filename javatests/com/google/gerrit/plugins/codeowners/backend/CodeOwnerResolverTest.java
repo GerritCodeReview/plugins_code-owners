@@ -334,6 +334,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo")).isFalse();
     assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.com@example.org"))
         .isFalse();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed(CodeOwnerResolver.ALL_USERS_WILDCARD))
+        .isTrue();
   }
 
   @Test
@@ -345,6 +347,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.org")).isTrue();
     assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo")).isTrue();
     assertThat(codeOwnerResolver.get().isEmailDomainAllowed("foo@example.com@example.org"))
+        .isTrue();
+    assertThat(codeOwnerResolver.get().isEmailDomainAllowed(CodeOwnerResolver.ALL_USERS_WILDCARD))
         .isTrue();
   }
 
