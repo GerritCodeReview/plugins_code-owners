@@ -22,6 +22,30 @@
       },
       "revId": "ab3282925cd384880ab1e338ecd50ed62956ee78",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "307e5e29_9e10e28d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 641,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-22T13:51:43Z",
+      "side": 1,
+      "message": "Right, this is also unrelated. Moved it into a separate change:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/285545",
+      "parentUuid": "a7c8cc0d_58ee91d6",
+      "range": {
+        "startLine": 641,
+        "startChar": 14,
+        "endLine": 641,
+        "endChar": 86
+      },
+      "revId": "ab3282925cd384880ab1e338ecd50ed62956ee78",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
