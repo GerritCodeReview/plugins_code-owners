@@ -608,6 +608,24 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.com")
+  public void canUploadConfigThatAssignsCodeOwnershipToAnEmailWithAnAllowedEmailDomain()
+      throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    assertThat(admin.email()).endsWith("@example.com");
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    assertOkWithHints(r, "code owner config files validated, no issues found");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.com")
   public void cannotUploadConfigThatAssignsCodeOwnershipToAnEmailWithANonAllowedEmailDomain()
       throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
