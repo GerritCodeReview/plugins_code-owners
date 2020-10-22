@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d45de18d_8e05c861",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-22T13:21:36Z",
+      "side": 1,
+      "message": "Maybe have a separate class/method that gets all the code owner config paths? (doesn\u0027t this already exist? Maybe reuse it here)",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 0
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "148a4a36_994ba927",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-22T13:21:36Z",
+      "side": 1,
+      "message": "Can you export to a method or add a comment here?",
+      "range": {
+        "startLine": 140,
+        "startChar": 10,
+        "endLine": 141,
+        "endChar": 21
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "822a2d2e_f68d380a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-22T13:21:36Z",
+      "side": 1,
+      "message": "export to method?",
+      "range": {
+        "startLine": 160,
+        "startChar": 6,
+        "endLine": 166,
+        "endChar": 35
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "71f135f2_b856b791",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-22T13:21:36Z",
+      "side": 1,
+      "message": "export to method?",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 0
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f446d1cd_07002480",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScannerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-22T13:21:36Z",
+      "side": 1,
+      "message": "is there a better name for this test?",
+      "range": {
+        "startLine": 160,
+        "startChar": 14,
+        "endLine": 160,
+        "endChar": 22
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
