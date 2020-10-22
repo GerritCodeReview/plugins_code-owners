@@ -175,6 +175,10 @@ public class CheckCodeOwnerConfigFiles
   public static Optional<ConsistencyProblemInfo> createConsistencyProblemInfo(
       CommitValidationMessage commitValidationMessage) {
     switch (commitValidationMessage.getType()) {
+      case FATAL:
+        return Optional.of(
+            new ConsistencyProblemInfo(
+                ConsistencyProblemInfo.Status.FATAL, commitValidationMessage.getMessage()));
       case ERROR:
         return Optional.of(
             new ConsistencyProblemInfo(
