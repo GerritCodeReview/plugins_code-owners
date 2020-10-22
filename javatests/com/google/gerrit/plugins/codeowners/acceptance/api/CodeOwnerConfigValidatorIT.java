@@ -43,6 +43,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportType;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
@@ -94,6 +95,35 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             format(
                 CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                     .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    assertOkWithHints(r, "code owner config files validated, no issues found");
+  }
+
+  @Test
+  public void canUploadConfigWhichAssignsCodeOwnershipToAllUsers() throws Exception {
+    testCanUploadConfigWhichAssignsCodeOwnershipToAllUsers();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.com")
+  public void canUploadConfigWhichAssignsCodeOwnershipToAllUsers_restrictedAllowedEmailDomain()
+      throws Exception {
+    testCanUploadConfigWhichAssignsCodeOwnershipToAllUsers();
+  }
+
+  private void testCanUploadConfigWhichAssignsCodeOwnershipToAllUsers() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config without issues that assigns code ownership to all users.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(
+                            CodeOwnerResolver.ALL_USERS_WILDCARD))
                     .build()));
     assertOkWithHints(r, "code owner config files validated, no issues found");
   }
@@ -604,6 +634,24 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             unknownEmail2,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.com")
+  public void canUploadConfigThatAssignsCodeOwnershipToAnEmailWithAnAllowedEmailDomain()
+      throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    assertThat(admin.email()).endsWith("@example.com");
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    assertOkWithHints(r, "code owner config files validated, no issues found");
   }
 
   @Test

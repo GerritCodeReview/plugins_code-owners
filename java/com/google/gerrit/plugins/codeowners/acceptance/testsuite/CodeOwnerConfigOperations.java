@@ -110,6 +110,16 @@ public interface CodeOwnerConfigOperations {
     String getFilePath();
 
     /**
+     * Retrieves the raw file content of the code owner config.
+     *
+     * <p><strong>Note:</strong> This call will fail with an {@link IllegalStateException} if the
+     * requested code owner config doesn't exist.
+     *
+     * @return the raw file content of the code owner config
+     */
+    String getContent() throws Exception;
+
+    /**
      * Starts the fluent chain to update a code owner config. The returned builder can be used to
      * specify how the attributes of the code owner config should be modified. To update the code
      * owner config for real, {@link TestCodeOwnerConfigUpdate.Builder#update()} must be called.
