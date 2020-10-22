@@ -191,8 +191,7 @@ public class CodeOwnerApprovalCheck {
           codeOwnerResolver
               .get()
               .enforceVisibility(false)
-              .resolve(
-                  codeOwnersPluginConfiguration.getGlobalCodeOwners(changeNotes.getProjectName()));
+              .resolveGlobalCodeOwners(changeNotes.getProjectName());
       logger.atFine().log("global code owners = %s", globalCodeOwners);
 
       // If the branch doesn't contain any code owner config file yet, we apply special logic
