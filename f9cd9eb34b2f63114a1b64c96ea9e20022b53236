@@ -22,6 +22,30 @@
       },
       "revId": "f9cd9eb34b2f63114a1b64c96ea9e20022b53236",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cca55986_c533ce0c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-22T11:18:57Z",
+      "side": 1,
+      "message": "You are right, adding this line is unrelated to this change, and shouldn\u0027t have been included in this change. I\u0027ve extracted this into a separate change now:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/285540",
+      "parentUuid": "2ed74d9b_c040cc9b",
+      "range": {
+        "startLine": 373,
+        "startChar": 4,
+        "endLine": 373,
+        "endChar": 35
+      },
+      "revId": "f9cd9eb34b2f63114a1b64c96ea9e20022b53236",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
