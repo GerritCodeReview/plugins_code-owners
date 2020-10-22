@@ -370,6 +370,8 @@ public class CodeOwnerResolver {
    *     {@code false}
    */
   public boolean isEmailDomainAllowed(String email) {
+    requireNonNull(email, "email");
+
     ImmutableSet<String> allowedEmailDomains =
         codeOwnersPluginConfiguration.getAllowedEmailDomains();
     if (allowedEmailDomains.isEmpty()) {

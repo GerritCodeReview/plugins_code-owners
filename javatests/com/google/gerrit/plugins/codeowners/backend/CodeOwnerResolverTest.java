@@ -322,6 +322,14 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void isEmailDomainAllowedRequiresEmailToBeNonNull() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> codeOwnerResolver.get().isEmailDomainAllowed(null));
+    assertThat(npe).hasMessageThat().isEqualTo("email");
+  }
+
+  @Test
   @GerritConfig(
       name = "plugin.code-owners.allowedEmailDomain",
       values = {"example.com", "example.net"})
