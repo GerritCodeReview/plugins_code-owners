@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c5e95e20_af04f21b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/RenameEmail.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-23T17:06:16Z",
+      "side": 1,
+      "message": "What if there is a user with an email \"something_oldEmail\"?\nAren\u0027t you also renaming something_oldEmail to something_newEmail although that\u0027s unrelated?\n\nEither way, I think a test is warranted here.",
+      "range": {
+        "startLine": 163,
+        "startChar": 50,
+        "endLine": 163,
+        "endChar": 60
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3fded38a_9624593a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/RenameEmailIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-23T17:06:16Z",
+      "side": 1,
+      "message": "same test for project owners?",
+      "range": {
+        "startLine": 138,
+        "startChar": 14,
+        "endLine": 138,
+        "endChar": 54
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d58a8741_241be920",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/RenameEmailIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-23T17:06:16Z",
+      "side": 1,
+      "message": "You\u0027re testing a bit implicitly that the user can do this for the admin, put it in a separate test?",
+      "range": {
+        "startLine": 229,
+        "startChar": 0,
+        "endLine": 229,
+        "endChar": 49
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "278b11be_8abc3522",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-10-23T17:06:16Z",
+      "side": 1,
+      "message": "what\u0027s the default?",
+      "range": {
+        "startLine": 630,
+        "startChar": 16,
+        "endLine": 630,
+        "endChar": 24
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
