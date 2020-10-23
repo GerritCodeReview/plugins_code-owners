@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b7333c17_119b44f8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 126,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-23T14:09:39Z",
+      "side": 1,
+      "message": "I gave this a try, but it adds quite some complexity and makes the code harder to read. Instead I\u0027ve now moved this code into CodeOwnerConfigTreeWalk, which is a custom TreeWalk implementation.",
+      "parentUuid": "d45de18d_8e05c861",
+      "range": {
+        "startLine": 123,
+        "startChar": 0,
+        "endLine": 126,
+        "endChar": 0
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "148a4a36_994ba927",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-10-22T13:21:36Z",
       "side": 1,
       "message": "Can you export to a method or add a comment here?",
+      "range": {
+        "startLine": 140,
+        "startChar": 10,
+        "endLine": 141,
+        "endChar": 21
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd89c5fc_365aacfe",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-23T14:09:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "148a4a36_994ba927",
       "range": {
         "startLine": 140,
         "startChar": 10,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c1bc5f91_d452409b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 166,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-23T14:09:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "822a2d2e_f68d380a",
+      "range": {
+        "startLine": 160,
+        "startChar": 6,
+        "endLine": 166,
+        "endChar": 35
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "71f135f2_b856b791",
@@ -93,6 +165,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d58b864c_6a34cf16",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScanner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-23T14:09:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "71f135f2_b856b791",
+      "range": {
+        "startLine": 170,
+        "startChar": 0,
+        "endLine": 174,
+        "endChar": 0
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f446d1cd_07002480",
@@ -106,6 +202,30 @@
       "writtenOn": "2020-10-22T13:21:36Z",
       "side": 1,
       "message": "is there a better name for this test?",
+      "range": {
+        "startLine": 160,
+        "startChar": 14,
+        "endLine": 160,
+        "endChar": 22
+      },
+      "revId": "7a94683b2b6456cb38ae536b5a564683103f7623",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c11abaca_f66576c0",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigFileUpdateScannerTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-10-23T14:09:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f446d1cd_07002480",
       "range": {
         "startLine": 160,
         "startChar": 14,
