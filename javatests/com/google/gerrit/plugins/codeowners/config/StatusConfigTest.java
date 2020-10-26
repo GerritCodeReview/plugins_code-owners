@@ -192,6 +192,34 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void isDisabledForBranch_regularExpressionWithNegativeLookahead() throws Exception {
+    Config cfg = new Config();
+    cfg.setStringList(
+        SECTION_CODE_OWNERS,
+        null,
+        KEY_DISABLED_BRANCH,
+        // match all branches except refs/heads/master
+        ImmutableList.of("^refs/(?!heads/master$).*"));
+    assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
+        .isFalse();
+    assertThat(
+            statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master-foo-bar")))
+        .isTrue();
+    assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "foo")))
+        .isTrue();
+    assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "other")))
+        .isTrue();
+    assertThat(
+            statusConfig.isDisabledForBranch(
+                cfg, BranchNameKey.create(project, RefNames.REFS_CONFIG)))
+        .isTrue();
+    assertThat(
+            statusConfig.isDisabledForBranch(
+                cfg, BranchNameKey.create(project, "refs/meta/master")))
+        .isTrue();
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/heads/master")
   public void isDisabledForBranchIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
       throws Exception {

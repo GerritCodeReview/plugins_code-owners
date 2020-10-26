@@ -24,6 +24,10 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="pluginCodeOwnersDisabledBranch">plugin.@PLUGIN@.disabledBranch</a>
 :       An exact ref, a ref pattern or a regular expression to disable the code
         owners functionality for the matched branches.\
+        By using a negative lookahead, it's possible to match all but one
+        branches. E.g. to disable the code owners functionality for all branches
+        except the `refs/heads/master` branch the following regular expression
+        can be used: `^refs/(?!heads/master$).*`
         For matched branches submitting changes doesn't require code owner
         approvals.\
         This allows branches to opt-out of the code owners functionality.\
@@ -219,6 +223,10 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="codeOwnersDisabledBranch">codeOwners.disabledBranch</a>
 :       An exact ref, a ref pattern or a regular expression to disable the code
         owners functionality for the matched branches.\
+        By using a negative lookahead, it's possible to match all but one
+        branches. E.g. to disable the code owners functionality for all branches
+        except the `refs/heads/master` branch the following regular expression
+        can be used: `^refs/(?!heads/master$).*`
         For matched branches submitting changes doesn't require code owner
         approvals.\
         This allows branches to opt-out of the code owners functionality.\
