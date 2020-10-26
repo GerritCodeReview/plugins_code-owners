@@ -161,7 +161,8 @@ public class CodeOwnerConfigScanner {
           continue;
         }
 
-        checkState(codeOwnerConfig.isPresent(), "code owner config %s not found", codeOwnerConfig);
+        checkState(
+            codeOwnerConfig.isPresent(), "code owner config %s not found", codeOwnerConfigKey);
         boolean visitFurtherCodeOwnerConfigFiles =
             codeOwnerConfigVisitor.visit(codeOwnerConfig.get());
         if (!visitFurtherCodeOwnerConfigFiles) {
