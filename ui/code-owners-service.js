@@ -84,15 +84,13 @@ class CodeOwnerApi {
    * Returns a promise fetching the owners for a given path.
    *
    * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
-   * @param {string} project
-   * @param {string} branch
+   * @param {string} changeId
    * @param {string} path
    */
-  listOwnersForPath(project, branch, path) {
+  listOwnersForPath(changeId, path) {
     return this.restApi.get(
-        `/projects/${encodeURIComponent(project)}/` +
-        `branches/${encodeURIComponent(branch)}/` +
-        `code_owners/${encodeURIComponent(path)}?limit=5&o=DETAILS`
+        `/changes/${changeId}/revisions/current/code_owners` +
+        `/${encodeURIComponent(path)}?limit=5&o=DETAILS`
     );
   }
 
@@ -441,8 +439,7 @@ export class CodeOwnerService {
         batchRequests.push(
             this.codeOwnerApi
                 .listOwnersForPath(
-                    this.change.project,
-                    this.change.branch,
+                    this.change.id,
                     filePath
                 )
                 .then(owners => {
