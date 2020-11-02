@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "faafd122_de5437fc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-02T16:39:57Z",
+      "side": 1,
+      "message": "The CI can only succeed if it runs against the Gerrit core change. Hence removing the -1 from Zuul.",
+      "revId": "d0de104be7754493431a8db0e6e0fdb9c491d275",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
