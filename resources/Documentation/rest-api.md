@@ -16,6 +16,11 @@ Gets the code owner project configuration.
 As a response a [CodeOwnerProjectConfigInfo](#code-owner-project-config-info)
 entity is returned that describes the code owner project configuration.
 
+The response includes the configuration of all branches. If a caller is
+interested in a particular branch only, the [Get Code Owner Branch
+Config](#get-code-owner-branch-config) REST endpoint should be used instead, as
+that REST endpoint is much faster if the project contains many branches.
+
 #### Request
 
 ```
@@ -124,6 +129,43 @@ Code owner config files that have no issues are omitted from the response.
 ```
 
 ## <a id="branch-endpoints">Branch Endpoints
+
+### <a id="get-code-owner-branch-config">Get Code Owner Branch Config
+_'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.branch_config'_
+
+Gets the code owner branch configuration.
+
+As a response a [CodeOwnerBranchConfigInfo](#code-owner-branch-config-info)
+entity is returned that describes the code owner branch configuration.
+
+#### Request
+
+```
+  GET /projects/foo%2Fbar/branches/master/code_owners.branch_config HTTP/1.0
+```
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "general": {
+      "merge_commit_strategy": "ALL_CHANGED_FILES"
+    },
+    "backend_id": "find-owners",
+    "required_approval": {
+      "label": "Code-Review",
+      "value": 1
+    },
+    "override_approval": {
+      "label": "Owners-Override",
+      "value": 1
+    }
+  }
 
 ### <a id="list-code-owner-config-files">List Code Owner Config Files
 _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.config_files/'_
@@ -475,6 +517,20 @@ The `CodeOwnerInfo` entity contains information about a code owner.
 | Field Name  |          | Description |
 | ----------- | -------- | ----------- |
 | `account`   | optional | The account of the code owner as an [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entity. At the moment the `account` field is always set, but it's marked as optional as in the future we may also return groups as code owner and then the `account` field would be unset.
+
+---
+
+### <a id="code-owner-branch-config-info"> CodeOwnerBranchConfigInfo
+The `CodeOwnerBranchConfigInfo` entity describes the code owner branch
+configuration.
+
+| Field Name  |          | Description |
+| ----------- | -------- | ----------- |
+| `general`   | optional | The general code owners configuration as [GeneralInfo](#general-info) entity. Not set if `disabled` is `true`.
+| `disabled`  | optional | Whether the code owners functionality is disabled for the branch. If `true` the code owners API is disabled and submitting changes doesn't require code owner approvals. Not set if `false`.
+| `backend_id`| optional | ID of the code owner backend that is configured for the branch. Not set if `disabled` is `true`.
+| `required_approval` | optional | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval. Not set if `disabled` is `true`.
+| `override_approval` | optional | The approval that is required to override the code owners submit check as [RequiredApprovalInfo](#required-approval-info) entity. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
 
 ---
 
