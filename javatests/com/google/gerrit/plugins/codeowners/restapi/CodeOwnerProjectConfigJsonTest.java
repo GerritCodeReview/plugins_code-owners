@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerBranchConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
@@ -31,6 +32,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
@@ -62,15 +64,19 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Inject private CurrentUser currentUser;
 
+  private CodeOwnerConfigOperations codeOwnerConfigOperations;
   private CodeOwnerProjectConfigJson codeOwnerProjectConfigJson;
   private FindOwnersBackend findOwnersBackend;
   private ProtoBackend protoBackend;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
+    codeOwnerConfigOperations =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
     codeOwnerProjectConfigJson =
         new CodeOwnerProjectConfigJson(
             codeOwnersPluginConfiguration,
+            plugin.getSysInjector().getInstance(CodeOwnerConfigScanner.class),
             plugin.getSysInjector().getInstance(new Key<Provider<ListBranches>>() {}));
     findOwnersBackend = plugin.getSysInjector().getInstance(FindOwnersBackend.class);
     protoBackend = plugin.getSysInjector().getInstance(ProtoBackend.class);
@@ -224,6 +230,14 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   public void formatCodeOwnerBranchConfig() throws Exception {
     createOwnersOverrideLabel();
 
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
     when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(false);
     when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
         .thenReturn(findOwnersBackend);
@@ -256,6 +270,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerBranchConfigInfo.requiredApproval.value).isEqualTo(2);
     assertThat(codeOwnerBranchConfigInfo.overrideApproval.label).isEqualTo("Owners-Override");
     assertThat(codeOwnerBranchConfigInfo.overrideApproval.value).isEqualTo(1);
+    assertThat(codeOwnerBranchConfigInfo.noCodeOwnersDefined).isNull();
   }
 
   @Test
@@ -269,6 +284,33 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerBranchConfigInfo.backendId).isNull();
     assertThat(codeOwnerBranchConfigInfo.requiredApproval).isNull();
     assertThat(codeOwnerBranchConfigInfo.overrideApproval).isNull();
+    assertThat(codeOwnerBranchConfigInfo.noCodeOwnersDefined).isNull();
+  }
+
+  @Test
+  public void formatCodeOwnerBranchConfig_bootstrappingMode() throws Exception {
+    createOwnersOverrideLabel();
+
+    when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(false);
+    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+        .thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfiguration.getFileExtension(project)).thenReturn(Optional.of("foo"));
+    when(codeOwnersPluginConfiguration.getOverrideInfoUrl(project))
+        .thenReturn(Optional.of("http://foo.example.com"));
+    when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
+    when(codeOwnersPluginConfiguration.getRequiredApproval(project))
+        .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
+    when(codeOwnersPluginConfiguration.getOverrideApproval(project))
+        .thenReturn(
+            Optional.of(
+                RequiredApproval.create(
+                    LabelType.withDefaultValues("Owners-Override"), (short) 1)));
+
+    CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
+        codeOwnerProjectConfigJson.format(createBranchResource("refs/heads/master"));
+    assertThat(codeOwnerBranchConfigInfo.noCodeOwnersDefined).isTrue();
   }
 
   private ProjectResource createProjectResource() {
