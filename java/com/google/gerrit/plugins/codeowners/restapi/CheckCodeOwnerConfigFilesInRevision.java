@@ -122,7 +122,10 @@ public class CheckCodeOwnerConfigFilesInRevision
                                   changedFile,
                                   rw,
                                   commit)
-                              .map(CheckCodeOwnerConfigFiles::createConsistencyProblemInfo)
+                              .map(
+                                  commitValidationMessage ->
+                                      CheckCodeOwnerConfigFiles.createConsistencyProblemInfo(
+                                          commitValidationMessage, input.verbosity))
                               .filter(Optional::isPresent)
                               .map(Optional::get)
                               .collect(toImmutableList()))));

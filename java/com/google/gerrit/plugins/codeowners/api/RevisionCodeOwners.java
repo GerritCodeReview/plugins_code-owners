@@ -37,6 +37,7 @@ public interface RevisionCodeOwners {
   /** Request to check code owner config files. */
   abstract class CheckCodeOwnerConfigFilesRequest {
     private String path;
+    private ConsistencyProblemInfo.Status verbosity;
 
     /**
      * Sets a glob that limits the validation to code owner config files that have a path that
@@ -54,6 +55,30 @@ public interface RevisionCodeOwners {
     @Nullable
     public String getPath() {
       return path;
+    }
+
+    /**
+     * Sets the verbosity level that controls which kind of issues should be returned.
+     *
+     * <p>The following values are supported:
+     *
+     * <ul>
+     *   <li>{@code FATAL}: only fatal issues are returned
+     *   <li>{@code ERROR}: only fatal and error issues are returned
+     *   <li>{@code WARNING}: all issues (warning, error and fatal) are returned
+     * </ul>
+     *
+     * <p>If unset, {@code WARNING} is used.
+     */
+    public CheckCodeOwnerConfigFilesRequest setVerbosity(
+        @Nullable ConsistencyProblemInfo.Status verbosity) {
+      this.verbosity = verbosity;
+      return this;
+    }
+
+    /** Gets the verbosity level that controls which kind of issues should be returned. */
+    public ConsistencyProblemInfo.Status getVerbosity() {
+      return verbosity;
     }
 
     /**

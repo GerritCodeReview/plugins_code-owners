@@ -24,6 +24,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
@@ -126,7 +127,8 @@ public class CheckCodeOwnerConfigFiles
         .forEach(
             branchNameKey ->
                 resultsByBranchBuilder.put(
-                    branchNameKey.branch(), checkBranch(input.path, branchNameKey)));
+                    branchNameKey.branch(),
+                    checkBranch(input.path, branchNameKey, input.verbosity)));
     return Response.ok(resultsByBranchBuilder.build());
   }
 
@@ -139,7 +141,9 @@ public class CheckCodeOwnerConfigFiles
   }
 
   private Map<String, List<ConsistencyProblemInfo>> checkBranch(
-      String pathGlob, BranchNameKey branchNameKey) {
+      String pathGlob,
+      BranchNameKey branchNameKey,
+      @Nullable ConsistencyProblemInfo.Status verbosity) {
     ListMultimap<String, ConsistencyProblemInfo> problemsByPath = LinkedListMultimap.create();
     CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
     codeOwnerConfigScanner.visit(
@@ -147,7 +151,7 @@ public class CheckCodeOwnerConfigFiles
         codeOwnerConfig -> {
           problemsByPath.putAll(
               codeOwnerBackend.getFilePath(codeOwnerConfig.key()).toString(),
-              checkCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig));
+              checkCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig, verbosity));
           return true;
         },
         (codeOwnerConfigFilePath, configInvalidException) -> {
@@ -162,28 +166,42 @@ public class CheckCodeOwnerConfigFiles
   }
 
   private ImmutableList<ConsistencyProblemInfo> checkCodeOwnerConfig(
-      CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
+      CodeOwnerBackend codeOwnerBackend,
+      CodeOwnerConfig codeOwnerConfig,
+      @Nullable ConsistencyProblemInfo.Status verbosity) {
     return codeOwnerConfigValidator
         .validateCodeOwnerConfig(
             currentUser.get().asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
-        .map(CheckCodeOwnerConfigFiles::createConsistencyProblemInfo)
+        .map(
+            commitValidationMessage ->
+                createConsistencyProblemInfo(commitValidationMessage, verbosity))
         .filter(Optional::isPresent)
         .map(Optional::get)
         .collect(toImmutableList());
   }
 
   public static Optional<ConsistencyProblemInfo> createConsistencyProblemInfo(
-      CommitValidationMessage commitValidationMessage) {
+      CommitValidationMessage commitValidationMessage,
+      @Nullable ConsistencyProblemInfo.Status verbosity) {
     switch (commitValidationMessage.getType()) {
       case FATAL:
         return Optional.of(
             new ConsistencyProblemInfo(
                 ConsistencyProblemInfo.Status.FATAL, commitValidationMessage.getMessage()));
       case ERROR:
+        if (ConsistencyProblemInfo.Status.FATAL.equals(verbosity)) {
+          // errors should not be reported
+          return Optional.empty();
+        }
         return Optional.of(
             new ConsistencyProblemInfo(
                 ConsistencyProblemInfo.Status.ERROR, commitValidationMessage.getMessage()));
       case WARNING:
+        if (ConsistencyProblemInfo.Status.FATAL.equals(verbosity)
+            || ConsistencyProblemInfo.Status.ERROR.equals(verbosity)) {
+          // warnings should not be reported
+          return Optional.empty();
+        }
         return Optional.of(
             new ConsistencyProblemInfo(
                 ConsistencyProblemInfo.Status.WARNING, commitValidationMessage.getMessage()));
