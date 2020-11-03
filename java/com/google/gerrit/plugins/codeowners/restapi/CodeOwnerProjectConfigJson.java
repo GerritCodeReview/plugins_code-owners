@@ -26,6 +26,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerBranchConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.GeneralInfo;
@@ -34,6 +35,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.project.ProjectResource;
 import com.google.gerrit.server.restapi.project.ListBranches;
 import com.google.inject.Inject;
@@ -70,6 +72,26 @@ public class CodeOwnerProjectConfigJson {
     info.backend = formatBackendInfo(projectResource);
     info.requiredApproval = formatRequiredApprovalInfo(projectResource.getNameKey());
     info.overrideApproval = formatOverrideApprovalInfo(projectResource.getNameKey());
+
+    return info;
+  }
+
+  CodeOwnerBranchConfigInfo format(BranchResource branchResource) {
+    CodeOwnerBranchConfigInfo info = new CodeOwnerBranchConfigInfo();
+
+    boolean disabled = codeOwnersPluginConfiguration.isDisabled(branchResource.getBranchKey());
+    info.disabled = disabled ? disabled : null;
+
+    if (disabled) {
+      return info;
+    }
+
+    info.general = formatGeneralInfo(branchResource.getNameKey());
+    info.backendId =
+        CodeOwnerBackendId.getBackendId(
+            codeOwnersPluginConfiguration.getBackend(branchResource.getBranchKey()).getClass());
+    info.requiredApproval = formatRequiredApprovalInfo(branchResource.getNameKey());
+    info.overrideApproval = formatOverrideApprovalInfo(branchResource.getNameKey());
 
     return info;
   }

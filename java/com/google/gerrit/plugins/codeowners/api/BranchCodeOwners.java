@@ -25,6 +25,9 @@ import java.util.List;
  * <p>To create an instance for a branch use {@link ProjectCodeOwners#branch(String)}.
  */
 public interface BranchCodeOwners {
+  /** Returns the code owner project configuration. */
+  CodeOwnerBranchConfigInfo getConfig() throws RestApiException;
+
   /** Create a request to retrieve code owner config files from the branch. */
   CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException;
 
@@ -56,6 +59,11 @@ public interface BranchCodeOwners {
    * interface.
    */
   class NotImplemented implements BranchCodeOwners {
+    @Override
+    public CodeOwnerBranchConfigInfo getConfig() throws RestApiException {
+      throw new NotImplementedException();
+    }
+
     @Override
     public CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException {
       throw new NotImplementedException();
