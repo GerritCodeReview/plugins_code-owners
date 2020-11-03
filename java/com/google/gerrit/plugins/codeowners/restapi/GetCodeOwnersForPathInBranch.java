@@ -61,7 +61,12 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
   private final GitRepositoryManager repoManager;
   private String revision;
 
-  @Option(name = "-revision", usage = "revision from which the code owner configs should be read")
+  @Option(
+      name = "-revision",
+      usage =
+          "revision from which the code owner configs in the branch should be read (imports from"
+              + " other branches or repositories as well as global code owners from refs/meta/config"
+              + " are still read from the current revisions)")
   public void setRevision(String revision) {
     this.revision = revision;
   }
