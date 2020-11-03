@@ -22,6 +22,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.CurrentUser;
@@ -155,6 +156,16 @@ public class CodeOwnerResolver {
       logger.atFine().log("resolving path code owners for path %s", absolutePath);
       return resolve(pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get());
     }
+  }
+
+  /**
+   * Resolves the global code owners for the given project.
+   *
+   * @param projectName the name of the project for which the global code owners should be resolved
+   * @return the resolved global code owners of the given project
+   */
+  public CodeOwnerResolverResult resolveGlobalCodeOwners(Project.NameKey projectName) {
+    return resolve(codeOwnersPluginConfiguration.getGlobalCodeOwners(projectName));
   }
 
   /**
