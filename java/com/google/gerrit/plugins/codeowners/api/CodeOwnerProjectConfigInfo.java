@@ -20,7 +20,11 @@ package com.google.gerrit.plugins.codeowners.api;
  * <p>This class determines the JSON format of code owner project configuration in the REST API.
  */
 public class CodeOwnerProjectConfigInfo {
-  /** The general code owners configuration. */
+  /**
+   * The general code owners configuration.
+   *
+   * <p>Not set if {@code status.disabled} is {@code true}.
+   */
   public GeneralInfo general;
 
   /**
@@ -31,16 +35,26 @@ public class CodeOwnerProjectConfigInfo {
    */
   public CodeOwnersStatusInfo status;
 
-  /** The code owner backend configuration. */
+  /**
+   * The code owner backend configuration.
+   *
+   * <p>Not set if {@code status.disabled} is {@code true}.
+   */
   public BackendInfo backend;
 
   /**
    * The approval that is required from code owners to approve the files in a change.
    *
    * <p>Defines which approval counts as code owner approval.
+   *
+   * <p>Not set if {@code status.disabled} is {@code true}.
    */
   public RequiredApprovalInfo requiredApproval;
 
-  /** The approval that is required to override the code owners submit check. */
+  /**
+   * The approval that is required to override the code owners submit check.
+   *
+   * <p>Not set if {@code status.disabled} is {@code true}.
+   */
   public RequiredApprovalInfo overrideApproval;
 }

@@ -233,19 +233,19 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getConfigWithConfiguredOverrideApproval() throws Exception {
-    configureImplicitApprovals(project);
-    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
-        projectCodeOwnersApiFactory.project(project).getConfig();
-    assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isTrue();
-  }
-
-  @Test
-  public void getConfigWithEnabledImplicitApprovals() throws Exception {
     configureOverrideApproval(project, "Code-Review+2");
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.overrideApproval.label).isEqualTo("Code-Review");
     assertThat(codeOwnerProjectConfigInfo.overrideApproval.value).isEqualTo(2);
+  }
+
+  @Test
+  public void getConfigWithEnabledImplicitApprovals() throws Exception {
+    configureImplicitApprovals(project);
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isTrue();
   }
 
   private void configureFileExtension(Project.NameKey project, String fileExtension)
