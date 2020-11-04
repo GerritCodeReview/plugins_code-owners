@@ -167,12 +167,12 @@ export class OwnerRequirementValue extends Polymer.Element {
         .reduce((prev, cur) => {
           const oldPathStatus = cur.old_path_status;
           const newPathStatus = cur.new_path_status;
-          if (this._isMissing(newPathStatus.status)) {
+          if (newPathStatus && this._isMissing(newPathStatus.status)) {
             prev.missing ++;
-          } else if (this._isPending(newPathStatus.status)) {
+          } else if (newPathStatus && this._isPending(newPathStatus.status)) {
             prev.pending ++;
           } else if (oldPathStatus) {
-            // check oldPath if newPath approved
+            // check oldPath if newPath approved or the file is deleted
             if (this._isMissing(oldPathStatus.status)) {
               prev.missing ++;
             } else if (this._isPending(oldPathStatus.status)) {
