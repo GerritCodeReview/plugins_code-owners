@@ -22,6 +22,30 @@
       },
       "revId": "0f64b310d9ad28f3d5823b01c4bbf640b6f9624e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2c455577_1c40098e",
+        "filename": "resources/Documentation/setup-guide.md",
+        "patchSetId": 3
+      },
+      "lineNbr": 391,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-04T14:59:14Z",
+      "side": 0,
+      "message": "I considered it, but decided against it, since we already have the examples in the REST API documentation to which link from here.",
+      "parentUuid": "eea973bf_3871610d",
+      "range": {
+        "startLine": 391,
+        "startChar": 0,
+        "endLine": 391,
+        "endChar": 7
+      },
+      "revId": "0f64b310d9ad28f3d5823b01c4bbf640b6f9624e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
