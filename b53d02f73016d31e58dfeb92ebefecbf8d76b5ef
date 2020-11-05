@@ -22,6 +22,30 @@
       },
       "revId": "b53d02f73016d31e58dfeb92ebefecbf8d76b5ef",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0d8ac2b8_f8a779da",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-05T07:53:17Z",
+      "side": 1,
+      "message": "Yes, this would be useful, but it\u0027s hard to implement which is why we can\u0027t do this right now.\nThe problem is that the project owner permissions are assigned to groups, so to suggest the project owners you would need to list the members of these groups. Unfortunately listing members of (external) groups is not implemented in Gerrit and it\u0027s not easy to add. Basically for every group backend we would need to implement a method that contacts the external group system to list the members. Then we would need some kind of caching for this information, as we cannot reach out to the external group system each time we want to suggest project owners. So this is out-of-scope for now, but we are aware that it would be nice to have at some point in time.",
+      "parentUuid": "84d427bf_4d95aa8f",
+      "range": {
+        "startLine": 152,
+        "startChar": 35,
+        "endLine": 153,
+        "endChar": 4
+      },
+      "revId": "b53d02f73016d31e58dfeb92ebefecbf8d76b5ef",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
