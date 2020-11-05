@@ -25,6 +25,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.BackendInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerBranchConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
@@ -35,12 +36,16 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.server.CurrentUser;
+import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.project.ProjectResource;
 import com.google.gerrit.server.restapi.project.ListBranches;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
+import java.io.IOException;
 import java.util.Optional;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -215,8 +220,67 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(statusInfo.disabledBranches).containsExactly("refs/heads/master");
   }
 
+  @Test
+  public void formatCodeOwnerBranchConfig() throws Exception {
+    createOwnersOverrideLabel();
+
+    when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(false);
+    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+        .thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfiguration.getFileExtension(project)).thenReturn(Optional.of("foo"));
+    when(codeOwnersPluginConfiguration.getOverrideInfoUrl(project))
+        .thenReturn(Optional.of("http://foo.example.com"));
+    when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
+    when(codeOwnersPluginConfiguration.getRequiredApproval(project))
+        .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
+    when(codeOwnersPluginConfiguration.getOverrideApproval(project))
+        .thenReturn(
+            Optional.of(
+                RequiredApproval.create(
+                    LabelType.withDefaultValues("Owners-Override"), (short) 1)));
+
+    CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
+        codeOwnerProjectConfigJson.format(createBranchResource("refs/heads/master"));
+    assertThat(codeOwnerBranchConfigInfo.disabled).isNull();
+    assertThat(codeOwnerBranchConfigInfo.general.fileExtension).isEqualTo("foo");
+    assertThat(codeOwnerBranchConfigInfo.general.overrideInfoUrl)
+        .isEqualTo("http://foo.example.com");
+    assertThat(codeOwnerBranchConfigInfo.general.mergeCommitStrategy)
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    assertThat(codeOwnerBranchConfigInfo.general.implicitApprovals).isTrue();
+    assertThat(codeOwnerBranchConfigInfo.backendId)
+        .isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
+    assertThat(codeOwnerBranchConfigInfo.requiredApproval.label).isEqualTo("Code-Review");
+    assertThat(codeOwnerBranchConfigInfo.requiredApproval.value).isEqualTo(2);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.label).isEqualTo("Owners-Override");
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.value).isEqualTo(1);
+  }
+
+  @Test
+  public void formatCodeOwnerBranchConfig_disabled() throws Exception {
+    when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(true);
+
+    CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
+        codeOwnerProjectConfigJson.format(createBranchResource("refs/heads/master"));
+    assertThat(codeOwnerBranchConfigInfo.disabled).isTrue();
+    assertThat(codeOwnerBranchConfigInfo.general).isNull();
+    assertThat(codeOwnerBranchConfigInfo.backendId).isNull();
+    assertThat(codeOwnerBranchConfigInfo.requiredApproval).isNull();
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval).isNull();
+  }
+
   private ProjectResource createProjectResource() {
     return new ProjectResource(
         projectCache.get(project).orElseThrow(illegalState(project)), currentUser);
+  }
+
+  private BranchResource createBranchResource(String branch) throws IOException {
+    try (Repository repository = repoManager.openRepository(project)) {
+      Ref ref = repository.exactRef(branch);
+      return new BranchResource(
+          projectCache.get(project).orElseThrow(illegalState(project)), currentUser, ref);
+    }
   }
 }

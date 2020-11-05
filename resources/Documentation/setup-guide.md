@@ -378,43 +378,24 @@ To update the `code-owners.config` file do (requires to be a project owner):
 
 ##### <a id="checkIfEnabled">How to check if the code owners functionality is enabled for a project or branch
 
-To check if the code owners functionality is enabled for a project or branch,
-use the [Get Code Owner Project Config](rest-api.html#get-code-owner-project-config)
-REST endpoint and inspect the [status](rest-api.html#code-owners-status-info) in
-the response.
+To check if the code owners functionality is enabled for a single branch, use
+the [Get Code Owner Branch Config](rest-api.html#get-code-owner-branch-config)
+REST endpoint and inspect the
+[disabled](rest-api.html#code-owner-branch-config-info) field in the response
+(if it is not present, the code owners functionality is enabled).
 
-You can invoke the REST endpoint via `curl` from the command-line or
-alternatively open the following URL in a browser:\
+To check if the code owners functionality is enabled for a project or for
+multiple branches, use the [Get Code Owner Project
+Config](rest-api.html#get-code-owner-project-config) REST endpoint and inspect
+the [status](rest-api.html#code-owners-status-info) in the response (an empty
+status means that the code owners functionality is enabled for all branches of
+the project).
+
+You can invoke the REST endpoints via `curl` from the command-line or
+alternatively open the following URLs in a browser:\
+`https://<host>/projects/<project-name>/branches/<branch-name>/code_owners.branch_config`\
 `https://<host>/projects/<project-name>/code_owners.project_config`\
-(remember to URL-encode the project-name)
-
-Example response (an empty status means that the code owners functionality is
-enabled for all branches of the project):
-
-```
-  )]}'
-  {
-    "general": {
-      "merge_commit_strategy": "ALL_CHANGED_FILES",
-    },
-    "status": {
-      "disabled_branches": [
-        "refs/meta/config"
-      ]
-    },
-    "backend": {
-      "id": "find-owners"
-    },
-    "required_approval": {
-      "label": "Code-Review",
-      "value": 1
-    },
-    "override_approval": {
-      "label": "Owners-Override",
-      "value": 1
-    }
-  }
-```
+(remember to URL-encode the project-name and branch-name)
 
 ---
 

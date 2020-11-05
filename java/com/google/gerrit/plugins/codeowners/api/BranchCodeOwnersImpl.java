@@ -14,7 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
+
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerBranchConfig;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigFiles;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.inject.Inject;
@@ -28,15 +31,27 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
     BranchCodeOwnersImpl create(BranchResource branchResource);
   }
 
+  private final GetCodeOwnerBranchConfig getCodeOwnerBranchConfig;
   private final Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider;
   private final BranchResource branchResource;
 
   @Inject
   public BranchCodeOwnersImpl(
+      GetCodeOwnerBranchConfig getCodeOwnerBranchConfig,
       Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider,
       @Assisted BranchResource branchResource) {
     this.getCodeOwnerConfigFilesProvider = getCodeOwnerConfigFilesProvider;
+    this.getCodeOwnerBranchConfig = getCodeOwnerBranchConfig;
     this.branchResource = branchResource;
+  }
+
+  @Override
+  public CodeOwnerBranchConfigInfo getConfig() throws RestApiException {
+    try {
+      return getCodeOwnerBranchConfig.apply(branchResource).value();
+    } catch (Exception e) {
+      throw asRestApiException("Cannot get code owner branch config", e);
+    }
   }
 
   @Override
