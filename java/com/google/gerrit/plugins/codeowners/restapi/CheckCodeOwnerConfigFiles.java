@@ -109,8 +109,12 @@ public class CheckCodeOwnerConfigFiles
 
     logger.atFine().log(
         "checking code owner config files for project %s"
-            + " (validateDisabledBranches = %s, branches = %s, path = %s)",
-        projectResource.getNameKey(), input.validateDisabledBranches, input.branches, input.path);
+            + " (validateDisabledBranches = %s, branches = %s, path = %s, verbosity = %s)",
+        projectResource.getNameKey(),
+        input.validateDisabledBranches,
+        input.branches,
+        input.path,
+        input.verbosity);
 
     ImmutableSet<BranchNameKey> branches = branches(projectResource);
 
