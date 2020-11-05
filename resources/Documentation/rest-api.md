@@ -287,7 +287,7 @@ The following request parameters can be specified:
 | `o`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) that controls which fields in the returned accounts should be populated. Can be specified multiple times. If not given, only the `_account_id` field for the account ID is populated.
 | `O`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
 | `limit`\|`n` | optional | Limit defining how many code owners should be returned at most. By default 10.
-| `revision` | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
+| `revision` | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners from this branch, but imports from other branches or repositories as well as global code owners from `refs/meta/config` are still read from the current revisions. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
 
 As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
 The returned code owners are sorted by an internal score that expresses how good
@@ -531,6 +531,7 @@ configuration.
 | `backend_id`| optional | ID of the code owner backend that is configured for the branch. Not set if `disabled` is `true`.
 | `required_approval` | optional | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval. Not set if `disabled` is `true`.
 | `override_approval` | optional | The approval that is required to override the code owners submit check as [RequiredApprovalInfo](#required-approval-info) entity. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
+| `no_code_owners_defined` | optional | Whether the branch doesn't contain any code owner config file yet. If a branch doesn't contain any code owner config file yet, the projects owners are considered as code owners. Once a first code owner config file is added to the branch, the project owners are no longer code owners (unless code ownership is granted to them via the code owner config file). Not set if `false` or if `disabled` is `true`.
 
 ---
 

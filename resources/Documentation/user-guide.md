@@ -136,6 +136,22 @@ the score:
   The smaller the distance the better we consider the code owner as
   reviewer/approver for the path.
 
+## <a id="noCodeOwnersDefined">How to submit changes with files that have no code owners?
+
+If the code owners functionality is enabled, all touched files require an
+approval from a code owner. If files are touched for which no code owners are
+defined, the change can only be submitted with a [code owner
+override](#codeOwnerOverride).
+
+If the destination branch doesn't contain any [code owner config
+file](#codeOwnerConfigFiles) at all yet, the project owners are considered as
+code owners and can grant [code owner approvals](#codeOwnerApproval) for all
+files. This is to allow bootstrapping code owners and should be only a temporary
+state until the first [code owner config file](#codeOwnerConfigFiles) is added.
+Please note that the [code owner suggestion](#codeOwnerSuggestion) isn't working
+if no code owners are defined yet (project owners will not be suggested in this
+case).
+
 ## <a id="renames">Renames
 
 When files/folders get renamed, their code owner configuration should stay

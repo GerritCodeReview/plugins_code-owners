@@ -75,6 +75,14 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getDefaultConfig() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
     CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
         projectCodeOwnersApiFactory.project(project).branch("master").getConfig();
     assertThat(codeOwnerBranchConfigInfo.general.fileExtension).isNull();
@@ -90,6 +98,7 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerBranchConfigInfo.requiredApproval.value)
         .isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
     assertThat(codeOwnerBranchConfigInfo.overrideApproval).isNull();
+    assertThat(codeOwnerBranchConfigInfo.noCodeOwnersDefined).isNull();
   }
 
   @Test
@@ -210,6 +219,14 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
         projectCodeOwnersApiFactory.project(project).branch("master").getConfig();
     assertThat(codeOwnerBranchConfigInfo.general.implicitApprovals).isTrue();
+  }
+
+  @Test
+  public void getConfig_bootstrappingMode() throws Exception {
+    configureImplicitApprovals(project);
+    CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
+        projectCodeOwnersApiFactory.project(project).branch("master").getConfig();
+    assertThat(codeOwnerBranchConfigInfo.noCodeOwnersDefined).isTrue();
   }
 
   private void configureFileExtension(Project.NameKey project, String fileExtension)
