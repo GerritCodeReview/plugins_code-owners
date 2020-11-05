@@ -22,6 +22,30 @@
       },
       "revId": "1fc86442ae1864d6d54859c12f21bbfff2f2a27e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c1075533_bc1bf7d6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-05T07:56:18Z",
+      "side": 1,
+      "message": "So far the frontend never calls \"List Code Owner Config Files\" REST endpoint. If it would, I agree that the frontend would already know this. Calling this REST endpoint would be too expensive, which is why we rather return this info here.",
+      "parentUuid": "cb8aaa03_e50f0a6c",
+      "range": {
+        "startLine": 11,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 8
+      },
+      "revId": "1fc86442ae1864d6d54859c12f21bbfff2f2a27e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
