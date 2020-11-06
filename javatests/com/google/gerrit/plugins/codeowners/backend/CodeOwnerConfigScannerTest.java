@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
@@ -51,13 +52,14 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   @Mock private InvalidCodeOwnerConfigCallback invalidCodeOwnerConfigCallback;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
-  private CodeOwnerConfigScanner codeOwnerConfigScanner;
+  private CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
-    codeOwnerConfigScanner = plugin.getSysInjector().getInstance(CodeOwnerConfigScanner.class);
+    codeOwnerConfigScannerFactory =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigScanner.Factory.class);
   }
 
   @Test
@@ -65,7 +67,10 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerConfigScanner.visit(null, visitor, invalidCodeOwnerConfigCallback));
+            () ->
+                codeOwnerConfigScannerFactory
+                    .create()
+                    .visit(null, visitor, invalidCodeOwnerConfigCallback));
     assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
   }
 
@@ -76,7 +81,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                codeOwnerConfigScanner.visit(branchNameKey, null, invalidCodeOwnerConfigCallback));
+                codeOwnerConfigScannerFactory
+                    .create()
+                    .visit(branchNameKey, null, invalidCodeOwnerConfigCallback));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
   }
 
@@ -86,7 +93,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerConfigScanner.visit(branchNameKey, visitor, null));
+            () -> codeOwnerConfigScannerFactory.create().visit(branchNameKey, visitor, null));
     assertThat(npe).hasMessageThat().isEqualTo("invalidCodeOwnerConfigCallback");
   }
 
@@ -97,8 +104,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         assertThrows(
             IllegalStateException.class,
             () ->
-                codeOwnerConfigScanner.visit(
-                    branchNameKey, visitor, invalidCodeOwnerConfigCallback));
+                codeOwnerConfigScannerFactory
+                    .create()
+                    .visit(branchNameKey, visitor, invalidCodeOwnerConfigCallback));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -271,7 +279,58 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void visitorInvokedForDefaulCodeOwnerConfigFileInRefsMetaConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit();
+
+    // Verify that we received the expected callback.
+    Mockito.verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+  }
+
+  @Test
+  public void visitorNotInvokedForDefaulCodeOwnerConfigFileInRefsMetaConfigIfSkipped()
+      throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    visit(
+        /** includeDefaultCodeOwnerConfig */
+        false);
+
+    // Verify that we did not receive any callback.
+    verifyZeroInteractions(visitor);
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+  }
+
+  @Test
   public void visitorIsInvokedForAllCodeOwnerConfigFiles() throws Exception {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
     CodeOwnerConfig.Key rootCodeOwnerConfigKey =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
@@ -309,6 +368,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     InOrder orderVerifier = Mockito.inOrder(visitor);
     orderVerifier
         .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
     orderVerifier
         .verify(visitor)
@@ -316,6 +378,55 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     orderVerifier
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+
+    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+  }
+
+  @Test
+  public void skipDefaultCodeOwnerConfigFile() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .fileName("OWNERS")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key fooCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .fileName("OWNERS")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit(
+        /** includeDefaultCodeOwnerConfig */
+        false);
+
+    // Verify that we received only the expected callbacks (e.g. no callback for the default code
+    // owner config in refs/meta/config).
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
     verifyZeroInteractions(invalidCodeOwnerConfigCallback);
@@ -374,8 +485,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   @Test
   public void containsNoCodeOwnerConfigFile() throws Exception {
     assertThat(
-            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
-                BranchNameKey.create(project, "master")))
+            codeOwnerConfigScannerFactory
+                .create()
+                .containsAnyCodeOwnerConfigFile(BranchNameKey.create(project, "master")))
         .isFalse();
   }
 
@@ -391,9 +503,45 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .create();
 
     assertThat(
-            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
-                BranchNameKey.create(project, "master")))
+            codeOwnerConfigScannerFactory
+                .create()
+                .containsAnyCodeOwnerConfigFile(BranchNameKey.create(project, "master")))
         .isTrue();
+  }
+
+  @Test
+  public void containsACodeOwnerConfigFile_defaultCodeOwnerConfigExists() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    assertThat(
+            codeOwnerConfigScannerFactory
+                .create()
+                .containsAnyCodeOwnerConfigFile(BranchNameKey.create(project, "master")))
+        .isTrue();
+  }
+
+  @Test
+  public void containsACodeOwnerConfigFile_defaultCodeOwnerConfigIsSkipped() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    assertThat(
+            codeOwnerConfigScannerFactory
+                .create()
+                .includeDefaultCodeOwnerConfig(false)
+                .containsAnyCodeOwnerConfigFile(BranchNameKey.create(project, "master")))
+        .isFalse();
   }
 
   @Test
@@ -410,8 +558,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .create();
 
     assertThat(
-            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
-                BranchNameKey.create(project, "master")))
+            codeOwnerConfigScannerFactory
+                .create()
+                .containsAnyCodeOwnerConfigFile(BranchNameKey.create(project, "master")))
         .isTrue();
   }
 
@@ -420,14 +569,23 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     createInvalidCodeOwnerConfig("/OWNERS");
 
     assertThat(
-            codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(
-                BranchNameKey.create(project, "master")))
+            codeOwnerConfigScannerFactory
+                .create()
+                .containsAnyCodeOwnerConfigFile(BranchNameKey.create(project, "master")))
         .isTrue();
   }
 
   private void visit() {
-    codeOwnerConfigScanner.visit(
-        BranchNameKey.create(project, "master"), visitor, invalidCodeOwnerConfigCallback);
+    visit(
+        /** includeDefaultCodeOwnerConfig */
+        true);
+  }
+
+  private void visit(boolean includeDefaultCodeOwnerConfig) {
+    codeOwnerConfigScannerFactory
+        .create()
+        .includeDefaultCodeOwnerConfig(includeDefaultCodeOwnerConfig)
+        .visit(BranchNameKey.create(project, "master"), visitor, invalidCodeOwnerConfigCallback);
   }
 
   private void createInvalidCodeOwnerConfig(String path) throws Exception {

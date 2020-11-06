@@ -18,12 +18,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
@@ -527,6 +529,156 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     orderVerifier
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void visitorInvokedForCodeOwnerConfigInRefsMetaConfig() throws Exception {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit("master", "/foo/bar/baz.md");
+    verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void visitorNotInvokedForCodeOwnerConfigInRefsMetaConfigIfItDoesntApply()
+      throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchAllFilesInSubfolder("other"))
+                .addCodeOwnerEmail(admin.email())
+                .build())
+        .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit("master", "/foo/bar/baz.md");
+    verifyZeroInteractions(visitor);
+  }
+
+  @Test
+  public void visitorInvokedForCodeOwnerConfigInRefsMetaConfigWithMatchingPathExpression()
+      throws Exception {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchAllFilesInSubfolder("foo"))
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit("master", "/foo/bar/baz.md");
+    verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void visitorForCodeOwnerConfigInRefsMetaConfigInvokedLast() throws Exception {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchAllFilesInSubfolder("other"))
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit("master", "/foo/bar/baz.md");
+
+    InOrder orderVerifier = Mockito.inOrder(visitor);
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
+    orderVerifier
+        .verify(visitor)
+        .visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void
+      visitorNotInvokedForCodeOwnerConfigInRefsMetaConfigIfRootCodeOwnerConfigIgnoresParent()
+          throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .ignoreParentCodeOwners()
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    visit("master", "/foo/bar/baz.md");
+    verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void visitorCanStopTheIterationAtRoot() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .ignoreParentCodeOwners()
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(false);
+    visit("master", "/foo/bar/baz.md");
+    verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
   }
 

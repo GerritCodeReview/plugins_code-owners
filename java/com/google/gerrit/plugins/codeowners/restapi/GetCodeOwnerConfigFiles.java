@@ -46,7 +46,7 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private final CodeOwnerConfigScanner codeOwnerConfigScanner;
+  private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
 
   private String email;
 
@@ -61,9 +61,9 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
   @Inject
   public GetCodeOwnerConfigFiles(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      CodeOwnerConfigScanner codeOwnerConfigScanner) {
+      CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
-    this.codeOwnerConfigScanner = codeOwnerConfigScanner;
+    this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
   }
 
   @Override
@@ -78,16 +78,19 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
           email);
     }
 
-    codeOwnerConfigScanner.visit(
-        resource.getBranchKey(),
-        codeOwnerConfig -> {
-          Path codeOwnerConfigPath = codeOwnerBackend.getFilePath(codeOwnerConfig.key());
-          if (email == null || containsEmail(codeOwnerConfig, codeOwnerConfigPath, email)) {
-            codeOwnerConfigs.add(codeOwnerConfigPath);
-          }
-          return true;
-        },
-        CodeOwnerConfigScanner.ignoreInvalidCodeOwnerConfigFiles());
+    codeOwnerConfigScannerFactory
+        .create()
+        .includeDefaultCodeOwnerConfig(false)
+        .visit(
+            resource.getBranchKey(),
+            codeOwnerConfig -> {
+              Path codeOwnerConfigPath = codeOwnerBackend.getFilePath(codeOwnerConfig.key());
+              if (email == null || containsEmail(codeOwnerConfig, codeOwnerConfigPath, email)) {
+                codeOwnerConfigs.add(codeOwnerConfigPath);
+              }
+              return true;
+            },
+            CodeOwnerConfigScanner.ignoreInvalidCodeOwnerConfigFiles());
     return Response.ok(
         codeOwnerConfigs.build().stream().map(Path::toString).collect(toImmutableList()));
   }

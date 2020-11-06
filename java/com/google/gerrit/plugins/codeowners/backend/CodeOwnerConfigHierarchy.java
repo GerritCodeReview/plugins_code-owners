@@ -19,24 +19,37 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * Class to visit the code owner configs in a given branch that apply for a given path by following
- * the path hierarchy from the given path up to the root folder.
+ * the path hierarchy from the given path up to the root folder and the default code owner config in
+ * {@code refs/meta/config}.
  */
 @Singleton
 public class CodeOwnerConfigHierarchy {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final GitRepositoryManager repoManager;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
   @Inject
-  CodeOwnerConfigHierarchy(PathCodeOwners.Factory pathCodeOwnersFactory) {
+  CodeOwnerConfigHierarchy(
+      GitRepositoryManager repoManager, PathCodeOwners.Factory pathCodeOwnersFactory) {
+    this.repoManager = repoManager;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
   }
 
@@ -95,6 +108,34 @@ public class CodeOwnerConfigHierarchy {
 
       // Continue the loop with the next parent folder.
       ownerConfigFolder = ownerConfigFolder.getParent();
+    }
+
+    visitCodeOwnerConfigInRefsMetaConfig(branch.project(), absolutePath, codeOwnerConfigVisitor);
+  }
+
+  private void visitCodeOwnerConfigInRefsMetaConfig(
+      Project.NameKey project, Path absolutePath, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, RefNames.REFS_CONFIG, "/");
+    logger.atFine().log("visiting code owner config %s", metaCodeOwnerConfigKey);
+    try (Repository repository = repoManager.openRepository(project);
+        RevWalk rw = new RevWalk(repository)) {
+      Ref ref = repository.exactRef(RefNames.REFS_CONFIG);
+      if (ref == null) {
+        logger.atFine().log("%s not found", RefNames.REFS_CONFIG);
+        return;
+      }
+      RevCommit metaRevision = rw.parseCommit(ref.getObjectId());
+      Optional<PathCodeOwners> pathCodeOwners =
+          pathCodeOwnersFactory.create(metaCodeOwnerConfigKey, metaRevision, absolutePath);
+      if (pathCodeOwners.isPresent()) {
+        logger.atFine().log("visit code owner config %s", metaCodeOwnerConfigKey);
+        codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
+      } else {
+        logger.atFine().log("code owner config %s not found", metaCodeOwnerConfigKey);
+      }
+    } catch (IOException e) {
+      throw new StorageException(String.format("failed to read %s", metaCodeOwnerConfigKey), e);
     }
   }
 }

@@ -74,7 +74,7 @@ public class CheckCodeOwnerConfigFiles
   private final PermissionBackend permissionBackend;
   private final Provider<ListBranches> listBranches;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private final CodeOwnerConfigScanner codeOwnerConfigScanner;
+  private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
   private final CodeOwnerConfigValidator codeOwnerConfigValidator;
 
   @Inject
@@ -83,13 +83,13 @@ public class CheckCodeOwnerConfigFiles
       PermissionBackend permissionBackend,
       Provider<ListBranches> listBranches,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      CodeOwnerConfigScanner codeOwnerConfigScanner,
+      CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       CodeOwnerConfigValidator codeOwnerConfigValidator) {
     this.currentUser = currentUser;
     this.permissionBackend = permissionBackend;
     this.listBranches = listBranches;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
-    this.codeOwnerConfigScanner = codeOwnerConfigScanner;
+    this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
     this.codeOwnerConfigValidator = codeOwnerConfigValidator;
   }
 
@@ -150,21 +150,24 @@ public class CheckCodeOwnerConfigFiles
       @Nullable ConsistencyProblemInfo.Status verbosity) {
     ListMultimap<String, ConsistencyProblemInfo> problemsByPath = LinkedListMultimap.create();
     CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
-    codeOwnerConfigScanner.visit(
-        branchNameKey,
-        codeOwnerConfig -> {
-          problemsByPath.putAll(
-              codeOwnerBackend.getFilePath(codeOwnerConfig.key()).toString(),
-              checkCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig, verbosity));
-          return true;
-        },
-        (codeOwnerConfigFilePath, configInvalidException) -> {
-          problemsByPath.put(
-              codeOwnerConfigFilePath.toString(),
-              new ConsistencyProblemInfo(
-                  ConsistencyProblemInfo.Status.FATAL, configInvalidException.getMessage()));
-        },
-        pathGlob);
+    codeOwnerConfigScannerFactory
+        .create()
+        .includeDefaultCodeOwnerConfig(false)
+        .visit(
+            branchNameKey,
+            codeOwnerConfig -> {
+              problemsByPath.putAll(
+                  codeOwnerBackend.getFilePath(codeOwnerConfig.key()).toString(),
+                  checkCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig, verbosity));
+              return true;
+            },
+            (codeOwnerConfigFilePath, configInvalidException) -> {
+              problemsByPath.put(
+                  codeOwnerConfigFilePath.toString(),
+                  new ConsistencyProblemInfo(
+                      ConsistencyProblemInfo.Status.FATAL, configInvalidException.getMessage()));
+            },
+            pathGlob);
 
     return Multimaps.asMap(problemsByPath);
   }
