@@ -105,7 +105,7 @@ export class OwnerRequirementValue extends Polymer.Element {
   }
 
   _checkIfOverriden() {
-    this.ownerService.getProjectConfig().then(res => {
+    this.ownerService.getBranchConfig().then(res => {
       if (!res['override_approval']) {
         // no override label configured
         this._isOverriden = false;
@@ -150,7 +150,7 @@ export class OwnerRequirementValue extends Polymer.Element {
   }
 
   _updateOverrideInfoUrl() {
-    this.ownerService.getProjectConfig().then(config => {
+    this.ownerService.getBranchConfig().then(config => {
       this._overrideInfoUrl = config.general && config.general.override_info_url
         ?
         config.general.override_info_url : '';
