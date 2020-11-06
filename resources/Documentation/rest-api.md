@@ -455,6 +455,16 @@ the response.
   }
 ```
 
+## <a id="general-responses"> General Responses
+
+All REST endpoints may return the following responses:
+
+* `409 Conflict` is returned if a request cannot be executed due to:
+** an non-parseable code owner config file (in this case the project owners need
+   to fix the code owner config file)
+** an invalid plugin configuration (in this case the project owners need to fix
+   the code-owners plugin configuration)
+
 ## <a id="ids"> IDs
 
 ### <a id="path"> \{path\}
