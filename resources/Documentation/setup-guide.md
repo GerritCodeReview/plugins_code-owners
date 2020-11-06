@@ -219,6 +219,12 @@ on code owner approvals, you may need to reconfigure existing label definitions
 (e.g. change the `Code-Review` label definition to not require a `Code-Review+2`
 vote for change submission.
 
+**NOTE:** Whether code owner approvals are sticky across patch sets depends on
+the definition of the required label. If the label definition has [copy
+rules](../../../Documentation/config-labels.html#label_copyAnyScore) enabled so
+that votes are sticky across patch sets, then also the code owner approvals
+which are based on these votes will be sticky.
+
 ### <a id="grantCodeOwnerPermissions">5. Grant code owners permission to vote on the label that counts as code owner approval
 
 Code owners must be granted permissions to vote on the label that counts as code

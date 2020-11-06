@@ -86,6 +86,12 @@ necessary code owner approvals have been granted. This is the case, if futher
 non-code-owner approvals are required and missing, or if further non-code-owner
 submit requirements are not fulfilled yet.
 
+**NOTE:** Whether code owner approvals are sticky across patch sets depends on
+the definition of the required label. If the label definition has [copy
+rules](../../../Documentation/config-labels.html#label_copyAnyScore) enabled so
+that votes are sticky across patch sets, then also the code owner approvals
+which are based on these votes will be sticky.
+
 ## <a id="codeOwnerOverride">Code owner override
 
 Usually some privileged users, such as sheriffs, are allowed to override the
