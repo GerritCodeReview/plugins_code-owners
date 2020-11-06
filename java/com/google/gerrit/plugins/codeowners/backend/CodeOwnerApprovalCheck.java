@@ -30,6 +30,7 @@ import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
+import com.google.gerrit.server.ApprovalsUtil;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
@@ -49,6 +50,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -80,6 +82,7 @@ public class CodeOwnerApprovalCheck {
   private final CodeOwnerConfigScanner codeOwnerConfigScanner;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
+  private final ApprovalsUtil approvalsUtil;
 
   @Inject
   CodeOwnerApprovalCheck(
@@ -89,7 +92,8 @@ public class CodeOwnerApprovalCheck {
       ChangedFiles changedFiles,
       CodeOwnerConfigScanner codeOwnerConfigScanner,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
-      Provider<CodeOwnerResolver> codeOwnerResolver) {
+      Provider<CodeOwnerResolver> codeOwnerResolver,
+      ApprovalsUtil approvalsUtil) {
     this.permissionBackend = permissionBackend;
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -97,6 +101,7 @@ public class CodeOwnerApprovalCheck {
     this.codeOwnerConfigScanner = codeOwnerConfigScanner;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
+    this.approvalsUtil = approvalsUtil;
   }
 
   /**
@@ -612,7 +617,18 @@ public class CodeOwnerApprovalCheck {
    */
   private ImmutableSet<Account.Id> getApproverAccountIds(
       RequiredApproval requiredApproval, ChangeNotes changeNotes) {
-    return changeNotes.getApprovals().get(changeNotes.getCurrentPatchSet().id()).stream()
+    return StreamSupport.stream(
+            approvalsUtil
+                .byPatchSet(
+                    changeNotes,
+                    changeNotes.getCurrentPatchSet().id(),
+                    /** revWalk */
+                    null,
+                    /** repoConfig */
+                    null)
+                .spliterator(),
+            /** parallel */
+            false)
         .filter(requiredApproval::isApprovedBy)
         .map(PatchSetApproval::accountId)
         .collect(toImmutableSet());

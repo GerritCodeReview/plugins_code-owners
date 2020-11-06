@@ -1870,6 +1870,84 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThat(exception).hasMessageThat().isEqualTo("destination branch not found");
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void approvedByStickyApprovalOnOldPatchSet() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // Create a code owner config file with 'user' as code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user2, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is not approved yet.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Let the 'user' approve the change.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allowLabel("Code-Review").ref("refs/heads/*").group(REGISTERED_USERS).range(-2, +2))
+        .update();
+    requestScopeOperations.setApiUser(user.id());
+    approve(changeId);
+
+    // Check that the file is approved now.
+    requestScopeOperations.setApiUser(admin.id());
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+
+    // Change some other file ('user' who uploads the change is a code owner and hence owner
+    // approvals are implicit for this change)
+    String changeId2 =
+        createChange(user, "Change Other File", "other.txt", "file content").getChangeId();
+    approve(changeId2);
+    gApi.changes().id(changeId2).current().submit();
+
+    // Rebase the first change (trivial rebase).
+    gApi.changes().id(changeId).rebase();
+
+    // Check that the approval from 'user' is still there (since Code-Review is sticky on trivial
+    // rebase).
+    assertThat(gApi.changes().id(changeId).get().labels.get("Code-Review").approved.email)
+        .isEqualTo(user.email());
+
+    // Check that the file is still approved.
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
     return changeNotesFactory.create(project, Change.id(gApi.changes().id(changeId).get()._number));
   }
