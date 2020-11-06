@@ -1948,6 +1948,59 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .isEqualTo(CodeOwnerStatus.APPROVED);
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+1")
+  public void codeReviewPlus2CountsAsApprovalIfCodeReviewPlus1IsRequired() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // Create a code owner config file with 'user' as code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user2, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is not approved yet.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Let 'user' approve the change (vote Code-Review+2)
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allowLabel("Code-Review").ref("refs/heads/*").group(REGISTERED_USERS).range(-2, +2))
+        .update();
+    requestScopeOperations.setApiUser(user.id());
+    approve(changeId);
+
+    // Check that the file is approved now.
+    requestScopeOperations.setApiUser(admin.id());
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
     return changeNotesFactory.create(project, Change.id(gApi.changes().id(changeId).get()._number));
   }
