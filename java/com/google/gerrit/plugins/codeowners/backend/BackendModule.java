@@ -17,6 +17,8 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.extensions.registration.DynamicMap;
+import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.server.ExceptionHook;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.UserInitiated;
@@ -40,6 +42,8 @@ public class BackendModule extends FactoryModule {
     }
 
     install(new CodeOwnerSubmitRule.Module());
+
+    DynamicSet.bind(binder(), ExceptionHook.class).to(CodeOwnersExceptionHook.class);
   }
 
   @Provides
