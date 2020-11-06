@@ -19,24 +19,42 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * Class to visit the code owner configs in a given branch that apply for a given path by following
- * the path hierarchy from the given path up to the root folder.
+ * the path hierarchy from the given path up to the root folder and the default code owner config in
+ * {@code refs/meta/config}.
+ *
+ * <p>The default code owner config in {@code refs/meta/config} is the parent of the code owner
+ * config in the root folder of the branch. The same as any other parent it can be ignored (e.g. by
+ * using {@code set noparent} in the root code owner config if the {@code find-owners} backend is
+ * used).
  */
 @Singleton
 public class CodeOwnerConfigHierarchy {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final GitRepositoryManager repoManager;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
 
   @Inject
-  CodeOwnerConfigHierarchy(PathCodeOwners.Factory pathCodeOwnersFactory) {
+  CodeOwnerConfigHierarchy(
+      GitRepositoryManager repoManager, PathCodeOwners.Factory pathCodeOwnersFactory) {
+    this.repoManager = repoManager;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
   }
 
@@ -44,7 +62,7 @@ public class CodeOwnerConfigHierarchy {
    * Visits the code owner configs in the given branch that apply for the given path by following
    * the path hierarchy from the given path up to the root folder.
    *
-   * @param branch project and branch from which the code owner configs should be visited
+   * @param branchNameKey project and branch from which the code owner configs should be visited
    * @param revision the branch revision from which the code owner configs should be loaded
    * @param absolutePath the path for which the code owner configs should be visited; the path must
    *     be absolute; can be the path of a file or folder; the path may or may not exist
@@ -52,11 +70,11 @@ public class CodeOwnerConfigHierarchy {
    *     configs
    */
   public void visit(
-      BranchNameKey branch,
+      BranchNameKey branchNameKey,
       ObjectId revision,
       Path absolutePath,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
-    requireNonNull(branch, "branch");
+    requireNonNull(branchNameKey, "branch");
     requireNonNull(revision, "revision");
     requireNonNull(absolutePath, "absolutePath");
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
@@ -64,7 +82,7 @@ public class CodeOwnerConfigHierarchy {
 
     logger.atFine().log(
         "visiting code owner configs for '%s' in branch '%s' in project '%s' (revision = '%s')",
-        absolutePath, branch.shortName(), branch.project(), revision.name());
+        absolutePath, branchNameKey.shortName(), branchNameKey.project(), revision.name());
 
     // Next path in which we look for a code owner configuration. We start at the given path and
     // then go up the parent hierarchy.
@@ -77,7 +95,7 @@ public class CodeOwnerConfigHierarchy {
       logger.atFine().log("inspecting code owner config for %s", ownerConfigFolder);
       Optional<PathCodeOwners> pathCodeOwners =
           pathCodeOwnersFactory.create(
-              CodeOwnerConfig.Key.create(branch, ownerConfigFolder), revision, absolutePath);
+              CodeOwnerConfig.Key.create(branchNameKey, ownerConfigFolder), revision, absolutePath);
       if (pathCodeOwners.isPresent()) {
         logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
         boolean visitFurtherCodeOwnerConfigs =
@@ -87,6 +105,11 @@ public class CodeOwnerConfigHierarchy {
             "visitFurtherCodeOwnerConfigs = %s, ignoreParentCodeOwners = %s",
             visitFurtherCodeOwnerConfigs, ignoreParentCodeOwners);
         if (!visitFurtherCodeOwnerConfigs || ignoreParentCodeOwners) {
+          // If no further code owner configs should be visited or if all parent code owner configs
+          // are ignored, we are done.
+          // No need to check further parent code owner configs (including the default code owner
+          // config in refs/meta/config which is the parent of the root code owner config), hence we
+          // can return here.
           return;
         }
       } else {
@@ -95,6 +118,55 @@ public class CodeOwnerConfigHierarchy {
 
       // Continue the loop with the next parent folder.
       ownerConfigFolder = ownerConfigFolder.getParent();
+    }
+
+    if (!RefNames.REFS_CONFIG.equals(branchNameKey.branch())) {
+      visitCodeOwnerConfigInRefsMetaConfig(
+          branchNameKey.project(), absolutePath, codeOwnerConfigVisitor);
+    }
+  }
+
+  /**
+   * Visits the code owner config file at the root of the {@code refs/meta/config} branch in the
+   * given project.
+   *
+   * <p>The root code owner config file in the {@code refs/meta/config} branch defines default code
+   * owners for all branches.
+   *
+   * <p>There is no inheritance of code owner config files from parent projects. If code owners
+   * should be defined for child projects, this is possible via global code owners, but not via the
+   * default code owner config file in {@code refs/meta/config}.
+   *
+   * @param project the project in which we want to visit the code owner config file at the root of
+   *     the {@code refs/meta/config} branch
+   * @param absolutePath the path for which the code owner configs should be visited; the path must
+   *     be absolute; can be the path of a file or folder; the path may or may not exist
+   * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
+   *     configs
+   */
+  private void visitCodeOwnerConfigInRefsMetaConfig(
+      Project.NameKey project, Path absolutePath, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(project, RefNames.REFS_CONFIG, "/");
+    logger.atFine().log("visiting code owner config %s", metaCodeOwnerConfigKey);
+    try (Repository repository = repoManager.openRepository(project);
+        RevWalk rw = new RevWalk(repository)) {
+      Ref ref = repository.exactRef(RefNames.REFS_CONFIG);
+      if (ref == null) {
+        logger.atFine().log("%s not found", RefNames.REFS_CONFIG);
+        return;
+      }
+      RevCommit metaRevision = rw.parseCommit(ref.getObjectId());
+      Optional<PathCodeOwners> pathCodeOwners =
+          pathCodeOwnersFactory.create(metaCodeOwnerConfigKey, metaRevision, absolutePath);
+      if (pathCodeOwners.isPresent()) {
+        logger.atFine().log("visit code owner config %s", metaCodeOwnerConfigKey);
+        codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
+      } else {
+        logger.atFine().log("code owner config %s not found", metaCodeOwnerConfigKey);
+      }
+    } catch (IOException e) {
+      throw new StorageException(String.format("failed to read %s", metaCodeOwnerConfigKey), e);
     }
   }
 }

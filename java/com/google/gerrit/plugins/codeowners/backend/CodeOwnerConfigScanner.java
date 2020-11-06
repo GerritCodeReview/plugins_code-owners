@@ -20,11 +20,11 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -32,13 +32,24 @@ import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 
-/** Class to scan a branch for code owner config files. */
-@Singleton
+/**
+ * Class to scan a branch for code owner config files.
+ *
+ * <p>Whether the scan includes the code owner config file at the root of {@code refs/meta/config}
+ * branch that contains the default code owners for the whole repository can be controlled via
+ * {@link #includeDefaultCodeOwnerConfig(boolean)}.
+ */
 public class CodeOwnerConfigScanner {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  public interface Factory {
+    CodeOwnerConfigScanner create();
+  }
+
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+
+  private boolean includeDefaultCodeOwnerConfig = true;
 
   @Inject
   CodeOwnerConfigScanner(
@@ -46,6 +57,16 @@ public class CodeOwnerConfigScanner {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+  }
+
+  /**
+   * Whether the scan should include the code owner config file at the root of {@code
+   * refs/meta/config} branch that contains the default code owners for the whole repository.
+   */
+  public CodeOwnerConfigScanner includeDefaultCodeOwnerConfig(
+      boolean includeDefaultCodeOwnerConfig) {
+    this.includeDefaultCodeOwnerConfig = includeDefaultCodeOwnerConfig;
+    return this;
   }
 
   /**
@@ -107,6 +128,26 @@ public class CodeOwnerConfigScanner {
     logger.atFine().log(
         "scanning code owner files in branch %s of project %s (path glob = %s)",
         branchNameKey.branch(), branchNameKey.project(), pathGlob);
+
+    if (includeDefaultCodeOwnerConfig && !RefNames.REFS_CONFIG.equals(branchNameKey.branch())) {
+      logger.atFine().log("Scanning code owner config file in %s", RefNames.REFS_CONFIG);
+      Optional<CodeOwnerConfig> metaCodeOwnerConfig =
+          codeOwnerBackend.getCodeOwnerConfig(
+              CodeOwnerConfig.Key.createWithFileName(
+                  codeOwnerBackend, branchNameKey.project(), RefNames.REFS_CONFIG, "/"),
+              /** revision */
+              null);
+      if (metaCodeOwnerConfig.isPresent()) {
+        boolean visitFurtherCodeOwnerConfigFiles =
+            codeOwnerConfigVisitor.visit(metaCodeOwnerConfig.get());
+        if (!visitFurtherCodeOwnerConfigFiles) {
+          // By returning false the callback told us to not visit any further code owner config
+          // files, hence we are done and do not need to search for further code owner config files
+          // in the branch.
+          return;
+        }
+      }
+    }
 
     try (Repository repository = repoManager.openRepository(branchNameKey.project());
         RevWalk rw = new RevWalk(repository);

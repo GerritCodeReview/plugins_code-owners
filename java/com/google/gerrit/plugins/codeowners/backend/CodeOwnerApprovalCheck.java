@@ -79,7 +79,7 @@ public class CodeOwnerApprovalCheck {
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ChangedFiles changedFiles;
-  private final CodeOwnerConfigScanner codeOwnerConfigScanner;
+  private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final ApprovalsUtil approvalsUtil;
@@ -90,7 +90,7 @@ public class CodeOwnerApprovalCheck {
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       ChangedFiles changedFiles,
-      CodeOwnerConfigScanner codeOwnerConfigScanner,
+      CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ApprovalsUtil approvalsUtil) {
@@ -98,7 +98,7 @@ public class CodeOwnerApprovalCheck {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.changedFiles = changedFiles;
-    this.codeOwnerConfigScanner = codeOwnerConfigScanner;
+    this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.approvalsUtil = approvalsUtil;
@@ -203,7 +203,8 @@ public class CodeOwnerApprovalCheck {
       // (project
       // owners count as code owners) to allow bootstrapping the code owner configuration in the
       // branch.
-      boolean isBootstrapping = !codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(branch);
+      boolean isBootstrapping =
+          !codeOwnerConfigScannerFactory.create().containsAnyCodeOwnerConfigFile(branch);
       logger.atFine().log("isBootstrapping = %s", isBootstrapping);
 
       ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);

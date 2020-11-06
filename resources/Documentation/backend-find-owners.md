@@ -14,6 +14,17 @@ contains the `OWNERS` file, and all its subdirectories (except if a subdirectory
 contains an `OWNERS` file that disables the inheritance of code owners from the
 parent directories via the [set noparent](#setNoparent) keyword).
 
+<a id="defaultCodeOwnerConfiguration">
+Default code owners that apply to all branches can be defined in an `OWNERS`
+file in the root directory of the `refs/meta/config` branch. This `OWNERS` file
+is the parent of the root `OWNERS` files in all branches. This means if a root
+`OWNERS` file disables the inheritance of code owners from the parent
+directories via the [set noparent](#setNoparent) keyword the `OWNERS` file in
+the `refs/meta/config` branch is ignored. Default code owners are not inherited
+from parent projects. If code owners should be defined for child projects this
+can be done by setting [global code
+owners](config.html#codeOwnersGlobalCodeOwner).
+
 ### <a id="codeOwnerConfigFileExtension">
 **NOTE:** It's possible that projects have a [file extension for code owner
 config files](config.html#codeOwnersFileExtension) configured. In this case the
