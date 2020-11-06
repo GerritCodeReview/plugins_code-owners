@@ -240,6 +240,34 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void issuesInDefaultCodeOwnerConfigFile() throws Exception {
+    CodeOwnerConfig.Key invalidDefaultConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerEmail("unknown@example.com")
+            .create();
+    String pathOfInvalidConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(invalidDefaultConfig).getFilePath();
+
+    assertThat(checkCodeOwnerConfigFilesIn(project))
+        .containsExactly(
+            "refs/heads/master",
+            ImmutableMap.of(),
+            RefNames.REFS_CONFIG,
+            ImmutableMap.of(
+                pathOfInvalidConfig,
+                ImmutableList.of(
+                    error(
+                        String.format(
+                            "code owner email 'unknown@example.com' in '%s' cannot be"
+                                + " resolved for admin",
+                            pathOfInvalidConfig)))));
+  }
+
+  @Test
   public void validateSpecifiedBranches() throws Exception {
     createBranch(BranchNameKey.create(project, "stable-1.0"));
     createBranch(BranchNameKey.create(project, "stable-1.1"));

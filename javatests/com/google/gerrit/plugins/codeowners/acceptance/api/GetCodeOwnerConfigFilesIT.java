@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
@@ -42,6 +43,25 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void noCodeOwnerConfigFiles() throws Exception {
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .paths())
+        .isEmpty();
+  }
+
+  @Test
+  public void defaultCodeOwnerConfigFileIsSkipped() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(RefNames.REFS_CONFIG)
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
     assertThat(
             projectCodeOwnersApiFactory
                 .project(project)

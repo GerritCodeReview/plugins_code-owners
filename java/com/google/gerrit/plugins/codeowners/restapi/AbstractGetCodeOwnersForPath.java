@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
@@ -137,10 +138,9 @@ public abstract class AbstractGetCodeOwnersForPath {
     // configuration.
     int rootDistance = rsrc.getPath().getNameCount();
 
-    // The maximal possible distance. This is the distance that applies to global code owners and is
-    // by 1 greater than the distance that applies to code owners that are defined in the root code
-    // owner configuration.
-    int maxDistance = rootDistance + 1;
+    int defaultOwnersDistance = rootDistance + 1;
+    int globalOwnersDistance = defaultOwnersDistance + 1;
+    int maxDistance = globalOwnersDistance;
 
     CodeOwnerScoring.Builder distanceScoring = CodeOwnerScore.DISTANCE.createScoring(maxDistance);
 
@@ -170,7 +170,10 @@ public abstract class AbstractGetCodeOwnersForPath {
             return false;
           }
 
-          int distance = rootDistance - codeOwnerConfig.key().folderPath().getNameCount();
+          int distance =
+              codeOwnerConfig.key().branchNameKey().branch().equals(RefNames.REFS_CONFIG)
+                  ? defaultOwnersDistance
+                  : rootDistance - codeOwnerConfig.key().folderPath().getNameCount();
           pathCodeOwners
               .codeOwners()
               .forEach(
@@ -188,7 +191,8 @@ public abstract class AbstractGetCodeOwnersForPath {
       CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
       globalCodeOwners
           .codeOwners()
-          .forEach(codeOwner -> distanceScoring.putValueForCodeOwner(codeOwner, maxDistance));
+          .forEach(
+              codeOwner -> distanceScoring.putValueForCodeOwner(codeOwner, globalOwnersDistance));
       codeOwners.addAll(filterCodeOwners(rsrc, globalCodeOwners.codeOwners()));
 
       if (globalCodeOwners.ownedByAllUsers()) {
