@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9c44d119_e4d10a5a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1965,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-09T15:53:10Z",
+      "side": 1,
+      "message": "this contradicts the previous comments. Can you make it clear those are different users?",
+      "range": {
+        "startLine": 1965,
+        "startChar": 28,
+        "endLine": 1965,
+        "endChar": 32
+      },
+      "revId": "97d18220964bc7bda20e275413458cf1a877bc91",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
