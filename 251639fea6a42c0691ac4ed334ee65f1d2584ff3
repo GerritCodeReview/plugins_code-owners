@@ -74,6 +74,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "06b7deac_f9c787ad",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-09T11:56:54Z",
+      "side": 1,
+      "message": "But this returns you a Stream of Iterable\u003cInteger\u003e and what you would want is a Stream of Integer.",
+      "parentUuid": "7ff630e0_9d15e31d",
+      "range": {
+        "startLine": 620,
+        "startChar": 11,
+        "endLine": 620,
+        "endChar": 31
+      },
+      "revId": "251639fea6a42c0691ac4ed334ee65f1d2584ff3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "0bfa934a_661f463a",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
         "patchSetId": 1
