@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "250c06cf_b0b6dd1d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-09T11:17:15Z",
+      "side": 1,
+      "message": "I think it\u0027s cleaner to just use Stream.of without spliterator (as split suggests doing something with concurrency).",
+      "range": {
+        "startLine": 620,
+        "startChar": 11,
+        "endLine": 620,
+        "endChar": 31
+      },
+      "revId": "251639fea6a42c0691ac4ed334ee65f1d2584ff3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0bfa934a_661f463a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 622,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-09T11:17:15Z",
+      "side": 1,
+      "message": "Can you add comments describing these nulls (and false below)?",
+      "range": {
+        "startLine": 622,
+        "startChar": 80,
+        "endLine": 622,
+        "endChar": 90
+      },
+      "revId": "251639fea6a42c0691ac4ed334ee65f1d2584ff3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
