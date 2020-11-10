@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "55485105_5ac09e9a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-10T08:28:40Z",
+      "side": 1,
+      "message": "CI is broken, verifying manually.",
+      "revId": "d41b6d3d0cd105c6a39a7fa238d77c2d0b5b703f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
