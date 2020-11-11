@@ -121,6 +121,21 @@ class CodeOwnerApi {
         `/projects/${encodeURIComponent(project)}/code_owners.project_config`
     );
   }
+
+  /**
+   * Returns a promise fetching the owners config for a given branch.
+   *
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#branch-endpoints
+   * @param {string} project
+   * @param {string} branch
+   */
+  getBranchConfig(project, branch) {
+    return this.restApi.get(
+        `/projects/${encodeURIComponent(project)}/` +
+        `branches/${encodeURIComponent(branch)}/` +
+        `code_owners.branch_config`
+    );
+  }
 }
 
 /**
@@ -475,21 +490,22 @@ export class CodeOwnerService {
     return this.getProjectConfigPromise;
   }
 
+  getBranchConfig() {
+    if (!this.getBranchConfigPromise) {
+      this.getBranchConfigPromise =
+          this.codeOwnerApi.getBranchConfig(this.change.project,
+              this.change.branch);
+    }
+    return this.getBranchConfigPromise;
+  }
+
   isCodeOwnerEnabled() {
     if (this.change.status === ChangeStatus.ABANDONED ||
         this.change.status === ChangeStatus.MERGED) {
       return Promise.resolve(false);
     }
-    return this.getProjectConfig().then(config => {
-      if (config.status && config.status.disabled) {
-        return false;
-      }
-      if (config.status
-          && config.status.disabled_branches
-          && config.status.disabled_branches.includes(this.change.branch)) {
-        return false;
-      }
-      return true;
+    return this.getBranchConfig().then(config => {
+      return !(config.status && config.status.disabled);
     });
   }
 
