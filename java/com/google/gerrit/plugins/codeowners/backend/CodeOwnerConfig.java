@@ -307,6 +307,13 @@ public abstract class CodeOwnerConfig {
     }
 
     /**
+     * Creates a builder from this code owner config key.
+     *
+     * @return builder that was created from this code owner config key
+     */
+    public abstract Key.Builder toBuilder();
+
+    /**
      * Creates a code owner config key.
      *
      * @param project the project to which the code owner config belongs
@@ -367,6 +374,28 @@ public abstract class CodeOwnerConfig {
       }
 
       return builder.build();
+    }
+
+    /**
+     * Create a key with the file name being set.
+     *
+     * @param codeOwnerBackend code owner backend that should be used to lookup the file name if it
+     *     is not set yet
+     * @param project the project to which the code owner config belongs
+     * @param branch the branch to which the code owner config belongs
+     * @param folderPath the path of the folder to which the code owner config belongs, must be
+     *     absolute
+     * @return the code owner config key with the file name being set
+     */
+    public static Key createWithFileName(
+        CodeOwnerBackend codeOwnerBackend,
+        Project.NameKey project,
+        String branch,
+        String folderPath) {
+      Key key = create(project, branch, folderPath);
+      return key.toBuilder()
+          .setFileName(codeOwnerBackend.getFilePath(key).getFileName().toString())
+          .build();
     }
 
     @AutoValue.Builder

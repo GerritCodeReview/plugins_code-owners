@@ -29,6 +29,7 @@ public class BackendModule extends FactoryModule {
   @Override
   protected void configure() {
     factory(CodeOwnersUpdate.Factory.class);
+    factory(CodeOwnerConfigScanner.Factory.class);
 
     DynamicMap.mapOf(binder(), CodeOwnerBackend.class);
 

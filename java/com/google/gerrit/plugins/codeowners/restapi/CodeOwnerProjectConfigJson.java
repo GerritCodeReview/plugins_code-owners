@@ -50,16 +50,16 @@ import java.util.stream.Stream;
 @Singleton
 public class CodeOwnerProjectConfigJson {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private final CodeOwnerConfigScanner codeOwnerConfigScanner;
+  private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
   private final Provider<ListBranches> listBranches;
 
   @Inject
   CodeOwnerProjectConfigJson(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      CodeOwnerConfigScanner codeOwnerConfigScanner,
+      CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       Provider<ListBranches> listBranches) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
-    this.codeOwnerConfigScanner = codeOwnerConfigScanner;
+    this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
     this.listBranches = listBranches;
   }
 
@@ -98,7 +98,9 @@ public class CodeOwnerProjectConfigJson {
     info.overrideApproval = formatOverrideApprovalInfo(branchResource.getNameKey());
 
     boolean noCodeOwnersDefined =
-        !codeOwnerConfigScanner.containsAnyCodeOwnerConfigFile(branchResource.getBranchKey());
+        !codeOwnerConfigScannerFactory
+            .create()
+            .containsAnyCodeOwnerConfigFile(branchResource.getBranchKey());
     info.noCodeOwnersDefined = noCodeOwnersDefined ? noCodeOwnersDefined : null;
 
     return info;

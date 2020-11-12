@@ -76,7 +76,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     codeOwnerProjectConfigJson =
         new CodeOwnerProjectConfigJson(
             codeOwnersPluginConfiguration,
-            plugin.getSysInjector().getInstance(CodeOwnerConfigScanner.class),
+            plugin.getSysInjector().getInstance(CodeOwnerConfigScanner.Factory.class),
             plugin.getSysInjector().getInstance(new Key<Provider<ListBranches>>() {}));
     findOwnersBackend = plugin.getSysInjector().getInstance(FindOwnersBackend.class);
     protoBackend = plugin.getSysInjector().getInstance(ProtoBackend.class);
