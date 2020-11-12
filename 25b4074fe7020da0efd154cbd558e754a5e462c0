@@ -26,6 +26,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "3b9ec045_5159677f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:36:48Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a44b642d_9224a5f4",
+      "range": {
+        "startLine": 310,
+        "startChar": 25,
+        "endLine": 310,
+        "endChar": 29
+      },
+      "revId": "25b4074fe7020da0efd154cbd558e754a5e462c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "c7b471fb_f0bc61ae",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
         "patchSetId": 2
