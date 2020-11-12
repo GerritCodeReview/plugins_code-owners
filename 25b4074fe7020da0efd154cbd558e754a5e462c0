@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c7b471fb_f0bc61ae",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 123,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "If we are iterating over the code owner configs of refs/meta/config we must skip this code here, otherwise the root code owner config in refs/meta/config is visited twice.",
+      "revId": "25b4074fe7020da0efd154cbd558e754a5e462c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5ad11eea_8e6ef45a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigScanner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 132,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "If we are scanning the code owner configs of refs/meta/config we must skip this code here, otherwise the root code owner config in refs/meta/config is visited twice.",
+      "revId": "25b4074fe7020da0efd154cbd558e754a5e462c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "16348c83_0b780299",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigScanner.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "I noticed that the callback here was a bit inconsistent with the callbacks done below. As below the provided code owner config key had the file name field set, but for the callback here the file name field in the key wasn\u0027t set. Fixed it now.",
+      "revId": "25b4074fe7020da0efd154cbd558e754a5e462c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}

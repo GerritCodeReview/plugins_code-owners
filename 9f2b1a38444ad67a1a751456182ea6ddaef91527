@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fbe7928_d421623b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 103,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "Returning here is intended. Since we do not want to visit further code owner configs, we also do not need to check for the code owner config in refs/meta/config. Added a comment to make this intend clearer.",
+      "parentUuid": "7d839ea3_a4a4f1d2",
+      "range": {
+        "startLine": 103,
+        "startChar": 10,
+        "endLine": 103,
+        "endChar": 16
+      },
+      "revId": "9f2b1a38444ad67a1a751456182ea6ddaef91527",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d1308d5a_c089d175",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-11-12T10:25:32Z",
       "side": 1,
       "message": "Should you visit All-Projects refs/meta/config?\nWell more generally, should you visit parent projects for refs/meta/config?\n\nI think it\u0027s a bit contradictory to the other implementation that you don\u0027t visit parent projects by default, so if not implement it, it\u0027s worth documenting that it doesn\u0027t work.",
+      "range": {
+        "startLine": 116,
+        "startChar": 15,
+        "endLine": 116,
+        "endChar": 51
+      },
+      "revId": "9f2b1a38444ad67a1a751456182ea6ddaef91527",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "66acd030_48428161",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 116,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "There are 2 kind of configurations:\n\n1. plugin configuration: code-owners.config in refs/meta/config, this is basically just an extension of project.config. This configuration is inherited from parent projects.\n\n2. definition of code owners in OWNERS files: these files are part of the source code and there is no inheritance from parent projects\n\nFor me, semantically the OWNERS file in refs/meta/config is an extension of 2. (just an additional OWNERS file which is the root of all OWNERS files). At this point we do not intend to implement inheritance from parent projects here, although technically it would be possible. If you want to define code owners for child projects you can already do this via global code owners, hence I think supporting inheritance for default code owners is not needed, but let\u0027s see if stakeholders will still request this later :)\n\nAdded Javadoc to this method and also updated the documentation and the commit message to mention this explicitly.",
+      "parentUuid": "d1308d5a_c089d175",
       "range": {
         "startLine": 116,
         "startChar": 15,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f96e1d37_a663f965",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigScanner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "\u003e why are you skipping the method below?\n\nThe visitor callback controls whether further code owner config files should be visited (also see JavaDoc of CodeOwnerConfigVisitor). If it returns false, we are done and can return. Added a comment here, to make this clearer.",
+      "parentUuid": "099b3aaa_8830e922",
+      "range": {
+        "startLine": 141,
+        "startChar": 10,
+        "endLine": 141,
+        "endChar": 16
+      },
+      "revId": "9f2b1a38444ad67a1a751456182ea6ddaef91527",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7cbb9ad1_1be69afd",
@@ -83,6 +155,30 @@
       "writtenOn": "2020-11-12T10:25:32Z",
       "side": 1,
       "message": "worth documenting this",
+      "range": {
+        "startLine": 155,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 45
+      },
+      "revId": "9f2b1a38444ad67a1a751456182ea6ddaef91527",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8c22a183_12b82c47",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwnerConfigFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7cbb9ad1_1be69afd",
       "range": {
         "startLine": 155,
         "startChar": 0,
@@ -116,6 +212,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5e850c96_f5d19a65",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnerConfigFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c03d0e2_03c5c546",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 45
+      },
+      "revId": "9f2b1a38444ad67a1a751456182ea6ddaef91527",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d80f83c6_b28c49b3",
@@ -129,6 +249,30 @@
       "writtenOn": "2020-11-12T10:25:32Z",
       "side": 1,
       "message": "I didn\u0027t realize this functionality exists, worth clarifying in the docs.",
+      "range": {
+        "startLine": 633,
+        "startChar": 6,
+        "endLine": 633,
+        "endChar": 91
+      },
+      "revId": "9f2b1a38444ad67a1a751456182ea6ddaef91527",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2f17443d_46c8f640",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 633,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:06:45Z",
+      "side": 1,
+      "message": "Added this to the class java doc of CodeOwnerConfigHierarchy.\nIn the user documentation it was already explained here:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/287307/1/resources/Documentation/backend-find-owners.md",
+      "parentUuid": "d80f83c6_b28c49b3",
       "range": {
         "startLine": 633,
         "startChar": 6,
