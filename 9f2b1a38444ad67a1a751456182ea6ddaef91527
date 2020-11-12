@@ -213,6 +213,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a147306a_ccffa4d5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwnerConfigFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-12T14:36:48Z",
+      "side": 1,
+      "message": "Yeah, I think for the REST endpoints it\u0027s pretty clear that they are only looking at the code owner configs in the branch for which the REST endpoint is invoked.",
+      "parentUuid": "daec2313_4d38f0f6",
+      "range": {
+        "startLine": 155,
+        "startChar": 0,
+        "endLine": 155,
+        "endChar": 45
+      },
+      "revId": "9f2b1a38444ad67a1a751456182ea6ddaef91527",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3c03d0e2_03c5c546",
