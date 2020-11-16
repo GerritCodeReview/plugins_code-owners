@@ -19,6 +19,13 @@ export const SuggestionsState = {
   NotLoaded: 'NotLoaded',
   Loaded: 'Loaded',
   Loading: 'Loading',
+  LoadFailed: 'LoadFailed',
+};
+
+export const PluginState = {
+  Enabled: 'Enabled',
+  Disabled: 'Disabled',
+  Failed: 'Failed',
 };
 
 /**
@@ -51,6 +58,7 @@ export class CodeOwnersModel extends EventTarget {
     this.suggestionsState = SuggestionsState.NotLoaded;
     this.suggestionsLoadProgress = undefined;
     this.showSuggestions = false;
+    this.pluginStatus = undefined;
   }
 
   setBranchConfig(config) {
@@ -105,6 +113,31 @@ export class CodeOwnersModel extends EventTarget {
     if (this.showSuggestions === show) return;
     this.showSuggestions = show;
     this._firePropertyChanged('showSuggestions');
+  }
+
+  setPluginEnabled(enabled) {
+    this._setPluginStatus({state: enabled ?
+      PluginState.Enabled : PluginState.Disabled});
+  }
+
+  setPluginFailed(failedMessage) {
+    this._setPluginStatus({state: PluginState.Failed, failedMessage});
+  }
+
+  _setPluginStatus(status) {
+    if (this._arePluginStatusesEqual(this.pluginStatus, status)) return;
+    this.pluginStatus = status;
+    this._firePropertyChanged('pluginStatus');
+  }
+
+  _arePluginStatusesEqual(status1, status2) {
+    if (status1 === undefined || status2 === undefined) {
+      return status1 === status2;
+    }
+    if (status1.state !== status2.state) return false;
+    return status1.state === PluginState.Failed ?
+      status1.failedMessage === status2.failedMessage :
+      true;
   }
 
   _firePropertyChanged(propertyName) {
