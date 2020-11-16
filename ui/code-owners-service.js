@@ -546,7 +546,7 @@ export class CodeOwnerService {
     this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
   }
 
-  getBranchConfig() {
+  async getBranchConfig() {
     return this.codeOwnerCacheApi.getBranchConfig();
   }
 
@@ -570,3 +570,4 @@ export class CodeOwnerService {
     return this.ownerService;
   }
 }
+
