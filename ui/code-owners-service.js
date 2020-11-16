@@ -190,6 +190,48 @@ export class CodeOwnersChangeState extends Polymer.Element {
   }
 }
 
+export class CodeOwnersChangeApi {
+  constructor(restApi, change) {
+    this.restApi = restApi;
+    this.codeOwnerApi = new CodeOwnerApi(restApi);
+    this.change = change;
+    this.promises = {};
+  }
+
+  _fetchOnce(key, asyncFn) {
+    if (!this.promises[key]) {
+      this.promises[key] = asyncFn();
+    }
+    return this.promises[key];
+  }
+
+  getAccount() {
+    return this._fetchOnce('getAccount', () => this._getAccount());
+  }
+
+  async _getAccount() {
+    const loggedIn = await this.restApi.getLoggedIn();
+    if (!loggedIn) return undefined;
+    return await this.restApi.getAccount();
+  }
+
+  listOwnerStatus() {
+    return this._fetchOnce('listOwnerStatus',
+        () => this.codeOwnerApi.listOwnerStatus(this.change._number));
+  }
+
+  getProjectConfig() {
+    return this._fetchOnce('getProjectConfig',
+        () => this.codeOwnerApi.getProjectConfig(this.change.project));
+  }
+
+  getBranchConfig() {
+    return this._fetchOnce('getBranchConfig',
+        () => this.codeOwnerApi.getBranchConfig(this.change.project,
+            this.change.branch));
+  }
+}
+
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -198,6 +240,7 @@ export class CodeOwnerService {
     this.restApi = restApi;
     this.change = change;
     this.options = {maxConcurrentRequests: 10, ...options};
+    this.codeOwnerChangeApi = new CodeOwnersChangeApi(restApi, change);
     this.codeOwnerApi = new CodeOwnerApi(restApi);
 
     // fetched files and fetching status
@@ -210,38 +253,8 @@ export class CodeOwnerService {
    * Initial fetches.
    */
   async init() {
-    this.accountPromise = this._getAccount();
-    this.statusPromise = this._getStatus();
-  }
-
-  async _getAccount() {
-    const loggedIn = await this.restApi.getLoggedIn();
-    if (!loggedIn) return undefined;
-    return await this.restApi.getAccount();
-  }
-
-  async _getStatus() {
-    const enabled = await this.isCodeOwnerEnabled();
-    if (!enabled) {
-      return {
-        patchsetNumber: 0,
-        enabled: false,
-        codeOwnerStatusMap: new Map(),
-        rawStatuses: [],
-      };
-    }
-
-    const onwerStatus = await this.codeOwnerApi
-        .listOwnerStatus(this.change._number);
-
-    return {
-      enabled: true,
-      patchsetNumber: onwerStatus.patch_set_number,
-      codeOwnerStatusMap: this._formatStatuses(
-          onwerStatus.file_code_owner_statuses
-      ),
-      rawStatuses: onwerStatus.file_code_owner_statuses,
-    };
+    this.codeOwnerChangeApi.getAccount();
+    this.getStatus();
   }
 
   /**
@@ -251,7 +264,7 @@ export class CodeOwnerService {
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
   async getLoggedInUserInitialRole() {
-    const account = await this.accountPromise;
+    const account = await this.codeOwnerChangeApi.getAccount();
     if (!account) {
       return UserRole.ANONYMOUS;
     }
@@ -294,14 +307,38 @@ export class CodeOwnerService {
   }
 
   async getStatus() {
-    const status = await this.statusPromise;
+    const status = await this._getStatus();
     if (status.enabled && !this.isOnLatestPatchset(status.patchsetNumber)) {
       // status is outdated, abort and re-init
       this.abort();
       this.init();
-      return this.statusPromise;
+      return await this.codeOwnerChangeApi.getStatus();
     }
     return status;
+  }
+
+  async _getStatus() {
+    const enabled = await this.isCodeOwnerEnabled();
+    if (!enabled) {
+      return {
+        patchsetNumber: 0,
+        enabled: false,
+        codeOwnerStatusMap: new Map(),
+        rawStatuses: [],
+      };
+    }
+
+    const onwerStatus = await this.codeOwnerChangeApi
+        .listOwnerStatus();
+
+    return {
+      enabled: true,
+      patchsetNumber: onwerStatus.patch_set_number,
+      codeOwnerStatusMap: this._formatStatuses(
+          onwerStatus.file_code_owner_statuses
+      ),
+      rawStatuses: onwerStatus.file_code_owner_statuses,
+    };
   }
 
   async areAllFilesApproved() {
@@ -379,7 +416,6 @@ export class CodeOwnerService {
     const filesToFetch = filesGroupByStatus.missing.concat(filesGroupByStatus.pending);
     this._totalFetchCount = filesToFetch.length;
     return await this._batchFetchCodeOwners(filesToFetch);
-
   }
 
   _formatStatuses(statuses) {
@@ -527,20 +563,11 @@ export class CodeOwnerService {
   }
 
   getProjectConfig() {
-    if (!this.getProjectConfigPromise) {
-      this.getProjectConfigPromise =
-          this.codeOwnerApi.getProjectConfig(this.change.project);
-    }
-    return this.getProjectConfigPromise;
+    return this.codeOwnerChangeApi.getProjectConfig();
   }
 
   getBranchConfig() {
-    if (!this.getBranchConfigPromise) {
-      this.getBranchConfigPromise =
-          this.codeOwnerApi.getBranchConfig(this.change.project,
-              this.change.branch);
-    }
-    return this.getBranchConfigPromise;
+    return this.codeOwnerChangeApi.getBranchConfig();
   }
 
   async isCodeOwnerEnabled() {
@@ -548,7 +575,7 @@ export class CodeOwnerService {
         this.change.status === ChangeStatus.MERGED) {
       return false;
     }
-    const config = await this.getBranchConfig();
+    const config = await this.codeOwnerChangeApi.getBranchConfig();
     return !(config.status && config.status.disabled);
   }
 
