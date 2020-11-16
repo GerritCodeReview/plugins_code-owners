@@ -220,11 +220,6 @@ export class CodeOwnersChangeApi {
         () => this.codeOwnerApi.listOwnerStatus(this.change._number));
   }
 
-  getProjectConfig() {
-    return this._fetchOnce('getProjectConfig',
-        () => this.codeOwnerApi.getProjectConfig(this.change.project));
-  }
-
   getBranchConfig() {
     return this._fetchOnce('getBranchConfig',
         () => this.codeOwnerApi.getBranchConfig(this.change.project,
@@ -250,7 +245,8 @@ export class OwnersFetcher {
   getProgressString() {
     return this._totalFetchCount === 0 ?
       `Loading suggested owners ...` :
-      `${this._fetchedOwners.size} out of ${this._totalFetchCount} files have returned suggested owners.`;
+      `${this._fetchedOwners.size} out of ${this._totalFetchCount} files ` +
+        `have returned suggested owners.`;
   }
 
   getFiles() {
@@ -281,7 +277,8 @@ export class OwnersFetcher {
         }
         , {pending: [], missing: []});
     // always fetch INSUFFICIENT_REVIEWERS first and then pending
-    const filesToFetch = filesGroupByStatus.missing.concat(filesGroupByStatus.pending);
+    const filesToFetch =
+        filesGroupByStatus.missing.concat(filesGroupByStatus.pending);
     this._totalFetchCount = filesToFetch.length;
     await this._batchFetchCodeOwners(filesToFetch);
     this._fetchStatus = FetchStatus.FINISHED;
@@ -342,7 +339,7 @@ export class CodeOwnerService {
     this.codeOwnerChangeApi = new CodeOwnersChangeApi(restApi, change);
     const fetcherOptions = {
       maxConcurrentRequests: options.maxConcurrentRequests || 10,
-    }
+    };
     this.ownersFetcher = new OwnersFetcher(restApi, change, fetcherOptions);
   }
 
@@ -400,12 +397,13 @@ export class CodeOwnerService {
     if (!reviewers) {
       return false;
     }
-    return reviewers.some(reviewer => reviewer._account_id === account._account_id);
+    return reviewers.some(
+        reviewer => reviewer._account_id === account._account_id);
   }
 
   async getStatus() {
     const status = await this._getStatus();
-    if (status.enabled && !this.isOnLatestPatchset(status.patchsetNumber)) {
+    if (status.enabled && !this._isOnLatestPatchset(status.patchsetNumber)) {
       // status is outdated, abort and re-init
       this.ownersFetcher.abort();
       this.init();
@@ -483,7 +481,8 @@ export class CodeOwnerService {
       finished: this.ownersFetcher.getStatus() === FetchStatus.FINISHED,
       status: this.ownersFetcher.getStatus(),
       progress: this.ownersFetcher.getProgressString(),
-      suggestions: this._groupFilesByOwners(codeOwnerStatusMap, this.ownersFetcher.getFiles()),
+      suggestions: this._groupFilesByOwners(codeOwnerStatusMap,
+          this.ownersFetcher.getFiles()),
     };
   }
 
@@ -553,7 +552,7 @@ export class CodeOwnerService {
     }
     const groupedItems = [];
     for (const ownersKey of ownersFilesMap.keys()) {
-      const groupName = this.getGroupName(ownersFilesMap.get(ownersKey).files);
+      const groupName = this._getGroupName(ownersFilesMap.get(ownersKey).files);
       groupedItems.push({
         groupName,
         files: ownersFilesMap.get(ownersKey).files,
@@ -564,16 +563,17 @@ export class CodeOwnerService {
     if (failedToFetchFiles.size > 0) {
       const failedFiles = [...failedToFetchFiles];
       groupedItems.push({
-        groupName: this.getGroupName(failedFiles),
+        groupName: this._getGroupName(failedFiles),
         files: failedFiles,
-        error: new Error('Failed to fetch code owner info. Try to refresh the page.'),
+        error: new Error(
+            'Failed to fetch code owner info. Try to refresh the page.'),
       });
     }
 
     return groupedItems;
   }
 
-  getGroupName(files) {
+  _getGroupName(files) {
     const fileName = files[0].path.split('/').pop();
     return {
       name: fileName,
@@ -581,13 +581,9 @@ export class CodeOwnerService {
     };
   }
 
-  isOnLatestPatchset(patchsetId) {
+  _isOnLatestPatchset(patchsetId) {
     const latestRevision = this.change.revisions[this.change.current_revision];
     return `${latestRevision._number}` === `${patchsetId}`;
-  }
-
-  getProjectConfig() {
-    return this.codeOwnerChangeApi.getProjectConfig();
   }
 
   getBranchConfig() {
