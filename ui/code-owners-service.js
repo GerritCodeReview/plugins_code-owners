@@ -534,7 +534,7 @@ export class CodeOwnerService {
     this.ownersFetcher.abort();
   }
 
-  getBranchConfig() {
+  async getBranchConfig() {
     return this.codeOwnerCacheApi.getBranchConfig();
   }
 
@@ -558,3 +558,4 @@ export class CodeOwnerService {
     return this.ownerService;
   }
 }
+

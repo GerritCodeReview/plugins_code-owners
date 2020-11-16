@@ -101,7 +101,8 @@
                     "Polymer",
                     "LegacyElementMixin",
                     "GestureEventListeners",
-                    "LegacyDataMixin"
+                    "LegacyDataMixin",
+                    "CodeOwnersModelMixin"
                 ]
             }
         ],
