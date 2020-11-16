@@ -530,7 +530,7 @@ export class CodeOwnerService {
     return `${latestRevision._number}` === `${patchsetId}`;
   }
 
-  getBranchConfig() {
+  async getBranchConfig() {
     return this.codeOwnerCacheApi.getBranchConfig();
   }
 
@@ -554,3 +554,4 @@ export class CodeOwnerService {
     return this.ownerService;
   }
 }
+
