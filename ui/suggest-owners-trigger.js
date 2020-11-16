@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
+import {PluginState} from './code-owners-model.js';
 
 export class SuggestOwnersTrigger extends
   CodeOwnersModelMixin(Polymer.Element) {
@@ -26,7 +27,7 @@ export class SuggestOwnersTrigger extends
     return {
       hidden: {
         type: Boolean,
-        computed: '_computeHidden(model.isCodeOwnerEnabled,' +
+        computed: '_computeHidden(model.pluginStatus,' +
             'model.areAllFilesApproved, model.userRole)',
         reflectToAttribute: true,
       },
@@ -68,17 +69,17 @@ export class SuggestOwnersTrigger extends
   loadPropertiesAfterModelChanged() {
     super.loadPropertiesAfterModelChanged();
     this.modelLoader.loadUserRole();
-    this.modelLoader.loadIsCodeOwnerEnabled();
+    this.modelLoader.loadPluginStatus();
     this.modelLoader.loadAreAllFilesApproved();
   }
 
-  _computeHidden(enabled, allFilesApproved, userRole) {
-    if (enabled === undefined ||
+  _computeHidden(pluginStatus, allFilesApproved, userRole) {
+    if (pluginStatus === undefined ||
         allFilesApproved === undefined ||
         userRole === undefined) {
       return true;
     }
-    if (enabled) {
+    if (pluginStatus.state === PluginState.Enabled) {
       return allFilesApproved;
     } else {
       return true;

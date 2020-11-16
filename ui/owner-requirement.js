@@ -17,6 +17,8 @@
 
 import {OwnerStatus} from './code-owners-service.js';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
+import {showPluginFailedMessage} from './code-owners-banner.js';
+import {PluginState} from './code-owners-model.js';
 
 /**
  * Owner requirement control for `submit-requirement-item-code-owners` endpoint.
@@ -62,18 +64,26 @@ export class OwnerRequirementValue extends
           Loading status ...
         </p>
         <template is="dom-if" if="[[!_isLoading]]">
-          <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
-          <template is="dom-if" if="[[_overrideInfoUrl]]">
-            <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
-              target="_blank">
-              <iron-icon icon="gr-icons:help-outline"
-                title="Documentation for overriding code owners"></iron-icon>
-            </a>
+          <template is="dom-if" if="[[!_pluginFailed(model.pluginStatus)]]">  
+            <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
+            <template is="dom-if" if="[[_overrideInfoUrl]]">
+              <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
+                target="_blank">
+                <iron-icon icon="gr-icons:help-outline"
+                  title="Documentation for overriding code owners"></iron-icon>
+              </a>
+            </template>
+            <template is="dom-if" if="[[!_allApproved]]">
+              <gr-button link on-click="_openReplyDialog">
+              Suggest owners
+            </gr-button>
+            </template>
           </template>
-          <template is="dom-if" if="[[!_allApproved]]">
-            <gr-button link on-click="_openReplyDialog">
-            Suggest owners
-          </gr-button>
+          <template is="dom-if" if="[[_pluginFailed(model.pluginStatus)]]">
+            <span>Code-owners plugin has failed</span>
+            <gr-button link on-click="_showFailDetails">
+              Details
+            </gr-button>
           </template>
         </template>
       `;
@@ -85,7 +95,7 @@ export class OwnerRequirementValue extends
       _isLoading: {
         type: Boolean,
         computed: '_computeIsLoading(model.branchConfig, model.status, '
-            + 'model.userRole)',
+            + 'model.userRole, model.pluginStatus)',
       },
       _allApproved: {
         type: Boolean,
@@ -116,8 +126,15 @@ export class OwnerRequirementValue extends
     this.modelLoader.loadUserRole();
   }
 
-  _computeIsLoading(branchConfig, status, userRole) {
+  _computeIsLoading(branchConfig, status, userRole, pluginStatus) {
+    if (this._pluginFailed(pluginStatus)) {
+      return false;
+    }
     return !branchConfig || !status || !userRole;
+  }
+
+  _pluginFailed(pluginStatus) {
+    return pluginStatus && pluginStatus.state === PluginState.Failed;
   }
 
   _onStatusChanged(status, userRole) {
@@ -160,7 +177,7 @@ export class OwnerRequirementValue extends
   }
 
   _computeAllApproved(statusCount) {
-    return statusCount.missing === 0
+    return statusCount && statusCount.missing === 0
             && statusCount.pending === 0;
   }
 
@@ -224,6 +241,10 @@ export class OwnerRequirementValue extends
     );
     this.reporting.reportInteraction('suggest-owners-from-submit-requirement',
         {user_role: this.model.userRole});
+  }
+
+  _showFailDetails() {
+    showPluginFailedMessage(this, this.model.pluginStatus);
   }
 }
 
