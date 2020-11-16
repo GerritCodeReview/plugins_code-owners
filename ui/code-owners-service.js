@@ -140,43 +140,44 @@ export class CodeOwnerService {
     this._fetchedOwners = new Map();
     this._fetchStatus = FetchStatus.NOT_STARTED;
     this._totalFetchCount = 0;
-
-    this.init();
   }
 
   /**
    * Initial fetches.
    */
-  init() {
-    this.accountPromise = this.restApi.getLoggedIn().then(loggedIn => {
-      if (!loggedIn) {
-        return undefined;
-      }
-      return this.restApi.getAccount();
-    });
+  async init() {
+    this.accountPromise = this._getAccount();
+    this.statusPromise = this._getStatus();
+  }
 
-    this.statusPromise = this.isCodeOwnerEnabled().then(enabled => {
-      if (!enabled) {
-        return {
-          patchsetNumber: 0,
-          enabled: false,
-          codeOwnerStatusMap: new Map(),
-          rawStatuses: [],
-        };
-      }
-      return this.codeOwnerApi
-          .listOwnerStatus(this.change._number)
-          .then(res => {
-            return {
-              enabled: true,
-              patchsetNumber: res.patch_set_number,
-              codeOwnerStatusMap: this._formatStatuses(
-                  res.file_code_owner_statuses
-              ),
-              rawStatuses: res.file_code_owner_statuses,
-            };
-          });
-    });
+  async _getAccount() {
+    const loggedIn = await this.restApi.getLoggedIn();
+    if (!loggedIn) return undefined;
+    return await this.restApi.getAccount();
+  }
+
+  async _getStatus() {
+    const enabled = await this.isCodeOwnerEnabled();
+    if (!enabled) {
+      return {
+        patchsetNumber: 0,
+        enabled: false,
+        codeOwnerStatusMap: new Map(),
+        rawStatuses: [],
+      };
+    }
+
+    const onwerStatus = await this.codeOwnerApi
+        .listOwnerStatus(this.change._number);
+
+    return {
+      enabled: true,
+      patchsetNumber: onwerStatus.patch_set_number,
+      codeOwnerStatusMap: this._formatStatuses(
+          onwerStatus.file_code_owner_statuses
+      ),
+      rawStatuses: onwerStatus.file_code_owner_statuses,
+    };
   }
 
   /**
@@ -185,42 +186,40 @@ export class CodeOwnerService {
    * For example, if a user removes themselves as a reviewer, the returned
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
-  getLoggedInUserInitialRole() {
-    return this.accountPromise.then(account => {
-      if (!account) {
-        return UserRole.ANONYMOUS;
-      }
-      const change = this.change;
+  async getLoggedInUserInitialRole() {
+    const account = await this.accountPromise;
+    if (!account) {
+      return UserRole.ANONYMOUS;
+    }
+    const change = this.change;
+    if (
+      change.revisions &&
+      change.current_revision &&
+      change.revisions[change.current_revision]
+    ) {
+      const commit = change.revisions[change.current_revision].commit;
       if (
-        change.revisions &&
-        change.current_revision &&
-        change.revisions[change.current_revision]
+        commit &&
+        commit.author &&
+        account.email &&
+        commit.author.email === account.email
       ) {
-        const commit = change.revisions[change.current_revision].commit;
-        if (
-          commit &&
-          commit.author &&
-          account.email &&
-          commit.author.email === account.email
-        ) {
-          return UserRole.AUTHOR;
-        }
+        return UserRole.AUTHOR;
       }
-      if (change.owner._account_id === account._account_id) {
-        return UserRole.CHANGE_OWNER;
+    }
+    if (change.owner._account_id === account._account_id) {
+      return UserRole.CHANGE_OWNER;
+    }
+    if (change.reviewers) {
+      if (this._accountInReviewers(change.reviewers.REVIEWER, account)) {
+        return UserRole.REVIEWER;
+      } else if (this._accountInReviewers(change.reviewers.CC, account)) {
+        return UserRole.CC;
+      } else if (this._accountInReviewers(change.reviewers.REMOVED, account)) {
+        return UserRole.REMOVED_REVIEWER;
       }
-      if (change.reviewers) {
-        if (this._accountInReviewers(change.reviewers.REVIEWER, account)) {
-          return UserRole.REVIEWER;
-        } else if (this._accountInReviewers(change.reviewers.CC, account)) {
-          return UserRole.CC;
-        } else if (this._accountInReviewers(change.reviewers.REMOVED,
-            account)) {
-          return UserRole.REMOVED_REVIEWER;
-        }
-      }
-      return UserRole.OTHER;
-    });
+    }
+    return UserRole.OTHER;
   }
 
   _accountInReviewers(reviewers, account) {
@@ -231,27 +230,25 @@ export class CodeOwnerService {
       reviewer._account_id === account._account_id);
   }
 
-  getStatus() {
-    return this.statusPromise.then(res => {
-      if (res.enabled && !this.isOnLatestPatchset(res.patchsetNumber)) {
-        // status is outdated, abort and re-init
-        this.abort();
-        this.init();
-        return this.statusPromise;
-      }
-      return res;
-    });
+  async getStatus() {
+    const status = await this.statusPromise;
+    if (status.enabled && !this.isOnLatestPatchset(status.patchsetNumber)) {
+      // status is outdated, abort and re-init
+      this.abort();
+      this.init();
+      return this.statusPromise;
+    }
+    return status;
   }
 
-  areAllFilesApproved() {
-    return this.getStatus().then(({rawStatuses}) => {
-      return !rawStatuses.some(status => {
-        const oldPathStatus = status.old_path_status;
-        const newPathStatus = status.new_path_status;
-        // For deleted files, no new_path_status exists
-        return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED)
-          || (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
-      });
+  async areAllFilesApproved() {
+    const {rawStatuses} = await this.getStatus();
+    return !rawStatuses.some(status => {
+      const oldPathStatus = status.old_path_status;
+      const newPathStatus = status.new_path_status;
+      // For deleted files, no new_path_status exists
+      return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED)
+        || (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
     });
   }
 
@@ -272,7 +269,7 @@ export class CodeOwnerService {
    *  }>
    * }}
    */
-  getSuggestedOwners() {
+  async getSuggestedOwners() {
     // In case its aborted due to outdated patches
     // should kick start the fetching again
     // Note: we currently are not reusing the instance when switching changes,
@@ -280,51 +277,47 @@ export class CodeOwnerService {
     // outdated and not used.
     if (this._fetchStatus === FetchStatus.NOT_STARTED
       || this._fetchStatus === FetchStatus.ABORT) {
-      this._fetchSuggestedOwners().then(() => {
-        this._fetchStatus = FetchStatus.FINISHED;
-      });
+      await this._fetchSuggestedOwners();
+      this._fetchStatus = FetchStatus.FINISHED;
     }
 
-    return this.getStatus().then(({codeOwnerStatusMap}) => {
-      return {
-        finished: this._fetchStatus === FetchStatus.FINISHED,
-        status: this._fetchStatus,
-        progress: this._totalFetchCount === 0 ?
-          `Loading suggested owners ...` :
-          `${this._fetchedOwners.size} out of ${this._totalFetchCount} ` +
-            `files have returned suggested owners.`,
-        suggestions: this._groupFilesByOwners(codeOwnerStatusMap),
-      };
-    });
+    const {codeOwnerStatusMap} = await this.getStatus();
+    return {
+      finished: this._fetchStatus === FetchStatus.FINISHED,
+      status: this._fetchStatus,
+      progress: this._totalFetchCount === 0 ?
+        `Loading suggested owners ...` :
+        `${this._fetchedOwners.size} out of ${this._totalFetchCount} ` +
+          `files have returned suggested owners.`,
+      suggestions: this._groupFilesByOwners(codeOwnerStatusMap),
+    };
   }
 
-  _fetchSuggestedOwners() {
+  async _fetchSuggestedOwners() {
     // reset existing temporary storage
     this._fetchedOwners = new Map();
     this._fetchStatus = FetchStatus.FETCHING;
     this._totalFetchCount = 0;
 
-    return this.getStatus()
-        .then(({codeOwnerStatusMap}) => {
-          // only fetch those not approved yet
-          const filesGroupByStatus = [...codeOwnerStatusMap.keys()].reduce(
-              (list, file) => {
-                const status = codeOwnerStatusMap
-                    .get(file).status;
-                if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
-                  list.missing.push(file);
-                } else if (status === OwnerStatus.PENDING) {
-                  list.pending.push(file);
-                }
-                return list;
-              }
-              , {pending: [], missing: []});
-          // always fetch INSUFFICIENT_REVIEWERS first and then pending
-          const filesToFetch = filesGroupByStatus.missing
-              .concat(filesGroupByStatus.pending);
-          this._totalFetchCount = filesToFetch.length;
-          return this._batchFetchCodeOwners(filesToFetch);
-        });
+    const {codeOwnerStatusMap} = await this.getStatus();
+    // only fetch those not approved yet
+    const filesGroupByStatus = [...codeOwnerStatusMap.keys()].reduce(
+        (list, file) => {
+          const status = codeOwnerStatusMap
+              .get(file).status;
+          if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
+            list.missing.push(file);
+          } else if (status === OwnerStatus.PENDING) {
+            list.pending.push(file);
+          }
+          return list;
+        }
+        , {pending: [], missing: []});
+    // always fetch INSUFFICIENT_REVIEWERS first and then pending
+    const filesToFetch = filesGroupByStatus.missing
+        .concat(filesGroupByStatus.pending);
+    this._totalFetchCount = filesToFetch.length;
+    return await this._batchFetchCodeOwners(filesToFetch);
   }
 
   _formatStatuses(statuses) {
@@ -433,9 +426,9 @@ export class CodeOwnerService {
    *
    * @param {!Array<string>} files
    */
-  _batchFetchCodeOwners(files) {
+  async _batchFetchCodeOwners(files) {
     if (this._fetchStatus === FetchStatus.ABORT) {
-      return Promise.resolve(this._fetchedOwners);
+      return this._fetchedOwners;
     }
 
     const batchRequests = [];
@@ -444,29 +437,26 @@ export class CodeOwnerService {
       const filePath = files[i];
       if (filePath) {
         this._fetchedOwners.set(filePath, {});
-        batchRequests.push(
-            this.codeOwnerApi
-                .listOwnersForPath(
-                    this.change.id,
-                    filePath
-                )
-                .then(owners => {
-                  // use Set to de-dup
-                  this._fetchedOwners.get(filePath).owners = new Set(owners);
-                })
-                .catch(e => {
-                  this._fetchedOwners.get(filePath).error = e;
-                })
-        );
+        batchRequests.push(this._fetchOwnersForPath(this.change.id, filePath));
       }
     }
     const resPromise = Promise.all(batchRequests);
+    await resPromise;
     if (files.length > maxConcurrentRequests) {
-      return resPromise.then(() => {
-        return this._batchFetchCodeOwners(files.slice(maxConcurrentRequests));
-      });
+      return await this._batchFetchCodeOwners(
+          files.slice(maxConcurrentRequests));
     }
-    return resPromise.then(() => this._fetchedOwners);
+    return this._fetchedOwners;
+  }
+
+  async _fetchOwnersForPath(changeId, filePath) {
+    try {
+      const owners = await this.codeOwnerApi.listOwnersForPath(changeId,
+          filePath);
+      this._fetchedOwners.get(filePath).owners = new Set(owners);
+    } catch (e) {
+      this._fetchedOwners.get(filePath).error = e;
+    }
   }
 
   abort() {
@@ -484,14 +474,13 @@ export class CodeOwnerService {
     return this.getBranchConfigPromise;
   }
 
-  isCodeOwnerEnabled() {
+  async isCodeOwnerEnabled() {
     if (this.change.status === ChangeStatus.ABANDONED ||
         this.change.status === ChangeStatus.MERGED) {
-      return Promise.resolve(false);
+      return false;
     }
-    return this.getBranchConfig().then(config => {
-      return !(config.status && config.status.disabled);
-    });
+    const config = await this.getBranchConfig();
+    return !(config.status && config.status.disabled);
   }
 
   static getOwnerService(restApi, change) {
@@ -500,6 +489,7 @@ export class CodeOwnerService {
         // Chrome has a limit of 6 connections per host name, and a max of 10 connections.
         maxConcurrentRequests: 6,
       });
+      this.ownerService.init();
     }
     return this.ownerService;
   }
