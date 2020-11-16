@@ -196,9 +196,9 @@
     });
 
     suite('abort', () => {
-      let resolver;
       setup(done => {
-        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve(fakeStatus));
+        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`)
+            .returns(Promise.resolve(fakeStatus));
 
         codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange});
         flush(done);
