@@ -272,6 +272,61 @@ export class OwnersFetcher {
   }
 }
 
+export class CodeOwnersChangeState extends EventTarget {
+  constructor() {
+    super();
+    this.branchConfig = undefined;
+    this.status = undefined;
+    this.userRole = undefined;
+  }
+
+  setBranchConfig(config) {
+    if (this.branchConfig === config) return;
+    this.branchConfig = config;
+    this._firePropertyChanged('branchConfig');
+  }
+
+  setStatus(status) {
+    if (this.status === status) return;
+    this.status = status;
+    this._firePropertyChanged('status');
+  }
+
+  setUserRole(userRole) {
+    if (this.userRole === userRole) return;
+    this.userRole = userRole;
+    this._firePropertyChanged('userRole');
+  }
+
+  setIsCodeOwnerEnabled(enabled) {
+    if (this.isCodeOwnerEnabled === enabled) return;
+    this.isCodeOwnerEnabled = enabled;
+    this._firePropertyChanged('isCodeOwnerEnabled');
+  }
+
+  setAreAllFilesApproved(approved) {
+    if (this.areAllFilesApproved === approved) return;
+    this.areAllFilesApproved = approved;
+    this._firePropertyChanged('areAllFilesApproved');
+  }
+
+  subscribePropertyChanged(callback) {
+    const fn = e => { callback(e.detail.propertyName); };
+    this.addEventListener('code-owners-state-property-changed', fn);
+    return () => {
+      this.removeEventListener('code-owners-state-property-changed', fn);
+    };
+  }
+
+  _firePropertyChanged(propertyName) {
+    this.dispatchEvent(new CustomEvent('code-owners-state-property-changed', {
+      detail: {
+        propertyName,
+      },
+    }));
+  }
+}
+
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -286,6 +341,7 @@ export class CodeOwnerService {
       maxConcurrentRequests: options.maxConcurrentRequests || 10,
     };
     this.ownersFetcher = new OwnersFetcher(restApi, change, fetcherOptions);
+    this.state = new CodeOwnersChangeState();
   }
 
   /**
@@ -532,6 +588,37 @@ export class CodeOwnerService {
 
   getBranchConfig() {
     return this.codeOwnerCacheApi.getBranchConfig();
+  }
+
+  async ensureBranchConfigLoaded() {
+    if (!this.state.branchConfig) {
+      this.state.setBranchConfig(
+          await this.codeOwnerChangeApi.getBranchConfig());
+    }
+  }
+
+  async ensureStatusLoaded() {
+    if (!this.state.status) {
+      this.state.setStatus(await this.getStatus());
+    }
+  }
+
+  async ensureUserRoleLoaded() {
+    if (!this.state.userRole) {
+      this.state.setUserRole(await this.getLoggedInUserInitialRole());
+    }
+  }
+
+  async ensureIsCodeOwnerEnabledLoaded() {
+    if (this.state.isCodeOwnerEnabled === undefined) {
+      this.state.setIsCodeOwnerEnabled(await this.isCodeOwnerEnabled());
+    }
+  }
+
+  async ensureAreAllFilesApprovedLoaded() {
+    if (this.state.areAllFilesApproved === undefined) {
+      this.state.setAreAllFilesApproved(await this.areAllFilesApproved());
+    }
   }
 
   async isCodeOwnerEnabled() {
