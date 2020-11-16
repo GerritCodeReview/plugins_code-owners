@@ -16,6 +16,7 @@
  */
 
 import {CodeOwnerService, OwnerStatus} from './code-owners-service.js';
+import {CodeOwnersMixin} from './code-owners-mixin.js';
 
 const MAGIC_FILES = ['/COMMIT_MSG', '/MERGE_LIST', '/PATCHSET_LEVEL'];
 const STATUS_CODE = {
@@ -46,7 +47,7 @@ const STATUS_TOOLTIP = {
   [STATUS_CODE.ERROR]: 'Failed to fetch code owner status',
 };
 
-class BaseEl extends Polymer.Element {
+class BaseEl extends CodeOwnersMixin(Polymer.Element) {
   computeHidden(change, patchRange) {
     if ([change, patchRange].includes(undefined)) return true;
     // if code-owners is not a submit requirement, don't show status column
@@ -65,11 +66,6 @@ class BaseEl extends Polymer.Element {
     // only show if its latest patchset
     if (`${patchRange.patchNum}` !== `${latestPatchset._number}`) return true;
     return false;
-  }
-
-  onInputChanged(restApi, change) {
-    if ([restApi, change].includes(undefined)) return;
-    this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
   }
 }
 
@@ -96,25 +92,14 @@ export class OwnerStatusColumnHeader extends BaseEl {
 
   static get properties() {
     return {
-      change: Object,
-      reporting: Object,
       patchRange: Object,
-      restApi: Object,
 
       hidden: {
         type: Boolean,
         reflectToAttribute: true,
         computed: 'computeHidden(change, patchRange)',
       },
-      ownerService: Object,
     };
-  }
-
-  static get observers() {
-    return [
-      'onInputChanged(restApi, change)',
-      'onOwnerServiceChanged(ownerServive)',
-    ];
   }
 }
 
@@ -188,47 +173,45 @@ export class OwnerStatusColumnContent extends BaseEl {
 
   static get observers() {
     return [
-      'onInputChanged(restApi, change)',
-      'computeStatusIcon(ownerService, path)',
+      'computeStatusIcon(ownersState.status, path)',
     ];
   }
 
-  computeStatusIcon(ownerService, path) {
-    if ([ownerService, path].includes(undefined)) return;
+  _loadDataAfterStateChanged() {
+    super._loadDataAfterStateChanged();
+    this.ownerService.ensureStatusLoaded();
+  }
+
+  computeStatusIcon(ownersStateStatus, path) {
+    if ([ownersStateStatus, path].includes(undefined)) return;
     if (MAGIC_FILES.includes(path)) return;
 
-    ownerService.getStatus()
-        .then(({codeOwnerStatusMap}) => {
-          const statusItem = codeOwnerStatusMap.get(path);
-          if (!statusItem) {
-            this.status = STATUS_CODE.ERROR;
-            return;
-          }
+    const codeOwnerStatusMap = ownersStateStatus.codeOwnerStatusMap;
+    const statusItem = codeOwnerStatusMap.get(path);
+    if (!statusItem) {
+      this.status = STATUS_CODE.ERROR;
+      return;
+    }
 
-          const status = statusItem.status;
-          let oldPathStatus = null;
-          if (statusItem.oldPath) {
-            const oldStatusItem = codeOwnerStatusMap.get(statusItem.oldPath);
-            if (!oldStatusItem) {
-              // should not happen
-            } else {
-              oldPathStatus = oldStatusItem.status;
-            }
-          }
+    const status = statusItem.status;
+    let oldPathStatus = null;
+    if (statusItem.oldPath) {
+      const oldStatusItem = codeOwnerStatusMap.get(statusItem.oldPath);
+      if (!oldStatusItem) {
+        // should not happen
+      } else {
+        oldPathStatus = oldStatusItem.status;
+      }
+    }
 
-          const newPathStatus = this._computeStatus(status);
-          if (!oldPathStatus) {
-            this.status = newPathStatus;
-          } else {
-            this.status = newPathStatus === STATUS_CODE.APPROVED
-              ? this._computeStatus(oldPathStatus, /* oldPath= */ true)
-              : newPathStatus;
-          }
-        })
-        .catch(e => {
-          this.status = STATUS_CODE.ERROR;
-          throw e;
-        });
+    const newPathStatus = this._computeStatus(status);
+    if (!oldPathStatus) {
+      this.status = newPathStatus;
+    } else {
+      this.status = newPathStatus === STATUS_CODE.APPROVED
+        ? this._computeStatus(oldPathStatus, /* oldPath= */ true)
+        : newPathStatus;
+    }
   }
 
   _computeIcon(status) {
