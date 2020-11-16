@@ -107,7 +107,7 @@ export class SuggestOwnersTrigger extends Polymer.Element {
     Promise.all([
       this.ownerService.isCodeOwnerEnabled(),
       this.ownerService.areAllFilesApproved(),
-      this.ownerService.getLoggedInUserInitialRole()
+      this.ownerService.getLoggedInUserInitialRole(),
     ])
         .then(([enabled, approved, userRole]) => {
           if (enabled) {
