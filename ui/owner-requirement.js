@@ -15,8 +15,9 @@
  * limitations under the License.
  */
 
-import {CodeOwnerService, OwnerStatus} from './code-owners-service.js';
+import {OwnerStatus} from './code-owners-service.js';
 import {ownerState} from './owner-ui-state.js';
+import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 
 /**
  * Owner requirement control for `submit-requirement-item-code-owners` endpoint.
@@ -24,7 +25,8 @@ import {ownerState} from './owner-ui-state.js';
  * This will show the status and suggest owners button next to
  * the code-owners submit requirement.
  */
-export class OwnerRequirementValue extends Polymer.Element {
+export class OwnerRequirementValue extends
+  CodeOwnersModelMixin(Polymer.Element) {
   static get is() {
     return 'owner-requirement-value';
   }
@@ -80,83 +82,82 @@ export class OwnerRequirementValue extends Polymer.Element {
 
   static get properties() {
     return {
-      change: Object,
-      reporting: Object,
-      restApi: Object,
-
-      ownerService: Object,
-
       _statusCount: Object,
       _isLoading: {
         type: Boolean,
-        value: true,
+        computed: '_computeIsLoading(model.branchConfig, model.status, '
+            + 'model.userRole)',
       },
       _allApproved: {
         type: Boolean,
         computed: '_computeAllApproved(_statusCount)',
       },
-      _isOverriden: Boolean,
-      _overrideInfoUrl: String,
+      _isOverriden: {
+        type: Boolean,
+        computed: '_computeIsOverriden(model.branchConfig)',
+      },
+      _overrideInfoUrl: {
+        type: String,
+        computed: '_computeOverrideInfoUrl(model.branchConfig)',
+      },
     };
   }
 
   static get observers() {
     return [
-      'onInputChanged(restApi, change, reporting)',
+      '_onStatusChanged(model.status, model.userRole)',
     ];
   }
 
-  _checkIfOverriden() {
-    this.ownerService.getBranchConfig().then(res => {
-      if (!res['override_approval']) {
-        // no override label configured
-        this._isOverriden = false;
-        return;
-      }
-
-      const overridenLabel = res['override_approval'].label;
-      const overridenValue = res['override_approval'].value;
-
-      if (this.change.labels[overridenLabel]) {
-        const votes = this.change.labels[overridenLabel].all || [];
-        if (votes.find(v => `${v.value}` === `${overridenValue}`)) {
-          this._isOverriden = true;
-          return;
-        }
-      }
-
-      // otherwise always reset it to false
-      this._isOverriden = false;
-    });
-  }
-
-  _updateStatus() {
-    this._isLoading = true;
+  loadPropertiesAfterModelChanged() {
+    super.loadPropertiesAfterModelChanged();
     this.reporting.reportLifeCycle('owners-submit-requirement-summary-start');
-
-    return this.ownerService.getStatus()
-        .then(({rawStatuses}) => {
-          this._statusCount = this._getStatusCount(rawStatuses);
-          this.ownerService.getLoggedInUserInitialRole().then(role => {
-            // Send a metric with overall summary when code owners submit
-            // requirement shown and finished fetching status
-            this.reporting.reportLifeCycle(
-                'owners-submit-requirement-summary-shown',
-                {...this._statusCount, user_role: role}
-            );
-          });
-        })
-        .finally(() => {
-          this._isLoading = false;
-        });
+    this.modelLoader.loadBranchConfig();
+    this.modelLoader.loadStatus();
+    this.modelLoader.loadUserRole();
   }
 
-  _updateOverrideInfoUrl() {
-    this.ownerService.getBranchConfig().then(config => {
-      this._overrideInfoUrl = config.general && config.general.override_info_url
-        ?
-        config.general.override_info_url : '';
-    });
+  _computeIsLoading(branchConfig, status, userRole) {
+    return !branchConfig || !status || !userRole;
+  }
+
+  _onStatusChanged(status, userRole) {
+    if (!status || !userRole) {
+      this._statusCount = undefined;
+      return;
+    }
+    const rawStatuses = status.rawStatuses;
+    this._statusCount = this._getStatusCount(rawStatuses);
+    this.reporting.reportLifeCycle('owners-submit-requirement-summary-shown',
+        {...this._statusCount, user_role: userRole});
+  }
+
+  _computeOverrideInfoUrl(branchConfig) {
+    if (!branchConfig) {
+      return '';
+    }
+    return branchConfig.general && branchConfig.general.override_info_url
+      ? branchConfig.general.override_info_url : '';
+  }
+
+  _computeIsOverriden(branchConfig) {
+    if (!branchConfig || !branchConfig['override_approval']) {
+      // no override label configured
+      return false;
+    }
+
+    const overridenLabel = branchConfig['override_approval'].label;
+    const overridenValue = branchConfig['override_approval'].value;
+
+    if (this.change.labels[overridenLabel]) {
+      const votes = this.change.labels[overridenLabel].all || [];
+      if (votes.find(v => `${v.value}` === `${overridenValue}`)) {
+        return true;
+      }
+    }
+
+    // otherwise always reset it to false
+    return false;
   }
 
   _computeAllApproved(statusCount) {
@@ -188,6 +189,7 @@ export class OwnerRequirementValue extends Polymer.Element {
   }
 
   _computeStatusText(statusCount, isOverriden) {
+    if (statusCount === undefined || isOverriden === undefined) return '';
     const statusText = [];
     if (statusCount.missing) {
       statusText.push(`${statusCount.missing} missing`);
@@ -212,14 +214,6 @@ export class OwnerRequirementValue extends Polymer.Element {
     return status === OwnerStatus.PENDING;
   }
 
-  onInputChanged(restApi, change, reporting) {
-    if ([restApi, change, reporting].includes(undefined)) return;
-    this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
-    this._updateStatus();
-    this._checkIfOverriden();
-    this._updateOverrideInfoUrl();
-  }
-
   _openReplyDialog() {
     this.dispatchEvent(
         new CustomEvent('open-reply-dialog', {
@@ -229,10 +223,8 @@ export class OwnerRequirementValue extends Polymer.Element {
         })
     );
     ownerState.expandSuggestion = true;
-    this.ownerService.getLoggedInUserInitialRole().then(role => {
-      this.reporting.reportInteraction(
-          'suggest-owners-from-submit-requirement', {user_role: role});
-    });
+    this.reporting.reportInteraction('suggest-owners-from-submit-requirement',
+        {user_role: this.model.userRole});
   }
 }
 
