@@ -171,6 +171,107 @@ export class CodeOwnersCacheApi {
   }
 }
 
+export class OwnersFetcher {
+  constructor(restApi, change, options) {
+    // fetched files and fetching status
+    this._fetchedOwners = new Map();
+    this._fetchStatus = FetchStatus.NOT_STARTED;
+    this._totalFetchCount = 0;
+    this.change = change;
+    this.options = options;
+    this.codeOwnerApi = new CodeOwnerApi(restApi);
+  }
+
+  getStatus() {
+    return this._fetchStatus;
+  }
+
+  getProgressString() {
+    return this._totalFetchCount === 0 ?
+      `Loading suggested owners ...` :
+      `${this._fetchedOwners.size} out of ${this._totalFetchCount} files have returned suggested owners.`;
+  }
+
+  getFiles() {
+    const result = [];
+    for (const [path, info] of this._fetchedOwners.entries()) {
+      result.push({path, info});
+    }
+    return result;
+  }
+
+  async fetchSuggestedOwners(codeOwnerStatusMap) {
+    // reset existing temporary storage
+    this._fetchedOwners = new Map();
+    this._fetchStatus = FetchStatus.FETCHING;
+    this._totalFetchCount = 0;
+
+    // only fetch those not approved yet
+    const filesGroupByStatus = [...codeOwnerStatusMap.keys()].reduce(
+        (list, file) => {
+          const status = codeOwnerStatusMap
+              .get(file).status;
+          if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
+            list.missing.push(file);
+          } else if (status === OwnerStatus.PENDING) {
+            list.pending.push(file);
+          }
+          return list;
+        }
+        , {pending: [], missing: []});
+    // always fetch INSUFFICIENT_REVIEWERS first and then pending
+    const filesToFetch = filesGroupByStatus.missing
+        .concat(filesGroupByStatus.pending);
+    this._totalFetchCount = filesToFetch.length;
+    await this._batchFetchCodeOwners(filesToFetch);
+    this._fetchStatus = FetchStatus.FINISHED;
+  }
+
+  /**
+   * Recursively fetches code owners for all files until finished.
+   *
+   * @param {!Array<string>} files
+   */
+  async _batchFetchCodeOwners(files) {
+    if (this._fetchStatus === FetchStatus.ABORT) {
+      return this._fetchedOwners;
+    }
+
+    const batchRequests = [];
+    const maxConcurrentRequests = this.options.maxConcurrentRequests;
+    for (let i = 0; i < maxConcurrentRequests; i++) {
+      const filePath = files[i];
+      if (filePath) {
+        this._fetchedOwners.set(filePath, {});
+        batchRequests.push(this._fetchOwnersForPath(this.change.id, filePath));
+      }
+    }
+    const resPromise = Promise.all(batchRequests);
+    await resPromise;
+    if (files.length > maxConcurrentRequests) {
+      return await this._batchFetchCodeOwners(
+          files.slice(maxConcurrentRequests));
+    }
+    return this._fetchedOwners;
+  }
+
+  async _fetchOwnersForPath(changeId, filePath) {
+    try {
+      const owners = await this.codeOwnerApi.listOwnersForPath(changeId,
+          filePath);
+      this._fetchedOwners.get(filePath).owners = new Set(owners);
+    } catch (e) {
+      this._fetchedOwners.get(filePath).error = e;
+    }
+  }
+
+  abort() {
+    this._fetchStatus = FetchStatus.ABORT;
+    this._fetchedOwners = new Map();
+    this._totalFetchCount = 0;
+  }
+}
+
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -178,14 +279,13 @@ export class CodeOwnerService {
   constructor(restApi, change, options = {}) {
     this.restApi = restApi;
     this.change = change;
-    this.options = {maxConcurrentRequests: 10, ...options};
     const codeOwnerApi = new CodeOwnerApi(restApi);
     this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
 
-    // fetched files and fetching status
-    this._fetchedOwners = new Map();
-    this._fetchStatus = FetchStatus.NOT_STARTED;
-    this._totalFetchCount = 0;
+    const fetcherOptions = {
+      maxConcurrentRequests: options.maxConcurrentRequests || 10,
+    };
+    this.ownersFetcher = new OwnersFetcher(restApi, change, fetcherOptions);
   }
 
   /**
@@ -309,54 +409,25 @@ export class CodeOwnerService {
    * }}
    */
   async getSuggestedOwners() {
+    const {codeOwnerStatusMap} = await this.getStatus();
+
     // In case its aborted due to outdated patches
     // should kick start the fetching again
     // Note: we currently are not reusing the instance when switching changes,
     // so if its `abort` due to different changes, the whole instance will be
     // outdated and not used.
-    if (this._fetchStatus === FetchStatus.NOT_STARTED
-      || this._fetchStatus === FetchStatus.ABORT) {
-      await this._fetchSuggestedOwners();
-      this._fetchStatus = FetchStatus.FINISHED;
+    if (this.ownersFetcher.getStatus() === FetchStatus.NOT_STARTED
+      || this.ownersFetcher.getStatus() === FetchStatus.ABORT) {
+      await this.ownersFetcher.fetchSuggestedOwners(codeOwnerStatusMap);
     }
 
-    const {codeOwnerStatusMap} = await this.getStatus();
     return {
-      finished: this._fetchStatus === FetchStatus.FINISHED,
-      status: this._fetchStatus,
-      progress: this._totalFetchCount === 0 ?
-        `Loading suggested owners ...` :
-        `${this._fetchedOwners.size} out of ${this._totalFetchCount} ` +
-          `files have returned suggested owners.`,
-      suggestions: this._groupFilesByOwners(codeOwnerStatusMap),
+      finished: this.ownersFetcher.getStatus() === FetchStatus.FINISHED,
+      status: this.ownersFetcher.getStatus(),
+      progress: this.ownersFetcher.getProgressString(),
+      suggestions: this._groupFilesByOwners(codeOwnerStatusMap,
+          this.ownersFetcher.getFiles()),
     };
-  }
-
-  async _fetchSuggestedOwners() {
-    // reset existing temporary storage
-    this._fetchedOwners = new Map();
-    this._fetchStatus = FetchStatus.FETCHING;
-    this._totalFetchCount = 0;
-
-    const {codeOwnerStatusMap} = await this.getStatus();
-    // only fetch those not approved yet
-    const filesGroupByStatus = [...codeOwnerStatusMap.keys()].reduce(
-        (list, file) => {
-          const status = codeOwnerStatusMap
-              .get(file).status;
-          if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
-            list.missing.push(file);
-          } else if (status === OwnerStatus.PENDING) {
-            list.pending.push(file);
-          }
-          return list;
-        }
-        , {pending: [], missing: []});
-    // always fetch INSUFFICIENT_REVIEWERS first and then pending
-    const filesToFetch = filesGroupByStatus.missing
-        .concat(filesGroupByStatus.pending);
-    this._totalFetchCount = filesToFetch.length;
-    return await this._batchFetchCodeOwners(filesToFetch);
   }
 
   _formatStatuses(statuses) {
@@ -392,28 +463,27 @@ export class CodeOwnerService {
     return;
   }
 
-  _groupFilesByOwners(codeOwnerStatusMap) {
+  _groupFilesByOwners(codeOwnerStatusMap, files) {
     // Note: for renamed or moved files, they will have two entries in the map
     // we will treat them as two entries when group as well
-    const allFiles = [...this._fetchedOwners.keys()];
     const ownersFilesMap = new Map();
     const failedToFetchFiles = new Set();
-    for (let i = 0; i < allFiles.length; i++) {
+    for (const file of files) {
       const fileInfo = {
-        path: allFiles[i],
-        status: this._computeFileStatus(codeOwnerStatusMap, allFiles[i]),
+        path: file.path,
+        status: this._computeFileStatus(codeOwnerStatusMap, file.path),
       };
       // for files failed to fetch, add them to the special group
-      if (this._fetchedOwners.get(fileInfo.path).error) {
+      if (file.info.error) {
         failedToFetchFiles.add(fileInfo);
         continue;
       }
 
       // do not include files still in fetching
-      if (!this._fetchedOwners.get(fileInfo.path).owners) {
+      if (!file.info.owners) {
         continue;
       }
-      const owners = [...this._fetchedOwners.get(fileInfo.path).owners];
+      const owners = [...file.info.owners];
       const ownersKey = owners
           .map(owner => owner.account._account_id)
           .sort()
@@ -460,47 +530,8 @@ export class CodeOwnerService {
     return `${latestRevision._number}` === `${patchsetId}`;
   }
 
-  /**
-   * Recursively fetches code owners for all files until finished.
-   *
-   * @param {!Array<string>} files
-   */
-  async _batchFetchCodeOwners(files) {
-    if (this._fetchStatus === FetchStatus.ABORT) {
-      return this._fetchedOwners;
-    }
-
-    const batchRequests = [];
-    const maxConcurrentRequests = this.options.maxConcurrentRequests;
-    for (let i = 0; i < maxConcurrentRequests; i++) {
-      const filePath = files[i];
-      if (filePath) {
-        this._fetchedOwners.set(filePath, {});
-        batchRequests.push(this._fetchOwnersForPath(this.change.id, filePath));
-      }
-    }
-    const resPromise = Promise.all(batchRequests);
-    await resPromise;
-    if (files.length > maxConcurrentRequests) {
-      return await this._batchFetchCodeOwners(
-          files.slice(maxConcurrentRequests));
-    }
-    return this._fetchedOwners;
-  }
-
-  async _fetchOwnersForPath(changeId, filePath) {
-    try {
-      const owners = await this.codeOwnerCacheApi.listOwnersForPath(filePath);
-      this._fetchedOwners.get(filePath).owners = new Set(owners);
-    } catch (e) {
-      this._fetchedOwners.get(filePath).error = e;
-    }
-  }
-
   abort() {
-    this._fetchStatus = FetchStatus.ABORT;
-    this._fetchedOwners = new Map();
-    this._totalFetchCount = 0;
+    this.ownersFetcher.abort();
     const codeOwnerApi = new CodeOwnerApi(this.restApi);
     this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
   }
