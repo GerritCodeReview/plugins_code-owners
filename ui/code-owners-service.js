@@ -292,8 +292,16 @@ export class CodeOwnerService {
    * Prefetch data
    */
   async prefetch() {
-    this.codeOwnerCacheApi.getAccount();
-    this.getStatus();
+    try {
+      await Promise.all([
+        this.codeOwnerCacheApi.getAccount(),
+        this.getStatus(),
+      ]);
+    } catch {
+      // Ignore any errors during prefetch.
+      // The same call from a different place throws the same exception
+      // again. The CodeOwnerService is not responsible for error processing.
+    }
   }
 
   /**
@@ -557,7 +565,7 @@ export class CodeOwnerService {
       return false;
     }
     const config = await this.codeOwnerCacheApi.getBranchConfig();
-    return !(config.status && config.status.disabled);
+    return config && !(config.status && config.status.disabled);
   }
 
   static getOwnerService(restApi, change) {
