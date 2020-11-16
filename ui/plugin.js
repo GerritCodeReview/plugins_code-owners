@@ -19,10 +19,20 @@ import {SuggestOwners} from './suggest-owners.js';
 import {OwnerStatusColumnContent, OwnerStatusColumnHeader} from './owner-status-column.js';
 import {OwnerRequirementValue} from './owner-requirement.js';
 import {SuggestOwnersTrigger} from './suggest-owners-trigger.js';
+import {CodeOwnersBanner, CodeOwnersPluginStatusNotifier} from './code-owners-banner.js';
 
 Gerrit.install(plugin => {
   const restApi = plugin.restApi();
   const reporting = plugin.reporting();
+
+  plugin.registerCustomComponent('banner', CodeOwnersBanner.is);
+
+  plugin.registerCustomComponent(
+      'change-view-integration', CodeOwnersPluginStatusNotifier.is)
+      .onAttached(view => {
+        view.restApi = restApi;
+        view.reporting = reporting;
+      });
 
   // owner status column / rows for file list
   plugin.registerDynamicCustomComponent(
