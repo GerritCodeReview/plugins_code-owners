@@ -127,6 +127,61 @@ class CodeOwnerApi {
 }
 
 /**
+ * Wrapper around codeOwnerApi, sends each requests only once and then cache
+ * the response. A new CodeOwnersCacheApi instance is created every time when a
+ * new change object is assigned.
+ * Gerrit never updates existing change object, but instead always assigns a new
+ * change object. Particularly, a new change object is assigned when a change
+ * is updated and user clicks reload toasts to see the updated change.
+ * As a result, the lifetime of a cache is the same as a lifetime of an assigned
+ * change object.
+ * Periodical cache invalidation can lead to inconsistency in UI, i.e.
+ * user can see the old reviewers list (reflects a state when a change was
+ * loaded) and code-owners status for the current reviewer list. To avoid
+ * this incostistency, the cache doesn't invalidated.
+ */
+export class CodeOwnersCacheApi {
+  constructor(codeOwnerApi, change) {
+    this.codeOwnerApi = codeOwnerApi;
+    this.change = change;
+    this.promises = {};
+  }
+
+  _fetchOnce(cacheKey, asyncFn) {
+    if (!this.promises[cacheKey]) {
+      this.promises[cacheKey] = asyncFn();
+    }
+    return this.promises[cacheKey];
+  }
+
+  getAccount() {
+    return this._fetchOnce('getAccount', () => this._getAccount());
+  }
+
+  async _getAccount() {
+    const loggedIn = await this.codeOwnerApi.restApi.getLoggedIn();
+    if (!loggedIn) return undefined;
+    return await this.codeOwnerApi.restApi.getAccount();
+  }
+
+  listOwnerStatus() {
+    return this._fetchOnce('listOwnerStatus',
+        () => this.codeOwnerApi.listOwnerStatus(this.change._number));
+  }
+
+  getBranchConfig() {
+    return this._fetchOnce('getBranchConfig',
+        () => this.codeOwnerApi.getBranchConfig(this.change.project,
+            this.change.branch));
+  }
+
+  listOwnersForPath(path) {
+    return this._fetchOnce(`listOwnersForPath:${path}`,
+        () => this.codeOwnerApi.listOwnersForPath(this.change.id, path));
+  }
+}
+
+/**
  * Service for the data layer used in the plugin UI.
  */
 export class CodeOwnerService {
@@ -134,7 +189,8 @@ export class CodeOwnerService {
     this.restApi = restApi;
     this.change = change;
     this.options = {maxConcurrentRequests: 10, ...options};
-    this.codeOwnerApi = new CodeOwnerApi(restApi);
+    const codeOwnerApi = new CodeOwnerApi(restApi);
+    this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
 
     // fetched files and fetching status
     this._fetchedOwners = new Map();
@@ -143,41 +199,11 @@ export class CodeOwnerService {
   }
 
   /**
-   * Initial fetches.
+   * Prefetch data
    */
-  async init() {
-    this.accountPromise = this._getAccount();
-    this.statusPromise = this._getStatus();
-  }
-
-  async _getAccount() {
-    const loggedIn = await this.restApi.getLoggedIn();
-    if (!loggedIn) return undefined;
-    return await this.restApi.getAccount();
-  }
-
-  async _getStatus() {
-    const enabled = await this.isCodeOwnerEnabled();
-    if (!enabled) {
-      return {
-        patchsetNumber: 0,
-        enabled: false,
-        codeOwnerStatusMap: new Map(),
-        rawStatuses: [],
-      };
-    }
-
-    const onwerStatus = await this.codeOwnerApi
-        .listOwnerStatus(this.change._number);
-
-    return {
-      enabled: true,
-      patchsetNumber: onwerStatus.patch_set_number,
-      codeOwnerStatusMap: this._formatStatuses(
-          onwerStatus.file_code_owner_statuses
-      ),
-      rawStatuses: onwerStatus.file_code_owner_statuses,
-    };
+  async prefetch() {
+    this.codeOwnerCacheApi.getAccount();
+    this.getStatus();
   }
 
   /**
@@ -187,7 +213,7 @@ export class CodeOwnerService {
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
   async getLoggedInUserInitialRole() {
-    const account = await this.accountPromise;
+    const account = await this.codeOwnerCacheApi.getAccount();
     if (!account) {
       return UserRole.ANONYMOUS;
     }
@@ -231,14 +257,37 @@ export class CodeOwnerService {
   }
 
   async getStatus() {
-    const status = await this.statusPromise;
+    const status = await this._getStatus();
     if (status.enabled && !this.isOnLatestPatchset(status.patchsetNumber)) {
       // status is outdated, abort and re-init
       this.abort();
-      this.init();
-      return this.statusPromise;
+      this.prefetch();
+      return await this.codeOwnerCacheApi.getStatus();
     }
     return status;
+  }
+
+  async _getStatus() {
+    const enabled = await this.isCodeOwnerEnabled();
+    if (!enabled) {
+      return {
+        patchsetNumber: 0,
+        enabled: false,
+        codeOwnerStatusMap: new Map(),
+        rawStatuses: [],
+      };
+    }
+
+    const onwerStatus = await this.codeOwnerCacheApi.listOwnerStatus();
+
+    return {
+      enabled: true,
+      patchsetNumber: onwerStatus.patch_set_number,
+      codeOwnerStatusMap: this._formatStatuses(
+          onwerStatus.file_code_owner_statuses
+      ),
+      rawStatuses: onwerStatus.file_code_owner_statuses,
+    };
   }
 
   async areAllFilesApproved() {
@@ -451,8 +500,7 @@ export class CodeOwnerService {
 
   async _fetchOwnersForPath(changeId, filePath) {
     try {
-      const owners = await this.codeOwnerApi.listOwnersForPath(changeId,
-          filePath);
+      const owners = await this.codeOwnerCacheApi.listOwnersForPath(filePath);
       this._fetchedOwners.get(filePath).owners = new Set(owners);
     } catch (e) {
       this._fetchedOwners.get(filePath).error = e;
@@ -463,15 +511,12 @@ export class CodeOwnerService {
     this._fetchStatus = FetchStatus.ABORT;
     this._fetchedOwners = new Map();
     this._totalFetchCount = 0;
+    const codeOwnerApi = new CodeOwnerApi(this.restApi);
+    this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
   }
 
   getBranchConfig() {
-    if (!this.getBranchConfigPromise) {
-      this.getBranchConfigPromise =
-          this.codeOwnerApi.getBranchConfig(this.change.project,
-              this.change.branch);
-    }
-    return this.getBranchConfigPromise;
+    return this.codeOwnerCacheApi.getBranchConfig();
   }
 
   async isCodeOwnerEnabled() {
@@ -479,7 +524,7 @@ export class CodeOwnerService {
         this.change.status === ChangeStatus.MERGED) {
       return false;
     }
-    const config = await this.getBranchConfig();
+    const config = await this.codeOwnerCacheApi.getBranchConfig();
     return !(config.status && config.status.disabled);
   }
 
@@ -489,7 +534,7 @@ export class CodeOwnerService {
         // Chrome has a limit of 6 connections per host name, and a max of 10 connections.
         maxConcurrentRequests: 6,
       });
-      this.ownerService.init();
+      this.ownerService.prefetch();
     }
     return this.ownerService;
   }
