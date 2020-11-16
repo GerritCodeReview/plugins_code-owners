@@ -83,78 +83,91 @@ export class OwnerRequirementValue extends Polymer.Element {
       restApi: Object,
 
       ownerService: Object,
+      ownersState: {
+        type: Object,
+        observer: '_ownersStateChanged',
+      },
 
       _statusCount: Object,
       _isLoading: {
         type: Boolean,
-        value: true,
+        computed: '_computeIsLoading(ownersState.branchConfig, ' +
+            'ownersState.status)',
       },
       _allApproved: {
         type: Boolean,
         computed: '_computeAllApproved(_statusCount)',
       },
-      _isOverriden: Boolean,
-      _overrideInfoUrl: String,
+      _isOverriden: {
+        type: Boolean,
+        computed: '_computeIsOverriden(ownersState.branchConfig)',
+      },
+      _overrideInfoUrl: {
+        type: String,
+        computed: '_computeOverrideInfoUrl(ownersState.branchConfig)',
+      },
     };
   }
 
   static get observers() {
     return [
       'onInputChanged(restApi, change, reporting)',
+      '_onStatusChanged(ownersState.status)',
     ];
   }
 
-  _checkIfOverriden() {
-    this.ownerService.getBranchConfig().then(res => {
-      if (!res['override_approval']) {
-        // no override label configured
-        this._isOverriden = false;
-        return;
-      }
-
-      const overridenLabel = res['override_approval'].label;
-      const overridenValue = res['override_approval'].value;
-
-      if (this.change.labels[overridenLabel]) {
-        const votes = this.change.labels[overridenLabel].all || [];
-        if (votes.find(v => `${v.value}` === `${overridenValue}`)) {
-          this._isOverriden = true;
-          return;
-        }
-      }
-
-      // otherwise always reset it to false
-      this._isOverriden = false;
-    });
+  _computeIsLoading(branchConfig, status) {
+    return !branchConfig || !status;
   }
 
-  _updateStatus() {
-    this._isLoading = true;
+  _requestStatusUpdate() {
     this.reporting.reportLifeCycle('owners-submit-requirement-summary-start');
-
-    return this.ownerService.getStatus()
-        .then(({rawStatuses}) => {
-          this._statusCount = this._getStatusCount(rawStatuses);
-          this.ownerService.getLoggedInUserInitialRole().then(role => {
-            // Send a metric with overall summary when code owners submit
-            // requirement shown and finished fetching status
-            this.reporting.reportLifeCycle(
-                'owners-submit-requirement-summary-shown',
-                {...this._statusCount, user_role: role}
-            );
-          });
-        })
-        .finally(() => {
-          this._isLoading = false;
-        });
+    this.ownerService.ensureStatusLoaded();
   }
 
-  _updateOverrideInfoUrl() {
-    this.ownerService.getBranchConfig().then(config => {
-      this._overrideInfoUrl = config.general && config.general.override_info_url
-        ?
-        config.general.override_info_url : '';
-    });
+  _onStatusChanged(status) {
+    if (!status) {
+      this._statusCount = 0;
+      return;
+    }
+    const rawStatuses = status.rawStatuses;
+    this._statusCount = this._getStatusCount(rawStatuses);
+    this.reportLifeCycleWithRole(
+        'owners-submit-requirement-summary-shown', {...this._statusCount});
+  }
+
+  reportLifeCycleWithRole(name, data) {}
+
+  _requestBranchConfigUpdate() {
+    this.ownerService.ensureBranchConfigLoaded();
+  }
+
+  _computeOverrideInfoUrl(branchConfig) {
+    if (!branchConfig) {
+      return '';
+    }
+    return branchConfig.general && branchConfig.general.override_info_url
+      ? branchConfig.general.override_info_url : '';
+  }
+
+  _computeIsOverriden(branchConfig) {
+    if (!branchConfig || !branchConfig['override_approval']) {
+      // no override label configured
+      return false;
+    }
+
+    const overridenLabel = branchConfig['override_approval'].label;
+    const overridenValue = branchConfig['override_approval'].value;
+
+    if (this.change.labels[overridenLabel]) {
+      const votes = this.change.labels[overridenLabel].all || [];
+      if (votes.find(v => `${v.value}` === `${overridenValue}`)) {
+        return true;
+      }
+    }
+
+    // otherwise always reset it to false
+    return false;
   }
 
   _computeAllApproved(statusCount) {
@@ -186,6 +199,7 @@ export class OwnerRequirementValue extends Polymer.Element {
   }
 
   _computeStatusText(statusCount, isOverriden) {
+    if (statusCount === undefined || isOverriden === undefined) return '';
     const statusText = [];
     if (statusCount.missing) {
       statusText.push(`${statusCount.missing} missing`);
@@ -213,9 +227,7 @@ export class OwnerRequirementValue extends Polymer.Element {
   onInputChanged(restApi, change, reporting) {
     if ([restApi, change, reporting].includes(undefined)) return;
     this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
-    this._updateStatus();
-    this._checkIfOverriden();
-    this._updateOverrideInfoUrl();
+    this.ownersState = this.ownerService.state;
   }
 
   _openReplyDialog() {
@@ -231,6 +243,19 @@ export class OwnerRequirementValue extends Polymer.Element {
       this.reporting.reportInteraction(
           'suggest-owners-from-submit-requirement', {user_role: role});
     });
+  }
+
+  _ownersStateChanged(newState) {
+    if (this.statePropertyChangedUnsubscriber) {
+      this.oldStateUnsubscriber();
+    }
+    if (!newState) return;
+    this.statePropertyChangedUnsubscriber =
+        newState.subscribePropertyChanged(propertyName => {
+          this.notifyPath(`ownersState.${propertyName}`);
+        });
+    this._requestStatusUpdate();
+    this._requestBranchConfigUpdate();
   }
 }
 

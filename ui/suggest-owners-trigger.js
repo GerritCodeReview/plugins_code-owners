@@ -32,6 +32,10 @@ export class SuggestOwnersTrigger extends Polymer.Element {
       change: Object,
       reporting: Object,
       restApi: Object,
+      ownersState: {
+        type: Object,
+        observer: '_ownersStateChanged',
+      },
 
       expanded: {
         type: Boolean,
@@ -39,7 +43,7 @@ export class SuggestOwnersTrigger extends Polymer.Element {
       },
       hidden: {
         type: Boolean,
-        value: true,
+        computed: '_computeHidden(ownersState.isCodeOwnerEnabled, ownersState.areAllFilesApproved, ownersState.userRole)',
         reflectToAttribute: true,
       },
     };
@@ -97,26 +101,40 @@ export class SuggestOwnersTrigger extends Polymer.Element {
     }
   }
 
+  _computeHidden(enabled, allFilesApproved, userRole) {
+    if (enabled === undefined ||
+        allFilesApproved === undefined ||
+        userRole === undefined) {
+      return true;
+    }
+    if (enabled) {
+      return allFilesApproved;
+    } else {
+      return true;
+    }
+  }
+
   onInputChanged(restApi, change) {
     if ([restApi, change].includes(undefined)) return;
     this.ownerService = CodeOwnerService.getOwnerService(
         this.restApi,
         this.change
     );
+    this.ownersState = this.ownerService.state;
+  }
 
-    Promise.all([
-      this.ownerService.isCodeOwnerEnabled(),
-      this.ownerService.areAllFilesApproved(),
-      this.ownerService.getLoggedInUserInitialRole(),
-    ])
-        .then(([enabled, approved, userRole]) => {
-          if (enabled) {
-            this.hidden = approved;
-          } else {
-            this.hidden = true;
-          }
-          this._userRole = userRole;
+  _ownersStateChanged(newState) {
+    if (this.statePropertyChangedUnsubscriber) {
+      this.oldStateUnsubscriber();
+    }
+    if (!newState) return;
+    this.statePropertyChangedUnsubscriber =
+        newState.subscribePropertyChanged(propertyName => {
+          this.notifyPath(`ownersState.${propertyName}`);
         });
+    this.ownerService.ensureUserRoleLoaded();
+    this.ownerService.ensureIsCodeOwnerEnabledLoaded();
+    this.ownerService.ensureAreAllFilesApprovedLoaded();
   }
 
   toggleControlContent() {
@@ -124,7 +142,7 @@ export class SuggestOwnersTrigger extends Polymer.Element {
     ownerState.expandSuggestion = this.expanded;
     this.reporting.reportInteraction('toggle-suggest-owners', {
       expanded: this.expanded,
-      user_role: this._userRole ? this._userRole : 'UNKNOWN',
+      user_role: this.ownersState.userRole ? this.ownersState.userRole : 'UNKNOWN',
     });
   }
 
