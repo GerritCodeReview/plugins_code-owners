@@ -62,18 +62,26 @@ export class OwnerRequirementValue extends
           Loading status ...
         </p>
         <template is="dom-if" if="[[!_isLoading]]">
-          <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
-          <template is="dom-if" if="[[_overrideInfoUrl]]">
-            <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
-              target="_blank">
-              <iron-icon icon="gr-icons:help-outline"
-                title="Documentation for overriding code owners"></iron-icon>
-            </a>
+          <template is="dom-if" if="[[!_pluginFailed(model.pluginState)]]">  
+            <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
+            <template is="dom-if" if="[[_overrideInfoUrl]]">
+              <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
+                target="_blank">
+                <iron-icon icon="gr-icons:help-outline"
+                  title="Documentation for overriding code owners"></iron-icon>
+              </a>
+            </template>
+            <template is="dom-if" if="[[!_allApproved]]">
+              <gr-button link on-click="_openReplyDialog">
+              Suggest owners
+            </gr-button>
+            </template>
           </template>
-          <template is="dom-if" if="[[!_allApproved]]">
-            <gr-button link on-click="_openReplyDialog">
-            Suggest owners
-          </gr-button>
+          <template is="dom-if" if="[[_pluginFailed(model.pluginState)]]">
+            <span>Code-owners plugin has failed</span>
+            <gr-button link on-click="_showFailDetails">
+              Details
+            </gr-button>
           </template>
         </template>
       `;
@@ -85,7 +93,7 @@ export class OwnerRequirementValue extends
       _isLoading: {
         type: Boolean,
         computed: '_computeIsLoading(model.branchConfig, model.status, '
-            + 'model.userRole)',
+            + 'model.userRole, model.pluginState)',
       },
       _allApproved: {
         type: Boolean,
@@ -116,8 +124,15 @@ export class OwnerRequirementValue extends
     this.modelLoader.loadUserRole();
   }
 
-  _computeIsLoading(branchConfig, status, userRole) {
+  _computeIsLoading(branchConfig, status, userRole, pluginState) {
+    if (this._pluginFailed(pluginState)) {
+      return false;
+    }
     return !branchConfig || !status || !userRole;
+  }
+
+  _pluginFailed(pluginState) {
+    return pluginState === PluginState.Failed;
   }
 
   _onStatusChanged(status, userRole) {
@@ -224,6 +239,16 @@ export class OwnerRequirementValue extends
     );
     this.reporting.reportInteraction('suggest-owners-from-submit-requirement',
         {user_role: this.model.userRole});
+  }
+
+  _showFailDetails() {
+    this.dispatchEvent(
+        new CustomEvent('show-error', {
+          detail: {message: this.model.pluginFailedReason},
+          composed: true,
+          bubbles: true,
+        })
+    );
   }
 }
 
