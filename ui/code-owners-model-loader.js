@@ -35,7 +35,13 @@ export class ModelLoader {
   async _loadProperty(propertyName, propertyLoader, propertySetter) {
     // Load property only if it was not already loaded
     if (this.ownersModel[propertyName] !== undefined) return;
-    const newValue = await propertyLoader();
+    let newValue;
+    try {
+      newValue = await propertyLoader();
+    } catch (e) {
+      this.ownersModel.setPluginFailed(e.message);
+      return;
+    }
     // It is possible, that several requests is made in parallel.
     // Store only the first result and discard all other results.
     // (also, due to the CodeOwnersCacheApi all result must be identical)
@@ -64,10 +70,10 @@ export class ModelLoader {
     );
   }
 
-  async loadIsCodeOwnerEnabled() {
-    await this._loadProperty('isCodeOwnerEnabled',
+  async loadPluginStatus() {
+    await this._loadProperty('pluginStatus',
         () => this.ownersService.isCodeOwnerEnabled(),
-        value => this.ownersModel.setIsCodeOwnerEnabled(value)
+        value => this.ownersModel.setPluginEnabled(value)
     );
   }
 
@@ -84,14 +90,26 @@ export class ModelLoader {
         !== SuggestionsState.NotLoaded) return;
 
     this.ownersModel.setSuggestionsState(SuggestionsState.Loading);
-    const suggestedOwners = await this.ownersService.getSuggestedOwners();
+    let suggestedOwners;
+    try {
+      suggestedOwners = await this.ownersService.getSuggestedOwners();
+    } catch (e) {
+      this.ownersModel.setSuggestionsState(SuggestionsState.LoadFailed);
+      this.ownersModel.setPluginFailed(e.message);
+      return;
+    }
     this.ownersModel.setSuggestions(suggestedOwners.suggestions);
     this.ownersModel.setSuggestionsState(SuggestionsState.Loaded);
   }
 
   async updateLoadSuggestionsProgress() {
-    const suggestedOwners =
-        await this.ownersService.getSuggestedOwnersProgress();
+    let suggestedOwners;
+    try {
+      suggestedOwners = await this.ownersService.getSuggestedOwnersProgress();
+    } catch {
+      // Ignore any error, keep progress unchanged.
+      return;
+    }
     this.ownersModel.setSuggestionsLoadProgress(suggestedOwners.progress);
     this.ownersModel.setSuggestions(suggestedOwners.suggestions);
   }
