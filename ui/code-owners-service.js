@@ -138,60 +138,9 @@ class CodeOwnerApi {
   }
 }
 
-export class CodeOwnersChangeState extends Polymer.Element {
-  static get is() {
-    return 'code-owners-change-state';
-  }
-
-  constructor() {
-    super();
-    this._codeOwnersApiCancellationToken = new CancellationToken();
-    this._restApiCancellationToken = new CancellationToken();
-  }
-
-  static get properties() {
-    return {
-      _enabled: {
-        type: Boolean,
-        value: false,
-      },
-      _loggedIn: {
-        type: Boolean,
-        value: false,
-      },
-      _status: Object,
-      _account: Object,
-      _codeOwnersApi: Object,
-      _restApi: Object,
-    };
-  }
-
-  static get observers() {
-    return [
-      '_onCodeOwnersApiChanged(_codeOwnersApi)',
-      '_onRestApiChanged(_restApi)',
-    ];
-  }
-
-  _onCodeOwnersApiChanged(_codeOwnersApi) {
-    if (this._codeOwnersApiCancellationToken) {
-      this._codeOwnersApiCancellationToken.cancelRequests();
-      this._codeOwnersApiCancellationToken = undefined;
-    }
-    this.enabled = false;
-    if (!_codeOwnersApi) return;
-    this._codeOwnersApiCancellationToken = new CancellationToken();
-  }
-
-  _onRestApiChanged(_restApi) {
-    if (!_restApi) {
-      this._loggedIn = !!_restApi;
-    }
-  }
-}
-
-export class CodeOwnersChangeApi {
+export class CodeOwnersChangeApi extends EventTarget {
   constructor(restApi, change) {
+    super();
     this.restApi = restApi;
     this.codeOwnerApi = new CodeOwnerApi(restApi);
     this.change = change;
@@ -200,7 +149,19 @@ export class CodeOwnersChangeApi {
 
   _fetchOnce(key, asyncFn) {
     if (!this.promises[key]) {
-      this.promises[key] = asyncFn();
+      const fn = async () => {
+        try {
+          return await asyncFn();
+        } catch (error) {
+          this.dispatchEvent(new CustomEvent('request-failed', {
+            detail: {
+              error,
+            },
+          }));
+          return undefined;
+        }
+      };
+      this.promises[key] = fn();
     }
     return this.promises[key];
   }
@@ -329,6 +290,85 @@ export class OwnersFetcher {
   }
 }
 
+export const PluginState = {
+  Disabled: 'Disabled',
+  Enabled: 'Enabled',
+  Failed: 'Failed',
+};
+
+export class CodeOwnersChangeState extends EventTarget {
+  constructor() {
+    super();
+    this.branchConfig = undefined;
+    this.status = undefined;
+    this.userRole = undefined;
+    this.pluginState = undefined;
+    this.failedReason = undefined;
+  }
+
+  setBranchConfig(config) {
+    if (this.branchConfig === config) return;
+    this.branchConfig = config;
+    this._firePropertyChanged('branchConfig');
+  }
+
+  setStatus(status) {
+    if (this.status === status) return;
+    this.status = status;
+    this._firePropertyChanged('status');
+  }
+
+  setUserRole(userRole) {
+    if (this.userRole === userRole) return;
+    this.userRole = userRole;
+    this._firePropertyChanged('userRole');
+  }
+
+  setEnabled(enabled) {
+    this._setPluginState(enabled ? PluginState.Enabled : PluginState.Disabled);
+    this._setFailedReason(undefined);
+  }
+
+  setFailed(reason) {
+    this._setFailedReason(reason);
+    this._setPluginState(PluginState.Failed);
+  }
+
+  _setPluginState(pluginState) {
+    if (this.pluginState === pluginState) return;
+    this.pluginState = pluginState;
+    this._firePropertyChanged('pluginState');
+  }
+
+  _setFailedReason(failedReason) {
+    if (this.failedReason === failedReason) return;
+    this.failedReason = failedReason;
+    this._firePropertyChanged('failedReason');
+  }
+
+  setAreAllFilesApproved(approved) {
+    if (this.areAllFilesApproved === approved) return;
+    this.areAllFilesApproved = approved;
+    this._firePropertyChanged('areAllFilesApproved');
+  }
+
+  subscribePropertyChanged(callback) {
+    const fn = e => { callback(e.detail.propertyName); };
+    this.addEventListener('code-owners-state-property-changed', fn);
+    return () => {
+      this.removeEventListener('code-owners-state-property-changed', fn);
+    };
+  }
+
+  _firePropertyChanged(propertyName) {
+    this.dispatchEvent(new CustomEvent('code-owners-state-property-changed', {
+      detail: {
+        propertyName,
+      },
+    }));
+  }
+}
+
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -341,6 +381,10 @@ export class CodeOwnerService {
       maxConcurrentRequests: options.maxConcurrentRequests || 10,
     };
     this.ownersFetcher = new OwnersFetcher(restApi, change, fetcherOptions);
+    this.state = new CodeOwnersChangeState();
+    this.codeOwnerChangeApi.addEventListener('request-failed', e => {
+      this.state.setFailed(e.detail.error.message);
+    });
   }
 
   /**
@@ -357,7 +401,7 @@ export class CodeOwnerService {
    * For example, if a user removes themselves as a reviewer, the returned
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
-  async getLoggedInUserInitialRole() {
+  async _getLoggedInUserInitialRole() {
     const account = await this.codeOwnerChangeApi.getAccount();
     if (!account) {
       return UserRole.ANONYMOUS;
@@ -403,6 +447,9 @@ export class CodeOwnerService {
 
   async getStatus() {
     const status = await this._getStatus();
+    if (!status) {
+      return undefined;
+    }
     if (status.enabled && !this._isOnLatestPatchset(status.patchsetNumber)) {
       // status is outdated, abort and re-init
       this.ownersFetcher.abort();
@@ -414,33 +461,31 @@ export class CodeOwnerService {
 
   async _getStatus() {
     const enabled = await this.isCodeOwnerEnabled();
-    if (!enabled) {
-      return {
-        patchsetNumber: 0,
-        enabled: false,
-        codeOwnerStatusMap: new Map(),
-        rawStatuses: [],
-      };
-    }
+    if (!enabled) return undefined;
 
-    const onwerStatus = await this.codeOwnerChangeApi
+    const ownerStatus = await this.codeOwnerChangeApi
         .listOwnerStatus();
+
+    if (!ownerStatus) return undefined;
 
     return {
       enabled: true,
-      patchsetNumber: onwerStatus.patch_set_number,
+      patchsetNumber: ownerStatus.patch_set_number,
       codeOwnerStatusMap: this._formatStatuses(
-          onwerStatus.file_code_owner_statuses
+          ownerStatus.file_code_owner_statuses
       ),
-      rawStatuses: onwerStatus.file_code_owner_statuses,
+      rawStatuses: ownerStatus.file_code_owner_statuses,
     };
   }
 
   async areAllFilesApproved() {
-    const {rawStatuses} = await this.getStatus();
-    return !rawStatuses.some(status => {
-      const oldPathStatus = status.old_path_status;
-      const newPathStatus = status.new_path_status;
+    const status = await this.getStatus();
+    if (!status) {
+      return undefined;
+    }
+    return !status.rawStatuses.some(rawStatus => {
+      const oldPathStatus = rawStatus.old_path_status;
+      const newPathStatus = rawStatus.new_path_status;
       // For deleted files, no new_path_status exists
       return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED)
         || (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
@@ -465,7 +510,11 @@ export class CodeOwnerService {
    * }}
    */
   async getSuggestedOwners() {
-    const {codeOwnerStatusMap} = await this.getStatus();
+    const status = await this.getStatus();
+    if (!status) {
+      return undefined;
+    }
+    const codeOwnerStatusMap = status.codeOwnerStatusMap;
 
     // In case its aborted due to outdated patches
     // should kick start the fetching again
@@ -590,14 +639,51 @@ export class CodeOwnerService {
     return this.codeOwnerChangeApi.getBranchConfig();
   }
 
+  async ensureBranchConfigLoaded() {
+    if (!this.state.branchConfig) {
+      this.state.setBranchConfig(
+          await this.codeOwnerChangeApi.getBranchConfig());
+    }
+  }
+
+  async ensureStatusLoaded() {
+    if (!this.state.status) {
+      this.state.setStatus(await this.getStatus());
+    }
+  }
+
+  async ensureUserRoleLoaded() {
+    if (!this.state.userRole) {
+      this.state.setUserRole(await this._getLoggedInUserInitialRole());
+    }
+  }
+
+  async ensureIsCodeOwnerEnabledLoaded() {
+    if (this.state.pluginState === undefined) {
+      const enabled = await this.isCodeOwnerEnabled();
+      if (this.state.pluginState === undefined) {
+        // Other requests can change plugin state to failed, so
+        // set state only if it is unchanged
+        this.state.setEnabled(enabled);
+      }
+    }
+  }
+
+  async ensureAreAllFilesApprovedLoaded() {
+    if (this.state.areAllFilesApproved === undefined) {
+      this.state.setAreAllFilesApproved(await this.areAllFilesApproved());
+    }
+  }
+
   async isCodeOwnerEnabled() {
     if (this.change.status === ChangeStatus.ABANDONED ||
         this.change.status === ChangeStatus.MERGED) {
       return false;
     }
     const config = await this.codeOwnerChangeApi.getBranchConfig();
-    return !(config.status && config.status.disabled);
+    return config && !(config.status && config.status.disabled);
   }
+
 
   static getOwnerService(restApi, change) {
     if (!this.ownerService || this.ownerService.change !== change) {

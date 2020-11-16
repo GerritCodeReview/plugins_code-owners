@@ -262,6 +262,7 @@ export class SuggestOwners extends Polymer.Element {
             <template is="dom-if" if="[[suggestion.error]]">
               <div class="fetch-error-content">
                 [[suggestion.error]]
+                <a on-click="_showErrorDetails"
               </div>
             </template>
             <template is="dom-if" if="[[!suggestion.error]]">
