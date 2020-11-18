@@ -115,7 +115,11 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
   @Test
   public void ruleErrorWhenChangeDataIsNull() throws Exception {
     SubmitRecordSubject submitRecordSubject =
-        assertThatOptional(codeOwnerSubmitRule.evaluate(null)).value();
+        assertThatOptional(
+                codeOwnerSubmitRule.evaluate(
+                    /** changeData = */
+                    null))
+            .value();
     submitRecordSubject.hasStatusThat().isRuleError();
     submitRecordSubject.hasErrorMessageThat().isEqualTo("Failed to evaluate code owner statuses.");
   }

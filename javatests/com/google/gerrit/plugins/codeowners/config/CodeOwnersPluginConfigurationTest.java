@@ -66,7 +66,10 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnersPluginConfiguration.isDisabled((Project.NameKey) null));
+            () ->
+                codeOwnersPluginConfiguration.isDisabled(
+                    /** project = */
+                    (Project.NameKey) null));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -75,7 +78,10 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnersPluginConfiguration.isDisabled((BranchNameKey) null));
+            () ->
+                codeOwnersPluginConfiguration.isDisabled(
+                    /** branchNameKey = */
+                    (BranchNameKey) null));
     assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
   }
 
@@ -718,7 +724,11 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void cannotGetFileExtensionForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> codeOwnersPluginConfiguration.getFileExtension(null));
+            NullPointerException.class,
+            () ->
+                codeOwnersPluginConfiguration.getFileExtension(
+                    /** project = */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -759,7 +769,10 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnersPluginConfiguration.getMergeCommitStrategy(null));
+            () ->
+                codeOwnersPluginConfiguration.getMergeCommitStrategy(
+                    /** project = */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -808,20 +821,39 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED, disabled);
+    setCodeOwnersConfig(
+        project,
+        /** subsection = */
+        null,
+        StatusConfig.KEY_DISABLED,
+        disabled);
   }
 
   private void configureDisabledBranch(Project.NameKey project, String disabledBranch)
       throws Exception {
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
+    setCodeOwnersConfig(
+        project,
+        /** subsection = */
+        null,
+        StatusConfig.KEY_DISABLED_BRANCH,
+        disabledBranch);
   }
 
   private void enableCodeOwnersForAllBranches(Project.NameKey project) throws Exception {
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, "");
+    setCodeOwnersConfig(
+        project,
+        /** subsection = */
+        null,
+        StatusConfig.KEY_DISABLED_BRANCH,
+        "");
   }
 
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
-    configureBackend(project, null, backendName);
+    configureBackend(
+        project,
+        /** branch = */
+        null,
+        backendName);
   }
 
   private void configureBackend(
@@ -832,24 +864,41 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
     setCodeOwnersConfig(
-        project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
+        project,
+        /** subsection = */
+        null,
+        RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
+        requiredApproval);
   }
 
   private void configureOverrideApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
     setCodeOwnersConfig(
-        project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, requiredApproval);
+        project,
+        /** subsection = */
+        null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        requiredApproval);
   }
 
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
-    setCodeOwnersConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+    setCodeOwnersConfig(
+        project,
+        /** subsection = */
+        null,
+        GeneralConfig.KEY_FILE_EXTENSION,
+        fileExtension);
   }
 
   private void configureMergeCommitStrategy(
       Project.NameKey project, MergeCommitStrategy mergeCommitStrategy) throws Exception {
     setCodeOwnersConfig(
-        project, null, GeneralConfig.KEY_MERGE_COMMIT_STRATEGY, mergeCommitStrategy.name());
+        project,
+        /** subsection = */
+        null,
+        GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
+        mergeCommitStrategy.name());
   }
 
   private AutoCloseable registerTestBackend() {
