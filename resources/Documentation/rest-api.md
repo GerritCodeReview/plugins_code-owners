@@ -406,6 +406,7 @@ suggestion.
 The following code owners are filtered out additionally:
 
 * service users (members of the `Service Users` group)
+* the change owner (since the change owner cannot be added as reviewer)
 
 ### <a id="check-code-owner-config-files-in-revision">Check Code Owner Config Files In Revision
 _'POST /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners.check_config'_

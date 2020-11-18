@@ -142,8 +142,15 @@ public class CodeOwnersInChangeCollection
       return new PathResource(revisionResource, branchRevision, parsePath(pathId));
     }
 
+    private final RevisionResource revisionResource;
+
     private PathResource(RevisionResource revisionResource, ObjectId branchRevision, Path path) {
       super(revisionResource, branchRevision, path);
+      this.revisionResource = revisionResource;
+    }
+
+    public RevisionResource getRevisionResource() {
+      return revisionResource;
     }
   }
 }

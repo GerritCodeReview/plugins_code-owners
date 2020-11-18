@@ -80,7 +80,21 @@ public class GetCodeOwnersForPathInChange
   @Override
   protected Stream<CodeOwner> filterCodeOwners(
       CodeOwnersInChangeCollection.PathResource rsrc, Stream<CodeOwner> codeOwners) {
-    return codeOwners.filter(filterOutServiceUsers());
+    return codeOwners.filter(filterOutChangeOwner(rsrc)).filter(filterOutServiceUsers());
+  }
+
+  private Predicate<CodeOwner> filterOutChangeOwner(
+      CodeOwnersInChangeCollection.PathResource rsrc) {
+    return codeOwner -> {
+      if (!codeOwner.accountId().equals(rsrc.getRevisionResource().getChange().getOwner())) {
+        // Returning true from the Predicate here means that the code owner should be kept.
+        return true;
+      }
+      logger.atFine().log(
+          "Filtering out %s because this code owner is the change owner", codeOwner);
+      // Returning false from the Predicate here means that the code owner should be filtered out.
+      return false;
+    };
   }
 
   private Predicate<CodeOwner> filterOutServiceUsers() {
