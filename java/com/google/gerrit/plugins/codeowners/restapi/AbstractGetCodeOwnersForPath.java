@@ -22,6 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
+import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.exceptions.StorageException;
@@ -237,7 +238,8 @@ public abstract class AbstractGetCodeOwnersForPath {
         codeOwners.stream().filter(filterOutNonVisibleCodeOwners(rsrc));
 
     if (suggest) {
-      filteredCodeOwners = filteredCodeOwners.filter(filterOutServiceUsers());
+      filteredCodeOwners =
+          filteredCodeOwners.filter(filterOutServiceUsers()).filter(filterOutChangeOwner(rsrc));
     }
 
     return filteredCodeOwners.collect(toImmutableSet());
@@ -261,6 +263,22 @@ public abstract class AbstractGetCodeOwnersForPath {
         return true;
       }
       logger.atFine().log("Filtering out %s because this code owner is a service user", codeOwner);
+      return false;
+    };
+  }
+
+  private Predicate<CodeOwner> filterOutChangeOwner(AbstractPathResource rsrc) {
+    return codeOwner -> {
+      if (!(rsrc instanceof CodeOwnersInChangeCollection.PathResource)) {
+        return true;
+      }
+      Change change =
+          ((CodeOwnersInChangeCollection.PathResource) rsrc).getRevisionResource().getChange();
+      if (!codeOwner.accountId().equals(change.getOwner())) {
+        return true;
+      }
+      logger.atFine().log(
+          "Filtering out %s because this code owner is the change owner", codeOwner);
       return false;
     };
   }

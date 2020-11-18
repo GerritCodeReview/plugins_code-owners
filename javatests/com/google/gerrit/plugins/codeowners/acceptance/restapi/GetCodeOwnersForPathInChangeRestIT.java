@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.gerrit.acceptance.RestResponse;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import org.junit.Before;
@@ -37,10 +38,18 @@ public class GetCodeOwnersForPathInChangeRestIT extends AbstractGetCodeOwnersFor
 
   @Before
   public void createTestChange() throws Exception {
+    TestAccount changeOwner =
+        accountCreator.create(
+            "changeOwner",
+            "changeOwner@example.com",
+            "ChangeOwner",
+            /** displayName = */
+            null);
     // Create a change that contains the file that is used in the tests. This is necessary since
     // CodeOwnersInChangeCollection rejects requests for paths that are not present in the change.
     changeId =
-        createChange("Test Change", JgitPath.of(TEST_PATH).get(), "some content").getChangeId();
+        createChange(changeOwner, "Test Change", JgitPath.of(TEST_PATH).get(), "some content")
+            .getChangeId();
   }
 
   @Override
