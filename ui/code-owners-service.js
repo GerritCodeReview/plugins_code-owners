@@ -111,18 +111,6 @@ class CodeOwnerApi {
   }
 
   /**
-   * Returns a promise fetching project_config for code owners.
-   *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#get-code-owner-project-config
-   * @param {string} project
-   */
-  getProjectConfig(project) {
-    return this.restApi.get(
-        `/projects/${encodeURIComponent(project)}/code_owners.project_config`
-    );
-  }
-
-  /**
    * Returns a promise fetching the owners config for a given branch.
    *
    * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#branch-endpoints
@@ -485,14 +473,6 @@ export class CodeOwnerService {
     this._fetchStatus = FetchStatus.ABORT;
     this._fetchedOwners = new Map();
     this._totalFetchCount = 0;
-  }
-
-  getProjectConfig() {
-    if (!this.getProjectConfigPromise) {
-      this.getProjectConfigPromise =
-          this.codeOwnerApi.getProjectConfig(this.change.project);
-    }
-    return this.getProjectConfigPromise;
   }
 
   getBranchConfig() {
