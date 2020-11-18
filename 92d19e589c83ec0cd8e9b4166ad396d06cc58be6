@@ -22,6 +22,30 @@
       },
       "revId": "92d19e589c83ec0cd8e9b4166ad396d06cc58be6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "606297eb_90bc6375",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnerConfigFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-18T13:19:04Z",
+      "side": 1,
+      "message": "ups, copy\u0026paste error...\n\nDone",
+      "parentUuid": "f345f296_2b77ee41",
+      "range": {
+        "startLine": 58,
+        "startChar": 41,
+        "endLine": 58,
+        "endChar": 50
+      },
+      "revId": "92d19e589c83ec0cd8e9b4166ad396d06cc58be6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
