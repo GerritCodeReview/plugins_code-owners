@@ -61,7 +61,9 @@ public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
         serviceUserClassifier,
-        codeOwnerJsonFactory);
+        codeOwnerJsonFactory,
+        /** suggest = */
+        true);
   }
 
   @Override

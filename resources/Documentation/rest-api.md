@@ -278,7 +278,6 @@ setting)
 * are referenced by an email with a disallowed domain (see
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
 * do not have read access to the branch
-* are service users (members of the `Service Users` group)
 
 are omitted from the result.
 
@@ -391,16 +390,22 @@ destination branch is missing.
 
 ## <a id="revision-endpoints"> Revision Endpoints
 
-### <a id="list-code-owners-for-path-in-change"> List Code Owners for path in change
+### <a id="list-code-owners-for-path-in-change"> Suggest Code Owners for path in change
 _'GET /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners/[\{path\}](#path)'_
 
-Lists the accounts that are code owners of a file in a change revision.
+Suggests accounts that are code owners of a file in a change revision.
 
 The code owners are computed from the owner configuration at the tip of the
 change's destination branch.
 
 This REST endpoint has the exact same request and response format as the
-[REST endpoint to list code owners for a path in a branch](#list-code-owners-for-path-in-branch).
+[REST endpoint to list code owners for a path in a branch](#list-code-owners-for-path-in-branch),
+but filters out code owners that which should be omitted from the code owner
+suggestion.
+
+The following code owners are filtered out additionally:
+
+* service users (members of the `Service Users` group)
 
 ### <a id="check-code-owner-config-files-in-revision">Check Code Owner Config Files In Revision
 _'POST /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners.check_config'_

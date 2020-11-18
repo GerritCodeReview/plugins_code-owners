@@ -92,7 +92,9 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
         serviceUserClassifier,
-        codeOwnerJsonFactory);
+        codeOwnerJsonFactory,
+        /** suggest = */
+        false);
     this.repoManager = repoManager;
   }
 

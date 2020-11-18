@@ -21,8 +21,12 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.toMap;
 
 import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -47,6 +51,7 @@ import org.junit.Test;
 public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPathIT {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
+  @Inject private GroupOperations groupOperations;
 
   private String changeId;
 
@@ -173,5 +178,51 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
     List<CodeOwnerInfo> codeOwnerInfos =
         codeOwnersApiFactory.change(changeId, "current").query().get(TEST_PATHS.get(0));
     assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(user.id());
+  }
+
+  @Test
+  public void codeOwnersThatAreServiceUsersAreFilteredOut() throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+
+    // Create a code owner config with 2 code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(serviceUser.email())
+        .create();
+
+    // Check that both code owners are suggested.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), serviceUser.id());
+
+    // Make 'serviceUser' a service user.
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+
+    // Expect that 'serviceUser' is filtered out now.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "service.user@example.com")
+  public void globalCodeOwnersThatAreServiceUsersAreFilteredOut() throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+    assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
   }
 }

@@ -18,7 +18,11 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -42,6 +46,7 @@ import org.junit.Test;
  */
 public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPathIT {
   @Inject private ProjectOperations projectOperations;
+  @Inject private GroupOperations groupOperations;
 
   @Override
   protected CodeOwners getCodeOwnersApi() throws RestApiException {
@@ -120,5 +125,48 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
                 queryCodeOwners(
                     getCodeOwnersApi().query().forRevision(revision.name()), "/foo/bar/baz.md"));
     assertThat(exception).hasMessageThat().isEqualTo("unknown revision");
+  }
+
+  @Test
+  public void codeOwnersThatAreServiceUsersAreIncluded() throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+
+    // Make 'serviceUser' a service user.
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+
+    // Create a code owner config with 2 code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(serviceUser.email())
+        .create();
+
+    // Expect that 'serviceUser' is included.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), serviceUser.id());
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "service.user@example.com")
+  public void globalCodeOwnersThatAreServiceUsersAreIncluded() throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(serviceUser.id());
   }
 }

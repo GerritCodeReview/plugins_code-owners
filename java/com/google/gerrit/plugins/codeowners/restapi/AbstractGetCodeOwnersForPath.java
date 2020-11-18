@@ -56,6 +56,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import org.kohsuke.args4j.Option;
 
@@ -77,6 +78,7 @@ public abstract class AbstractGetCodeOwnersForPath {
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final ServiceUserClassifier serviceUserClassifier;
   private final CodeOwnerJson.Factory codeOwnerJsonFactory;
+  private final boolean suggest;
   private final EnumSet<ListAccountsOption> options;
   private final Set<String> hexOptions;
 
@@ -115,7 +117,8 @@ public abstract class AbstractGetCodeOwnersForPath {
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ServiceUserClassifier serviceUserClassifier,
-      CodeOwnerJson.Factory codeOwnerJsonFactory) {
+      CodeOwnerJson.Factory codeOwnerJsonFactory,
+      boolean suggest) {
     this.accountVisibility = accountVisibility;
     this.accounts = accounts;
     this.accountControlFactory = accountControlFactory;
@@ -125,6 +128,7 @@ public abstract class AbstractGetCodeOwnersForPath {
     this.codeOwnerResolver = codeOwnerResolver;
     this.serviceUserClassifier = serviceUserClassifier;
     this.codeOwnerJsonFactory = codeOwnerJsonFactory;
+    this.suggest = suggest;
     this.options = EnumSet.noneOf(ListAccountsOption.class);
     this.hexOptions = new HashSet<>();
   }
@@ -229,27 +233,36 @@ public abstract class AbstractGetCodeOwnersForPath {
    */
   private ImmutableSet<CodeOwner> filterCodeOwners(
       AbstractPathResource rsrc, ImmutableSet<CodeOwner> codeOwners) {
-    return codeOwners.stream()
-        .filter(
-            codeOwner -> {
-              if (isVisibleTo(rsrc, codeOwner)) {
-                return true;
-              }
-              logger.atFine().log(
-                  "Filtering out %s because this code owner cannot see the branch %s",
-                  codeOwner, rsrc.getBranch().branch());
-              return false;
-            })
-        .filter(
-            codeOwner -> {
-              if (!isServiceUser(codeOwner)) {
-                return true;
-              }
-              logger.atFine().log(
-                  "Filtering out %s because this code owner is a service user", codeOwner);
-              return false;
-            })
-        .collect(toImmutableSet());
+    Stream<CodeOwner> filteredCodeOwners =
+        codeOwners.stream().filter(filterOutNonVisibleCodeOwners(rsrc));
+
+    if (suggest) {
+      filteredCodeOwners = filteredCodeOwners.filter(filterOutServiceUsers());
+    }
+
+    return filteredCodeOwners.collect(toImmutableSet());
+  }
+
+  private Predicate<CodeOwner> filterOutNonVisibleCodeOwners(AbstractPathResource rsrc) {
+    return codeOwner -> {
+      if (isVisibleTo(rsrc, codeOwner)) {
+        return true;
+      }
+      logger.atFine().log(
+          "Filtering out %s because this code owner cannot see the branch %s",
+          codeOwner, rsrc.getBranch().branch());
+      return false;
+    };
+  }
+
+  private Predicate<CodeOwner> filterOutServiceUsers() {
+    return codeOwner -> {
+      if (!isServiceUser(codeOwner)) {
+        return true;
+      }
+      logger.atFine().log("Filtering out %s because this code owner is a service user", codeOwner);
+      return false;
+    };
   }
 
   /** Whether the given resource is visible to the given code owner. */
