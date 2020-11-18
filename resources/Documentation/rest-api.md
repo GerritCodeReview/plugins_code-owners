@@ -166,6 +166,7 @@ entity is returned that describes the code owner branch configuration.
       "value": 1
     }
   }
+```
 
 ### <a id="list-code-owner-config-files">List Code Owner Config Files
 _'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.config_files/'_
@@ -460,10 +461,10 @@ the response.
 All REST endpoints may return the following responses:
 
 * `409 Conflict` is returned if a request cannot be executed due to:
-** an non-parseable code owner config file (in this case the project owners need
-   to fix the code owner config file)
-** an invalid plugin configuration (in this case the project owners need to fix
-   the code-owners plugin configuration)
+    * an non-parseable code owner config file (in this case the project owners
+      need to fix the code owner config file)
+    * an invalid plugin configuration (in this case the project owners need to
+      fix the code-owners plugin configuration)
 
 ## <a id="ids"> IDs
 
@@ -471,7 +472,7 @@ All REST endpoints may return the following responses:
 
 An arbitrary absolute path.
 
-The leading'/' can be omitted.
+The leading '/' can be omitted.
 
 The path may or may not exist in the branch.
 
