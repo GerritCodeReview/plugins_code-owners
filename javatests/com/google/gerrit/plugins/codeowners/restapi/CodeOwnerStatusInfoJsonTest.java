@@ -184,7 +184,11 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> CodeOwnerStatusInfoJson.format(PatchSet.id(Change.id(1), 1), null));
+            () ->
+                CodeOwnerStatusInfoJson.format(
+                    PatchSet.id(Change.id(1), 1),
+                    /** fileCodeOwnerStatuses */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("fileCodeOwnerStatuses");
   }
 
@@ -193,7 +197,10 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> CodeOwnerStatusInfoJson.format(null, ImmutableSet.of()));
+            () ->
+                CodeOwnerStatusInfoJson.format(
+                    /** patchSetId */
+                    null, ImmutableSet.of()));
     assertThat(npe).hasMessageThat().isEqualTo("patchSetId");
   }
 

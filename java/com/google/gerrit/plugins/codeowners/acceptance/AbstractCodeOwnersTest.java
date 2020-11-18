@@ -25,6 +25,7 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
@@ -142,7 +143,8 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   }
 
   protected void setCodeOwnersConfig(
-      Project.NameKey project, String subsection, String key, String value) throws Exception {
+      Project.NameKey project, @Nullable String subsection, String key, String value)
+      throws Exception {
     Config codeOwnersConfig = new Config();
     codeOwnersConfig.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value);

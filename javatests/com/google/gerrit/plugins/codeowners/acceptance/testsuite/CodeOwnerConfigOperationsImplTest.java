@@ -333,7 +333,10 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   @Test
   public void setIgnoreParentCodeOwners() throws Exception {
-    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(false, admin.email());
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            /** ignoreParentCodeOwners */
+            false, admin.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
@@ -346,7 +349,10 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
   @Test
   public void unsetIgnoreParentCodeOwners() throws Exception {
-    CodeOwnerConfig codeOwnerConfig = createCodeOwnerConfig(true, admin.email());
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfig(
+            /** ignoreParentCodeOwners */
+            true, admin.email());
     codeOwnerConfigOperations
         .codeOwnerConfig(codeOwnerConfig.key())
         .forUpdate()
@@ -422,7 +428,9 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
 
     // Create a code owner config that contains only a single code owner set.
     CodeOwnerConfig codeOwnerConfig =
-        createCodeOwnerConfig(false, CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet)));
+        createCodeOwnerConfig(
+            /** ignoreParentCodeOwners */
+            false, CodeOwnerSetModification.set(ImmutableList.of(codeOwnerSet)));
 
     // Remove all code owners so that the code owner set becomes empty.
     codeOwnerConfigOperations
@@ -705,7 +713,9 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
   }
 
   private CodeOwnerConfig createCodeOwnerConfig(String... emails) {
-    return createCodeOwnerConfig(false, emails);
+    return createCodeOwnerConfig(
+        /** ignoreParentCodeOwners */
+        false, emails);
   }
 
   private CodeOwnerConfig createCodeOwnerConfig(boolean ignoreParentCodeOwners, String... emails) {

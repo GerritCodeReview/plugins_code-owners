@@ -30,7 +30,12 @@ public class CodeOwnerScoringTest extends AbstractCodeOwnersTest {
   public void cannotAddValueForNullCodeOwner() throws Exception {
     CodeOwnerScoring.Builder builder = CodeOwnerScoring.builder(CodeOwnerScore.DISTANCE, 100);
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> builder.putValueForCodeOwner(null, 50));
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                builder.putValueForCodeOwner(
+                    /** codeOwner */
+                    null, 50));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwner");
   }
 

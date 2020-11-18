@@ -104,7 +104,11 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 codeOwnerConfigHierarchy.visit(
-                    branchNameKey, getCurrentRevision(branchNameKey), null, visitor));
+                    branchNameKey,
+                    getCurrentRevision(branchNameKey),
+                    /** absolutePath */
+                    null,
+                    visitor));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 

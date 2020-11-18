@@ -99,7 +99,10 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
             NullPointerException.class,
             () ->
                 codeOwnerConfigFileUpdateScanner.update(
-                    branchNameKey, "Update code owner configs", null));
+                    branchNameKey,
+                    "Update code owner configs",
+                    /** codeOwnerConfigFileUpdater */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileUpdater");
   }
 

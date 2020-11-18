@@ -65,7 +65,10 @@ public class CodeOwnersUpdateTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "test-backend")
   public void codeOwnerUpdateIsForwardedToConfiguredBackendServerInitiated() throws Exception {
-    testCodeOwnerUpdateIsForwardedToConfiguredBackend(serverInitiatedCodeOwnersUpdate.get(), null);
+    testCodeOwnerUpdateIsForwardedToConfiguredBackend(
+        serverInitiatedCodeOwnersUpdate.get(),
+        /** currentUser */
+        null);
   }
 
   private void testCodeOwnerUpdateIsForwardedToConfiguredBackend(

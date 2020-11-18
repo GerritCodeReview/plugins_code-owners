@@ -74,7 +74,11 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setBoolean(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, null, StatusConfig.KEY_DISABLED, true);
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        null,
+        StatusConfig.KEY_DISABLED,
+        /** value */
+        true);
     setCodeOwnersConfig(cfg);
 
     PushResult r = pushRefsMetaConfig();

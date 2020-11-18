@@ -107,7 +107,12 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/foo/bar/");
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwnerConfigKey.filePath(null));
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwnerConfigKey.filePath(
+                    /** defaultCodeOwnerConfigFileName */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileName");
   }
 
@@ -115,7 +120,12 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   public void cannotAddNullAsCodeOwnerSet() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> createCodeOwnerBuilder().addCodeOwnerSet(null));
+            NullPointerException.class,
+            () ->
+                createCodeOwnerBuilder()
+                    .addCodeOwnerSet(
+                        /** codeOwnerSet */
+                        null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerSet");
   }
 
@@ -123,7 +133,12 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   public void cannotRelativizeNullPath() throws Exception {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwnerConfig.relativize(null));
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwnerConfig.relativize(
+                    /** path */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 

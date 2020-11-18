@@ -97,7 +97,10 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> CodeOwnerProjectConfigJson.formatRequiredApproval(null));
+            () ->
+                CodeOwnerProjectConfigJson.formatRequiredApproval(
+                    /** requiredApproval */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("requiredApproval");
   }
 
