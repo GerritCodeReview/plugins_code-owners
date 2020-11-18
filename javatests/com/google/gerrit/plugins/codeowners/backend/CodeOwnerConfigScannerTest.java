@@ -70,7 +70,9 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerConfigScannerFactory
                     .create()
-                    .visit(null, visitor, invalidCodeOwnerConfigCallback));
+                    .visit(
+                        /** branchNameKey = */
+                        null, visitor, invalidCodeOwnerConfigCallback));
     assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
   }
 
@@ -83,7 +85,11 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerConfigScannerFactory
                     .create()
-                    .visit(branchNameKey, null, invalidCodeOwnerConfigCallback));
+                    .visit(
+                        branchNameKey,
+                        /** codeOwnerConfigVisitor = */
+                        null,
+                        invalidCodeOwnerConfigCallback));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
   }
 
@@ -93,7 +99,14 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerConfigScannerFactory.create().visit(branchNameKey, visitor, null));
+            () ->
+                codeOwnerConfigScannerFactory
+                    .create()
+                    .visit(
+                        branchNameKey,
+                        visitor,
+                        /** invalidCodeOwnerConfigCallback = */
+                        null));
     assertThat(npe).hasMessageThat().isEqualTo("invalidCodeOwnerConfigCallback");
   }
 

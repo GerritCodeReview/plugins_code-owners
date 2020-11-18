@@ -64,13 +64,23 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().resolve((CodeOwnerReference) null));
+            () ->
+                codeOwnerResolver
+                    .get()
+                    .resolve(
+                        /** codeOwnerReference = */
+                        (CodeOwnerReference) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
 
     npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().resolve((Set<CodeOwnerReference>) null));
+            () ->
+                codeOwnerResolver
+                    .get()
+                    .resolve(
+                        /** codeOwnerReferences = */
+                        (Set<CodeOwnerReference>) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReferences");
   }
 
@@ -106,7 +116,14 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             "Test update",
             user.id(),
             (a, u) ->
-                u.addExternalId(ExternalId.create("foo", "bar", user.id(), admin.email(), null)));
+                u.addExternalId(
+                    ExternalId.create(
+                        "foo",
+                        "bar",
+                        user.id(),
+                        admin.email(),
+                        /** hashedPassword = */
+                        null)));
 
     assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(admin.email()))).isEmpty();
   }
@@ -232,7 +249,12 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().resolvePathCodeOwners(null, Paths.get("/README.md")));
+            () ->
+                codeOwnerResolver
+                    .get()
+                    .resolvePathCodeOwners(
+                        /** codeOwnerConfig = */
+                        null, Paths.get("/README.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
@@ -245,7 +267,13 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, null));
+            () ->
+                codeOwnerResolver
+                    .get()
+                    .resolvePathCodeOwners(
+                        codeOwnerConfig,
+                        /** absolutePath = */
+                        null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 
@@ -325,7 +353,13 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void isEmailDomainAllowedRequiresEmailToBeNonNull() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> codeOwnerResolver.get().isEmailDomainAllowed(null));
+            NullPointerException.class,
+            () ->
+                codeOwnerResolver
+                    .get()
+                    .isEmailDomainAllowed(
+                        /** email = */
+                        null));
     assertThat(npe).hasMessageThat().isEqualTo("email");
   }
 

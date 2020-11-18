@@ -102,7 +102,12 @@ public class CodeOwnerConfigScanner {
       BranchNameKey branchNameKey,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor,
       InvalidCodeOwnerConfigCallback invalidCodeOwnerConfigCallback) {
-    visit(branchNameKey, codeOwnerConfigVisitor, invalidCodeOwnerConfigCallback, null);
+    visit(
+        branchNameKey,
+        codeOwnerConfigVisitor,
+        invalidCodeOwnerConfigCallback,
+        /** pathGlob = */
+        null);
   }
 
   /**

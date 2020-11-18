@@ -350,7 +350,11 @@ public abstract class CodeOwnerConfig {
      * @return the code owner config key
      */
     public static Key create(BranchNameKey branchNameKey, Path folderPath) {
-      return create(branchNameKey, folderPath, null);
+      return create(
+          branchNameKey,
+          folderPath,
+          /** fileName = */
+          null);
     }
 
     /**

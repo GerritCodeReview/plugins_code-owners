@@ -74,7 +74,12 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setBoolean(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, null, StatusConfig.KEY_DISABLED, true);
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
+        null,
+        StatusConfig.KEY_DISABLED,
+        /** value = */
+        true);
     setCodeOwnersConfig(cfg);
 
     PushResult r = pushRefsMetaConfig();
@@ -89,6 +94,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         StatusConfig.KEY_DISABLED_BRANCH,
         "refs/heads/master");
@@ -107,6 +113,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         StatusConfig.KEY_DISABLED,
         "INVALID");
@@ -128,6 +135,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         StatusConfig.KEY_DISABLED_BRANCH,
         "^refs/heads/[");
@@ -149,6 +157,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         BackendConfig.KEY_BACKEND,
         CodeOwnerBackendId.PROTO.getBackendId());
@@ -185,6 +194,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         BackendConfig.KEY_BACKEND,
         "INVALID");
@@ -227,6 +237,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "Code-Review+2");
@@ -246,6 +257,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "INVALID");
@@ -270,6 +282,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         "Code-Review+2");
@@ -290,6 +303,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         "INVALID");
@@ -314,6 +328,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setEnum(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         MergeCommitStrategy.ALL_CHANGED_FILES);
@@ -332,6 +347,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /** subsection = */
         null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         "INVALID");

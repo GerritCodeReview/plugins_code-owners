@@ -51,7 +51,12 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetCodeOwnerConfigForNullCodeOwnerConfigKey() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwners.get(null, TEST_REVISION));
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwners.get(
+                    /** codeOwnerConfigKey = */
+                    null, TEST_REVISION));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
   }
 
@@ -60,7 +65,11 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwners.get(CodeOwnerConfig.Key.create(project, "master", "/"), null));
+            () ->
+                codeOwners.get(
+                    CodeOwnerConfig.Key.create(project, "master", "/"),
+                    /** folderPath = */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
@@ -68,7 +77,12 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
   public void cannotGetCodeOwnerConfigFromCurrentRevisionForNullCodeOwnerConfigKey()
       throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> codeOwners.getFromCurrentRevision(null));
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwners.getFromCurrentRevision(
+                    /** codeOwnerConfigKey = */
+                    null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
   }
 
@@ -81,13 +95,20 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
             .build();
     CodeOwnerBackend codeOwnerBackendMock = mock(CodeOwnerBackend.class);
-    when(codeOwnerBackendMock.getCodeOwnerConfig(codeOwnerConfigKey, null))
+    when(codeOwnerBackendMock.getCodeOwnerConfig(
+            codeOwnerConfigKey,
+            /** revision = */
+            null))
         .thenReturn(Optional.of(expectedCodeOwnersConfig));
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnerBackendMock)) {
       Optional<CodeOwnerConfig> codeOwnerConfig =
           codeOwners.getFromCurrentRevision(codeOwnerConfigKey);
       assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
-      verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey, null);
+      verify(codeOwnerBackendMock)
+          .getCodeOwnerConfig(
+              codeOwnerConfigKey,
+              /** revision = */
+              null);
     }
   }
 

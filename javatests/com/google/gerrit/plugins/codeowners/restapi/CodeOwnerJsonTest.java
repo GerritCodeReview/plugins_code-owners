@@ -86,7 +86,12 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerJsonFactory.create(EnumSet.of(FillOptions.ID)).format(null));
+            () ->
+                codeOwnerJsonFactory
+                    .create(EnumSet.of(FillOptions.ID))
+                    .format(
+                        /** codeOwners = */
+                        null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwners");
   }
 }
