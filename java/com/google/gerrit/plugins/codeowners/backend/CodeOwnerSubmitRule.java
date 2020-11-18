@@ -21,7 +21,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.SubmitRecord;
 import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.extensions.annotations.Exports;
-import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.logging.Metadata;
@@ -31,6 +30,7 @@ import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.rules.SubmitRule;
+import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -41,7 +41,7 @@ import java.util.Optional;
 class CodeOwnerSubmitRule implements SubmitRule {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public static class Module extends FactoryModule {
+  public static class Module extends AbstractModule {
     @Override
     public void configure() {
       bind(SubmitRule.class)
