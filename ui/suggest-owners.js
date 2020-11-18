@@ -398,10 +398,12 @@ export class SuggestOwners extends Polymer.Element {
             this._suggestionsTimer = null;
             const reportDetails = res.suggestions.reduce((details, cur) => {
               details.totalGroups++;
-              details.stats.push([cur.files.length, cur.owners ? cur.owners.length : 0]);
+              details.stats.push([cur.files.length,
+                cur.owners ? cur.owners.length : 0]);
               return details;
             }, {totalGroups: 0, stats: []});
-            this.reporting.reportLifeCycle('owners-suggestions-fetching-finished', reportDetails);
+            this.reporting.reportLifeCycle(
+                'owners-suggestions-fetching-finished', reportDetails);
           }
           this.progressText = res.progress;
           this.isLoading = !res.finished;
@@ -517,7 +519,8 @@ export class SuggestOwners extends Polymer.Element {
   }
 
   _reportDocClick() {
-    this.reporting.reportInteraction('code-owners-doc-click', {section: 'no owners found'});
+    this.reporting.reportInteraction('code-owners-doc-click',
+        {section: 'no owners found'});
   }
 }
 

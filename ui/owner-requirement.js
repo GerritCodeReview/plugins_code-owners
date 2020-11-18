@@ -63,8 +63,10 @@ export class OwnerRequirementValue extends Polymer.Element {
         <template is="dom-if" if="[[!_isLoading]]">
           <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
           <template is="dom-if" if="[[_overrideInfoUrl]]">
-            <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]" target="_blank">
-              <iron-icon icon="gr-icons:help-outline" title="Documentation for overriding code owners"></iron-icon>
+            <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
+              target="_blank">
+              <iron-icon icon="gr-icons:help-outline"
+                title="Documentation for overriding code owners"></iron-icon>
             </a>
           </template>
           <template is="dom-if" if="[[!_allApproved]]">

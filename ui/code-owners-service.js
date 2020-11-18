@@ -226,19 +226,21 @@ export class CodeOwnerService {
           return UserRole.REVIEWER;
         } else if (this._accountInReviewers(change.reviewers.CC, account)) {
           return UserRole.CC;
-        } else if (this._accountInReviewers(change.reviewers.REMOVED, account)) {
+        } else if (this._accountInReviewers(change.reviewers.REMOVED,
+            account)) {
           return UserRole.REMOVED_REVIEWER;
         }
       }
       return UserRole.OTHER;
-    })
+    });
   }
 
   _accountInReviewers(reviewers, account) {
     if (!reviewers) {
       return false;
     }
-    return reviewers.some(reviewer => reviewer._account_id === account._account_id);
+    return reviewers.some(reviewer =>
+      reviewer._account_id === account._account_id);
   }
 
   getStatus() {
@@ -301,7 +303,8 @@ export class CodeOwnerService {
         status: this._fetchStatus,
         progress: this._totalFetchCount === 0 ?
           `Loading suggested owners ...` :
-          `${this._fetchedOwners.size} out of ${this._totalFetchCount} files have returned suggested owners.`,
+          `${this._fetchedOwners.size} out of ${this._totalFetchCount} ` +
+            `files have returned suggested owners.`,
         suggestions: this._groupFilesByOwners(codeOwnerStatusMap),
       };
     });
@@ -329,7 +332,8 @@ export class CodeOwnerService {
               }
               , {pending: [], missing: []});
           // always fetch INSUFFICIENT_REVIEWERS first and then pending
-          const filesToFetch = filesGroupByStatus.missing.concat(filesGroupByStatus.pending);
+          const filesToFetch = filesGroupByStatus.missing
+              .concat(filesGroupByStatus.pending);
           this._totalFetchCount = filesToFetch.length;
           return this._batchFetchCodeOwners(filesToFetch);
         });
@@ -415,7 +419,8 @@ export class CodeOwnerService {
       groupedItems.push({
         groupName: this.getGroupName(failedFiles),
         files: failedFiles,
-        error: new Error('Failed to fetch code owner info. Try to refresh the page.'),
+        error: new Error(
+            'Failed to fetch code owner info. Try to refresh the page.'),
       });
     }
 

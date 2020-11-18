@@ -38,8 +38,10 @@ const STATUS_ICON = {
 const STATUS_TOOLTIP = {
   [STATUS_CODE.PENDING]: 'Pending code owner approval',
   [STATUS_CODE.MISSING]: 'Missing code owner approval',
-  [STATUS_CODE.PENDING_OLD_PATH]: 'Pending code owner approval on pre-renamed file',
-  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing code owner approval on pre-renamed file',
+  [STATUS_CODE.PENDING_OLD_PATH]:
+      'Pending code owner approval on pre-renamed file',
+  [STATUS_CODE.MISSING_OLD_PATH]:
+      'Missing code owner approval on pre-renamed file',
   [STATUS_CODE.APPROVED]: 'Approved by code owner',
   [STATUS_CODE.ERROR]: 'Failed to fetch code owner status',
 };
