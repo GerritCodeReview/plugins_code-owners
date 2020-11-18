@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b5cafa51_ea927e84",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerBackend.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-18T10:47:33Z",
+      "side": 1,
+      "message": "oh, I guess all of these comments should have an \u0027\u003d\u0027  in it, like /** revWalk \u003d */ ?",
+      "range": {
+        "startLine": 57,
+        "startChar": 12,
+        "endLine": 57,
+        "endChar": 19
+      },
+      "revId": "754755e96c5671775538d2d012a04b6661000985",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
