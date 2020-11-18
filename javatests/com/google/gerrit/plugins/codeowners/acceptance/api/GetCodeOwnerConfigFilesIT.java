@@ -15,9 +15,11 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
@@ -223,6 +225,50 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 .paths())
         .containsExactly(
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
+  }
+
+  @Test
+  public void includeInvalidCodeOwnerConfigFiles() throws Exception {
+    String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
+    createInvalidCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .includeNonParsableFiles(true)
+                .paths())
+        .containsExactly(
+            JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath().toString(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
+  }
+
+  @Test
+  public void includeNonParsableFilesAndEmailOptionsAreMutuallyExclusive() throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                projectCodeOwnersApiFactory
+                    .project(project)
+                    .branch("master")
+                    .codeOwnerConfigFiles()
+                    .includeNonParsableFiles(true)
+                    .withEmail(admin.email())
+                    .paths());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("the options 'email' and 'include-non-parsable-files' are mutually exclusive");
   }
 
   @Test

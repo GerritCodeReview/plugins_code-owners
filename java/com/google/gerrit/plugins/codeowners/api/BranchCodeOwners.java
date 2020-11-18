@@ -32,7 +32,19 @@ public interface BranchCodeOwners {
   CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException;
 
   abstract class CodeOwnerConfigFilesRequest {
+    private boolean includeNonParsableFiles;
     private String email;
+
+    /** Includes non-parsable code owner config files into the result. */
+    public CodeOwnerConfigFilesRequest includeNonParsableFiles(boolean includeNonParsableFiles) {
+      this.includeNonParsableFiles = includeNonParsableFiles;
+      return this;
+    }
+
+    /** Whether non-parsable code owner config files should be included into the result. */
+    public boolean getIncludeNonParsableFiles() {
+      return includeNonParsableFiles;
+    }
 
     /**
      * Limits the returned code owner config files to those that contain the given email.

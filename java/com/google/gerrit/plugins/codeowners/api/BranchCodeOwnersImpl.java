@@ -60,6 +60,7 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
       @Override
       public List<String> paths() throws RestApiException {
         GetCodeOwnerConfigFiles getCodeOwnerConfigFiles = getCodeOwnerConfigFilesProvider.get();
+        getCodeOwnerConfigFiles.setIncludeNonParsableFiles(getIncludeNonParsableFiles());
         getCodeOwnerConfigFiles.setEmail(getEmail());
         return getCodeOwnerConfigFiles.apply(branchResource).value();
       }

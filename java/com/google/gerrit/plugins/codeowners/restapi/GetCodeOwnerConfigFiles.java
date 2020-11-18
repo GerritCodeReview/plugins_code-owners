@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
@@ -48,7 +49,15 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
 
+  private boolean includeNonParsableFiles;
   private String email;
+
+  @Option(
+      name = "--include-non-parsable-files",
+      usage = "includes non-parseable code owner config files in the response")
+  public void setIncludeNonParsableFiles(boolean includeNonParsableFiles) {
+    this.includeNonParsableFiles = includeNonParsableFiles;
+  }
 
   @Option(
       name = "--email",
@@ -67,7 +76,9 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
   }
 
   @Override
-  public Response<List<String>> apply(BranchResource resource) {
+  public Response<List<String>> apply(BranchResource resource) throws BadRequestException {
+    validateOptions();
+
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(resource.getBranchKey());
     ImmutableList.Builder<Path> codeOwnerConfigs = ImmutableList.builder();
@@ -93,7 +104,11 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
               }
               return true;
             },
-            CodeOwnerConfigScanner.ignoreInvalidCodeOwnerConfigFiles());
+            includeNonParsableFiles
+                ? (codeOwnerConfigFilePath, configInvalidException) -> {
+                  codeOwnerConfigs.add(codeOwnerConfigFilePath);
+                }
+                : CodeOwnerConfigScanner.ignoreInvalidCodeOwnerConfigFiles());
     return Response.ok(
         codeOwnerConfigs.build().stream().map(Path::toString).collect(toImmutableList()));
   }
@@ -119,5 +134,12 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
           "Filtering out %s since it doesn't contain the email", codeOwnerConfigPath);
     }
     return containsEmail;
+  }
+
+  private void validateOptions() throws BadRequestException {
+    if (email != null && includeNonParsableFiles) {
+      throw new BadRequestException(
+          "the options 'email' and 'include-non-parsable-files' are mutually exclusive");
+    }
   }
 }

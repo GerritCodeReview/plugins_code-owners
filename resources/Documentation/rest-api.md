@@ -182,8 +182,8 @@ The following request parameters can be specified:
 
 | Field Name  |          | Description |
 | ----------- | -------- | ----------- |
-| `email`     | optional | Code owner email that must appear in the returned
-code owner config files.
+| `include-non-parsable-files` | optional | Includes non-parseable code owner config files in the response. By default `false`. Cannot be used in combination with the `email` option.
+| `email`     | optional | Code owner email that must appear in the returned code owner config files.
 
 #### Request
 
@@ -195,7 +195,8 @@ As response the paths of the code owner config files are returned as a list. The
 result also includes code owner config that use name prefixes
 ('\<prefix\>_OWNERS') or name extensions ('OWNERS_\<extension\>').
 
-Non-parseable code owner config files are omitted from the response.
+Non-parseable code owner config files are omitted from the response, unless the
+`include-non-parsable-files` option was set.
 
 #### Response
 
