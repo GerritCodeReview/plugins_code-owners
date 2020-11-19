@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "13f84314_999e0f7c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-19T15:57:32Z",
+      "side": 1,
+      "message": "maybe just includeServiceUsers/excludeServiceUsers?",
+      "range": {
+        "startLine": 81,
+        "startChar": 24,
+        "endLine": 81,
+        "endChar": 31
+      },
+      "revId": "b56e764ce200c2bd33ebdd1b557982148ab8b68e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
