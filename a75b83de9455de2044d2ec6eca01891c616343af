@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f26523f_b289e456",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-20T09:04:52Z",
+      "side": 1,
+      "message": "Why is this needed?\nmaybe this should return false?",
+      "range": {
+        "startLine": 272,
+        "startChar": 12,
+        "endLine": 272,
+        "endChar": 69
+      },
+      "revId": "a75b83de9455de2044d2ec6eca01891c616343af",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "be11e5ef_f863a8e3",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInChangeIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-20T09:04:52Z",
+      "side": 1,
+      "message": "changeOwner (this comment is silly if you change this to changeOwner, so maybe just omit).",
+      "range": {
+        "startLine": 254,
+        "startChar": 18,
+        "endLine": 254,
+        "endChar": 23
+      },
+      "revId": "a75b83de9455de2044d2ec6eca01891c616343af",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
