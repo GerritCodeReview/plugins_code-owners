@@ -15,6 +15,12 @@
  * limitations under the License.
  */
 
+export const SuggestionsState = {
+  NotLoaded: 'NotLoaded',
+  Loaded: 'Loaded',
+  Loading: 'Loading',
+}
+
 /**
  * Maintain the state of code-owners.
  * Raises 'property-changed' event when a property is changed.
@@ -34,6 +40,9 @@ export class CodeOwnersModel extends EventTarget {
     this.userRole = undefined;
     this.isCodeOwnerEnabled = undefined;
     this.areAllFilesApproved = undefined;
+    this.suggestions = undefined;
+    this.suggestionsState = SuggestionsState.NotLoaded;
+    this.suggestionsLoadProgress = undefined;
   }
 
   setBranchConfig(config) {
@@ -64,6 +73,24 @@ export class CodeOwnersModel extends EventTarget {
     if (this.areAllFilesApproved === approved) return;
     this.areAllFilesApproved = approved;
     this._firePropertyChanged('areAllFilesApproved');
+  }
+
+  setSuggestions(suggestions) {
+    if (this.suggestions === suggestions) return;
+    this.suggestions = suggestions;
+    this._firePropertyChanged('suggestions');
+  }
+
+  setSuggestionsState(state) {
+    if (this.suggestionsState === state) return;
+    this.suggestionsState = state;
+    this._firePropertyChanged('suggestionsState');
+  }
+
+  setSuggestionsLoadProgress(progress) {
+    if (this.suggestionsLoadProgress === progress) return;
+    this.suggestionsLoadProgress = progress;
+    this._firePropertyChanged('suggestionsLoadProgress');
   }
 
   _firePropertyChanged(propertyName) {

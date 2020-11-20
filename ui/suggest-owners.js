@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CodeOwnerService} from './code-owners-service.js';
 import {ownerState} from './owner-ui-state.js';
+import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
+import {SuggestionsState} from './code-owners-model.js';
 
 const SUGGESTION_POLLING_INTERVAL = 1000;
 
@@ -89,7 +90,7 @@ class OwnerGroupFileList extends Polymer.Element {
 
 customElements.define(OwnerGroupFileList.is, OwnerGroupFileList);
 
-export class SuggestOwners extends Polymer.Element {
+export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
   static get is() {
     return 'suggest-owners';
   }
@@ -299,18 +300,13 @@ export class SuggestOwners extends Polymer.Element {
 
   static get properties() {
     return {
-      // @input
-      change: Object,
-      restApi: Object,
-      reporting: Object,
-
       // @internal attributes
       hidden: {
         type: Boolean,
         value: true,
         reflectToAttribute: true,
+        computed: '_isHidden(model.areAllFilesApproved)',
       },
-      ownerService: Object,
       suggestedOwners: Array,
       isLoading: {
         type: Boolean,
@@ -325,8 +321,10 @@ export class SuggestOwners extends Polymer.Element {
 
   static get observers() {
     return [
-      'onInputChanged(restApi, change)',
-      'onReviewerChange(reviewers)',
+      '_onReviewerChanged(reviewers)',
+      '_onSuggestionsStateChanged(model.suggestionsState)',
+      '_onSuggestionsChanged(model.suggestions, model.suggestionsState)',
+      '_onSuggestionsLoadProgressChanged(model.suggestionsLoadProgress)',
     ];
   }
 
@@ -345,76 +343,110 @@ export class SuggestOwners extends Polymer.Element {
             // legacy element mixin which not used in this plugin.
             Polymer.Async.timeOut.run(() => this.click(), 100);
 
-            // start fetching suggestions
-            if (!this._suggestionsTimer) {
-              this._suggestionsTimer = setInterval(() => {
-                this._pollingSuggestions();
-              }, SUGGESTION_POLLING_INTERVAL);
-
-              // poll immediately to kick start the fetching
-              this.reporting
-                  .reportLifeCycle('owners-suggestions-fetching-start');
-              this._pollingSuggestions();
-            }
+            this.modelLoader.loadSuggestions();
+            this.reporting.reportLifeCycle('owners-suggestions-fetching-start');
           }
         });
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
+    this._stopUpdateProgressTimer();
     if (this.expandSuggestionStateUnsubscriber) {
       this.expandSuggestionStateUnsubscriber();
       this.expandSuggestionStateUnsubscriber = undefined;
     }
   }
 
-  onInputChanged(restApi, change) {
-    ownerState.expandSuggestion = false;
-    if ([restApi, change].includes(undefined)) return;
-    this.isLoading = true;
-    const ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
-    if (this.ownerService && this.ownerService !== ownerService) {
-      // abort all pending requests
-      this.ownerService.abort();
-      clearInterval(this._suggestionsTimer);
-      this._suggestionsTimer = null;
+  _startUpdateProgressTimer() {
+    if (this._progressUpdateTimer) return;
+    this._progressUpdateTimer = setInterval(() => {
+      this.modelLoader.updateLoadSuggestionsProgress();
+    }, SUGGESTION_POLLING_INTERVAL);
+  }
+
+  _stopUpdateProgressTimer() {
+    if (!this._progressUpdateTimer) return;
+    clearInterval(this._progressUpdateTimer);
+    this._progressUpdateTimer = undefined;
+  }
+
+  _onSuggestionsStateChanged(state) {
+    this._stopUpdateProgressTimer();
+    if (state === SuggestionsState.Loading) {
+      this._startUpdateProgressTimer();
     }
-    this.ownerService = ownerService;
+    this.isLoading = state === SuggestionsState.Loading;
+  }
 
+  // onInputChanged(restApi, change) {
+  //   ownerState.expandSuggestion = false;
+  //   if ([restApi, change].includes(undefined)) return;
+  //   this.isLoading = true;
+  //   const ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
+  //   if (this.ownerService && this.ownerService !== ownerService) {
+  //     // abort all pending requests
+  //     this.ownerService.abort();
+  //     clearInterval(this._suggestionsTimer);
+  //     this._suggestionsTimer = null;
+  //   }
+  //   this.ownerService = ownerService;
+  // }
+
+  _isHidden(allFilesApproved) {
     // if all approved, no need to show the container
-    this.ownerService.areAllFilesApproved().then(approved => {
-      if (approved) {
-        this.hidden = approved;
-      }
-    });
+    return allFilesApproved === undefined || !!allFilesApproved;
   }
 
-  _pollingSuggestions() {
-    this.ownerService
-        .getSuggestedOwners()
-        .then(res => {
-          if (res.finished) {
-            clearInterval(this._suggestionsTimer);
-            this._suggestionsTimer = null;
-            const reportDetails = res.suggestions.reduce((details, cur) => {
-              details.totalGroups++;
-              details.stats.push([cur.files.length,
-                cur.owners ? cur.owners.length : 0]);
-              return details;
-            }, {totalGroups: 0, stats: []});
-            this.reporting.reportLifeCycle(
-                'owners-suggestions-fetching-finished', reportDetails);
-          }
-          this.progressText = res.progress;
-          this.isLoading = !res.finished;
-
-          this._updateSuggestions(res.suggestions);
-
-          // in case `_updateAllChips` called before suggestedOwners ready
-          // from onReviewerChange
-          this._updateAllChips(this._currentReviewers);
-        });
+  loadPropertiesAfterModelChanged() {
+    super.loadPropertiesAfterModelChanged();
+    this._stopUpdateProgressTimer();
+    this.modelLoader.loadAreAllFilesApproved();
   }
+
+  _onSuggestionsChanged(suggestions, suggestionsState) {
+    if (!suggestions || suggestionsState !== SuggestionsState.Loaded) return;
+    const reportDetails = suggestions.reduce((details, cur) => {
+      details.totalGroups++;
+      details.stats.push([cur.files.length,
+        cur.owners ? cur.owners.length : 0]);
+      return details;
+    }, {totalGroups: 0, stats: []});
+    this.reporting.reportLifeCycle(
+        'owners-suggestions-fetching-finished', reportDetails);
+    this._updateSuggestions(suggestions);
+  }
+
+  _onSuggestionsLoadProgressChanged(progress) {
+    this.progressText = progress;
+  }
+
+  // _pollingSuggestions() {
+  //   this.ownerService
+  //       .getSuggestedOwners()
+  //       .then(res => {
+  //         if (res.finished) {
+  //           clearInterval(this._suggestionsTimer);
+  //           this._suggestionsTimer = null;
+  //           const reportDetails = res.suggestions.reduce((details, cur) => {
+  //             details.totalGroups++;
+  //             details.stats.push([cur.files.length,
+  //               cur.owners ? cur.owners.length : 0]);
+  //             return details;
+  //           }, {totalGroups: 0, stats: []});
+  //           this.reporting.reportLifeCycle(
+  //               'owners-suggestions-fetching-finished', reportDetails);
+  //         }
+  //         this.progressText = res.progress;
+  //         this.isLoading = !res.finished;
+  //
+  //         this._updateSuggestions(res.suggestions);
+  //
+  //         // in case `_updateAllChips` called before suggestedOwners ready
+  //         // from _onReviewerChanged
+  //         this._updateAllChips(this._currentReviewers);
+  //       });
+  // }
 
   _updateSuggestions(suggestions) {
     // update group names and files, no modification on owners or error
@@ -423,7 +455,7 @@ export class SuggestOwners extends Polymer.Element {
     });
   }
 
-  onReviewerChange(reviewers) {
+  _onReviewerChanged(reviewers) {
     this._currentReviewers = reviewers;
     this._updateAllChips(reviewers);
   }
