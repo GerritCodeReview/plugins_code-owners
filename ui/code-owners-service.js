@@ -430,6 +430,17 @@ export class CodeOwnerService {
     };
   }
 
+  async getSuggestedOwnersProgress() {
+    const {codeOwnerStatusMap} = await this.getStatus();
+    return {
+      finished: this.ownersFetcher.getStatus() === FetchStatus.FINISHED,
+      status: this.ownersFetcher.getStatus(),
+      progress: this.ownersFetcher.getProgressString(),
+      suggestions: this._groupFilesByOwners(codeOwnerStatusMap,
+          this.ownersFetcher.getFiles()),
+    };
+  }
+
   _formatStatuses(statuses) {
     // convert the array of statuses to map between file path -> status
     return statuses.reduce((prev, cur) => {
