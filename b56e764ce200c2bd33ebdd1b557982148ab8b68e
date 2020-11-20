@@ -46,6 +46,30 @@
       },
       "revId": "b56e764ce200c2bd33ebdd1b557982148ab8b68e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "00e99490_6a7ac93b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-20T08:38:45Z",
+      "side": 1,
+      "message": "\u003e probably not, based on the next change.\nYes :)",
+      "parentUuid": "5ce15e98_951e2fd5",
+      "range": {
+        "startLine": 81,
+        "startChar": 24,
+        "endLine": 81,
+        "endChar": 31
+      },
+      "revId": "b56e764ce200c2bd33ebdd1b557982148ab8b68e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
