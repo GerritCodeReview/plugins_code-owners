@@ -22,14 +22,12 @@ import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.Accounts;
-import com.google.gerrit.server.account.ServiceUserClassifier;
 import com.google.gerrit.server.change.IncludedInResolver;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.permissions.PermissionBackend;
@@ -56,8 +54,8 @@ import org.kohsuke.args4j.Option;
  *
  * <p>The path may or may not exist in the branch.
  */
-public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
-    implements RestReadView<CodeOwnersInBranchCollection.PathResource> {
+public class GetCodeOwnersForPathInBranch
+    extends AbstractGetCodeOwnersForPath<CodeOwnersInBranchCollection.PathResource> {
   private final GitRepositoryManager repoManager;
   private String revision;
 
@@ -80,7 +78,6 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
-      ServiceUserClassifier serviceUserClassifier,
       CodeOwnerJson.Factory codeOwnerJsonFactory,
       GitRepositoryManager repoManager) {
     super(
@@ -91,10 +88,7 @@ public class GetCodeOwnersForPathInBranch extends AbstractGetCodeOwnersForPath
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
-        serviceUserClassifier,
-        codeOwnerJsonFactory,
-        /** suggest = */
-        false);
+        codeOwnerJsonFactory);
     this.repoManager = repoManager;
   }
 

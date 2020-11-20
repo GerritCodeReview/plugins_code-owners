@@ -14,11 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
@@ -30,6 +31,8 @@ import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * REST endpoint that gets the code owners for an arbitrary path in a revision of a change.
@@ -39,8 +42,12 @@ import java.util.List;
  *
  * <p>The path may or may not exist in the revision of the change.
  */
-public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
-    implements RestReadView<CodeOwnersInChangeCollection.PathResource> {
+public class GetCodeOwnersForPathInChange
+    extends AbstractGetCodeOwnersForPath<CodeOwnersInChangeCollection.PathResource> {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  private final ServiceUserClassifier serviceUserClassifier;
+
   @Inject
   GetCodeOwnersForPathInChange(
       AccountVisibility accountVisibility,
@@ -60,15 +67,36 @@ public class GetCodeOwnersForPathInChange extends AbstractGetCodeOwnersForPath
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
-        serviceUserClassifier,
-        codeOwnerJsonFactory,
-        /** suggest = */
-        true);
+        codeOwnerJsonFactory);
+    this.serviceUserClassifier = serviceUserClassifier;
   }
 
   @Override
   public Response<List<CodeOwnerInfo>> apply(CodeOwnersInChangeCollection.PathResource rsrc)
       throws RestApiException, PermissionBackendException {
     return super.applyImpl(rsrc);
+  }
+
+  @Override
+  protected Stream<CodeOwner> filterCodeOwners(
+      CodeOwnersInChangeCollection.PathResource rsrc, Stream<CodeOwner> codeOwners) {
+    return codeOwners.filter(filterOutServiceUsers());
+  }
+
+  private Predicate<CodeOwner> filterOutServiceUsers() {
+    return codeOwner -> {
+      if (!isServiceUser(codeOwner)) {
+        // Returning true from the Predicate here means that the code owner should be kept.
+        return true;
+      }
+      logger.atFine().log("Filtering out %s because this code owner is a service user", codeOwner);
+      // Returning false from the Predicate here means that the code owner should be filtered out.
+      return false;
+    };
+  }
+
+  /** Whether the given code owner is a service user. */
+  private boolean isServiceUser(CodeOwner codeOwner) {
+    return serviceUserClassifier.isServiceUser(codeOwner.accountId());
   }
 }
