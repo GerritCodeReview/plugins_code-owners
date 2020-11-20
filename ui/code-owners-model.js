@@ -15,11 +15,17 @@
  * limitations under the License.
  */
 
+export const SuggestionsState = {
+  NotLoaded: 'NotLoaded',
+  Loaded: 'Loaded',
+  Loading: 'Loading',
+};
+
 /**
  * Maintain the state of code-owners.
  * Raises 'model-property-changed' event when a property is changed.
- * The plugin shares the same model between all UI elements (thought it is not
- * required).
+ * The plugin shares the same model between all UI elements (if it is not,
+ * the plugin can't maintain showSuggestions state across different UI elements).
  * UI elements use values from this model to display information
  * and listens for the model-property-changed event. To do so, UI elements
  * add CodeOwnersModelMixin, which is doing the listening and the translation
@@ -41,6 +47,10 @@ export class CodeOwnersModel extends EventTarget {
     this.userRole = undefined;
     this.isCodeOwnerEnabled = undefined;
     this.areAllFilesApproved = undefined;
+    this.suggestions = undefined;
+    this.suggestionsState = SuggestionsState.NotLoaded;
+    this.suggestionsLoadProgress = undefined;
+    this.showSuggestions = false;
   }
 
   setBranchConfig(config) {
@@ -71,6 +81,30 @@ export class CodeOwnersModel extends EventTarget {
     if (this.areAllFilesApproved === approved) return;
     this.areAllFilesApproved = approved;
     this._firePropertyChanged('areAllFilesApproved');
+  }
+
+  setSuggestions(suggestions) {
+    if (this.suggestions === suggestions) return;
+    this.suggestions = suggestions;
+    this._firePropertyChanged('suggestions');
+  }
+
+  setSuggestionsState(state) {
+    if (this.suggestionsState === state) return;
+    this.suggestionsState = state;
+    this._firePropertyChanged('suggestionsState');
+  }
+
+  setSuggestionsLoadProgress(progress) {
+    if (this.suggestionsLoadProgress === progress) return;
+    this.suggestionsLoadProgress = progress;
+    this._firePropertyChanged('suggestionsLoadProgress');
+  }
+
+  setShowSuggestions(show) {
+    if (this.showSuggestions === show) return;
+    this.showSuggestions = show;
+    this._firePropertyChanged('showSuggestions');
   }
 
   _firePropertyChanged(propertyName) {

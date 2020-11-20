@@ -16,7 +16,6 @@
  */
 
 import {OwnerStatus} from './code-owners-service.js';
-import {ownerState} from './owner-ui-state.js';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 
 /**
@@ -215,6 +214,7 @@ export class OwnerRequirementValue extends
   }
 
   _openReplyDialog() {
+    this.model.setShowSuggestions(true);
     this.dispatchEvent(
         new CustomEvent('open-reply-dialog', {
           detail: {},
@@ -222,7 +222,6 @@ export class OwnerRequirementValue extends
           bubbles: true,
         })
     );
-    ownerState.expandSuggestion = true;
     this.reporting.reportInteraction('suggest-owners-from-submit-requirement',
         {user_role: this.model.userRole});
   }
