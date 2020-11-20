@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "069ede1f_fe6ff98d",
+        "filename": "resources/Documentation/how-to-use.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-20T09:40:54Z",
+      "side": 1,
+      "message": "was/is?",
+      "range": {
+        "startLine": 27,
+        "startChar": 21,
+        "endLine": 27,
+        "endChar": 28
+      },
+      "revId": "062fce00c688998991e1b920fc2c44f5ee7d370a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a8cf4fd7_2dd3017b",
+        "filename": "resources/Documentation/how-to-use.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 89,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-20T09:40:54Z",
+      "side": 1,
+      "message": "(random unrelated thought that I also had during the demo)\nIs it possible that we have those suggestions:\nfoo/a.txt -\u003e reviewer A,B,C,D,E\nbar/b.txt -\u003e reviewer X,Y,Z,W,T \n\nOWNERS - A\nfoo/OWNERS - B,C,D,E\nbar/OWNERS - X,Y,Z,W,T\n\nReviewer A can also give code owner approval for b.txt? (reviewer A just got a lower score).",
+      "range": {
+        "startLine": 89,
+        "startChar": 47,
+        "endLine": 89,
+        "endChar": 68
+      },
+      "revId": "062fce00c688998991e1b920fc2c44f5ee7d370a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
