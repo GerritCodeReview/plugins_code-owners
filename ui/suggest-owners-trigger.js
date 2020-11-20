@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {ownerState} from './owner-ui-state.js';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 
 export class SuggestOwnersTrigger extends
@@ -23,17 +22,8 @@ export class SuggestOwnersTrigger extends
     return 'suggest-owners-trigger';
   }
 
-  constructor(props) {
-    super(props);
-    this.expandSuggestionStateUnsubscriber = undefined;
-  }
-
   static get properties() {
     return {
-      expanded: {
-        type: Boolean,
-        value: false,
-      },
       hidden: {
         type: Boolean,
         computed: '_computeHidden(model.isCodeOwnerEnabled,' +
@@ -62,7 +52,7 @@ export class SuggestOwnersTrigger extends
           has-tooltip
           title="Suggest owners for your change"
         >
-          [[computeButtonText(expanded)]]
+          [[computeButtonText(model.showSuggestions)]]
         </gr-button>
         <span>
           <a on-click="_reportBugClick" href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin" target="_blank">
@@ -82,22 +72,6 @@ export class SuggestOwnersTrigger extends
     this.modelLoader.loadAreAllFilesApproved();
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.expandSuggestionStateUnsubscriber = ownerState
-        .onExpandSuggestionChange(expanded => {
-          this.expanded = expanded;
-        });
-  }
-
-  disconnnectedCallback() {
-    super.disconnectedCallback();
-    if (this.expandSuggestionStateUnsubscriber) {
-      this.expandSuggestionStateUnsubscriber();
-      this.expandSuggestionStateUnsubscriber = undefined;
-    }
-  }
-
   _computeHidden(enabled, allFilesApproved, userRole) {
     if (enabled === undefined ||
         allFilesApproved === undefined ||
@@ -112,8 +86,7 @@ export class SuggestOwnersTrigger extends
   }
 
   toggleControlContent() {
-    this.expanded = !this.expanded;
-    ownerState.expandSuggestion = this.expanded;
+    this.model.setShowSuggestions(!this.model.showSuggestions);
     this.reporting.reportInteraction('toggle-suggest-owners', {
       expanded: this.expanded,
       user_role: this.model.userRole ?
