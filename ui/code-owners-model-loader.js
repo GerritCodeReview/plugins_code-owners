@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import {SuggestionsState} from './code-owners-model.js';
+
 /**
  * ModelLoader provides a method for loading data into the model.
  * It is a bridge between an ownersModel and an ownersService.
@@ -74,5 +76,23 @@ export class ModelLoader {
         () => this.ownersService.areAllFilesApproved(),
         value => this.ownersModel.setAreAllFilesApproved(value)
     );
+  }
+
+  async loadSuggestions() {
+    // If a loading has been started already, do nothing
+    if (this.ownersModel.suggestionsState
+        !== SuggestionsState.NotLoaded) return;
+
+    this.ownersModel.setSuggestionsState(SuggestionsState.Loading);
+    const suggestedOwners = await this.ownersService.getSuggestedOwners();
+    this.ownersModel.setSuggestions(suggestedOwners.suggestions);
+    this.ownersModel.setSuggestionsState(SuggestionsState.Loaded);
+  }
+
+  async updateLoadSuggestionsProgress() {
+    const suggestedOwners =
+        await this.ownersService.getSuggestedOwnersProgress();
+    this.ownersModel.setSuggestionsLoadProgress(suggestedOwners.progress);
+    this.ownersModel.setSuggestions(suggestedOwners.suggestions);
   }
 }
