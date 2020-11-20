@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f73bb946_7e0b88f4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 272,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-20T10:49:38Z",
+      "side": 1,
+      "message": "\u003e Why is this needed?\n\nIt\u0027s because we are in the abstract class here which handles list code owners requests on a branch and on a change. If the request is done on a branch, there is no change. Hence we need to downcast the resource here to see if it contains a change.\n\nI agree that this is not very nice, hence now I implemented a new approach for this in the predecessor change that makes this cast unnecessary. \n\n\u003e maybe this should return false?\n\nThis is the return value from the Predicate that is returned by the filterOutChangeOwner method. For the Predicate returning true means keep the entry, while returning false mean that should be filtered out. I\u0027ve now added comments to avoid this confusion here.",
+      "parentUuid": "1f26523f_b289e456",
+      "range": {
+        "startLine": 272,
+        "startChar": 12,
+        "endLine": 272,
+        "endChar": 69
+      },
+      "revId": "a75b83de9455de2044d2ec6eca01891c616343af",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "be11e5ef_f863a8e3",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-11-20T09:04:52Z",
       "side": 1,
       "message": "changeOwner (this comment is silly if you change this to changeOwner, so maybe just omit).",
+      "range": {
+        "startLine": 254,
+        "startChar": 18,
+        "endLine": 254,
+        "endChar": 23
+      },
+      "revId": "a75b83de9455de2044d2ec6eca01891c616343af",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6f0353d0_f0dd5306",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInChangeIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-20T10:49:38Z",
+      "side": 1,
+      "message": "Ups, yes. Dropped it.",
+      "parentUuid": "be11e5ef_f863a8e3",
       "range": {
         "startLine": 254,
         "startChar": 18,
