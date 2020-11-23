@@ -64,19 +64,28 @@ export class OwnerRequirementValue extends
           Loading status ...
         </p>
         <template is="dom-if" if="[[!_isLoading]]">
-          <template is="dom-if" if="[[!_pluginFailed(model.pluginStatus)]]">  
-            <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
-            <template is="dom-if" if="[[_overrideInfoUrl]]">
-              <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
-                target="_blank">
-                <iron-icon icon="gr-icons:help-outline"
-                  title="Documentation for overriding code owners"></iron-icon>
-              </a>
+          <template is="dom-if" if="[[!_pluginFailed(model.pluginStatus)]]">
+            <template is="dom-if" if="[[!model.branchConfig.no_code_owners_defined]]">              
+              <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
+              <template is="dom-if" if="[[_overrideInfoUrl]]">
+                <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
+                  target="_blank">
+                  <iron-icon icon="gr-icons:help-outline"
+                    title="Documentation for overriding code owners"></iron-icon>
+                </a>
+              </template>
+              <template is="dom-if" if="[[!_allApproved]]">
+                <gr-button link on-click="_openReplyDialog">
+                Suggest owners
+              </gr-button>
+              </template>
             </template>
-            <template is="dom-if" if="[[!_allApproved]]">
-              <gr-button link on-click="_openReplyDialog">
-              Suggest owners
-            </gr-button>
+            <template is="dom-if" if="[[model.branchConfig.no_code_owners_defined]]">                
+              <span>No code-owners file</span>
+              <a href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/user-guide.md#how-to-submit-changes-with-files-that-have-no-code-owners" target="_blank">
+                <iron-icon icon="gr-icons:help-outline"
+                  title="Documentation about submitting changes with files that have no code owners?"></iron-icon>
+              </a>
             </template>
           </template>
           <template is="dom-if" if="[[_pluginFailed(model.pluginStatus)]]">
