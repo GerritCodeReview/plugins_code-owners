@@ -28,7 +28,7 @@ export class SuggestOwnersTrigger extends
       hidden: {
         type: Boolean,
         computed: '_computeHidden(model.pluginStatus,' +
-            'model.areAllFilesApproved, model.userRole)',
+            'model.areAllFilesApproved, model.userRole, model.branchConfig)',
         reflectToAttribute: true,
       },
     };
@@ -71,14 +71,17 @@ export class SuggestOwnersTrigger extends
     this.modelLoader.loadUserRole();
     this.modelLoader.loadPluginStatus();
     this.modelLoader.loadAreAllFilesApproved();
+    this.modelLoader.loadBranchConfig();
   }
 
-  _computeHidden(pluginStatus, allFilesApproved, userRole) {
+  _computeHidden(pluginStatus, allFilesApproved, userRole, branchConfig) {
     if (pluginStatus === undefined ||
         allFilesApproved === undefined ||
-        userRole === undefined) {
+        userRole === undefined ||
+        branchConfig === undefined) {
       return true;
     }
+    if (branchConfig.no_code_owners_defined) return true;
     if (pluginStatus.state === PluginState.Enabled) {
       return allFilesApproved;
     } else {
