@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "75822a59_f567591b",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 4
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2020-11-23T18:12:50Z",
+      "side": 1,
+      "message": "You are calling getStatus from prefetch and prefetch from getStatus, is there possibility for infinite loop?",
+      "range": {
+        "startLine": 254,
+        "startChar": 11,
+        "endLine": 254,
+        "endChar": 19
+      },
+      "revId": "3f5cac5583bf84712c4e25601cf68ed109808c3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
