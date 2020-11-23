@@ -575,7 +575,7 @@ export class CodeOwnerService {
       return false;
     }
     const config = await this.codeOwnerCacheApi.getBranchConfig();
-    return config && !(config.status && config.status.disabled);
+    return config && !config.disabled;
   }
 
   static getOwnerService(restApi, change) {
