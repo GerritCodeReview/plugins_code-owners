@@ -22,6 +22,30 @@
       },
       "revId": "3f5cac5583bf84712c4e25601cf68ed109808c3b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7a48be8e_22ded473",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 4
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-23T18:40:32Z",
+      "side": 1,
+      "message": "Yes, it is possible. I know one possible scenario - the new patchset is uploaded right before the status is requested. In this case this.isOnLatestPatchset always returns false. Seems, this problem already exists in the plugin for some time.\n\nI planned to fix this problem (and several other problems) in a separate change, but the change is not ready yet.\nAre you ok with submitting current change without fixing this issue?",
+      "parentUuid": "75822a59_f567591b",
+      "range": {
+        "startLine": 254,
+        "startChar": 11,
+        "endLine": 254,
+        "endChar": 19
+      },
+      "revId": "3f5cac5583bf84712c4e25601cf68ed109808c3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
