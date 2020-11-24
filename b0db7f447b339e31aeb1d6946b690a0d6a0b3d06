@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f17d7fbb_55a14d67",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2020-11-24T13:44:29Z",
+      "side": 1,
+      "message": "expections",
+      "range": {
+        "startLine": 10,
+        "startChar": 24,
+        "endLine": 10,
+        "endChar": 34
+      },
+      "revId": "b0db7f447b339e31aeb1d6946b690a0d6a0b3d06",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "854bc26e_36e9d956",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2020-11-24T13:44:29Z",
+      "side": 1,
+      "message": "pluginState or pluginStatus",
+      "range": {
+        "startLine": 10,
+        "startChar": 52,
+        "endLine": 10,
+        "endChar": 64
+      },
+      "revId": "b0db7f447b339e31aeb1d6946b690a0d6a0b3d06",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "680763b1_bbeb4da7",
+        "filename": "ui/code-owners-banner.js",
+        "patchSetId": 7
+      },
+      "lineNbr": 73,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2020-11-24T13:44:29Z",
+      "side": 1,
+      "message": "to remove",
+      "range": {
+        "startLine": 73,
+        "startChar": 15,
+        "endLine": 73,
+        "endChar": 23
+      },
+      "revId": "b0db7f447b339e31aeb1d6946b690a0d6a0b3d06",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c96f219_f1cca558",
+        "filename": "ui/code-owners-banner.js",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2020-11-24T13:44:29Z",
+      "side": 1,
+      "message": "Maybe use --error-text-color (which is red) and background something else?",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 23
+      },
+      "revId": "b0db7f447b339e31aeb1d6946b690a0d6a0b3d06",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
