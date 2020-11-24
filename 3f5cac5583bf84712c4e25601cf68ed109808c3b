@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "f4e0e24c_2ba08447",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-24T07:15:53Z",
+      "side": 1,
+      "message": "Maybe add a comment about cache invalidation. Why do you think that all these methods do not have to be retrieved again? Would it make sense to cache just for 1 minute/hour/day and then retrieve fresh results? Is that just a nice-to-have or does not make sense? Also think about the use case of leaving a tab open over night.",
+      "revId": "3f5cac5583bf84712c4e25601cf68ed109808c3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "75822a59_f567591b",
         "filename": "ui/code-owners-service.js",
         "patchSetId": 4
