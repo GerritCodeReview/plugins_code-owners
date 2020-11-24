@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8b974d6_5dff0283",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/RenameEmail.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 163,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-24T13:00:52Z",
+      "side": 1,
+      "message": "Good catch! Thanks a lot for pointing this out! This was indeed broken 😞\nIt should work with the new patch set now and is also covered by tests now.",
+      "parentUuid": "c5e95e20_af04f21b",
+      "range": {
+        "startLine": 163,
+        "startChar": 50,
+        "endLine": 163,
+        "endChar": 60
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3fded38a_9624593a",
