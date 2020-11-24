@@ -71,6 +71,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1200ca16_472d75af",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/RenameEmailIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-24T14:21:32Z",
+      "side": 1,
+      "message": "I think it\u0027s not possible to write this test for project owners too.\n\nRenameEmail requires the caller to be project owner or has direct push permissions. This makes 3 test cases:\n1. caller is neither project owner nor has direct push permissions (this test)\n2. the caller is project owner (renameEmailAsProjectOwner())\n3. the caller has direct push permissions (renameEmailWithDirectPushPermission())\n\nMaybe let me just rename this test to make it clearer.\n\nDone",
+      "parentUuid": "3fded38a_9624593a",
+      "range": {
+        "startLine": 138,
+        "startChar": 14,
+        "endLine": 138,
+        "endChar": 54
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d58a8741_241be920",
@@ -94,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f284749_964ed18c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/RenameEmailIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 229,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-24T14:21:32Z",
+      "side": 1,
+      "message": "Done. I\u0027ve split this in 2 tests:\n1. renameOwnEmail\n2. renameOtherEmail",
+      "parentUuid": "d58a8741_241be920",
+      "range": {
+        "startLine": 229,
+        "startChar": 0,
+        "endLine": 229,
+        "endChar": 49
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "278b11be_8abc3522",
@@ -107,6 +155,30 @@
       "writtenOn": "2020-10-23T17:06:16Z",
       "side": 1,
       "message": "what\u0027s the default?",
+      "range": {
+        "startLine": 630,
+        "startChar": 16,
+        "endLine": 630,
+        "endChar": 24
+      },
+      "revId": "01023834e8846e22df33dd7e76b7adb18c97002b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "91fff912_59f8bdda",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 630,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-24T14:21:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "278b11be_8abc3522",
       "range": {
         "startLine": 630,
         "startChar": 16,
