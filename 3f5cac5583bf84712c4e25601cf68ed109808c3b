@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4e91b5c7_56fcf55b",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 4
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-24T09:56:31Z",
+      "side": 1,
+      "message": "Comment is added.\n\nPlease note, that in this change I didn\u0027t change existing behavior, just made it more explicit. Previous code also shares promises made only one request.",
+      "parentUuid": "f4e0e24c_2ba08447",
+      "revId": "3f5cac5583bf84712c4e25601cf68ed109808c3b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "75822a59_f567591b",
