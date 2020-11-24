@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4076c5fd_ccd03d5e",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 8
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2020-11-24T13:29:15Z",
+      "side": 1,
+      "message": "inconsistency",
+      "range": {
+        "startLine": 141,
+        "startChar": 8,
+        "endLine": 141,
+        "endChar": 21
+      },
+      "revId": "17f9efd2d75d19573fc3f7f0aedc1a2516bfc465",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8f282d67_6a87e3c6",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 8
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2020-11-24T13:29:15Z",
+      "side": 1,
+      "message": "invalidate",
+      "range": {
+        "startLine": 141,
+        "startChar": 41,
+        "endLine": 141,
+        "endChar": 52
+      },
+      "revId": "17f9efd2d75d19573fc3f7f0aedc1a2516bfc465",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
