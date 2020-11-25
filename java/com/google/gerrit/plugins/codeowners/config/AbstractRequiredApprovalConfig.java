@@ -17,13 +17,13 @@ package com.google.gerrit.plugins.codeowners.config;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
-import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
 /**
@@ -51,48 +51,59 @@ abstract class AbstractRequiredApprovalConfig {
   protected abstract String getConfigKey();
 
   /**
-   * Reads the required approval for the specified project from the given plugin config with
+   * Reads the required approvals for the specified project from the given plugin config with
    * fallback to {@code gerrit.config}.
    *
-   * @param projectState state of the project for which the required approval should be read
-   * @param pluginConfig the plugin config from which the required approval should be read
-   * @return the required approval, {@link Optional#empty} if none was configured
+   * @param projectState state of the project for which the required approvals should be read
+   * @param pluginConfig the plugin config from which the required approvals should be read
+   * @return the required approvals, an empty list if none was configured
    */
-  Optional<RequiredApproval> get(ProjectState projectState, Config pluginConfig) {
+  ImmutableList<RequiredApproval> get(ProjectState projectState, Config pluginConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(pluginConfig, "pluginConfig");
 
-    String requiredApproval =
-        pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
-    if (requiredApproval != null) {
-      try {
-        return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
-      } catch (IllegalStateException | IllegalArgumentException e) {
-        throw new InvalidPluginConfigurationException(
-            pluginName,
-            String.format(
-                "Required approval '%s' that is configured in %s.config"
-                    + " (parameter %s.%s) is invalid: %s",
-                requiredApproval, pluginName, SECTION_CODE_OWNERS, getConfigKey(), e.getMessage()));
+    ImmutableList.Builder<RequiredApproval> requiredApprovalList = ImmutableList.builder();
+    String[] requiredApprovals =
+        pluginConfig.getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
+    if (requiredApprovals.length > 0) {
+      for (String requiredApproval : requiredApprovals) {
+        try {
+          requiredApprovalList.add(RequiredApproval.parse(projectState, requiredApproval));
+        } catch (IllegalStateException | IllegalArgumentException e) {
+          throw new InvalidPluginConfigurationException(
+              pluginName,
+              String.format(
+                  "Required approval '%s' that is configured in %s.config"
+                      + " (parameter %s.%s) is invalid: %s",
+                  requiredApproval,
+                  pluginName,
+                  SECTION_CODE_OWNERS,
+                  getConfigKey(),
+                  e.getMessage()));
+        }
       }
+      return requiredApprovalList.build();
     }
 
-    requiredApproval =
-        pluginConfigFactory.getFromGerritConfig(pluginName).getString(getConfigKey());
-    if (requiredApproval != null) {
-      try {
-        return Optional.of(RequiredApproval.parse(projectState, requiredApproval));
-      } catch (IllegalStateException | IllegalArgumentException e) {
-        throw new InvalidPluginConfigurationException(
-            pluginName,
-            String.format(
-                "Required approval '%s' that is configured in gerrit.config"
-                    + " (parameter plugin.%s.%s) is invalid: %s",
-                requiredApproval, pluginName, getConfigKey(), e.getMessage()));
+    requiredApprovals =
+        pluginConfigFactory.getFromGerritConfig(pluginName).getStringList(getConfigKey());
+    if (requiredApprovals.length > 0) {
+      for (String requiredApproval : requiredApprovals) {
+        try {
+          requiredApprovalList.add(RequiredApproval.parse(projectState, requiredApproval));
+        } catch (IllegalStateException | IllegalArgumentException e) {
+          throw new InvalidPluginConfigurationException(
+              pluginName,
+              String.format(
+                  "Required approval '%s' that is configured in gerrit.config"
+                      + " (parameter plugin.%s.%s) is invalid: %s",
+                  requiredApproval, pluginName, getConfigKey(), e.getMessage()));
+        }
       }
+      return requiredApprovalList.build();
     }
 
-    return Optional.empty();
+    return ImmutableList.of();
   }
 
   /**
@@ -103,21 +114,22 @@ abstract class AbstractRequiredApprovalConfig {
    * @return list of validation messages for validation errors, empty list if there are no
    *     validation errors
    */
-  Optional<CommitValidationMessage> validateProjectLevelConfig(
+  ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
       ProjectState projectState, String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
-    String requiredApproval =
+    String[] requiredApprovals =
         projectLevelConfig
             .getConfig()
-            .getString(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
-    if (requiredApproval != null) {
+            .getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
+    ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
+    for (String requiredApproval : requiredApprovals) {
       try {
         RequiredApproval.parse(projectState, requiredApproval);
       } catch (IllegalArgumentException | IllegalStateException e) {
-        return Optional.of(
+        validationMessages.add(
             new CommitValidationMessage(
                 String.format(
                     "Required approval '%s' that is configured in %s (parameter %s.%s) is invalid: %s",
@@ -129,6 +141,6 @@ abstract class AbstractRequiredApprovalConfig {
                 ValidationMessage.Type.ERROR));
       }
     }
-    return Optional.empty();
+    return validationMessages.build();
   }
 }
