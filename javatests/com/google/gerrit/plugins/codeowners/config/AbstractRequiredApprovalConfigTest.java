@@ -19,14 +19,13 @@ import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfig
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
-import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Test;
 
@@ -85,11 +84,11 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
         /* subsection= */ null,
         getRequiredApprovalConfig().getConfigKey(),
         "Code-Review+2");
-    Optional<RequiredApproval> requiredApproval =
+    ImmutableList<RequiredApproval> requiredApproval =
         getRequiredApprovalConfig().get(projectState, cfg);
-    assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -160,7 +159,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
   @Test
   public void validateEmptyProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    Optional<CommitValidationMessage> commitValidationMessage =
+    ImmutableList<CommitValidationMessage> commitValidationMessage =
         getRequiredApprovalConfig()
             .validateProjectLevelConfig(
                 projectState,
@@ -179,7 +178,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
             /* subsection= */ null,
             getRequiredApprovalConfig().getConfigKey(),
             "Code-Review+2");
-    Optional<CommitValidationMessage> commitValidationMessage =
+    ImmutableList<CommitValidationMessage> commitValidationMessage =
         getRequiredApprovalConfig()
             .validateProjectLevelConfig(projectState, "code-owners.config", cfg);
     assertThat(commitValidationMessage).isEmpty();
@@ -195,12 +194,12 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
             /* subsection= */ null,
             getRequiredApprovalConfig().getConfigKey(),
             "INVALID");
-    Optional<CommitValidationMessage> commitValidationMessage =
+    ImmutableList<CommitValidationMessage> commitValidationMessage =
         getRequiredApprovalConfig()
             .validateProjectLevelConfig(projectState, "code-owners.config", cfg);
-    assertThat(commitValidationMessage).isPresent();
-    assertThat(commitValidationMessage.get().getType()).isEqualTo(ValidationMessage.Type.ERROR);
-    assertThat(commitValidationMessage.get().getMessage())
+    assertThat(commitValidationMessage).hasSize(1);
+    assertThat(commitValidationMessage.get(0).getType()).isEqualTo(ValidationMessage.Type.ERROR);
+    assertThat(commitValidationMessage.get(0).getMessage())
         .isEqualTo(
             String.format(
                 "Required approval 'INVALID' that is configured in code-owners.config (parameter"

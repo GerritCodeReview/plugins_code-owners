@@ -14,14 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
-import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.server.project.ProjectState;
-import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -46,11 +44,11 @@ public class OverrideApprovalConfigTest extends AbstractRequiredApprovalConfigTe
     createOwnersOverrideLabel();
 
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    Optional<RequiredApproval> requiredApproval =
+    ImmutableList<RequiredApproval> requiredApproval =
         getRequiredApprovalConfig().get(projectState, new Config());
-    assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(requiredApproval).value().hasValueThat().isEqualTo(1);
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test

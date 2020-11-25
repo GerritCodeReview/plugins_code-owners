@@ -16,11 +16,13 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
+import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Optional;
 
@@ -45,6 +47,17 @@ public class RequiredApprovalSubject extends Subject {
   public static OptionalSubject<RequiredApprovalSubject, RequiredApproval> assertThat(
       Optional<RequiredApproval> requiredApproval) {
     return OptionalSubject.assertThat(requiredApproval, requiredApprovals());
+  }
+
+  /**
+   * Starts a fluent chain to do assertions on a list of {@link RequiredApproval}s.
+   *
+   * @param requiredApprovals list of required approvals on which assertions should be done
+   * @return the created {@link ListSubject}
+   */
+  public static ListSubject<RequiredApprovalSubject, RequiredApproval> assertThat(
+      ImmutableList<RequiredApproval> requiredApprovals) {
+    return ListSubject.assertThat(requiredApprovals, requiredApprovals());
   }
 
   /**
