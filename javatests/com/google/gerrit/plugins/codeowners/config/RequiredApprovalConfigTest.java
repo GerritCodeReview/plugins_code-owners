@@ -22,6 +22,7 @@ import static com.google.gerrit.truth.OptionalSubject.assertThat;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.server.project.ProjectState;
 import java.util.Optional;
+import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,7 +45,7 @@ public class RequiredApprovalConfigTest extends AbstractRequiredApprovalConfigTe
   public void getFromGlobalPluginConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     Optional<RequiredApproval> requiredApproval =
-        getRequiredApprovalConfig().getFromGlobalPluginConfig(projectState);
+        getRequiredApprovalConfig().get(projectState, new Config());
     assertThat(requiredApproval).isPresent();
     assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.get().value()).isEqualTo(2);
@@ -52,8 +53,8 @@ public class RequiredApprovalConfigTest extends AbstractRequiredApprovalConfigTe
 
   @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "INVALID")
-  public void cannotGetFromGlobalPluginConfigIfConfigIsInvalid() throws Exception {
-    testCannotGetFromGlobalPluginConfigIfConfigIsInvalid("INVALID");
+  public void cannotIfGlobalConfigIsInvalid() throws Exception {
+    testCannotGetIfGlobalConfigIsInvalid("INVALID");
   }
 
   @Test
