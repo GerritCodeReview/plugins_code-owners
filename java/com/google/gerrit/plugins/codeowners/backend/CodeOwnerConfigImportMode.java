@@ -30,14 +30,10 @@ public enum CodeOwnerConfigImportMode {
    * <p>Imports of the referenced code owner config are resolved.
    */
   ALL(
-      /** importIgnoreParentCodeOwners = */
-      true,
-      /** importGlobalCodeOwnerSets = */
-      true,
-      /** importPerFileCodeOwnerSets = */
-      true,
-      /** resolveImportsOfImport = */
-      true),
+      /* importIgnoreParentCodeOwners= */ true,
+      /* importGlobalCodeOwnerSets= */ true,
+      /* importPerFileCodeOwnerSets= */ true,
+      /* resolveImportsOfImport= */ true),
 
   /**
    * Only global code owner sets (code owner sets without path expressions) should be imported from
@@ -53,14 +49,10 @@ public enum CodeOwnerConfigImportMode {
    * <p>Imports of the referenced code owner config are resolved.
    */
   GLOBAL_CODE_OWNER_SETS_ONLY(
-      /** importIgnoreParentCodeOwners = */
-      false,
-      /** importGlobalCodeOwnerSets = */
-      true,
-      /** importPerFileCodeOwnerSets = */
-      false,
-      /** resolveImportsOfImport = */
-      true);
+      /* importIgnoreParentCodeOwners= */ false,
+      /* importGlobalCodeOwnerSets= */ true,
+      /* importPerFileCodeOwnerSets= */ false,
+      /* resolveImportsOfImport= */ true);
 
   private final boolean importIgnoreParentCodeOwners;
   private final boolean importGlobalCodeOwnerSets;

@@ -423,10 +423,7 @@ public class CodeOwnersPluginConfiguration {
     try {
       return pluginConfigFactory
           .getFromGerritConfig(pluginName)
-          .getBoolean(
-              KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS,
-              /** defaultValue = */
-              false);
+          .getBoolean(KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS, /* defaultValue= */ false);
     } catch (IllegalArgumentException e) {
       logger.atWarning().withCause(e).log(
           "Value '%s' in gerrit.config (parameter plugin.%s.%s) is invalid.",

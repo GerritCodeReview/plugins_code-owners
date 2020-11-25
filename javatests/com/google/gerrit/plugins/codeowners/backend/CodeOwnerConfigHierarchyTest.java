@@ -75,8 +75,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 codeOwnerConfigHierarchy.visit(
-                    /** branchNameKey = */
-                    null,
+                    /* branchNameKey= */ null,
                     getCurrentRevision(BranchNameKey.create(project, "master")),
                     Paths.get("/foo/bar/baz.md"),
                     visitor));
@@ -91,8 +90,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerConfigHierarchy.visit(
                     BranchNameKey.create(project, "master"),
-                    /** revision = */
-                    null,
+                    /* revision= */ null,
                     Paths.get("/foo/bar/baz.md"),
                     visitor));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
@@ -108,8 +106,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
                 codeOwnerConfigHierarchy.visit(
                     branchNameKey,
                     getCurrentRevision(branchNameKey),
-                    /** absolutePath = */
-                    null,
+                    /* absolutePath= */ null,
                     visitor));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
@@ -143,8 +140,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
                     branchNameKey,
                     getCurrentRevision(branchNameKey),
                     Paths.get("/foo/bar/baz.md"),
-                    /** codeOwnerConfigVisitor = */
-                    null));
+                    /* codeOwnerConfigVisitor= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
   }
 

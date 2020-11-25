@@ -70,10 +70,7 @@ public class CodeOwners {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
-    return codeOwnerBackend.getCodeOwnerConfig(
-        codeOwnerConfigKey,
-        /** revision = */
-        null);
+    return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, /* revision= */ null);
   }
 
   /**

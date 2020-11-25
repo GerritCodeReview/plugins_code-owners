@@ -109,10 +109,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                codeOwnerConfigKey.filePath(
-                    /** defaultCodeOwnerConfigFileName = */
-                    null));
+            () -> codeOwnerConfigKey.filePath(/* defaultCodeOwnerConfigFileName= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileName");
   }
 
@@ -121,11 +118,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                createCodeOwnerBuilder()
-                    .addCodeOwnerSet(
-                        /** codeOwnerSet = */
-                        null));
+            () -> createCodeOwnerBuilder().addCodeOwnerSet(/* codeOwnerSet= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerSet");
   }
 
@@ -134,11 +127,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class,
-            () ->
-                codeOwnerConfig.relativize(
-                    /** path = */
-                    null));
+            NullPointerException.class, () -> codeOwnerConfig.relativize(/* path= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 
