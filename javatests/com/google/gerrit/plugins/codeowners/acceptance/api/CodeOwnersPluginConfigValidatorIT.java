@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.acceptance.GitUtil.fetch;
 import static com.google.gerrit.acceptance.GitUtil.pushHead;
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
@@ -238,8 +239,8 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -282,8 +283,9 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
     Optional<RequiredApproval> overrideApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
-    assertThat(overrideApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(overrideApproval.get().value()).isEqualTo(2);
+    assertThat(overrideApproval).isPresent();
+    assertThat(overrideApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(overrideApproval).value().hasValueThat().isEqualTo(2);
   }
 
   @Test

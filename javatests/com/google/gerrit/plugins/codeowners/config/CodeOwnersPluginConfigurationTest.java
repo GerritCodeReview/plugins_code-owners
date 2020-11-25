@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
@@ -460,17 +461,16 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   public void getDefaultRequiredApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName())
-        .isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
-    assertThat(requiredApproval.value()).isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
+    assertThat(requiredApproval).hasValueThat().isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
   public void getConfiguredDefaultRequireApproval() throws Exception {
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -530,8 +530,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void getRequiredApprovalConfiguredOnProjectLevel() throws Exception {
     configureRequiredApproval(project, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -540,16 +540,16 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
       throws Exception {
     configureRequiredApproval(project, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
   public void requiredApprovalIsInheritedFromParentProject() throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -557,8 +557,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void inheritedRequiredApprovalOverridesDefaultRequiredApproval() throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -566,8 +566,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     configureRequiredApproval(allProjects, "Code-Review+1");
     configureRequiredApproval(project, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -631,8 +631,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     Project.NameKey otherProject = projectOperations.newProject().create();
     configureRequiredApproval(otherProject, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(1);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -660,8 +660,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     Optional<RequiredApproval> requiredApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
     assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.get().value()).isEqualTo(2);
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -670,8 +670,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     Optional<RequiredApproval> requiredApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
     assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.get().value()).isEqualTo(2);
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
   }
 
   @Test
