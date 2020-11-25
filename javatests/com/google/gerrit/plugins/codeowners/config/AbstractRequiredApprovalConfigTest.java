@@ -34,16 +34,8 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
   /** Must return the {@link AbstractRequiredApprovalConfig} that should be tested. */
   protected abstract AbstractRequiredApprovalConfig getRequiredApprovalConfig();
 
-  protected void testGetFromGlobalPluginConfig() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    Optional<RequiredApproval> requiredApproval =
-        getRequiredApprovalConfig().getFromGlobalPluginConfig(projectState);
-    assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.get().value()).isEqualTo(2);
-  }
-
-  protected void testCannotGetFromGlobalPluginConfigIfConfigIsInvalid() throws Exception {
+  protected void testCannotGetFromGlobalPluginConfigIfConfigIsInvalid(String invalidValue)
+      throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     InvalidPluginConfigurationException exception =
         assertThrows(
@@ -53,10 +45,10 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
         .hasMessageThat()
         .isEqualTo(
             String.format(
-                "Invalid configuration of the code-owners plugin. Required approval 'INVALID' that is"
+                "Invalid configuration of the code-owners plugin. Required approval '%s' that is"
                     + " configured in gerrit.config (parameter plugin.code-owners.%s) is"
                     + " invalid: Invalid format, expected '<label-name>+<label-value>'.",
-                getRequiredApprovalConfig().getConfigKey()));
+                invalidValue, getRequiredApprovalConfig().getConfigKey()));
   }
 
   @Test
