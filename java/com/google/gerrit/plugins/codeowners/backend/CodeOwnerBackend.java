@@ -53,11 +53,7 @@ public interface CodeOwnerBackend {
    */
   default Optional<CodeOwnerConfig> getCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
-    return getCodeOwnerConfig(
-        codeOwnerConfigKey,
-        /** revWalk = */
-        null,
-        revision);
+    return getCodeOwnerConfig(codeOwnerConfigKey, /* revWalk= */ null, revision);
   }
 
   /**

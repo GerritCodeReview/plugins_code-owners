@@ -89,9 +89,7 @@ public class CodeOwnerJsonTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerJsonFactory
                     .create(EnumSet.of(FillOptions.ID))
-                    .format(
-                        /** codeOwners = */
-                        null));
+                    .format(/* codeOwners= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwners");
   }
 }

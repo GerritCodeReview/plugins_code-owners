@@ -71,8 +71,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
             NullPointerException.class,
             () ->
                 codeOwnerConfigFileUpdateScanner.update(
-                    /** branchNameKey = */
-                    null,
+                    /* branchNameKey= */ null,
                     "Update code owner configs",
                     (codeOwnerConfigFilePath, codeOwnerConfigFileContent) -> Optional.empty()));
     assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
@@ -87,8 +86,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
             () ->
                 codeOwnerConfigFileUpdateScanner.update(
                     branchNameKey,
-                    /** commitMessage = */
-                    null,
+                    /* commitMessage= */ null,
                     (codeOwnerConfigFilePath, codeOwnerConfigFileContent) -> Optional.empty()));
     assertThat(npe).hasMessageThat().isEqualTo("commitMessage");
   }
@@ -103,8 +101,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
                 codeOwnerConfigFileUpdateScanner.update(
                     branchNameKey,
                     "Update code owner configs",
-                    /** codeOwnerConfigFileUpdater = */
-                    null));
+                    /* codeOwnerConfigFileUpdater= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileUpdater");
   }
 

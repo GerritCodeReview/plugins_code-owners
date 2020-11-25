@@ -50,8 +50,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 CodeOwnerStatusInfoJson.format(
-                    /** pathCodeOwnerStatus = */
-                    (PathCodeOwnerStatus) null));
+                    /* pathCodeOwnerStatus= */ (PathCodeOwnerStatus) null));
     assertThat(npe).hasMessageThat().isEqualTo("pathCodeOwnerStatus");
   }
 
@@ -72,8 +71,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 CodeOwnerStatusInfoJson.format(
-                    /** fileCodeOwnerStatus = */
-                    (FileCodeOwnerStatus) null));
+                    /* fileCodeOwnerStatus= */ (FileCodeOwnerStatus) null));
     assertThat(npe).hasMessageThat().isEqualTo("fileCodeOwnerStatus");
   }
 
@@ -192,9 +190,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 CodeOwnerStatusInfoJson.format(
-                    PatchSet.id(Change.id(1), 1),
-                    /** fileCodeOwnerStatuses = */
-                    null));
+                    PatchSet.id(Change.id(1), 1), /* fileCodeOwnerStatuses= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("fileCodeOwnerStatuses");
   }
 
@@ -203,10 +199,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                CodeOwnerStatusInfoJson.format(
-                    /** patchSetId = */
-                    null, ImmutableSet.of()));
+            () -> CodeOwnerStatusInfoJson.format(/* patchSetId= */ null, ImmutableSet.of()));
     assertThat(npe).hasMessageThat().isEqualTo("patchSetId");
   }
 

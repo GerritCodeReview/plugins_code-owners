@@ -62,11 +62,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   public void createTestChange() throws Exception {
     changeOwner =
         accountCreator.create(
-            "changeOwner",
-            "changeOwner@example.com",
-            "ChangeOwner",
-            /** displayName = */
-            null);
+            "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
     TestRepository<InMemoryRepository> testRepo = cloneProject(project, changeOwner);
     // Create a change that contains files for all paths that are used in the tests. This is
     // necessary since CodeOwnersInChangeCollection rejects requests for paths that are not present

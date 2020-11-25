@@ -106,8 +106,7 @@ public class CodeOwnerConfigScanner {
         branchNameKey,
         codeOwnerConfigVisitor,
         invalidCodeOwnerConfigCallback,
-        /** pathGlob = */
-        null);
+        /* pathGlob= */ null);
   }
 
   /**

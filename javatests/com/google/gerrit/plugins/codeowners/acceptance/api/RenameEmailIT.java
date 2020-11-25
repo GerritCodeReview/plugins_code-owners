@@ -679,25 +679,13 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
     TestAccount otherUser1 =
         accountCreator.create(
-            "otherUser1",
-            "foo" + user.email(),
-            "Other User 1",
-            /** displayName = */
-            null);
+            "otherUser1", "foo" + user.email(), "Other User 1", /* displayName= */ null);
     TestAccount otherUser2 =
         accountCreator.create(
-            "otherUser2",
-            user.email() + "bar",
-            "Other User 2",
-            /** displayName = */
-            null);
+            "otherUser2", user.email() + "bar", "Other User 2", /* displayName= */ null);
     TestAccount otherUser3 =
         accountCreator.create(
-            "otherUser3",
-            "foo" + user.email() + "bar",
-            "Other User 3",
-            /** displayName = */
-            null);
+            "otherUser3", "foo" + user.email() + "bar", "Other User 3", /* displayName= */ null);
 
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
