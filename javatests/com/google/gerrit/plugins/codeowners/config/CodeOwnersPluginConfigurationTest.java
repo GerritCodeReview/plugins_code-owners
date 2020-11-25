@@ -19,6 +19,7 @@ import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubje
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
@@ -535,6 +536,20 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getRequiredApprovalMultipleConfiguredOnProjectLevel() throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
+        ImmutableList.of("Code-Review+2", "Code-Review+1"));
+
+    // If multiple values are set for a key, the last value wins.
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(1);
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+1")
   public void requiredApprovalConfiguredOnProjectLevelOverridesDefaultRequiredApproval()
       throws Exception {
@@ -672,6 +687,22 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     assertThat(requiredApproval).isPresent();
     assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
     assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
+  }
+
+  @Test
+  public void getOverrideApprovalMultipleConfiguredOnProjectLevel() throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        ImmutableList.of("Code-Review+2", "Code-Review+1"));
+
+    // If multiple values are set for a key, the last value wins.
+    Optional<RequiredApproval> requiredApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(project);
+    assertThat(requiredApproval).isPresent();
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(1);
   }
 
   @Test
