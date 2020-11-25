@@ -34,13 +34,12 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
   /** Must return the {@link AbstractRequiredApprovalConfig} that should be tested. */
   protected abstract AbstractRequiredApprovalConfig getRequiredApprovalConfig();
 
-  protected void testCannotGetFromGlobalPluginConfigIfConfigIsInvalid(String invalidValue)
-      throws Exception {
+  protected void testCannotGetIfGlobalConfigIsInvalid(String invalidValue) throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () -> getRequiredApprovalConfig().getFromGlobalPluginConfig(projectState));
+            () -> getRequiredApprovalConfig().get(projectState, new Config()));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -52,34 +51,32 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
   }
 
   @Test
-  public void cannotGetForProjectForNullProjectState() throws Exception {
+  public void cannotGetForNullProjectState() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                getRequiredApprovalConfig().getForProject(/* projectState= */ null, new Config()));
+            () -> getRequiredApprovalConfig().get(/* projectState= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("projectState");
   }
 
   @Test
-  public void cannotGetForProjectForNullConfig() throws Exception {
+  public void cannotGetForNullConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                getRequiredApprovalConfig().getForProject(projectState, /* pluginConfig= */ null));
+            () -> getRequiredApprovalConfig().get(projectState, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
-  public void getForProjectWhenRequiredApprovalIsNotSet() throws Exception {
+  public void getWhenRequiredApprovalIsNotSet() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    assertThat(getRequiredApprovalConfig().getForProject(projectState, new Config())).isEmpty();
+    assertThat(getRequiredApprovalConfig().get(projectState, new Config())).isEmpty();
   }
 
   @Test
-  public void getForProject() throws Exception {
+  public void getFromPluginConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     Config cfg = new Config();
     cfg.setString(
@@ -88,14 +85,14 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
         getRequiredApprovalConfig().getConfigKey(),
         "Code-Review+2");
     Optional<RequiredApproval> requiredApproval =
-        getRequiredApprovalConfig().getForProject(projectState, cfg);
+        getRequiredApprovalConfig().get(projectState, cfg);
     assertThat(requiredApproval).isPresent();
     assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
     assertThat(requiredApproval.get().value()).isEqualTo(2);
   }
 
   @Test
-  public void cannotGetForProjectIfConfigIsInvalid() throws Exception {
+  public void cannotGetFromPluginConfigIfConfigIsInvalid() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     Config cfg = new Config();
     cfg.setString(
@@ -106,7 +103,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
     InvalidPluginConfigurationException exception =
         assertThrows(
             InvalidPluginConfigurationException.class,
-            () -> getRequiredApprovalConfig().getForProject(projectState, cfg));
+            () -> getRequiredApprovalConfig().get(projectState, cfg));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(
@@ -115,21 +112,6 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
                     + " configured in code-owners.config (parameter codeOwners.%s) is"
                     + " invalid: Invalid format, expected '<label-name>+<label-value>'.",
                 getRequiredApprovalConfig().getConfigKey()));
-  }
-
-  @Test
-  public void cannotGetFromGlobalPluginConfigForNullProjectState() throws Exception {
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () -> getRequiredApprovalConfig().getFromGlobalPluginConfig(/* projectState */ null));
-    assertThat(npe).hasMessageThat().isEqualTo("projectState");
-  }
-
-  @Test
-  public void getFromGlobalPluginConfigWhenRequiredApprovalIsNotSet() throws Exception {
-    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    assertThat(getRequiredApprovalConfig().getFromGlobalPluginConfig(projectState)).isEmpty();
   }
 
   @Test

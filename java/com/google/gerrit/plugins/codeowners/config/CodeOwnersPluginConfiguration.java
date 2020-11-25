@@ -388,23 +388,8 @@ public class CodeOwnersPluginConfiguration {
   private Optional<RequiredApproval> getConfiguredRequiredApproval(
       AbstractRequiredApprovalConfig requiredApprovalConfig, Project.NameKey project) {
     Config pluginConfig = getPluginConfig(project);
-
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-
-    // check if a project specific required approval is configured
-    Optional<RequiredApproval> requiredApproval =
-        requiredApprovalConfig.getForProject(projectState, pluginConfig);
-    if (requiredApproval.isPresent()) {
-      return requiredApproval;
-    }
-
-    // check if a required approval is globally configured
-    requiredApproval = requiredApprovalConfig.getFromGlobalPluginConfig(projectState);
-    if (requiredApproval.isPresent()) {
-      return requiredApproval;
-    }
-
-    return Optional.empty();
+    return requiredApprovalConfig.get(projectState, pluginConfig);
   }
 
   /**
