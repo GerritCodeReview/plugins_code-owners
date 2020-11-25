@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
@@ -47,8 +48,8 @@ public class RequiredApprovalConfigTest extends AbstractRequiredApprovalConfigTe
     Optional<RequiredApproval> requiredApproval =
         getRequiredApprovalConfig().get(projectState, new Config());
     assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.get().value()).isEqualTo(2);
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
   }
 
   @Test

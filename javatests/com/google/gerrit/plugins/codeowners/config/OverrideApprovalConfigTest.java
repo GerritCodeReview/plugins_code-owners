@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
@@ -48,8 +49,8 @@ public class OverrideApprovalConfigTest extends AbstractRequiredApprovalConfigTe
     Optional<RequiredApproval> requiredApproval =
         getRequiredApprovalConfig().get(projectState, new Config());
     assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Owners-Override");
-    assertThat(requiredApproval.get().value()).isEqualTo(1);
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(1);
   }
 
   @Test
