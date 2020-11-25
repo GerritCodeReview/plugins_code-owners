@@ -53,7 +53,8 @@ abstract class AbstractRequiredApprovalConfig {
   Optional<RequiredApproval> getForProject(ProjectState projectState, Config pluginConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(pluginConfig, "pluginConfig");
-    String requiredApproval = pluginConfig.getString(SECTION_CODE_OWNERS, null, getConfigKey());
+    String requiredApproval =
+        pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
     if (requiredApproval == null) {
       return Optional.empty();
     }
@@ -106,7 +107,9 @@ abstract class AbstractRequiredApprovalConfig {
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     String requiredApproval =
-        projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, null, getConfigKey());
+        projectLevelConfig
+            .getConfig()
+            .getString(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
     if (requiredApproval != null) {
       try {
         RequiredApproval.parse(projectState, requiredApproval);

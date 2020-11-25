@@ -45,11 +45,7 @@ public class CodeOwnerSetTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                CodeOwnerSet.builder()
-                    .addCodeOwner(
-                        /** codeOwnerReference = */
-                        null));
+            () -> CodeOwnerSet.builder().addCodeOwner(/* codeOwnerReference= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
   }
 
@@ -83,11 +79,7 @@ public class CodeOwnerSetTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                CodeOwnerSet.builder()
-                    .addCodeOwnerEmail(
-                        /** email = */
-                        null));
+            () -> CodeOwnerSet.builder().addCodeOwnerEmail(/* email= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerEmail");
   }
 
@@ -121,11 +113,7 @@ public class CodeOwnerSetTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                CodeOwnerSet.builder()
-                    .addPathExpression(
-                        /** pathExpression = */
-                        null));
+            () -> CodeOwnerSet.builder().addPathExpression(/* pathExpression= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pathExpression");
   }
 

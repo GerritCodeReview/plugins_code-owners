@@ -614,8 +614,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
             NullPointerException.class,
             () ->
                 FindOwnersCodeOwnerConfigParser.replaceEmail(
-                    /** content = */
-                    null, admin.email(), user.email()));
+                    /* content= */ null, admin.email(), user.email()));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileContent");
   }
 
@@ -626,10 +625,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
             NullPointerException.class,
             () ->
                 FindOwnersCodeOwnerConfigParser.replaceEmail(
-                    "content",
-                    /** oldEmail = */
-                    null,
-                    user.email()));
+                    "content", /* oldEmail= */ null, user.email()));
     assertThat(npe).hasMessageThat().isEqualTo("oldEmail");
   }
 
@@ -640,10 +636,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
             NullPointerException.class,
             () ->
                 FindOwnersCodeOwnerConfigParser.replaceEmail(
-                    "content",
-                    admin.email(),
-                    /** newEmail = */
-                    null));
+                    "content", admin.email(), /* newEmail= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("newEmail");
   }
 
