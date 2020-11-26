@@ -213,6 +213,33 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default `ALL_CHANGED_FILES`.
 
+<a id="pluginCodeOwnersFallbackCodeOwners">plugin.@PLUGIN@.fallbackCodeOwners</a>
+:       Policy that controls who should own paths that have no code owners
+        defined.\
+        \
+        Can be `NONE` or `ALL_USERS`.\
+        \
+        `NONE`:\
+        Paths for which no code owners are defined are owned by no one. This
+        means changes that touch these files can only be submitted with a code
+        owner override.\
+        \
+        `ALL_USERS`:\
+        Paths for which no code owners are defined are owned by all users. This
+        means changes to these paths can be approved by anyone. If [implicit
+        approvals](#pluginCodeOwnersEnableImplicitApprovals) are enabled, these
+        files are always automatically approved. The `ALL_USERS` option should
+        only be used with care as it means that any path that is not covered by
+        the code owner config files is automatically opened up to everyone and
+        mistakes with configuring code owners can easily happen. This is why
+        this option is intended to be only used if requiring code owner
+        approvals should not be enforced.\
+        \
+        Can be overridden per project by setting
+        [codeOwners.fallbackCodeOwners](#codeOwnersFallbackCodeOwners) in
+        `@PLUGIN@.config`.\
+        By default `NONE`.
+
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
 <a id="codeOwnersDisabled">codeOwners.disabled</a>
@@ -403,6 +430,19 @@ Parameters that are not set for a project are inherited from the parent project.
         in `gerrit.config`.\
         If not set, the global setting
         [plugin.@PLUGIN@.mergeCommitStrategy](#pluginCodeOwnersMergeCommitStrategy)
+        in `gerrit.config` is used.
+
+<a id="codeOwnersFallbackCodeOwners">codeOwners.fallbackCodeOwners</a>
+:       Policy that controls who should own paths that have no code owners
+        defined.\
+        Can be `NONE` or `ALL_USERS` (see
+        [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
+        for an explanation of these values).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
         in `gerrit.config` is used.
 
 ---

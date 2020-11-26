@@ -28,6 +28,7 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -59,6 +60,7 @@ public class GeneralConfig {
   @VisibleForTesting public static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
   @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
   @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
+  @VisibleForTesting public static final String KEY_FALLBACK_CODE_OWNERS = "fallbackCodeOwners";
 
   @VisibleForTesting
   public static final String KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED =
@@ -118,6 +120,24 @@ public class GeneralConfig {
               ValidationMessage.Type.ERROR));
     }
 
+    try {
+      projectLevelConfig
+          .getConfig()
+          .getEnum(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
+    } catch (IllegalArgumentException e) {
+      validationMessages.add(
+          new CommitValidationMessage(
+              String.format(
+                  "The value for fallback code owners '%s' that is configured in %s (parameter %s.%s) is invalid.",
+                  projectLevelConfig
+                      .getConfig()
+                      .getString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS),
+                  fileName,
+                  SECTION_CODE_OWNERS,
+                  KEY_FALLBACK_CODE_OWNERS),
+              ValidationMessage.Type.ERROR));
+    }
+
     return ImmutableList.copyOf(validationMessages);
   }
 
@@ -171,6 +191,46 @@ public class GeneralConfig {
     }
 
     return pluginConfigFromGerritConfig.getBoolean(KEY_READ_ONLY, false);
+  }
+
+  /**
+   * Gets the fallback code owners that own paths that have no defined code owners.
+   *
+   * @param project the project for which the fallback code owners should be read
+   * @param pluginConfig the plugin config from which the fallback code owners should be read
+   * @return the fallback code owners that own paths that have no defined code owners
+   */
+  FallbackCodeOwners getFallbackCodeOwners(Project.NameKey project, Config pluginConfig) {
+    requireNonNull(project, "project");
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    String fallbackCodeOwnersString =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS);
+    if (fallbackCodeOwnersString != null) {
+      try {
+        return pluginConfig.getEnum(
+            SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().log(
+            "Ignoring invalid value %s for fallback code owners in '%s.config' of project %s."
+                + " Falling back to global config.",
+            fallbackCodeOwnersString, pluginName, project.get());
+      }
+    }
+
+    try {
+      return pluginConfigFromGerritConfig.getEnum(
+          KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().log(
+          "Ignoring invalid value %s for fallback code owners in gerrit.config (parameter"
+              + " plugin.%s.%s). Falling back to default value %s.",
+          pluginConfigFromGerritConfig.getString(KEY_FALLBACK_CODE_OWNERS),
+          pluginName,
+          KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+          FallbackCodeOwners.NONE);
+      return FallbackCodeOwners.NONE;
+    }
   }
 
   /**

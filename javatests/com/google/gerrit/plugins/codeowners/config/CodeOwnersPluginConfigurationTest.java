@@ -36,6 +36,7 @@ import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
@@ -841,6 +842,52 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
   }
 
+  @Test
+  public void cannotGetFallbackCodeOwnersForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnersPluginConfiguration.getFallbackCodeOwners(/* project= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void getFallbackCodeOwnersIfNoneIsConfigured() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void getFallbackCodeOwnersIfNoneIsConfiguredOnProjectLevel() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void fallbackCodeOnwersOnProjectLevelOverridesGlobalFallbackCodeOwners() throws Exception {
+    configureFallbackCodeOwners(project, FallbackCodeOwners.NONE);
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void fallbackCodeOwnersIsInheritedFromParentProject() throws Exception {
+    configureFallbackCodeOwners(allProjects, FallbackCodeOwners.NONE);
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  public void inheritedFallbackCodeOwnersCanBeOverridden() throws Exception {
+    configureFallbackCodeOwners(allProjects, FallbackCodeOwners.ALL_USERS);
+    configureFallbackCodeOwners(project, FallbackCodeOwners.NONE);
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
     setCodeOwnersConfig(project, /* subsection= */ null, StatusConfig.KEY_DISABLED, disabled);
   }
@@ -895,6 +942,15 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         /* subsection= */ null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         mergeCommitStrategy.name());
+  }
+
+  private void configureFallbackCodeOwners(
+      Project.NameKey project, FallbackCodeOwners fallbackCodeOwners) throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        fallbackCodeOwners.name());
   }
 
   private AutoCloseable registerTestBackend() {

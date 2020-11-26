@@ -145,6 +145,8 @@ For the [code-owner.config](config.html#projectLevelConfigFile) in the
   before)
 * the [codeOwners.mergeCommitStrategy](config.html#codeOwnersMergeCommitStrategy)
   configuration is valid
+* the [codeOwners.fallbackCodeOwners](config.html#codeOwnersFallbackCodeOwners)
+  configuration is valid
 
 ---
 
