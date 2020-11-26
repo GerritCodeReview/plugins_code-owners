@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import java.util.List;
+
 /**
  * Representation of the code owner project configuration in the REST API.
  *
@@ -52,9 +54,12 @@ public class CodeOwnerProjectConfigInfo {
   public RequiredApprovalInfo requiredApproval;
 
   /**
-   * The approval that is required to override the code owners submit check.
+   * The approval that count as override for the code owners submit check.
+   *
+   * <p>If multiple approvals are returned, any of them is sufficient to override the code owners
+   * submit check.
    *
    * <p>Not set if {@code status.disabled} is {@code true}.
    */
-  public RequiredApprovalInfo overrideApproval;
+  public List<RequiredApprovalInfo> overrideApproval;
 }

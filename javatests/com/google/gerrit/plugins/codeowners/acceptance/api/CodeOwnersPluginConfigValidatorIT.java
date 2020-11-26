@@ -19,6 +19,7 @@ import static com.google.gerrit.acceptance.GitUtil.fetch;
 import static com.google.gerrit.acceptance.GitUtil.pushHead;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -32,7 +33,6 @@ import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
-import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.transport.PushResult;
@@ -281,11 +281,11 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    Optional<RequiredApproval> overrideApproval =
+    ImmutableList<RequiredApproval> overrideApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
-    assertThat(overrideApproval).isPresent();
-    assertThat(overrideApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(overrideApproval).value().hasValueThat().isEqualTo(2);
+    assertThat(overrideApproval).hasSize(1);
+    assertThat(overrideApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(overrideApproval).element(0).hasValueThat().isEqualTo(2);
   }
 
   @Test

@@ -348,8 +348,11 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
-   * Returns the approval that is required to override the code owners submit check for a change of
-   * the given project.
+   * Returns the approvals that are required to override the code owners submit check for a change
+   * of the given project.
+   *
+   * <p>If multiple approvals are returned, any of them is sufficient to override the code owners
+   * submit check.
    *
    * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
    * exist the call fails with {@link IllegalStateException}.
@@ -363,22 +366,13 @@ public class CodeOwnersPluginConfiguration {
    *
    * <p>The first override approval configuration that exists counts and the evaluation is stopped.
    *
-   * <p>If the code owner configuration contains multiple override values, the last value is used.
-   *
    * @param project project for which the override approval should be returned
-   * @return the override approval that should be used for the given project, {@link
-   *     Optional#empty()} if no override approval is configured, in this case the override
-   *     functionality is disabled
+   * @return the override approvals that should be used for the given project, an empty list if no
+   *     override approval is configured, in this case the override functionality is disabled
    */
-  public Optional<RequiredApproval> getOverrideApproval(Project.NameKey project) {
+  public ImmutableList<RequiredApproval> getOverrideApproval(Project.NameKey project) {
     try {
-      ImmutableList<RequiredApproval> configuredOverrideApprovalConfig =
-          getConfiguredRequiredApproval(overrideApprovalConfig, project);
-      if (!configuredOverrideApprovalConfig.isEmpty()) {
-        // There can be only one override approval. If multiple ones are configured just use the
-        // last one, this is also what Config#getString(String, String, String) does.
-        return Optional.of(Iterables.getLast(configuredOverrideApprovalConfig));
-      }
+      return getConfiguredRequiredApproval(overrideApprovalConfig, project);
     } catch (InvalidPluginConfigurationException e) {
       logger.atWarning().withCause(e).log(
           "Ignoring invalid override approval configuration for project %s."
@@ -386,7 +380,7 @@ public class CodeOwnersPluginConfiguration {
           project.get());
     }
 
-    return Optional.empty();
+    return ImmutableList.of();
   }
 
   /**

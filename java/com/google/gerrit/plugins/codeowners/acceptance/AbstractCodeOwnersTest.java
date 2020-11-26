@@ -187,16 +187,20 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   }
 
   protected void createOwnersOverrideLabel() throws RestApiException {
+    createOwnersOverrideLabel("Owners-Override");
+  }
+
+  protected void createOwnersOverrideLabel(String labelName) throws RestApiException {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
-    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+    gApi.projects().name(project.get()).label(labelName).create(input).get();
 
     // Allow to vote on the Owners-Override label.
     projectOperations
         .project(project)
         .forUpdate()
         .add(
-            TestProjectUpdate.allowLabel("Owners-Override")
+            TestProjectUpdate.allowLabel(labelName)
                 .range(0, 1)
                 .ref("refs/*")
                 .group(REGISTERED_USERS)
