@@ -117,12 +117,20 @@ class CodeOwnerApi {
    * @param {string} project
    * @param {string} branch
    */
-  getBranchConfig(project, branch) {
-    return this.restApi.get(
+  async getBranchConfig(project, branch) {
+    const config = await this.restApi.get(
         `/projects/${encodeURIComponent(project)}/` +
         `branches/${encodeURIComponent(branch)}/` +
         `code_owners.branch_config`
     );
+    if (config.override_approval && !(config.override_approval instanceof Array)) {
+      // In the upcoming backend changes, the override_approval will be changed
+      // to array with (possible) multiple items.
+      // While this transition is in progress, the frontend supports both API -
+      // the old one and the new one.
+      return {...config, override_approval: [config.override_approval]};
+    }
+    return config;
   }
 }
 
