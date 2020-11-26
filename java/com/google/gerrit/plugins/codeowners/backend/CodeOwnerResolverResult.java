@@ -46,6 +46,14 @@ public abstract class CodeOwnerResolverResult {
   /** Whether there are code owner references which couldn't be resolved. */
   public abstract boolean hasUnresolvedCodeOwners();
 
+  /**
+   * Whether there are any code owners defined for the path, regardless of whether they can be
+   * resolved or not.
+   */
+  public boolean hasRevelantCodeOwnerDefinitions() {
+    return !codeOwners().isEmpty() || ownedByAllUsers() || hasUnresolvedCodeOwners();
+  }
+
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
