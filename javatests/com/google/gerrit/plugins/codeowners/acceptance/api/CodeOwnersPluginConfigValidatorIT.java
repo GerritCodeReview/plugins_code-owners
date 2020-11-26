@@ -26,6 +26,7 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
@@ -404,6 +405,45 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
         .contains(
             "Merge commit strategy 'INVALID' that is configured in code-owners.config"
                 + " (parameter codeOwners.mergeCommitStrategy) is invalid.");
+  }
+
+  @Test
+  public void configureFallbackCodeOwners() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setEnum(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        FallbackCodeOwners.ALL_USERS);
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
+  }
+
+  @Test
+  public void cannotSetInvalidFallbackCodeOwners() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        "INVALID");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            "The value for fallback code owners 'INVALID' that is configured in code-owners.config"
+                + " (parameter codeOwners.fallbackCodeOwners) is invalid.");
   }
 
   private void fetchRefsMetaConfig() throws Exception {

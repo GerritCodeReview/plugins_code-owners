@@ -30,6 +30,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.project.ProjectCache;
@@ -136,6 +137,17 @@ public class CodeOwnersPluginConfiguration {
   public MergeCommitStrategy getMergeCommitStrategy(Project.NameKey project) {
     requireNonNull(project, "project");
     return generalConfig.getMergeCommitStrategy(project, getPluginConfig(project));
+  }
+
+  /**
+   * Gets the fallback code owners for the given project.
+   *
+   * @param project the project for which the fallback code owners should be retrieved
+   * @return the fallback code owners for the given project
+   */
+  public FallbackCodeOwners getFallbackCodeOwners(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getFallbackCodeOwners(project, getPluginConfig(project));
   }
 
   /**

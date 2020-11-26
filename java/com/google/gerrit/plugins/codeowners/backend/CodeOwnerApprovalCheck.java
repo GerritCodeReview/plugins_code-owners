@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -359,6 +360,20 @@ public class CodeOwnerApprovalCheck {
       codeOwnerStatus = CodeOwnerStatus.PENDING;
     }
 
+    // Since there are no code owner config files in bootstrapping mode, fallback code owners also
+    // apply if they are configured. We can skip checking them if we already found that the file was
+    // approved.
+    if (codeOwnerStatus != CodeOwnerStatus.APPROVED) {
+      codeOwnerStatus =
+          getCodeOwnerStatusForFallbackCodeOwners(
+              codeOwnerStatus,
+              branch.project(),
+              enableImplicitApprovalFromUploader,
+              reviewerAccountIds,
+              approverAccountIds,
+              absolutePath);
+    }
+
     PathCodeOwnerStatus pathCodeOwnerStatus =
         PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus);
     logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
@@ -484,6 +499,7 @@ public class CodeOwnerApprovalCheck {
         codeOwnerStatus.set(CodeOwnerStatus.PENDING);
       }
 
+      AtomicBoolean hasRevelantCodeOwnerDefinitions = new AtomicBoolean(false);
       codeOwnerConfigHierarchy.visit(
           branch,
           revision,
@@ -495,6 +511,10 @@ public class CodeOwnerApprovalCheck {
                 codeOwners,
                 codeOwnerConfig.key().folderPath(),
                 codeOwnerConfig.key().fileName().orElse("<default>"));
+
+            if (codeOwners.hasRevelantCodeOwnerDefinitions()) {
+              hasRevelantCodeOwnerDefinitions.set(true);
+            }
 
             if (isApproved(
                 absolutePath,
@@ -516,12 +536,87 @@ public class CodeOwnerApprovalCheck {
             // change or is a reviewer.
             return true;
           });
+
+      // If no code owners have been defined for the file, the fallback code owners apply if they
+      // are configured. We can skip checking them if we already found that the file was
+      // approved.
+      if (codeOwnerStatus.get() != CodeOwnerStatus.APPROVED
+          && !hasRevelantCodeOwnerDefinitions.get()) {
+        codeOwnerStatus.set(
+            getCodeOwnerStatusForFallbackCodeOwners(
+                codeOwnerStatus.get(),
+                branch.project(),
+                enableImplicitApprovalFromUploader,
+                reviewerAccountIds,
+                approverAccountIds,
+                absolutePath));
+      }
     }
 
     PathCodeOwnerStatus pathCodeOwnerStatus =
         PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
     logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
     return pathCodeOwnerStatus;
+  }
+
+  /**
+   * Computes the code owner status for the given path based on the configured fallback code owners.
+   */
+  private CodeOwnerStatus getCodeOwnerStatusForFallbackCodeOwners(
+      CodeOwnerStatus codeOwnerStatus,
+      Project.NameKey project,
+      boolean enableImplicitApprovalFromUploader,
+      ImmutableSet<Account.Id> reviewerAccountIds,
+      ImmutableSet<Account.Id> approverAccountIds,
+      Path absolutePath) {
+    FallbackCodeOwners fallbackCodeOwners =
+        codeOwnersPluginConfiguration.getFallbackCodeOwners(project);
+    logger.atFine().log(
+        "getting code owner status for fallback code owners (fallback code owners = %s)",
+        fallbackCodeOwners);
+    switch (fallbackCodeOwners) {
+      case NONE:
+        logger.atFine().log("no fallback code owners");
+        return codeOwnerStatus;
+      case ALL_USERS:
+        return getCodeOwnerStatusIfAllUsersAreCodeOwners(
+            enableImplicitApprovalFromUploader,
+            reviewerAccountIds,
+            approverAccountIds,
+            absolutePath);
+    }
+
+    throw new StorageException(
+        String.format("unknown fallback code owners configured: %s", fallbackCodeOwners));
+  }
+
+  /** Computes the code owner status for the given path assuming that all users are code owners. */
+  private CodeOwnerStatus getCodeOwnerStatusIfAllUsersAreCodeOwners(
+      boolean enableImplicitApprovalFromUploader,
+      ImmutableSet<Account.Id> reviewerAccountIds,
+      ImmutableSet<Account.Id> approverAccountIds,
+      Path absolutePath) {
+    logger.atFine().log(
+        "getting code owner status for fallback code owners (all users are fallback code owners)");
+
+    if (enableImplicitApprovalFromUploader) {
+      logger.atFine().log(
+          "%s was implicitly approved by the patch set uploader since the uploader is a fallback"
+              + " code owner",
+          absolutePath);
+      return CodeOwnerStatus.APPROVED;
+    }
+
+    if (!approverAccountIds.isEmpty()) {
+      logger.atFine().log("%s was approved by a fallback code owner", absolutePath);
+      return CodeOwnerStatus.APPROVED;
+    } else if (!reviewerAccountIds.isEmpty()) {
+      logger.atFine().log("%s has a fallback code owner as reviewer", absolutePath);
+      return CodeOwnerStatus.PENDING;
+    }
+
+    logger.atFine().log("%s has no fallback code owner as a reviewer", absolutePath);
+    return CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
   }
 
   private boolean isApproved(
