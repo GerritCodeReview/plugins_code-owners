@@ -112,7 +112,7 @@ export class OwnerRequirementValue extends
       },
       _isOverriden: {
         type: Boolean,
-        computed: '_computeIsOverriden(model.branchConfig)',
+        computed: '_computeIsOverriden(change, model.branchConfig)',
       },
       _overrideInfoUrl: {
         type: String,
@@ -165,19 +165,23 @@ export class OwnerRequirementValue extends
       ? branchConfig.general.override_info_url : '';
   }
 
-  _computeIsOverriden(branchConfig) {
-    if (!branchConfig || !branchConfig['override_approval']) {
-      // no override label configured
+  _computeIsOverriden(change, branchConfig) {
+    if (!change || !branchConfig || !branchConfig['override_approval']) {
+      // no override labels configured
       return false;
     }
 
-    const overridenLabel = branchConfig['override_approval'].label;
-    const overridenValue = branchConfig['override_approval'].value;
 
-    if (this.change.labels[overridenLabel]) {
-      const votes = this.change.labels[overridenLabel].all || [];
-      if (votes.find(v => `${v.value}` === `${overridenValue}`)) {
-        return true;
+    for(const requiredApprovalInfo of branchConfig['override_approval']) {
+      const overridenLabel = requiredApprovalInfo.label;
+      const overridenValue = Number(requiredApprovalInfo.value);
+      if (isNaN(overridenValue)) continue;
+
+      if (this.change.labels[overridenLabel]) {
+        const votes = change.labels[overridenLabel].all || [];
+        if (votes.find(v => Number(v.value) >= overridenValue)) {
+          return true;
+        }
       }
     }
 
