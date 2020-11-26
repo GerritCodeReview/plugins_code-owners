@@ -163,6 +163,30 @@
       },
       "revId": "b0db7f447b339e31aeb1d6946b690a0d6a0b3d06",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d921dda7_81a7fb97",
+        "filename": "ui/code-owners-banner.js",
+        "patchSetId": 7
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:31:50Z",
+      "side": 1,
+      "message": "I agree, this might be not the best choice, but a user will see this banner quite seldom, so I think we can temporary live with red background. I will discuss it with Delphine, but for now I prefer to submit as is (otherwise, it can take an additional week to fix the colors).",
+      "parentUuid": "6c96f219_f1cca558",
+      "range": {
+        "startLine": 74,
+        "startChar": 0,
+        "endLine": 74,
+        "endChar": 23
+      },
+      "revId": "b0db7f447b339e31aeb1d6946b690a0d6a0b3d06",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
