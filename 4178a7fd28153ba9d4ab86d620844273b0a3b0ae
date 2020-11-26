@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bf79aa13_4cbb0fb4",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T08:00:58Z",
+      "side": 1,
+      "message": "I have added some comments to the parent change, but by itself this is fine.",
+      "revId": "4178a7fd28153ba9d4ab86d620844273b0a3b0ae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
