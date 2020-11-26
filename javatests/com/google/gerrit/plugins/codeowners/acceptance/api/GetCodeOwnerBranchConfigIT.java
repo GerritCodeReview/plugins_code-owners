@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
@@ -209,8 +210,27 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
     configureOverrideApproval(project, "Code-Review+2");
     CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
         projectCodeOwnersApiFactory.project(project).branch("master").getConfig();
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.label).isEqualTo("Code-Review");
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.value).isEqualTo(2);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval).hasSize(1);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).label).isEqualTo("Code-Review");
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).value).isEqualTo(2);
+  }
+
+  @Test
+  public void getConfigWithMultipleConfiguredOverrideApproval() throws Exception {
+    createOwnersOverrideLabel();
+    setCodeOwnersConfig(
+        project,
+        null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        ImmutableList.of("Owners-Override+1", "Code-Review+2"));
+    CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
+        projectCodeOwnersApiFactory.project(project).branch("master").getConfig();
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval).hasSize(2);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).label)
+        .isEqualTo("Owners-Override");
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).value).isEqualTo(1);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(1).label).isEqualTo("Code-Review");
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(1).value).isEqualTo(2);
   }
 
   @Test

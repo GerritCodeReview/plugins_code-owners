@@ -20,6 +20,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
@@ -672,37 +673,42 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Code-Review+2")
   public void getConfiguredDefaultOverrideApproval() throws Exception {
-    Optional<RequiredApproval> requiredApproval =
+    ImmutableSet<RequiredApproval> requiredApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
-    assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(2);
   }
 
   @Test
   public void getOverrideApprovalConfiguredOnProjectLevel() throws Exception {
     configureOverrideApproval(project, "Code-Review+2");
-    Optional<RequiredApproval> requiredApproval =
+    ImmutableSet<RequiredApproval> requiredApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
-    assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(2);
   }
 
   @Test
   public void getOverrideApprovalMultipleConfiguredOnProjectLevel() throws Exception {
+    createOwnersOverrideLabel();
+    createOwnersOverrideLabel("Other-Override");
+
     setCodeOwnersConfig(
         project,
         /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
-        ImmutableList.of("Code-Review+2", "Code-Review+1"));
+        ImmutableList.of("Owners-Override+1", "Other-Override+1"));
 
     // If multiple values are set for a key, the last value wins.
-    Optional<RequiredApproval> requiredApproval =
+    ImmutableSet<RequiredApproval> requiredApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
-    assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(requiredApproval).value().hasValueThat().isEqualTo(1);
+    assertThat(requiredApproval).hasSize(2);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    assertThat(requiredApproval).element(1).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApproval).element(1).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -716,6 +722,22 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
       throws Exception {
     configureOverrideApproval(project, "INVALID");
     assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+  }
+
+  @Test
+  public void getOverrideApprovalDuplicatesAreFilteredOut() throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        ImmutableList.of("Code-Review+2", "Code-Review+1", "Code-Review+2"));
+
+    // If multiple values are set for a key, the last value wins.
+    ImmutableSet<RequiredApproval> requiredApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(project);
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test

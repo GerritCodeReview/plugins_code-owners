@@ -21,6 +21,8 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -165,7 +167,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
     when(codeOwnersPluginConfiguration.getOverrideApproval(project))
         .thenReturn(
-            Optional.of(
+            ImmutableSet.of(
                 RequiredApproval.create(
                     LabelType.withDefaultValues("Owners-Override"), (short) 1)));
 
@@ -185,8 +187,10 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .containsExactly("refs/heads/stable-2.10", CodeOwnerBackendId.PROTO.getBackendId());
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.label).isEqualTo("Code-Review");
     assertThat(codeOwnerProjectConfigInfo.requiredApproval.value).isEqualTo(2);
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.label).isEqualTo("Owners-Override");
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.value).isEqualTo(1);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval).hasSize(1);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).label)
+        .isEqualTo("Owners-Override");
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).value).isEqualTo(1);
   }
 
   @Test
@@ -227,6 +231,25 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void withMultipleOverrides() throws Exception {
+    createOwnersOverrideLabel();
+
+    when(codeOwnersPluginConfiguration.getOverrideApproval(project))
+        .thenReturn(
+            ImmutableSet.of(
+                RequiredApproval.create(LabelType.withDefaultValues("Owners-Override"), (short) 1),
+                RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2)));
+
+    ImmutableList<RequiredApprovalInfo> requiredApprovalInfos =
+        codeOwnerProjectConfigJson.formatOverrideApprovalInfo(project);
+    assertThat(requiredApprovalInfos).hasSize(2);
+    assertThat(requiredApprovalInfos.get(0).label).isEqualTo("Owners-Override");
+    assertThat(requiredApprovalInfos.get(0).value).isEqualTo(1);
+    assertThat(requiredApprovalInfos.get(1).label).isEqualTo("Code-Review");
+    assertThat(requiredApprovalInfos.get(1).value).isEqualTo(2);
+  }
+
+  @Test
   public void formatCodeOwnerBranchConfig() throws Exception {
     createOwnersOverrideLabel();
 
@@ -251,7 +274,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
     when(codeOwnersPluginConfiguration.getOverrideApproval(project))
         .thenReturn(
-            Optional.of(
+            ImmutableSet.of(
                 RequiredApproval.create(
                     LabelType.withDefaultValues("Owners-Override"), (short) 1)));
 
@@ -268,8 +291,10 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
     assertThat(codeOwnerBranchConfigInfo.requiredApproval.label).isEqualTo("Code-Review");
     assertThat(codeOwnerBranchConfigInfo.requiredApproval.value).isEqualTo(2);
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.label).isEqualTo("Owners-Override");
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.value).isEqualTo(1);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval).hasSize(1);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).label)
+        .isEqualTo("Owners-Override");
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).value).isEqualTo(1);
     assertThat(codeOwnerBranchConfigInfo.noCodeOwnersDefined).isNull();
   }
 
@@ -304,7 +329,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
     when(codeOwnersPluginConfiguration.getOverrideApproval(project))
         .thenReturn(
-            Optional.of(
+            ImmutableSet.of(
                 RequiredApproval.create(
                     LabelType.withDefaultValues("Owners-Override"), (short) 1)));
 

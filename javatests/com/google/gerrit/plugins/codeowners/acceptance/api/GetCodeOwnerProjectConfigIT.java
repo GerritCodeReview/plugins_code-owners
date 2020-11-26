@@ -19,6 +19,7 @@ import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.b
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
@@ -236,8 +237,27 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     configureOverrideApproval(project, "Code-Review+2");
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.label).isEqualTo("Code-Review");
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.value).isEqualTo(2);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval).hasSize(1);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).label).isEqualTo("Code-Review");
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).value).isEqualTo(2);
+  }
+
+  @Test
+  public void getConfigWithMultipleConfiguredOverrideApproval() throws Exception {
+    createOwnersOverrideLabel();
+    setCodeOwnersConfig(
+        project,
+        null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        ImmutableList.of("Owners-Override+1", "Code-Review+2"));
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval).hasSize(2);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).label)
+        .isEqualTo("Owners-Override");
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).value).isEqualTo(1);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(1).label).isEqualTo("Code-Review");
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(1).value).isEqualTo(2);
   }
 
   @Test

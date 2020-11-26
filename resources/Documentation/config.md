@@ -151,10 +151,13 @@ Parameters that are not set for a project are inherited from the parent project.
         By default "Code-Review+1".
 
 <a id="pluginCodeOwnersOverrideApproval">plugin.@PLUGIN@.overrideApproval</a>
-:       Approval that is required to override the code owners submit check.\
+:       Approval that counts as override for the code owners submit check.\
         The override approval must be specified in the format
         "\<label-name\>+\<label-value\>".\
-        The configured label must exist for all projects for which this setting
+        Can be specifed multiple times to configure multiple override approvals.
+        If multiple approvals are configured, any of them is sufficient to
+        override the code owners submit check.\
+        The configured labels must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
         Can be overridden per project by setting
@@ -379,10 +382,13 @@ Parameters that are not set for a project are inherited from the parent project.
         `gerrit.config` is used.
 
 <a id="codeOwnersOverrideApproval">codeOwners.overrideApproval</a>
-:       Approval that is required to override the code owners submit check.\
+:       Approval that counts as override for the code owners submit check.\
         The override approval must be specified in the format
         "\<label-name\>+\<label-value\>".\
-        The configured label must exist for all projects for which this setting
+        Can be specifed multiple times to configure multiple override approvals.
+        If multiple approvals are configured, any of them is sufficient to
+        override the code owners submit check.\
+        The configured labels must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
         Overrides the global setting

@@ -13,6 +13,8 @@
 // limitations under the License.
 package com.google.gerrit.plugins.codeowners.api;
 
+import java.util.List;
+
 /**
  * Representation of the code owner branch configuration in the REST API.
  *
@@ -53,11 +55,14 @@ public class CodeOwnerBranchConfigInfo {
   public RequiredApprovalInfo requiredApproval;
 
   /**
-   * The approval that is required to override the code owners submit check.
+   * The approvals that count as override for the code owners submit check.
+   *
+   * <p>If multiple approvals are returned, any of them is sufficient to override the code owners
+   * submit check.
    *
    * <p>Not set if {@link #disabled} is {@code true}.
    */
-  public RequiredApprovalInfo overrideApproval;
+  public List<RequiredApprovalInfo> overrideApproval;
 
   /**
    * Whether the branch doesn't contain any code owner config file yet.
