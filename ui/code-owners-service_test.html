@@ -98,12 +98,14 @@
 
     suite('basic api request tests', () => {
       setup(done => {
-        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve(fakeStatus));
-        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange});
+        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`)
+            .returns(Promise.resolve(fakeStatus));
+        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi,
+            {...fakeChange});
         flush(done);
       });
 
-      test('same change should return the same instance through getOwnerService', () => {
+      test('getOwnerService - same change returns the same instance', () => {
         assert.equal(
             CodeOwnerService.getOwnerService(fakeRestApi, fakeChange),
             CodeOwnerService.getOwnerService(fakeRestApi, fakeChange)
@@ -119,7 +121,8 @@
 
       test('should fetch status after init', () => {
         assert.isTrue(getApiStub.calledOnce);
-        assert.equal(getApiStub.lastCall.args[0], `/changes/${fakeChange._number}/code_owners.status`);
+        assert.equal(getApiStub.lastCall.args[0],
+            `/changes/${fakeChange._number}/code_owners.status`);
       });
 
       test('getSuggestion should kickoff the fetch', done => {
@@ -144,33 +147,35 @@
 
     suite('all approved case', () => {
       setup(done => {
-        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve({
-          // fake data with fake files
-          patch_set_number: 1,
-          file_code_owner_statuses: [
-            {
-              new_path_status: {
-                path: 'a.js',
-                status: 'APPROVED',
-              },
-            },
-            {
-              new_path_status: {
-                path: 'b.js',
-                status: 'APPROVED',
-              },
-            },
-            {
-              old_path_status: {
-                path: 'd.js',
-                status: 'APPROVED',
-              },
-              change_type: 'DELETED',
-            },
-          ],
-        }));
+        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`)
+            .returns(Promise.resolve({
+              // fake data with fake files
+              patch_set_number: 1,
+              file_code_owner_statuses: [
+                {
+                  new_path_status: {
+                    path: 'a.js',
+                    status: 'APPROVED',
+                  },
+                },
+                {
+                  new_path_status: {
+                    path: 'b.js',
+                    status: 'APPROVED',
+                  },
+                },
+                {
+                  old_path_status: {
+                    path: 'd.js',
+                    status: 'APPROVED',
+                  },
+                  change_type: 'DELETED',
+                },
+              ],
+            }));
 
-        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange});
+        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi,
+            {...fakeChange});
         flush(done);
       });
 
@@ -196,11 +201,12 @@
     });
 
     suite('abort', () => {
-      let resolver;
       setup(done => {
-        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`).returns(Promise.resolve(fakeStatus));
+        getApiStub.withArgs(`/changes/${fakeChange._number}/code_owners.status`)
+            .returns(Promise.resolve(fakeStatus));
 
-        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {...fakeChange});
+        codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi,
+            {...fakeChange});
         flush(done);
       });
 

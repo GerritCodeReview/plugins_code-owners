@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import {CodeOwnerService, OwnerStatus} from './code-owners-service.js';
+import {OwnerStatus} from './code-owners-service.js';
+import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 
 const MAGIC_FILES = ['/COMMIT_MSG', '/MERGE_LIST', '/PATCHSET_LEVEL'];
 const STATUS_CODE = {
@@ -38,13 +39,15 @@ const STATUS_ICON = {
 const STATUS_TOOLTIP = {
   [STATUS_CODE.PENDING]: 'Pending code owner approval',
   [STATUS_CODE.MISSING]: 'Missing code owner approval',
-  [STATUS_CODE.PENDING_OLD_PATH]: 'Pending code owner approval on pre-renamed file',
-  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing code owner approval on pre-renamed file',
+  [STATUS_CODE.PENDING_OLD_PATH]:
+      'Pending code owner approval on pre-renamed file',
+  [STATUS_CODE.MISSING_OLD_PATH]:
+      'Missing code owner approval on pre-renamed file',
   [STATUS_CODE.APPROVED]: 'Approved by code owner',
   [STATUS_CODE.ERROR]: 'Failed to fetch code owner status',
 };
 
-class BaseEl extends Polymer.Element {
+class BaseEl extends CodeOwnersModelMixin(Polymer.Element) {
   computeHidden(change, patchRange) {
     if ([change, patchRange].includes(undefined)) return true;
     // if code-owners is not a submit requirement, don't show status column
@@ -63,11 +66,6 @@ class BaseEl extends Polymer.Element {
     // only show if its latest patchset
     if (`${patchRange.patchNum}` !== `${latestPatchset._number}`) return true;
     return false;
-  }
-
-  onInputChanged(restApi, change) {
-    if ([restApi, change].includes(undefined)) return;
-    this.ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
   }
 }
 
@@ -94,25 +92,14 @@ export class OwnerStatusColumnHeader extends BaseEl {
 
   static get properties() {
     return {
-      change: Object,
-      reporting: Object,
       patchRange: Object,
-      restApi: Object,
 
       hidden: {
         type: Boolean,
         reflectToAttribute: true,
         computed: 'computeHidden(change, patchRange)',
       },
-      ownerService: Object,
     };
-  }
-
-  static get observers() {
-    return [
-      'onInputChanged(restApi, change)',
-      'onOwnerServiceChanged(ownerServive)',
-    ];
   }
 }
 
@@ -128,10 +115,6 @@ export class OwnerStatusColumnContent extends BaseEl {
 
   static get properties() {
     return {
-      change: Object,
-      reporting: Object,
-      restApi: Object,
-
       path: String,
       patchRange: Object,
       hidden: {
@@ -186,47 +169,45 @@ export class OwnerStatusColumnContent extends BaseEl {
 
   static get observers() {
     return [
-      'onInputChanged(restApi, change)',
-      'computeStatusIcon(ownerService, path)',
+      'computeStatusIcon(model.status, path)',
     ];
   }
 
-  computeStatusIcon(ownerService, path) {
-    if ([ownerService, path].includes(undefined)) return;
+  loadPropertiesAfterModelChanged() {
+    super.loadPropertiesAfterModelChanged();
+    this.modelLoader.loadStatus();
+  }
+
+  computeStatusIcon(modelStatus, path) {
+    if ([modelStatus, path].includes(undefined)) return;
     if (MAGIC_FILES.includes(path)) return;
 
-    ownerService.getStatus()
-        .then(({codeOwnerStatusMap}) => {
-          const statusItem = codeOwnerStatusMap.get(path);
-          if (!statusItem) {
-            this.status = STATUS_CODE.ERROR;
-            return;
-          }
+    const codeOwnerStatusMap = modelStatus.codeOwnerStatusMap;
+    const statusItem = codeOwnerStatusMap.get(path);
+    if (!statusItem) {
+      this.status = STATUS_CODE.ERROR;
+      return;
+    }
 
-          const status = statusItem.status;
-          let oldPathStatus = null;
-          if (statusItem.oldPath) {
-            const oldStatusItem = codeOwnerStatusMap.get(statusItem.oldPath);
-            if (!oldStatusItem) {
-              // should not happen
-            } else {
-              oldPathStatus = oldStatusItem.status;
-            }
-          }
+    const status = statusItem.status;
+    let oldPathStatus = null;
+    if (statusItem.oldPath) {
+      const oldStatusItem = codeOwnerStatusMap.get(statusItem.oldPath);
+      if (!oldStatusItem) {
+        // should not happen
+      } else {
+        oldPathStatus = oldStatusItem.status;
+      }
+    }
 
-          const newPathStatus = this._computeStatus(status);
-          if (!oldPathStatus) {
-            this.status = newPathStatus;
-          } else {
-            this.status = newPathStatus === STATUS_CODE.APPROVED
-              ? this._computeStatus(oldPathStatus, /* oldPath= */ true)
-              : newPathStatus;
-          }
-        })
-        .catch(e => {
-          this.status = STATUS_CODE.ERROR;
-          throw e;
-        });
+    const newPathStatus = this._computeStatus(status);
+    if (!oldPathStatus) {
+      this.status = newPathStatus;
+    } else {
+      this.status = newPathStatus === STATUS_CODE.APPROVED
+        ? this._computeStatus(oldPathStatus, /* oldPath= */ true)
+        : newPathStatus;
+    }
   }
 
   _computeIcon(status) {

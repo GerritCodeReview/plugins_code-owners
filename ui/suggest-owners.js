@@ -14,19 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CodeOwnerService} from './code-owners-service.js';
-import {ownerState} from './owner-ui-state.js';
+import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
+import {SuggestionsState} from './code-owners-model.js';
 
 const SUGGESTION_POLLING_INTERVAL = 1000;
 
 class OwnerGroupFileList extends Polymer.Element {
   static get is() {
     return 'owner-group-file-list';
-  }
-
-  constructor() {
-    super();
-    this.expandSuggestionStateUnsubscriber = undefined;
   }
 
   static get properties() {
@@ -89,7 +84,7 @@ class OwnerGroupFileList extends Polymer.Element {
 
 customElements.define(OwnerGroupFileList.is, OwnerGroupFileList);
 
-export class SuggestOwners extends Polymer.Element {
+export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
   static get is() {
     return 'suggest-owners';
   }
@@ -262,6 +257,7 @@ export class SuggestOwners extends Polymer.Element {
             <template is="dom-if" if="[[suggestion.error]]">
               <div class="fetch-error-content">
                 [[suggestion.error]]
+                <a on-click="_showErrorDetails"
               </div>
             </template>
             <template is="dom-if" if="[[!suggestion.error]]">
@@ -299,18 +295,14 @@ export class SuggestOwners extends Polymer.Element {
 
   static get properties() {
     return {
-      // @input
-      change: Object,
-      restApi: Object,
-      reporting: Object,
-
       // @internal attributes
       hidden: {
         type: Boolean,
         value: true,
         reflectToAttribute: true,
+        computed: '_isHidden(model.areAllFilesApproved, ' +
+            'model.showSuggestions)',
       },
-      ownerService: Object,
       suggestedOwners: Array,
       isLoading: {
         type: Boolean,
@@ -325,93 +317,87 @@ export class SuggestOwners extends Polymer.Element {
 
   static get observers() {
     return [
-      'onInputChanged(restApi, change)',
-      'onReviewerChange(reviewers)',
+      '_onReviewerChanged(reviewers)',
+      '_onShowSuggestionsChanged(model.showSuggestions)',
+      '_onSuggestionsStateChanged(model.suggestionsState)',
+      '_onSuggestionsChanged(model.suggestions, model.suggestionsState)',
+      '_onSuggestionsLoadProgressChanged(model.suggestionsLoadProgress)',
     ];
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.expandSuggestionStateUnsubscriber = ownerState
-        .onExpandSuggestionChange(expanded => {
-          this.hidden = !expanded;
-          if (expanded) {
-            // this is more of a hack to let reivew input lose focus
-            // to avoid suggestion dropdown
-            // gr-autocomplete has a internal state for tracking focus
-            // that will be canceled if any click happens outside of
-            // it's target
-            // Can not use `this.async` as it's only available in
-            // legacy element mixin which not used in this plugin.
-            Polymer.Async.timeOut.run(() => this.click(), 100);
+  _onShowSuggestionsChanged(showSuggestions) {
+    if (!showSuggestions ||
+        this.model.suggestionsLoadProgress === SuggestionsState.NotLoaded) {
+      return;
+    }
+    // this is more of a hack to let review input lose focus
+    // to avoid suggestion dropdown
+    // gr-autocomplete has a internal state for tracking focus
+    // that will be canceled if any click happens outside of
+    // it's target
+    // Can not use `this.async` as it's only available in
+    // legacy element mixin which not used in this plugin.
+    Polymer.Async.timeOut.run(() => this.click(), 100);
 
-            // start fetching suggestions
-            if (!this._suggestionsTimer) {
-              this._suggestionsTimer = setInterval(() => {
-                this._pollingSuggestions();
-              }, SUGGESTION_POLLING_INTERVAL);
-
-              // poll immediately to kick start the fetching
-              this.reporting
-                  .reportLifeCycle('owners-suggestions-fetching-start');
-              this._pollingSuggestions();
-            }
-          }
-        });
+    this.modelLoader.loadSuggestions();
+    this.reporting.reportLifeCycle('owners-suggestions-fetching-start');
   }
 
   disconnectedCallback() {
     super.disconnectedCallback();
-    if (this.expandSuggestionStateUnsubscriber) {
-      this.expandSuggestionStateUnsubscriber();
-      this.expandSuggestionStateUnsubscriber = undefined;
-    }
+    this._stopUpdateProgressTimer();
   }
 
-  onInputChanged(restApi, change) {
-    ownerState.expandSuggestion = false;
-    if ([restApi, change].includes(undefined)) return;
-    this.isLoading = true;
-    const ownerService = CodeOwnerService.getOwnerService(this.restApi, change);
-    if (this.ownerService && this.ownerService !== ownerService) {
-      // abort all pending requests
-      this.ownerService.abort();
-      clearInterval(this._suggestionsTimer);
-      this._suggestionsTimer = null;
-    }
-    this.ownerService = ownerService;
+  _startUpdateProgressTimer() {
+    if (this._progressUpdateTimer) return;
+    this._progressUpdateTimer = setInterval(() => {
+      this.modelLoader.updateLoadSuggestionsProgress();
+    }, SUGGESTION_POLLING_INTERVAL);
+  }
 
+  _stopUpdateProgressTimer() {
+    if (!this._progressUpdateTimer) return;
+    clearInterval(this._progressUpdateTimer);
+    this._progressUpdateTimer = undefined;
+  }
+
+  _onSuggestionsStateChanged(state) {
+    this._stopUpdateProgressTimer();
+    if (state === SuggestionsState.Loading) {
+      this._startUpdateProgressTimer();
+    }
+    this.isLoading = state === SuggestionsState.Loading;
+  }
+
+  _isHidden(allFilesApproved, showSuggestions) {
+    if (!showSuggestions) return true;
     // if all approved, no need to show the container
-    this.ownerService.areAllFilesApproved().then(approved => {
-      if (approved) {
-        this.hidden = approved;
-      }
-    });
+    return allFilesApproved === undefined || !!allFilesApproved;
   }
 
-  _pollingSuggestions() {
-    this.ownerService
-        .getSuggestedOwners()
-        .then(res => {
-          if (res.finished) {
-            clearInterval(this._suggestionsTimer);
-            this._suggestionsTimer = null;
-            const reportDetails = res.suggestions.reduce((details, cur) => {
-              details.totalGroups++;
-              details.stats.push([cur.files.length, cur.owners ? cur.owners.length : 0]);
-              return details;
-            }, {totalGroups: 0, stats: []});
-            this.reporting.reportLifeCycle('owners-suggestions-fetching-finished', reportDetails);
-          }
-          this.progressText = res.progress;
-          this.isLoading = !res.finished;
+  loadPropertiesAfterModelChanged() {
+    super.loadPropertiesAfterModelChanged();
+    this._stopUpdateProgressTimer();
+    this.modelLoader.loadAreAllFilesApproved();
+  }
 
-          this._updateSuggestions(res.suggestions);
+  _onSuggestionsChanged(suggestions, suggestionsState) {
+    // The updateLoadSuggestionsProgress method also updates suggestions
+    this._updateSuggestions(suggestions || []);
+    this._updateAllChips(this._currentReviewers);
+    if (!suggestions || suggestionsState !== SuggestionsState.Loaded) return;
+    const reportDetails = suggestions.reduce((details, cur) => {
+      details.totalGroups++;
+      details.stats.push([cur.files.length,
+        cur.owners ? cur.owners.length : 0]);
+      return details;
+    }, {totalGroups: 0, stats: []});
+    this.reporting.reportLifeCycle(
+        'owners-suggestions-fetching-finished', reportDetails);
+  }
 
-          // in case `_updateAllChips` called before suggestedOwners ready
-          // from onReviewerChange
-          this._updateAllChips(this._currentReviewers);
-        });
+  _onSuggestionsLoadProgressChanged(progress) {
+    this.progressText = progress;
   }
 
   _updateSuggestions(suggestions) {
@@ -421,7 +407,7 @@ export class SuggestOwners extends Polymer.Element {
     });
   }
 
-  onReviewerChange(reviewers) {
+  _onReviewerChanged(reviewers) {
     this._currentReviewers = reviewers;
     this._updateAllChips(reviewers);
   }
@@ -517,7 +503,8 @@ export class SuggestOwners extends Polymer.Element {
   }
 
   _reportDocClick() {
-    this.reporting.reportInteraction('code-owners-doc-click', {section: 'no owners found'});
+    this.reporting.reportInteraction('code-owners-doc-click',
+        {section: 'no owners found'});
   }
 }
 

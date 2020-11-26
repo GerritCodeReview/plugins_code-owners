@@ -14,39 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {CodeOwnerService} from './code-owners-service.js';
-import {ownerState} from './owner-ui-state.js';
+import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
+import {PluginState} from './code-owners-model.js';
 
-export class SuggestOwnersTrigger extends Polymer.Element {
+export class SuggestOwnersTrigger extends
+  CodeOwnersModelMixin(Polymer.Element) {
   static get is() {
     return 'suggest-owners-trigger';
   }
 
-  constructor(props) {
-    super(props);
-    this.expandSuggestionStateUnsubscriber = undefined;
-  }
-
   static get properties() {
     return {
-      change: Object,
-      reporting: Object,
-      restApi: Object,
-
-      expanded: {
-        type: Boolean,
-        value: false,
-      },
       hidden: {
         type: Boolean,
-        value: true,
+        computed: '_computeHidden(model.pluginStatus,' +
+            'model.areAllFilesApproved, model.userRole, model.branchConfig)',
         reflectToAttribute: true,
       },
     };
-  }
-
-  static get observers() {
-    return ['onInputChanged(restApi, change)'];
   }
 
   static get template() {
@@ -68,7 +53,7 @@ export class SuggestOwnersTrigger extends Polymer.Element {
           has-tooltip
           title="Suggest owners for your change"
         >
-          [[computeButtonText(expanded)]]
+          [[computeButtonText(model.showSuggestions)]]
         </gr-button>
         <span>
           <a on-click="_reportBugClick" href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin" target="_blank">
@@ -81,50 +66,35 @@ export class SuggestOwnersTrigger extends Polymer.Element {
       `;
   }
 
-  connectedCallback() {
-    super.connectedCallback();
-    this.expandSuggestionStateUnsubscriber = ownerState
-        .onExpandSuggestionChange(expanded => {
-          this.expanded = expanded;
-        });
+  loadPropertiesAfterModelChanged() {
+    super.loadPropertiesAfterModelChanged();
+    this.modelLoader.loadUserRole();
+    this.modelLoader.loadPluginStatus();
+    this.modelLoader.loadAreAllFilesApproved();
+    this.modelLoader.loadBranchConfig();
   }
 
-  disconnnectedCallback() {
-    super.disconnectedCallback();
-    if (this.expandSuggestionStateUnsubscriber) {
-      this.expandSuggestionStateUnsubscriber();
-      this.expandSuggestionStateUnsubscriber = undefined;
+  _computeHidden(pluginStatus, allFilesApproved, userRole, branchConfig) {
+    if (pluginStatus === undefined ||
+        allFilesApproved === undefined ||
+        userRole === undefined ||
+        branchConfig === undefined) {
+      return true;
+    }
+    if (branchConfig.no_code_owners_defined) return true;
+    if (pluginStatus.state === PluginState.Enabled) {
+      return allFilesApproved;
+    } else {
+      return true;
     }
   }
 
-  onInputChanged(restApi, change) {
-    if ([restApi, change].includes(undefined)) return;
-    this.ownerService = CodeOwnerService.getOwnerService(
-        this.restApi,
-        this.change
-    );
-
-    Promise.all([
-      this.ownerService.isCodeOwnerEnabled(),
-      this.ownerService.areAllFilesApproved(),
-      this.ownerService.getLoggedInUserInitialRole()
-    ])
-        .then(([enabled, approved, userRole]) => {
-          if (enabled) {
-            this.hidden = approved;
-          } else {
-            this.hidden = true;
-          }
-          this._userRole = userRole;
-        });
-  }
-
   toggleControlContent() {
-    this.expanded = !this.expanded;
-    ownerState.expandSuggestion = this.expanded;
+    this.model.setShowSuggestions(!this.model.showSuggestions);
     this.reporting.reportInteraction('toggle-suggest-owners', {
       expanded: this.expanded,
-      user_role: this._userRole ? this._userRole : 'UNKNOWN',
+      user_role: this.model.userRole ?
+        this.model.userRole : 'UNKNOWN',
     });
   }
 
