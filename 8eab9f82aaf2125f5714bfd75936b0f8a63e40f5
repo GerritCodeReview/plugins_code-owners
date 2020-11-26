@@ -81,6 +81,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2d62ed9b_4895e187",
+        "filename": "ui/code-owners-model-mixin.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:37:11Z",
+      "side": 1,
+      "message": "Comment is added.\nI agree about appContext, but it appContext is not exposed to plugin now.",
+      "parentUuid": "cec9a333_9684483c",
+      "range": {
+        "startLine": 33,
+        "startChar": 8,
+        "endLine": 35,
+        "endChar": 24
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "26f82b43_b727b9e3",
@@ -98,6 +122,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b53b9246_7e208ba1",
+        "filename": "ui/code-owners-model-mixin.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:37:11Z",
+      "side": 1,
+      "message": "Yes, it can be just a field",
+      "parentUuid": "26f82b43_b727b9e3",
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d1173fcf_89d7569d",
@@ -111,6 +153,24 @@
       "writtenOn": "2020-11-26T07:58:05Z",
       "side": 1,
       "message": "Add a comment.",
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "35943dd6_2de39bf0",
+        "filename": "ui/code-owners-model-mixin.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d1173fcf_89d7569d",
       "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -138,6 +198,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3738c7b4_e7900761",
+        "filename": "ui/code-owners-model.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:37:11Z",
+      "side": 1,
+      "message": "renamed, the event has nothing to do with Polymer",
+      "parentUuid": "cdbb6d33_f45cac0c",
+      "range": {
+        "startLine": 20,
+        "startChar": 11,
+        "endLine": 20,
+        "endChar": 27
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "aeadf8a7_bec04bc0",
@@ -155,6 +239,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e43db5bd_44051d26",
+        "filename": "ui/code-owners-model.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aeadf8a7_bec04bc0",
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e49d60a8_6f674fd3",
@@ -168,6 +270,30 @@
       "writtenOn": "2020-11-26T07:58:05Z",
       "side": 1,
       "message": "This looks a bit like handcrafted Observables. Maybe add a comment to the class about why you are not using Observable instead.",
+      "range": {
+        "startLine": 39,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 3
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b8e0b9ad_998a380b",
+        "filename": "ui/code-owners-model.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:37:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e49d60a8_6f674fd3",
       "range": {
         "startLine": 39,
         "startChar": 2,
