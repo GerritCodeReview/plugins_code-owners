@@ -3,26 +3,31 @@
     "description": "code owners plugin",
     "browser": true,
     "scripts": {
-        "test": "polymer serve",
         "eslint": "../../node_modules/eslint/bin/eslint.js --ext .html,.js ./ui/",
         "eslintfix": "npm run eslint -- --fix",
-        "wct-test": "npm i && npx bower i && npx polymer test -l chrome"
+        "safe_bazelisk": "if which bazelisk >/dev/null; then bazel_bin=bazelisk; else bazel_bin=bazel; fi && $bazel_bin",
+        "test": "npm run safe_bazelisk run //polygerrit-ui:karma_bin -- -- start $(pwd)/karma.conf.js"
     },
     "devDependencies": {
         "@bazel/rollup": "^1.1.0",
         "@polymer/iron-test-helpers": "^3.0.1",
-        "@webcomponents/shadycss": "^1.9.2",
-        "@webcomponents/webcomponentsjs": "^1.3.3",
-        "bower": "^1.8.8",
-        "es6-promise": "^3.3.1",
+        "@polymer/test-fixture": "^4.0.2",
+        "@types/lodash": "^4.14.162",
+        "@types/mocha": "^8.0.3",
+        "@types/sinon": "^9.0.8",
+        "chai": "^4.2.0",
         "eslint": "^6.6.0",
         "eslint-config-google": "^0.13.0",
         "eslint-plugin-html": "^6.0.0",
         "eslint-plugin-import": "^2.20.1",
         "eslint-plugin-jsdoc": "^19.2.0",
-        "polymer-bridges": "file:../../polymer-bridges/",
-        "polymer-cli": "^1.9.11"
+        "lodash": "^4.17.15",
+        "mocha": "7.2.0",
+        "sinon": "^9.0.2"
     },
     "license": "Apache-2.0",
-    "private": true
+    "private": true,
+    "dependencies": {
+        "@types/chai": "^4.2.14"
+    }
 }
