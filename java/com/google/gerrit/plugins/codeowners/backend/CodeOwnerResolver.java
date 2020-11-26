@@ -45,7 +45,6 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Stream;
 
 /** Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s. */
 public class CodeOwnerResolver {
@@ -188,7 +187,9 @@ public class CodeOwnerResolver {
                   }
                   return true;
                 })
-            .flatMap(this::resolve)
+            .map(this::resolve)
+            .filter(Optional::isPresent)
+            .map(Optional::get)
             .collect(toImmutableSet());
     return CodeOwnerResolverResult.create(codeOwners, ownedByAllUsers.get());
   }
@@ -233,34 +234,34 @@ public class CodeOwnerResolver {
    * @return the {@link CodeOwner} for the code owner reference if it was resolved, otherwise {@link
    *     Optional#empty()}
    */
-  public Stream<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
+  public Optional<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
     String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
     logger.atFine().log("resolving code owner reference %s", codeOwnerReference);
 
     if (!isEmailDomainAllowed(email)) {
       logger.atFine().log("domain of email %s is not allowed", email);
-      return Stream.of();
+      return Optional.empty();
     }
 
     Optional<AccountState> accountState =
         lookupEmail(email).flatMap(accountId -> lookupAccount(accountId, email));
     if (!accountState.isPresent()) {
       logger.atFine().log("no account for email %s", email);
-      return Stream.of();
+      return Optional.empty();
     }
     if (!accountState.get().account().isActive()) {
       logger.atFine().log("account for email %s is inactive", email);
-      return Stream.of();
+      return Optional.empty();
     }
     if (enforceVisibility && !isVisible(accountState.get(), email)) {
       logger.atFine().log(
           "account %d or email %s not visible", accountState.get().account().id().get(), email);
-      return Stream.of();
+      return Optional.empty();
     }
 
     CodeOwner codeOwner = CodeOwner.create(accountState.get().account().id());
     logger.atFine().log("resolved to code owner %s", codeOwner);
-    return Stream.of(codeOwner);
+    return Optional.of(codeOwner);
   }
 
   /** Whether the given account can be seen. */

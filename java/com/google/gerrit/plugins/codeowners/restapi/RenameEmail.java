@@ -14,13 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
@@ -158,19 +155,14 @@ public class RenameEmail implements RestModifyView<BranchResource, RenameEmailIn
     }
   }
 
-  private Account.Id resolveEmail(String email)
-      throws ResourceConflictException, UnprocessableEntityException {
+  private Account.Id resolveEmail(String email) throws UnprocessableEntityException {
     requireNonNull(email, "email");
 
-    ImmutableSet<CodeOwner> codeOwners =
-        codeOwnerResolver.resolve(CodeOwnerReference.create(email)).collect(toImmutableSet());
-    if (codeOwners.isEmpty()) {
+    Optional<CodeOwner> codeOwner = codeOwnerResolver.resolve(CodeOwnerReference.create(email));
+    if (!codeOwner.isPresent()) {
       throw new UnprocessableEntityException(String.format("cannot resolve email %s", email));
     }
-    if (codeOwners.size() > 1) {
-      throw new ResourceConflictException(String.format("email %s is ambigious", email));
-    }
-    return Iterables.getOnlyElement(codeOwners).accountId();
+    return codeOwner.get().accountId();
   }
 
   /**
