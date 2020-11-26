@@ -34,8 +34,8 @@ import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.nio.file.Paths;
+import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.junit.Before;
@@ -89,14 +89,14 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
   @Test
   public void resolveCodeOwnerReferenceForEmail() throws Exception {
-    Stream<CodeOwner> codeOwner =
+    Optional<CodeOwner> codeOwner =
         codeOwnerResolver.get().resolve(CodeOwnerReference.create(admin.email()));
-    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(admin.id());
+    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(admin.id());
   }
 
   @Test
   public void cannotResolveCodeOwnerReferenceForStarAsEmail() throws Exception {
-    Stream<CodeOwner> codeOwner =
+    Optional<CodeOwner> codeOwner =
         codeOwnerResolver
             .get()
             .resolve(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
@@ -160,14 +160,14 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
     // admin has the "Modify Account" global capability and hence can see the secondary email of the
     // user account.
-    Stream<CodeOwner> codeOwner =
+    Optional<CodeOwner> codeOwner =
         codeOwnerResolver.get().resolve(CodeOwnerReference.create(secondaryEmail));
-    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(user.id());
+    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
 
     // user can see its own secondary email.
     requestScopeOperations.setApiUser(user.id());
     codeOwner = codeOwnerResolver.get().resolve(CodeOwnerReference.create(secondaryEmail));
-    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(user.id());
+    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
   }
 
   @Test
@@ -297,9 +297,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerResolver.get().resolve(adminCodeOwnerReference)).isEmpty();
 
     // if visibility is not enforced the code owner reference can be resolved regardless
-    Stream<CodeOwner> codeOwner =
+    Optional<CodeOwner> codeOwner =
         codeOwnerResolver.get().enforceVisibility(false).resolve(adminCodeOwnerReference);
-    assertThat(codeOwner).onlyElement().hasAccountIdThat().isEqualTo(admin.id());
+    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(admin.id());
   }
 
   @Test
@@ -311,13 +311,13 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
     // admin is the current user and can see the account
     assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(user.email())))
-        .isNotEmpty();
+        .isPresent();
     assertThat(
             codeOwnerResolver
                 .get()
                 .forUser(identifiedUserFactory.create(admin.id()))
                 .resolve(CodeOwnerReference.create(user.email())))
-        .isNotEmpty();
+        .isPresent();
 
     // user2 cannot see the account
     assertThat(
