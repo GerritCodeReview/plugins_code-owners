@@ -233,7 +233,6 @@ public class CodeOwnerResolver {
    * @return the {@link CodeOwner} for the code owner reference if it was resolved, otherwise {@link
    *     Optional#empty()}
    */
-  @VisibleForTesting
   public Stream<CodeOwner> resolve(CodeOwnerReference codeOwnerReference) {
     String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
     logger.atFine().log("resolving code owner reference %s", codeOwnerReference);
