@@ -82,6 +82,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d37129ff_631e3e69",
+        "filename": "ui/code-owners-model-loader.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T14:09:34Z",
+      "side": 1,
+      "message": "As discussed, I am not convinced of ModelLoader being a great idea, because it adds an additional layer and thus complexity. It is not clear to me yet how to clearly define the responsibility of the loader compared to the service.\n\nBut I am happy to +2 the change and explore this approach further in the code-owners plugin. Just saying that have to discuss and explore further before we can establish this as a best practice for core. :-)",
+      "parentUuid": "23a966a7_af9f4194",
+      "range": {
+        "startLine": 44,
+        "startChar": 2,
+        "endLine": 49,
+        "endChar": 3
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cec9a333_9684483c",
