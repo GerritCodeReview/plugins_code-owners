@@ -16,6 +16,166 @@
       "message": "I really like these models",
       "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d267fe4_1f56f2ba",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 9
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "I am very happy to see code for a proper UI model, however I am not convinced that this is the best pattern. I am happy to just approve the change and let you use the code-owners plugin as a playground to gather some experience with this approach. But I am doubtful that this is the best practice that we want to establish for core. Looking forward to some discussions. Feel free to ping me for adhoc VCs, if you think that speeds up the process. I will also come up with a proposal for models/services for the new Checks tab, so we will have an alternative proposal to talk about. :-)",
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3c535364_fd0cfc63",
+        "filename": "ui/code-owners-model-loader.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "I am not sure I am convinced of the value of the indirection that the loader offers.\n\nWhy is it better for the UI to depend on Loader instead of Service? I don\u0027t see an issue with the UI depending on the service and service controlling the model.",
+      "range": {
+        "startLine": 44,
+        "startChar": 2,
+        "endLine": 49,
+        "endChar": 3
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cec9a333_9684483c",
+        "filename": "ui/code-owners-model-mixin.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "Maybe add to the class comment that these three properties will have to be set from the outside for the mixin to work.\n\nIn an ideal world the mixin would be able to get the `reporting` and `restApi` from an appContext, but I understand that this is beyond the scope of this change.",
+      "range": {
+        "startLine": 33,
+        "startChar": 8,
+        "endLine": 35,
+        "endChar": 24
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "26f82b43_b727b9e3",
+        "filename": "ui/code-owners-model-mixin.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "Does this have to be a Polymer property? Or can it just be a field?",
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d1173fcf_89d7569d",
+        "filename": "ui/code-owners-model-mixin.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 88,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "Add a comment.",
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cdbb6d33_f45cac0c",
+        "filename": "ui/code-owners-model.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "Does this have something to do with Polymer?\n\nIf not, maybe rename to \u0027model-property-changed\u0027?",
+      "range": {
+        "startLine": 20,
+        "startChar": 11,
+        "endLine": 20,
+        "endChar": 27
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aeadf8a7_bec04bc0",
+        "filename": "ui/code-owners-model.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "Maybe mention that UI elements just add the model mixin, which is doing the listening and the translation from model to Polymer properties.",
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e49d60a8_6f674fd3",
+        "filename": "ui/code-owners-model.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2020-11-26T07:58:05Z",
+      "side": 1,
+      "message": "This looks a bit like handcrafted Observables. Maybe add a comment to the class about why you are not using Observable instead.",
+      "range": {
+        "startLine": 39,
+        "startChar": 2,
+        "endLine": 43,
+        "endChar": 3
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
