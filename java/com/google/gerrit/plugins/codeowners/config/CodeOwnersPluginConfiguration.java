@@ -36,6 +36,8 @@ import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
@@ -348,8 +350,11 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
-   * Returns the approval that is required to override the code owners submit check for a change of
-   * the given project.
+   * Returns the approvals that are required to override the code owners submit check for a change
+   * of the given project.
+   *
+   * <p>If multiple approvals are returned, any of them is sufficient to override the code owners
+   * submit check.
    *
    * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
    * exist the call fails with {@link IllegalStateException}.
@@ -363,22 +368,14 @@ public class CodeOwnersPluginConfiguration {
    *
    * <p>The first override approval configuration that exists counts and the evaluation is stopped.
    *
-   * <p>If the code owner configuration contains multiple override values, the last value is used.
-   *
    * @param project project for which the override approval should be returned
-   * @return the override approval that should be used for the given project, {@link
-   *     Optional#empty()} if no override approval is configured, in this case the override
-   *     functionality is disabled
+   * @return the override approvals that should be used for the given project, an empty list if no
+   *     override approval is configured, in this case the override functionality is disabled
    */
-  public Optional<RequiredApproval> getOverrideApproval(Project.NameKey project) {
+  public ImmutableSet<RequiredApproval> getOverrideApproval(Project.NameKey project) {
     try {
-      ImmutableList<RequiredApproval> configuredOverrideApprovalConfig =
-          getConfiguredRequiredApproval(overrideApprovalConfig, project);
-      if (!configuredOverrideApprovalConfig.isEmpty()) {
-        // There can be only one override approval. If multiple ones are configured just use the
-        // last one, this is also what Config#getString(String, String, String) does.
-        return Optional.of(Iterables.getLast(configuredOverrideApprovalConfig));
-      }
+      return filterOutDuplicateRequiredApprovals(
+          getConfiguredRequiredApproval(overrideApprovalConfig, project));
     } catch (InvalidPluginConfigurationException e) {
       logger.atWarning().withCause(e).log(
           "Ignoring invalid override approval configuration for project %s."
@@ -386,7 +383,34 @@ public class CodeOwnersPluginConfiguration {
           project.get());
     }
 
-    return Optional.empty();
+    return ImmutableSet.of();
+  }
+
+  /**
+   * Filters out duplicate required approvals from the input list.
+   *
+   * <p>The following entries are considered as duplicate:
+   *
+   * <ul>
+   *   <li>exact identical required approvals (e.g. "Code-Review+2" and "Code-Review+2")
+   *   <li>required approvals with the same label name and a higher value (e.g. "Code-Review+2" is
+   *       not needed if "Code-Review+1" is already contained, since "Code-Review+1" covers all
+   *       "Code-Review" approvals >= 1)
+   * </ul>
+   */
+  private ImmutableSet<RequiredApproval> filterOutDuplicateRequiredApprovals(
+      ImmutableList<RequiredApproval> requiredApprovals) {
+    Map<String, RequiredApproval> requiredApprovalsByLabel = new HashMap<>();
+    for (RequiredApproval requiredApproval : requiredApprovals) {
+      String labelName = requiredApproval.labelType().getName();
+      RequiredApproval otherRequiredApproval = requiredApprovalsByLabel.get(labelName);
+      if (otherRequiredApproval != null
+          && otherRequiredApproval.value() <= requiredApproval.value()) {
+        continue;
+      }
+      requiredApprovalsByLabel.put(labelName, requiredApproval);
+    }
+    return ImmutableSet.copyOf(requiredApprovalsByLabel.values());
   }
 
   /**
