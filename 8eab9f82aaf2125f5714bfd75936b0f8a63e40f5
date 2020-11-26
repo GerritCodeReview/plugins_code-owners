@@ -60,6 +60,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "23a966a7_af9f4194",
+        "filename": "ui/code-owners-model-loader.js",
+        "patchSetId": 9
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2020-11-26T10:50:58Z",
+      "side": 1,
+      "message": "In my mind I have the following separation:\nservice - load and process data from backend (data level).\nmodel - stores UI-related information.\nThe service shouldn\u0027t depend on UI implementation, so adding a model into it makes a connection between UI and data level.\nIn another change (https://gerrit-review.googlesource.com/c/plugins/code-owners/+/288702/11) I added a error handling into the ModelLoader, because how we should handle a errors basically depends on the UI, service shouldn\u0027t be aware of it.\nDoes it make sense?",
+      "parentUuid": "3c535364_fd0cfc63",
+      "range": {
+        "startLine": 44,
+        "startChar": 2,
+        "endLine": 49,
+        "endChar": 3
+      },
+      "revId": "8eab9f82aaf2125f5714bfd75936b0f8a63e40f5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "cec9a333_9684483c",
         "filename": "ui/code-owners-model-mixin.js",
         "patchSetId": 9
