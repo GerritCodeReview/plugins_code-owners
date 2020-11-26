@@ -49,7 +49,10 @@ import org.eclipse.jgit.junit.TestRepository;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link CodeOwnerApprovalCheck}. */
+/**
+ * Tests for {@link CodeOwnerApprovalCheck}. Further tests with fallback code owners are implemented
+ * in {@link CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest}}.
+ */
 public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Inject private ChangeNotes.Factory changeNotesFactory;
   @Inject private RequestScopeOperations requestScopeOperations;

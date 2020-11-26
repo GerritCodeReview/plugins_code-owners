@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
@@ -33,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
@@ -394,5 +396,63 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_OVERRIDE_INFO_URL, "http://bar.example.com");
     assertThat(generalConfig.getOverrideInfoUrl(cfg)).value().isEqualTo("http://bar.example.com");
+  }
+
+  @Test
+  public void cannotGetFallbackCodeOwnersForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getFallbackCodeOwners(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetFallbackCodeOwnersForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getFallbackCodeOwners(project, /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noFallbackCodeOwnersConfigured() throws Exception {
+    assertThat(generalConfig.getFallbackCodeOwners(project, new Config()))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void fallbackCodeOwnersIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getFallbackCodeOwners(project, new Config()))
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void fallbackCodeOwnersInPluginConfigOverridesFallbackCodeOwnersInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, "NONE");
+    assertThat(generalConfig.getFallbackCodeOwners(project, cfg))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void globalFallbackOnwersUsedIfInvalidFallbackCodeOwnersConfigured() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, "INVALID");
+    assertThat(generalConfig.getFallbackCodeOwners(project, cfg))
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "INVALID")
+  public void defaultValueUsedIfInvalidGlobalFallbackCodeOwnersConfigured() throws Exception {
+    assertThat(generalConfig.getFallbackCodeOwners(project, new Config()))
+        .isEqualTo(FallbackCodeOwners.NONE);
   }
 }
