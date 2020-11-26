@@ -16,6 +16,29 @@
       "message": "Blocking submission until the frontend was adapted.",
       "revId": "4ea30da00a901cd66f257701671dca54af1a6370",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ef7d0bec_34351bb6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 373,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-26T13:40:36Z",
+      "side": 1,
+      "message": "This should be an ImmutableSet, so that there can\u0027t be duplicates.\n\nIn addition we want to filter out duplicates for the same label, but with different values. In this case we only want to return the RequiredApproval with the lowest value. E.g. if \"Code-Review+1\" and \"Code-Review+2\" are configured as override approvals, we only want to return \"Code-Review+1\". This automatically covers \"Code-Review+2\" as it means all Code-Review approvals \u003e\u003d 1 count as override approval.",
+      "range": {
+        "startLine": 373,
+        "startChar": 9,
+        "endLine": 373,
+        "endChar": 22
+      },
+      "revId": "4ea30da00a901cd66f257701671dca54af1a6370",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
