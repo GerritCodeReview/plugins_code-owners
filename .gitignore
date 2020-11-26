@@ -1,5 +1,6 @@
 bower_components
 .vscode
+.ts-out
 web-component-tester
 node_modules
 
