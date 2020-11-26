@@ -177,6 +177,7 @@ public class CodeOwnerResolver {
   public CodeOwnerResolverResult resolve(Set<CodeOwnerReference> codeOwnerReferences) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
+    AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
     ImmutableSet<CodeOwner> codeOwners =
         codeOwnerReferences.stream()
             .filter(
@@ -188,10 +189,18 @@ public class CodeOwnerResolver {
                   return true;
                 })
             .map(this::resolve)
-            .filter(Optional::isPresent)
+            .filter(
+                codeOwner -> {
+                  if (!codeOwner.isPresent()) {
+                    hasUnresolvedCodeOwners.set(true);
+                    return false;
+                  }
+                  return true;
+                })
             .map(Optional::get)
             .collect(toImmutableSet());
-    return CodeOwnerResolverResult.create(codeOwners, ownedByAllUsers.get());
+    return CodeOwnerResolverResult.create(
+        codeOwners, ownedByAllUsers.get(), hasUnresolvedCodeOwners.get());
   }
 
   /**

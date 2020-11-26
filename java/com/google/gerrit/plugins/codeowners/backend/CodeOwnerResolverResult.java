@@ -43,17 +43,24 @@ public abstract class CodeOwnerResolverResult {
    */
   public abstract boolean ownedByAllUsers();
 
+  /** Whether there are code owner references which couldn't be resolved. */
+  public abstract boolean hasUnresolvedCodeOwners();
+
   @Override
   public String toString() {
     return MoreObjects.toStringHelper(this)
         .add("codeOwners", codeOwners())
         .add("ownedByAllUsers", ownedByAllUsers())
+        .add("hasUnresolvedCodeOwners", hasUnresolvedCodeOwners())
         .toString();
   }
 
   /** Creates a {@link CodeOwnerResolverResult} instance. */
   public static CodeOwnerResolverResult create(
-      ImmutableSet<CodeOwner> codeOwners, boolean ownedByAllUsers) {
-    return new AutoValue_CodeOwnerResolverResult(codeOwners, ownedByAllUsers);
+      ImmutableSet<CodeOwner> codeOwners,
+      boolean ownedByAllUsers,
+      boolean hasUnresolvedCodeOwners) {
+    return new AutoValue_CodeOwnerResolverResult(
+        codeOwners, ownedByAllUsers, hasUnresolvedCodeOwners);
   }
 }

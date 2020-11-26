@@ -192,6 +192,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwners()).isEmpty();
     assertThat(result.ownedByAllUsers()).isFalse();
+    assertThat(result.hasUnresolvedCodeOwners()).isFalse();
   }
 
   @Test
@@ -205,6 +206,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
     assertThat(result.ownedByAllUsers()).isFalse();
+    assertThat(result.hasUnresolvedCodeOwners()).isFalse();
   }
 
   @Test
@@ -219,6 +221,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwnersAccountIds()).isEmpty();
     assertThat(result.ownedByAllUsers()).isTrue();
+    assertThat(result.hasUnresolvedCodeOwners()).isFalse();
   }
 
   @Test
@@ -233,6 +236,23 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
     assertThat(result.ownedByAllUsers()).isFalse();
+    assertThat(result.hasUnresolvedCodeOwners()).isTrue();
+  }
+
+  @Test
+  public void resolvePathCodeOwnersNonResolvableCodeOwnersAreFilteredOutIfOwnedByAllUsers()
+      throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.createWithoutPathExpressions(
+                    "*", admin.email(), "non-existing@example.com"))
+            .build();
+    CodeOwnerResolverResult result =
+        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
+    assertThat(result.ownedByAllUsers()).isTrue();
+    assertThat(result.hasUnresolvedCodeOwners()).isTrue();
   }
 
   @Test
@@ -386,6 +406,21 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                     CodeOwnerReference.create(user.email())));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
     assertThat(result.ownedByAllUsers()).isFalse();
+    assertThat(result.hasUnresolvedCodeOwners()).isFalse();
+  }
+
+  @Test
+  public void resolveCodeOwnerReferencesNonResolveableCodeOwnersAreFilteredOut() throws Exception {
+    CodeOwnerResolverResult result =
+        codeOwnerResolver
+            .get()
+            .resolve(
+                ImmutableSet.of(
+                    CodeOwnerReference.create(admin.email()),
+                    CodeOwnerReference.create("non-existing@example.com")));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
+    assertThat(result.ownedByAllUsers()).isFalse();
+    assertThat(result.hasUnresolvedCodeOwners()).isTrue();
   }
 
   @Test
