@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5cd615fe_309d29ad",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-27T14:23:40Z",
+      "side": 1,
+      "message": "Still keeping the -2 since we must wait with submitting this change until the frontend change has been rolled out.",
+      "revId": "efd061970f5b2f32d33ae133063a14aa37e08e2e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
