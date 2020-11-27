@@ -218,7 +218,8 @@ Parameters that are not set for a project are inherited from the parent project.
 
 <a id="pluginCodeOwnersFallbackCodeOwners">plugin.@PLUGIN@.fallbackCodeOwners</a>
 :       Policy that controls who should own paths that have no code owners
-        defined.\
+        defined. This policy only applies if inheritance of parent code owners
+        hasn't been explicity disabled in a relevant code owner config file.\
         \
         Can be `NONE` or `ALL_USERS`.\
         \

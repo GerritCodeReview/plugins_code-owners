@@ -33,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationExc
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.function.Consumer;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -53,6 +54,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
   @Rule public final MockitoRule mockito = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Mock private CodeOwnerConfigVisitor visitor;
+  @Mock private Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback;
 
   @Inject private ProjectOperations projectOperations;
 
@@ -142,6 +144,22 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
                     Paths.get("/foo/bar/baz.md"),
                     /* codeOwnerConfigVisitor= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
+  }
+
+  @Test
+  public void cannotVisitCodeOwnerConfigsWithNullCallback() throws Exception {
+    BranchNameKey branchNameKey = BranchNameKey.create(project, "master");
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                codeOwnerConfigHierarchy.visit(
+                    branchNameKey,
+                    getCurrentRevision(branchNameKey),
+                    Paths.get("/foo/bar/baz.md"),
+                    visitor,
+                    /* parentCodeOwnersIgnoredCallback= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("parentCodeOwnersIgnoredCallback");
   }
 
   @Test
@@ -414,6 +432,9 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+
+    verify(parentCodeOwnersIgnoredCallback).accept(fooBarCodeOwnerConfigKey);
+    verifyNoMoreInteractions(parentCodeOwnersIgnoredCallback);
   }
 
   @Test
@@ -477,6 +498,9 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+
+    verify(parentCodeOwnersIgnoredCallback).accept(fooBarCodeOwnerConfigKey);
+    verifyNoMoreInteractions(parentCodeOwnersIgnoredCallback);
   }
 
   @Test
@@ -533,6 +557,8 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .verify(visitor)
         .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+
+    verifyZeroInteractions(parentCodeOwnersIgnoredCallback);
   }
 
   @Test
@@ -657,6 +683,9 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     visit("master", "/foo/bar/baz.md");
     verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
+
+    verify(parentCodeOwnersIgnoredCallback).accept(rootCodeOwnerConfigKey);
+    verifyNoMoreInteractions(parentCodeOwnersIgnoredCallback);
   }
 
   @Test
@@ -711,7 +740,11 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
       throws InvalidPluginConfigurationException, IOException {
     BranchNameKey branchNameKey = BranchNameKey.create(project, branchName);
     codeOwnerConfigHierarchy.visit(
-        branchNameKey, getCurrentRevision(branchNameKey), Paths.get(path), visitor);
+        branchNameKey,
+        getCurrentRevision(branchNameKey),
+        Paths.get(path),
+        visitor,
+        parentCodeOwnersIgnoredCallback);
   }
 
   private ObjectId getCurrentRevision(BranchNameKey branchNameKey) throws IOException {

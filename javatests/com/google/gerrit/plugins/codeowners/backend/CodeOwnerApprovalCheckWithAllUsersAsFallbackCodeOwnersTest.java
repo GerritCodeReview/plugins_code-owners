@@ -395,6 +395,90 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         .isEqualTo(CodeOwnerStatus.APPROVED);
   }
 
+  @Test
+  public void notApprovedByFallbackCodeOwnerIfParentCodeOwnersIgnored() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .ignoreParentCodeOwners()
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    // Verify that the file is not approved yet.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add a fallback code owner as reviewer.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
+    // defined).
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add a Code-Review+1 (= code owner approval) from a fallback code owner.
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId);
+
+    // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
+    // defined).
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void notImplicitlyApprovedByFallbackCodeOwnerIfParentCodeOwnersIgnored() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .ignoreParentCodeOwners()
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    // Verify that the file is not approved yet.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
     return changeNotesFactory.create(project, Change.id(gApi.changes().id(changeId).get()._number));
   }
