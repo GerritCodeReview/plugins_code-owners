@@ -22,6 +22,30 @@
       },
       "revId": "606ab804d08c5a9859f9502f69b552edea256a4d",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4927df1c_c5ada6a1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/AbstractRequiredApprovalConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-27T13:09:46Z",
+      "side": 1,
+      "message": "Ha, thanks for pointing out my laziness :D I thought about testing this, but then I was too lazy. But yes, it should be covered :) \n\nDone now.",
+      "parentUuid": "ad883ea9_71c0d2af",
+      "range": {
+        "startLine": 117,
+        "startChar": 41,
+        "endLine": 117,
+        "endChar": 67
+      },
+      "revId": "606ab804d08c5a9859f9502f69b552edea256a4d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
