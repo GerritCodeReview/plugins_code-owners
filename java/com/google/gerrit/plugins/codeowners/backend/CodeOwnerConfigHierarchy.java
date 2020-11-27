@@ -28,6 +28,7 @@ import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
+import java.util.function.Consumer;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -74,10 +75,38 @@ public class CodeOwnerConfigHierarchy {
       ObjectId revision,
       Path absolutePath,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
+    visit(
+        branchNameKey,
+        revision,
+        absolutePath,
+        codeOwnerConfigVisitor,
+        /* parentCodeOwnersIgnoredCallback= */ codeOwnerConfigKey -> {});
+  }
+
+  /**
+   * Visits the code owner configs in the given branch that apply for the given path by following
+   * the path hierarchy from the given path up to the root folder.
+   *
+   * @param branchNameKey project and branch from which the code owner configs should be visited
+   * @param revision the branch revision from which the code owner configs should be loaded
+   * @param absolutePath the path for which the code owner configs should be visited; the path must
+   *     be absolute; can be the path of a file or folder; the path may or may not exist
+   * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
+   *     configs
+   * @param parentCodeOwnersIgnoredCallback callback that is invoked for the first visited code
+   *     owner config that ignores parent code owners
+   */
+  public void visit(
+      BranchNameKey branchNameKey,
+      ObjectId revision,
+      Path absolutePath,
+      CodeOwnerConfigVisitor codeOwnerConfigVisitor,
+      Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
     requireNonNull(branchNameKey, "branch");
     requireNonNull(revision, "revision");
     requireNonNull(absolutePath, "absolutePath");
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
+    requireNonNull(parentCodeOwnersIgnoredCallback, "parentCodeOwnersIgnoredCallback");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
     logger.atFine().log(
@@ -93,14 +122,18 @@ public class CodeOwnerConfigHierarchy {
       // Read code owner config and invoke the codeOwnerConfigVisitor if the code owner config
       // exists.
       logger.atFine().log("inspecting code owner config for %s", ownerConfigFolder);
+      CodeOwnerConfig.Key codeOwnerConfigKey =
+          CodeOwnerConfig.Key.create(branchNameKey, ownerConfigFolder);
       Optional<PathCodeOwners> pathCodeOwners =
-          pathCodeOwnersFactory.create(
-              CodeOwnerConfig.Key.create(branchNameKey, ownerConfigFolder), revision, absolutePath);
+          pathCodeOwnersFactory.create(codeOwnerConfigKey, revision, absolutePath);
       if (pathCodeOwners.isPresent()) {
         logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
         boolean visitFurtherCodeOwnerConfigs =
             codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
         boolean ignoreParentCodeOwners = pathCodeOwners.get().ignoreParentCodeOwners();
+        if (ignoreParentCodeOwners) {
+          parentCodeOwnersIgnoredCallback.accept(codeOwnerConfigKey);
+        }
         logger.atFine().log(
             "visitFurtherCodeOwnerConfigs = %s, ignoreParentCodeOwners = %s",
             visitFurtherCodeOwnerConfigs, ignoreParentCodeOwners);
