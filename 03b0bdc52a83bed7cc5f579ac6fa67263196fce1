@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2bfd0b82_26061aa1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-27T10:20:36Z",
+      "side": 1,
+      "message": "I wonder why the split here is \\\\R but then you\u0027re joining with \\n.\nConsider using the suggested \\r?\\n:\n\nhttps://guava.dev/releases/23.0/api/docs/com/google/common/base/Splitter.html#onPattern-java.lang.String-",
+      "range": {
+        "startLine": 122,
+        "startChar": 43,
+        "endLine": 122,
+        "endChar": 46
+      },
+      "revId": "03b0bdc52a83bed7cc5f579ac6fa67263196fce1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a790f374_326d611f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 733,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-27T10:20:36Z",
+      "side": 1,
+      "message": "I suspect that if there was no trailing line before this method, it might appear after this method. Do we mind?",
+      "range": {
+        "startLine": 733,
+        "startChar": 7,
+        "endLine": 733,
+        "endChar": 47
+      },
+      "revId": "03b0bdc52a83bed7cc5f579ac6fa67263196fce1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
