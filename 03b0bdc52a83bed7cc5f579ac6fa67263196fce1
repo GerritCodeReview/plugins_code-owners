@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d19d00ac_9b5f3e01",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-27T12:51:47Z",
+      "side": 1,
+      "message": "Mainly to be consistent with line 191 which also uses \\R to split lines. This was copied\u0026pasted from the find-owners plugin and I left it like this since it seems to be best way to match line breaks. See [1] which defines \\R as \"Any Unicode linebreak sequence, is equivalent to \\u000D\\u000A|[\\u000A\\u000B\\u000C\\u000D\\u0085\\u2028\\u2029]\". But since I also had to look this up when I saw it for the first time, I\u0027ve now extracted this as static var that has a comment on it. So it should be more readable now.\n\n[1] https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html",
+      "parentUuid": "2bfd0b82_26061aa1",
+      "range": {
+        "startLine": 122,
+        "startChar": 43,
+        "endLine": 122,
+        "endChar": 46
+      },
+      "revId": "03b0bdc52a83bed7cc5f579ac6fa67263196fce1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a790f374_326d611f",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-11-27T10:20:36Z",
       "side": 1,
       "message": "I suspect that if there was no trailing line before this method, it might appear after this method. Do we mind?",
+      "range": {
+        "startLine": 733,
+        "startChar": 7,
+        "endLine": 733,
+        "endChar": 47
+      },
+      "revId": "03b0bdc52a83bed7cc5f579ac6fa67263196fce1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dcde9de0_5a3bc98b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 733,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-11-27T12:51:47Z",
+      "side": 1,
+      "message": "Surprisingly this works with and without trailing line :) \n\nSee line 730 above which tests it without trailing line.\n\nThis works because \n\n  Splitter.onPattern(\"\\\\R\").split(\"foo\\nbar\")\n\nproduces \"[foo, bar]\", but\n\n  Splitter.onPattern(\"\\\\R\").split(\"foo\\nbar\\n\")\n\nproduces [foo, bar, ] (note that we have an empty string as third entry in the array now). When putting this back together with join, that empty string produces the trailing line.",
+      "parentUuid": "a790f374_326d611f",
       "range": {
         "startLine": 733,
         "startChar": 7,
