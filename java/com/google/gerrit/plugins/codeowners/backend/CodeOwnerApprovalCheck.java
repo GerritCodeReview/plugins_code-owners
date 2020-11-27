@@ -200,9 +200,8 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log("global code owners = %s", globalCodeOwners);
 
       // If the branch doesn't contain any code owner config file yet, we apply special logic
-      // (project
-      // owners count as code owners) to allow bootstrapping the code owner configuration in the
-      // branch.
+      // (project owners count as code owners) to allow bootstrapping the code owner configuration
+      // in the branch.
       boolean isBootstrapping =
           !codeOwnerConfigScannerFactory.create().containsAnyCodeOwnerConfigFile(branch);
       logger.atFine().log("isBootstrapping = %s", isBootstrapping);
