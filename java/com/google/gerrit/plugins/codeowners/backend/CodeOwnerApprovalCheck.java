@@ -501,6 +501,7 @@ public class CodeOwnerApprovalCheck {
       }
 
       AtomicBoolean hasRevelantCodeOwnerDefinitions = new AtomicBoolean(false);
+      AtomicBoolean parentCodeOwnersAreIgnored = new AtomicBoolean(false);
       codeOwnerConfigHierarchy.visit(
           branch,
           revision,
@@ -536,13 +537,20 @@ public class CodeOwnerApprovalCheck {
             // We need to continue to check if any of the higher-level code owners approved the
             // change or is a reviewer.
             return true;
+          },
+          codeOwnerConfigKey -> {
+            logger.atFine().log(
+                "code owner config %s ignores parent code owners for %s",
+                codeOwnerConfigKey, absolutePath);
+            parentCodeOwnersAreIgnored.set(true);
           });
 
-      // If no code owners have been defined for the file, the fallback code owners apply if they
-      // are configured. We can skip checking them if we already found that the file was
-      // approved.
+      // If no code owners have been defined for the file and if parent code owners are not ignored,
+      // the fallback code owners apply if they are configured. We can skip checking them if we
+      // already found that the file was approved.
       if (codeOwnerStatus.get() != CodeOwnerStatus.APPROVED
-          && !hasRevelantCodeOwnerDefinitions.get()) {
+          && !hasRevelantCodeOwnerDefinitions.get()
+          && !parentCodeOwnersAreIgnored.get()) {
         codeOwnerStatus.set(
             getCodeOwnerStatusForFallbackCodeOwners(
                 codeOwnerStatus.get(),
