@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ad883ea9_71c0d2af",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/AbstractRequiredApprovalConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 117,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-11-27T10:55:05Z",
+      "side": 1,
+      "message": "should we have a test for the case where you have two validation messages due to two configured approvals?",
+      "range": {
+        "startLine": 117,
+        "startChar": 41,
+        "endLine": 117,
+        "endChar": 67
+      },
+      "revId": "606ab804d08c5a9859f9502f69b552edea256a4d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
