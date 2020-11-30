@@ -20,7 +20,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -123,7 +122,7 @@ public class PathCodeOwners {
   private final Path path;
   private final PathExpressionMatcher pathExpressionMatcher;
 
-  private CodeOwnerConfig resolvedCodeOwnerConfig;
+  private PathCodeOwnersResult pathCodeOwnersResult;
 
   private PathCodeOwners(
       ProjectCache projectCache,
@@ -143,32 +142,6 @@ public class PathCodeOwners {
   /** Returns the local code owner config. */
   public CodeOwnerConfig getCodeOwnerConfig() {
     return codeOwnerConfig;
-  }
-
-  /**
-   * Gets the code owners from the code owner config that apply to the path.
-   *
-   * <p>Code owners from inherited code owner configs are not considered.
-   *
-   * @return the code owners of the path
-   */
-  public ImmutableSet<CodeOwnerReference> get() {
-    logger.atFine().log("computing path code owners for %s from %s", path, codeOwnerConfig.key());
-    ImmutableSet<CodeOwnerReference> pathCodeOwners =
-        resolveCodeOwnerConfig().codeOwnerSets().stream()
-            .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
-            .collect(toImmutableSet());
-    logger.atFine().log("pathCodeOwners = %s", pathCodeOwners);
-    return pathCodeOwners;
-  }
-
-  /**
-   * Whether parent code owners should be ignored for the path.
-   *
-   * @return whether parent code owners should be ignored for the path
-   */
-  public boolean ignoreParentCodeOwners() {
-    return resolveCodeOwnerConfig().ignoreParentCodeOwners();
   }
 
   /**
@@ -207,9 +180,9 @@ public class PathCodeOwners {
    *
    * @return the resolved code owner config
    */
-  private CodeOwnerConfig resolveCodeOwnerConfig() {
-    if (this.resolvedCodeOwnerConfig != null) {
-      return this.resolvedCodeOwnerConfig;
+  public PathCodeOwnersResult resolveCodeOwnerConfig() {
+    if (this.pathCodeOwnersResult != null) {
+      return this.pathCodeOwnersResult;
     }
 
     try (TraceTimer traceTimer =
@@ -255,9 +228,9 @@ public class PathCodeOwners {
                 .build();
       }
 
-      this.resolvedCodeOwnerConfig = resolvedCodeOwnerConfig;
-      logger.atFine().log("resolved code owner config = %s", resolvedCodeOwnerConfig);
-      return this.resolvedCodeOwnerConfig;
+      this.pathCodeOwnersResult = PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig);
+      logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
+      return this.pathCodeOwnersResult;
     }
   }
 

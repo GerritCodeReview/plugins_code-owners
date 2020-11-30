@@ -205,7 +205,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig emptyCodeOwnerConfig = createCodeOwnerBuilder().build();
     PathCodeOwners pathCodeOwners =
         pathCodeOwnersFactory.create(emptyCodeOwnerConfig, Paths.get("/foo/bar/baz.md"));
-    assertThat(pathCodeOwners.get()).isEmpty();
+    assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners()).isEmpty();
   }
 
   @Test
@@ -216,7 +216,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .build();
     PathCodeOwners pathCodeOwners =
         pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
-    assertThat(pathCodeOwners.get())
+    assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -254,7 +254,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .build();
       PathCodeOwners pathCodeOwners =
           pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
-      assertThat(pathCodeOwners.get())
+      assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -275,7 +275,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .build();
       PathCodeOwners pathCodeOwners =
           pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
-      assertThat(pathCodeOwners.get()).isEmpty();
+      assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners()).isEmpty();
     }
   }
 
@@ -307,7 +307,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .build();
       PathCodeOwners pathCodeOwners =
           pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
-      assertThat(pathCodeOwners.get())
+      assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email());
     }
@@ -341,7 +341,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .build();
       PathCodeOwners pathCodeOwners =
           pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
-      assertThat(pathCodeOwners.get())
+      assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -376,7 +376,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .build();
       PathCodeOwners pathCodeOwners =
           pathCodeOwnersFactory.create(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
-      assertThat(pathCodeOwners.get())
+      assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
     }
@@ -389,7 +389,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         pathCodeOwnersFactory.create(
             createCodeOwnerBuilder().setIgnoreParentCodeOwners().build(),
             Paths.get("/foo/bar/baz.md"));
-    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isTrue();
+    assertThat(pathCodeOwners.resolveCodeOwnerConfig().ignoreParentCodeOwners()).isTrue();
   }
 
   @Test
@@ -399,7 +399,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         pathCodeOwnersFactory.create(
             createCodeOwnerBuilder().setIgnoreParentCodeOwners(false).build(),
             Paths.get("/foo/bar/baz.md"));
-    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
   }
 
   @Test
@@ -415,7 +415,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                         .build())
                 .build(),
             Paths.get("/foo.md"));
-    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isTrue();
+    assertThat(pathCodeOwners.resolveCodeOwnerConfig().ignoreParentCodeOwners()).isTrue();
   }
 
   @Test
@@ -432,7 +432,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                         .build())
                 .build(),
             Paths.get("/foo.md"));
-    assertThat(pathCodeOwners.ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
   }
 
   @Test
@@ -459,7 +459,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the global code owner from the importing code owner config, the
     // non-resolveable import is silently ignored
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
   }
@@ -504,7 +504,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the global code owners from the importing and the imported code owner
     // config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -549,7 +549,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the matching per-file code owners from the importing and the imported
     // code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -595,7 +595,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // Expectation: we only get the matching per-file code owners from the importing code owner
     // config, the per-file code owners from the imported code owner config are not relevant since
     // they do not match
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
   }
@@ -642,7 +642,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // Expectation: we only get the matching per-file code owners from the importing code owner
     // config, the matching per-file code owners from the imported code owner config are not
     // relevant with import mode GLOBAL_CODE_OWNER_SETS_ONLY
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
   }
@@ -690,10 +690,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // the matching per-file code owner set in the imported code owner config has the
     // ignoreGlobalAndParentCodeOwners flag set to true which causes global code owners to be
     // ignored, in addition this flag causes parent code owners to be ignored
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(user.email());
-    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isTrue();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isTrue();
   }
 
   @Test
@@ -738,10 +738,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // per-file code owners from the imported code owner config and its
     // ignoreGlobalAndParentCodeOwners flag are not relevant since the per-file code owner set does
     // not match
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
-    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
   }
 
   @Test
@@ -786,10 +786,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // matching per-file code owners from the imported code owner config and its
     // ignoreGlobalAndParentCodeOwners flag are not relevant with import mode
     // GLOBAL_CODE_OWNER_SETS_ONLY
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
-    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
   }
 
   @Test
@@ -824,7 +824,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: ignoreParentCodeOwners is true because the ignoreParentCodeOwners flag in the
     // imported code owner config is set to true
-    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isTrue();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isTrue();
   }
 
   @Test
@@ -861,7 +861,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: ignoreParentCodeOwners is false because the ignoreParentCodeOwners flag in the
     // imported code owner config is not relevant with import mode GLOBAL_CODE_OWNER_SETS_ONLY
-    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
   }
 
   @Test
@@ -919,7 +919,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the global owners from the importing code owner config, the imported code
     // owner config and the code owner config that is imported by the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email(), user2.email());
   }
@@ -977,7 +977,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // Expectation: we get the global owners from the importing code owner config and the imported
     // code owner config but not the per file code owner from the code owner config that is imported
     // by the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1027,7 +1027,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the global code owners from the importing and the imported code owner
     // config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1064,7 +1064,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1111,7 +1111,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the global owners from the importing and the imported code owner config
     // as they were defined at oldRevision
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1147,7 +1147,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1176,7 +1176,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
   }
@@ -1220,7 +1220,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // Expectation: we get the global owners from the importing code owner config, the global code
     // owners from the imported code owner config are ignored since the project that contains the
     // code owner config is hidden
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
   }
@@ -1250,7 +1250,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
   }
@@ -1290,7 +1290,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1337,7 +1337,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1380,7 +1380,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1425,7 +1425,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
@@ -1459,7 +1459,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the per file code owner from the importing code owner config, the
     // non-resolveable per file import is silently ignored
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
   }
@@ -1511,12 +1511,12 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // Expectation: we get the per file code owners from the importing and the global code owner
     // from the imported code owner config, but not the per file code owner from the imported code
     // owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
 
     // Expectation: the ignoreParentCodeOwners flag from the imported code owner config is ignored
-    assertThat(pathCodeOwners.get().ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
   }
 
   @Test
@@ -1570,7 +1570,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: we get the global owners from the importing code owner config, the imported code
     // owner config and the code owner config that is imported by the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email(), user2.email());
   }
@@ -1629,7 +1629,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // Expectation: we get the global owners from the importing code owner config and the imported
     // code owner config, but not the per file code owner from the code owner config that is
     // imported by the imported code owner config
-    assertThat(pathCodeOwners.get().get())
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
   }
