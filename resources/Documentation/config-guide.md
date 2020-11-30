@@ -37,6 +37,9 @@ is always implicitly approved by the uploader.
 **NOTE:** If implicit approvals are disabled, users can still self-approve their
 own changes by voting on the required label.
 
+**IMPORTANT**: Enabling implicit approvals is considered unsafe, see [security
+pitfalls](#securityImplicitApprovals) below.
+
 ### <a id="mergeCommits">Required code owner approvals on merge commits
 
 For merge commits the list of modified files depends on the base against which
@@ -60,6 +63,60 @@ differ with the Auto-Merge (case 2). If case 1 is configured, all file diffs
 that have been approved in one branch must be re-approved when they are merged
 into another branch. If case 2 is configured, only conflict resolutions have to
 be approved when a merge is done.
+
+**IMPORTANT**: Requiring code owner approvals only for files that differ with
+the Auto-Merge (case 2) is considered unsafe, see [security
+pitfalls](#securityMergeCommits) below.
+
+## <a id="securityPitfalls">Security pitfalls
+
+While requiring code owner approvals is primarily considered as a code quality
+feature and not a security feature, many admins / projects owners are concerned
+about possibilities to bypass code owner approvals. These admins / projects
+owners should be aware that some configuration settings may make it possible to
+bypass code owner approvals, and hence using them is not recommended.
+
+### <a id="securityImplicitApprovals">Implicit approvals
+
+If [implicit approvals](#implicitApprovals) are enabled, it is important that
+code owners are aware of their implicit approval when they upload new patch sets
+for other users. E.g. if a contributor pushes a change to a wrong branch and a
+code owner helps them to get it rebased onto the correct branch, the rebased
+change has implicit approvals from the code owner, since the code owner is the
+uploader. To avoid situations like this it is recommended to not enable implicit
+approvals.
+
+### <a id="securityMergeCommits">Required code owner approvals on merge commits
+
+If any branch doesn't require code owner approvals or if the code owners in any
+branch are not trusted, it is not safe to [configure for merge commits that they
+only require code owner approvals for files that differ with the
+Auto-Merge](#mergeCommits). E.g. if there is a branch that doesn't require code
+owner approvals, with this setting the code owners check can be bypassed by:
+
+1. setting the branch that doesn't require code owner approvals to the same
+   commit as the main branch that does require code owner approvals
+2. making a change in the branch that doesn't require code owner approvals
+3. merging this change back into the main branch that does require code owner
+   approvals
+4. since it's a clean merge, all files are merged automatically and no code
+   owner approval is required
+
+### <a id="securityFallbackCodeOwners">Setting all users as fallback code owners
+
+As soon as the code owners functionality is enabled for a project / branch, all
+files in it require code owner approvals. This means if any path doesn't have
+any code owners defined, submitting changes to the path is only possible with
+
+1. a code owner override
+2. an approval from a fallback code owners (only if enabled)
+
+[Configuring all users as fallback code
+owners](config.html#pluginCodeOwnersFallbackCodeOwners) is problematic, as it
+can happen easily that code owner config files are misconfigured so that some
+paths are accidentally not covered by code owners. In this case, the affected
+paths would suddenly be open to all users, which may not be wanted. This is why
+configuring all users as fallback code owners is not recommended.
 
 ---
 
