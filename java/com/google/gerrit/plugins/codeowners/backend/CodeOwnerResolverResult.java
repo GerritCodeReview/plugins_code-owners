@@ -46,12 +46,18 @@ public abstract class CodeOwnerResolverResult {
   /** Whether there are code owner references which couldn't be resolved. */
   public abstract boolean hasUnresolvedCodeOwners();
 
+  /** Whether there are imports which couldn't be resolved. */
+  public abstract boolean hasUnresolvedImports();
+
   /**
    * Whether there are any code owners defined for the path, regardless of whether they can be
    * resolved or not.
    */
   public boolean hasRevelantCodeOwnerDefinitions() {
-    return !codeOwners().isEmpty() || ownedByAllUsers() || hasUnresolvedCodeOwners();
+    return !codeOwners().isEmpty()
+        || ownedByAllUsers()
+        || hasUnresolvedCodeOwners()
+        || hasUnresolvedImports();
   }
 
   @Override
@@ -60,6 +66,7 @@ public abstract class CodeOwnerResolverResult {
         .add("codeOwners", codeOwners())
         .add("ownedByAllUsers", ownedByAllUsers())
         .add("hasUnresolvedCodeOwners", hasUnresolvedCodeOwners())
+        .add("hasUnresolvedImports", hasUnresolvedImports())
         .toString();
   }
 
@@ -67,8 +74,9 @@ public abstract class CodeOwnerResolverResult {
   public static CodeOwnerResolverResult create(
       ImmutableSet<CodeOwner> codeOwners,
       boolean ownedByAllUsers,
-      boolean hasUnresolvedCodeOwners) {
+      boolean hasUnresolvedCodeOwners,
+      boolean hasUnresolvedImports) {
     return new AutoValue_CodeOwnerResolverResult(
-        codeOwners, ownedByAllUsers, hasUnresolvedCodeOwners);
+        codeOwners, ownedByAllUsers, hasUnresolvedCodeOwners, hasUnresolvedImports);
   }
 }
