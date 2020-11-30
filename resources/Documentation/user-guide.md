@@ -146,8 +146,10 @@ the score:
 
 If the code owners functionality is enabled, all touched files require an
 approval from a code owner. If files are touched for which no code owners are
-defined, the change can only be submitted with a [code owner
-override](#codeOwnerOverride).
+defined, the change can only be submitted with an approval of a fallback code
+owner (if [configured](config.html#pluginCodeOwnersFallbackCodeOwners)) or with
+a [code owner override](#codeOwnerOverride). Please note that fallback code
+owners are not included in the [code owner suggestion](#codeOwnerSuggestion).
 
 If the destination branch doesn't contain any [code owner config
 file](#codeOwnerConfigFiles) at all yet and the project also doesn't have a
