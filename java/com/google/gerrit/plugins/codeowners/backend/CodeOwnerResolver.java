@@ -153,11 +153,10 @@ public class CodeOwnerResolver {
                 .filePath(codeOwnerConfig.key().fileName().orElse("<default>"))
                 .build())) {
       logger.atFine().log("resolving path code owners for path %s", absolutePath);
+      PathCodeOwnersResult pathCodeOwnersResult =
+          pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).resolveCodeOwnerConfig();
       return resolve(
-          pathCodeOwnersFactory
-              .create(codeOwnerConfig, absolutePath)
-              .resolveCodeOwnerConfig()
-              .getPathCodeOwners());
+          pathCodeOwnersResult.getPathCodeOwners(), pathCodeOwnersResult.hasUnresolvedImports());
     }
   }
 
@@ -179,6 +178,19 @@ public class CodeOwnerResolver {
    * @see #resolve(CodeOwnerReference)
    */
   public CodeOwnerResolverResult resolve(Set<CodeOwnerReference> codeOwnerReferences) {
+    return resolve(codeOwnerReferences, /* hasUnresolvedImports= */ false);
+  }
+
+  /**
+   * Resolves the given {@link CodeOwnerReference}s to {@link CodeOwner}s.
+   *
+   * @param codeOwnerReferences the code owner references that should be resolved
+   * @param hasUnresolvedImports whether there are unresolved imports
+   * @return the {@link CodeOwner} for the given code owner references
+   * @see #resolve(CodeOwnerReference)
+   */
+  private CodeOwnerResolverResult resolve(
+      Set<CodeOwnerReference> codeOwnerReferences, boolean hasUnresolvedImports) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
     AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
@@ -204,7 +216,7 @@ public class CodeOwnerResolver {
             .map(Optional::get)
             .collect(toImmutableSet());
     return CodeOwnerResolverResult.create(
-        codeOwners, ownedByAllUsers.get(), hasUnresolvedCodeOwners.get());
+        codeOwners, ownedByAllUsers.get(), hasUnresolvedCodeOwners.get(), hasUnresolvedImports);
   }
 
   /**

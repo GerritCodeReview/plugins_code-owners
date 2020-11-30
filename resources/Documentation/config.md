@@ -217,7 +217,7 @@ Parameters that are not set for a project are inherited from the parent project.
 :       Policy that controls who should own paths that have no code owners
         defined. This policy only applies if the inheritance of parent code
         owners hasn't been explicity disabled in a relevant code owner config
-        file.\
+        file and if there are no unresolved imports.\
         \
         Can be `NONE` or `ALL_USERS`.\
         \
@@ -438,7 +438,7 @@ Parameters that are not set for a project are inherited from the parent project.
 :       Policy that controls who should own paths that have no code owners
         defined. This policy only applies if the inheritance of parent code
         owners hasn't been explicity disabled in a relevant code owner config
-        file.\
+        file and if there are no unresolved imports.\
         Can be `NONE` or `ALL_USERS` (see
         [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
         for an explanation of these values).\
