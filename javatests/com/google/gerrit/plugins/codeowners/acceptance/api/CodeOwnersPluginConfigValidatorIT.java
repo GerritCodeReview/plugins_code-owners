@@ -17,7 +17,9 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.acceptance.GitUtil.fetch;
 import static com.google.gerrit.acceptance.GitUtil.pushHead;
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -75,11 +77,9 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setBoolean(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         StatusConfig.KEY_DISABLED,
-        /** value = */
-        true);
+        /* value= */ true);
     setCodeOwnersConfig(cfg);
 
     PushResult r = pushRefsMetaConfig();
@@ -94,8 +94,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         StatusConfig.KEY_DISABLED_BRANCH,
         "refs/heads/master");
     setCodeOwnersConfig(cfg);
@@ -113,8 +112,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         StatusConfig.KEY_DISABLED,
         "INVALID");
     setCodeOwnersConfig(cfg);
@@ -135,8 +133,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         StatusConfig.KEY_DISABLED_BRANCH,
         "^refs/heads/[");
     setCodeOwnersConfig(cfg);
@@ -157,8 +154,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         BackendConfig.KEY_BACKEND,
         CodeOwnerBackendId.PROTO.getBackendId());
     setCodeOwnersConfig(cfg);
@@ -194,8 +190,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         BackendConfig.KEY_BACKEND,
         "INVALID");
     setCodeOwnersConfig(cfg);
@@ -237,8 +232,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "Code-Review+2");
     setCodeOwnersConfig(cfg);
@@ -246,8 +240,8 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -257,8 +251,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "INVALID");
     setCodeOwnersConfig(cfg);
@@ -276,14 +269,40 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void allRequiredApprovalsAreValidated() throws Exception {
+    fetchRefsMetaConfig();
+
+    ImmutableList<String> invalidValues = ImmutableList.of("INVALID", "ALSO_INVALID");
+    Config cfg = new Config();
+    cfg.setStringList(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
+        invalidValues);
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    for (String invalidValue : invalidValues) {
+      assertThat(r.getMessages())
+          .contains(
+              String.format(
+                  "Required approval '%s' that is configured in code-owners.config (parameter"
+                      + " codeOwners.%s) is invalid: Invalid format, expected"
+                      + " '<label-name>+<label-value>'.",
+                  invalidValue, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL));
+    }
+  }
+
+  @Test
   public void configureOverrideApproval() throws Exception {
     fetchRefsMetaConfig();
 
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         "Code-Review+2");
     setCodeOwnersConfig(cfg);
@@ -292,8 +311,9 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
     Optional<RequiredApproval> overrideApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
-    assertThat(overrideApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(overrideApproval.get().value()).isEqualTo(2);
+    assertThat(overrideApproval).isPresent();
+    assertThat(overrideApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(overrideApproval).value().hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -303,8 +323,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         "INVALID");
     setCodeOwnersConfig(cfg);
@@ -322,14 +341,40 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void allOverrideApprovalsAreValidated() throws Exception {
+    fetchRefsMetaConfig();
+
+    ImmutableList<String> invalidValues = ImmutableList.of("INVALID", "ALSO_INVALID");
+    Config cfg = new Config();
+    cfg.setStringList(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        invalidValues);
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    for (String invalidValue : invalidValues) {
+      assertThat(r.getMessages())
+          .contains(
+              String.format(
+                  "Required approval '%s' that is configured in code-owners.config (parameter"
+                      + " codeOwners.%s) is invalid: Invalid format, expected"
+                      + " '<label-name>+<label-value>'.",
+                  invalidValue, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL));
+    }
+  }
+
+  @Test
   public void configureMergeCommitStrategy() throws Exception {
     fetchRefsMetaConfig();
 
     Config cfg = new Config();
     cfg.setEnum(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         MergeCommitStrategy.ALL_CHANGED_FILES);
     setCodeOwnersConfig(cfg);
@@ -347,8 +392,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     Config cfg = new Config();
     cfg.setString(
         CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         "INVALID");
     setCodeOwnersConfig(cfg);

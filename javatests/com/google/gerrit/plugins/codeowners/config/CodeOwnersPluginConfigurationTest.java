@@ -15,9 +15,11 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
@@ -66,10 +68,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                codeOwnersPluginConfiguration.isDisabled(
-                    /** project = */
-                    (Project.NameKey) null));
+            () -> codeOwnersPluginConfiguration.isDisabled(/* project= */ (Project.NameKey) null));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -80,8 +79,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 codeOwnersPluginConfiguration.isDisabled(
-                    /** branchNameKey = */
-                    (BranchNameKey) null));
+                    /* branchNameKey= */ (BranchNameKey) null));
     assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
   }
 
@@ -464,17 +462,16 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Test
   public void getDefaultRequiredApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName())
-        .isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
-    assertThat(requiredApproval.value()).isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
+    assertThat(requiredApproval).hasValueThat().isEqualTo(RequiredApprovalConfig.DEFAULT_VALUE);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
   public void getConfiguredDefaultRequireApproval() throws Exception {
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -534,8 +531,22 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void getRequiredApprovalConfiguredOnProjectLevel() throws Exception {
     configureRequiredApproval(project, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
+  }
+
+  @Test
+  public void getRequiredApprovalMultipleConfiguredOnProjectLevel() throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
+        ImmutableList.of("Code-Review+2", "Code-Review+1"));
+
+    // If multiple values are set for a key, the last value wins.
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -544,16 +555,16 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
       throws Exception {
     configureRequiredApproval(project, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
   public void requiredApprovalIsInheritedFromParentProject() throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -561,8 +572,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   public void inheritedRequiredApprovalOverridesDefaultRequiredApproval() throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -570,8 +581,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     configureRequiredApproval(allProjects, "Code-Review+1");
     configureRequiredApproval(project, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(2);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -635,8 +646,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     Project.NameKey otherProject = projectOperations.newProject().create();
     configureRequiredApproval(otherProject, "Code-Review+2");
     RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
-    assertThat(requiredApproval.labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.value()).isEqualTo(1);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -664,8 +675,8 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     Optional<RequiredApproval> requiredApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
     assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.get().value()).isEqualTo(2);
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -674,8 +685,24 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     Optional<RequiredApproval> requiredApproval =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
     assertThat(requiredApproval).isPresent();
-    assertThat(requiredApproval.get().labelType().getName()).isEqualTo("Code-Review");
-    assertThat(requiredApproval.get().value()).isEqualTo(2);
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(2);
+  }
+
+  @Test
+  public void getOverrideApprovalMultipleConfiguredOnProjectLevel() throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        ImmutableList.of("Code-Review+2", "Code-Review+1"));
+
+    // If multiple values are set for a key, the last value wins.
+    Optional<RequiredApproval> requiredApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(project);
+    assertThat(requiredApproval).isPresent();
+    assertThat(requiredApproval).value().hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).value().hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -725,10 +752,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                codeOwnersPluginConfiguration.getFileExtension(
-                    /** project = */
-                    null));
+            () -> codeOwnersPluginConfiguration.getFileExtension(/* project= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -769,10 +793,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                codeOwnersPluginConfiguration.getMergeCommitStrategy(
-                    /** project = */
-                    null));
+            () -> codeOwnersPluginConfiguration.getMergeCommitStrategy(/* project= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -821,39 +842,21 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
-    setCodeOwnersConfig(
-        project,
-        /** subsection = */
-        null,
-        StatusConfig.KEY_DISABLED,
-        disabled);
+    setCodeOwnersConfig(project, /* subsection= */ null, StatusConfig.KEY_DISABLED, disabled);
   }
 
   private void configureDisabledBranch(Project.NameKey project, String disabledBranch)
       throws Exception {
     setCodeOwnersConfig(
-        project,
-        /** subsection = */
-        null,
-        StatusConfig.KEY_DISABLED_BRANCH,
-        disabledBranch);
+        project, /* subsection= */ null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
   }
 
   private void enableCodeOwnersForAllBranches(Project.NameKey project) throws Exception {
-    setCodeOwnersConfig(
-        project,
-        /** subsection = */
-        null,
-        StatusConfig.KEY_DISABLED_BRANCH,
-        "");
+    setCodeOwnersConfig(project, /* subsection= */ null, StatusConfig.KEY_DISABLED_BRANCH, "");
   }
 
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
-    configureBackend(
-        project,
-        /** branch = */
-        null,
-        backendName);
+    configureBackend(project, /* branch= */ null, backendName);
   }
 
   private void configureBackend(
@@ -865,8 +868,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
       throws Exception {
     setCodeOwnersConfig(
         project,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         requiredApproval);
   }
@@ -875,8 +877,7 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
       throws Exception {
     setCodeOwnersConfig(
         project,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         requiredApproval);
   }
@@ -884,19 +885,14 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
     setCodeOwnersConfig(
-        project,
-        /** subsection = */
-        null,
-        GeneralConfig.KEY_FILE_EXTENSION,
-        fileExtension);
+        project, /* subsection= */ null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
   }
 
   private void configureMergeCommitStrategy(
       Project.NameKey project, MergeCommitStrategy mergeCommitStrategy) throws Exception {
     setCodeOwnersConfig(
         project,
-        /** subsection = */
-        null,
+        /* subsection= */ null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         mergeCommitStrategy.name());
   }

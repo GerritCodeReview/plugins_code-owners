@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
@@ -77,6 +78,12 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   // Artifical owner token for "set noparent" when used in per-file.
   private static final String TOK_SET_NOPARENT = "set noparent";
 
+  /**
+   * Any Unicode linebreak sequence, is equivalent to {@code
+   * \u000D\u000A|[\u000A\u000B\u000C\u000D\u0085\u2028\u2029]}.
+   */
+  private static final String LINEBREAK_MATCHER = "\\R";
+
   @Override
   public CodeOwnerConfig parse(
       ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString)
@@ -96,6 +103,35 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
   @Override
   public String formatAsString(CodeOwnerConfig codeOwnerConfig) {
     return Formatter.formatAsString(requireNonNull(codeOwnerConfig, "codeOwnerConfig"));
+  }
+
+  public static String replaceEmail(
+      String codeOwnerConfigFileContent, String oldEmail, String newEmail) {
+    requireNonNull(codeOwnerConfigFileContent, "codeOwnerConfigFileContent");
+    requireNonNull(oldEmail, "oldEmail");
+    requireNonNull(newEmail, "newEmail");
+
+    String charsThatCanAppearBeforeOrAfterEmail = "[\\s=,#]";
+    Pattern pattern =
+        Pattern.compile(
+            "(^|.*"
+                + charsThatCanAppearBeforeOrAfterEmail
+                + "+)"
+                + "("
+                + Pattern.quote(oldEmail)
+                + ")"
+                + "($|"
+                + charsThatCanAppearBeforeOrAfterEmail
+                + "+.*)");
+
+    List<String> updatedLines = new ArrayList<>();
+    for (String line : Splitter.onPattern(LINEBREAK_MATCHER).split(codeOwnerConfigFileContent)) {
+      while (pattern.matcher(line).matches()) {
+        line = pattern.matcher(line).replaceFirst("$1" + newEmail + "$3");
+      }
+      updatedLines.add(line);
+    }
+    return Joiner.on("\n").join(updatedLines);
   }
 
   private static class Parser implements ValidationError.Sink {
@@ -158,7 +194,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       CodeOwnerSet.Builder globalCodeOwnerSetBuilder = CodeOwnerSet.builder();
       List<CodeOwnerSet> perFileCodeOwnerSet = new ArrayList<>();
 
-      for (String line : Splitter.onPattern("\\R").split(codeOwnerConfigAsString)) {
+      for (String line : Splitter.onPattern(LINEBREAK_MATCHER).split(codeOwnerConfigAsString)) {
         parseLine(codeOwnerConfigBuilder, globalCodeOwnerSetBuilder, perFileCodeOwnerSet, line);
       }
 

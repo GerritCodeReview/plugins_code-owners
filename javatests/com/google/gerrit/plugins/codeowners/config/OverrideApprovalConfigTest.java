@@ -14,7 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
+import static com.google.gerrit.server.project.ProjectCache.illegalState;
+
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.server.project.ProjectState;
+import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -33,14 +39,21 @@ public class OverrideApprovalConfigTest extends AbstractRequiredApprovalConfigTe
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Code-Review+2")
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void getFromGlobalPluginConfig() throws Exception {
-    testGetFromGlobalPluginConfig();
+    createOwnersOverrideLabel();
+
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    ImmutableList<RequiredApproval> requiredApproval =
+        getRequiredApprovalConfig().get(projectState, new Config());
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "INVALID")
-  public void cannotGetFromGlobalPluginConfigIfConfigIsInvalid() throws Exception {
-    testCannotGetFromGlobalPluginConfigIfConfigIsInvalid();
+  public void cannotGetIfGlobalConfigIsInvalid() throws Exception {
+    testCannotGetIfGlobalConfigIsInvalid("INVALID");
   }
 }

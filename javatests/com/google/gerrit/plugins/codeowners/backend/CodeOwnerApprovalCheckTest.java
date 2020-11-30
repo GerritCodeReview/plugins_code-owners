@@ -70,10 +70,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                codeOwnerApprovalCheck.getFileStatuses(
-                    /** changeNotes = */
-                    null));
+            () -> codeOwnerApprovalCheck.getFileStatuses(/* changeNotes= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("changeNotes");
   }
 
@@ -601,16 +598,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   public void getStatusForFileAddition_noImplicitApprovalByPatchSetUploader() throws Exception {
     testImplicitApprovalByPatchSetUploaderOnGetStatusForFileAddition(
-        /** implicitApprovalsEnabled = */
-        false);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void getStatusForFileAddition_withImplicitApprovalByPatchSetUploader() throws Exception {
     testImplicitApprovalByPatchSetUploaderOnGetStatusForFileAddition(
-        /** implicitApprovalsEnabled = */
-        true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileAddition(
@@ -649,8 +644,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   public void getStatusForFileModification_noImplicitApprovalByPatchSetUploader() throws Exception {
     testImplicitApprovalByPatchSetUploaderOnGetStatusForFileModification(
-        /** implicitApprovalsEnabled = */
-        false);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
@@ -658,8 +652,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileModification_withImplicitApprovalByPatchSetUploader()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnGetStatusForFileModification(
-        /** implicitApprovalsEnabled = */
-        true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileModification(
@@ -700,16 +693,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   public void getStatusForFileDeletion_noImplicitApprovalByPatchSetUploader() throws Exception {
     testImplicitApprovalByPatchSetUploaderOnGetStatusForFileDeletion(
-        /** implicitApprovalsEnabled = */
-        false);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void getStatusForFileDeletion_withImplicitApprovalByPatchSetUploader() throws Exception {
     testImplicitApprovalByPatchSetUploaderOnGetStatusForFileDeletion(
-        /** implicitApprovalsEnabled = */
-        true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileDeletion(
@@ -748,8 +739,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnOldPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
-        /** implicitApprovalsEnabled = */
-        false);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
@@ -757,8 +747,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnOldPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
-        /** implicitApprovalsEnabled = */
-        true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
@@ -803,8 +792,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnNewPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
-        /** implicitApprovalsEnabled = */
-        false);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
@@ -812,8 +800,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnNewPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
-        /** implicitApprovalsEnabled = */
-        true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
@@ -967,17 +954,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void everyoneIsCodeOwner_noImplicitApproval() throws Exception {
-    testImplicitlyApprovedWhenEveryoneIsCodeOwner(
-        /** implicitApprovalsEnabled = */
-        false);
+    testImplicitlyApprovedWhenEveryoneIsCodeOwner(/* implicitApprovalsEnabled= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void everyoneIsCodeOwner_withImplicitApproval() throws Exception {
-    testImplicitlyApprovedWhenEveryoneIsCodeOwner(
-        /** implicitApprovalsEnabled = */
-        true);
+    testImplicitlyApprovedWhenEveryoneIsCodeOwner(/* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitlyApprovedWhenEveryoneIsCodeOwner(boolean implicitApprovalsEnabled)
@@ -1057,28 +1040,19 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void approvedByGlobalCodeOwner() throws Exception {
-    testApprovedByGlobalCodeOwner(
-        /** bootstrappingMode = */
-        false);
+    testApprovedByGlobalCodeOwner(/* bootstrappingMode= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void approvedByGlobalCodeOwner_bootstrappingMode() throws Exception {
-    testApprovedByGlobalCodeOwner(
-        /** bootstrappingMode = */
-        true);
+    testApprovedByGlobalCodeOwner(/* bootstrappingMode= */ true);
   }
 
   private void testApprovedByGlobalCodeOwner(boolean bootstrappingMode) throws Exception {
     // Create a bot user that is a global code owner.
     TestAccount bot =
-        accountCreator.create(
-            "bot",
-            "bot@example.com",
-            "Bot",
-            /** displayName = */
-            null);
+        accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
@@ -1134,10 +1108,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void globalCodeOwner_noImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        false,
-        /** bootstrappingMode = */
-        false);
+        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ false);
   }
 
   @Test
@@ -1145,20 +1116,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void globalCodeOwner_withImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        true,
-        /** bootstrappingMode = */
-        false);
+        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void globalCodeOwner_noImplicitApproval_bootstrappingMode() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        false,
-        /** bootstrappingMode = */
-        true);
+        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ true);
   }
 
   @Test
@@ -1166,21 +1131,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void globalCodeOwner_withImplicitApproval_bootstrappingMode() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        true,
-        /** bootstrappingMode = */
-        true);
+        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ true);
   }
 
   private void testImplicitlyApprovedByGlobalCodeOwner(
       boolean implicitApprovalsEnabled, boolean bootstrappingMode) throws Exception {
     TestAccount bot =
-        accountCreator.create(
-            "bot",
-            "bot@example.com",
-            "Bot",
-            /** displayName = */
-            null);
+        accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     if (!bootstrappingMode) {
       codeOwnerConfigOperations
@@ -1215,28 +1172,19 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void globalCodeOwnerAsReviewer() throws Exception {
-    testGlobalCodeOwnerAsReviewer(
-        /** bootstrappingMode = */
-        false);
+    testGlobalCodeOwnerAsReviewer(/* bootstrappingMode= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void globalCodeOwnerAsReviewer_bootstrappingMode() throws Exception {
-    testGlobalCodeOwnerAsReviewer(
-        /** bootstrappingMode = */
-        true);
+    testGlobalCodeOwnerAsReviewer(/* bootstrappingMode= */ true);
   }
 
   private void testGlobalCodeOwnerAsReviewer(boolean bootstrappingMode) throws Exception {
     // Create a bot user that is a global code owner.
     TestAccount bot =
-        accountCreator.create(
-            "bot",
-            "bot@example.com",
-            "Bot",
-            /** displayName = */
-            null);
+        accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
@@ -1305,17 +1253,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void approvedByAnyoneWhenEveryoneIsGlobalCodeOwner() throws Exception {
-    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(
-        /** bootstrappingMode = */
-        false);
+    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void approvedByAnyoneWhenEveryoneIsGlobalCodeOwner_bootstrappingMode() throws Exception {
-    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(
-        /** bootstrappingMode = */
-        true);
+    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ true);
   }
 
   private void testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
@@ -1369,10 +1313,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void everyoneIsGlobalCodeOwner_noImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        false,
-        /** bootstrappingMode = */
-        false);
+        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ false);
   }
 
   @Test
@@ -1380,20 +1321,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void everyoneIsGlobalCodeOwner_withImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        true,
-        /** bootstrappingMode = */
-        false);
+        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void everyoneIsGlobalCodeOwner_noImplicitApproval_bootstrappingMode() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        false,
-        /** bootstrappingMode = */
-        true);
+        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ true);
   }
 
   @Test
@@ -1401,10 +1336,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void everyoneIsGlobalCodeOwner_withImplicitApproval_bootstrappingMode() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /** implicitApprovalsEnabled = */
-        true,
-        /** bootstrappingMode = */
-        true);
+        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ true);
   }
 
   private void testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
@@ -1442,17 +1374,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void anyReviewerWhenEveryoneIsGlobalCodeOwner() throws Exception {
-    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(
-        /** bootstrappingMode = */
-        false);
+    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void anyReviewerWhenEveryoneIsGlobalCodeOwner_bootstrappingMode() throws Exception {
-    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(
-        /** bootstrappingMode = */
-        true);
+    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ true);
   }
 
   private void testAnyReviewerWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
@@ -1506,12 +1434,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void parentCodeOwnerConfigsAreConsidered() throws Exception {
     TestAccount user2 = accountCreator.user2();
     TestAccount user3 =
-        accountCreator.create(
-            "user3",
-            "user3@example.com",
-            "User3",
-            /** displayName = */
-            null);
+        accountCreator.create("user3", "user3@example.com", "User3", /* displayName= */ null);
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -1617,10 +1540,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                codeOwnerApprovalCheck.isSubmittable(
-                    /** changeNotes = */
-                    null));
+            () -> codeOwnerApprovalCheck.isSubmittable(/* changeNotes= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("changeNotes");
   }
 
@@ -1710,12 +1630,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     TestAccount user2 = accountCreator.user2();
     TestAccount user3 =
-        accountCreator.create(
-            "user3",
-            "user3@example.com",
-            "User3",
-            /** displayName = */
-            null);
+        accountCreator.create("user3", "user3@example.com", "User3", /* displayName= */ null);
 
     // Create change with a user that is not a project owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -1813,16 +1728,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   public void bootstrappingGetStatus_noImplicitApprovalByPatchSetUploader() throws Exception {
     testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(
-        /** implicitApprovalsEnabled = */
-        false);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void bootstrappingGetStatus_withImplicitApprovalByPatchSetUploader() throws Exception {
     testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(
-        /** implicitApprovalsEnabled = */
-        true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(
@@ -2206,17 +2119,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void defaultCodeOwner_noImplicitApproval() throws Exception {
-    testImplicitlyApprovedByDefaultCodeOwner(
-        /** implicitApprovalsEnabled = */
-        false);
+    testImplicitlyApprovedByDefaultCodeOwner(/* implicitApprovalsEnabled= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void defaultCodeOwner_withImplicitApproval() throws Exception {
-    testImplicitlyApprovedByDefaultCodeOwner(
-        /** implicitApprovalsEnabled = */
-        true);
+    testImplicitlyApprovedByDefaultCodeOwner(/* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitlyApprovedByDefaultCodeOwner(boolean implicitApprovalsEnabled)

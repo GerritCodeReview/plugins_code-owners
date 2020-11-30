@@ -40,11 +40,7 @@ public class GetCodeOwnersForPathInChangeRestIT extends AbstractGetCodeOwnersFor
   public void createTestChange() throws Exception {
     TestAccount changeOwner =
         accountCreator.create(
-            "changeOwner",
-            "changeOwner@example.com",
-            "ChangeOwner",
-            /** displayName = */
-            null);
+            "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
     // Create a change that contains the file that is used in the tests. This is necessary since
     // CodeOwnersInChangeCollection rejects requests for paths that are not present in the change.
     changeId =

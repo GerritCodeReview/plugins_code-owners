@@ -16,10 +16,12 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.joining;
 
+import com.google.common.base.Joiner;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
@@ -34,6 +36,7 @@ import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubj
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.regex.Pattern;
 import org.junit.Test;
 
 /** Tests for {@link FindOwnersCodeOwnerConfigParser}. */
@@ -602,5 +605,126 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
               .hasImportModeThat()
               .isEqualTo(CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY);
         });
+  }
+
+  @Test
+  public void replaceEmail_contentCannotBeNull() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                FindOwnersCodeOwnerConfigParser.replaceEmail(
+                    /* content= */ null, admin.email(), user.email()));
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileContent");
+  }
+
+  @Test
+  public void replaceEmail_oldEmailCannotBeNull() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                FindOwnersCodeOwnerConfigParser.replaceEmail(
+                    "content", /* oldEmail= */ null, user.email()));
+    assertThat(npe).hasMessageThat().isEqualTo("oldEmail");
+  }
+
+  @Test
+  public void replaceEmail_newEmailCannotBeNull() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                FindOwnersCodeOwnerConfigParser.replaceEmail(
+                    "content", admin.email(), /* newEmail= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("newEmail");
+  }
+
+  @Test
+  public void replaceEmail() throws Exception {
+    String oldEmail = "old@example.com";
+    String newEmail = "new@example.com";
+
+    // In the following test lines '${email} is used as placefolder for the email that we expect to
+    // be replaced.
+    String[] testLines = {
+      // line = email
+      "${email}",
+      // line = email with leading whitespace
+      " ${email}",
+      // line = email with trailing whitespace
+      "${email} ",
+      // line = email with leading and trailing whitespace
+      " ${email} ",
+      // line = email with comment
+      "${email}# comment",
+      // line = email with trailing whitespace and comment
+      "${email} # comment",
+      // line = email with leading whitespace and comment
+      " ${email}# comment",
+      // line = email with leading and trailing whitespace and comment
+      " ${email} # comment",
+      // line = email that ends with oldEmail
+      "foo" + oldEmail,
+      // line = email that starts with oldEmail
+      oldEmail + "bar",
+      // line = email that contains oldEmail
+      "foo" + oldEmail + "bar",
+      // line = email that contains oldEmail with leading and trailing whitespace
+      " foo" + oldEmail + "bar ",
+      // line = email that contains oldEmail with leading and trailing whitespace and comment
+      " foo" + oldEmail + "bar # comment",
+      // email in comment
+      "foo@example.com # ${email}",
+      // email in comment that contains oldEmail
+      "foo@example.com # foo" + oldEmail + "bar",
+      // per-file line with email
+      "per-file *.md=${email}",
+      // per-file line with email and whitespace
+      "per-file *.md = ${email} ",
+      // per-file line with multiple emails and old email at first position
+      "per-file *.md=${email},foo@example.com,bar@example.com",
+      // per-file line with multiple emails and old email at middle position
+      "per-file *.md=foo@example.com,${email},bar@example.com",
+      // per-file line with multiple emails and old email at last position
+      "per-file *.md=foo@example.com,bar@example.com,${email}",
+      // per-file line with multiple emails and old email at last position and comment
+      "per-file *.md=foo@example.com,bar@example.com,${email}# comment",
+      // per-file line with multiple emails and old email at last position and comment with
+      // whitespace
+      "per-file *.md = foo@example.com, bar@example.com , ${email} # comment",
+      // per-file line with multiple emails and old email appearing multiple times
+      "per-file *.md=${email},${email}",
+      "per-file *.md=${email},${email},${email}",
+      "per-file *.md=${email},foo@example.com,${email},bar@example.com,${email}",
+      // per-file line with multiple emails and old email appearing multiple times and comment
+      "per-file *.md=${email},foo@example.com,${email},bar@example.com,${email}# comment",
+      // per-file line with multiple emails and old email appearing multiple times and comment and
+      // whitespace
+      "per-file *.md= ${email} , foo@example.com , ${email} , bar@example.com , ${email} # comment",
+      // per-file line with email that contains old email
+      "per-file *.md=for" + oldEmail + "bar",
+      // per-file line with multiple emails and one email that contains the old email
+      "per-file *.md=for" + oldEmail + "bar,${email}",
+    };
+
+    for (String testLine : testLines) {
+      String content = testLine.replaceAll(Pattern.quote("${email}"), oldEmail);
+      String expectedContent = testLine.replaceAll(Pattern.quote("${email}"), newEmail);
+      assertWithMessage(testLine)
+          .that(FindOwnersCodeOwnerConfigParser.replaceEmail(content, oldEmail, newEmail))
+          .isEqualTo(expectedContent);
+    }
+
+    // join all test lines and replace email in all of them at once
+    String testContent = Joiner.on("\n").join(testLines);
+    String content = testContent.replaceAll(Pattern.quote("${email}"), oldEmail);
+    String expectedContent = testContent.replaceAll(Pattern.quote("${email}"), newEmail);
+    assertThat(FindOwnersCodeOwnerConfigParser.replaceEmail(content, oldEmail, newEmail))
+        .isEqualTo(expectedContent);
+
+    // test that trailing new line is preserved
+    assertThat(FindOwnersCodeOwnerConfigParser.replaceEmail(content + "\n", oldEmail, newEmail))
+        .isEqualTo(expectedContent + "\n");
   }
 }

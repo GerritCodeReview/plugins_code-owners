@@ -15,6 +15,7 @@ acceptance_tests(
         ":testbases",
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
 )
 
@@ -25,9 +26,11 @@ java_library(
         "//java/com/google/gerrit/server",
         "//java/com/google/gerrit/testing:gerrit-test-util",
         "//java/com/google/gerrit/truth",
+        "//lib:guava",
         "//lib:jgit",
         "//lib/truth",
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
 )

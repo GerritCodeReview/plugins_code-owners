@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance;
 
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
@@ -40,6 +41,7 @@ import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.function.Consumer;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Config;
@@ -145,9 +147,30 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   protected void setCodeOwnersConfig(
       Project.NameKey project, @Nullable String subsection, String key, String value)
       throws Exception {
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig ->
+            codeOwnersConfig.setString(
+                CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value));
+  }
+
+  protected void setCodeOwnersConfig(
+      Project.NameKey project,
+      @Nullable String subsection,
+      String key,
+      ImmutableList<String> values)
+      throws Exception {
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig ->
+            codeOwnersConfig.setStringList(
+                CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, values));
+  }
+
+  private void updateCodeOwnersConfig(Project.NameKey project, Consumer<Config> configUpdater)
+      throws Exception {
     Config codeOwnersConfig = new Config();
-    codeOwnersConfig.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value);
+    configUpdater.accept(codeOwnersConfig);
     try (TestRepository<Repository> testRepo =
         new TestRepository<>(repoManager.openRepository(project))) {
       Ref ref = testRepo.getRepository().exactRef(RefNames.REFS_CONFIG);

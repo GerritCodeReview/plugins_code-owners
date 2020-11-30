@@ -31,6 +31,7 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
         .to(GetCodeOwnerConfigForPathInBranch.class);
     get(BRANCH_KIND, "code_owners.config_files").to(GetCodeOwnerConfigFiles.class);
     get(BRANCH_KIND, "code_owners.branch_config").to(GetCodeOwnerBranchConfig.class);
+    post(BRANCH_KIND, "code_owners.rename").to(RenameEmail.class);
 
     factory(CodeOwnerJson.Factory.class);
     DynamicMap.mapOf(binder(), CodeOwnersInBranchCollection.PathResource.PATH_KIND);

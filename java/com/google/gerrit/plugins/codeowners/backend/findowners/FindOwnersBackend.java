@@ -63,4 +63,10 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
   public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
     return Optional.of(GlobMatcher.INSTANCE);
   }
+
+  @Override
+  public String replaceEmail(String codeOwnerConfigFileContent, String oldEmail, String newEmail) {
+    return FindOwnersCodeOwnerConfigParser.replaceEmail(
+        codeOwnerConfigFileContent, oldEmail, newEmail);
+  }
 }

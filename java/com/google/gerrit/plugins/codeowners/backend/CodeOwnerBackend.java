@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.server.IdentifiedUser;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -52,11 +53,7 @@ public interface CodeOwnerBackend {
    */
   default Optional<CodeOwnerConfig> getCodeOwnerConfig(
       CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
-    return getCodeOwnerConfig(
-        codeOwnerConfigKey,
-        /** revWalk = */
-        null,
-        revision);
+    return getCodeOwnerConfig(codeOwnerConfigKey, /* revWalk= */ null, revision);
   }
 
   /**
@@ -117,5 +114,20 @@ public interface CodeOwnerBackend {
    */
   default Optional<PathExpressionMatcher> getPathExpressionMatcher() {
     return Optional.empty();
+  }
+
+  /**
+   * Replaces the old email in the given code owner config file content with the new email.
+   *
+   * @param codeOwnerConfigFileContent the code owner config file content in which the old email
+   *     should be replaced with the new email
+   * @param oldEmail the email that should be replaced by the new email
+   * @param newEmail the email that should replace the old email
+   * @return the updated content
+   * @throws NotImplementedException if the backend doesn't support replacing emails in code owner
+   *     config files
+   */
+  default String replaceEmail(String codeOwnerConfigFileContent, String oldEmail, String newEmail) {
+    throw new NotImplementedException();
   }
 }

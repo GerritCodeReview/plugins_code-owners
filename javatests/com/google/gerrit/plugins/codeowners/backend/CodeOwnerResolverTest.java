@@ -67,9 +67,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerResolver
                     .get()
-                    .resolve(
-                        /** codeOwnerReference = */
-                        (CodeOwnerReference) null));
+                    .resolve(/* codeOwnerReference= */ (CodeOwnerReference) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
 
     npe =
@@ -78,9 +76,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerResolver
                     .get()
-                    .resolve(
-                        /** codeOwnerReferences = */
-                        (Set<CodeOwnerReference>) null));
+                    .resolve(/* codeOwnerReferences= */ (Set<CodeOwnerReference>) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReferences");
   }
 
@@ -118,12 +114,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             (a, u) ->
                 u.addExternalId(
                     ExternalId.create(
-                        "foo",
-                        "bar",
-                        user.id(),
-                        admin.email(),
-                        /** hashedPassword = */
-                        null)));
+                        "foo", "bar", user.id(), admin.email(), /* hashedPassword= */ null)));
 
     assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(admin.email()))).isEmpty();
   }
@@ -252,9 +243,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerResolver
                     .get()
-                    .resolvePathCodeOwners(
-                        /** codeOwnerConfig = */
-                        null, Paths.get("/README.md")));
+                    .resolvePathCodeOwners(/* codeOwnerConfig= */ null, Paths.get("/README.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
@@ -270,10 +259,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerResolver
                     .get()
-                    .resolvePathCodeOwners(
-                        codeOwnerConfig,
-                        /** absolutePath = */
-                        null));
+                    .resolvePathCodeOwners(codeOwnerConfig, /* absolutePath= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 
@@ -354,12 +340,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                codeOwnerResolver
-                    .get()
-                    .isEmailDomainAllowed(
-                        /** email = */
-                        null));
+            () -> codeOwnerResolver.get().isEmailDomainAllowed(/* email= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("email");
   }
 

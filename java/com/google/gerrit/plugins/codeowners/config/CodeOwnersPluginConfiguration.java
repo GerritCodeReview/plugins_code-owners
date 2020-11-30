@@ -18,7 +18,9 @@ import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -322,16 +324,22 @@ public class CodeOwnersPluginConfiguration {
    *   <li>hard-coded default required approval
    * </ul>
    *
-   * <p>The first required code owner approval that exists counts and the evaluation is stopped.
+   * <p>The first required code owner approval configuration that exists counts and the evaluation
+   * is stopped.
+   *
+   * <p>If the code owner configuration contains multiple required approvals values, the last value
+   * is used.
    *
    * @param project project for which the required approval should be returned
    * @return the required code owner approval that should be used for the given project
    */
   public RequiredApproval getRequiredApproval(Project.NameKey project) {
-    Optional<RequiredApproval> configuredRequiredApprovalConfig =
+    ImmutableList<RequiredApproval> configuredRequiredApprovalConfig =
         getConfiguredRequiredApproval(requiredApprovalConfig, project);
-    if (configuredRequiredApprovalConfig.isPresent()) {
-      return configuredRequiredApprovalConfig.get();
+    if (!configuredRequiredApprovalConfig.isEmpty()) {
+      // There can be only one required approval. If multiple ones are configured just use the last
+      // one, this is also what Config#getString(String, String, String) does.
+      return Iterables.getLast(configuredRequiredApprovalConfig);
     }
 
     // fall back to hard-coded default required approval
@@ -353,7 +361,9 @@ public class CodeOwnersPluginConfiguration {
    *   <li>globally configured override approval
    * </ul>
    *
-   * <p>The first override approval that exists counts and the evaluation is stopped.
+   * <p>The first override approval configuration that exists counts and the evaluation is stopped.
+   *
+   * <p>If the code owner configuration contains multiple override values, the last value is used.
    *
    * @param project project for which the override approval should be returned
    * @return the override approval that should be used for the given project, {@link
@@ -362,10 +372,12 @@ public class CodeOwnersPluginConfiguration {
    */
   public Optional<RequiredApproval> getOverrideApproval(Project.NameKey project) {
     try {
-      Optional<RequiredApproval> configuredOverrideApprovalConfig =
+      ImmutableList<RequiredApproval> configuredOverrideApprovalConfig =
           getConfiguredRequiredApproval(overrideApprovalConfig, project);
-      if (configuredOverrideApprovalConfig.isPresent()) {
-        return configuredOverrideApprovalConfig;
+      if (!configuredOverrideApprovalConfig.isEmpty()) {
+        // There can be only one override approval. If multiple ones are configured just use the
+        // last one, this is also what Config#getString(String, String, String) does.
+        return Optional.of(Iterables.getLast(configuredOverrideApprovalConfig));
       }
     } catch (InvalidPluginConfigurationException e) {
       logger.atWarning().withCause(e).log(
@@ -378,33 +390,18 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
-   * Gets the required approval that is configured for the given project.
+   * Gets the required approvals that are configured for the given project.
    *
-   * @param requiredApprovalConfig the config from which the required approval should be read
-   * @param project the project for which the configured required approval should be returned
-   * @return the required approval that is configured for the given project, {@link
-   *     Optional#empty()} if no required approval is configured
+   * @param requiredApprovalConfig the config from which the required approvals should be read
+   * @param project the project for which the configured required approvals should be returned
+   * @return the required approvals that is configured for the given project, an empty list if no
+   *     required approvals are configured
    */
-  private Optional<RequiredApproval> getConfiguredRequiredApproval(
+  private ImmutableList<RequiredApproval> getConfiguredRequiredApproval(
       AbstractRequiredApprovalConfig requiredApprovalConfig, Project.NameKey project) {
     Config pluginConfig = getPluginConfig(project);
-
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-
-    // check if a project specific required approval is configured
-    Optional<RequiredApproval> requiredApproval =
-        requiredApprovalConfig.getForProject(projectState, pluginConfig);
-    if (requiredApproval.isPresent()) {
-      return requiredApproval;
-    }
-
-    // check if a required approval is globally configured
-    requiredApproval = requiredApprovalConfig.getFromGlobalPluginConfig(projectState);
-    if (requiredApproval.isPresent()) {
-      return requiredApproval;
-    }
-
-    return Optional.empty();
+    return requiredApprovalConfig.get(projectState, pluginConfig);
   }
 
   /**
@@ -423,10 +420,7 @@ public class CodeOwnersPluginConfiguration {
     try {
       return pluginConfigFactory
           .getFromGerritConfig(pluginName)
-          .getBoolean(
-              KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS,
-              /** defaultValue = */
-              false);
+          .getBoolean(KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS, /* defaultValue= */ false);
     } catch (IllegalArgumentException e) {
       logger.atWarning().withCause(e).log(
           "Value '%s' in gerrit.config (parameter plugin.%s.%s) is invalid.",
