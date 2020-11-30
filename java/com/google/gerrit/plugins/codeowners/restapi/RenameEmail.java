@@ -56,7 +56,7 @@ import org.eclipse.jgit.revwalk.RevCommit;
 @Singleton
 public class RenameEmail implements RestModifyView<BranchResource, RenameEmailInput> {
   @VisibleForTesting
-  public static String DEFAULT_COMMIT_MESSAGE = "Rename email in code owner config files";
+  public static final String DEFAULT_COMMIT_MESSAGE = "Rename email in code owner config files";
 
   private final Provider<CurrentUser> currentUser;
   private final PermissionBackend permissionBackend;
