@@ -68,6 +68,64 @@ be approved when a merge is done.
 the Auto-Merge (case 2) is considered unsafe, see [security
 pitfalls](#securityMergeCommits) below.
 
+## <a id="codeOwners">Recommendations for defining code owners
+
+Code owners can be defined on different levels, which differ by scope. This
+section gives an overview of the different levels and explains when they should
+be used.
+
+1. Folder and file code owners:
+   These are the code owners that are defined in the [code owner config
+   files](user-guide.html#codeOwnerConfigFiles) that are stored in the source
+   tree of the repository. They can either apply to a whole
+   [folder](backend-find-owners.html#userEmails) (folder code owners) or to
+   [matched files](backend-find-owners.html#perFile) (file code owners).\
+   This is the normal way to define code owners. This code owner definition is
+   discoverable since it is stored in human-readable code owner config file in
+   the source tree of the repository.\
+   Folder and file code owners can differ from branch to branch since they are
+   defined in the source tree.\
+   Folder and file code owners are usually users that are expert for a code area
+   and that should review and approve all changes to this code.
+2. Root code owners:
+   Root code owners are folder code owners (see 1.) that are defined in the code
+   owner config file that is stored in the root directory of a branch.\
+   Usually root code owners are the most experienced developers that can approve
+   changes to all the code base if needed, but that should only review and
+   approve changes if no other, more specific, code owners are available.\
+   Root code owners can differ from branch to branch.
+3. Default code owners:
+   [Default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration)
+   are stored in the code owner config file in the `refs/meta/config` branch
+   that apply for all branches (unless inheritance is ignored).\
+   The same as root code owners these are experienced developers that can
+   approve changes to all the code base if needed.\
+   However in contrast to root code owners that apply to all branches (including
+   newly created branches), and hence can be used if code owners should be kept
+   consistent across all branches.\
+   A small disadvantage is that this code owner definition is not very well
+   discoverable since it is stored in the `refs/meta/config` branch, but default
+   code owners are suggested to users the same way as other code owners.
+4. Global code owners:
+   [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner) are defined
+   in the plugin configuration and apply to all projects or all child projects.\
+   They are intended to configure bots as code owners that need to operate on
+   all or multiple projects.\
+   Global code owners still apply if parent code owners are ignored.
+5. Fallback code owners:
+   [Fallback code owners](config.html#pluginCodeOwnersFallbackCodeOwners) is a
+   policy configuration that controls who should own paths that have no code
+   owners defined.\
+   Fallback code owners are not included in the code owner suggestion.\
+   Configuring all users as fallback code owners may allow bypassing the code
+   owners check (see [security pitfalls](#securityFallbackCodeOwners) below).
+
+In addition users can be allowed to [override the code owner submit
+check](user-guide.html#codeOwnerOverride). This permission is normally granted
+to users that that need to react to emergencies and need to submit changes
+quickly (e.g sheriffs) or users that need to make large-scale changes across
+many repositories.
+
 ## <a id="securityPitfalls">Security pitfalls
 
 While requiring code owner approvals is primarily considered as a code quality
