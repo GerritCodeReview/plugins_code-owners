@@ -33,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
@@ -160,6 +161,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(Optional.of("http://foo.example.com"));
     when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
         .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    when(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .thenReturn(FallbackCodeOwners.ALL_USERS);
     when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
     when(codeOwnersPluginConfiguration.getRequiredApproval(project))
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
@@ -178,6 +181,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .isEqualTo("http://foo.example.com");
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    assertThat(codeOwnerProjectConfigInfo.general.fallbackCodeOwners)
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
     assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isTrue();
     assertThat(codeOwnerProjectConfigInfo.backend.id)
         .isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
@@ -246,6 +251,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(Optional.of("http://foo.example.com"));
     when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
         .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    when(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .thenReturn(FallbackCodeOwners.ALL_USERS);
     when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
     when(codeOwnersPluginConfiguration.getRequiredApproval(project))
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
@@ -263,6 +270,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .isEqualTo("http://foo.example.com");
     assertThat(codeOwnerBranchConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    assertThat(codeOwnerBranchConfigInfo.general.fallbackCodeOwners)
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
     assertThat(codeOwnerBranchConfigInfo.general.implicitApprovals).isTrue();
     assertThat(codeOwnerBranchConfigInfo.backendId)
         .isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
@@ -299,6 +308,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(Optional.of("http://foo.example.com"));
     when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
         .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    when(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .thenReturn(FallbackCodeOwners.ALL_USERS);
     when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
     when(codeOwnersPluginConfiguration.getRequiredApproval(project))
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
