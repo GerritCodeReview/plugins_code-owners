@@ -342,6 +342,7 @@ setting)
 * are referenced by an email with a disallowed domain (see
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
 * do not have read access to the branch
+* [fallback code owners](config.html#pluginCodeOwnersFallbackCodeOwners)
 
 are omitted from the result.
 
