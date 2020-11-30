@@ -22,6 +22,8 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubjec
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
@@ -527,14 +529,14 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
           // insert comment line at the top of the file
           b.append("# top comment\n");
 
-          String[] lines = codeOwnerConfigFileContent.split("\\n");
-          b.append(lines[0] + "\n");
+          Iterable<String> lines = Splitter.on('\n').split(codeOwnerConfigFileContent);
+          b.append(Iterables.get(lines, /* position= */ 0) + "\n");
 
           // insert comment line in the middle of the file
           b.append("# middle comment\n");
 
-          for (int n = 1; n < lines.length; n++) {
-            b.append(lines[n] + "\n");
+          for (String line : Iterables.skip(lines, /* numberToSkip= */ 1)) {
+            b.append(line + "\n");
           }
 
           // insert comment line at the bottom of the file
@@ -560,10 +562,11 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
     // verify that the comments are still present
     String codeOwnerConfigFileContent =
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent();
-    String[] lines = codeOwnerConfigFileContent.split("\\n");
-    assertThat(lines[0]).isEqualTo("# top comment");
-    assertThat(lines[2]).isEqualTo("# middle comment");
-    assertThat(lines[lines.length - 1]).isEqualTo("# bottom comment");
+    Iterable<String> lines = Splitter.on('\n').split(codeOwnerConfigFileContent);
+    assertThat(Iterables.get(lines, /* position= */ 0)).isEqualTo("# top comment");
+    assertThat(Iterables.get(lines, /* position= */ 2)).isEqualTo("# middle comment");
+    assertThat(Iterables.get(lines, /* position= */ Iterables.size(lines) - 2))
+        .isEqualTo("# bottom comment");
   }
 
   @Test
@@ -587,7 +590,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
         "Insert comments",
         (codeOwnerConfigFilePath, codeOwnerConfigFileContent) -> {
           StringBuilder b = new StringBuilder();
-          for (String line : codeOwnerConfigFileContent.split("\\n")) {
+          for (String line : Splitter.on('\n').split(codeOwnerConfigFileContent)) {
             if (line.contains(user.email())) {
               b.append(line + "# some comment\n");
               continue;
@@ -619,7 +622,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
     // verify that the inline comments are still present
     String codeOwnerConfigFileContent =
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent();
-    for (String line : codeOwnerConfigFileContent.split("\\n")) {
+    for (String line : Splitter.on('\n').split(codeOwnerConfigFileContent)) {
       if (line.contains(secondaryEmail)) {
         assertThat(line).endsWith("# some comment");
       } else if (line.contains(admin.email())) {
@@ -667,7 +670,8 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
     // verify that the comments are still present
     String codeOwnerConfigFileContent =
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent();
-    assertThat(codeOwnerConfigFileContent.split("\\n")[0])
+    assertThat(
+            Iterables.get(Splitter.on('\n').split(codeOwnerConfigFileContent), /* position= */ 0))
         .endsWith("# foo " + secondaryEmail + " bar");
   }
 
