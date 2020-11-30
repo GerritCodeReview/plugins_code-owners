@@ -153,7 +153,11 @@ public class CodeOwnerResolver {
                 .filePath(codeOwnerConfig.key().fileName().orElse("<default>"))
                 .build())) {
       logger.atFine().log("resolving path code owners for path %s", absolutePath);
-      return resolve(pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).get());
+      return resolve(
+          pathCodeOwnersFactory
+              .create(codeOwnerConfig, absolutePath)
+              .resolveCodeOwnerConfig()
+              .getPathCodeOwners());
     }
   }
 
