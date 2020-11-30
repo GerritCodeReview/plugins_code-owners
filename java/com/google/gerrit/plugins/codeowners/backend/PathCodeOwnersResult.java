@@ -33,6 +33,9 @@ public abstract class PathCodeOwnersResult {
   /** Gets the resolved code owner config. */
   abstract CodeOwnerConfig codeOwnerConfig();
 
+  /** Whether there are unresolved imports. */
+  public abstract boolean hasUnresolvedImports();
+
   /**
    * Gets the code owners from the code owner config that apply to the path.
    *
@@ -65,11 +68,13 @@ public abstract class PathCodeOwnersResult {
     return MoreObjects.toStringHelper(this)
         .add("path", path())
         .add("codeOwnerConfig", codeOwnerConfig())
+        .add("hasUnresolvedImports", hasUnresolvedImports())
         .toString();
   }
 
   /** Creates a {@link CodeOwnerResolverResult} instance. */
-  public static PathCodeOwnersResult create(Path path, CodeOwnerConfig codeOwnerConfig) {
-    return new AutoValue_PathCodeOwnersResult(path, codeOwnerConfig);
+  public static PathCodeOwnersResult create(
+      Path path, CodeOwnerConfig codeOwnerConfig, boolean hasUnresolvedImports) {
+    return new AutoValue_PathCodeOwnersResult(path, codeOwnerConfig, hasUnresolvedImports);
   }
 }

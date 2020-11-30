@@ -206,6 +206,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     PathCodeOwners pathCodeOwners =
         pathCodeOwnersFactory.create(emptyCodeOwnerConfig, Paths.get("/foo/bar/baz.md"));
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().getPathCodeOwners()).isEmpty();
+    assertThat(pathCodeOwners.resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -462,6 +463,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isTrue();
   }
 
   @Test
@@ -507,6 +509,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -552,6 +555,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -598,6 +602,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -645,6 +650,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -694,6 +700,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         .comparingElementsUsing(hasEmail())
         .containsExactly(user.email());
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isTrue();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -742,6 +749,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -790,6 +798,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -922,6 +931,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email(), user2.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -980,6 +990,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1150,6 +1161,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1179,6 +1191,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isTrue();
   }
 
   @Test
@@ -1223,6 +1236,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isTrue();
   }
 
   @Test
@@ -1253,6 +1267,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isTrue();
   }
 
   @Test
@@ -1293,6 +1308,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1340,6 +1356,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1383,6 +1400,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1428,6 +1446,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1462,6 +1481,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isTrue();
   }
 
   @Test
@@ -1517,6 +1537,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // Expectation: the ignoreParentCodeOwners flag from the imported code owner config is ignored
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners()).isFalse();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1573,6 +1594,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email(), user2.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test
@@ -1632,6 +1654,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().hasUnresolvedImports()).isFalse();
   }
 
   @Test

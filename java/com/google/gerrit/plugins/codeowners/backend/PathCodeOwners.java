@@ -206,7 +206,8 @@ public class PathCodeOwners {
       getMatchingPerFileCodeOwnerSets(codeOwnerConfig)
           .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
 
-      resolveImports(codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
+      boolean hasUnresolvedImports =
+          !resolveImports(codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
 
       CodeOwnerConfig resolvedCodeOwnerConfig = resolvedCodeOwnerConfigBuilder.build();
 
@@ -228,15 +229,24 @@ public class PathCodeOwners {
                 .build();
       }
 
-      this.pathCodeOwnersResult = PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig);
+      this.pathCodeOwnersResult =
+          PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig, hasUnresolvedImports);
       logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
       return this.pathCodeOwnersResult;
     }
   }
 
-  private void resolveImports(
+  /**
+   * Resolve the imports of the given code owner config.
+   *
+   * @param importingCodeOwnerConfig the code owner config for which imports should be resolved
+   * @param resolvedCodeOwnerConfigBuilder the builder for the resolved code owner config
+   * @return whether all imports have been resolved successfully
+   */
+  private boolean resolveImports(
       CodeOwnerConfig importingCodeOwnerConfig,
       CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
+    boolean hasUnresolvedImports = false;
     try (TraceTimer traceTimer =
         TraceContext.newTimer(
             "Resolve code owner config imports",
@@ -280,6 +290,7 @@ public class PathCodeOwners {
           Optional<ProjectState> projectState =
               projectCache.get(keyOfImportedCodeOwnerConfig.project());
           if (!projectState.isPresent()) {
+            hasUnresolvedImports = true;
             logger.atWarning().log(
                 "cannot resolve code owner config %s that is imported by code owner config %s:"
                     + " project %s not found",
@@ -289,6 +300,7 @@ public class PathCodeOwners {
             continue;
           }
           if (!projectState.get().statePermitsRead()) {
+            hasUnresolvedImports = true;
             logger.atWarning().log(
                 "cannot resolve code owner config %s that is imported by code owner config %s:"
                     + " state of project %s doesn't permit read",
@@ -310,6 +322,7 @@ public class PathCodeOwners {
                   : codeOwners.getFromCurrentRevision(keyOfImportedCodeOwnerConfig);
 
           if (!mayBeImportedCodeOwnerConfig.isPresent()) {
+            hasUnresolvedImports = true;
             logger.atWarning().log(
                 "cannot resolve code owner config %s that is imported by code owner config %s"
                     + " (revision = %s)",
@@ -377,6 +390,7 @@ public class PathCodeOwners {
         }
       }
     }
+    return !hasUnresolvedImports;
   }
 
   public static CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
