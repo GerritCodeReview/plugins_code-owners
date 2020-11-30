@@ -685,6 +685,7 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | `merge_commit_strategy` || Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
 | `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.html#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
 | `override_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to request a code owner override.
+|`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `ALL_USER`: Paths for which no code owners are defined are owned by all users.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path

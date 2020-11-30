@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+
 /**
  * Representation of the general code owners configuration in the REST API.
  *
@@ -43,4 +45,7 @@ public class GeneralInfo {
    * code owner override.
    */
   public String overrideInfoUrl;
+
+  /** Policy that controls who should own paths that have no code owners defined. */
+  public FallbackCodeOwners fallbackCodeOwners;
 }

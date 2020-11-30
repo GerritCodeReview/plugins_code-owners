@@ -33,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.GeneralConfig;
@@ -87,6 +88,8 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isNull();
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+    assertThat(codeOwnerProjectConfigInfo.general.fallbackCodeOwners)
+        .isEqualTo(FallbackCodeOwners.NONE);
     assertThat(codeOwnerProjectConfigInfo.general.implicitApprovals).isNull();
     assertThat(codeOwnerProjectConfigInfo.general.overrideInfoUrl).isNull();
     assertThat(codeOwnerProjectConfigInfo.status.disabled).isNull();
@@ -126,6 +129,15 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  }
+
+  @Test
+  public void getConfigWithConfiguredFallbackCodeOwners() throws Exception {
+    configureFallbackCodeOwners(project, FallbackCodeOwners.ALL_USERS);
+    CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
+        projectCodeOwnersApiFactory.project(project).getConfig();
+    assertThat(codeOwnerProjectConfigInfo.general.fallbackCodeOwners)
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
   }
 
   @Test
@@ -261,6 +273,11 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   private void configureMergeCommitStrategy(
       Project.NameKey project, MergeCommitStrategy mergeCommitStrategy) throws Exception {
     setConfig(project, null, GeneralConfig.KEY_MERGE_COMMIT_STRATEGY, mergeCommitStrategy.name());
+  }
+
+  private void configureFallbackCodeOwners(
+      Project.NameKey project, FallbackCodeOwners fallbackCodeOwners) throws Exception {
+    setConfig(project, null, GeneralConfig.KEY_FALLBACK_CODE_OWNERS, fallbackCodeOwners.name());
   }
 
   private void configureDisabledBranch(Project.NameKey project, String disabledBranch)

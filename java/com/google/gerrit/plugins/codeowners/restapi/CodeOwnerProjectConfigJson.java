@@ -116,6 +116,8 @@ public class CodeOwnerProjectConfigJson {
         codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(projectName) ? true : null;
     generalInfo.overrideInfoUrl =
         codeOwnersPluginConfiguration.getOverrideInfoUrl(projectName).orElse(null);
+    generalInfo.fallbackCodeOwners =
+        codeOwnersPluginConfiguration.getFallbackCodeOwners(projectName);
     return generalInfo;
   }
 
