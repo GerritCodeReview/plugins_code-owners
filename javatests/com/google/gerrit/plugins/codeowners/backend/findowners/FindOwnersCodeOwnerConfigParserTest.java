@@ -614,7 +614,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
             NullPointerException.class,
             () ->
                 FindOwnersCodeOwnerConfigParser.replaceEmail(
-                    /* content= */ null, admin.email(), user.email()));
+                    /* codeOwnerConfigFileContent= */ null, admin.email(), user.email()));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigFileContent");
   }
 

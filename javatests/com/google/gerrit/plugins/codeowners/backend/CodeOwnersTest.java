@@ -64,7 +64,7 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 codeOwners.get(
-                    CodeOwnerConfig.Key.create(project, "master", "/"), /* folderPath= */ null));
+                    CodeOwnerConfig.Key.create(project, "master", "/"), /* revision= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
