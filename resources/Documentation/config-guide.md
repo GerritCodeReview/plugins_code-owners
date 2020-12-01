@@ -134,6 +134,26 @@ to users that that need to react to emergencies and need to submit changes
 quickly (e.g sheriffs) or users that need to make large-scale changes across
 many repositories.
 
+## <a id="externalValidationOfCodeOwnerConfigs">External validation of code owner config files
+
+By default, when code owner config files are modified they are
+[validated](validation.html) on push. If any issues in the modified code owner
+config files are found, the push is rejected. This is important since
+non-parsable code owner config files make submissions fail which likely blocks
+the development teams, and hence needs to be prevented.
+
+However rejecting pushes in case of invalid code owner config files is not an
+ideal workflow for everyone. Instead it may be wanted that the push always
+succeeds and that issues with modified code owner config files are then detected
+and reported by a CI bot. The CI bot would then post its findings as checks on
+the open change which prevent the change submission. To enable this the
+validation of code owner config files on push can be
+[disabled](config.html#pluginCodeOwnersEnableValidationOnCommitReceived), but
+then the host admins should setup a bot to do the validation of modified code
+owner config files externally. For this the bot could use the [Check Code Owner
+Config Files In Revision](rest-api.html#check-code-owner-config-files-in-revision)
+REST endpoint.
+
 ## <a id="securityPitfalls">Security pitfalls
 
 While requiring code owner approvals is primarily considered as a code quality

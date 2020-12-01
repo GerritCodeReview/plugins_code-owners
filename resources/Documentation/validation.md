@@ -20,6 +20,11 @@ configuration files, configuration of a non-existing [backend](backends.html)
 etc.) are severe errors and block the submission of all changes for which the
 affected configuration files are relevant.
 
+**NOTE:** It's possible to disable the validation of code owner config files on
+push and setup an [external
+validation](config-guide.html#externalValidationOfCodeOwnerConfigs) by a CI bot
+instead. In this case findings would be posted on the change.
+
 All validations are best effort to prevent invalid configurations from
 entering the repository, but not all possible issues can be prevented. Doing the
 validation is useful since it prevents most issues and also gives quick feedback
