@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9bd1dbe2_5b910dd5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-01T13:28:46Z",
+      "side": 1,
+      "message": "Yes, you read the code for hasUnresolvedCodeOwners correctly (it\u0027s true if one of them is non-resolvable). \n\nHowever for this case here \"none of them is resolvable\" is intended. This is why hasUnresolvedCodeOwners \u003d true alone is not sufficient to detect this case, but in addition codeOwners (which are the resolved code owners) must be empty, see line 26 below.",
+      "parentUuid": "5ff6a200_e92ca796",
+      "range": {
+        "startLine": 15,
+        "startChar": 42,
+        "endLine": 15,
+        "endChar": 72
+      },
+      "revId": "f048a2a764941c9f11c6aa6956c434185ee23341",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a7805389_1f4492ff",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-12-01T12:53:03Z",
       "side": 1,
       "message": "not really introduced by this change, but is the atomic really needed here? What can happen async?",
+      "range": {
+        "startLine": 180,
+        "startChar": 4,
+        "endLine": 180,
+        "endChar": 17
+      },
+      "revId": "f048a2a764941c9f11c6aa6956c434185ee23341",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37eb6845_d22e018c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-01T13:28:46Z",
+      "side": 1,
+      "message": "The problem is that we have to set this flag in the callback, but read it after the callback has been performed. To access this variable in the callback it must be final (here it\u0027s implicitly final because hasUnresolvedCodeOwners is only set on instantiation). If it\u0027s final we cannot set hasUnresolvedCodeOwners to a new value. But if hasUnresolvedCodeOwners is an AtomicBoolean we can just update the value in it, and there is no need to set hasUnresolvedCodeOwners itself to a new value, as it would be the case if was a normal boolean.",
+      "parentUuid": "a7805389_1f4492ff",
       "range": {
         "startLine": 180,
         "startChar": 4,
