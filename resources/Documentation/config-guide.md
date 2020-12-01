@@ -154,6 +154,17 @@ owner config files externally. For this the bot could use the [Check Code Owner
 Config Files In Revision](rest-api.html#check-code-owner-config-files-in-revision)
 REST endpoint.
 
+## <a id="differentCodeOwnerConfigurations">Use different code owner configurations than upstream
+
+If an upstream repository is replicated into an internal repository and code
+owners are used in the upstream repository, the upstream code owner
+configuration shouldn't apply for the internal repository (the internal
+repository should have different code owners, and also upstream code owners
+could likely not be resolved internally). In this case it is possible to
+[configure a file extension](config.html#pluginCodeOwnersFileExtension) for code
+owner config files in the internal repository so that the internal code owner
+config files do not clash with the upstream code owner config files.
+
 ## <a id="securityPitfalls">Security pitfalls
 
 While requiring code owner approvals is primarily considered as a code quality

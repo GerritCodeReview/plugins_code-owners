@@ -58,11 +58,12 @@ Parameters that are not set for a project are inherited from the parent project.
 
 <a id="pluginCodeOwnersFileExtension">plugin.@PLUGIN@.fileExtension</a>
 :       The file extension that should be used for code owner config files.\
-        Allows to use different owner configurations for upstream and internal
-        in the same repository. E.g. if upstream uses `OWNERS` code owner config
-        files (no file extension configured) one could set `internal` as file
-        extension internally so that internally `OWNERS.internal` files are used
-        and the existing `OWNERS` files are ignored.\
+        Allows to use different code owner configurations for upstream and
+        internal in the same repository. E.g. if upstream uses `OWNERS` code
+        owner config files (no file extension configured) one could set
+        `internal` as file extension internally so that internally
+        `OWNERS.internal` files are used and the existing `OWNERS` files are
+        ignored.\
         Can be overridden per project by setting
         [codeOwners.fileExtension](#codeOwnersFileExtension) in
         `@PLUGIN@.config`.\
