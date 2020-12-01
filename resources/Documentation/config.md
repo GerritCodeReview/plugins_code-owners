@@ -136,6 +136,8 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="pluginCodeOwnersRequiredApproval">plugin.@PLUGIN@.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a
         change.\
+        Any approval on the configured label that has a value >= the configured
+        value is considered as code owner approval.\
         The required approval must be specified in the format
         "\<label-name\>+\<label-value\>".\
         The configured label must exist for all projects for which this setting
@@ -152,6 +154,8 @@ Parameters that are not set for a project are inherited from the parent project.
 
 <a id="pluginCodeOwnersOverrideApproval">plugin.@PLUGIN@.overrideApproval</a>
 :       Approval that counts as override for the code owners submit check.\
+        Any approval on the configured label that has a value >= the configured
+        value is considered as code owner override.\
         The override approval must be specified in the format
         "\<label-name\>+\<label-value\>".\
         Can be specifed multiple times to configure multiple override approvals.
@@ -365,6 +369,8 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a
         change.\
+        Any approval on the configured label that has a value >= the configured
+        value is considered as code owner approval.\
         The required approval must be specified in the format
         "\<label-name\>+\<label-value\>".\
         The configured label must exist for all projects for which this setting
@@ -383,6 +389,8 @@ Parameters that are not set for a project are inherited from the parent project.
 
 <a id="codeOwnersOverrideApproval">codeOwners.overrideApproval</a>
 :       Approval that counts as override for the code owners submit check.\
+        Any approval on the configured label that has a value >= the configured
+        value is considered as code owner override.\
         The override approval must be specified in the format
         "\<label-name\>+\<label-value\>".\
         Can be specifed multiple times to configure multiple override approvals.
