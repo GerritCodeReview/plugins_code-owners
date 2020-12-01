@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5ff6a200_e92ca796",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-01T12:53:03Z",
+      "side": 1,
+      "message": "reading the code I see that hasUnresolvedCodeOwners is true even if one of them is non-resolvable (doesn\u0027t require \"non of them is resolvable\"). Is this right?",
+      "range": {
+        "startLine": 15,
+        "startChar": 42,
+        "endLine": 15,
+        "endChar": 72
+      },
+      "revId": "f048a2a764941c9f11c6aa6956c434185ee23341",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a7805389_1f4492ff",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 180,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-01T12:53:03Z",
+      "side": 1,
+      "message": "not really introduced by this change, but is the atomic really needed here? What can happen async?",
+      "range": {
+        "startLine": 180,
+        "startChar": 4,
+        "endLine": 180,
+        "endChar": 17
+      },
+      "revId": "f048a2a764941c9f11c6aa6956c434185ee23341",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
