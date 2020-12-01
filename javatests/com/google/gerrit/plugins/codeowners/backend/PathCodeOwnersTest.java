@@ -81,7 +81,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> pathCodeOwnersFactory.create(null, Paths.get("/foo/bar/baz.md")));
+            () ->
+                pathCodeOwnersFactory.create(
+                    /* codeOwnerConfig= */ null, Paths.get("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
@@ -90,7 +92,8 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig codeOwnerConfig = createCodeOwnerBuilder().build();
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> pathCodeOwnersFactory.create(codeOwnerConfig, null));
+            NullPointerException.class,
+            () -> pathCodeOwnersFactory.create(codeOwnerConfig, /* absolutePath= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 
@@ -133,7 +136,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 pathCodeOwnersFactory.create(
-                    null,
+                    /* codeOwnerConfigKey= */ null,
                     projectOperations.project(project).getHead("master"),
                     Paths.get("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
@@ -148,7 +151,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                 pathCodeOwnersFactory.create(
                     CodeOwnerConfig.Key.create(
                         BranchNameKey.create(project, "master"), Paths.get("/")),
-                    null,
+                    /* revision= */ null,
                     Paths.get("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
@@ -171,7 +174,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                 pathCodeOwnersFactory.create(
                     codeOwnerConfigKey,
                     projectOperations.project(project).getHead("master"),
-                    null));
+                    /* absolutePath= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("path");
   }
 
@@ -265,7 +268,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.backend", value = TestCodeOwnerBackend.ID)
   public void codeOwnerSetsWithPathExpressionsAreIgnoredIfBackendDoesntSupportPathExpressions()
       throws Exception {
-    try (AutoCloseable registration = registerTestBackend(null)) {
+    try (AutoCloseable registration = registerTestBackend(/* pathExpressionMatcher= */ null)) {
       CodeOwnerConfig codeOwnerConfig =
           createCodeOwnerBuilder()
               .addCodeOwnerSet(
@@ -1664,7 +1667,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 PathCodeOwners.matches(
-                    null, Paths.get("bar/baz.md"), mock(PathExpressionMatcher.class)));
+                    /* codeOwnerSet= */ null,
+                    Paths.get("bar/baz.md"),
+                    mock(PathExpressionMatcher.class)));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerSet");
   }
 
@@ -1676,7 +1681,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             () ->
                 PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
-                    null,
+                    /* relativePath= */ null,
                     mock(PathExpressionMatcher.class)));
     assertThat(npe).hasMessageThat().isEqualTo("relativePath");
   }
@@ -1706,7 +1711,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                 PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
                     Paths.get("bar/baz.md"),
-                    null));
+                    /* matcher= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("matcher");
   }
 
