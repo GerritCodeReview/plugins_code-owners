@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d8176ed2_faec1097",
+        "filename": "resources/Documentation/config-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-01T14:39:48Z",
+      "side": 1,
+      "message": "it looks like this guide really duplicates lots of information that\u0027s already available in config.md. It might become increasingly difficult for you to make changes in the code if you need to update so much docs (e.g add a third option here apart from first parent commit and auto-merge).\n\nMaybe reduce some explanations and link to the other config.md file?",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 71
+      },
+      "revId": "bc4f4b08afec739aa38638a1c58bea63aa76461f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
