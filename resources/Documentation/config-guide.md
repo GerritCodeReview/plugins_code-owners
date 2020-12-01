@@ -20,6 +20,14 @@ guide](setup-guide.html).
 
 Some of the configuration parameters have an effect on the user workflow.
 
+### <a id="stickyApprovals">Make code owner approvals / overrides sticky
+
+Code owner approvals and code owner overrides can be made sticky by enabling
+[copy rules](../../../Documentation/config-labels.html#label_copyAnyScore) in
+the definitions of the labels that are configured as [required
+approval](config.html#pluginCodeOwnersRequiredApproval) and [override
+approval](config.html#pluginCodeOwnersOverrideApproval).
+
 ### <a id="implicitApprovals">Implicit code owner approvals
 
 It's possible to [enable implicit approvals](config.html#pluginCodeOwnersEnableImplicitApprovals)
