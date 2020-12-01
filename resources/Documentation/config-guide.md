@@ -154,6 +154,17 @@ owner config files externally. For this the bot could use the [Check Code Owner
 Config Files In Revision](rest-api.html#check-code-owner-config-files-in-revision)
 REST endpoint.
 
+## <a id="differentCodeOwnerConfigurations">Use different code owner configurations in a fork
+
+If a respository is forked and code owners are used in the original repository,
+the code owner configuration of the original repository shouldn't apply for the
+fork (the fork should have different code owners, and if the fork is stored on
+another Gerrit host it's also likely that the original code owners cannot be
+resolved on that host). In this case it is possible to [configure a file
+extension](config.html#pluginCodeOwnersFileExtension) for code owner config
+files in the fork so that its code owner config files do not clash with the
+original code owner config files.
+
 ## <a id="securityPitfalls">Security pitfalls
 
 While requiring code owner approvals is primarily considered as a code quality
