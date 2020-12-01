@@ -7,6 +7,11 @@ changes that touch these files.
 This user guide explains the functionality of the `@PLUGIN@` plugin. For a
 walkthrough of the UI please refer to the [intro](how-to-use.html) page.
 
+**TIP:** You may also want to check out the [presentation about code
+owners](https://docs.google.com/presentation/d/1DupBnGr3apIx-jzxi9cHzSgkI-2c1ouGu1teQ4khSfc)
+from the [Gerrit Contributor Summit
+2020](https://docs.google.com/document/d/1WauJfNxracjBK3PxuVnwNIppESGMBtZwxMYjxxeDN6M).
+
 **NOTE:** How to setup the code owners functionality is explained in the
 [setup guide](setup-guide.html).
 
