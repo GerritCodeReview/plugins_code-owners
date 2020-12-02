@@ -79,4 +79,13 @@ public abstract class CodeOwnerResolverResult {
     return new AutoValue_CodeOwnerResolverResult(
         codeOwners, ownedByAllUsers, hasUnresolvedCodeOwners, hasUnresolvedImports);
   }
+
+  /** Creates a empty {@link CodeOwnerResolverResult} instance. */
+  public static CodeOwnerResolverResult createEmpty() {
+    return new AutoValue_CodeOwnerResolverResult(
+        /* codeOwners= */ ImmutableSet.of(),
+        /* ownedByAllUsers= */ false,
+        /* hasUnresolvedCodeOwners= */ false,
+        /* hasUnresolvedImports= */ false);
+  }
 }

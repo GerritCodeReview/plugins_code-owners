@@ -52,8 +52,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests for {@link CodeOwnerApprovalCheck}. Further tests with fallback code owners are implemented
- * in {@link CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest}}.
+ * Tests for {@link CodeOwnerApprovalCheck}.
+ *
+ * <p>Further tests with fallback code owners are implemented in {@link
+ * CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest} and the functionality of {@link
+ * CodeOwnerApprovalCheck#getFileStatusesForAccount(ChangeNotes,
+ * com.google.gerrit.entities.Account.Id)} is covered by {@link
+ * CodeOwnerApprovalCheckForAccountTest}.
  */
 public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Inject private ChangeNotes.Factory changeNotesFactory;
