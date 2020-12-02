@@ -22,6 +22,7 @@ import com.google.gerrit.server.ExceptionHook;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.UserInitiated;
+import com.google.gerrit.server.restapi.change.OnPostReview;
 import com.google.inject.Provides;
 
 /** Guice module to bind code owner backends. */
@@ -45,6 +46,7 @@ public class BackendModule extends FactoryModule {
     install(new CodeOwnerSubmitRule.Module());
 
     DynamicSet.bind(binder(), ExceptionHook.class).to(CodeOwnersExceptionHook.class);
+    DynamicSet.bind(binder(), OnPostReview.class).to(CodeOwnersOnPostReview.class);
   }
 
   @Provides
