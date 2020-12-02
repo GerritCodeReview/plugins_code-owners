@@ -80,6 +80,30 @@
       },
       "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8d6baee8_db46eef5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-02T16:41:44Z",
+      "side": 1,
+      "message": "\u003e So say I am the owner for the files /a/b/c/x.java and /a/b/y.cc\n\u003e in the change, what exactly would be added to the change message?\n\nThe message would contain these paths: \"/a/b/c/x.java\" and \"/a/b/y.cc\"",
+      "parentUuid": "c9022049_9b7bb762",
+      "range": {
+        "startLine": 100,
+        "startChar": 24,
+        "endLine": 100,
+        "endChar": 34
+      },
+      "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
