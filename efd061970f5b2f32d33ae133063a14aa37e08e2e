@@ -33,6 +33,69 @@
       "message": "The corresponding [1] has been rolled out now, so that this can be submitted now.\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/290068",
       "revId": "efd061970f5b2f32d33ae133063a14aa37e08e2e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e3940eb_0bef2fd5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 372,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-02T10:05:39Z",
+      "side": 1,
+      "message": "set",
+      "range": {
+        "startLine": 372,
+        "startChar": 88,
+        "endLine": 372,
+        "endChar": 92
+      },
+      "revId": "efd061970f5b2f32d33ae133063a14aa37e08e2e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1e95dfd9_4114ba97",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1538,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-02T10:05:39Z",
+      "side": 1,
+      "message": "Is there a test that verifies that Owners+Override +2 will give override even if Owners-Override+1 is configured? Not exactly related to this change but just making sure.",
+      "range": {
+        "startLine": 1538,
+        "startChar": 3,
+        "endLine": 1538,
+        "endChar": 7
+      },
+      "revId": "efd061970f5b2f32d33ae133063a14aa37e08e2e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0ee69950_667152cf",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-02T10:05:39Z",
+      "side": 1,
+      "message": "can\u0027t do it in this change, but you may need to update config-guide in a separate change.",
+      "revId": "efd061970f5b2f32d33ae133063a14aa37e08e2e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
