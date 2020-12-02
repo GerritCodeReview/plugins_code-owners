@@ -56,6 +56,30 @@
       },
       "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c9022049_9b7bb762",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-02T16:39:49Z",
+      "side": 1,
+      "message": "These are absolute file paths, e.g. the same paths that are shown in the file list on the change screen.\n\nI\u0027ll add an example to the commit message tomorrow.",
+      "parentUuid": "0d273430_1041e932",
+      "range": {
+        "startLine": 100,
+        "startChar": 24,
+        "endLine": 100,
+        "endChar": 34
+      },
+      "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
