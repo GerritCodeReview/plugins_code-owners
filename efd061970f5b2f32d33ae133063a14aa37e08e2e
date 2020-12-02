@@ -16,6 +16,23 @@
       "message": "Still keeping the -2 since we must wait with submitting this change until the frontend change has been rolled out.",
       "revId": "efd061970f5b2f32d33ae133063a14aa37e08e2e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "38a17a3c_9fe44724",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-02T09:11:07Z",
+      "side": 1,
+      "message": "The corresponding [1] has been rolled out now, so that this can be submitted now.\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/290068",
+      "revId": "efd061970f5b2f32d33ae133063a14aa37e08e2e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
