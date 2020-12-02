@@ -175,12 +175,11 @@ public class CodeOwnerApprovalCheck {
           codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
       logger.atFine().log("requiredApproval = %s", requiredApproval);
 
-      Optional<RequiredApproval> overrideApproval =
+      ImmutableSet<RequiredApproval> overrideApprovals =
           codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
-      boolean hasOverride =
-          overrideApproval.isPresent() && hasOverride(overrideApproval.get(), changeNotes);
+      boolean hasOverride = hasOverride(overrideApprovals, changeNotes);
       logger.atFine().log(
-          "hasOverride = %s (overrideApproval = %s)", hasOverride, overrideApproval);
+          "hasOverride = %s (overrideApprovals = %s)", hasOverride, overrideApprovals);
 
       BranchNameKey branch = changeNotes.getChange().getDest();
       ObjectId revision = getDestBranchRevision(changeNotes.getChange());
@@ -740,13 +739,17 @@ public class CodeOwnerApprovalCheck {
   /**
    * Checks whether the given change has an override approval.
    *
-   * @param overrideApproval approval that is required to override the code owners submit check.
+   * @param overrideApprovals approvals that count as override for the code owners submit check.
    * @param changeNotes the change notes
    * @return whether the given change has an override approval
    */
-  private boolean hasOverride(RequiredApproval overrideApproval, ChangeNotes changeNotes) {
+  private boolean hasOverride(
+      ImmutableSet<RequiredApproval> overrideApprovals, ChangeNotes changeNotes) {
     return changeNotes.getApprovals().get(changeNotes.getCurrentPatchSet().id()).stream()
-        .anyMatch(overrideApproval::isApprovedBy);
+        .anyMatch(
+            patchSetApproval ->
+                overrideApprovals.stream()
+                    .anyMatch(overrideApproval -> overrideApproval.isApprovedBy(patchSetApproval)));
   }
 
   /**

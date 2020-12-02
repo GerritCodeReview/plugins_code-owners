@@ -27,12 +27,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
+import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -1539,6 +1541,89 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(
+      name = "plugin.code-owners.overrideApproval",
+      values = {"Owners-Override+1", "Another-Override+1"})
+  public void getStatus_anyOverrideApprovesAllFiles() throws Exception {
+    // create arbitrary code owner config to avoid entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+    createArbitraryCodeOwnerConfigFile();
+
+    createOwnersOverrideLabel();
+    createOwnersOverrideLabel("Another-Override");
+
+    // Create a change.
+    String changeId =
+        pushFactory
+            .create(
+                admin.newIdent(),
+                testRepo,
+                "Test Change",
+                ImmutableMap.of(
+                    "foo/baz.config", "content",
+                    "bar/baz.config", "other content"))
+            .to("refs/for/master")
+            .getChangeId();
+
+    // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
+    // Add an override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // With override approval the expected status is APPROVED.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.APPROVED);
+    }
+
+    // Delete the override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
+
+    // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
+    // Add another override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Another-Override", 1));
+
+    // With override approval the expected status is APPROVED.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.APPROVED);
+    }
+  }
+
+  @Test
   public void cannotCheckIfSubmittableForNullChangeNotes() throws Exception {
     NullPointerException npe =
         assertThrows(
@@ -1621,6 +1706,53 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Add an override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // With override approval the change is submittable.
+    assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isTrue();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.overrideApproval",
+      values = {"Owners-Override+1", "Another-Override+1"})
+  public void isSubmittableIfAnyOverrideIsPresent() throws Exception {
+    // create arbitrary code owner config to avoid entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+    createArbitraryCodeOwnerConfigFile();
+
+    createOwnersOverrideLabel();
+    createOwnersOverrideLabel("Another-Override");
+
+    // Create a change.
+    String changeId =
+        pushFactory
+            .create(
+                admin.newIdent(),
+                testRepo,
+                "Test Change",
+                ImmutableMap.of(
+                    "foo/baz.config", "content",
+                    "bar/baz.config", "other content"))
+            .to("refs/for/master")
+            .getChangeId();
+
+    // Without override approval the change is not submittable.
+    assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isFalse();
+
+    // Add an override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // With override approval the change is submittable.
+    assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isTrue();
+
+    // Delete the override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
+
+    // Without override approval the change is not submittable.
+    assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isFalse();
+
+    // Add another override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Another-Override", 1));
 
     // With override approval the change is submittable.
     assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isTrue();
@@ -1853,6 +1985,90 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(
+      name = "plugin.code-owners.overrideApproval",
+      values = {"Owners-Override+1", "Another-Override+1"})
+  public void bootstrappingGetStatus_anyOverrideApprovesAllFiles() throws Exception {
+    // since no code owner config exists we are entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+
+    createOwnersOverrideLabel();
+    createOwnersOverrideLabel("Another-Override");
+
+    // Create a change with a user that is not a project owner.
+    TestRepository<InMemoryRepository> testRepo = cloneProject(project, user);
+    String changeId =
+        pushFactory
+            .create(
+                user.newIdent(),
+                testRepo,
+                "Test Change",
+                ImmutableMap.of(
+                    "foo/baz.config", "content",
+                    "bar/baz.config", "other content"))
+            .to("refs/for/master")
+            .getChangeId();
+
+    // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
+    // Add an override approval (by a user that is not a project owners, and hence no code owner).
+    requestScopeOperations.setApiUser(user.id());
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // With override approval the expected status is APPROVED.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.APPROVED);
+    }
+
+    // Delete the override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
+
+    // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
+    // Add another override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Another-Override", 1));
+
+    // With override approval the expected status is APPROVED.
+    for (FileCodeOwnerStatus fileCodeOwnerStatus :
+        codeOwnerApprovalCheck
+            .getFileStatuses(getChangeNotes(changeId))
+            .collect(toImmutableList())) {
+      assertThat(fileCodeOwnerStatus)
+          .hasNewPathStatus()
+          .value()
+          .hasStatusThat()
+          .isEqualTo(CodeOwnerStatus.APPROVED);
+    }
+  }
+
+  @Test
   public void getStatus_branchDeleted() throws Exception {
     String branchName = "tempBranch";
     createBranch(BranchNameKey.create(project, branchName));
@@ -1988,6 +2204,70 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .update();
     requestScopeOperations.setApiUser(user.id());
     approve(changeId);
+
+    // Check that the file is approved now.
+    requestScopeOperations.setApiUser(admin.id());
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void ownersOverridePlus2CountsAsOverrideIfOverridePlus1IsRequired() throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+2", "Override+2", "+1", "Override", " 0", "No Override");
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 2)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    TestAccount user2 = accountCreator.user2();
+
+    // Create a code owner config file with 'admin' as code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // Create a change as 'user' that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is not approved yet.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Let 'user2' override with Owners-Override+2
+    requestScopeOperations.setApiUser(user2.id());
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 2));
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());

@@ -159,12 +159,14 @@ public class CodeOwnerProjectConfigJson {
     return formatRequiredApproval(codeOwnersPluginConfiguration.getRequiredApproval(projectName));
   }
 
+  @VisibleForTesting
   @Nullable
-  private RequiredApprovalInfo formatOverrideApprovalInfo(Project.NameKey projectName) {
-    return codeOwnersPluginConfiguration
-        .getOverrideApproval(projectName)
-        .map(CodeOwnerProjectConfigJson::formatRequiredApproval)
-        .orElse(null);
+  ImmutableList<RequiredApprovalInfo> formatOverrideApprovalInfo(Project.NameKey projectName) {
+    ImmutableList<RequiredApprovalInfo> overrideApprovalInfos =
+        codeOwnersPluginConfiguration.getOverrideApproval(projectName).stream()
+            .map(CodeOwnerProjectConfigJson::formatRequiredApproval)
+            .collect(toImmutableList());
+    return overrideApprovalInfos.isEmpty() ? null : overrideApprovalInfos;
   }
 
   @VisibleForTesting
