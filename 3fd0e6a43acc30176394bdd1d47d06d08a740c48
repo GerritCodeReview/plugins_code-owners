@@ -104,6 +104,30 @@
       },
       "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b478a329_4a2cf4b7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1074328
+      },
+      "writtenOn": "2020-12-02T17:09:03Z",
+      "side": 1,
+      "message": "Thanks for clarifying. One final clarification: That likely also means that if there is /a/b/foo.java and /a/b/bar.cc bot of them will be in the list, correct?",
+      "parentUuid": "8d6baee8_db46eef5",
+      "range": {
+        "startLine": 100,
+        "startChar": 24,
+        "endLine": 100,
+        "endChar": 34
+      },
+      "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
