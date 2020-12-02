@@ -16,6 +16,46 @@
       "message": "Requires this change in Gerrit core:\nhttps://gerrit-review.googlesource.com/c/gerrit/+/290572",
       "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3d87b5c7_9f2111da",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1074328
+      },
+      "writtenOn": "2020-12-02T16:36:14Z",
+      "side": 1,
+      "message": "Thanks for doing this Edwin. Just have one quick question to make sure I understand what\u0027s being put into the change message.",
+      "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0d273430_1041e932",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1074328
+      },
+      "writtenOn": "2020-12-02T16:36:14Z",
+      "side": 1,
+      "message": "just to clarify, Edwin, will these be full file names with paths or just the directories that contained the approved files? Would sub-directories also be included? So say I am the owner for the files /a/b/c/x.java and /a/b/y.cc in the change, what exactly would be added to the change message?  Maybe you can add an example of a concrete message to the commit message?",
+      "range": {
+        "startLine": 100,
+        "startChar": 24,
+        "endLine": 100,
+        "endChar": 34
+      },
+      "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
