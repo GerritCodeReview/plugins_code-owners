@@ -373,6 +373,68 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
         .isEmpty();
   }
 
+  @Test
+  public void getCodeOwnerConfigFilesWithPathGlob() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey2 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey3 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/bar/")
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .withPath("/foo/bar/" + getCodeOwnerConfigFileName())
+                .paths())
+        .containsExactly(
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey3).getFilePath());
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .withPath("/foo/bar/*")
+                .paths())
+        .containsExactly(
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey3).getFilePath())
+        .inOrder();
+
+    assertThat(
+            projectCodeOwnersApiFactory
+                .project(project)
+                .branch("master")
+                .codeOwnerConfigFiles()
+                .withPath("/foo/**")
+                .paths())
+        .containsExactly(
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey3).getFilePath())
+        .inOrder();
+  }
+
   private String getCodeOwnerConfigFileName() {
     CodeOwnerBackend backend = backendConfig.getDefaultBackend();
     if (backend instanceof FindOwnersBackend) {

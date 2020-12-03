@@ -51,6 +51,7 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
 
   private boolean includeNonParsableFiles;
   private String email;
+  private String pathGlob;
 
   @Option(
       name = "--include-non-parsable-files",
@@ -65,6 +66,15 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
       usage = "limits the returned code owner config files to those that contain this email")
   public void setEmail(@Nullable String email) {
     this.email = email;
+  }
+
+  @Option(
+      name = "--path",
+      usage =
+          "limits the returned code owner config files to those that have a path matching"
+              + " this glob")
+  public void setPath(@Nullable String pathGlob) {
+    this.pathGlob = pathGlob;
   }
 
   @Inject
@@ -108,7 +118,8 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
                 ? (codeOwnerConfigFilePath, configInvalidException) -> {
                   codeOwnerConfigs.add(codeOwnerConfigFilePath);
                 }
-                : CodeOwnerConfigScanner.ignoreInvalidCodeOwnerConfigFiles());
+                : CodeOwnerConfigScanner.ignoreInvalidCodeOwnerConfigFiles(),
+            pathGlob);
     return Response.ok(
         codeOwnerConfigs.build().stream().map(Path::toString).collect(toImmutableList()));
   }

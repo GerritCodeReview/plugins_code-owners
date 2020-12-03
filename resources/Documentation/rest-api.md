@@ -188,6 +188,7 @@ The following request parameters can be specified:
 | ----------- | -------- | ----------- |
 | `include-non-parsable-files` | optional | Includes non-parseable code owner config files in the response. By default `false`. Cannot be used in combination with the `email` option.
 | `email`     | optional | Code owner email that must appear in the returned code owner config files.
+| `path`      | optional | Path glob that must be matched by the returned code owner config files.
 
 #### Request
 
