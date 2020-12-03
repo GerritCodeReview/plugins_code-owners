@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
@@ -32,16 +31,10 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
-import org.eclipse.jgit.junit.TestRepository;
-import org.eclipse.jgit.lib.Config;
-import org.eclipse.jgit.lib.Ref;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -263,22 +256,24 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
 
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
-    setConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+    setCodeOwnersConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
   }
 
   private void configureOverrideInfoUrl(Project.NameKey project, String overrideInfoUrl)
       throws Exception {
-    setConfig(project, null, GeneralConfig.KEY_OVERRIDE_INFO_URL, overrideInfoUrl);
+    setCodeOwnersConfig(project, null, GeneralConfig.KEY_OVERRIDE_INFO_URL, overrideInfoUrl);
   }
 
   private void configureMergeCommitStrategy(
       Project.NameKey project, MergeCommitStrategy mergeCommitStrategy) throws Exception {
-    setConfig(project, null, GeneralConfig.KEY_MERGE_COMMIT_STRATEGY, mergeCommitStrategy.name());
+    setCodeOwnersConfig(
+        project, null, GeneralConfig.KEY_MERGE_COMMIT_STRATEGY, mergeCommitStrategy.name());
   }
 
   private void configureFallbackCodeOwners(
       Project.NameKey project, FallbackCodeOwners fallbackCodeOwners) throws Exception {
-    setConfig(project, null, GeneralConfig.KEY_FALLBACK_CODE_OWNERS, fallbackCodeOwners.name());
+    setCodeOwnersConfig(
+        project, null, GeneralConfig.KEY_FALLBACK_CODE_OWNERS, fallbackCodeOwners.name());
   }
 
   private void configureDisabledBranch(Project.NameKey project, String disabledBranch)
@@ -292,41 +287,23 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
 
   private void configureBackend(
       Project.NameKey project, @Nullable String branch, String backendName) throws Exception {
-    setConfig(project, branch, BackendConfig.KEY_BACKEND, backendName);
+    setCodeOwnersConfig(project, branch, BackendConfig.KEY_BACKEND, backendName);
   }
 
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
-    setConfig(project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
+    setCodeOwnersConfig(
+        project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
   }
 
   private void configureOverrideApproval(Project.NameKey project, String overrideApproval)
       throws Exception {
-    setConfig(project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, overrideApproval);
+    setCodeOwnersConfig(
+        project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, overrideApproval);
   }
 
   private void configureImplicitApprovals(Project.NameKey project) throws Exception {
-    setConfig(project, null, GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS, "true");
-  }
-
-  private void setConfig(Project.NameKey project, String subsection, String key, String value)
-      throws Exception {
-    Config codeOwnersConfig = new Config();
-    codeOwnersConfig.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value);
-    try (TestRepository<Repository> testRepo =
-        new TestRepository<>(repoManager.openRepository(project))) {
-      Ref ref = testRepo.getRepository().exactRef(RefNames.REFS_CONFIG);
-      RevCommit head = testRepo.getRevWalk().parseCommit(ref.getObjectId());
-      testRepo.update(
-          RefNames.REFS_CONFIG,
-          testRepo
-              .commit()
-              .parent(head)
-              .message("Configure code owner backend")
-              .add("code-owners.config", codeOwnersConfig.toText()));
-    }
-    projectCache.evict(project);
+    setCodeOwnersConfig(project, null, GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS, "true");
   }
 
   /** Returns the ID of a code owner backend that is not the given backend. */
