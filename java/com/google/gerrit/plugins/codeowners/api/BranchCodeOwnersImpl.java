@@ -66,6 +66,7 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
         GetCodeOwnerConfigFiles getCodeOwnerConfigFiles = getCodeOwnerConfigFilesProvider.get();
         getCodeOwnerConfigFiles.setIncludeNonParsableFiles(getIncludeNonParsableFiles());
         getCodeOwnerConfigFiles.setEmail(getEmail());
+        getCodeOwnerConfigFiles.setPath(getPath());
         return getCodeOwnerConfigFiles.apply(branchResource).value();
       }
     };
