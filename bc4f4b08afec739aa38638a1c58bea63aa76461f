@@ -22,6 +22,30 @@
       },
       "revId": "bc4f4b08afec739aa38638a1c58bea63aa76461f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c96961ef_c7a5f04b",
+        "filename": "resources/Documentation/config-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-03T14:34:46Z",
+      "side": 1,
+      "message": "Yes, this is a valid concern.\n\nStill I prefer having this information here too, as it\u0027s quite difficult to find the relevant information in config.md. config.md is not made to be read from start to end, but rather to lookup how a certain parameter behaves. config-guide.md starts from the use-case and then points you to the config parameters that are relevant for it. So I expect this to be the starting point for most readers. This is why I want it to contain enough information so that readers can judge if this is relevant to them without going to another page, even if it means duplicating some information. I believe for merge commits it\u0027s rather unlikely that we ever add a third option. It\u0027s rather the config for implicit approvals that is still going to be changed. But yeah, I\u0027m fine with needing to update this doc then.",
+      "parentUuid": "d8176ed2_faec1097",
+      "range": {
+        "startLine": 40,
+        "startChar": 0,
+        "endLine": 40,
+        "endChar": 71
+      },
+      "revId": "bc4f4b08afec739aa38638a1c58bea63aa76461f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
