@@ -252,7 +252,7 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     createOwnersOverrideLabel();
     setCodeOwnersConfig(
         project,
-        null,
+        /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         ImmutableList.of("Owners-Override+1", "Code-Review+2"));
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
@@ -275,33 +275,42 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   private void configureFileExtension(Project.NameKey project, String fileExtension)
       throws Exception {
-    setCodeOwnersConfig(project, null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
+    setCodeOwnersConfig(
+        project, /* subsection= */ null, GeneralConfig.KEY_FILE_EXTENSION, fileExtension);
   }
 
   private void configureOverrideInfoUrl(Project.NameKey project, String overrideInfoUrl)
       throws Exception {
-    setCodeOwnersConfig(project, null, GeneralConfig.KEY_OVERRIDE_INFO_URL, overrideInfoUrl);
+    setCodeOwnersConfig(
+        project, /* subsection= */ null, GeneralConfig.KEY_OVERRIDE_INFO_URL, overrideInfoUrl);
   }
 
   private void configureMergeCommitStrategy(
       Project.NameKey project, MergeCommitStrategy mergeCommitStrategy) throws Exception {
     setCodeOwnersConfig(
-        project, null, GeneralConfig.KEY_MERGE_COMMIT_STRATEGY, mergeCommitStrategy.name());
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
+        mergeCommitStrategy.name());
   }
 
   private void configureFallbackCodeOwners(
       Project.NameKey project, FallbackCodeOwners fallbackCodeOwners) throws Exception {
     setCodeOwnersConfig(
-        project, null, GeneralConfig.KEY_FALLBACK_CODE_OWNERS, fallbackCodeOwners.name());
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        fallbackCodeOwners.name());
   }
 
   private void configureDisabledBranch(Project.NameKey project, String disabledBranch)
       throws Exception {
-    setCodeOwnersConfig(project, null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
+    setCodeOwnersConfig(
+        project, /* subsection= */ null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
   }
 
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
-    configureBackend(project, null, backendName);
+    configureBackend(project, /* branch= */ null, backendName);
   }
 
   private void configureBackend(
@@ -312,17 +321,24 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
     setCodeOwnersConfig(
-        project, null, RequiredApprovalConfig.KEY_REQUIRED_APPROVAL, requiredApproval);
+        project,
+        /* subsection= */ null,
+        RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
+        requiredApproval);
   }
 
   private void configureOverrideApproval(Project.NameKey project, String overrideApproval)
       throws Exception {
     setCodeOwnersConfig(
-        project, null, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, overrideApproval);
+        project,
+        /* subsection= */ null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        overrideApproval);
   }
 
   private void configureImplicitApprovals(Project.NameKey project) throws Exception {
-    setCodeOwnersConfig(project, null, GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS, "true");
+    setCodeOwnersConfig(
+        project, /* subsection= */ null, GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS, "true");
   }
 
   /** Returns the ID of a code owner backend that is not the given backend. */
