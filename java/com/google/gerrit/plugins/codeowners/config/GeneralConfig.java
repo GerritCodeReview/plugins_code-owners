@@ -227,7 +227,7 @@ public class GeneralConfig {
               + " plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_FALLBACK_CODE_OWNERS),
           pluginName,
-          KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+          KEY_FALLBACK_CODE_OWNERS,
           FallbackCodeOwners.NONE);
       return FallbackCodeOwners.NONE;
     }
