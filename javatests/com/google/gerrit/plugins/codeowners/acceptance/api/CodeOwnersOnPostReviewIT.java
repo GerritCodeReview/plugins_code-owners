@@ -260,4 +260,124 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
   }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "4")
+  public void pathsInChangeMessageAreLimited_limitNotReached() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path1 = "foo/bar.baz";
+    String path2 = "foo/baz.bar";
+    String path3 = "bar/foo.baz";
+    String path4 = "bar/baz.foo";
+    String changeId =
+        createChange(
+                "Test Change",
+                ImmutableMap.of(
+                    path1,
+                    "file content",
+                    path2,
+                    "file content",
+                    path3,
+                    "file content",
+                    path4,
+                    "file content"))
+            .getChangeId();
+
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n"
+                    + "* %s\n"
+                    + "* %s\n"
+                    + "* %s\n",
+                admin.fullName(), path4, path3, path1, path2));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "3")
+  public void pathsInChangeMessageAreLimited_limitReached() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path1 = "foo/bar.baz";
+    String path2 = "foo/baz.bar";
+    String path3 = "bar/foo.baz";
+    String path4 = "bar/baz.foo";
+    String changeId =
+        createChange(
+                "Test Change",
+                ImmutableMap.of(
+                    path1,
+                    "file content",
+                    path2,
+                    "file content",
+                    path3,
+                    "file content",
+                    path4,
+                    "file content"))
+            .getChangeId();
+
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n"
+                    + "* %s\n"
+                    + "(2 more files)\n",
+                admin.fullName(), path4, path3));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "0")
+  public void pathsInChangeMessagesDisabled() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String changeId =
+        createChange(
+                "Test Change",
+                ImmutableMap.of(
+                    "foo/bar.baz",
+                    "file content",
+                    "foo/baz.bar",
+                    "file content",
+                    "bar/foo.baz",
+                    "file content",
+                    "bar/baz.foo",
+                    "file content"))
+            .getChangeId();
+
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
+  }
 }
