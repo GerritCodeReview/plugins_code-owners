@@ -152,6 +152,30 @@
       },
       "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7eb2aad4_70112186",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-03T08:56:52Z",
+      "side": 1,
+      "message": "Included an example message into the commit message.",
+      "parentUuid": "b032745a_b2c6797a",
+      "range": {
+        "startLine": 100,
+        "startChar": 24,
+        "endLine": 100,
+        "endChar": 34
+      },
+      "revId": "3fd0e6a43acc30176394bdd1d47d06d08a740c48",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
