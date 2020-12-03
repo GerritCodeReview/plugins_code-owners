@@ -248,10 +248,10 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     ImmutableList<RequiredApprovalInfo> requiredApprovalInfos =
         codeOwnerProjectConfigJson.formatOverrideApprovalInfo(project);
     assertThat(requiredApprovalInfos).hasSize(2);
-    assertThat(requiredApprovalInfos.get(0).label).isEqualTo("Owners-Override");
-    assertThat(requiredApprovalInfos.get(0).value).isEqualTo(1);
-    assertThat(requiredApprovalInfos.get(1).label).isEqualTo("Code-Review");
-    assertThat(requiredApprovalInfos.get(1).value).isEqualTo(2);
+    assertThat(requiredApprovalInfos.get(0).label).isEqualTo("Code-Review");
+    assertThat(requiredApprovalInfos.get(0).value).isEqualTo(2);
+    assertThat(requiredApprovalInfos.get(1).label).isEqualTo("Owners-Override");
+    assertThat(requiredApprovalInfos.get(1).value).isEqualTo(1);
   }
 
   @Test

@@ -265,11 +265,11 @@ public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         projectCodeOwnersApiFactory.project(project).getConfig();
     assertThat(codeOwnerProjectConfigInfo.overrideApproval).hasSize(2);
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).label)
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).label).isEqualTo("Code-Review");
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).value).isEqualTo(2);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(1).label)
         .isEqualTo("Owners-Override");
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(0).value).isEqualTo(1);
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(1).label).isEqualTo("Code-Review");
-    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(1).value).isEqualTo(2);
+    assertThat(codeOwnerProjectConfigInfo.overrideApproval.get(1).value).isEqualTo(1);
   }
 
   @Test

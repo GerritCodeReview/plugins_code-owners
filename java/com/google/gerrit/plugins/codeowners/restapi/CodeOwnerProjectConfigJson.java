@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -164,6 +165,7 @@ public class CodeOwnerProjectConfigJson {
   ImmutableList<RequiredApprovalInfo> formatOverrideApprovalInfo(Project.NameKey projectName) {
     ImmutableList<RequiredApprovalInfo> overrideApprovalInfos =
         codeOwnersPluginConfiguration.getOverrideApproval(projectName).stream()
+            .sorted(comparing(requiredApproval -> requiredApproval.toString()))
             .map(CodeOwnerProjectConfigJson::formatRequiredApproval)
             .collect(toImmutableList());
     return overrideApprovalInfos.isEmpty() ? null : overrideApprovalInfos;

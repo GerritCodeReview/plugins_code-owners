@@ -238,11 +238,11 @@ public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
         projectCodeOwnersApiFactory.project(project).branch("master").getConfig();
     assertThat(codeOwnerBranchConfigInfo.overrideApproval).hasSize(2);
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).label)
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).label).isEqualTo("Code-Review");
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).value).isEqualTo(2);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(1).label)
         .isEqualTo("Owners-Override");
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(0).value).isEqualTo(1);
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(1).label).isEqualTo("Code-Review");
-    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(1).value).isEqualTo(2);
+    assertThat(codeOwnerBranchConfigInfo.overrideApproval.get(1).value).isEqualTo(1);
   }
 
   @Test
