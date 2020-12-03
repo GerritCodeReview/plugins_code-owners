@@ -66,6 +66,9 @@ public class GeneralConfig {
   public static final String KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED =
       "enableValidationOnCommitReceived";
 
+  @VisibleForTesting
+  public static final String KEY_MAX_PATHS_IN_CHANGE_MESSAGES = "maxPathsInChangeMessages";
+
   @VisibleForTesting public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
   @VisibleForTesting public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
 
@@ -73,6 +76,8 @@ public class GeneralConfig {
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
 
   @VisibleForTesting public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
+
+  @VisibleForTesting static final int DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES = 100;
 
   private final String pluginName;
   private final PluginConfig pluginConfigFromGerritConfig;
@@ -135,6 +140,29 @@ public class GeneralConfig {
                   fileName,
                   SECTION_CODE_OWNERS,
                   KEY_FALLBACK_CODE_OWNERS),
+              ValidationMessage.Type.ERROR));
+    }
+
+    try {
+      projectLevelConfig
+          .getConfig()
+          .getInt(
+              SECTION_CODE_OWNERS,
+              null,
+              KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+              DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+    } catch (IllegalArgumentException e) {
+      validationMessages.add(
+          new CommitValidationMessage(
+              String.format(
+                  "The value for max paths in change messages '%s' that is configured in %s"
+                      + " (parameter %s.%s) is invalid.",
+                  projectLevelConfig
+                      .getConfig()
+                      .getString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
+                  fileName,
+                  SECTION_CODE_OWNERS,
+                  KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
               ValidationMessage.Type.ERROR));
     }
 
@@ -230,6 +258,51 @@ public class GeneralConfig {
           KEY_FALLBACK_CODE_OWNERS,
           FallbackCodeOwners.NONE);
       return FallbackCodeOwners.NONE;
+    }
+  }
+
+  /**
+   * Gets the maximum number of paths that should be incuded in change messages.
+   *
+   * @param project the project for which the maximum number of paths in change messages should be
+   *     read
+   * @param pluginConfig the plugin config from which the maximum number of paths in change messages
+   *     should be read
+   * @return the maximum number of paths in change messages
+   */
+  int getMaxPathsInChangeMessages(Project.NameKey project, Config pluginConfig) {
+    requireNonNull(project, "project");
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    String maxPathInChangeMessagesString =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES);
+    if (maxPathInChangeMessagesString != null) {
+      try {
+        return pluginConfig.getInt(
+            SECTION_CODE_OWNERS,
+            null,
+            KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+            DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().log(
+            "Ignoring invalid value %s for max paths in change messages in '%s.config' of"
+                + " project %s. Falling back to global config.",
+            maxPathInChangeMessagesString, pluginName, project.get());
+      }
+    }
+
+    try {
+      return pluginConfigFromGerritConfig.getInt(
+          KEY_MAX_PATHS_IN_CHANGE_MESSAGES, DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().log(
+          "Ignoring invalid value %s for max paths in change messages in gerrit.config (parameter"
+              + " plugin.%s.%s). Falling back to default value %s.",
+          pluginConfigFromGerritConfig.getString(KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
+          pluginName,
+          KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+          DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+      return DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
     }
   }
 

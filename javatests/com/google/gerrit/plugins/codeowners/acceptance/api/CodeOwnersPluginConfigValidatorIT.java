@@ -446,6 +446,44 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
                 + " (parameter codeOwners.fallbackCodeOwners) is invalid.");
   }
 
+  @Test
+  public void configureMaxPathsInChangeMessages() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setInt(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+        50);
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(50);
+  }
+
+  @Test
+  public void cannotSetInvalidMaxPathsInChangeMessages() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+        "INVALID");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            "The value for max paths in change messages 'INVALID' that is configured in"
+                + " code-owners.config (parameter codeOwners.maxPathsInChangeMessages) is invalid.");
+  }
+
   private void fetchRefsMetaConfig() throws Exception {
     fetch(testRepo, RefNames.REFS_CONFIG + ":" + RefNames.REFS_CONFIG);
     testRepo.reset(RefNames.REFS_CONFIG);

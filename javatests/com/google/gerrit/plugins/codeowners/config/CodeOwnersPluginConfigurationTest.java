@@ -910,6 +910,50 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         .isEqualTo(FallbackCodeOwners.NONE);
   }
 
+  @Test
+  public void cannotGetMaxPathsInChangeMessagesForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(/* project= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void getMaxPathsInChangeMessagesIfNoneIsConfigured() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project))
+        .isEqualTo(GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "50")
+  public void getMaxPathsInChangeMessagesIfNoneIsConfiguredOnProjectLevel() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(50);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "50")
+  public void maxPathInChangeMessagesOnProjectLevelOverridesGlobalMaxPathInChangeMessages()
+      throws Exception {
+    configureFallbackCodeOwners(project, FallbackCodeOwners.NONE);
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "50")
+  public void maxPathInChangeMessagesIsInheritedFromParentProject() throws Exception {
+    configureMaxPathsInChangeMessages(allProjects, 20);
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(20);
+  }
+
+  @Test
+  public void inheritedMaxPathInChangeMessagesCanBeOverridden() throws Exception {
+    configureMaxPathsInChangeMessages(allProjects, 50);
+    configureMaxPathsInChangeMessages(project, 20);
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(20);
+  }
+
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {
     setCodeOwnersConfig(project, /* subsection= */ null, StatusConfig.KEY_DISABLED, disabled);
   }
@@ -973,6 +1017,15 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         /* subsection= */ null,
         GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
         fallbackCodeOwners.name());
+  }
+
+  private void configureMaxPathsInChangeMessages(
+      Project.NameKey project, int maxPathsInChangeMessages) throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+        Integer.toString(maxPathsInChangeMessages));
   }
 
   private AutoCloseable registerTestBackend() {
