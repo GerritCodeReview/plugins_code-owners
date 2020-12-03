@@ -16,6 +16,24 @@
       "message": "fyi I recently found that internally we have a check that verifies that your comments actually match the variable. ",
       "revId": "9a573d6002750264cac6c96a668b55cfcd1bbabf",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "379fe31c_3291047f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-03T16:15:53Z",
+      "side": 1,
+      "message": "I noticed that it runs on import. This is how I found these:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/290264",
+      "parentUuid": "a10619c4_bae3ba47",
+      "revId": "9a573d6002750264cac6c96a668b55cfcd1bbabf",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
