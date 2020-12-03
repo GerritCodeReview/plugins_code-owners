@@ -14,10 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.truth.PathSubject.paths;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -44,5 +49,24 @@ public class CodeOwnerConfigReferenceTest extends AbstractCodeOwnersTest {
                     .setBranch(Optional.of("master"))
                     .build());
     assertThat(exception).hasMessageThat().isEqualTo("branch must be full name: master");
+  }
+
+  @Test
+  public void absoluteFilePathCanBeSpecifiedInDifferentFormats() throws Exception {
+    Path expectedPath = Paths.get("/foo/OWNERS");
+    for (String inputPath : new String[] {"/foo/OWNERS", "//foo/OWNERS"}) {
+      Path path =
+          CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, inputPath).filePath();
+      assertWithMessage(inputPath).about(paths()).that(path).isEqualTo(expectedPath);
+      assertThat(path.isAbsolute()).isTrue();
+    }
+  }
+
+  @Test
+  public void relativeFilePathCanBeSpecified() throws Exception {
+    Path path =
+        CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "foo/OWNERS").filePath();
+    assertThat(path).isEqualTo(Paths.get("foo/OWNERS"));
+    assertThat(path.isAbsolute()).isFalse();
   }
 }
