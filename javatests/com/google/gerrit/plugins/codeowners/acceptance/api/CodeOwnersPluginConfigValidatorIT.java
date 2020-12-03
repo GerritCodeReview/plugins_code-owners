@@ -37,8 +37,10 @@ import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevObject;
 import org.eclipse.jgit.transport.PushResult;
 import org.eclipse.jgit.transport.RemoteRefUpdate.Status;
+import org.eclipse.jgit.util.RawParseUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -366,6 +368,52 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
                       + " '<label-name>+<label-value>'.",
                   invalidValue, OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL));
     }
+  }
+
+  @Test
+  public void defineAndConfigureOverrideLabelInSameCommit() throws Exception {
+    fetchRefsMetaConfig();
+
+    RevCommit head = getHead(testRepo.getRepository(), RefNames.REFS_CONFIG);
+    RevObject blob = testRepo.get(head.getTree(), "project.config");
+    byte[] data = testRepo.getRepository().open(blob).getCachedBytes(Integer.MAX_VALUE);
+    String projectConfigText = RawParseUtils.decode(data);
+
+    Config projectConfig = new Config();
+    projectConfig.fromText(projectConfigText);
+    String labelName = "Owners-Override";
+    projectConfig.setString("label", labelName, "function", "NoOp");
+    projectConfig.setStringList(
+        "label", labelName, "value", ImmutableList.of("0 Not Override", "+1 Override"));
+
+    Config codeOwnersConfig = new Config();
+    codeOwnersConfig.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
+        "Owners-Override+1");
+
+    RevCommit commit =
+        testRepo.update(
+            RefNames.REFS_CONFIG,
+            testRepo
+                .commit()
+                .parent(head)
+                .message("Add test code owner config")
+                .author(admin.newIdent())
+                .committer(admin.newIdent())
+                .add("code-owners.config", codeOwnersConfig.toText())
+                .add("project.config", projectConfig.toText()));
+
+    testRepo.reset(commit);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    ImmutableSet<RequiredApproval> overrideApproval =
+        codeOwnersPluginConfiguration.getOverrideApproval(project);
+    assertThat(overrideApproval).hasSize(1);
+    assertThat(overrideApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(overrideApproval).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test

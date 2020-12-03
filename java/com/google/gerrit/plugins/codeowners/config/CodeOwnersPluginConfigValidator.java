@@ -14,8 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
-import static com.google.gerrit.server.project.ProjectCache.illegalState;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Project;
@@ -30,7 +28,7 @@ import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
-import com.google.gerrit.server.project.ProjectCache;
+import com.google.gerrit.server.project.ProjectConfig;
 import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
@@ -41,6 +39,7 @@ import java.util.List;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 
 /** Validates modifications to the {@code code-owners.config} file in {@code refs/meta/config}. */
 @Singleton
@@ -48,8 +47,9 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final String pluginName;
-  private final ProjectCache projectCache;
   private final GitRepositoryManager repoManager;
+  private final ProjectConfig.Factory projectConfigFactory;
+  private final ProjectState.Factory projectStateFactory;
   private final ChangedFiles changedFiles;
   private final GeneralConfig generalConfig;
   private final StatusConfig statusConfig;
@@ -60,8 +60,9 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
   @Inject
   CodeOwnersPluginConfigValidator(
       @PluginName String pluginName,
-      ProjectCache projectCache,
       GitRepositoryManager repoManager,
+      ProjectConfig.Factory projectConfigFactory,
+      ProjectState.Factory projectStateFactory,
       ChangedFiles changedFiles,
       GeneralConfig generalConfig,
       StatusConfig statusConfig,
@@ -69,8 +70,9 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
       RequiredApprovalConfig requiredApprovalConfig,
       OverrideApprovalConfig overrideApprovalConfig) {
     this.pluginName = pluginName;
-    this.projectCache = projectCache;
     this.repoManager = repoManager;
+    this.projectConfigFactory = projectConfigFactory;
+    this.projectStateFactory = projectStateFactory;
     this.changedFiles = changedFiles;
     this.generalConfig = generalConfig;
     this.statusConfig = statusConfig;
@@ -93,17 +95,26 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
         return ImmutableList.of();
       }
 
-      ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+      ProjectState projectState = getProjectState(project, receiveEvent.commit);
       ProjectLevelConfig.Bare cfg = loadConfig(project, fileName, receiveEvent.commit);
       validateConfig(projectState, fileName, cfg);
       return ImmutableList.of();
-    } catch (IOException | PatchListNotAvailableException e) {
+    } catch (IOException | ConfigInvalidException | PatchListNotAvailableException e) {
       String errorMessage =
           String.format(
               "failed to validate file %s for revision %s in ref %s of project %s",
               fileName, receiveEvent.commit.getName(), RefNames.REFS_CONFIG, project);
       logger.atSevere().log(errorMessage);
       throw new CommitValidationException(errorMessage, e);
+    }
+  }
+
+  private ProjectState getProjectState(Project.NameKey projectName, RevCommit commit)
+      throws IOException, ConfigInvalidException {
+    try (Repository repo = repoManager.openRepository(projectName)) {
+      ProjectConfig projectConfig = projectConfigFactory.create(projectName);
+      projectConfig.load(repo, commit);
+      return projectStateFactory.create(projectConfig.getCacheable());
     }
   }
 
