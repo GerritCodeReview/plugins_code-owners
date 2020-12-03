@@ -34,6 +34,7 @@ public interface BranchCodeOwners {
   abstract class CodeOwnerConfigFilesRequest {
     private boolean includeNonParsableFiles;
     private String email;
+    private String path;
 
     /** Includes non-parsable code owner config files into the result. */
     public CodeOwnerConfigFilesRequest includeNonParsableFiles(boolean includeNonParsableFiles) {
@@ -60,6 +61,23 @@ public interface BranchCodeOwners {
     @Nullable
     public String getEmail() {
       return email;
+    }
+
+    /**
+     * Limits the returned code owner config files to those that have a path matching the given
+     * glob.
+     *
+     * @param path the path glob that should be matched
+     */
+    public CodeOwnerConfigFilesRequest withPath(String path) {
+      this.path = path;
+      return this;
+    }
+
+    /** Returns the path glob that should be matched by the returned code owner config files/ */
+    @Nullable
+    public String getPath() {
+      return path;
     }
 
     /** Executes the request and retrieves the paths of the requested code owner config file */
