@@ -50,14 +50,6 @@ import org.eclipse.jgit.lib.ObjectId;
  * <p>The syntax is described at in the {@code find-owners} plugin documentation at:
  * https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md
  *
- * <p><strong>Note:</strong> Currently this class only supports a subset of the syntax. Only the
- * following syntax elements are supported:
- *
- * <ul>
- *   <li>comment: a line can be a comment (comments must start with '#')
- *   <li>code owner emails: a line can be the email of a code owner
- * </ul>
- *
  * <p>Comment lines are silently ignored.
  *
  * <p>Invalid lines cause the parsing to fail and trigger a {@link CodeOwnerConfigParseException}.
