@@ -249,6 +249,21 @@ Parameters that are not set for a project are inherited from the parent project.
         `@PLUGIN@.config`.\
         By default `NONE`.
 
+<a id="pluginCodeOwnersMaxPathsInChangeMessages">plugin.@PLUGIN@.maxPathsInChangeMessages</a>
+:       When a user votes on the [code owners
+        label](#pluginCodeOwnersRequiredApproval) the paths that are affected by
+        the vote are listed in the change message that is posted when the vote
+        is applied.\
+        This configuration parameter controls the maximum number of paths that
+        are included in change messages. This is to prevent that the change
+        messages become too big for large changes that touch many files.\
+        Setting the value to `0` disables including affected paths into change
+        messages.\
+        Can be overridden per project by setting
+        [codeOwners.maxPathsInChangeMessages](#codeOwnersMaxPathsInChangeMessages)
+        in `@PLUGIN@.config`.\
+        By default `100`.
+
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
 <a id="codeOwnersDisabled">codeOwners.disabled</a>
@@ -462,6 +477,24 @@ Parameters that are not set for a project are inherited from the parent project.
         If not set, the global setting
         [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
         in `gerrit.config` is used.
+
+<a id="codeOwnersMaxPathsInChangeMessages">codeOwners.maxPathsInChangeMessages</a>
+:       When a user votes on the [code owners
+        label](#codeOwnersRequiredApproval) the paths that are affected by the
+        vote are listed in the change message that is posted when the vote is
+        applied.\
+        This configuration parameter controls the maximum number of paths that
+        are included in change messages. This is to prevent that the change
+        messages become too big for large changes that touch many files.\
+        Setting the value to `0` disables including affected paths into change
+        messages.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.maxPathsInChangeMessages](#pluginCodeOwnersMaxPathsInChangeMessages)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.maxPathsInChangeMessages](#pluginCodeOwnersMaxPathsInChangeMessages)
+        in `gerrit.config` is used.\
+        By default `100`.
 
 ---
 
