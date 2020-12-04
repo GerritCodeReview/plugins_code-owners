@@ -20,17 +20,21 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
+import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -41,6 +45,15 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
   private CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
 
+  /** Returns a {@code gerrit.config} that configures all users as fallback code owners. */
+  @ConfigSuite.Default
+  public static Config defaultConfig() {
+    Config cfg = new Config();
+    cfg.setString(
+        "plugin", "code-owners", OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, "Owners-Override+1");
+    return cfg;
+  }
+
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnerApprovalCheck = plugin.getSysInjector().getInstance(CodeOwnerApprovalCheck.class);
@@ -49,10 +62,16 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
   }
 
   @Before
+  public void defineOwnersOverrideLabel() throws Exception {
+    createOwnersOverrideLabel();
+  }
+
+  @Before
   public void disableSelfApprovals() throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.ignoreSelfApproval = true;
     gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+    gApi.projects().name(project.get()).label("Owners-Override").update(input);
   }
 
   @Test
@@ -282,6 +301,139 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
         codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  public void notOverriddenByUploaderWhoIsChangeOwner() throws Exception {
+    // create arbitrary code owner config to avoid entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+    createArbitraryCodeOwnerConfigFile();
+
+    TestAccount changeOwner =
+        accountCreator.create(
+            "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is not approved.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add an override approval.
+    requestScopeOperations.setApiUser(changeOwner.id());
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Verify that the file is not approved (since self approvals on the override label are
+    // ignored).
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  public void overridenByChangeOwnerThatIsNotUploader() throws Exception {
+    // create arbitrary code owner config to avoid entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+    createArbitraryCodeOwnerConfigFile();
+
+    TestAccount changeOwner =
+        accountCreator.create(
+            "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Upload another patch set by another user.
+    amendChange(admin, changeId);
+
+    // Verify that the file is not approved.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add an override approval from the change owner.
+    requestScopeOperations.setApiUser(changeOwner.id());
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Verify that the file is approved now (since the change owner is not the uploader of the
+    // current patch set and hence the override counts).
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  public void notOverridenByUploader() throws Exception {
+    // create arbitrary code owner config to avoid entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+    createArbitraryCodeOwnerConfigFile();
+
+    TestAccount changeOwner =
+        accountCreator.create(
+            "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Upload another patch set by another user.
+    amendChange(admin, changeId);
+
+    // Verify that the file is not approved.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add an override approval.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Verify that the file is not approved (since the override from the uploader is ignored).
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
         .hasNewPathStatus()

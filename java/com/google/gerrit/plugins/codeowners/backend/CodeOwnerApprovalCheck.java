@@ -171,26 +171,26 @@ public class CodeOwnerApprovalCheck {
                 .projectName(changeNotes.getProjectName().get())
                 .changeId(changeNotes.getChangeId().get())
                 .build())) {
-      RequiredApproval requiredApproval =
-          codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
-      logger.atFine().log("requiredApproval = %s", requiredApproval);
-
-      ImmutableSet<RequiredApproval> overrideApprovals =
-          codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
-      boolean hasOverride = hasOverride(overrideApprovals, changeNotes);
-      logger.atFine().log(
-          "hasOverride = %s (overrideApprovals = %s)", hasOverride, overrideApprovals);
-
-      BranchNameKey branch = changeNotes.getChange().getDest();
-      ObjectId revision = getDestBranchRevision(changeNotes.getChange());
-      logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
-
       boolean enableImplicitApprovalFromUploader =
           codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName());
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
       logger.atFine().log(
           "patchSetUploader = %d, implicit approval from uploader is %s",
           patchSetUploader.get(), enableImplicitApprovalFromUploader ? "enabled" : "disabled");
+
+      RequiredApproval requiredApproval =
+          codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
+      logger.atFine().log("requiredApproval = %s", requiredApproval);
+
+      ImmutableSet<RequiredApproval> overrideApprovals =
+          codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
+      boolean hasOverride = hasOverride(overrideApprovals, changeNotes, patchSetUploader);
+      logger.atFine().log(
+          "hasOverride = %s (overrideApprovals = %s)", hasOverride, overrideApprovals);
+
+      BranchNameKey branch = changeNotes.getChange().getDest();
+      ObjectId revision = getDestBranchRevision(changeNotes.getChange());
+      logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
       CodeOwnerResolverResult globalCodeOwners =
           codeOwnerResolver
@@ -772,11 +772,34 @@ public class CodeOwnerApprovalCheck {
    *
    * @param overrideApprovals approvals that count as override for the code owners submit check.
    * @param changeNotes the change notes
+   * @param patchSetUploader account ID of the patch set uploader
    * @return whether the given change has an override approval
    */
   private boolean hasOverride(
-      ImmutableSet<RequiredApproval> overrideApprovals, ChangeNotes changeNotes) {
+      ImmutableSet<RequiredApproval> overrideApprovals,
+      ChangeNotes changeNotes,
+      Account.Id patchSetUploader) {
+    ImmutableSet<RequiredApproval> overrideApprovalsThatIgnoreSelfApprovals =
+        overrideApprovals.stream()
+            .filter(overrideApproval -> overrideApproval.labelType().isIgnoreSelfApproval())
+            .collect(toImmutableSet());
     return changeNotes.getApprovals().get(changeNotes.getCurrentPatchSet().id()).stream()
+        .filter(
+            approval -> {
+              // If the approval is from the patch set uploader and if it matches any of the labels
+              // for which self approvals are ignored, filter it out.
+              if (approval.accountId().equals(patchSetUploader)
+                  && overrideApprovalsThatIgnoreSelfApprovals.stream()
+                      .anyMatch(
+                          requiredApproval ->
+                              requiredApproval
+                                  .labelType()
+                                  .getLabelId()
+                                  .equals(approval.key().labelId()))) {
+                return false;
+              }
+              return true;
+            })
         .anyMatch(
             patchSetApproval ->
                 overrideApprovals.stream()
