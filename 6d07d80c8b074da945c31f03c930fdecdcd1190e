@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e15da206_4169cc1a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-04T15:12:18Z",
+      "side": 1,
+      "message": "why not - shouldn\u0027t this also be exported as a metric?",
+      "range": {
+        "startLine": 239,
+        "startChar": 17,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc7e2905_ca604870",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-04T15:12:18Z",
+      "side": 1,
+      "message": "This confused me since it\u0027s not really a part of the test, add a comment that it\u0027s only used to avoid bootstraping?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 0
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7afbaf68_4c367437",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-04T15:12:18Z",
+      "side": 1,
+      "message": "A bit confusing that you\u0027re using user here, but admin in the previous test. Looks like it doesn\u0027t matter so I would just use the same one.",
+      "range": {
+        "startLine": 107,
+        "startChar": 83,
+        "endLine": 107,
+        "endChar": 92
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ed3ee5ae_124f4951",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-04T15:12:18Z",
+      "side": 1,
+      "message": "wrong comment? assertion here is \"approved\".",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 100
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
