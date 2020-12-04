@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -702,14 +703,13 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         ImmutableList.of("Owners-Override+1", "Other-Override+1"));
 
-    // If multiple values are set for a key, the last value wins.
-    ImmutableSet<RequiredApproval> requiredApproval =
+    ImmutableSet<RequiredApproval> requiredApprovals =
         codeOwnersPluginConfiguration.getOverrideApproval(project);
-    assertThat(requiredApproval).hasSize(2);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
-    assertThat(requiredApproval).element(1).hasLabelNameThat().isEqualTo("Other-Override");
-    assertThat(requiredApproval).element(1).hasValueThat().isEqualTo(1);
+    assertThat(
+            requiredApprovals.stream()
+                .map(requiredApproval -> requiredApproval.toString())
+                .collect(toImmutableSet()))
+        .containsExactly("Owners-Override+1", "Other-Override+1");
   }
 
   @Test
