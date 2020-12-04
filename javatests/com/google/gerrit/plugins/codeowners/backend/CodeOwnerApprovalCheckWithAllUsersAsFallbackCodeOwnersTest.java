@@ -69,14 +69,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(codeOwner.email())
-        .create();
+    setAsRootCodeOwners(codeOwner);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -130,14 +123,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(codeOwner.email())
-        .create();
+    setAsRootCodeOwners(codeOwner);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
