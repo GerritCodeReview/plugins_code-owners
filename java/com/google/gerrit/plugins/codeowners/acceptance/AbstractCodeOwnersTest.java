@@ -36,6 +36,7 @@ import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation.Builder;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
 import com.google.inject.Inject;
@@ -242,6 +243,54 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
     enableCodeOwnersForProject(project);
+  }
+
+  /**
+   * Creates a default code owner config with the given test accounts as code owners.
+   *
+   * @param testAccounts the accounts of the users that should be code owner
+   */
+  protected void setAsDefaultCodeOwner(TestAccount... testAccounts) {
+    setAsCodeOwner(RefNames.REFS_CONFIG, "/", testAccounts);
+  }
+
+  /**
+   * Creates a root code owner config with the given test accounts as code owners.
+   *
+   * @param testAccounts the accounts of the users that should be code owner
+   */
+  protected void setAsRootCodeOwner(TestAccount... testAccounts) {
+    setAsCodeOwner("/", testAccounts);
+  }
+
+  /**
+   * Creates a code owner config at the given path with the given test accounts as code owners.
+   *
+   * @param path the path of the code owner config file
+   * @param testAccounts the accounts of the users that should be code owner
+   */
+  protected void setAsCodeOwner(String path, TestAccount... testAccounts) {
+    setAsCodeOwner("master", path, testAccounts);
+  }
+
+  /**
+   * Creates a code owner config at the given path with the given test accounts as code owners.
+   *
+   * @param branchName the name of the branch in whcih the code owner config should be created
+   * @param path the path of the code owner config file
+   * @param testAccounts the accounts of the users that should be code owner
+   */
+  private void setAsCodeOwner(String branchName, String path, TestAccount... testAccounts) {
+    Builder newCodeOwnerConfigBuilder =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branchName)
+            .folderPath(path);
+    for (TestAccount testAccount : testAccounts) {
+      newCodeOwnerConfigBuilder.addCodeOwnerEmail(testAccount.email());
+    }
+    newCodeOwnerConfigBuilder.create();
   }
 
   /**

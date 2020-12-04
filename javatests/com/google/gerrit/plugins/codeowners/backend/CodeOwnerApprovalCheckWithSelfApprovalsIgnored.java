@@ -24,7 +24,6 @@ import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject;
@@ -43,7 +42,6 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnored extends AbstractCode
   @Inject private RequestScopeOperations requestScopeOperations;
 
   private CodeOwnerApprovalCheck codeOwnerApprovalCheck;
-  private CodeOwnerConfigOperations codeOwnerConfigOperations;
 
   /** Returns a {@code gerrit.config} that configures all users as fallback code owners. */
   @ConfigSuite.Default
@@ -57,8 +55,6 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnored extends AbstractCode
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnerApprovalCheck = plugin.getSysInjector().getInstance(CodeOwnerApprovalCheck.class);
-    codeOwnerConfigOperations =
-        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
   }
 
   @Before
@@ -79,14 +75,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnored extends AbstractCode
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(codeOwner.email())
-        .create();
+    setAsRootCodeOwner(codeOwner);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -125,14 +114,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnored extends AbstractCode
     TestAccount changeOwner =
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(changeOwner.email())
-        .create();
+    setAsRootCodeOwner(changeOwner);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -175,17 +157,11 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnored extends AbstractCode
     TestAccount changeOwner =
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
+
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(codeOwner.email())
-        .create();
+    setAsRootCodeOwner(codeOwner);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -243,14 +219,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnored extends AbstractCode
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(codeOwner.email())
-        .create();
+    setAsRootCodeOwner(codeOwner);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -276,17 +245,11 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnored extends AbstractCode
     TestAccount changeOwner =
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
+
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(codeOwner.email())
-        .create();
+    setAsRootCodeOwner(codeOwner);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
