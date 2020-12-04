@@ -206,9 +206,10 @@ public class CodeOwnerApprovalCheck {
           !codeOwnerConfigScannerFactory.create().containsAnyCodeOwnerConfigFile(branch);
       logger.atFine().log("isBootstrapping = %s", isBootstrapping);
 
-      ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);
+      ImmutableSet<Account.Id> reviewerAccountIds =
+          getReviewerAccountIds(requiredApproval, changeNotes, patchSetUploader);
       ImmutableSet<Account.Id> approverAccountIds =
-          getApproverAccountIds(requiredApproval, changeNotes);
+          getApproverAccountIds(requiredApproval, changeNotes, patchSetUploader);
       logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
       return changedFiles
@@ -705,8 +706,19 @@ public class CodeOwnerApprovalCheck {
    *
    * @param changeNotes the change notes
    */
-  private ImmutableSet<Account.Id> getReviewerAccountIds(ChangeNotes changeNotes) {
-    return changeNotes.getReviewers().byState(ReviewerStateInternal.REVIEWER);
+  private ImmutableSet<Account.Id> getReviewerAccountIds(
+      RequiredApproval requiredApproval, ChangeNotes changeNotes, Account.Id patchSetUploader) {
+    ImmutableSet<Account.Id> reviewerAccountIds =
+        changeNotes.getReviewers().byState(ReviewerStateInternal.REVIEWER);
+    if (requiredApproval.labelType().isIgnoreSelfApproval()
+        && reviewerAccountIds.contains(patchSetUploader)) {
+      logger.atFine().log(
+          "Removing patch set uploader %s from reviewers since the label of the required"
+              + " approval (%s) is configured to ignore self approvals",
+          patchSetUploader, requiredApproval.labelType());
+      return filterOutAccount(reviewerAccountIds, patchSetUploader);
+    }
+    return reviewerAccountIds;
   }
 
   /**
@@ -718,21 +730,40 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the change notes
    */
   private ImmutableSet<Account.Id> getApproverAccountIds(
-      RequiredApproval requiredApproval, ChangeNotes changeNotes) {
-    return StreamSupport.stream(
-            approvalsUtil
-                .byPatchSet(
-                    changeNotes,
-                    changeNotes.getCurrentPatchSet().id(),
-                    /** revWalk */
-                    null,
-                    /** repoConfig */
-                    null)
-                .spliterator(),
-            /** parallel */
-            false)
-        .filter(requiredApproval::isApprovedBy)
-        .map(PatchSetApproval::accountId)
+      RequiredApproval requiredApproval, ChangeNotes changeNotes, Account.Id patchSetUploader) {
+    ImmutableSet<Account.Id> approverAccountIds =
+        StreamSupport.stream(
+                approvalsUtil
+                    .byPatchSet(
+                        changeNotes,
+                        changeNotes.getCurrentPatchSet().id(),
+                        /** revWalk */
+                        null,
+                        /** repoConfig */
+                        null)
+                    .spliterator(),
+                /** parallel */
+                false)
+            .filter(requiredApproval::isApprovedBy)
+            .map(PatchSetApproval::accountId)
+            .collect(toImmutableSet());
+
+    if (requiredApproval.labelType().isIgnoreSelfApproval()
+        && approverAccountIds.contains(patchSetUploader)) {
+      logger.atFine().log(
+          "Removing patch set uploader %s from approvers since the label of the required"
+              + " approval (%s) is configured to ignore self approvals",
+          patchSetUploader, requiredApproval.labelType());
+      return filterOutAccount(approverAccountIds, patchSetUploader);
+    }
+
+    return approverAccountIds;
+  }
+
+  private ImmutableSet<Account.Id> filterOutAccount(
+      ImmutableSet<Account.Id> accountIds, Account.Id accountIdToFilterOut) {
+    return accountIds.stream()
+        .filter(accountId -> !accountId.equals(accountIdToFilterOut))
         .collect(toImmutableSet());
   }
 
