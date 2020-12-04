@@ -173,6 +173,10 @@ Parameters that are not set for a project are inherited from the parent project.
         The configured labels must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
+        If the definition of the configured labels has [copy
+        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        enabled so that votes are sticky across patch sets, also the code owner
+        overrides will be sticky.\
         Can be overridden per project by setting
         [codeOwners.overrideApproval](#codeOwnersOverrideApproval) in
         `@PLUGIN@.config`.\
@@ -446,6 +450,10 @@ Parameters that are not set for a project are inherited from the parent project.
         The configured labels must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
+        If the definition of the configured labels has [copy
+        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        enabled so that votes are sticky across patch sets, also the code owner
+        overrides will be sticky.\
         Overrides the global setting
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
         `gerrit.config`.\
