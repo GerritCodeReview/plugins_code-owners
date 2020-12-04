@@ -1061,13 +1061,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(admin.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is not a code owner.
@@ -1145,13 +1139,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     if (!bootstrappingMode) {
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(admin.email())
-          .create();
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      createArbitraryCodeOwnerConfigFile();
     }
 
     Path path = Paths.get("/foo/bar.baz");
@@ -1193,13 +1182,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(admin.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is not a code owner.
@@ -1271,13 +1254,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       throws Exception {
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(user.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change.
@@ -1347,13 +1324,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   private void testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
       boolean implicitApprovalsEnabled, boolean bootstrappingMode) throws Exception {
     if (!bootstrappingMode) {
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(user.email())
-          .create();
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is a code owner only through the global code ownership.
@@ -1390,17 +1362,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testAnyReviewerWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
       throws Exception {
-    TestAccount user2 = accountCreator.user2();
-
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(user2.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is a code owner only through the global code ownership.
