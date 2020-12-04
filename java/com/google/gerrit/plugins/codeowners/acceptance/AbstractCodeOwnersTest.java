@@ -230,6 +230,21 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   }
 
   /**
+   * Creates a non-parseable code owner config file at the given path.
+   *
+   * @param path path of the code owner config file
+   */
+  protected void createNonParseableCodeOwnerConfig(String path) throws Exception {
+    disableCodeOwnersForProject(project);
+    String changeId =
+        createChange("Add invalid code owners file", JgitPath.of(path).get(), "INVALID")
+            .getChangeId();
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+    enableCodeOwnersForProject(project);
+  }
+
+  /**
    * Creates a new change for the given test account.
    *
    * @param testAccount the account that should own the new change

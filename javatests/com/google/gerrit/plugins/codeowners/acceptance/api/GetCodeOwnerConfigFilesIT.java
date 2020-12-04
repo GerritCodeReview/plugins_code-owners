@@ -206,7 +206,7 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getCodeOwnerConfigFilesIfInvalidCodeOwnerConfigFilesExist() throws Exception {
-    createInvalidCodeOwnerConfig(getCodeOwnerConfigFileName());
+    createNonParseableCodeOwnerConfig(getCodeOwnerConfigFileName());
 
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
@@ -230,7 +230,7 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   @Test
   public void includeInvalidCodeOwnerConfigFiles() throws Exception {
     String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
-    createInvalidCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
+    createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
 
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
@@ -443,15 +443,5 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
       return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
     }
     throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
-  }
-
-  private void createInvalidCodeOwnerConfig(String path) throws Exception {
-    disableCodeOwnersForProject(project);
-    String changeId =
-        createChange("Add invalid code owners file", JgitPath.of(path).get(), "INVALID")
-            .getChangeId();
-    approve(changeId);
-    gApi.changes().id(changeId).current().submit();
-    enableCodeOwnersForProject(project);
   }
 }

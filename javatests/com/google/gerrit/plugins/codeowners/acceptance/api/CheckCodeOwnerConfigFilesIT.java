@@ -35,7 +35,6 @@ import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.UnprocessableEntityException;
-import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -606,16 +605,6 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
       return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
     }
     throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
-  }
-
-  private void createNonParseableCodeOwnerConfig(String path) throws Exception {
-    disableCodeOwnersForProject(project);
-    String changeId =
-        createChange("Add invalid code owners file", JgitPath.of(path).get(), "INVALID")
-            .getChangeId();
-    approve(changeId);
-    gApi.changes().id(changeId).current().submit();
-    enableCodeOwnersForProject(project);
   }
 
   private String getParsingErrorMessage(
