@@ -24,13 +24,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.plugins.codeowners.api.MergeCommitStrategy;
+import com.google.gerrit.plugins.codeowners.backend.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
-import com.google.gerrit.plugins.codeowners.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.plugins.codeowners.config.GeneralConfig;
+import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.config.RequiredApprovalConfig;
@@ -77,7 +77,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setBoolean(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         StatusConfig.KEY_DISABLED,
         /* value= */ true);
@@ -94,7 +94,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         StatusConfig.KEY_DISABLED_BRANCH,
         "refs/heads/master");
@@ -112,7 +112,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         StatusConfig.KEY_DISABLED,
         "INVALID");
@@ -133,7 +133,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         StatusConfig.KEY_DISABLED_BRANCH,
         "^refs/heads/[");
@@ -154,7 +154,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         BackendConfig.KEY_BACKEND,
         CodeOwnerBackendId.PROTO.getBackendId());
@@ -172,7 +172,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         "master",
         BackendConfig.KEY_BACKEND,
         CodeOwnerBackendId.PROTO.getBackendId());
@@ -190,7 +190,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         BackendConfig.KEY_BACKEND,
         "INVALID");
@@ -210,11 +210,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     fetchRefsMetaConfig();
 
     Config cfg = new Config();
-    cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
-        "master",
-        BackendConfig.KEY_BACKEND,
-        "INVALID");
+    cfg.setString(StatusConfig.SECTION_CODE_OWNERS, "master", BackendConfig.KEY_BACKEND, "INVALID");
     setCodeOwnersConfig(cfg);
 
     PushResult r = pushRefsMetaConfig();
@@ -232,7 +228,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "Code-Review+2");
@@ -251,7 +247,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         "INVALID");
@@ -276,7 +272,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     ImmutableList<String> invalidValues = ImmutableList.of("INVALID", "ALSO_INVALID");
     Config cfg = new Config();
     cfg.setStringList(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         RequiredApprovalConfig.KEY_REQUIRED_APPROVAL,
         invalidValues);
@@ -302,7 +298,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         "Code-Review+2");
@@ -323,7 +319,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         "INVALID");
@@ -348,7 +344,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     ImmutableList<String> invalidValues = ImmutableList.of("INVALID", "ALSO_INVALID");
     Config cfg = new Config();
     cfg.setStringList(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         invalidValues);
@@ -374,7 +370,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setEnum(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         MergeCommitStrategy.ALL_CHANGED_FILES);
@@ -392,7 +388,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         GeneralConfig.KEY_MERGE_COMMIT_STRATEGY,
         "INVALID");
@@ -413,7 +409,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setEnum(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
         FallbackCodeOwners.ALL_USERS);
@@ -431,7 +427,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     Config cfg = new Config();
     cfg.setString(
-        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
         "INVALID");

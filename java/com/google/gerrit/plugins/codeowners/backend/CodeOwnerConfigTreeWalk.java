@@ -21,7 +21,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;

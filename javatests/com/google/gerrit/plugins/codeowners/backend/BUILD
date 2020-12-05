@@ -13,11 +13,14 @@ acceptance_tests(
     group = "backend",
     deps = [
         ":testbases",
-        "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/config",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )
 
@@ -35,8 +38,8 @@ java_library(
         "//lib:jgit",
         "//lib/truth",
         "//lib/truth:truth-java8-extension",
-        "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
     ],

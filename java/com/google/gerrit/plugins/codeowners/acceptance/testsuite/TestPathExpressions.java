@@ -14,11 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
+import com.google.gerrit.plugins.codeowners.backend.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
-import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.inject.Inject;
 
 /**

@@ -14,8 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
-import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
-
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.PluginConfigFactory;
@@ -55,7 +53,7 @@ public class RequiredApprovalConfig extends AbstractRequiredApprovalConfig {
     return KEY_REQUIRED_APPROVAL;
   }
 
-  RequiredApproval createDefault(ProjectState projectState) throws IllegalStateException {
+  public RequiredApproval createDefault(ProjectState projectState) throws IllegalStateException {
     try {
       return RequiredApproval.createDefault(projectState, DEFAULT_LABEL, DEFAULT_VALUE);
     } catch (IllegalStateException | IllegalArgumentException e) {
@@ -69,7 +67,7 @@ public class RequiredApprovalConfig extends AbstractRequiredApprovalConfig {
               projectState.getName(),
               e.getMessage(),
               pluginName,
-              SECTION_CODE_OWNERS,
+              StatusConfig.SECTION_CODE_OWNERS,
               getConfigKey()));
     }
   }

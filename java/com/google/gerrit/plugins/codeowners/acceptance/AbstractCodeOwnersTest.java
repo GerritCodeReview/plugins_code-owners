@@ -34,10 +34,9 @@ import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.StatusConfig;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.util.Map;
@@ -150,8 +149,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     updateCodeOwnersConfig(
         project,
         codeOwnersConfig ->
-            codeOwnersConfig.setString(
-                CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, value));
+            codeOwnersConfig.setString(StatusConfig.SECTION_CODE_OWNERS, subsection, key, value));
   }
 
   protected void setCodeOwnersConfig(
@@ -164,7 +162,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
         project,
         codeOwnersConfig ->
             codeOwnersConfig.setStringList(
-                CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, values));
+                StatusConfig.SECTION_CODE_OWNERS, subsection, key, values));
   }
 
   private void updateCodeOwnersConfig(Project.NameKey project, Consumer<Config> configUpdater)

@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 
 /**
  * Representation of the general code owners configuration in the REST API.

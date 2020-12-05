@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
-import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -62,6 +61,8 @@ public class StatusConfig {
   private final String pluginName;
   private final PluginConfig pluginConfigFromGerritConfig;
 
+  @VisibleForTesting public static final String SECTION_CODE_OWNERS = "codeOwners";
+
   @Inject
   StatusConfig(@PluginName String pluginName, PluginConfigFactory pluginConfigFactory) {
     this.pluginName = pluginName;
@@ -76,7 +77,7 @@ public class StatusConfig {
    * @return list of validation messages for validation errors, empty list if there are no
    *     validation errors
    */
-  ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
+  public ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
       String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
@@ -84,16 +85,20 @@ public class StatusConfig {
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
 
     try {
-      projectLevelConfig.getConfig().getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+      projectLevelConfig
+          .getConfig()
+          .getBoolean(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
     } catch (IllegalArgumentException e) {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
                   "Disabled value '%s' that is configured in %s.config (parameter %s.%s) is"
                       + " invalid.",
-                  projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, null, KEY_DISABLED),
+                  projectLevelConfig
+                      .getConfig()
+                      .getString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED),
                   pluginName,
-                  SECTION_CODE_OWNERS,
+                  StatusConfig.SECTION_CODE_OWNERS,
                   KEY_DISABLED),
               ValidationMessage.Type.ERROR));
     }
@@ -101,7 +106,7 @@ public class StatusConfig {
     for (String refPattern :
         projectLevelConfig
             .getConfig()
-            .getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
+            .getStringList(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
       try {
         RefPatternMatcher.getMatcher(refPattern).match("refs/heads/master", null);
       } catch (PatternSyntaxException e) {
@@ -112,7 +117,7 @@ public class StatusConfig {
                         + " invalid: %s",
                     refPattern,
                     pluginName,
-                    SECTION_CODE_OWNERS,
+                    StatusConfig.SECTION_CODE_OWNERS,
                     KEY_DISABLED_BRANCH,
                     e.getMessage()),
                 ValidationMessage.Type.ERROR));
@@ -134,22 +139,23 @@ public class StatusConfig {
    * @return {@code true} if the code owners functionality is disabled for the project, otherwise
    *     {@code false}
    */
-  boolean isDisabledForProject(Config pluginConfig, Project.NameKey project) {
+  public boolean isDisabledForProject(Config pluginConfig, Project.NameKey project) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(project, "project");
 
-    String disabledString = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_DISABLED);
+    String disabledString =
+        pluginConfig.getString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED);
     if (disabledString != null) {
       // a value for KEY_DISABLED is set on project-level
       try {
-        return pluginConfig.getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+        return pluginConfig.getBoolean(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
       } catch (IllegalArgumentException e) {
         // if the configuration is invalid we assume that the code owners functionality is not
         // disabled, this is safe as it's the more restrictive choice
         logger.atWarning().withCause(e).log(
             "Disabled value '%s' that is configured for project %s in %s.config (parameter"
                 + " %s.%s) is invalid.",
-            disabledString, project, pluginName, SECTION_CODE_OWNERS, KEY_DISABLED);
+            disabledString, project, pluginName, StatusConfig.SECTION_CODE_OWNERS, KEY_DISABLED);
         return false;
       }
     }
@@ -178,23 +184,23 @@ public class StatusConfig {
    * @return {@code true} if the code owners functionality is disabled for the branch, otherwise
    *     {@code false}
    */
-  boolean isDisabledForBranch(Config pluginConfig, BranchNameKey branch) {
+  public boolean isDisabledForBranch(Config pluginConfig, BranchNameKey branch) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(branch, "branch");
 
     String disabledBranches =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH);
+        pluginConfig.getString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH);
     if (disabledBranches != null) {
       // a value for KEY_DISABLED_BRANCH is set on project-level
       return isDisabledForBranch(
-          pluginConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH),
+          pluginConfig.getStringList(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH),
           branch.branch(),
           "Disabled branch '%s' that is configured for project "
               + branch.project()
               + " in "
               + pluginName
               + ".config (parameter "
-              + SECTION_CODE_OWNERS
+              + StatusConfig.SECTION_CODE_OWNERS
               + "."
               + KEY_DISABLED_BRANCH
               + ") is invalid.");

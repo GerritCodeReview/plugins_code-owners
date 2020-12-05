@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.StatusConfig.KEY_DISABLED;
 import static com.google.gerrit.plugins.codeowners.config.StatusConfig.KEY_DISABLED_BRANCH;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -67,14 +66,14 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void isDisabledForProject() throws Exception {
     Config cfg = new Config();
-    cfg.setBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, true);
+    cfg.setBoolean(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, true);
     assertThat(statusConfig.isDisabledForProject(cfg, project)).isTrue();
   }
 
   @Test
   public void isDisabledForProject_invalidValueIsIgnored() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "invalid");
+    cfg.setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, "invalid");
     assertThat(statusConfig.isDisabledForProject(cfg, project)).isFalse();
   }
 
@@ -90,7 +89,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   public void disabledConfigurationInPluginConfigOverridesDisabledConfigurationInGerritConfig()
       throws Exception {
     Config cfg = new Config();
-    cfg.setBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+    cfg.setBoolean(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
     assertThat(statusConfig.isDisabledForProject(cfg, project)).isFalse();
   }
 
@@ -98,7 +97,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.disabled", value = "INVALID")
   public void isDisabledForProject_invalidValueInGerritConfigIsIgnored() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "invalid");
+    cfg.setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, "invalid");
     assertThat(statusConfig.isDisabledForProject(cfg, project)).isFalse();
   }
 
@@ -130,7 +129,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   public void isDisabledForBranch_exactRef() throws Exception {
     Config cfg = new Config();
     cfg.setStringList(
-        SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         null,
         KEY_DISABLED_BRANCH,
         ImmutableList.of("refs/heads/master", "refs/heads/foo"));
@@ -145,7 +144,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void isDisabledForBranch_refPattern() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "refs/heads/*");
+    cfg.setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "refs/heads/*");
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
         .isTrue();
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "other")))
@@ -159,7 +158,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void isDisabledForBranch_regularExpression() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/.*");
+    cfg.setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/.*");
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
         .isTrue();
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "other")))
@@ -173,7 +172,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void isDisabledForBranch_invalidRegularExpressionIsIgnored() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/[");
+    cfg.setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/[");
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
         .isFalse();
   }
@@ -183,7 +182,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     Config cfg = new Config();
     cfg.setStringList(
-        SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         null,
         KEY_DISABLED_BRANCH,
         ImmutableList.of("^refs/heads/[", "refs/heads/master"));
@@ -195,7 +194,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   public void isDisabledForBranch_regularExpressionWithNegativeLookahead() throws Exception {
     Config cfg = new Config();
     cfg.setStringList(
-        SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         null,
         KEY_DISABLED_BRANCH,
         // match all branches except refs/heads/master
@@ -233,7 +232,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
       disabledBranchConfigurationInPluginConfigOverridesDisabledBranchConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "");
+    cfg.setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "");
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
         .isFalse();
   }
@@ -286,8 +285,10 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void validateValidProjectLevelConfig() throws Exception {
     ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig().setBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, true);
-    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "refs/heads/master");
+    cfg.getConfig().setBoolean(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, true);
+    cfg.getConfig()
+        .setString(
+            StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "refs/heads/master");
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         statusConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessage).isEmpty();
@@ -296,7 +297,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void validateInvalidProjectLevelConfig_invalidDisabledValue() throws Exception {
     ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "INVALID");
+    cfg.getConfig().setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         statusConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);
@@ -312,7 +313,8 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void validateInvalidProjectLevelConfig_invalidDisabledBranch() throws Exception {
     ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/[");
+    cfg.getConfig()
+        .setString(StatusConfig.SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/[");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         statusConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);

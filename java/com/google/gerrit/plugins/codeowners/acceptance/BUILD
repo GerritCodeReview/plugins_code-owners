@@ -12,6 +12,10 @@ java_library(
         "//java/com/google/gerrit/acceptance:lib",
         "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api/impl",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/config",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )

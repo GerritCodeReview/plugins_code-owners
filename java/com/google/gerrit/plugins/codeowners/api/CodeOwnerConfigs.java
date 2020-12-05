@@ -23,7 +23,7 @@ import java.util.Optional;
 /**
  * Java API for code owners configs in a branch.
  *
- * <p>To create an instance for a branch use {@link CodeOwnerConfigsFactory}.
+ * <p>To create an instance for a branch use the corresponding factory.
  */
 public interface CodeOwnerConfigs {
   /**

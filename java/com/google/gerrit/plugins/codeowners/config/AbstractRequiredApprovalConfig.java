@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.config;
 
-import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
@@ -37,7 +36,7 @@ import org.eclipse.jgit.lib.Config;
  * <p>Projects that have no required approval configuration inherit the configuration from their
  * parent projects.
  */
-abstract class AbstractRequiredApprovalConfig {
+public abstract class AbstractRequiredApprovalConfig {
   protected final String pluginName;
 
   private final PluginConfigFactory pluginConfigFactory;
@@ -58,13 +57,14 @@ abstract class AbstractRequiredApprovalConfig {
    * @param pluginConfig the plugin config from which the required approvals should be read
    * @return the required approvals, an empty list if none was configured
    */
-  ImmutableList<RequiredApproval> get(ProjectState projectState, Config pluginConfig) {
+  public ImmutableList<RequiredApproval> get(ProjectState projectState, Config pluginConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(pluginConfig, "pluginConfig");
 
     ImmutableList.Builder<RequiredApproval> requiredApprovalList = ImmutableList.builder();
     String[] requiredApprovals =
-        pluginConfig.getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
+        pluginConfig.getStringList(
+            StatusConfig.SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
     if (requiredApprovals.length > 0) {
       for (String requiredApproval : requiredApprovals) {
         try {
@@ -77,7 +77,7 @@ abstract class AbstractRequiredApprovalConfig {
                       + " (parameter %s.%s) is invalid: %s",
                   requiredApproval,
                   pluginName,
-                  SECTION_CODE_OWNERS,
+                  StatusConfig.SECTION_CODE_OWNERS,
                   getConfigKey(),
                   e.getMessage()));
         }
@@ -114,7 +114,7 @@ abstract class AbstractRequiredApprovalConfig {
    * @return list of validation messages for validation errors, empty list if there are no
    *     validation errors
    */
-  ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
+  public ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
       ProjectState projectState, String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(fileName, "fileName");
@@ -123,7 +123,8 @@ abstract class AbstractRequiredApprovalConfig {
     String[] requiredApprovals =
         projectLevelConfig
             .getConfig()
-            .getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
+            .getStringList(
+                StatusConfig.SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
     ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
     for (String requiredApproval : requiredApprovals) {
       try {
@@ -135,7 +136,7 @@ abstract class AbstractRequiredApprovalConfig {
                     "Required approval '%s' that is configured in %s (parameter %s.%s) is invalid: %s",
                     requiredApproval,
                     fileName,
-                    SECTION_CODE_OWNERS,
+                    StatusConfig.SECTION_CODE_OWNERS,
                     getConfigKey(),
                     e.getMessage()),
                 ValidationMessage.Type.ERROR));

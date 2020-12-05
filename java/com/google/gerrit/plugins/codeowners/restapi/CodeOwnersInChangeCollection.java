@@ -24,7 +24,7 @@ import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestView;
-import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
+import com.google.gerrit.plugins.codeowners.common.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInChangeCollection.PathResource;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;

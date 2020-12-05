@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -80,7 +79,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     Config cfg = new Config();
     cfg.setString(
-        SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         getRequiredApprovalConfig().getConfigKey(),
         "Code-Review+2");
@@ -96,7 +95,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     Config cfg = new Config();
     cfg.setString(
-        SECTION_CODE_OWNERS,
+        StatusConfig.SECTION_CODE_OWNERS,
         /* subsection= */ null,
         getRequiredApprovalConfig().getConfigKey(),
         "INVALID");
@@ -174,7 +173,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
     ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
     cfg.getConfig()
         .setString(
-            SECTION_CODE_OWNERS,
+            StatusConfig.SECTION_CODE_OWNERS,
             /* subsection= */ null,
             getRequiredApprovalConfig().getConfigKey(),
             "Code-Review+2");
@@ -190,7 +189,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
     ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
     cfg.getConfig()
         .setString(
-            SECTION_CODE_OWNERS,
+            StatusConfig.SECTION_CODE_OWNERS,
             /* subsection= */ null,
             getRequiredApprovalConfig().getConfigKey(),
             "INVALID");

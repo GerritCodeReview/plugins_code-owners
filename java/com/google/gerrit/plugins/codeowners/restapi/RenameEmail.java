@@ -35,7 +35,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFileUpdateScanner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.git.CommitUtil;
 import com.google.gerrit.server.permissions.PermissionBackend;

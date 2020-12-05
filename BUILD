@@ -15,16 +15,22 @@ load("@npm//@bazel/rollup:index.bzl", "rollup_bundle")
 
 gerrit_plugin(
     name = "code-owners",
-    srcs = glob(["java/com/google/gerrit/plugins/codeowners/**/*.java"]),
+    srcs = glob(["java/com/google/gerrit/plugins/codeowners/module/*.java"]),
     manifest_entries = [
         "Gerrit-PluginName: code-owners",
-        "Gerrit-Module: com.google.gerrit.plugins.codeowners.Module",
-        "Gerrit-HttpModule: com.google.gerrit.plugins.codeowners.HttpModule",
+        "Gerrit-Module: com.google.gerrit.plugins.codeowners.module.Module",
+        "Gerrit-HttpModule: com.google.gerrit.plugins.codeowners.module.HttpModule",
     ],
     resource_jars = [":code-owners-fe-static"],
     resource_strip_prefix = "plugins/code-owners/resources",
     resources = glob(["resources/**/*"]),
-    deps = ["//plugins/code-owners/proto:owners_metadata_java_proto"],
+    deps = [
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api/impl",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/restapi",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/validation",
+    ],
 )
 
 polygerrit_plugin(
