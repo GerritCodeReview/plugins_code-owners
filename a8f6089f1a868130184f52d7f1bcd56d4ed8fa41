@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9e3855c6_14572021",
+        "filename": "resources/Documentation/config-guide.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-07T15:44:11Z",
+      "side": 1,
+      "message": "ode owner is available",
+      "range": {
+        "startLine": 95,
+        "startChar": 47,
+        "endLine": 95,
+        "endChar": 72
+      },
+      "revId": "a8f6089f1a868130184f52d7f1bcd56d4ed8fa41",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
