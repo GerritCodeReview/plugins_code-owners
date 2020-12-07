@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "72857e66_3579af78",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-07T15:19:17Z",
+      "side": 1,
+      "message": "more intuitive to check \u0027approvals\u0027, then. Will that work?",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 24
+      },
+      "revId": "d9ea4468c8959a5912b41e46d47fdcd246da7917",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
