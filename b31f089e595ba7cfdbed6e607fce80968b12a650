@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "59191639_8fdf79e8",
+        "filename": "resources/Documentation/config-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 165,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-07T15:54:58Z",
+      "side": 1,
+      "message": "I am a bit confused about what \"internal repository\" means here, is that about the import, or maybe we have some use-case of having the same repository on multiple hosts?\n\nEither way, should we put this documentation somewhere internally? I admit I am not sure if there\u0027s such a fitting place, though.",
+      "range": {
+        "startLine": 165,
+        "startChar": 26,
+        "endLine": 165,
+        "endChar": 45
+      },
+      "revId": "b31f089e595ba7cfdbed6e607fce80968b12a650",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
