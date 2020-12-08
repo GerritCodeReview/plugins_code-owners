@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "47d0005f_1ef3176e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-08T16:48:59Z",
+      "side": 1,
+      "message": "nit: and",
+      "range": {
+        "startLine": 9,
+        "startChar": 37,
+        "endLine": 9,
+        "endChar": 39
+      },
+      "revId": "f8a3413ce4a20aac3eaa242ace9246d84726b856",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b6f66938_7d7394bf",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-08T16:48:59Z",
+      "side": 1,
+      "message": "owners (here and below)",
+      "range": {
+        "startLine": 251,
+        "startChar": 71,
+        "endLine": 251,
+        "endChar": 76
+      },
+      "revId": "f8a3413ce4a20aac3eaa242ace9246d84726b856",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "67d8918c_9fa76b08",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 279,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-08T16:48:59Z",
+      "side": 1,
+      "message": "which",
+      "range": {
+        "startLine": 279,
+        "startChar": 49,
+        "endLine": 279,
+        "endChar": 54
+      },
+      "revId": "f8a3413ce4a20aac3eaa242ace9246d84726b856",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f8f60fd8_49ca19b6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 283,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-08T16:48:59Z",
+      "side": 1,
+      "message": "maybe also plural? Unsure.",
+      "range": {
+        "startLine": 283,
+        "startChar": 15,
+        "endLine": 283,
+        "endChar": 29
+      },
+      "revId": "f8a3413ce4a20aac3eaa242ace9246d84726b856",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3340a88a_033a707f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 396,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-08T16:48:59Z",
+      "side": 1,
+      "message": "The logic here changed but I think it doesn\u0027t matter. It used to be /foo/ and not root. Same in other tests.",
+      "range": {
+        "startLine": 396,
+        "startChar": 4,
+        "endLine": 396,
+        "endChar": 22
+      },
+      "revId": "f8a3413ce4a20aac3eaa242ace9246d84726b856",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
