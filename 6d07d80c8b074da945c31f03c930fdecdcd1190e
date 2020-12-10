@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "044afcf6_264d2d44",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T14:08:50Z",
+      "side": 1,
+      "message": "Since this method is assuming an explicit approval of the user, there are no implicitly approved files of this users that are not already approved by the explicit approval. Implicit approvals of other users should not be considered. I\u0027ve dropped this here and made it clearer by a comment below.\n\nThis method is being used to list the files that get approved when a code owner votes on a change. Implicit approvals are implicit and never change as result of a users voting on a change. If we want to cover implicit approvals in change messages properly, we would need to post a change message on upload of a patch set, listing the implicitly approved files at this point. This would require another extension point in Gerrit and I\u0027m not sure it\u0027s worth the effort.",
+      "parentUuid": "e15da206_4169cc1a",
+      "range": {
+        "startLine": 239,
+        "startChar": 17,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "cc7e2905_ca604870",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
         "patchSetId": 4
@@ -37,6 +61,30 @@
       "writtenOn": "2020-12-04T15:12:18Z",
       "side": 1,
       "message": "This confused me since it\u0027s not really a part of the test, add a comment that it\u0027s only used to avoid bootstraping?",
+      "range": {
+        "startLine": 54,
+        "startChar": 0,
+        "endLine": 65,
+        "endChar": 0
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dcdf4c36_3d9b78e0",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T14:08:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cc7e2905_ca604870",
       "range": {
         "startLine": 54,
         "startChar": 0,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3863be91_9099bc31",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 107,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T14:08:50Z",
+      "side": 1,
+      "message": "Yes, let\u0027s use \u0027user\u0027 consistently.\n\nDone.",
+      "parentUuid": "7afbaf68_4c367437",
+      "range": {
+        "startLine": 107,
+        "startChar": 83,
+        "endLine": 107,
+        "endChar": 92
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ed3ee5ae_124f4951",
@@ -83,6 +155,30 @@
       "writtenOn": "2020-12-04T15:12:18Z",
       "side": 1,
       "message": "wrong comment? assertion here is \"approved\".",
+      "range": {
+        "startLine": 176,
+        "startChar": 0,
+        "endLine": 176,
+        "endChar": 100
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0bb2ba89_643a5899",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 176,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T14:08:50Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ed3ee5ae_124f4951",
       "range": {
         "startLine": 176,
         "startChar": 0,
