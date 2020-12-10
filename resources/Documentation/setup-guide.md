@@ -27,6 +27,9 @@ FAQ's:
 * [How to update the code-owners.config file for a project](#updateCodeOwnersConfig)
 * [How to check if the code owners functionality is enabled for a project or branch](#checkIfEnabled)
 
+Recommendations about further configuration parameters can be found in the
+[config guide](config-guide.html).
+
 ### <a id="configureCodeOwnersBackend">1. Configure the code owners backend that should be used
 
 The `code-owners` plugin supports multiple [code owner backends](backends.html)
