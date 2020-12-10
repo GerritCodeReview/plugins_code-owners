@@ -22,6 +22,30 @@
       },
       "revId": "d9ea4468c8959a5912b41e46d47fdcd246da7917",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a44d4eb0_358e32a5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T09:50:37Z",
+      "side": 1,
+      "message": "No, approvals always contains all approvals, including approvals that didn\u0027t change. We only want to execute our logic if a code owner approval has changed, but not if a code owner approval is just present and not changed.\n\nFYI, the contents of oldApprovals and approvals are part of the SSH stream events API and we cannot change them without breaking this API.",
+      "parentUuid": "72857e66_3579af78",
+      "range": {
+        "startLine": 86,
+        "startChar": 12,
+        "endLine": 86,
+        "endChar": 24
+      },
+      "revId": "d9ea4468c8959a5912b41e46d47fdcd246da7917",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
