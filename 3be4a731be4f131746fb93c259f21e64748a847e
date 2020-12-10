@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "91271281_a228b836",
+        "filename": "resources/Documentation/config-guide.md",
+        "patchSetId": 3
+      },
+      "lineNbr": 162,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-10T13:23:55Z",
+      "side": 1,
+      "message": "likely",
+      "range": {
+        "startLine": 162,
+        "startChar": 30,
+        "endLine": 162,
+        "endChar": 35
+      },
+      "revId": "3be4a731be4f131746fb93c259f21e64748a847e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
