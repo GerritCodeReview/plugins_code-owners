@@ -20,6 +20,14 @@ guide](setup-guide.html).
 
 Some of the configuration parameters have an effect on the user workflow.
 
+### <a id="stickyApprovals">Make code owner approvals / overrides sticky
+
+Code owner approvals and code owner overrides can be made sticky by enabling
+[copy rules](../../../Documentation/config-labels.html#label_copyAnyScore) in
+the definitions of the labels that are configured as [required
+approval](config.html#pluginCodeOwnersRequiredApproval) and [override
+approval](config.html#pluginCodeOwnersOverrideApproval).
+
 ### <a id="implicitApprovals">Implicit code owner approvals
 
 It's possible to [enable implicit approvals](config.html#pluginCodeOwnersEnableImplicitApprovals)
@@ -67,6 +75,95 @@ be approved when a merge is done.
 **IMPORTANT**: Requiring code owner approvals only for files that differ with
 the Auto-Merge (case 2) is considered unsafe, see [security
 pitfalls](#securityMergeCommits) below.
+
+## <a id="codeOwners">Recommendations for defining code owners
+
+Code owners can be defined on different levels, which differ by scope. This
+section gives an overview of the different levels and explains when they should
+be used.
+
+1. Folder and file code owners:
+   These are the code owners that are defined in the [code owner config
+   files](user-guide.html#codeOwnerConfigFiles) that are stored in the source
+   tree of the repository. They can either apply to a whole
+   [folder](backend-find-owners.html#userEmails) (folder code owners) or to
+   [matched files](backend-find-owners.html#perFile) (file code owners).\
+   This is the normal way to define code owners. This code owner definition is
+   discoverable since it is stored in human-readable code owner config file in
+   the source tree of the repository.\
+   Folder and file code owners can differ from branch to branch since they are
+   defined in the source tree.\
+   Folder and file code owners are usually users that are expert for a code area
+   and that should review and approve all changes to this code.
+2. Root code owners:
+   Root code owners are folder code owners (see 1.) that are defined in the code
+   owner config file that is stored in the root directory of a branch.\
+   Usually root code owners are the most experienced developers that can approve
+   changes to all the code base if needed, but that should only review and
+   approve changes if no other, more specific, code owner is available.\
+   Root code owners can differ from branch to branch.
+3. Default code owners:
+   [Default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration)
+   are stored in the code owner config file in the `refs/meta/config` branch
+   that apply for all branches (unless inheritance is ignored).\
+   The same as root code owners these are experienced developers that can
+   approve changes to all the code base if needed.\
+   However in contrast to root code owners that apply to all branches (including
+   newly created branches), and hence can be used if code owners should be kept
+   consistent across all branches.\
+   A small disadvantage is that this code owner definition is not very well
+   discoverable since it is stored in the `refs/meta/config` branch, but default
+   code owners are suggested to users the same way as other code owners.
+4. Global code owners:
+   [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner) are defined
+   in the plugin configuration and apply to all projects or all child projects.\
+   They are intended to configure bots as code owners that need to operate on
+   all or multiple projects.\
+   Global code owners still apply if parent code owners are ignored.
+5. Fallback code owners:
+   [Fallback code owners](config.html#pluginCodeOwnersFallbackCodeOwners) is a
+   policy configuration that controls who should own paths that have no code
+   owners defined.\
+   Fallback code owners are not included in the code owner suggestion.\
+   Configuring all users as fallback code owners may allow bypassing the code
+   owners check (see [security pitfalls](#securityFallbackCodeOwners) below).
+
+In addition users can be allowed to [override the code owner submit
+check](user-guide.html#codeOwnerOverride). This permission is normally granted
+to users that that need to react to emergencies and need to submit changes
+quickly (e.g sheriffs) or users that need to make large-scale changes across
+many repositories.
+
+## <a id="externalValidationOfCodeOwnerConfigs">External validation of code owner config files
+
+By default, when code owner config files are modified they are
+[validated](validation.html) on push. If any issues in the modified code owner
+config files are found, the push is rejected. This is important since
+non-parsable code owner config files make submissions fail which likely blocks
+the development teams, and hence needs to be prevented.
+
+However rejecting pushes in case of invalid code owner config files is not an
+ideal workflow for everyone. Instead it may be wanted that the push always
+succeeds and that issues with modified code owner config files are then detected
+and reported by a CI bot. The CI bot would then post its findings as checks on
+the open change which prevent the change submission. To enable this the
+validation of code owner config files on push can be
+[disabled](config.html#pluginCodeOwnersEnableValidationOnCommitReceived), but
+then the host admins should setup a bot to do the validation of modified code
+owner config files externally. For this the bot could use the [Check Code Owner
+Config Files In Revision](rest-api.html#check-code-owner-config-files-in-revision)
+REST endpoint.
+
+## <a id="differentCodeOwnerConfigurations">Use different code owner configurations in a fork
+
+If a respository is forked and code owners are used in the original repository,
+the code owner configuration of the original repository shouldn't apply for the
+fork (the fork should have different code owners, and if the fork is stored on
+another Gerrit host it's also likely that the original code owners cannot be
+resolved on that host). In this case it is possible to [configure a file
+extension](config.html#pluginCodeOwnersFileExtension) for code owner config
+files in the fork so that its code owner config files do not clash with the
+original code owner config files.
 
 ## <a id="securityPitfalls">Security pitfalls
 
