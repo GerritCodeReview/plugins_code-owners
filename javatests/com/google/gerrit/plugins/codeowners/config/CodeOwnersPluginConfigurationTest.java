@@ -29,6 +29,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
@@ -908,6 +909,17 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     configureFallbackCodeOwners(project, FallbackCodeOwners.NONE);
     assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
         .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void implicitApprovalsAreDisabledIfRequiredLabelIgnoresSelfApprovals() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isTrue();
+
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isFalse();
   }
 
   private void configureDisabled(Project.NameKey project, String disabled) throws Exception {

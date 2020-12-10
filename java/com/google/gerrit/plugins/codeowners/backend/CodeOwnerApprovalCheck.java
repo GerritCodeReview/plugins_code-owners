@@ -172,26 +172,26 @@ public class CodeOwnerApprovalCheck {
                 .projectName(changeNotes.getProjectName().get())
                 .changeId(changeNotes.getChangeId().get())
                 .build())) {
-      RequiredApproval requiredApproval =
-          codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
-      logger.atFine().log("requiredApproval = %s", requiredApproval);
-
-      ImmutableSet<RequiredApproval> overrideApprovals =
-          codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
-      boolean hasOverride = hasOverride(overrideApprovals, changeNotes);
-      logger.atFine().log(
-          "hasOverride = %s (overrideApprovals = %s)", hasOverride, overrideApprovals);
-
-      BranchNameKey branch = changeNotes.getChange().getDest();
-      ObjectId revision = getDestBranchRevision(changeNotes.getChange());
-      logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
-
       boolean enableImplicitApprovalFromUploader =
           codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName());
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
       logger.atFine().log(
           "patchSetUploader = %d, implicit approval from uploader is %s",
           patchSetUploader.get(), enableImplicitApprovalFromUploader ? "enabled" : "disabled");
+
+      RequiredApproval requiredApproval =
+          codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
+      logger.atFine().log("requiredApproval = %s", requiredApproval);
+
+      ImmutableSet<RequiredApproval> overrideApprovals =
+          codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
+      boolean hasOverride = hasOverride(overrideApprovals, changeNotes, patchSetUploader);
+      logger.atFine().log(
+          "hasOverride = %s (overrideApprovals = %s)", hasOverride, overrideApprovals);
+
+      BranchNameKey branch = changeNotes.getChange().getDest();
+      ObjectId revision = getDestBranchRevision(changeNotes.getChange());
+      logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
       CodeOwnerResolverResult globalCodeOwners =
           codeOwnerResolver
@@ -207,9 +207,10 @@ public class CodeOwnerApprovalCheck {
           !codeOwnerConfigScannerFactory.create().containsAnyCodeOwnerConfigFile(branch);
       logger.atFine().log("isBootstrapping = %s", isBootstrapping);
 
-      ImmutableSet<Account.Id> reviewerAccountIds = getReviewerAccountIds(changeNotes);
+      ImmutableSet<Account.Id> reviewerAccountIds =
+          getReviewerAccountIds(requiredApproval, changeNotes, patchSetUploader);
       ImmutableSet<Account.Id> approverAccountIds =
-          getApproverAccountIds(requiredApproval, changeNotes);
+          getApproverAccountIds(requiredApproval, changeNotes, patchSetUploader);
       logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
       return changedFiles
@@ -798,8 +799,19 @@ public class CodeOwnerApprovalCheck {
    *
    * @param changeNotes the change notes
    */
-  private ImmutableSet<Account.Id> getReviewerAccountIds(ChangeNotes changeNotes) {
-    return changeNotes.getReviewers().byState(ReviewerStateInternal.REVIEWER);
+  private ImmutableSet<Account.Id> getReviewerAccountIds(
+      RequiredApproval requiredApproval, ChangeNotes changeNotes, Account.Id patchSetUploader) {
+    ImmutableSet<Account.Id> reviewerAccountIds =
+        changeNotes.getReviewers().byState(ReviewerStateInternal.REVIEWER);
+    if (requiredApproval.labelType().isIgnoreSelfApproval()
+        && reviewerAccountIds.contains(patchSetUploader)) {
+      logger.atFine().log(
+          "Removing patch set uploader %s from reviewers since the label of the required"
+              + " approval (%s) is configured to ignore self approvals",
+          patchSetUploader, requiredApproval.labelType());
+      return filterOutAccount(reviewerAccountIds, patchSetUploader);
+    }
+    return reviewerAccountIds;
   }
 
   /**
@@ -811,21 +823,40 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the change notes
    */
   private ImmutableSet<Account.Id> getApproverAccountIds(
-      RequiredApproval requiredApproval, ChangeNotes changeNotes) {
-    return StreamSupport.stream(
-            approvalsUtil
-                .byPatchSet(
-                    changeNotes,
-                    changeNotes.getCurrentPatchSet().id(),
-                    /** revWalk */
-                    null,
-                    /** repoConfig */
-                    null)
-                .spliterator(),
-            /** parallel */
-            false)
-        .filter(requiredApproval::isApprovedBy)
-        .map(PatchSetApproval::accountId)
+      RequiredApproval requiredApproval, ChangeNotes changeNotes, Account.Id patchSetUploader) {
+    ImmutableSet<Account.Id> approverAccountIds =
+        StreamSupport.stream(
+                approvalsUtil
+                    .byPatchSet(
+                        changeNotes,
+                        changeNotes.getCurrentPatchSet().id(),
+                        /** revWalk */
+                        null,
+                        /** repoConfig */
+                        null)
+                    .spliterator(),
+                /** parallel */
+                false)
+            .filter(requiredApproval::isApprovedBy)
+            .map(PatchSetApproval::accountId)
+            .collect(toImmutableSet());
+
+    if (requiredApproval.labelType().isIgnoreSelfApproval()
+        && approverAccountIds.contains(patchSetUploader)) {
+      logger.atFine().log(
+          "Removing patch set uploader %s from approvers since the label of the required"
+              + " approval (%s) is configured to ignore self approvals",
+          patchSetUploader, requiredApproval.labelType());
+      return filterOutAccount(approverAccountIds, patchSetUploader);
+    }
+
+    return approverAccountIds;
+  }
+
+  private ImmutableSet<Account.Id> filterOutAccount(
+      ImmutableSet<Account.Id> accountIds, Account.Id accountIdToFilterOut) {
+    return accountIds.stream()
+        .filter(accountId -> !accountId.equals(accountIdToFilterOut))
         .collect(toImmutableSet());
   }
 
@@ -834,11 +865,34 @@ public class CodeOwnerApprovalCheck {
    *
    * @param overrideApprovals approvals that count as override for the code owners submit check.
    * @param changeNotes the change notes
+   * @param patchSetUploader account ID of the patch set uploader
    * @return whether the given change has an override approval
    */
   private boolean hasOverride(
-      ImmutableSet<RequiredApproval> overrideApprovals, ChangeNotes changeNotes) {
+      ImmutableSet<RequiredApproval> overrideApprovals,
+      ChangeNotes changeNotes,
+      Account.Id patchSetUploader) {
+    ImmutableSet<RequiredApproval> overrideApprovalsThatIgnoreSelfApprovals =
+        overrideApprovals.stream()
+            .filter(overrideApproval -> overrideApproval.labelType().isIgnoreSelfApproval())
+            .collect(toImmutableSet());
     return changeNotes.getApprovals().get(changeNotes.getCurrentPatchSet().id()).stream()
+        .filter(
+            approval -> {
+              // If the approval is from the patch set uploader and if it matches any of the labels
+              // for which self approvals are ignored, filter it out.
+              if (approval.accountId().equals(patchSetUploader)
+                  && overrideApprovalsThatIgnoreSelfApprovals.stream()
+                      .anyMatch(
+                          requiredApproval ->
+                              requiredApproval
+                                  .labelType()
+                                  .getLabelId()
+                                  .equals(approval.key().labelId()))) {
+                return false;
+              }
+              return true;
+            })
         .anyMatch(
             patchSetApproval ->
                 overrideApprovals.stream()

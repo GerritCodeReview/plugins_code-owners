@@ -31,7 +31,6 @@ import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
-import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
@@ -230,13 +229,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileAddition_pending() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -268,13 +261,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileModification_pending() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
@@ -308,13 +295,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileDeletion_pending() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId = createChangeWithFileDeletion(path);
@@ -345,13 +326,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_pendingOldPath() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/bar/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsCodeOwners("/foo/bar/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
     Path newPath = Paths.get("/foo/baz/abc.txt");
@@ -388,13 +363,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_pendingNewPath() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/baz/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsCodeOwners("/foo/baz/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
     Path newPath = Paths.get("/foo/baz/abc.txt");
@@ -429,13 +398,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileAddition_approved() throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -462,13 +425,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileModification_approved() throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
@@ -497,13 +454,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileDeletion_approved() throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId = createChangeWithFileDeletion(path);
@@ -529,13 +480,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileRename_approvedOldPath() throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/bar/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsCodeOwners("/foo/bar/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
     Path newPath = Paths.get("/foo/baz/abc.txt");
@@ -568,13 +513,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileRename_approvedNewPath() throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/baz/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsCodeOwners("/foo/baz/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
     Path newPath = Paths.get("/foo/baz/abc.txt");
@@ -620,13 +559,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileAddition(
       boolean implicitApprovalsEnabled) throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -667,13 +600,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileModification(
       boolean implicitApprovalsEnabled) throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
@@ -715,13 +642,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testImplicitApprovalByPatchSetUploaderOnGetStatusForFileDeletion(
       boolean implicitApprovalsEnabled) throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId = createChangeWithFileDeletion(path);
@@ -762,13 +683,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
       boolean implicitApprovalsEnabled) throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/bar/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsCodeOwners("/foo/bar/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
     Path newPath = Paths.get("/foo/baz/abc.txt");
@@ -815,13 +730,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
       boolean implicitApprovalsEnabled) throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/baz/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsCodeOwners("/foo/baz/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
     Path newPath = Paths.get("/foo/baz/abc.txt");
@@ -854,13 +763,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void getStatusForFileAddition_noImplicitlyApprovalByChangeOwner() throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(admin.email())
-        .create();
+    setAsRootCodeOwners(admin);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -888,13 +791,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -1066,13 +963,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(admin.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is not a code owner.
@@ -1150,13 +1041,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     if (!bootstrappingMode) {
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(admin.email())
-          .create();
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      createArbitraryCodeOwnerConfigFile();
     }
 
     Path path = Paths.get("/foo/bar.baz");
@@ -1198,13 +1084,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(admin.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is not a code owner.
@@ -1276,13 +1156,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       throws Exception {
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(user.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change.
@@ -1352,13 +1226,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   private void testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
       boolean implicitApprovalsEnabled, boolean bootstrappingMode) throws Exception {
     if (!bootstrappingMode) {
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(user.email())
-          .create();
+      // Create a code owner config file so that we are not in the bootstrapping mode.
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is a code owner only through the global code ownership.
@@ -1395,17 +1264,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testAnyReviewerWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
       throws Exception {
-    TestAccount user2 = accountCreator.user2();
-
     if (!bootstrappingMode) {
       // Create a code owner config file so that we are not in the bootstrapping mode.
-      codeOwnerConfigOperations
-          .newCodeOwnerConfig()
-          .project(project)
-          .branch("master")
-          .folderPath("/foo/")
-          .addCodeOwnerEmail(user2.email())
-          .create();
+      createArbitraryCodeOwnerConfigFile();
     }
 
     // Create a change as a user that is a code owner only through the global code ownership.
@@ -1446,28 +1307,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     TestAccount user3 =
         accountCreator.create("user3", "user3@example.com", "User3", /* displayName= */ null);
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/")
-        .addCodeOwnerEmail(user.email())
-        .create();
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user2.email())
-        .create();
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/bar/")
-        .addCodeOwnerEmail(user3.email())
-        .create();
+    setAsCodeOwners("/", user);
+    setAsCodeOwners("/foo/", user2);
+    setAsCodeOwners("/foo/bar/", user3);
 
     Path path = Paths.get("/foo/bar/baz.txt");
     String changeId =
@@ -1641,21 +1483,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void isSubmittable() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/bar/")
-        .addCodeOwnerEmail(user2.email())
-        .create();
+    setAsCodeOwners("/foo/", user);
+    setAsCodeOwners("/bar/", user2);
 
     String changeId =
         pushFactory
@@ -2096,14 +1925,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void approvedByStickyApprovalOnOldPatchSet() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    // Create a code owner config file with 'user' as code owner
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -2174,14 +1996,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void codeReviewPlus2CountsAsApprovalIfCodeReviewPlus1IsRequired() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    // Create a code owner config file with 'user' as code owner
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsRootCodeOwners(user);
 
     // Create a change as 'user2' that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -2243,14 +2058,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     TestAccount user2 = accountCreator.user2();
 
-    // Create a code owner config file with 'admin' as code owner
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/")
-        .addCodeOwnerEmail(admin.email())
-        .create();
+    setAsRootCodeOwners(admin);
 
     // Create a change as 'user' that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -2290,14 +2098,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void noBootstrappingIfDefaultCodeOwnerConfigExists() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    // Create default code owner config file in refs/meta/config.
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch(RefNames.REFS_CONFIG)
-        .folderPath("/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsDefaultCodeOwners(user);
 
     // Create a change as a user that is neither a code owner nor a project owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -2357,14 +2158,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void approvedByDefaultCodeOwner() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    // Create default code owner config file in refs/meta/config.
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch(RefNames.REFS_CONFIG)
-        .folderPath("/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsDefaultCodeOwners(user);
 
     // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -2418,14 +2212,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   private void testImplicitlyApprovedByDefaultCodeOwner(boolean implicitApprovalsEnabled)
       throws Exception {
-    // Create default code owner config file in refs/meta/config.
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch(RefNames.REFS_CONFIG)
-        .folderPath("/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsDefaultCodeOwners(user);
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -2451,14 +2238,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void defaultCodeOwnerAsReviewer() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    // Create default code owner config file in refs/meta/config.
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch(RefNames.REFS_CONFIG)
-        .folderPath("/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsDefaultCodeOwners(user);
 
     // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");

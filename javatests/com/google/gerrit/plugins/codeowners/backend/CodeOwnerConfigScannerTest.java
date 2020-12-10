@@ -25,7 +25,6 @@ import static org.mockito.Mockito.when;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import java.nio.file.Paths;
@@ -153,7 +152,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
 
   @Test
   public void visitorNotInvokedForInvalidCodeOwnerConfigFiles() throws Exception {
-    createInvalidCodeOwnerConfig("/OWNERS");
+    createNonParseableCodeOwnerConfig("/OWNERS");
 
     visit();
     verifyZeroInteractions(visitor);
@@ -167,7 +166,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   @Test
   public void visitorInvokedForValidCodeOwnerConfigFilesEvenIfInvalidCodeOwnerConfigFileExist()
       throws Exception {
-    createInvalidCodeOwnerConfig("/OWNERS");
+    createNonParseableCodeOwnerConfig("/OWNERS");
 
     // Create a valid code owner config file.
     CodeOwnerConfig.Key codeOwnerConfigKey =
@@ -554,7 +553,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
 
   @Test
   public void containsACodeOwnerConfigFile_invalidCodeOwnerConfigFileExists() throws Exception {
-    createInvalidCodeOwnerConfig("/OWNERS");
+    createNonParseableCodeOwnerConfig("/OWNERS");
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -574,7 +573,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
 
   @Test
   public void containsOnlyInvalidCodeOwnerConfigFiles() throws Exception {
-    createInvalidCodeOwnerConfig("/OWNERS");
+    createNonParseableCodeOwnerConfig("/OWNERS");
 
     assertThat(
             codeOwnerConfigScannerFactory
@@ -624,15 +623,5 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .create()
         .includeDefaultCodeOwnerConfig(includeDefaultCodeOwnerConfig)
         .visit(BranchNameKey.create(project, "master"), visitor, invalidCodeOwnerConfigCallback);
-  }
-
-  private void createInvalidCodeOwnerConfig(String path) throws Exception {
-    disableCodeOwnersForProject(project);
-    String changeId =
-        createChange("Add invalid code owners file", JgitPath.of(path).get(), "INVALID")
-            .getChangeId();
-    approve(changeId);
-    gApi.changes().id(changeId).current().submit();
-    enableCodeOwnersForProject(project);
   }
 }

@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
@@ -158,6 +159,14 @@ public class CodeOwnersPluginConfiguration {
    */
   public boolean areImplicitApprovalsEnabled(Project.NameKey project) {
     requireNonNull(project, "project");
+    LabelType requiredLabel = getRequiredApproval(project).labelType();
+    if (requiredLabel.isIgnoreSelfApproval()) {
+      logger.atFine().log(
+          "ignoring implicit approval configuration on project %s since the label of the required"
+              + " approval (%s) is configured to ignore self approvals",
+          project, requiredLabel);
+      return false;
+    }
     return generalConfig.getEnableImplicitApprovals(getPluginConfig(project));
   }
 

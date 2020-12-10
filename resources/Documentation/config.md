@@ -81,6 +81,11 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplictApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
+        This setting has no effect if self approvals from the last uploader are
+        ignored because the [required label](#pluginCodeOwnersRequiredApproval)
+        is configured to [ignore self
+        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        from the uploader.\
         If enabled, code owners need to be aware of their implicit approval when
         they upload new patch sets for other users (e.g. if a contributor pushes
         a change to a wrong branch and a code owner helps them to get it rebased
@@ -150,6 +155,10 @@ Parameters that are not set for a project are inherited from the parent project.
         rules](../../../Documentation/config-labels.html#label_copyAnyScore)
         enabled so that votes are sticky across patch sets, also the code owner
         approvals will be sticky.\
+        If the definition of the configured label [ignores self
+        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        from the uploader, any vote from the uploader is ignored for the code
+        owners check.\
         Can be overridden per project by setting
         [codeOwners.requiredApproval](#codeOwnersRequiredApproval) in
         `@PLUGIN@.config`.\
@@ -167,6 +176,14 @@ Parameters that are not set for a project are inherited from the parent project.
         The configured labels must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
+        If the definition of the configured labels has [copy
+        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        enabled so that votes are sticky across patch sets, also the code owner
+        overrides will be sticky.\
+        If the definition of a configured label [ignores self
+        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        from the uploader, any override vote from the uploader on that label is
+        ignored for the code owners check.\
         Can be overridden per project by setting
         [codeOwners.overrideApproval](#codeOwnersOverrideApproval) in
         `@PLUGIN@.config`.\
@@ -343,6 +360,11 @@ Parameters that are not set for a project are inherited from the parent project.
 <a id="codeOwnersEnableImplicitApprovals">codeOwners.enableImplicitApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
+        This setting has no effect if self approvals from the last uploader are
+        ignored because the [required label](#codeOwnersRequiredApproval)
+        is configured to [ignore self
+        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        from the uploader.\
         If enabled, code owners need to be aware of their implicit approval when
         they upload new patch sets for other users (e.g. if a contributor pushes
         a change to a wrong branch and a code owner helps them to get it rebased
@@ -412,6 +434,10 @@ Parameters that are not set for a project are inherited from the parent project.
         rules](../../../Documentation/config-labels.html#label_copyAnyScore)
         enabled so that votes are sticky across patch sets, also the code owner
         approvals will be sticky.\
+        If the definition of the configured label [ignores self
+        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        from the uploader, any vote from the uploader is ignored for the code
+        owners check.\
         Overrides the global setting
         [plugin.@PLUGIN@.requiredApproval](#pluginCodeOwnersRequiredApproval) in
         `gerrit.config`.\
@@ -431,6 +457,14 @@ Parameters that are not set for a project are inherited from the parent project.
         The configured labels must exist for all projects for which this setting
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
+        If the definition of the configured labels has [copy
+        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        enabled so that votes are sticky across patch sets, also the code owner
+        overrides will be sticky.\
+        If the definition of a configured label [ignores self
+        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        from the uploader, any override vote from the uploader on that label is
+        ignored for the code owners check.\
         Overrides the global setting
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
         `gerrit.config`.\
