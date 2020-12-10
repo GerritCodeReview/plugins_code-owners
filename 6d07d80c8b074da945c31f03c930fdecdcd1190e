@@ -72,6 +72,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "01a5e8a7_656e46e8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T15:50:49Z",
+      "side": 1,
+      "message": "Just to let you know. This question made me realise that the change messages that are added in the follow-up change are not accurate if files are implicitly approved. Will upload a new patch set for that follow-up change that addresses this in a minute.",
+      "parentUuid": "474cff96_b7f81df4",
+      "range": {
+        "startLine": 239,
+        "startChar": 17,
+        "endLine": 239,
+        "endChar": 48
+      },
+      "revId": "6d07d80c8b074da945c31f03c930fdecdcd1190e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cc7e2905_ca604870",
