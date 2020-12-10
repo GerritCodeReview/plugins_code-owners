@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6198d2a5_e5a68dce",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithSelfApprovalsIgnored.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T11:58:23Z",
+      "side": 1,
+      "message": "Done in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/290795",
+      "parentUuid": "cf097d08_c4920b1d",
+      "range": {
+        "startLine": 41,
+        "startChar": 13,
+        "endLine": 41,
+        "endChar": 59
+      },
+      "revId": "a372a9ccf623171b4b9ac403a6ea6aec20b97195",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "49ef3bf3_24de9c47",
@@ -37,6 +61,30 @@
       "writtenOn": "2020-12-08T16:41:10Z",
       "side": 1,
       "message": "same as previous change, can the change owner override now that they are not the most recent uploader?",
+      "range": {
+        "startLine": 401,
+        "startChar": 0,
+        "endLine": 401,
+        "endChar": 7
+      },
+      "revId": "a372a9ccf623171b4b9ac403a6ea6aec20b97195",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b95476f7_939b5337",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithSelfApprovalsIgnored.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 401,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T11:58:23Z",
+      "side": 1,
+      "message": "Covered by the overridenByChangeOwnerThatIsNotUploader test above.",
+      "parentUuid": "49ef3bf3_24de9c47",
       "range": {
         "startLine": 401,
         "startChar": 0,
