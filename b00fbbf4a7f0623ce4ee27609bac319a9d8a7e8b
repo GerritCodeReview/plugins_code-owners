@@ -1,6 +1,29 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b0a656c3_82571dd1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithSelfApprovalsIgnored.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T11:10:44Z",
+      "side": 1,
+      "message": "The class name should end with \"Test\".\n\nDone",
+      "range": {
+        "startLine": 37,
+        "startChar": 13,
+        "endLine": 37,
+        "endChar": 59
+      },
+      "revId": "b00fbbf4a7f0623ce4ee27609bac319a9d8a7e8b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1c594016_564d930e",
@@ -14,6 +37,30 @@
       "writtenOn": "2020-12-08T16:32:44Z",
       "side": 1,
       "message": "optional: test that it can be approved by the original change owner now?",
+      "range": {
+        "startLine": 256,
+        "startChar": 14,
+        "endLine": 256,
+        "endChar": 45
+      },
+      "revId": "b00fbbf4a7f0623ce4ee27609bac319a9d8a7e8b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ac48f9a9_bf3c232e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithSelfApprovalsIgnored.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 256,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-10T11:10:44Z",
+      "side": 1,
+      "message": "I think this is already sufficiently covered by the approvedByChangeOwnerThatIsNotUploader test.",
+      "parentUuid": "1c594016_564d930e",
       "range": {
         "startLine": 256,
         "startChar": 14,
