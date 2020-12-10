@@ -98,6 +98,12 @@ class CodeOwnersOnPostReview implements OnPostReview {
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals,
       RequiredApproval requiredApproval) {
+    int maxPathsInChangeMessage =
+        codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(changeNotes.getProjectName());
+    if (maxPathsInChangeMessage <= 0) {
+      return Optional.empty();
+    }
+
     LabelVote newVote = getNewVote(requiredApproval, approvals);
 
     ImmutableList<Path> ownedPaths = getOwnedPaths(changeNotes, user.getAccountId());
@@ -172,7 +178,14 @@ class CodeOwnersOnPostReview implements OnPostReview {
       return Optional.empty();
     }
 
-    ownedPaths.forEach(path -> message.append(String.format("* %s\n", JgitPath.of(path).get())));
+    if (ownedPaths.size() <= maxPathsInChangeMessage) {
+      appendPaths(message, ownedPaths.stream());
+    } else {
+      // -1 so that we never show "(1 more files)"
+      int limit = maxPathsInChangeMessage - 1;
+      appendPaths(message, ownedPaths.stream().limit(limit));
+      message.append(String.format("(%s more files)\n", ownedPaths.size() - limit));
+    }
 
     if (hasImplicitApprovalByUser && noLongerExplicitlyApproved) {
       message.append(
@@ -181,6 +194,10 @@ class CodeOwnersOnPostReview implements OnPostReview {
     }
 
     return Optional.of(message.toString());
+  }
+
+  private void appendPaths(StringBuilder message, Stream<Path> pathsToAppend) {
+    pathsToAppend.forEach(path -> message.append(String.format("* %s\n", JgitPath.of(path).get())));
   }
 
   private boolean isCodeOwnerApprovalNewlyApplied(
