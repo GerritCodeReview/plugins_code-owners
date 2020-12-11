@@ -107,12 +107,41 @@ public class CodeOwnersPluginConfiguration {
   /**
    * Checks whether code owner configs in the given project are read-only.
    *
-   * @param project the project for it should be checked whether code owner configs are read-only
+   * @param project the project for which it should be checked whether code owner configs are
+   *     read-only
    * @return whether code owner configs in the given project are read-only
    */
   public boolean areCodeOwnerConfigsReadOnly(Project.NameKey project) {
     requireNonNull(project, "project");
     return generalConfig.getReadOnly(getPluginConfig(project));
+  }
+
+  /**
+   * Checks whether newly added non-resolvable code owners should be rejected on commit received and
+   * submit.
+   *
+   * @param project the project for which it should be checked whether non-resolvable code owners
+   *     should be rejected
+   * @return whether newly added non-resolvable code owners should be rejected on commit received
+   *     and submit
+   */
+  public boolean rejectNonResolvableCodeOwners(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getRejectNonResolvableCodeOwners(getPluginConfig(project));
+  }
+
+  /**
+   * Checks whether newly added non-resolvable imports should be rejected on commit received and
+   * submit.
+   *
+   * @param project the project for which it should be checked whether non-resolvable imports should
+   *     be rejected
+   * @return whether newly added non-resolvable imports should be rejected on commit received and
+   *     submit
+   */
+  public boolean rejectNonResolvableImports(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getRejectNonResolvableImports(getPluginConfig(project));
   }
 
   /**
