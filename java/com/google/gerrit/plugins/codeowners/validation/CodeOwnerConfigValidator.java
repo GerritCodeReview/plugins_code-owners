@@ -237,16 +237,44 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .username(caller.getLoggableName())
                 .patchSetId(patchSetId.get())
                 .build())) {
-      ChangeNotes changeNotes =
-          changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
-      PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
-      IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
-      Optional<ValidationResult> validationResult =
-          validateCodeOwnerConfig(
-              branchNameKey, repository.getConfig(), revWalk, commit, patchSetUploader);
+      CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
+          codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(
+              branchNameKey.project());
+      logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
+      Optional<ValidationResult> validationResult;
+      if (!codeOwnerConfigValidationPolicy.runValidation()) {
+        validationResult =
+            Optional.of(
+                ValidationResult.create(
+                    "skipping validation of code owner config files",
+                    new CommitValidationMessage(
+                        "code owners config validation is disabled", ValidationMessage.Type.HINT)));
+      } else {
+        try {
+          ChangeNotes changeNotes =
+              changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
+          PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
+          IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
+          validationResult =
+              validateCodeOwnerConfig(
+                  branchNameKey, repository.getConfig(), revWalk, commit, patchSetUploader);
+        } catch (RuntimeException e) {
+          if (!codeOwnerConfigValidationPolicy.isDryRun()) {
+            throw e;
+          }
+
+          // The validation was executed as dry-run and failures during the validation should not
+          // cause an error. Hence we swallow the exception here.
+          logger.atFine().withCause(e).log(
+              "ignoring failure during validation of code owner config files in revision %s"
+                  + " (project = %s, branch = %s) because the validation was performed as dry-run",
+              commit.name(), branchNameKey.project(), branchNameKey.branch());
+          validationResult = Optional.empty();
+        }
+      }
       if (validationResult.isPresent()) {
         logger.atFine().log("validation result = %s", validationResult.get());
-        validationResult.get().processForOnPreMerge();
+        validationResult.get().processForOnPreMerge(codeOwnerConfigValidationPolicy.isDryRun());
       }
     }
   }
@@ -959,8 +987,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
      * <p>If there are no errors the validation messages are logged on fine level so that they show
      * up in a trace. Returning the message to the user without failing the submit is not possible.
      */
-    void processForOnPreMerge() throws MergeValidationException {
-      if (hasError()) {
+    void processForOnPreMerge(boolean dryRun) throws MergeValidationException {
+      if (!dryRun && hasError()) {
         throw new MergeValidationException(getMessage(validationMessages()));
       }
 

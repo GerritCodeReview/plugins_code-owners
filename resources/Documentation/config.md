@@ -133,6 +133,20 @@ Parameters that are not set for a project are inherited from the parent project.
         in `@PLUGIN@.config`.\
         By default `true`.
 
+<a id="pluginCodeOwnersEnableValidationOnSubmit">plugin.@PLUGIN@.enableValidationOnSubmit</a>
+:       Policy for validating code owner config files when a change is
+        submitted. Allowed values are `true` (the code owner config file
+        validation is enabled and the submit of invalid code owner config files
+        is rejected), `false` (the code owner config file validation is
+        disabled, invalid code owner config files are not rejected) and
+        `dry_run` (code owner config files are validated, but invalid code owner
+        config files are not rejected).\
+        Disabling the submit validation is not recommended.\
+        Can be overridden per project by setting
+        [codeOwners.enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit)
+        in `@PLUGIN@.config`.\
+        By default `true`.
+
 <a id="pluginCodeOwnersAllowedEmailDomain">plugin.@PLUGIN@.allowedEmailDomain</a>
 :       Email domain that allows to assign code ownerships to emails with this
         domain.\
@@ -418,6 +432,22 @@ Parameters that are not set for a project are inherited from the parent project.
         in `gerrit.config`.\
         If not set, the global setting
         [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
+        in `gerrit.config` is used.
+
+<a id="codeOwnersEnableValidationOnSubmit">codeOwners.enableValidationOnSubmit</a>
+:       Policy for validating code owner config files when a change is
+        submitted. Allowed values are `true` (the code owner config file
+        validation is enabled and the submit of invalid code owner config files
+        is rejected), `false` (the code owner config file validation is
+        disabled, invalid code owner config files are not rejected) and
+        `dry_run` (code owner config files are validated, but invalid code owner
+        config files are not rejected).\
+        Disabling the submit validation is not recommended.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
         in `gerrit.config` is used.
 
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>

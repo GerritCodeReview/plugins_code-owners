@@ -1399,6 +1399,81 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     testValidateMergeCommitCreatedViaTheCreateChangeRestApi();
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
+  public void canSubmitNonParseableConfigIfValidationIsDisabled() throws Exception {
+    testCanSubmitNonParseableConfig();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "dry_run")
+  public void canSubmitNonParseableConfigIfValidationIsDoneAsDryRun() throws Exception {
+    testCanSubmitNonParseableConfig();
+  }
+
+  private void testCanSubmitNonParseableConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload a non-parseable code owner config
+    // that we then try to submit
+    disableCodeOwnersForProject(project);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            "INVALID");
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    enableCodeOwnersForProject(project);
+
+    // submit the change
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
+  public void canSubmitConfigWithIssuesIfValidationIsDisabled() throws Exception {
+    testCanSubmitConfigWithIssues();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "dry_run")
+  public void canSubmitConfigWithIssuesIfValidationIsDoneAsDryRun() throws Exception {
+    testCanSubmitConfigWithIssues();
+  }
+
+  private void testCanSubmitConfigWithIssues() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload a code owner config with issues
+    // that we then try to submit
+    disableCodeOwnersForProject(project);
+
+    // upload a code owner config that has issues (non-resolvable code owners)
+    String unknownEmail1 = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail1))
+                    .build()));
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    enableCodeOwnersForProject(project);
+
+    // submit the change
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
   private void testValidateMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
     // Create another branch.
     String branchName = "stable";
