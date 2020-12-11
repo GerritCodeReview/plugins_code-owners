@@ -130,6 +130,20 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
+   * Whether code owner configs should be validated when a change is submitted.
+   *
+   * @param project the project for it should be checked whether code owner configs should be
+   *     validated when a change is submitted
+   * @return whether code owner configs should be validated when a change is submitted
+   */
+  public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForSubmit(
+      Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(
+        project, getPluginConfig(project));
+  }
+
+  /**
    * Gets the merge commit strategy for the given project.
    *
    * @param project the project for which the merge commit strategy should be retrieved

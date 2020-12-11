@@ -22,6 +22,7 @@ import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -166,6 +167,12 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             .addCodeOwnerEmail(user.email())
             .create();
 
+    // Fetch the commit that created the imported code owner config into the local repository so
+    // that the commit that creates the importing code owner config becomes a successor of this
+    // commit.
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+    testRepo.reset(projectOperations.project(project).getHead("master"));
+
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.create(
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
@@ -278,6 +285,47 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                             .addImport(codeOwnerConfigReference)
                             .build())
                     .build()));
+    assertOkWithHints(r, "code owner config files validated, no issues found");
+  }
+
+  @Test
+  public void canUploadConfigWithoutIssues_withImportOfConfigThatIsAddedInSameCommit()
+      throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig = createCodeOwnerConfigKey("/foo/");
+
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath());
+
+    // Create a code owner config with import and without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            ImmutableMap.of(
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+                format(
+                    CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                        .addImport(codeOwnerConfigReference)
+                        .addCodeOwnerSet(
+                            CodeOwnerSet.builder()
+                                .addCodeOwnerEmail(admin.email())
+                                .addPathExpression("foo")
+                                .addImport(codeOwnerConfigReference)
+                                .build())
+                        .build()),
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getJGitFilePath(),
+                format(
+                    CodeOwnerConfig.builder(keyOfImportedCodeOwnerConfig, TEST_REVISION)
+                        .addCodeOwnerSet(
+                            CodeOwnerSet.builder().addCodeOwnerEmail(user.email()).build())
+                        .build())));
     assertOkWithHints(r, "code owner config files validated, no issues found");
   }
 
@@ -1426,6 +1474,81 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     mergeInput.source = gApi.projects().name(project.get()).branch(branchName).get().revision;
     changeInput.merge = mergeInput;
     gApi.changes().create(changeInput);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
+  public void canSubmitNonParseableConfigIfValidationIsDisabled() throws Exception {
+    testCanSubmitNonParseableConfig();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "dry_run")
+  public void canSubmitNonParseableConfigIfValidationIsDoneAsDryRun() throws Exception {
+    testCanSubmitNonParseableConfig();
+  }
+
+  private void testCanSubmitNonParseableConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload a non-parseable code owner config
+    // that we then try to submit
+    disableCodeOwnersForProject(project);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            "INVALID");
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    enableCodeOwnersForProject(project);
+
+    // submit the change
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
+  public void canSubmitConfigWithIssuesIfValidationIsDisabled() throws Exception {
+    testCanSubmitConfigWithIssues();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "dry_run")
+  public void canSubmitConfigWithIssuesIfValidationIsDoneAsDryRun() throws Exception {
+    testCanSubmitConfigWithIssues();
+  }
+
+  private void testCanSubmitConfigWithIssues() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // disable the code owners functionality so that we can upload a code owner config with issues
+    // that we then try to submit
+    disableCodeOwnersForProject(project);
+
+    // upload a code owner config that has issues (non-resolvable code owners)
+    String unknownEmail1 = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail1))
+                    .build()));
+    r.assertOkStatus();
+
+    // re-enable the code owners functionality for the project
+    enableCodeOwnersForProject(project);
+
+    // submit the change
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
   private CodeOwnerConfig createCodeOwnerConfigWithImport(

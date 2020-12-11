@@ -237,16 +237,44 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .username(caller.getLoggableName())
                 .patchSetId(patchSetId.get())
                 .build())) {
-      ChangeNotes changeNotes =
-          changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
-      PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
-      IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
-      Optional<ValidationResult> validationResult =
-          validateCodeOwnerConfig(
-              branchNameKey, repository.getConfig(), revWalk, commit, patchSetUploader);
+      CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
+          codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(
+              branchNameKey.project());
+      logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
+      Optional<ValidationResult> validationResult;
+      if (!codeOwnerConfigValidationPolicy.runValidation()) {
+        validationResult =
+            Optional.of(
+                ValidationResult.create(
+                    "skipping validation of code owner config files",
+                    new CommitValidationMessage(
+                        "code owners config validation is disabled", ValidationMessage.Type.HINT)));
+      } else {
+        try {
+          ChangeNotes changeNotes =
+              changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
+          PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
+          IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
+          validationResult =
+              validateCodeOwnerConfig(
+                  branchNameKey, repository.getConfig(), revWalk, commit, patchSetUploader);
+        } catch (RuntimeException e) {
+          if (!codeOwnerConfigValidationPolicy.isDryRun()) {
+            throw e;
+          }
+
+          // The validation was executed as dry-run and failures during the validation should not
+          // cause an error. Hence we swallow the exception here.
+          logger.atFine().withCause(e).log(
+              "ignoring failure during validation of code owner config files in revision %s"
+                  + " (project = %s, branch = %s) because the validation was performed as dry-run",
+              commit.name(), branchNameKey.project(), branchNameKey.branch());
+          validationResult = Optional.empty();
+        }
+      }
       if (validationResult.isPresent()) {
         logger.atFine().log("validation result = %s", validationResult.get());
-        validationResult.get().processForOnPreMerge();
+        validationResult.get().processForOnPreMerge(codeOwnerConfigValidationPolicy.isDryRun());
       }
     }
   }
@@ -748,6 +776,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                         validateCodeOwnerConfigReference(
                             codeOwnerConfigFilePath,
                             codeOwnerConfig.key(),
+                            codeOwnerConfig.revision(),
                             CodeOwnerConfigImportType.GLOBAL,
                             codeOwnerConfigReference)),
             codeOwnerConfig.codeOwnerSets().stream()
@@ -757,6 +786,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                         validateCodeOwnerConfigReference(
                             codeOwnerConfigFilePath,
                             codeOwnerConfig.key(),
+                            codeOwnerConfig.revision(),
                             CodeOwnerConfigImportType.PER_FILE,
                             codeOwnerConfigReference)))
         .filter(Optional::isPresent)
@@ -769,6 +799,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config reference
    * @param keyOfImportingCodeOwnerConfig key of the importing code owner config
+   * @param codeOwnerConfigRevision the commit from which the code owner config which contains the
+   *     code owner config reference was loaded
    * @param importType the type of the import
    * @param codeOwnerConfigReference the code owner config reference that should be validated.
    * @return a validation message describing the issue with the code owner config reference, {@link
@@ -777,6 +809,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   private Optional<CommitValidationMessage> validateCodeOwnerConfigReference(
       Path codeOwnerConfigFilePath,
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      ObjectId codeOwnerConfigRevision,
       CodeOwnerConfigImportType importType,
       CodeOwnerConfigReference codeOwnerConfigReference) {
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
@@ -804,7 +837,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               projectState.get().getProject().getState().name()));
     }
 
-    Optional<ObjectId> revision = getRevision(keyOfImportedCodeOwnerConfig);
+    Optional<ObjectId> revision =
+        getRevision(
+            keyOfImportingCodeOwnerConfig, codeOwnerConfigRevision, keyOfImportedCodeOwnerConfig);
     if (!revision.isPresent() || !isBranchReadable(keyOfImportedCodeOwnerConfig)) {
       // we intentionally use the same error message for non-existing and non-readable branches so
       // that uploaders cannot probe for the existence of branches (e.g. deduce from the error
@@ -888,7 +923,18 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
   }
 
-  private Optional<ObjectId> getRevision(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+  private Optional<ObjectId> getRevision(
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      ObjectId codeOwnerConfigRevision,
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+    if (keyOfImportingCodeOwnerConfig
+        .branchNameKey()
+        .equals(keyOfImportedCodeOwnerConfig.branchNameKey())) {
+      // load the imported code owner config from the same revision from which the importing code
+      // owner config was loaded
+      return Optional.of(codeOwnerConfigRevision);
+    }
+
     try (Repository repo = repoManager.openRepository(keyOfImportedCodeOwnerConfig.project())) {
       return Optional.ofNullable(repo.exactRef(keyOfImportedCodeOwnerConfig.ref()))
           .map(Ref::getObjectId);
@@ -959,8 +1005,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
      * <p>If there are no errors the validation messages are logged on fine level so that they show
      * up in a trace. Returning the message to the user without failing the submit is not possible.
      */
-    void processForOnPreMerge() throws MergeValidationException {
-      if (hasError()) {
+    void processForOnPreMerge(boolean dryRun) throws MergeValidationException {
+      if (!dryRun && hasError()) {
         throw new MergeValidationException(getMessage(validationMessages()));
       }
 
