@@ -66,6 +66,9 @@ public class GeneralConfig {
   public static final String KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED =
       "enableValidationOnCommitReceived";
 
+  @VisibleForTesting
+  public static final String KEY_ENABLE_VALIDATION_ON_SUBMIT = "enableValidationOnSubmit";
+
   @VisibleForTesting public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
   @VisibleForTesting public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
 
@@ -240,23 +243,45 @@ public class GeneralConfig {
    * <p>The enable validation on commit received controls whether code owner config files should be
    * validated when a commit is received.
    *
-   * @param pluginConfig the plugin config from which the read-only configuration should be read.
+   * @param pluginConfig the plugin config from which the enable validation on commit received
+   *     configuration should be read.
    * @return whether code owner config files should be validated when a commit is received
    */
   CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived(
       Project.NameKey project, Config pluginConfig) {
+    return getCodeOwnerConfigValidationPolicy(
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, project, pluginConfig);
+  }
+
+  /**
+   * Gets the enable validation on submit configuration from the given plugin config with fallback
+   * to {@code gerrit.config} and default to {@code true}.
+   *
+   * <p>The enable validation on submit controls whether code owner config files should be validated
+   * when a change is submitted.
+   *
+   * @param pluginConfig the plugin config from which the enable validation on submit configuration
+   *     should be read.
+   * @return whether code owner config files should be validated when a change is submitted
+   */
+  CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForSubmit(
+      Project.NameKey project, Config pluginConfig) {
+    return getCodeOwnerConfigValidationPolicy(
+        KEY_ENABLE_VALIDATION_ON_SUBMIT, project, pluginConfig);
+  }
+
+  private CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicy(
+      String key, Project.NameKey project, Config pluginConfig) {
+    requireNonNull(key, "key");
     requireNonNull(project, "project");
     requireNonNull(pluginConfig, "pluginConfig");
 
     String codeOwnerConfigValidationPolicyString =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED);
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, key);
     if (codeOwnerConfigValidationPolicyString != null) {
       try {
         return pluginConfig.getEnum(
-            SECTION_CODE_OWNERS,
-            null,
-            KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
-            CodeOwnerConfigValidationPolicy.TRUE);
+            SECTION_CODE_OWNERS, null, key, CodeOwnerConfigValidationPolicy.TRUE);
       } catch (IllegalArgumentException e) {
         logger.atWarning().log(
             "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
@@ -266,15 +291,14 @@ public class GeneralConfig {
     }
 
     try {
-      return pluginConfigFromGerritConfig.getEnum(
-          KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, CodeOwnerConfigValidationPolicy.TRUE);
+      return pluginConfigFromGerritConfig.getEnum(key, CodeOwnerConfigValidationPolicy.TRUE);
     } catch (IllegalArgumentException e) {
       logger.atWarning().log(
           "Ignoring invalid value %s for the code owner config validation policy in gerrit.config"
               + " (parameter plugin.%s.%s). Falling back to default value %s.",
-          pluginConfigFromGerritConfig.getString(KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED),
+          pluginConfigFromGerritConfig.getString(key),
           pluginName,
-          KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+          key,
           CodeOwnerConfigValidationPolicy.TRUE);
       return CodeOwnerConfigValidationPolicy.TRUE;
     }
