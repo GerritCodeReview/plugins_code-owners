@@ -116,6 +116,13 @@ following checks are performed:
     * the project from which the file should be imported doesn't permit reads
       (e.g. has the state `HIDDEN`)
 
+**NOTE:** Whether commits that newly add non-resolvable code owners and
+non-resolvable imports are rejected on commit received and on submit is
+controlled by the
+[rejectNonResolvableCodeOwners](config.html#pluginCodeOwnersRejectNonResolvableCodeOwners)
+and [rejectNonResolvableImports](config.html#pluginCodeOwnersRejectNonResolvableImports)
+config settings.
+
 The following things are **not** checked (not an exhaustive list):
 
 * Cycles in imports of owner config files:\
