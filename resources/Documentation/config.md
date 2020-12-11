@@ -147,6 +147,37 @@ Parameters that are not set for a project are inherited from the parent project.
         in `@PLUGIN@.config`.\
         By default `true`.
 
+<a id="pluginCodeOwnersRejectNonResolvableCodeOwners">plugin.@PLUGIN@.rejectNonResolvableCodeOwners</a>
+:       Whether modifications of code owner config files that newly add
+        non-resolvable code owners should be rejected on commit received and
+        submit.\
+        if `true` newly added non-resolveable code owners are reported as errors
+        and the commit is rejected.\
+        If `false` newly added non-resolvable code owners are only reported as
+        warnings and the commit is not rejected.\
+        This setting has no effect if the validation is disabled via
+        [enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
+        or [enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit).
+        Can be overridden per project by setting
+        [codeOwners.rejectNonResolvableCodeOwners](#codeOwnersRejectNonResolvableCodeOwners)
+        in `@PLUGIN@.config`.\
+        By default `true`.
+
+<a id="pluginCodeOwnersRejectNonResolvableImports">plugin.@PLUGIN@.rejectNonResolvableImports</a>
+:       Whether modifications of code owner config files that newly add
+        non-resolvable imports should be rejected on commit received an submit.\
+        if `true` newly added non-resolveable imports are reported as errors and
+        the commit is rejected.\
+        If `false` newly added non-resolvable imports are only reported as
+        warnings and the commit is not rejected.\
+        This setting has no effect if the validation is disabled via
+        [enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
+        or [enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit).
+        Can be overridden per project by setting
+        [codeOwners.rejectNonResolvableImports](#codeOwnersRejectNonResolvableImports)
+        in `@PLUGIN@.config`.\
+        By default `true`.
+
 <a id="pluginCodeOwnersAllowedEmailDomain">plugin.@PLUGIN@.allowedEmailDomain</a>
 :       Email domain that allows to assign code ownerships to emails with this
         domain.\
@@ -463,6 +494,41 @@ Parameters that are not set for a project are inherited from the parent project.
         in `gerrit.config`.\
         If not set, the global setting
         [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
+        in `gerrit.config` is used.
+
+<a id="codeOwnersRejectNonResolvableCodeOwners">codeOwners.rejectNonResolvableCodeOwners</a>
+:       Whether modifications of code owner config files that newly add
+        non-resolvable code owners should be rejected on commit received and
+        submit.\
+        if `true` newly added non-resolveable code owners are reported as errors
+        and the commit is rejected.\
+        If `false` newly added non-resolvable code owners are only reported as
+        warnings and the commit is not rejected.\
+        This setting has no effect if the validation is disabled via
+        [enableValidationOnCommitReceived](#codeOwnersEnableValidationOnCommitReceived)
+        or [enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit).
+        Overrides the global setting
+        [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](#pluginCodeOwnersRejectNonResolvableCodeOwners)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](#pluginCodeOwnersRejectNonResolvableCodeOwners)
+        in `gerrit.config` is used.
+
+<a id="codeOwnersRejectNonResolvableImports">codeOwners.rejectNonResolvableImports</a>
+:       Whether modifications of code owner config files that newly add
+        non-resolvable imports should be rejected on commit received an submit.\
+        if `true` newly added non-resolveable imports are reported as errors and
+        the commit is rejected.\
+        If `false` newly added non-resolvable imports are only reported as
+        warnings and the commit is not rejected.\
+        This setting has no effect if the validation is disabled via
+        [enableValidationOnCommitReceived](#codeOwnersEnableValidationOnCommitReceived)
+        or [enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit).
+        Overrides the global setting
+        [plugin.@PLUGIN@.rejectNonResolvableImports](#pluginCodeOwnersRejectNonResolvableImports)
+        in `gerrit.config`.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.rejectNonResolvableImports](#pluginCodeOwnersRejectNonResolvableImports)
         in `gerrit.config` is used.
 
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>

@@ -161,7 +161,8 @@ public class CheckCodeOwnerConfigFiles
             codeOwnerConfig -> {
               problemsByPath.putAll(
                   codeOwnerBackend.getFilePath(codeOwnerConfig.key()).toString(),
-                  checkCodeOwnerConfig(codeOwnerBackend, codeOwnerConfig, verbosity));
+                  checkCodeOwnerConfig(
+                      branchNameKey.project(), codeOwnerBackend, codeOwnerConfig, verbosity));
               return true;
             },
             (codeOwnerConfigFilePath, configInvalidException) -> {
@@ -176,12 +177,13 @@ public class CheckCodeOwnerConfigFiles
   }
 
   private ImmutableList<ConsistencyProblemInfo> checkCodeOwnerConfig(
+      Project.NameKey project,
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig codeOwnerConfig,
       @Nullable ConsistencyProblemInfo.Status verbosity) {
     return codeOwnerConfigValidator
         .validateCodeOwnerConfig(
-            currentUser.get().asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
+            project, currentUser.get().asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
         .map(
             commitValidationMessage ->
                 createConsistencyProblemInfo(commitValidationMessage, verbosity))

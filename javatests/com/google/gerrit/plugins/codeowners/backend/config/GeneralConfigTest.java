@@ -27,6 +27,8 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_READ_ONLY;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
@@ -104,7 +106,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetReadOnlyForNullPluginConfig() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> generalConfig.getReadOnly(null));
+        assertThrows(
+            NullPointerException.class, () -> generalConfig.getReadOnly(/* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
@@ -127,6 +130,70 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, "false");
     assertThat(generalConfig.getReadOnly(cfg)).isFalse();
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableCodeOwnersForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getRejectNonResolvableCodeOwners(/* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noRejectNonResolvableCodeOwnersConfiguration() throws Exception {
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  public void
+      rejectNonResolvableCodeOwnersConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  public void
+      rejectNonResolvableCodeOwnersConfigurationInPluginConfigOverridesRejectNonResolvableCodeOwnersConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, "true");
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(cfg)).isTrue();
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableImportsForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getRejectNonResolvableImports(/* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noRejectNonResolvableImportsConfiguration() throws Exception {
+    assertThat(generalConfig.getRejectNonResolvableImports(new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void
+      rejectNonResolvableImportsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.getRejectNonResolvableImports(new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void
+      rejectNonResolvableImportsConfigurationInPluginConfigOverridesRejectNonResolvableImportsConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_REJECT_NON_RESOLVABLE_IMPORTS, "true");
+    assertThat(generalConfig.getRejectNonResolvableImports(cfg)).isTrue();
   }
 
   @Test

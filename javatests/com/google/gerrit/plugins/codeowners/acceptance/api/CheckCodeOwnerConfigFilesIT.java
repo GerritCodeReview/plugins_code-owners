@@ -184,6 +184,18 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void issuesInCodeOwnerConfigFile() throws Exception {
+    testIssuesInCodeOwnerConfigFile(ConsistencyProblemInfo.Status.ERROR);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void issuesInCodeOwnerConfigFileReportedAsWarnings() throws Exception {
+    testIssuesInCodeOwnerConfigFile(ConsistencyProblemInfo.Status.WARNING);
+  }
+
+  private void testIssuesInCodeOwnerConfigFile(ConsistencyProblemInfo.Status expectedStatus)
+      throws Exception {
     // imports are not supported for the proto backend
     assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
 
@@ -228,19 +240,22 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 ImmutableMap.of(
                     pathOfInvalidConfig1,
                     ImmutableList.of(
-                        error(
+                        problem(
+                            expectedStatus,
                             String.format(
                                 "invalid global import in '%s': '/not-a-code-owner-config' is"
                                     + " not a code owner config file",
                                 pathOfInvalidConfig1))),
                     pathOfInvalidConfig2,
                     ImmutableList.of(
-                        error(
+                        problem(
+                            expectedStatus,
                             String.format(
                                 "code owner email 'unknown1@example.com' in '%s' cannot be"
                                     + " resolved for admin",
                                 pathOfInvalidConfig2)),
-                        error(
+                        problem(
+                            expectedStatus,
                             String.format(
                                 "code owner email 'unknown2@example.com' in '%s' cannot be"
                                     + " resolved for admin",
@@ -515,27 +530,69 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void allIssuesAreReturnedIfNoLevelIsSpecified() throws Exception {
-    testIssuesAreFilteredByVerbosity(
-        /** verbosity */
-        null);
+    testIssuesAreFilteredByVerbosity(/* verbosity= */ null, ConsistencyProblemInfo.Status.ERROR);
   }
 
   @Test
   public void allIssuesAreReturnedIfLevelIsSetToWarning() throws Exception {
-    testIssuesAreFilteredByVerbosity(ConsistencyProblemInfo.Status.WARNING);
+    testIssuesAreFilteredByVerbosity(
+        ConsistencyProblemInfo.Status.WARNING, ConsistencyProblemInfo.Status.ERROR);
   }
 
   @Test
   public void onlyFatalAndErrorIssuesAreReturnedIfLevelIsSetToError() throws Exception {
-    testIssuesAreFilteredByVerbosity(ConsistencyProblemInfo.Status.ERROR);
+    testIssuesAreFilteredByVerbosity(
+        ConsistencyProblemInfo.Status.ERROR, ConsistencyProblemInfo.Status.ERROR);
   }
 
   @Test
   public void onlyFatalIssuesAreReturnedIfLevelIsSetToFatal() throws Exception {
-    testIssuesAreFilteredByVerbosity(ConsistencyProblemInfo.Status.FATAL);
+    testIssuesAreFilteredByVerbosity(
+        ConsistencyProblemInfo.Status.FATAL, ConsistencyProblemInfo.Status.ERROR);
   }
 
-  private void testIssuesAreFilteredByVerbosity(@Nullable ConsistencyProblemInfo.Status verbosity)
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void
+      allIssuesAreReturnedIfNoLevelIsSpecified_issuesInCodeOwnerConfigFileReportedAsWarnings()
+          throws Exception {
+    testIssuesAreFilteredByVerbosity(/* verbosity= */ null, ConsistencyProblemInfo.Status.WARNING);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void
+      allIssuesAreReturnedIfLevelIsSetToWarning_issuesInCodeOwnerConfigFileReportedAsWarnings()
+          throws Exception {
+    testIssuesAreFilteredByVerbosity(
+        ConsistencyProblemInfo.Status.WARNING, ConsistencyProblemInfo.Status.WARNING);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void
+      onlyFatalAndErrorIssuesAreReturnedIfLevelIsSetToError_issuesInCodeOwnerConfigFileReportedAsWarnings()
+          throws Exception {
+    testIssuesAreFilteredByVerbosity(
+        ConsistencyProblemInfo.Status.ERROR, ConsistencyProblemInfo.Status.WARNING);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void
+      onlyFatalIssuesAreReturnedIfLevelIsSetToFatal_issuesInCodeOwnerConfigFileReportedAsWarnings()
+          throws Exception {
+    testIssuesAreFilteredByVerbosity(
+        ConsistencyProblemInfo.Status.FATAL, ConsistencyProblemInfo.Status.WARNING);
+  }
+
+  private void testIssuesAreFilteredByVerbosity(
+      @Nullable ConsistencyProblemInfo.Status verbosity,
+      ConsistencyProblemInfo.Status expectedStatus)
       throws Exception {
     // create a non-parseable code owner config, that will be reported as fatal
     String pathOfNonParseableCodeOwnerConfig = "/" + getCodeOwnerConfigFileName();
@@ -572,12 +629,15 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                             ProtoBackend.class,
                             "1:8: Expected \"{\"."))))));
     if (verbosity == null
-        || ConsistencyProblemInfo.Status.ERROR.equals(verbosity)
-        || ConsistencyProblemInfo.Status.WARNING.equals(verbosity)) {
+        || (ConsistencyProblemInfo.Status.ERROR.equals(verbosity)
+            && (expectedStatus.equals(ConsistencyProblemInfo.Status.FATAL)
+                || expectedStatus.equals(ConsistencyProblemInfo.Status.ERROR)))
+        || (ConsistencyProblemInfo.Status.WARNING.equals(verbosity))) {
       expectedMasterIssues.put(
           pathOfInvalidConfig,
           ImmutableList.of(
-              error(
+              problem(
+                  expectedStatus,
                   String.format(
                       "code owner email 'unknown@example.com' in '%s' cannot be"
                           + " resolved for admin",
@@ -601,6 +661,10 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   private ConsistencyProblemInfo error(String message) {
     return new ConsistencyProblemInfo(ConsistencyProblemInfo.Status.ERROR, message);
+  }
+
+  private ConsistencyProblemInfo problem(ConsistencyProblemInfo.Status status, String message) {
+    return new ConsistencyProblemInfo(status, message);
   }
 
   private Map<String, Map<String, List<ConsistencyProblemInfo>>> checkCodeOwnerConfigFilesIn(
