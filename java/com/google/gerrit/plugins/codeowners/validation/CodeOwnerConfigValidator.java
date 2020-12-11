@@ -776,6 +776,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                         validateCodeOwnerConfigReference(
                             codeOwnerConfigFilePath,
                             codeOwnerConfig.key(),
+                            codeOwnerConfig.revision(),
                             CodeOwnerConfigImportType.GLOBAL,
                             codeOwnerConfigReference)),
             codeOwnerConfig.codeOwnerSets().stream()
@@ -785,6 +786,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                         validateCodeOwnerConfigReference(
                             codeOwnerConfigFilePath,
                             codeOwnerConfig.key(),
+                            codeOwnerConfig.revision(),
                             CodeOwnerConfigImportType.PER_FILE,
                             codeOwnerConfigReference)))
         .filter(Optional::isPresent)
@@ -797,6 +799,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config reference
    * @param keyOfImportingCodeOwnerConfig key of the importing code owner config
+   * @param codeOwnerConfigRevision the commit from which the code owner config which contains the
+   *     code owner config reference was loaded
    * @param importType the type of the import
    * @param codeOwnerConfigReference the code owner config reference that should be validated.
    * @return a validation message describing the issue with the code owner config reference, {@link
@@ -805,6 +809,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   private Optional<CommitValidationMessage> validateCodeOwnerConfigReference(
       Path codeOwnerConfigFilePath,
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      ObjectId codeOwnerConfigRevision,
       CodeOwnerConfigImportType importType,
       CodeOwnerConfigReference codeOwnerConfigReference) {
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
@@ -832,7 +837,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               projectState.get().getProject().getState().name()));
     }
 
-    Optional<ObjectId> revision = getRevision(keyOfImportedCodeOwnerConfig);
+    Optional<ObjectId> revision =
+        getRevision(
+            keyOfImportingCodeOwnerConfig, codeOwnerConfigRevision, keyOfImportedCodeOwnerConfig);
     if (!revision.isPresent() || !isBranchReadable(keyOfImportedCodeOwnerConfig)) {
       // we intentionally use the same error message for non-existing and non-readable branches so
       // that uploaders cannot probe for the existence of branches (e.g. deduce from the error
@@ -916,7 +923,18 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
   }
 
-  private Optional<ObjectId> getRevision(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+  private Optional<ObjectId> getRevision(
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      ObjectId codeOwnerConfigRevision,
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+    if (keyOfImportingCodeOwnerConfig
+        .branchNameKey()
+        .equals(keyOfImportedCodeOwnerConfig.branchNameKey())) {
+      // load the imported code owner config from the same revision from which the importing code
+      // owner config was loaded
+      return Optional.of(codeOwnerConfigRevision);
+    }
+
     try (Repository repo = repoManager.openRepository(keyOfImportedCodeOwnerConfig.project())) {
       return Optional.ofNullable(repo.exactRef(keyOfImportedCodeOwnerConfig.ref()))
           .map(Ref::getObjectId);
