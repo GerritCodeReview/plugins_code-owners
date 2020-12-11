@@ -97,6 +97,11 @@ rules](../../../Documentation/config-labels.html#label_copyAnyScore) enabled so
 that votes are sticky across patch sets, then also the code owner approvals
 which are based on these votes will be sticky.
 
+**NOTE:** Whether code owners can approve their own changes depends of the
+definition of the required label. If the label definition has
+[ignoreSelfApproval](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+enabled, code owner approvals of the patch set uploader are ignored.
+
 ## <a id="codeOwnerOverride">Code owner override
 
 Usually some privileged users, such as sheriffs, are allowed to override the
