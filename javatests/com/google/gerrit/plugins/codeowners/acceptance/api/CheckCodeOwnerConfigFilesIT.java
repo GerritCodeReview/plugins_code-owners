@@ -184,6 +184,18 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void issuesInCodeOwnerConfigFile() throws Exception {
+    testIssuesInCodeOwnerConfigFile(ConsistencyProblemInfo.Status.ERROR);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void issuesInCodeOwnerConfigFileReportedAsWarnings() throws Exception {
+    testIssuesInCodeOwnerConfigFile(ConsistencyProblemInfo.Status.WARNING);
+  }
+
+  private void testIssuesInCodeOwnerConfigFile(ConsistencyProblemInfo.Status expectedStatus)
+      throws Exception {
     // imports are not supported for the proto backend
     assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
 
@@ -228,19 +240,22 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                 ImmutableMap.of(
                     pathOfInvalidConfig1,
                     ImmutableList.of(
-                        error(
+                        problem(
+                            expectedStatus,
                             String.format(
                                 "invalid global import in '%s': '/not-a-code-owner-config' is"
                                     + " not a code owner config file",
                                 pathOfInvalidConfig1))),
                     pathOfInvalidConfig2,
                     ImmutableList.of(
-                        error(
+                        problem(
+                            expectedStatus,
                             String.format(
                                 "code owner email 'unknown1@example.com' in '%s' cannot be"
                                     + " resolved for admin",
                                 pathOfInvalidConfig2)),
-                        error(
+                        problem(
+                            expectedStatus,
                             String.format(
                                 "code owner email 'unknown2@example.com' in '%s' cannot be"
                                     + " resolved for admin",
@@ -601,6 +616,10 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   private ConsistencyProblemInfo error(String message) {
     return new ConsistencyProblemInfo(ConsistencyProblemInfo.Status.ERROR, message);
+  }
+
+  private ConsistencyProblemInfo problem(ConsistencyProblemInfo.Status status, String message) {
+    return new ConsistencyProblemInfo(status, message);
   }
 
   private Map<String, Map<String, List<ConsistencyProblemInfo>>> checkCodeOwnerConfigFilesIn(
