@@ -168,6 +168,11 @@ yet (project owners will not be suggested in this case).
 
 ## <a id="renames">Renames
 
+A rename is treated as a deletion at the old path and a creation at the new
+path. This is why for files that are renamed, Gerrit requires a code owner
+approval for the old and the new path of the files (also see [code owner
+approval](#codeOwnerApproval) section).
+
 When files/folders get renamed, their code owner configuration should stay
 intact. Renaming a file/folder should normally not result in a situation where
 the code owner configuration for this file/folder no longer applies, because it
@@ -186,10 +191,8 @@ matched by another path expression that makes user B a code owner. E.g. '*.md'
 is owned by user A, '*.txt' is owned by user B and 'config.md' is renamed to
 'config.txt'. In this case it is the responsibility of the author doing the
 rename and the current code owners to ensure that the file/folder has the proper
-code owners at the new path. This is why for files that are renamed Gerrit
-requires a code owner approval for the old and the new path of the files (also
-see [code owner approval](#codeOwnerApproval) section). Also this is the reason
-why [matching subfolders via path expressions is
+code owners at the new path. This is also the reason why [matching subfolders
+via path expressions is
 discouraged](backend-find-owners.html#doNotUsePathExpressionsForSubdirectories).
 
 ## <a id="mergeCommits">Merge commits
