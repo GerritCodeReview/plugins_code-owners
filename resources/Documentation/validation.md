@@ -129,7 +129,7 @@ The following things are **not** checked (not an exhaustive list):
   [code owner override](user-guide.html#codeOwnerOverride).
 
 
-### <a id="codeOwnerConfigFileChecks">Validation checks for code owner config files
+### <a id="codeOwnersConfigFileChecks">Validation checks for code-owners.config files
 
 For the [code-owner.config](config.html#projectLevelConfigFile) in the
 `refs/meta/config` branch the following checks are performed:
