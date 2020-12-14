@@ -104,7 +104,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
           String.format(
               "failed to validate file %s for revision %s in ref %s of project %s",
               fileName, receiveEvent.commit.getName(), RefNames.REFS_CONFIG, project);
-      logger.atSevere().log(errorMessage);
+      logger.atSevere().withCause(e).log(errorMessage);
       throw new CommitValidationException(errorMessage, e);
     }
   }
