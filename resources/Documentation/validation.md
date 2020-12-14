@@ -154,6 +154,8 @@ For the [code-owner.config](config.html#projectLevelConfigFile) in the
   configuration is valid
 * the [codeOwners.fallbackCodeOwners](config.html#codeOwnersFallbackCodeOwners)
   configuration is valid
+* the [codeOwners.maxPathsInChangeMessages](config.html#codeOwnersMaxPathsInChangeMessages)
+  configuration is valid
 
 ---
 

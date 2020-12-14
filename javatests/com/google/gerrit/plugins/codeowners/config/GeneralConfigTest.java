@@ -16,12 +16,14 @@ package com.google.gerrit.plugins.codeowners.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
+import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
 import static com.google.gerrit.plugins.codeowners.config.GeneralConfig.KEY_READ_ONLY;
@@ -499,5 +501,62 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void defaultValueUsedIfInvalidGlobalFallbackCodeOwnersConfigured() throws Exception {
     assertThat(generalConfig.getFallbackCodeOwners(project, new Config()))
         .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  public void cannotGetMaxPathsInChangeMessagesForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getMaxPathsInChangeMessages(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetMaxPathsInChangeMessagesForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getMaxPathsInChangeMessages(project, /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noMaxPathsInChangeMessagesConfigured() throws Exception {
+    assertThat(generalConfig.getMaxPathsInChangeMessages(project, new Config()))
+        .isEqualTo(DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "50")
+  public void maxPathsInChangeMessagesIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getMaxPathsInChangeMessages(project, new Config())).isEqualTo(50);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "50")
+  public void
+      maxPathsInChangeMessagesInPluginConfigOverridesMaxPathsInChangeMessagesInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES, "10");
+    assertThat(generalConfig.getMaxPathsInChangeMessages(project, cfg)).isEqualTo(10);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "50")
+  public void globalMaxPathsInChangeMessagesUsedIfInvalidMaxPathsInChangeMessagesConfigured()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES, "INVALID");
+    assertThat(generalConfig.getMaxPathsInChangeMessages(project, cfg)).isEqualTo(50);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxPathsInChangeMessages", value = "INVALID")
+  public void defaultValueUsedIfInvalidMaxPathsInChangeMessagesConfigured() throws Exception {
+    assertThat(generalConfig.getMaxPathsInChangeMessages(project, new Config()))
+        .isEqualTo(DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
   }
 }

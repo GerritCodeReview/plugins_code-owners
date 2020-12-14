@@ -166,6 +166,17 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
+   * Gets the max paths in change messages for the given project.
+   *
+   * @param project the project for which the fallback code owners should be retrieved
+   * @return the fallback code owners for the given project
+   */
+  public int getMaxPathsInChangeMessages(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getMaxPathsInChangeMessages(project, getPluginConfig(project));
+  }
+
+  /**
    * Checks whether an implicit code owner approval from the last uploader is assumed.
    *
    * @param project the project for it should be checked whether implict approvals are enabled
