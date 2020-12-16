@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9757deaa_d39fc463",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2020-12-16T17:32:39Z",
+      "side": 1,
+      "message": "Should we have a test for this case?",
+      "range": {
+        "startLine": 173,
+        "startChar": 0,
+        "endLine": 175,
+        "endChar": 0
+      },
+      "revId": "70ac147b316482becf0da40c019b9dbdbd89e33e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
