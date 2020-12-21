@@ -365,7 +365,9 @@ As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
 The returned code owners are sorted by an internal score that expresses how good
 the code owners are considered as reviewers/approvers for the path. Code owners
 with higher scores are returned first. If code owners have the same score the
-order is random.
+order is random. If the path is owned by all users (e.g. the code ownership is
+assigned to '*') a random set of (visible) users is returned, as many as are
+needed to fill up the requested limit.
 
 #### Request
 
