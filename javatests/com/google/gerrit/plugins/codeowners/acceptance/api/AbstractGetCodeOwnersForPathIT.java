@@ -50,6 +50,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.inject.Inject;
 import java.util.List;
+import java.util.Random;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -1012,5 +1013,74 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     assertThat(codeOwnerInfos)
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  public void getCodeOwnersProvidingASeedMakesSortOrderStableAcrocssRequests() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    long seed = (new Random()).nextLong();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md");
+    // all code owners have the same score, hence their order is random
+    assertThatList(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    // Check that the order for further requests that use the same seed is the same.
+    List<Account.Id> expectedAccountIds =
+        codeOwnerInfos.stream().map(info -> Account.id(info.account._accountId)).collect(toList());
+    for (int i = 0; i < 10; i++) {
+      assertThatList(queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds)
+          .inOrder();
+    }
+  }
+
+  @Test
+  public void getCodeOwnersProvidingASeedMakesSortOrderStableAcrocssRequests_allUsersAreCodeOwners()
+      throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    long seed = (new Random()).nextLong();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md");
+    // all code owners have the same score, hence their order is random
+    assertThatList(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    // Check that the order for further requests that use the same seed is the same.
+    List<Account.Id> expectedAccountIds =
+        codeOwnerInfos.stream().map(info -> Account.id(info.account._accountId)).collect(toList());
+    for (int i = 0; i < 10; i++) {
+      assertThatList(queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds)
+          .inOrder();
+    }
   }
 }
