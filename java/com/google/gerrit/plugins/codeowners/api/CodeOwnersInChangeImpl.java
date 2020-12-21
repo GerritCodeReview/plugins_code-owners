@@ -61,6 +61,7 @@ public class CodeOwnersInChangeImpl implements CodeOwners {
           GetCodeOwnersForPathInChange getCodeOwners = getCodeOwnersProvider.get();
           getOptions().forEach(getCodeOwners::addOption);
           getLimit().ifPresent(getCodeOwners::setLimit);
+          getSeed().ifPresent(getCodeOwners::setSeed);
           CodeOwnersInChangeCollection.PathResource pathInChangeResource =
               codeOwnersInChangeCollection.parse(
                   revisionResource, IdString.fromDecoded(path.toString()));
