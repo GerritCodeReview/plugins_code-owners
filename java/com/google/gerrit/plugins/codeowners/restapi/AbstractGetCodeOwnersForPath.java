@@ -55,6 +55,8 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Stream;
 import org.kohsuke.args4j.Option;
@@ -81,6 +83,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private final Set<String> hexOptions;
 
   private int limit = DEFAULT_LIMIT;
+  private Optional<Long> seed = Optional.empty();
 
   @Option(
       name = "-o",
@@ -104,6 +107,13 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       usage = "maximum number of code owners to list (default = " + DEFAULT_LIMIT + ")")
   public void setLimit(int limit) {
     this.limit = limit;
+  }
+
+  @Option(
+      name = "--seed",
+      usage = "seed that should be used to shuffle code owners that have the same score")
+  public void setSeed(long seed) {
+    this.seed = Optional.of(seed);
   }
 
   protected AbstractGetCodeOwnersForPath(
@@ -308,7 +318,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
   private ImmutableList<CodeOwner> sortAndLimit(
       CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
-    return sortCodeOwners(distanceScoring, codeOwners).limit(limit).collect(toImmutableList());
+    return sortCodeOwners(seed, distanceScoring, codeOwners)
+        .limit(limit)
+        .collect(toImmutableList());
   }
 
   /**
@@ -318,24 +330,27 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    *
    * <p>The order of code owners with the same distance score is random.
    *
+   * @param seed seed that should be used to randomize the order
    * @param distanceScoring the distance scorings for the code owners
    * @param codeOwners the code owners that should be sorted
    * @return the sorted code owners
    */
   private static Stream<CodeOwner> sortCodeOwners(
-      CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
-    return randomizeOrder(codeOwners).sorted(distanceScoring.comparingByScoring());
+      Optional<Long> seed, CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
+    return randomizeOrder(seed, codeOwners).sorted(distanceScoring.comparingByScoring());
   }
 
   /**
    * Returns the entries from the given set in a random order.
    *
+   * @param seed seed that should be used to randomize the order
    * @param set the set for which the entries should be returned in a random order
    * @return the entries from the given set in a random order
    */
-  private static <T> Stream<T> randomizeOrder(Set<T> set) {
+  private static <T> Stream<T> randomizeOrder(Optional<Long> seed, Set<T> set) {
     List<T> randomlyOrderedCodeOwners = new ArrayList<>(set);
-    Collections.shuffle(randomlyOrderedCodeOwners);
+    Collections.shuffle(
+        randomlyOrderedCodeOwners, seed.isPresent() ? new Random(seed.get()) : new Random());
     return randomlyOrderedCodeOwners.stream();
   }
 
@@ -406,6 +421,6 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    * <p>No visibility check is performed.
    */
   private Stream<Account.Id> getRandomUsers(int limit) throws IOException {
-    return randomizeOrder(accounts.allIds()).limit(limit);
+    return randomizeOrder(seed, accounts.allIds()).limit(limit);
   }
 }
