@@ -47,6 +47,7 @@ public interface CodeOwners {
     private Set<ListAccountsOption> options = EnumSet.noneOf(ListAccountsOption.class);
     private Integer limit;
     private String revision;
+    private Long seed;
 
     /**
      * Lists the code owners for the given path.
@@ -93,6 +94,16 @@ public interface CodeOwners {
     }
 
     /**
+     * Sets the seed that should be used to shuffle code owners that have the same score.
+     *
+     * @param seed seed that should be used to shuffle code owners that have the same score
+     */
+    public QueryRequest withSeed(long seed) {
+      this.seed = seed;
+      return this;
+    }
+
+    /**
      * Sets the branch revision from which the code owner configs should be read.
      *
      * <p>Not supported for querying code owners for a path in a change.
@@ -112,6 +123,11 @@ public interface CodeOwners {
     /** Returns the limit which has been set on the request. */
     public Optional<Integer> getLimit() {
       return Optional.ofNullable(limit);
+    }
+
+    /** Returns the seed that should be used to shuffle code owners that have the same score. */
+    public Optional<Long> getSeed() {
+      return Optional.ofNullable(seed);
     }
 
     /** Returns the branch revision from which the code owner configs should be read. */

@@ -353,12 +353,13 @@ are omitted from the result.
 
 The following request parameters can be specified:
 
-| Field Name  |          | Description |
-| ----------- | -------- | ----------- |
-| `o`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) that controls which fields in the returned accounts should be populated. Can be specified multiple times. If not given, only the `_account_id` field for the account ID is populated.
-| `O`         | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
+| Field Name   |          | Description |
+| ------------ | -------- | ----------- |
+| `o`          | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) that controls which fields in the returned accounts should be populated. Can be specified multiple times. If not given, only the `_account_id` field for the account ID is populated.
+| `O`          | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
 | `limit`\|`n` | optional | Limit defining how many code owners should be returned at most. By default 10.
-| `revision` | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners from this branch, but imports from other branches or repositories as well as default and global code owners from `refs/meta/config` are still read from the current revisions. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
+| `seed`       | optional | Seed, as a long value, that should be used to shuffle code owners that have the same score. Can be used to make the sort order stable across several requests, e.g. to get the same set of random code owners for different file paths that have the same code owners. Important: the sort order is only stable if the requests use the same seed **and** the same limit. In addition, the sort order is not guaranteed to be stable if new accounts are created in between the requests, or if the account visibility is changed.
+| `revision`   | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners from this branch, but imports from other branches or repositories as well as default and global code owners from `refs/meta/config` are still read from the current revisions. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
 
 As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
 The returned code owners are sorted by an internal score that expresses how good
