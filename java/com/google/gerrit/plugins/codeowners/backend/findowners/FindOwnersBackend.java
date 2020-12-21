@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
+import com.google.gerrit.plugins.codeowners.backend.FindOwnersGlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
@@ -61,7 +61,7 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
 
   @Override
   public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
-    return Optional.of(GlobMatcher.INSTANCE);
+    return Optional.of(FindOwnersGlobMatcher.INSTANCE);
   }
 
   @Override

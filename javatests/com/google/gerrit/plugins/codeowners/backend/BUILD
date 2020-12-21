@@ -23,7 +23,10 @@ package(
 
 java_library(
     name = "testbases",
-    srcs = glob(["Abstract*.java"]),
+    srcs = glob([
+        "Abstract*.java",
+        "GlobMatcherTest.java",
+    ]),
     deps = [
         "//java/com/google/gerrit/acceptance/config",
         "//java/com/google/gerrit/common:annotations",
