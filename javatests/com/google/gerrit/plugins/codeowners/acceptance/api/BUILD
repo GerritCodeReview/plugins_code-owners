@@ -5,12 +5,9 @@ package(
     default_visibility = ["//plugins/code-owners:visibility"],
 )
 
-acceptance_tests(
-    srcs = glob(
-        ["*IT.java"],
-        exclude = ["Abstract*.java"],
-    ),
-    group = "acceptance_api",
+[acceptance_tests(
+    srcs = [f],
+    group = f[:f.index(".")],
     deps = [
         "testbases",
         "//plugins/code-owners:code-owners__plugin",
@@ -18,7 +15,10 @@ acceptance_tests(
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
-)
+) for f in glob(
+    ["*IT.java"],
+    exclude = ["Abstract*.java"],
+)]
 
 java_library(
     name = "testbases",
