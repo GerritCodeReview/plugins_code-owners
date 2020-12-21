@@ -165,4 +165,11 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
                 + " 'non-existing-backend' that is configured in gerrit.config (parameter"
                 + " plugin.code-owners.backend) not found.");
   }
+
+  @Test
+  public void cannotGetCodeOwnersWithInvalidSeed() throws Exception {
+    RestResponse r = adminRestSession.get(getUrl(TEST_PATH, "seed=invalid"));
+    r.assertBadRequest();
+    assertThat(r.getEntityContent()).contains("\"invalid\" is not a valid value for \"--seed\"");
+  }
 }
