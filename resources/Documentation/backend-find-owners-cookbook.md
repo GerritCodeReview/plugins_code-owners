@@ -142,19 +142,18 @@ expression that matches all files of the wanted type, e.g. all '*.md' files:
   per-file *.md=tina.toe@example.com
 ```
 \
-To match '*.md' in the current directory and all its subdirectories use:
+This matches all '*.md' in the current directory and all its subdirectories.
 
-```
-  per-file **.md=tina.toe@example.com
-```
-\
+**NOTE**: Using '*.md' is the same as using '**.md' (both expressions match
+files in the current directory and in all subdirectories).
+
 **NOTE:** The syntax for path expressions / globs is explained
 [here](path-expressions.html#globs).
 
 ### <a id="defineCodeOwnersForAllFileInASubdirectory">Define code owners for all files in a subdirectory
 
 It is discouraged to use path expressions that explicitly name subdirectories
-such as `my-subdir/**` as they will break when the subdirectory gets
+such as `my-subdir/*` as they will break when the subdirectory gets
 renamed/moved. Instead prefer to define these code owners in `my-subdir/OWNERS`
 so that the code owners for the subdirectory stay intact when the subdirectory
 gets renamed/moved.
@@ -165,7 +164,7 @@ using a [per-file](backend-find-owners.html#perFile) line. This is the same as
 expression matches all files in the subdirectory:
 
 ```
-  per-file my-subdir/**=tina.toe@example.com
+  per-file my-subdir/*=tina.toe@example.com
 ```
 
 ### <a id="defineAGroupAsCodeOwner">Define a group as code owner
@@ -322,7 +321,7 @@ approvals:
 `OWNERS` files that exempts all '*.md' files (in the current directory and all
 subdirectories) from requiring code owner approvals:
 ```
-  per-file **.md=*
+  per-file *.md=*
 ```
 \
 **NOTE:** Files that are not owned by anyone are **not** excluded from requiring

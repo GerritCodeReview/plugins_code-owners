@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.FindOwnersGlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
@@ -47,6 +48,7 @@ public class TestPathExpressions {
   public String matchFileTypeInCurrentFolder(String fileType) {
     PathExpressionMatcher pathExpressionMatcher = getPathExpressionMatcher();
     if (pathExpressionMatcher instanceof GlobMatcher
+        || pathExpressionMatcher instanceof FindOwnersGlobMatcher
         || pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
       return "*." + fileType;
     }
@@ -63,7 +65,8 @@ public class TestPathExpressions {
    */
   public String matchAllFilesInSubfolder(String subfolder) {
     PathExpressionMatcher pathExpressionMatcher = getPathExpressionMatcher();
-    if (pathExpressionMatcher instanceof GlobMatcher) {
+    if (pathExpressionMatcher instanceof GlobMatcher
+        || pathExpressionMatcher instanceof FindOwnersGlobMatcher) {
       return subfolder + "/**";
     } else if (pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
       return subfolder + "/...";

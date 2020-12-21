@@ -227,7 +227,8 @@ comma-separated list.
 In the example below, Jana Roe, John Doe and the code owners that are inherited
 from parent `OWNERS` files are code owners of all files that are contained in
 the directory that contains the `OWNERS` file. In addition Richard Roe is a code
-owner of the `docs.config` file and all `*.md` files in this directory.
+owner of the `docs.config` file in this directory and all `*.md` files in this
+directory and the subdirectories.
 
 ```
   jane.roe@example.com
@@ -237,7 +238,7 @@ owner of the `docs.config` file and all `*.md` files in this directory.
 \
 ##### <a id="doNotUsePathExpressionsForSubdirectories">
 **NOTE:** It is discouraged to use path expressions that explicitly name
-subdirectories such as `my-subdir/**` as they will break when the subdirectory
+subdirectories such as `my-subdir/*` as they will break when the subdirectory
 gets renamed/moved. Instead prefer to define these code owners in
 `my-subdir/OWNERS` so that the code owners for the subdirectory stay intact when
 the subdirectory gets renamed/moved.
@@ -268,9 +269,10 @@ to prevent access by non-per-file owners from the current directory as well as
 from parent directories.
 
 In the example below, Richard Roe is the only code owner of the `docs.config`
-file and all `*.md` files in this directory. All other files in this directory
-and its subdirectories are owned by Jana Roe, John Doe and the code owners that
-are inherited from parent directories.
+file in this directory and all `*.md` files in this directory and the
+subdirectories. All other files in this directory and its subdirectories are
+owned by Jana Roe, John Doe and the code owners that are inherited from parent
+directories.
 
 ```
   jane.roe@example.com
