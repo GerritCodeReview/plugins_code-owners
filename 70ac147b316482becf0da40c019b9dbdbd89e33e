@@ -22,6 +22,30 @@
       },
       "revId": "70ac147b316482becf0da40c019b9dbdbd89e33e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f9f1da5a_7a2a8f32",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 175,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2020-12-22T09:34:55Z",
+      "side": 1,
+      "message": "Good idea. Done.",
+      "parentUuid": "9757deaa_d39fc463",
+      "range": {
+        "startLine": 173,
+        "startChar": 0,
+        "endLine": 175,
+        "endChar": 0
+      },
+      "revId": "70ac147b316482becf0da40c019b9dbdbd89e33e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
