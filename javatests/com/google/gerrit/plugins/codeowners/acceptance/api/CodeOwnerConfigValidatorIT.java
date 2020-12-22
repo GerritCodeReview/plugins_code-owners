@@ -469,7 +469,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files:\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 unknownEmail,
@@ -807,10 +807,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
     String abbreviatedCommit = abbreviateName(r.getCommit());
     r.assertErrorStatus(
-        String.format("commit %s: %s", abbreviatedCommit, "invalid code owner config files"));
+        String.format(
+            "commit %s: [code-owners] %s", abbreviatedCommit, "invalid code owner config files"));
     r.assertMessage(
         String.format(
-            "error: commit %s: %s",
+            "error: commit %s: [code-owners] %s",
             abbreviatedCommit,
             String.format(
                 "code owner email '%s' in '%s' cannot be resolved for %s",
@@ -821,7 +822,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     // the pre-existing issue is returned as warning
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
+            "warning: commit %s: [code-owners] code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviatedCommit,
             unknownEmail1,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
@@ -866,7 +867,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files:\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 unknownEmail,
@@ -915,7 +916,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
     r.assertMessage(
         String.format(
-            "error: commit %s: %s",
+            "error: commit %s: [code-owners] %s",
             abbreviatedCommit,
             String.format(
                 "code owner email '%s' in '%s' cannot be resolved for %s",
@@ -926,7 +927,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     // the pre-existing issue is returned as warning
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
+            "warning: commit %s: [code-owners] code owner email '%s' in '%s' cannot be resolved"
+                + " for %s",
             abbreviatedCommit,
             unknownEmail1,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
@@ -979,7 +981,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files:\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 admin.email(),
@@ -1791,7 +1793,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String hint : hints) {
       pushResult.assertMessage(
-          String.format("hint: commit %s: %s", abbreviateName(pushResult.getCommit()), hint));
+          String.format(
+              "hint: commit %s: [code-owners] %s", abbreviateName(pushResult.getCommit()), hint));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("error");
@@ -1803,7 +1806,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String error : errors) {
       pushResult.assertMessage(
-          String.format("fatal: commit %s: %s", abbreviateName(pushResult.getCommit()), error));
+          String.format(
+              "fatal: commit %s: [code-owners] %s", abbreviateName(pushResult.getCommit()), error));
     }
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
@@ -1815,7 +1819,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String error : errors) {
       pushResult.assertMessage(
-          String.format("error: commit %s: %s", abbreviateName(pushResult.getCommit()), error));
+          String.format(
+              "error: commit %s: [code-owners] %s", abbreviateName(pushResult.getCommit()), error));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("warning");
@@ -1827,7 +1832,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String warning : warnings) {
       pushResult.assertMessage(
-          String.format("warning: commit %s: %s", abbreviateName(pushResult.getCommit()), warning));
+          String.format(
+              "warning: commit %s: [code-owners] %s",
+              abbreviateName(pushResult.getCommit()), warning));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("error");
@@ -1837,9 +1844,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private void assertErrorWithMessages(
       PushOneCommit.Result pushResult, String summaryMessage, String... errors) throws Exception {
     String abbreviatedCommit = abbreviateName(pushResult.getCommit());
-    pushResult.assertErrorStatus(String.format("commit %s: %s", abbreviatedCommit, summaryMessage));
+    pushResult.assertErrorStatus(
+        String.format("commit %s: [code-owners] %s", abbreviatedCommit, summaryMessage));
     for (String error : errors) {
-      pushResult.assertMessage(String.format("error: commit %s: %s", abbreviatedCommit, error));
+      pushResult.assertMessage(
+          String.format("error: commit %s: [code-owners] %s", abbreviatedCommit, error));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("warning");
@@ -1849,9 +1858,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private void assertFatalWithMessages(
       PushOneCommit.Result pushResult, String summaryMessage, String... errors) throws Exception {
     String abbreviatedCommit = abbreviateName(pushResult.getCommit());
-    pushResult.assertErrorStatus(String.format("commit %s: %s", abbreviatedCommit, summaryMessage));
+    pushResult.assertErrorStatus(
+        String.format("commit %s: [code-owners] %s", abbreviatedCommit, summaryMessage));
     for (String error : errors) {
-      pushResult.assertMessage(String.format("fatal: commit %s: %s", abbreviatedCommit, error));
+      pushResult.assertMessage(
+          String.format("fatal: commit %s: [code-owners] %s", abbreviatedCommit, error));
     }
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
