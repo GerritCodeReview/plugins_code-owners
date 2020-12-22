@@ -1052,6 +1052,57 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   }
 
   @Test
+  public void getCodeOwnersProvidingASeedMakesSortOrderStableAcrossRequests_withLimit()
+      throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    long seed = (new Random()).nextLong();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md");
+    // all code owners have the same score, hence their order is random
+    assertThatList(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    // Check that the order for further requests that use the same seed is the same.
+    List<Account.Id> expectedAccountIds =
+        codeOwnerInfos.stream().map(info -> Account.id(info.account._accountId)).collect(toList());
+    for (int i = 0; i < 10; i++) {
+      assertThatList(
+              queryCodeOwners(
+                  getCodeOwnersApi().query().withLimit(1).withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds.subList(0, 1))
+          .inOrder();
+
+      assertThatList(
+              queryCodeOwners(
+                  getCodeOwnersApi().query().withLimit(2).withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds.subList(0, 2))
+          .inOrder();
+
+      assertThatList(
+              queryCodeOwners(
+                  getCodeOwnersApi().query().withLimit(3).withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds.subList(0, 3))
+          .inOrder();
+    }
+  }
+
+  @Test
   public void getCodeOwnersProvidingASeedMakesSortOrderStableAcrocssRequests_allUsersAreCodeOwners()
       throws Exception {
     TestAccount user2 = accountCreator.user2();
@@ -1083,5 +1134,203 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
           .containsExactlyElementsIn(expectedAccountIds)
           .inOrder();
     }
+  }
+
+  @Test
+  public void
+      getCodeOwnersProvidingASeedMakesSortOrderStableAcrossRequests_withLimit_allUsersAreCodeOwners()
+          throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    long seed = (new Random()).nextLong();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md");
+    // all code owners have the same score, hence their order is random
+    assertThatList(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    // Check that the order for further requests that use the same seed is the same.
+    List<Account.Id> expectedAccountIds =
+        codeOwnerInfos.stream().map(info -> Account.id(info.account._accountId)).collect(toList());
+    for (int i = 0; i < 10; i++) {
+      assertThatList(
+              queryCodeOwners(
+                  getCodeOwnersApi().query().withLimit(1).withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds.subList(0, 1))
+          .inOrder();
+
+      assertThatList(
+              queryCodeOwners(
+                  getCodeOwnersApi().query().withLimit(2).withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds.subList(0, 2))
+          .inOrder();
+
+      assertThatList(
+              queryCodeOwners(
+                  getCodeOwnersApi().query().withLimit(3).withSeed(seed), "/foo/bar/baz.md"))
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(expectedAccountIds.subList(0, 3))
+          .inOrder();
+    }
+  }
+
+  @Test
+  public void startCannotBeNegative() throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                codeOwnersApiFactory
+                    .branch(project, "master")
+                    .query()
+                    .withStart(-1)
+                    .get("/foo/bar/baz.md"));
+    assertThat(exception).hasMessageThat().isEqualTo("start cannot be negative");
+  }
+
+  @Test
+  public void startCannotBeUsedWithoutSeed() throws Exception {
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                codeOwnersApiFactory
+                    .branch(project, "master")
+                    .query()
+                    .withStart(1)
+                    .get("/foo/bar/baz.md"));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("using start requires setting a seed to fix the sort order");
+  }
+
+  @Test
+  public void paginate() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+    TestAccount user3 =
+        accountCreator.create("user3", "user3@example.com", "User 3", /* displayName= */ null);
+    TestAccount user4 =
+        accountCreator.create("user4", "user4@example.com", "User 4", /* displayName= */ null);
+    TestAccount user5 =
+        accountCreator.create("user5", "user5@example.com", "User 5", /* displayName= */ null);
+    TestAccount user6 =
+        accountCreator.create("user6", "user6@example.com", "User 6", /* displayName= */ null);
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .addCodeOwnerEmail(user3.email())
+        .addCodeOwnerEmail(user4.email())
+        .addCodeOwnerEmail(user5.email())
+        .addCodeOwnerEmail(user6.email())
+        .create();
+
+    long seed = (new Random()).nextLong();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md");
+    // all code owners have the same score, hence their order is random
+    assertThatList(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(
+            admin.id(), user.id(), user2.id(), user3.id(), user4.id(), user5.id(), user6.id());
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(0).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactlyElementsIn(codeOwnerInfos.subList(0, 2));
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(2).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactlyElementsIn(codeOwnerInfos.subList(2, 4));
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(4).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactlyElementsIn(codeOwnerInfos.subList(4, 6));
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(6).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactly(codeOwnerInfos.get(6));
+  }
+
+  @Test
+  public void paginate_allUsersAreCodeOwners() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+    TestAccount user3 =
+        accountCreator.create("user3", "user3@example.com", "User 3", /* displayName= */ null);
+    TestAccount user4 =
+        accountCreator.create("user4", "user4@example.com", "User 4", /* displayName= */ null);
+    TestAccount user5 =
+        accountCreator.create("user5", "user5@example.com", "User 5", /* displayName= */ null);
+    TestAccount user6 =
+        accountCreator.create("user6", "user6@example.com", "User 6", /* displayName= */ null);
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .create();
+
+    long seed = (new Random()).nextLong();
+
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md");
+    // all code owners have the same score, hence their order is random
+    assertThatList(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(
+            admin.id(), user.id(), user2.id(), user3.id(), user4.id(), user5.id(), user6.id());
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(0).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactlyElementsIn(codeOwnerInfos.subList(0, 2));
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(2).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactlyElementsIn(codeOwnerInfos.subList(2, 4));
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(4).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactlyElementsIn(codeOwnerInfos.subList(4, 6));
+
+    assertThatList(
+            queryCodeOwners(
+                getCodeOwnersApi().query().withLimit(2).withStart(6).withSeed(seed),
+                "/foo/bar/baz.md"))
+        .containsExactly(codeOwnerInfos.get(6));
   }
 }

@@ -46,6 +46,7 @@ public interface CodeOwners {
   abstract class QueryRequest {
     private Set<ListAccountsOption> options = EnumSet.noneOf(ListAccountsOption.class);
     private Integer limit;
+    private Integer start;
     private String revision;
     private Long seed;
 
@@ -94,6 +95,16 @@ public interface CodeOwners {
     }
 
     /**
+     * Sets a the number of code owners that should be skipped.
+     *
+     * @param start the number of code owners that should be skipped
+     */
+    public QueryRequest withStart(int start) {
+      this.start = start;
+      return this;
+    }
+
+    /**
      * Sets the seed that should be used to shuffle code owners that have the same score.
      *
      * @param seed seed that should be used to shuffle code owners that have the same score
@@ -123,6 +134,13 @@ public interface CodeOwners {
     /** Returns the limit which has been set on the request. */
     public Optional<Integer> getLimit() {
       return Optional.ofNullable(limit);
+    }
+
+    /**
+     * Returns the number of code owners that should be skipped which has been set on the request.
+     */
+    public Optional<Integer> getStart() {
+      return Optional.ofNullable(start);
     }
 
     /** Returns the seed that should be used to shuffle code owners that have the same score. */

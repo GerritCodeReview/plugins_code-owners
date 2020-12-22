@@ -174,6 +174,13 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
   }
 
   @Test
+  public void cannotGetCodeOwnersWithInvalidStart() throws Exception {
+    RestResponse r = adminRestSession.get(getUrl(TEST_PATH, "start=invalid"));
+    r.assertBadRequest();
+    assertThat(r.getEntityContent()).contains("\"invalid\" is not a valid value for \"--start\"");
+  }
+
+  @Test
   public void cannotGetCodeOwnersWithInvalidSeed() throws Exception {
     RestResponse r = adminRestSession.get(getUrl(TEST_PATH, "seed=invalid"));
     r.assertBadRequest();

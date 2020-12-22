@@ -83,6 +83,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private final Set<String> hexOptions;
 
   private int limit = DEFAULT_LIMIT;
+  private int start;
   private Optional<Long> seed = Optional.empty();
 
   @Option(
@@ -107,6 +108,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       usage = "maximum number of code owners to list (default = " + DEFAULT_LIMIT + ")")
   public void setLimit(int limit) {
     this.limit = limit;
+  }
+
+  @Option(
+      name = "--start",
+      aliases = {"-S"},
+      metaVar = "CNT",
+      usage = "Number of code owners to skip")
+  public void setStart(int start) {
+    this.start = start;
   }
 
   @Option(
@@ -140,7 +150,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   protected Response<List<CodeOwnerInfo>> applyImpl(R rsrc)
       throws AuthException, BadRequestException, PermissionBackendException {
     parseHexOptions();
-    validateLimit();
+    validateLimitAndStart();
 
     // The distance that applies to code owners that are defined in the root code owner
     // configuration.
@@ -163,14 +173,14 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
           codeOwners.addAll(filterCodeOwners(rsrc, pathCodeOwners.codeOwners()));
 
           if (pathCodeOwners.ownedByAllUsers()) {
-            fillUpWithRandomUsers(rsrc, codeOwners, limit);
+            fillUpWithRandomUsers(rsrc, codeOwners, start + limit);
 
-            if (codeOwners.size() < limit) {
+            if (codeOwners.size() < start + limit) {
               logger.atFine().log(
                   "tried to fill up the suggestion list with random users,"
                       + " but didn't find enough visible accounts"
                       + " (wanted number of suggestions = %d, got = %d",
-                  limit, codeOwners.size());
+                  start + limit, codeOwners.size());
             }
 
             // We already found that the path is owned by all users. Hence we do not need to check
@@ -187,15 +197,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               .forEach(
                   localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
-          // If codeOwners.size() >= limit we have gathered enough code owners and do not need to
-          // look at further code owner configs.
+          // If codeOwners.size() >= start + limit we have gathered enough code owners and do not
+          // need to look at further code owner configs.
           // We can abort here, since all further code owners will have a lower distance scoring
           // and hence they would appear at the end of the sorted code owners list and be dropped
           // due to the limit.
-          return codeOwners.size() < limit;
+          return codeOwners.size() < start + limit;
         });
 
-    if (codeOwners.size() < limit) {
+    if (codeOwners.size() < start + limit) {
       CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
       globalCodeOwners
           .codeOwners()
@@ -204,14 +214,14 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       codeOwners.addAll(filterCodeOwners(rsrc, globalCodeOwners.codeOwners()));
 
       if (globalCodeOwners.ownedByAllUsers()) {
-        fillUpWithRandomUsers(rsrc, codeOwners, limit);
+        fillUpWithRandomUsers(rsrc, codeOwners, start + limit);
       }
     }
 
     return Response.ok(
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+            .format(sortLimitAndSkip(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
   }
 
   private CodeOwnerResolverResult getGlobalCodeOwners(Project.NameKey projectName) {
@@ -295,9 +305,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     }
   }
 
-  private void validateLimit() throws BadRequestException {
+  private void validateLimitAndStart() throws BadRequestException {
     if (limit <= 0) {
       throw new BadRequestException("limit must be positive");
+    }
+    if (start < 0) {
+      throw new BadRequestException("start cannot be negative");
+    }
+    if (start > 0 && !seed.isPresent()) {
+      throw new BadRequestException("using start requires setting a seed to fix the sort order");
     }
   }
 
@@ -316,9 +332,10 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     return fillOptions;
   }
 
-  private ImmutableList<CodeOwner> sortAndLimit(
+  private ImmutableList<CodeOwner> sortLimitAndSkip(
       CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
     return sortCodeOwners(seed, distanceScoring, codeOwners)
+        .skip(start)
         .limit(limit)
         .collect(toImmutableList());
   }
