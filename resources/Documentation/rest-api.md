@@ -368,6 +368,16 @@ order is random. If the path is owned by all users (e.g. the code ownership is
 assigned to '*') a random set of (visible) users is returned, as many as are
 needed to fill up the requested limit.
 
+The following factors are taken into account for computing the scores of the
+listed code owners:
+
+* distance of the code owner config file that defines the code owner to the
+  path for which code owners are listed (the lower the distance the better the
+  code owner)
+
+Other factors like OOO state, recent review activity or code authorship are not
+considered.
+
 #### Request
 
 ```
