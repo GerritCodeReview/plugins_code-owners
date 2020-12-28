@@ -22,6 +22,8 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.fail;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.TestAccount;
@@ -31,6 +33,7 @@ import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.data.GlobalCapability;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.RefNames;
@@ -500,9 +503,35 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .containsExactly(admin.id(), user.id(), user2.id());
 
     // The first code owner in the result should be user as user has the best distance score.
-    // The other 2 code owners come in a random order, but verifying this in a test is hard, hence
-    // there is no assertion for this.
     assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isEqualTo(user.id());
+
+    // Check that the order for further requests is different at least once (code owners at position
+    // 1 and 2 are swapped, since they have the same score their order should be random).
+    List<Account.Id> accountIdsInRetrievedOrder =
+        codeOwnerInfos.stream().map(info -> Account.id(info.account._accountId)).collect(toList());
+    List<Account.Id> accountIdsInExpectedOrder =
+        ImmutableList.of(
+            accountIdsInRetrievedOrder.get(0),
+            accountIdsInRetrievedOrder.get(2),
+            accountIdsInRetrievedOrder.get(1));
+    boolean foundOtherOrder = false;
+    for (int i = 0; i < 10; i++) {
+      codeOwnerInfos = queryCodeOwners("/foo/bar.md");
+      accountIdsInRetrievedOrder =
+          codeOwnerInfos.stream()
+              .map(info -> Account.id(info.account._accountId))
+              .collect(toList());
+      if (accountIdsInRetrievedOrder.equals(accountIdsInExpectedOrder)) {
+        foundOtherOrder = true;
+        break;
+      }
+    }
+    if (!foundOtherOrder) {
+      fail(
+          String.format(
+              "expected different order %s, but order was always %s",
+              accountIdsInExpectedOrder, accountIdsInRetrievedOrder));
+    }
   }
 
   @Test
