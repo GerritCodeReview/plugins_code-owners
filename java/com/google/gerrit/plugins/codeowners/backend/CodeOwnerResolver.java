@@ -280,7 +280,7 @@ public class CodeOwnerResolver {
     }
     if (enforceVisibility && !isVisible(accountState.get(), email)) {
       logger.atFine().log(
-          "account %d or email %s not visible", accountState.get().account().id().get(), email);
+          "account %d of email %s is not visible", accountState.get().account().id().get(), email);
       return Optional.empty();
     }
 
