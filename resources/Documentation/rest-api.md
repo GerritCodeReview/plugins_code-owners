@@ -407,6 +407,23 @@ considered.
   ]
 ```
 
+#### <a id="batch-list-code-owners"> Batch Request
+
+There is no REST endpoint that allows to retrieve code owners for multiple
+paths/files at once with a single batch request, but callers are expected to
+send one request per path/file and do any necessary grouping of results (e.g.
+grouping of files with the same code owners) on their own.
+
+To ensure a stable sort order across requests for different paths/files it's
+possible to set a seed on the requests that should be used to shuffle code
+owners that have the same score (see `seed` request parameter above).
+
+To speed up getting code owners for multiple paths/files callers are advised to
+send batches of list code owners requests in parallel (e.g. 10) and start
+processing the results as soon as they come in (this approach is faster than
+having a batch REST endpoint, as the batch REST endpoint could only return
+results after the server has computed code owners for all paths).
+
 ## <a id="change-endpoints"> Change Endpoints
 
 ### <a id="get-code-owner-status"> Get Code Owner Status
