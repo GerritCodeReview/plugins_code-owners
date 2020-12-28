@@ -1992,6 +1992,77 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void overridenByStickyApprovalOnOldPatchSet() throws Exception {
+    createOwnersOverrideLabel();
+
+    // make the override label sticky
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.copyAnyScore = true;
+    gApi.projects().name(project.get()).label("Owners-Override").update(input);
+
+    // create arbitrary code owner config to avoid entering the bootstrapping code path in
+    // CodeOwnerApprovalCheck
+    createArbitraryCodeOwnerConfigFile();
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is not approved yet.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Apply an override
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Check that the file is approved now.
+    requestScopeOperations.setApiUser(admin.id());
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+
+    // Change some other file and submit the change with an override.
+    String changeId2 =
+        createChange(user, "Change Other File", "other.txt", "file content").getChangeId();
+    approve(changeId2);
+    gApi.changes().id(changeId2).current().review(new ReviewInput().label("Owners-Override", 1));
+    gApi.changes().id(changeId2).current().submit();
+
+    // Rebase the first change (trivial rebase).
+    gApi.changes().id(changeId).rebase();
+
+    // Check that the override is still there (since Owners-Override is sticky).
+    assertThat(gApi.changes().id(changeId).get().labels.get("Owners-Override").approved.email)
+        .isEqualTo(admin.email());
+
+    // Check that the file is still approved.
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+1")
   public void codeReviewPlus2CountsAsApprovalIfCodeReviewPlus1IsRequired() throws Exception {
     TestAccount user2 = accountCreator.user2();

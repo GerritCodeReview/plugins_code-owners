@@ -876,7 +876,18 @@ public class CodeOwnerApprovalCheck {
         overrideApprovals.stream()
             .filter(overrideApproval -> overrideApproval.labelType().isIgnoreSelfApproval())
             .collect(toImmutableSet());
-    return changeNotes.getApprovals().get(changeNotes.getCurrentPatchSet().id()).stream()
+    return StreamSupport.stream(
+            approvalsUtil
+                .byPatchSet(
+                    changeNotes,
+                    changeNotes.getCurrentPatchSet().id(),
+                    /** revWalk */
+                    null,
+                    /** repoConfig */
+                    null)
+                .spliterator(),
+            /** parallel */
+            false)
         .filter(
             approval -> {
               // If the approval is from the patch set uploader and if it matches any of the labels
