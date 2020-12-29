@@ -18,8 +18,10 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.Account;
+import java.util.List;
 
 /** The result of resolving code owner references via {@link CodeOwnerResolver}. */
 @AutoValue
@@ -49,6 +51,9 @@ public abstract class CodeOwnerResolverResult {
   /** Whether there are imports which couldn't be resolved. */
   public abstract boolean hasUnresolvedImports();
 
+  /** Gets messages that were collected while resolving the code owners. */
+  public abstract ImmutableList<String> messages();
+
   /**
    * Whether there are any code owners defined for the path, regardless of whether they can be
    * resolved or not.
@@ -67,6 +72,7 @@ public abstract class CodeOwnerResolverResult {
         .add("ownedByAllUsers", ownedByAllUsers())
         .add("hasUnresolvedCodeOwners", hasUnresolvedCodeOwners())
         .add("hasUnresolvedImports", hasUnresolvedImports())
+        .add("messages", messages())
         .toString();
   }
 
@@ -75,9 +81,14 @@ public abstract class CodeOwnerResolverResult {
       ImmutableSet<CodeOwner> codeOwners,
       boolean ownedByAllUsers,
       boolean hasUnresolvedCodeOwners,
-      boolean hasUnresolvedImports) {
+      boolean hasUnresolvedImports,
+      List<String> messages) {
     return new AutoValue_CodeOwnerResolverResult(
-        codeOwners, ownedByAllUsers, hasUnresolvedCodeOwners, hasUnresolvedImports);
+        codeOwners,
+        ownedByAllUsers,
+        hasUnresolvedCodeOwners,
+        hasUnresolvedImports,
+        ImmutableList.copyOf(messages));
   }
 
   /** Creates a empty {@link CodeOwnerResolverResult} instance. */
@@ -86,6 +97,7 @@ public abstract class CodeOwnerResolverResult {
         /* codeOwners= */ ImmutableSet.of(),
         /* ownedByAllUsers= */ false,
         /* hasUnresolvedCodeOwners= */ false,
-        /* hasUnresolvedImports= */ false);
+        /* hasUnresolvedImports= */ false,
+        /* messages= */ ImmutableList.of());
   }
 }
