@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -35,6 +36,7 @@ import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -206,8 +208,8 @@ public class PathCodeOwners {
       getMatchingPerFileCodeOwnerSets(codeOwnerConfig)
           .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
 
-      boolean hasUnresolvedImports =
-          !resolveImports(codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
+      List<UnresolvedImport> unresolvedImports =
+          resolveImports(codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
 
       CodeOwnerConfig resolvedCodeOwnerConfig = resolvedCodeOwnerConfigBuilder.build();
 
@@ -230,7 +232,7 @@ public class PathCodeOwners {
       }
 
       this.pathCodeOwnersResult =
-          PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig, hasUnresolvedImports);
+          PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig, unresolvedImports);
       logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
       return this.pathCodeOwnersResult;
     }
@@ -241,12 +243,12 @@ public class PathCodeOwners {
    *
    * @param importingCodeOwnerConfig the code owner config for which imports should be resolved
    * @param resolvedCodeOwnerConfigBuilder the builder for the resolved code owner config
-   * @return whether all imports have been resolved successfully
+   * @return list of unresolved imports, empty list if all imports were successfully resolved
    */
-  private boolean resolveImports(
+  private List<UnresolvedImport> resolveImports(
       CodeOwnerConfig importingCodeOwnerConfig,
       CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
-    boolean hasUnresolvedImports = false;
+    ImmutableList.Builder<UnresolvedImport> unresolvedImports = ImmutableList.builder();
     try (TraceTimer traceTimer =
         TraceContext.newTimer(
             "Resolve code owner config imports",
@@ -290,23 +292,31 @@ public class PathCodeOwners {
           Optional<ProjectState> projectState =
               projectCache.get(keyOfImportedCodeOwnerConfig.project());
           if (!projectState.isPresent()) {
-            hasUnresolvedImports = true;
-            logger.atWarning().log(
-                "cannot resolve code owner config %s that is imported by code owner config %s:"
-                    + " project %s not found",
-                keyOfImportedCodeOwnerConfig,
-                importingCodeOwnerConfig.key(),
-                keyOfImportedCodeOwnerConfig.project().get());
+            unresolvedImports.add(
+                UnresolvedImport.create(
+                    keyOfImportedCodeOwnerConfig,
+                    keyOfImportedCodeOwnerConfig,
+                    codeOwnerConfigReference,
+                    String.format(
+                        "cannot resolve code owner config %s that is imported by code owner config %s:"
+                            + " project %s not found",
+                        keyOfImportedCodeOwnerConfig,
+                        importingCodeOwnerConfig.key(),
+                        keyOfImportedCodeOwnerConfig.project().get())));
             continue;
           }
           if (!projectState.get().statePermitsRead()) {
-            hasUnresolvedImports = true;
-            logger.atWarning().log(
-                "cannot resolve code owner config %s that is imported by code owner config %s:"
-                    + " state of project %s doesn't permit read",
-                keyOfImportedCodeOwnerConfig,
-                importingCodeOwnerConfig.key(),
-                keyOfImportedCodeOwnerConfig.project().get());
+            unresolvedImports.add(
+                UnresolvedImport.create(
+                    keyOfImportedCodeOwnerConfig,
+                    keyOfImportedCodeOwnerConfig,
+                    codeOwnerConfigReference,
+                    String.format(
+                        "cannot resolve code owner config %s that is imported by code owner config %s:"
+                            + " state of project %s doesn't permit read",
+                        keyOfImportedCodeOwnerConfig,
+                        importingCodeOwnerConfig.key(),
+                        keyOfImportedCodeOwnerConfig.project().get())));
             continue;
           }
 
@@ -322,13 +332,17 @@ public class PathCodeOwners {
                   : codeOwners.getFromCurrentRevision(keyOfImportedCodeOwnerConfig);
 
           if (!mayBeImportedCodeOwnerConfig.isPresent()) {
-            hasUnresolvedImports = true;
-            logger.atWarning().log(
-                "cannot resolve code owner config %s that is imported by code owner config %s"
-                    + " (revision = %s)",
-                keyOfImportedCodeOwnerConfig,
-                importingCodeOwnerConfig.key(),
-                revision.map(ObjectId::name).orElse("current"));
+            unresolvedImports.add(
+                UnresolvedImport.create(
+                    keyOfImportedCodeOwnerConfig,
+                    keyOfImportedCodeOwnerConfig,
+                    codeOwnerConfigReference,
+                    String.format(
+                        "cannot resolve code owner config %s that is imported by code owner config %s"
+                            + " (revision = %s)",
+                        keyOfImportedCodeOwnerConfig,
+                        importingCodeOwnerConfig.key(),
+                        revision.map(ObjectId::name).orElse("current"))));
             continue;
           }
 
@@ -390,7 +404,7 @@ public class PathCodeOwners {
         }
       }
     }
-    return !hasUnresolvedImports;
+    return unresolvedImports.build();
   }
 
   public static CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
