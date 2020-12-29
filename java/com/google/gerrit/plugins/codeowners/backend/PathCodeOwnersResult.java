@@ -18,9 +18,11 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import java.nio.file.Path;
+import java.util.List;
 
 /** The result of resolving path code owners via {@link PathCodeOwners}. */
 @AutoValue
@@ -33,8 +35,13 @@ public abstract class PathCodeOwnersResult {
   /** Gets the resolved code owner config. */
   abstract CodeOwnerConfig codeOwnerConfig();
 
+  /** Gets a list of unresolved imports. */
+  public abstract ImmutableList<UnresolvedImport> unresolvedImports();
+
   /** Whether there are unresolved imports. */
-  public abstract boolean hasUnresolvedImports();
+  public boolean hasUnresolvedImports() {
+    return !unresolvedImports().isEmpty();
+  }
 
   /**
    * Gets the code owners from the code owner config that apply to the path.
@@ -68,13 +75,14 @@ public abstract class PathCodeOwnersResult {
     return MoreObjects.toStringHelper(this)
         .add("path", path())
         .add("codeOwnerConfig", codeOwnerConfig())
-        .add("hasUnresolvedImports", hasUnresolvedImports())
+        .add("unresolvedImports", unresolvedImports())
         .toString();
   }
 
   /** Creates a {@link PathCodeOwnersResult} instance. */
   public static PathCodeOwnersResult create(
-      Path path, CodeOwnerConfig codeOwnerConfig, boolean hasUnresolvedImports) {
-    return new AutoValue_PathCodeOwnersResult(path, codeOwnerConfig, hasUnresolvedImports);
+      Path path, CodeOwnerConfig codeOwnerConfig, List<UnresolvedImport> unresolvedImports) {
+    return new AutoValue_PathCodeOwnersResult(
+        path, codeOwnerConfig, ImmutableList.copyOf(unresolvedImports));
   }
 }
