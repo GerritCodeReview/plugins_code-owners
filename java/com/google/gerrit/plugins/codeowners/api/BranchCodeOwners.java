@@ -89,6 +89,69 @@ public interface BranchCodeOwners {
   RenameEmailResultInfo renameEmailInCodeOwnerConfigFiles(RenameEmailInput input)
       throws RestApiException;
 
+  /** Checks the code ownership of a user for a path in a branch. */
+  CodeOwnerCheckRequest checkCodeOwner() throws RestApiException;
+
+  /** Request for checking the code ownership of a user for a path in a branch. */
+  abstract class CodeOwnerCheckRequest {
+    private String email;
+    private String path;
+    private String user;
+
+    /**
+     * Sets the email for which the code ownership should be checked.
+     *
+     * @param email the email for which the code ownership should be checked
+     */
+    public CodeOwnerCheckRequest email(String email) {
+      this.email = email;
+      return this;
+    }
+
+    /** Returns the email for which the code ownership should be checked. */
+    @Nullable
+    public String getEmail() {
+      return email;
+    }
+
+    /**
+     * Sets the path for which the code ownership should be checked.
+     *
+     * @param path the path for which the code ownership should be checked
+     */
+    public CodeOwnerCheckRequest path(String path) {
+      this.path = path;
+      return this;
+    }
+
+    /** Returns the path for which the code ownership should be checked. */
+    @Nullable
+    public String getPath() {
+      return path;
+    }
+
+    /**
+     * Sets the user for which the code owner visibility should be checked.
+     *
+     * <p>If not specified the code owner visibility is not checked.
+     *
+     * @param user the user for which the code owner visibility should be checked
+     */
+    public CodeOwnerCheckRequest user(@Nullable String user) {
+      this.user = user;
+      return this;
+    }
+
+    /** Returns the user for which the code owner visibility should be checked. */
+    @Nullable
+    public String getUser() {
+      return user;
+    }
+
+    /** Executes the request and retrieves the result. */
+    public abstract CodeOwnerCheckInfo check() throws RestApiException;
+  }
+
   /**
    * A default implementation which allows source compatibility when adding new methods to the
    * interface.
@@ -107,6 +170,11 @@ public interface BranchCodeOwners {
     @Override
     public RenameEmailResultInfo renameEmailInCodeOwnerConfigFiles(RenameEmailInput input)
         throws RestApiException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public CodeOwnerCheckRequest checkCodeOwner() throws RestApiException {
       throw new NotImplementedException();
     }
   }
