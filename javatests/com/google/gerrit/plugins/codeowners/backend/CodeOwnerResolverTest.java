@@ -154,6 +154,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
   @Test
   public void resolveCodeOwnerReferenceForSecondaryEmail() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
     // add secondary email to user account
     String secondaryEmail = "user@foo.bar";
     accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
@@ -164,9 +166,28 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         codeOwnerResolver.get().resolve(CodeOwnerReference.create(secondaryEmail));
     assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
 
+    // admin has the "Modify Account" global capability and hence can see the secondary email of the
+    // user account if another user is the calling user
+    requestScopeOperations.setApiUser(user2.id());
+    codeOwner =
+        codeOwnerResolver
+            .get()
+            .forUser(identifiedUserFactory.create(admin.id()))
+            .resolve(CodeOwnerReference.create(secondaryEmail));
+    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
+
     // user can see its own secondary email.
     requestScopeOperations.setApiUser(user.id());
     codeOwner = codeOwnerResolver.get().resolve(CodeOwnerReference.create(secondaryEmail));
+    assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
+
+    // user can see its own secondary email if another user is the calling user.
+    requestScopeOperations.setApiUser(user2.id());
+    codeOwner =
+        codeOwnerResolver
+            .get()
+            .forUser(identifiedUserFactory.create(user.id()))
+            .resolve(CodeOwnerReference.create(secondaryEmail));
     assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(user.id());
   }
 
@@ -180,6 +201,16 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // email of the admin account.
     requestScopeOperations.setApiUser(user.id());
     assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(secondaryEmail)))
+        .isEmpty();
+
+    // user doesn't have the "Modify Account" global capability and hence cannot see the secondary
+    // email of the admin account if another user is the calling user
+    requestScopeOperations.setApiUser(admin.id());
+    assertThat(
+            codeOwnerResolver
+                .get()
+                .forUser(identifiedUserFactory.create(user.id()))
+                .resolve(CodeOwnerReference.create(secondaryEmail)))
         .isEmpty();
   }
 
