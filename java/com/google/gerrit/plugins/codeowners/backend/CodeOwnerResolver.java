@@ -240,11 +240,12 @@ public class CodeOwnerResolver {
    *       Gerrit core that also treats ambiguous identifiers as non-resolveable.
    * </ul>
    *
-   * <p>This methods checks whether the calling user can see the accounts of the code owners and
-   * returns code owners whose accounts are visible.
+   * <p>This methods checks whether the {@link #user} or the calling user (if {@link #user} is
+   * unset) can see the accounts of the code owners and returns code owners whose accounts are
+   * visible.
    *
    * <p>In addition code owners that are referenced by a secondary email are only returned if the
-   * calling user can see the secondary email:
+   * {@link #user} or the calling user (if {@link #user} is unset) can see the secondary email:
    *
    * <ul>
    *   <li>every user can see the own secondary emails
@@ -348,43 +349,63 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Checks whether the given account and email are visible to the calling user.
+   * Checks whether the given account and email are visible to the {@link #user} or the calling user
+   * (if {@link #user} is unset).
    *
-   * <p>If the email is a secondary email it is only visible if it is owned by the calling user or
-   * if the calling user has the {@code Modify Account} global capability.
+   * <p>If the email is a secondary email it is only visible if
    *
-   * @param accountState the account for which it should be checked whether it's visible to the
-   *     calling user
+   * <ul>
+   *   <li>it is owned by the {@link #user} or the calling user (if {@link #user} is unset)
+   *   <li>if the {@link #user} or the calling user (if {@link #user} is unset) has the {@code
+   *       Modify Account} global capability
+   * </ul>
+   *
+   * @param accountState the account for which it should be checked whether it's visible to the user
    * @param email email that was used to reference the account
-   * @return {@code true} if the given account and email are visible to the calling user, otherwise
-   *     {@code false}
+   * @return {@code true} if the given account and email are visible to the user, otherwise {@code
+   *     false}
    */
   private boolean isVisible(AccountState accountState, String email) {
     if (!canSee(accountState)) {
       logger.atFine().log(
-          "cannot resolve code owner email %s: account %s is not visible to calling user",
-          email, accountState.account().id());
+          "cannot resolve code owner email %s: account %s is not visible to user %s",
+          email,
+          accountState.account().id(),
+          user != null ? user.getLoggableName() : currentUser.get().getLoggableName());
       return false;
     }
 
     if (!email.equals(accountState.account().preferredEmail())) {
       // the email is a secondary email of the account
 
-      if (currentUser.get().isIdentifiedUser()
+      if (user != null) {
+        if (user.hasEmailAddress(email)) {
+          // it's a secondary email of the user, users can always see their own secondary emails
+          return true;
+        }
+      } else if (currentUser.get().isIdentifiedUser()
           && currentUser.get().asIdentifiedUser().hasEmailAddress(email)) {
         // it's a secondary email of the calling user, users can always see their own secondary
         // emails
         return true;
       }
 
-      // the email is a secondary email of another account, check if the calling user can see
-      // secondary emails
+      // the email is a secondary email of another account, check if the user can see secondary
+      // emails
       try {
-        if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
+        if (user != null) {
+          if (!permissionBackend.user(user).test(GlobalPermission.MODIFY_ACCOUNT)) {
+            logger.atFine().log(
+                "cannot resolve code owner email %s: account %s is referenced by secondary email,"
+                    + " but user %s cannot see secondary emails",
+                email, accountState.account().id(), user.getLoggableName());
+            return false;
+          }
+        } else if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
           logger.atFine().log(
               "cannot resolve code owner email %s: account %s is referenced by secondary email,"
-                  + " but the calling user cannot see secondary emails",
-              email, accountState.account().id());
+                  + " but the calling user %s cannot see secondary emails",
+              email, accountState.account().id(), currentUser.get().getLoggableName());
           return false;
         }
       } catch (PermissionBackendException e) {
