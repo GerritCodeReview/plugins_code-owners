@@ -72,7 +72,7 @@ public abstract class PathCodeOwnersResult {
         .toString();
   }
 
-  /** Creates a {@link CodeOwnerResolverResult} instance. */
+  /** Creates a {@link PathCodeOwnersResult} instance. */
   public static PathCodeOwnersResult create(
       Path path, CodeOwnerConfig codeOwnerConfig, boolean hasUnresolvedImports) {
     return new AutoValue_PathCodeOwnersResult(path, codeOwnerConfig, hasUnresolvedImports);
