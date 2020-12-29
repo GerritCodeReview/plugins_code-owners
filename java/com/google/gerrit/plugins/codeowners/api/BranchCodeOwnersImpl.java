@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.api;
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwner;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerBranchConfig;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigFiles;
 import com.google.gerrit.plugins.codeowners.restapi.RenameEmail;
@@ -35,6 +36,7 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
   private final GetCodeOwnerBranchConfig getCodeOwnerBranchConfig;
   private final Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider;
   private final RenameEmail renameEmail;
+  private final Provider<CheckCodeOwner> checkCodeOwnerProvider;
   private final BranchResource branchResource;
 
   @Inject
@@ -42,10 +44,12 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
       GetCodeOwnerBranchConfig getCodeOwnerBranchConfig,
       Provider<GetCodeOwnerConfigFiles> getCodeOwnerConfigFilesProvider,
       RenameEmail renameEmail,
+      Provider<CheckCodeOwner> checkCodeOwnerProvider,
       @Assisted BranchResource branchResource) {
     this.getCodeOwnerConfigFilesProvider = getCodeOwnerConfigFilesProvider;
     this.getCodeOwnerBranchConfig = getCodeOwnerBranchConfig;
     this.renameEmail = renameEmail;
+    this.checkCodeOwnerProvider = checkCodeOwnerProvider;
     this.branchResource = branchResource;
   }
 
@@ -80,5 +84,23 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
     } catch (Exception e) {
       throw asRestApiException("Cannot rename email", e);
     }
+  }
+
+  @Override
+  public CodeOwnerCheckRequest checkCodeOwner() throws RestApiException {
+    return new CodeOwnerCheckRequest() {
+      @Override
+      public CodeOwnerCheckInfo check() throws RestApiException {
+        CheckCodeOwner checkCodeOwner = checkCodeOwnerProvider.get();
+        checkCodeOwner.setEmail(getEmail());
+        checkCodeOwner.setPath(getPath());
+        checkCodeOwner.setUser(getUser());
+        try {
+          return checkCodeOwner.apply(branchResource).value();
+        } catch (Exception e) {
+          throw asRestApiException("Cannot check code owner", e);
+        }
+      }
+    };
   }
 }
