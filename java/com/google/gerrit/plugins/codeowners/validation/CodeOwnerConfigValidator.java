@@ -734,7 +734,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   private Optional<CommitValidationMessage> validateCodeOwnerReference(
       IdentifiedUser user, Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
     CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get().forUser(user);
-    if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email())) {
+    if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email()).get()) {
       return error(
           String.format(
               "the domain of the code owner email '%s' in '%s' is not allowed for code owners",
