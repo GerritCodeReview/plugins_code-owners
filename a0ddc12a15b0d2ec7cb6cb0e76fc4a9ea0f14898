@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "51a06d48_9cf62da9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/FindOwnersGlobMatcherTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-05T16:42:19Z",
+      "side": 1,
+      "message": "singular?",
+      "range": {
+        "startLine": 61,
+        "startChar": 14,
+        "endLine": 61,
+        "endChar": 15
+      },
+      "revId": "a0ddc12a15b0d2ec7cb6cb0e76fc4a9ea0f14898",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
