@@ -31,6 +31,7 @@ public interface BranchCodeOwners {
   /** Create a request to retrieve code owner config files from the branch. */
   CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException;
 
+  /** Request to retrieve code owner config files from the branch. */
   abstract class CodeOwnerConfigFilesRequest {
     private boolean includeNonParsableFiles;
     private String email;
@@ -57,7 +58,7 @@ public interface BranchCodeOwners {
       return this;
     }
 
-    /** Returns the email that should appear in the returned code owner config files/ */
+    /** Returns the email that should appear in the returned code owner config files. */
     @Nullable
     public String getEmail() {
       return email;
@@ -74,13 +75,13 @@ public interface BranchCodeOwners {
       return this;
     }
 
-    /** Returns the path glob that should be matched by the returned code owner config files/ */
+    /** Returns the path glob that should be matched by the returned code owner config files. */
     @Nullable
     public String getPath() {
       return path;
     }
 
-    /** Executes the request and retrieves the paths of the requested code owner config file */
+    /** Executes the request and retrieves the paths of the requested code owner config file. */
     public abstract List<String> paths() throws RestApiException;
   }
 
