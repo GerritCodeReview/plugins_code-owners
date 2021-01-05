@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "47f5ff90_a5bae678",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-05T14:06:41Z",
+      "side": 1,
+      "message": "I\u0027m a bit hesitant to approve it since I see that it was already flaky (Zool gave Verified -1 until you reran it and then it worked).\n\nSince we only need to try 10 times if the test is failing (otherwise we try only up until we find another order), isn\u0027t it safer to just increase the number even to 50? Alternatively/additionally, we can add more users.\n\nOptionally, should we try running it internally 100 times, and see that it always succeeds?\n\n\n\n",
+      "revId": "ebd1e8f869bfbb1cae4409180b249e0a51f9d0f9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
