@@ -16,6 +16,24 @@
       "message": "I\u0027m a bit hesitant to approve it since I see that it was already flaky (Zool gave Verified -1 until you reran it and then it worked).\n\nSince we only need to try 10 times if the test is failing (otherwise we try only up until we find another order), isn\u0027t it safer to just increase the number even to 50? Alternatively/additionally, we can add more users.\n\nOptionally, should we try running it internally 100 times, and see that it always succeeds?\n\n\n\n",
       "revId": "ebd1e8f869bfbb1cae4409180b249e0a51f9d0f9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d5d1ad3d_ceff2e9d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-05T15:53:47Z",
+      "side": 1,
+      "message": "\u003e I\u0027m a bit hesitant to approve it since I see that it was already\n\u003e flaky (Zool gave Verified -1 until you reran it and then it worked).\n\nAh yes, this is how it looks like now.\n\nIt\u0027s correct that it was flaky on patch set 1, but with patch set 2 the flakiness should be much less likely.\n\nThe Zuul failure on patch set 2 was not related to this test, but was just a global Zuul flakiness, but I don\u0027t know where to find that historic zuul log to prove this :/\n\n\u003e isn\u0027t it safer to just increase the number even to 50?\n\nSure, we could do this, but I never saw the test failing with patch set 2. So maybe let\u0027s do this only when we hit this flakiness?\n\n\u003e Alternatively/additionally, we can add more users.\n\nThis is what patch set 2 did, and I believe it already made the flakiness unlikely enough.\n\n\u003e Optionally, should we try running it internally 100 times, and see that it always succeeds?\n\nGood idea. Done by running:\n\n$ for i in {1..100} ; do echo \" $i \"; echo \u0027{}\u0027 | bazel test //plugins/code-owners/javatests/com/google/gerrit/plugins/codeowners/acceptance/api:GetCodeOwnerBranchConfigIT --cache_test_results\u003dNO \u003e\u003e out.txt ; done\n\nAll test runs succeeded.",
+      "parentUuid": "47f5ff90_a5bae678",
+      "revId": "ebd1e8f869bfbb1cae4409180b249e0a51f9d0f9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
