@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "90a084f0_a292d4ec",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 3
+      },
+      "lineNbr": 368,
+      "author": {
+        "id": 1099910
+      },
+      "writtenOn": "2021-01-05T18:19:40Z",
+      "side": 1,
+      "message": "I think it is be useful to let the user know that anyone can approve.\nOtherwise it\u0027s not clear if you must ask review from the listed reviewers, or you can select anyone and these are only suggestions.\ne.g. it might be better to ask for review from a teammate who knows what the change is all about, than a completely random developer who might not have any context.",
+      "range": {
+        "startLine": 368,
+        "startChar": 17,
+        "endLine": 368,
+        "endChar": 60
+      },
+      "revId": "1f3b096b28f3dea6285861b4cbd981e3bb0b4c68",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
