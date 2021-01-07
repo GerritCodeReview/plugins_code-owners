@@ -245,7 +245,7 @@ class CodeOwnersOnPostReview implements OnPostReview {
                           fileCodeOwnerStatus.newPathStatus(), fileCodeOwnerStatus.oldPathStatus())
                       .filter(Optional::isPresent)
                       .map(Optional::get))
-          .filter(PathCodeOwnerStatus -> PathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
+          .filter(pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
           .map(PathCodeOwnerStatus::path)
           .sorted(comparing(Path::toString))
           .collect(toImmutableList());
