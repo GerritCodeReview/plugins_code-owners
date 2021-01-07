@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e306e6a7_3e0e358f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 1054,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-07T14:00:05Z",
+      "side": 1,
+      "message": "Across",
+      "range": {
+        "startLine": 1054,
+        "startChar": 61,
+        "endLine": 1054,
+        "endChar": 68
+      },
+      "revId": "917b6fb5e383ff7cad5b7f82c687a2d616adb565",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
