@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2e6bb139_2ae1aab7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-07T11:03:18Z",
+      "side": 1,
+      "message": "isn\u0027t it more nuanced that this?\nE.g what about enabling code owner configuration on some branches while disabling it globally?",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 0
+      },
+      "revId": "3b7950f44f23d43da790b350a738ea9567997954",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
