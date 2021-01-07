@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.config;
+package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
@@ -39,6 +39,14 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
+import com.google.gerrit.plugins.codeowners.backend.config.OverrideApprovalConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.IdentifiedUser;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.config;
+package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
@@ -21,6 +21,9 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.AbstractRequiredApprovalConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig;
 import com.google.gerrit.server.project.ProjectState;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
