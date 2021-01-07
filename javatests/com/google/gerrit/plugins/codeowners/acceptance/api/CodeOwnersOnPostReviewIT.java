@@ -31,6 +31,26 @@ import org.junit.Test;
  */
 public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
   @Test
+  @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
+  public void changeMessageNotExtendedIfCodeOwnersFuctionalityIsDisabled() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
+  }
+
+  @Test
   public void changeMessageListsNewlyApprovedPaths() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
