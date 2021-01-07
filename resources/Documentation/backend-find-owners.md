@@ -88,9 +88,19 @@ The order of the user emails is not important and doesn't have any effect, but
 for consistency an alphabetical order is recommended.
 
 User emails that are added to `OWNERS` files must be resolvable in Gerrit. This
-means, there must be an active Gerrit account that has this email assigned,
-which is only the case if the user logged in at least once into the Gerrit
-WebUI (or if an administrator registered the user programatically).
+means:
+
+* there must be an active Gerrit account that has this email assigned,
+  which is only the case if the user logged in at least once into the Gerrit
+  WebUI (or if an administrator registered the user programatically)
+* the email is not ambiguous (the email belongs to exactly one active Gerrit
+  account)
+* the email has an allowed email domain (see [allowed email domain
+  configuration](config.html#pluginCodeOwnersAllowedEmailDomain)).
+
+##### <a id="nonResolvableCodeOwnersAreIgnored">
+**NOTE:** Non-resolvable code owners in submitted code owner configuration files
+are ignored.
 
 **NOTE:** In Gerrit the visibility of users is controlled via the
 [accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
