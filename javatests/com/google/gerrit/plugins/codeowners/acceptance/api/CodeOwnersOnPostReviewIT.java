@@ -18,12 +18,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import java.util.Collection;
+import java.util.HashMap;
 import org.junit.Test;
 
 /**
@@ -585,5 +587,40 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
 
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
+  }
+
+  @Test
+  public void changeMessageListsNewlyApprovedPathsIfCommentsAreAddedOnPostReview()
+      throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    ReviewInput.CommentInput commentInput = new ReviewInput.CommentInput();
+    commentInput.line = 1;
+    commentInput.message = "some comment";
+    commentInput.path = path;
+    ReviewInput reviewInput = ReviewInput.recommend();
+    reviewInput.comments = reviewInput.comments = new HashMap<>();
+    reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
+    gApi.changes().id(changeId).current().review(reviewInput);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "(1 comment)\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
   }
 }
