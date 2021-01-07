@@ -22,6 +22,7 @@ import com.google.gerrit.entities.SubmitRecord;
 import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
@@ -84,6 +85,12 @@ class CodeOwnerSubmitRule implements SubmitRule {
 
         return Optional.of(getSubmitRecord(changeData.notes()));
       }
+    } catch (RestApiException e) {
+      logger.atFine().withCause(e).log(
+          String.format(
+              "Couldn't evaluate code owner statuses for patch set %d of change %d.",
+              changeData.currentPatchSet().id().get(), changeData.change().getId().get()));
+      return Optional.of(notReady());
     } catch (Throwable t) {
       String errorMessage = "Failed to evaluate code owner statuses";
       if (changeData != null) {
