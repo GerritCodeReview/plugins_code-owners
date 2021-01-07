@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Patch;
-import com.google.gerrit.plugins.codeowners.JgitPath;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.patch.PatchListEntry;
 import java.nio.file.Path;
 import java.util.Optional;

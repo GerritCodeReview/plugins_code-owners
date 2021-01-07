@@ -24,12 +24,12 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.common.ChangeType;
-import com.google.gerrit.plugins.codeowners.JgitPath;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.FileCodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.PathCodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.util.Comparator;
 import org.eclipse.jgit.diff.DiffEntry;
 
