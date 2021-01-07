@@ -1,16 +1,13 @@
 load("@rules_java//java:defs.bzl", "java_library")
-
-package(
-    default_testonly = True,
-    default_visibility = ["//plugins/code-owners:visibility"],
-)
+load("//tools/bzl:plugin.bzl", "PLUGIN_DEPS_NEVERLINK")
 
 java_library(
-    name = "testsuite",
+    name = "validation",
     srcs = glob(["*.java"]),
-    deps = [
-        "//java/com/google/gerrit/acceptance:lib",
+    visibility = ["//visibility:public"],
+    deps = PLUGIN_DEPS_NEVERLINK + [
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )
