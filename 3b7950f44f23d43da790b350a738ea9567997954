@@ -22,6 +22,30 @@
       },
       "revId": "3b7950f44f23d43da790b350a738ea9567997954",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "36574c81_0111dc94",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-07T11:10:45Z",
+      "side": 1,
+      "message": "Not sure I understand the question.\nLine 77 checks if the code-owners functionality is disabled for the destination branch of the change. This isDisabled method takes all configuration (branch-level, project-level and parent and global into account), so this looks correct to me.",
+      "parentUuid": "2e6bb139_2ae1aab7",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 0
+      },
+      "revId": "3b7950f44f23d43da790b350a738ea9567997954",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
