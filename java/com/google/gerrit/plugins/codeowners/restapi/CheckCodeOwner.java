@@ -37,7 +37,6 @@ import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnersResult;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.IdentifiedUser;
-import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.project.BranchResource;
@@ -61,6 +60,7 @@ import org.kohsuke.args4j.Option;
  * /projects/<project-name>/branches/<branch-name>/code_owners.check} requests.
  */
 public class CheckCodeOwner implements RestReadView<BranchResource> {
+  private final CheckCodeOwnerCapability checkCodeOwnerCapability;
   private final PermissionBackend permissionBackend;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
@@ -76,6 +76,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
 
   @Inject
   public CheckCodeOwner(
+      CheckCodeOwnerCapability checkCodeOwnerCapability,
       PermissionBackend permissionBackend,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
@@ -83,6 +84,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       Provider<CodeOwnerResolver> codeOwnerResolverProvider,
       CodeOwners codeOwners,
       AccountsCollection accountsCollection) {
+    this.checkCodeOwnerCapability = checkCodeOwnerCapability;
     this.permissionBackend = permissionBackend;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
@@ -115,7 +117,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   public Response<CodeOwnerCheckInfo> apply(BranchResource branchResource)
       throws BadRequestException, AuthException, IOException, ConfigInvalidException,
           PermissionBackendException {
-    permissionBackend.currentUser().check(GlobalPermission.ADMINISTRATE_SERVER);
+    permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
 
     validateInput();
 
