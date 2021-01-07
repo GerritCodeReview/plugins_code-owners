@@ -1,11 +1,12 @@
 {
   "checks": {
     "zuul-check:plugins_code-owners": {
-      "state": "FAILED",
-      "message": "uuid \"zuul-check:plugins_code-owners\" has unknown language",
-      "started": "2021-01-07T07:41:23Z",
+      "state": "SCHEDULED",
+      "message": "Change has been enqueued in check",
+      "url": "https://ci.gerritcodereview.com/t/gerrit/status/change/291956,5",
+      "started": "2021-01-07T07:41:33Z",
       "created": "2021-01-07T07:41:23Z",
-      "updated": "2021-01-07T07:41:23Z"
+      "updated": "2021-01-07T07:41:33Z"
     }
   }
 }
