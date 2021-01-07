@@ -232,8 +232,8 @@ The following request parameters can be specified:
 | `path`      | mandatory | Path for which the code ownership should be checked.
 | `user`      | optional  | User for which the code owner visibility should be checked. If not specified the code owner visibility is not checked. Can be used to investigate why a code owner is not shown/suggested to this user.
 
-Requires that the caller has the [Administrate
-Server](../../../Documentation/access-control.html#capability_administrateServer)
+Requires that the caller has the [Check Code Owner](#checkCodeOwner) or the
+[Administrate Server](../../../Documentation/access-control.html#capability_administrateServer)
 global capability.
 
 This REST endpoint is intended to investigate code owner configurations that do
@@ -840,6 +840,19 @@ action.
 | `value`    | The voting value that is required on the label.
 
 ---
+
+## <a id="capabilities">Capabilities
+
+### <a id="checkCodeOwner">Check Code Owner
+
+Global capability that allows a user to call the [Check Code
+Owner](#check-code-owner) REST endpoint.
+
+Assigning this capability allows users to inspect code ownerships. This may
+reveal accounts and secondary emails to the user that the user cannot see
+otherwise. Hence this capability should only ge granted to trusted users.
+
+Administrators have this capability implicitly assigned.
 
 Back to [@PLUGIN@ documentation index](index.html)
 
