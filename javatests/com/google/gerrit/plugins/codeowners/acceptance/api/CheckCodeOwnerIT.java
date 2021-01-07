@@ -16,7 +16,9 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerCheckInfoSubject.assertThat;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.TestAccount;
@@ -40,6 +42,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
 import com.google.gerrit.server.account.externalids.ExternalId;
@@ -87,15 +90,33 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void requiresCallerToBeAdmin() throws Exception {
+  public void requiresCallerToBeAdminOrHaveTheCheckCodeOwnerCapability() throws Exception {
     requestScopeOperations.setApiUser(user.id());
     AuthException authException =
         assertThrows(AuthException.class, () -> checkCodeOwner(ROOT_PATH, user.email()));
-    assertThat(authException).hasMessageThat().isEqualTo("administrate server not permitted");
+    assertThat(authException)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format("%s for plugin code-owners not permitted", CheckCodeOwnerCapability.ID));
   }
 
   @Test
-  public void checkCodeOwner() throws Exception {
+  public void checkCodeOwner_byAdmin() throws Exception {
+    testCheckCodeOwner();
+  }
+
+  @Test
+  public void checkCodeOwner_byUserThatHasTheCheckCodeOwnerCapability() throws Exception {
+    projectOperations
+        .allProjectsForUpdate()
+        .add(allowCapability("code-owners-" + CheckCodeOwnerCapability.ID).group(REGISTERED_USERS))
+        .update();
+
+    requestScopeOperations.setApiUser(user.id());
+    testCheckCodeOwner();
+  }
+
+  private void testCheckCodeOwner() throws Exception {
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
