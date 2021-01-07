@@ -15,6 +15,9 @@ java_library(
         "//lib:guava",
         "//lib/truth",
         "//lib/truth:truth-java8-extension",
-        "//plugins/code-owners:code-owners__plugin",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/restapi",
     ],
 )

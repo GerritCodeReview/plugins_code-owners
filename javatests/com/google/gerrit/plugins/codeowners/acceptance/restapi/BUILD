@@ -14,10 +14,12 @@ acceptance_tests(
     deps = [
         "testbases",
         "//javatests/com/google/gerrit/acceptance/rest/util",
-        "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )
 
@@ -30,8 +32,8 @@ java_library(
         "//lib:gson",
         "//lib:guava",
         "//lib/guice",
-        "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
 )
