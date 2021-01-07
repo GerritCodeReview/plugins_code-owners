@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.config;
+package com.google.gerrit.plugins.codeowners.backend.config;
 
-import static com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.extensions.annotations.PluginName;
