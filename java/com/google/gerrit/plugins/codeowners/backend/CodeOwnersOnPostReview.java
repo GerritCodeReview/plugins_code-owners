@@ -74,6 +74,10 @@ class CodeOwnersOnPostReview implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals) {
+    if (codeOwnersPluginConfiguration.isDisabled(changeNotes.getChange().getDest())) {
+      return Optional.empty();
+    }
+
     // code owner approvals are only computed for the current patch set
     if (!changeNotes.getChange().currentPatchSetId().equals(patchSet.id())) {
       return Optional.empty();
