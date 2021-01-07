@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.api;
+package com.google.gerrit.plugins.codeowners.common;
 
 /** Strategy that defines for merge commits which files require code owner approvals. */
 public enum MergeCommitStrategy {

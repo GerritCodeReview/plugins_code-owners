@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
+import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import java.util.Optional;
 
 /** Code owner status for a particular file that was changed in a change. */
