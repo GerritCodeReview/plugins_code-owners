@@ -29,7 +29,7 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
+import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Paths;

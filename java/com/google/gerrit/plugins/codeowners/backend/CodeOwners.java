@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Throwables;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;

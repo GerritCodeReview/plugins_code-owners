@@ -23,7 +23,7 @@ import com.google.gerrit.plugins.codeowners.api.impl.CodeOwnerConfigsFactory;
 import com.google.gerrit.plugins.codeowners.api.impl.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.api.impl.ProjectCodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
-import com.google.gerrit.plugins.codeowners.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
 import org.eclipse.jgit.lib.Config;

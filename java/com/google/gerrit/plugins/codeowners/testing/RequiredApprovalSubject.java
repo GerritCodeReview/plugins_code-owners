@@ -22,7 +22,7 @@ import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
-import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Optional;

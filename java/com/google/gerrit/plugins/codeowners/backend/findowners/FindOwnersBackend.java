@@ -19,7 +19,7 @@ import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBa
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.FindOwnersGlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
