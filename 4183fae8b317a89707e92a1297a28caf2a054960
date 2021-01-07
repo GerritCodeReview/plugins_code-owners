@@ -1,0 +1,10 @@
+{
+  "checks": {
+    "zuul-check:plugins_code-owners": {
+      "state": "RUNNING",
+      "started": "2021-01-07T07:41:19Z",
+      "created": "2021-01-07T07:41:19Z",
+      "updated": "2021-01-07T07:41:19Z"
+    }
+  }
+}
