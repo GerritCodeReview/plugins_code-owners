@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Patch;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.server.patch.PatchListEntry;
 import java.nio.file.Paths;
 import org.eclipse.jgit.diff.DiffEntry;
