@@ -1,7 +1,8 @@
 {
   "checks": {
     "zuul-check:plugins_code-owners": {
-      "state": "RUNNING",
+      "state": "FAILED",
+      "message": "uuid \"zuul-check:plugins_code-owners\" has unknown language",
       "started": "2021-01-07T07:41:17Z",
       "created": "2021-01-07T07:41:17Z",
       "updated": "2021-01-07T07:41:17Z"
