@@ -19,11 +19,13 @@ import org.eclipse.jgit.junit.TestRepository;
 import org.junit.Test;
 
 /**
- * Test that verifies that the {@link com.google.gerrit.plugins.codeowners.BatchModule} has bound
- * all classes that are needed to run {@code
+ * Test that verifies that the {@link com.google.gerrit.plugins.codeowners.module.BatchModule} has
+ * bound all classes that are needed to run {@code
  * com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}.
  */
-@TestPlugin(name = "code-owners", sysModule = "com.google.gerrit.plugins.codeowners.BatchModule")
+@TestPlugin(
+    name = "code-owners",
+    sysModule = "com.google.gerrit.plugins.codeowners.module.BatchModule")
 public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
   @Inject private ProjectOperations projectOperations;
   @Inject private RequestScopeOperations requestScopeOperations;

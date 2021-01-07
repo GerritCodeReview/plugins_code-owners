@@ -12,22 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners;
+package com.google.gerrit.plugins.codeowners.module;
 
-import com.google.gerrit.common.UsedAt;
+import com.google.gerrit.extensions.config.FactoryModule;
+import com.google.gerrit.plugins.codeowners.api.ApiModule;
 import com.google.gerrit.plugins.codeowners.backend.BackendModule;
-import com.google.inject.AbstractModule;
+import com.google.gerrit.plugins.codeowners.config.ConfigModule;
+import com.google.gerrit.plugins.codeowners.restapi.RestApiModule;
+import com.google.gerrit.plugins.codeowners.validation.ValidationModule;
 
-/**
- * Binds a subset of the code-owners plugin functionality that should be available in batch jobs.
- */
-@UsedAt(UsedAt.Project.GOOGLE)
-public class BatchModule extends AbstractModule {
+/** Guice module that registers the extensions of the code-owners plugin. */
+public class Module extends FactoryModule {
   @Override
   protected void configure() {
-    // We only need the CodeOwnerSubmitRule in batch jobs, but since the CodeOwnerSubmitRule depends
-    // on the CodeOwnerBackend, CodeOwnerBackend must be bound too. This means we can simply install
-    // the whole BackendModule.
+    install(new ApiModule());
     install(new BackendModule());
+    install(new ConfigModule());
+    install(new RestApiModule());
+    install(new ValidationModule());
   }
 }
