@@ -15,7 +15,7 @@
 package com.google.gerrit.plugins.codeowners.module;
 
 import com.google.gerrit.extensions.config.FactoryModule;
-import com.google.gerrit.plugins.codeowners.api.ApiModule;
+import com.google.gerrit.plugins.codeowners.api.impl.ApiModule;
 import com.google.gerrit.plugins.codeowners.backend.BackendModule;
 import com.google.gerrit.plugins.codeowners.config.ConfigModule;
 import com.google.gerrit.plugins.codeowners.restapi.RestApiModule;

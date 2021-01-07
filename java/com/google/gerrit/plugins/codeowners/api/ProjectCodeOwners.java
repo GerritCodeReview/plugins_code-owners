@@ -25,7 +25,7 @@ import java.util.Map;
 /**
  * Project-level Java API of the code-owners plugin.
  *
- * <p>To create an instance for a project use {@link ProjectCodeOwnersFactory}.
+ * <p>To create an instance for a project use {@code ProjectCodeOwnersFactory}.
  */
 public interface ProjectCodeOwners {
   /** Returns the code owner project configuration. */

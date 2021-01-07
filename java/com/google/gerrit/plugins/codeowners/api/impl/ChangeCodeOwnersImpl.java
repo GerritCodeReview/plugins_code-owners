@@ -12,12 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.api;
+package com.google.gerrit.plugins.codeowners.api.impl;
 
 import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.plugins.codeowners.api.ChangeCodeOwners;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.api.RevisionCodeOwners;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus;
 import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.change.RevisionResource;
