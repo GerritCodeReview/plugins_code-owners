@@ -23,7 +23,7 @@ import com.google.gerrit.entities.Change;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.api;
+package com.google.gerrit.plugins.codeowners.common;
 
 /** Policy that should be used to validate code owner config files. */
 public enum CodeOwnerConfigValidationPolicy {

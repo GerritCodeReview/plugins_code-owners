@@ -21,8 +21,8 @@ import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.PathSubject;
 import com.google.common.truth.Subject;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 
 /** {@link Subject} for doing assertions on {@link PathCodeOwnerStatus}s. */
 public class PathCodeOwnerStatusSubject extends Subject {

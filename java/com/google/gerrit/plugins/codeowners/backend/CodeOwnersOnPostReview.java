@@ -23,7 +23,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;

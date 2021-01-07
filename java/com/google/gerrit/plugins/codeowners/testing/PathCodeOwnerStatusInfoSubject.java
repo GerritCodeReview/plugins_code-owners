@@ -19,8 +19,8 @@ import static com.google.common.truth.Truth.assertAbout;
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.api.PathCodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 
 /** {@link Subject} for doing assertions on {@link PathCodeOwnerStatusInfo}s. */
 public class PathCodeOwnerStatusInfoSubject extends Subject {
