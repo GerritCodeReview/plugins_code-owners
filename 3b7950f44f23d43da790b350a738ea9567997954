@@ -46,6 +46,30 @@
       },
       "revId": "3b7950f44f23d43da790b350a738ea9567997954",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "43d036f9_f9b144e2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-07T13:21:33Z",
+      "side": 1,
+      "message": "the test led me to think it\u0027s checking if it\u0027s disabled globally, and not just for the destination branch.\nI see now, makes sense.\n\nA test that disables globally but enables for a specific branch is also not needed since you\u0027re already testing codeOwnersPluginConfiguration elsewhere.",
+      "parentUuid": "36574c81_0111dc94",
+      "range": {
+        "startLine": 77,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 0
+      },
+      "revId": "3b7950f44f23d43da790b350a738ea9567997954",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
