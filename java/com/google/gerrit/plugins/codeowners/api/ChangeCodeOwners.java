@@ -20,7 +20,7 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 /**
  * Java API for change code owners.
  *
- * <p>To create an instance for a change use {@link ChangeCodeOwnersFactory}.
+ * <p>To create an instance for a change use {@code ChangeCodeOwnersFactory}.
  */
 public interface ChangeCodeOwners {
   /** Returns the code owner status for the files in the change. */
