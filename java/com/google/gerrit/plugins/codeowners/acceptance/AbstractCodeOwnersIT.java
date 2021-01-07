@@ -18,10 +18,10 @@ import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
-import com.google.gerrit.plugins.codeowners.api.ChangeCodeOwnersFactory;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigsFactory;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnersFactory;
-import com.google.gerrit.plugins.codeowners.api.ProjectCodeOwnersFactory;
+import com.google.gerrit.plugins.codeowners.api.impl.ChangeCodeOwnersFactory;
+import com.google.gerrit.plugins.codeowners.api.impl.CodeOwnerConfigsFactory;
+import com.google.gerrit.plugins.codeowners.api.impl.CodeOwnersFactory;
+import com.google.gerrit.plugins.codeowners.api.impl.ProjectCodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.config.BackendConfig;
 import com.google.gerrit.testing.ConfigSuite;
