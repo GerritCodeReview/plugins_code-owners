@@ -642,6 +642,30 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void getAllUsersAsGlobalCodeOwners() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id(), admin.id());
+
+    // Query code owners with a limit.
+    requestScopeOperations.setApiUser(user.id());
+    codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(2);
+    assertThatList(codeOwnerInfos)
+        .element(0)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id(), admin.id());
+    assertThatList(codeOwnerInfos)
+        .element(1)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id(), admin.id());
+  }
+
+  @Test
   @GerritConfig(
       name = "plugin.code-owners.globalCodeOwner",
       values = {"global.owner1@example.com", "global.owner2@example.com"})
