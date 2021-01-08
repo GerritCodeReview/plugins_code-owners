@@ -39,7 +39,7 @@ import org.junit.Test;
 public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
-  public void getCodeOwnersForInvalidPath() throws Exception {
+  public void getCodeOwnerConfigsForInvalidPath() throws Exception {
     RestResponse r =
         adminRestSession.get(
             String.format(
