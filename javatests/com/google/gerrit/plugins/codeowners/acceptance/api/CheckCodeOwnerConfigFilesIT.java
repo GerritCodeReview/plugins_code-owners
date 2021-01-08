@@ -71,6 +71,14 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void requiresAuthenticatedUser() throws Exception {
+    requestScopeOperations.setApiUserAnonymous();
+    AuthException authException =
+        assertThrows(AuthException.class, () -> checkCodeOwnerConfigFilesIn(project));
+    assertThat(authException).hasMessageThat().contains("Authentication required");
+  }
+
+  @Test
   public void requiresCallerToBeProjectOwner() throws Exception {
     requestScopeOperations.setApiUser(user.id());
     AuthException authException =
