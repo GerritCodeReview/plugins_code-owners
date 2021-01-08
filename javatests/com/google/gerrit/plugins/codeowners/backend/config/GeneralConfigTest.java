@@ -181,6 +181,26 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  public void invalidEnableValidationOnCommitReceivedConfigurationInPluginConfigIsIgnored()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "INVALID");
+    assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(project, cfg))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "INVALID")
+  public void invalidEnableValidationOnCommitReceivedConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                project, new Config()))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+  }
+
+  @Test
   public void cannotGetEnableValidationOnSubmitForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(
@@ -221,6 +241,24 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_SUBMIT, "true");
     assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(project, cfg))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
+  public void invalidEnableValidationOnSubmitConfigurationInPluginConfigIsIgnored()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_SUBMIT, "INVALID");
+    assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(project, cfg))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "INVALID")
+  public void invalidEnableValidationOnSubmitConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(project, new Config()))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 
