@@ -580,6 +580,26 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
+  public void cannotParseCodeOwnerConfigWithPerFileLineThatHasAnInvalidImportKeyword()
+      throws Exception {
+    // The 'import' keyword doesn't exist
+    String invalidLine = "per-file foo=import /foo/bar/OWNERS";
+
+    CodeOwnerConfigParseException exception =
+        assertThrows(
+            CodeOwnerConfigParseException.class,
+            () ->
+                codeOwnerConfigParser.parse(
+                    TEST_REVISION,
+                    CodeOwnerConfig.Key.create(project, "master", "/"),
+                    invalidLine));
+    assertThat(exception.getFullMessage(FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME))
+        .isEqualTo(
+            String.format(
+                "invalid code owner config file '/OWNERS':\n" + "  invalid line: %s", invalidLine));
+  }
+
+  @Test
   public void perFileCodeOwnerConfigImportWithImportModeGlobalCodeOwnerSetsOnly() throws Exception {
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
