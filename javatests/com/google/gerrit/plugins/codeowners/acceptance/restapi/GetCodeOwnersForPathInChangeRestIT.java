@@ -58,6 +58,16 @@ public class GetCodeOwnersForPathInChangeRestIT extends AbstractGetCodeOwnersFor
   }
 
   @Test
+  public void cannotListCodeOwners() throws Exception {
+    RestResponse r =
+        adminRestSession.get(
+            String.format(
+                "/changes/%s/revisions/%s/code_owners/",
+                IdString.fromDecoded(changeId), IdString.fromDecoded("current")));
+    r.assertNotFound();
+  }
+
+  @Test
   public void cannotGetCodeOwnersForNonExistingPath() throws Exception {
     String nonExistingPath = "/some/non/existing/path";
     RestResponse r = adminRestSession.get(getUrl(nonExistingPath));
