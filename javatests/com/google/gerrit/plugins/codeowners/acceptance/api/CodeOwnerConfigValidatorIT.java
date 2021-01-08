@@ -289,8 +289,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void canUploadConfigWithoutIssues_withImportOfConfigThatIsAddedInSameCommit()
-      throws Exception {
+  public void
+      canUploadConfigWithImportOfConfigThatIsAddedInSameCommit_importModeGlobalCodeOwnersOnly()
+          throws Exception {
     // imports are not supported for the proto backend
     assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
 
@@ -302,7 +303,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
             codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath());
 
-    // Create a code owner config with import and without issues.
     PushOneCommit.Result r =
         createChange(
             "Add code owners",
@@ -317,6 +317,42 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                                 .addPathExpression("foo")
                                 .addImport(codeOwnerConfigReference)
                                 .build())
+                        .build()),
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getJGitFilePath(),
+                format(
+                    CodeOwnerConfig.builder(keyOfImportedCodeOwnerConfig, TEST_REVISION)
+                        .addCodeOwnerSet(
+                            CodeOwnerSet.builder().addCodeOwnerEmail(user.email()).build())
+                        .build())));
+    assertOkWithHints(r, "code owner config files validated, no issues found");
+  }
+
+  @Test
+  public void canUploadConfigWithImportOfConfigThatIsAddedInSameCommit_importModeAll()
+      throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig = createCodeOwnerConfigKey("/foo/");
+
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.ALL,
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath());
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            ImmutableMap.of(
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+                format(
+                    CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                        .addImport(codeOwnerConfigReference)
+                        .addCodeOwnerSet(
+                            CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
                         .build()),
                 codeOwnerConfigOperations
                     .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
