@@ -861,6 +861,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .containsExactly(user.id(), user2.id(), admin.id());
 
     // Query code owners with a limit.
+    requestScopeOperations.setApiUser(user.id());
     codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
     assertThat(codeOwnerInfos).hasSize(2);
     assertThatList(codeOwnerInfos)
