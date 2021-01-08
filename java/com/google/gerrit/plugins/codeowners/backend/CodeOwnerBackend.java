@@ -112,9 +112,7 @@ public interface CodeOwnerBackend {
    * backend. It this case all {@link CodeOwnerSet}s that have path expressions are ignored and will
    * not have any effect.
    */
-  default Optional<PathExpressionMatcher> getPathExpressionMatcher() {
-    return Optional.empty();
-  }
+  Optional<PathExpressionMatcher> getPathExpressionMatcher();
 
   /**
    * Replaces the old email in the given code owner config file content with the new email.

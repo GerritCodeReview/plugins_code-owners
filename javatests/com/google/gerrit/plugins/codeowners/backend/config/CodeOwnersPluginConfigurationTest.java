@@ -39,6 +39,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
@@ -1082,6 +1083,11 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
     @Override
     public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
       throw new UnsupportedOperationException("not implemented");
+    }
+
+    @Override
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+      return Optional.empty();
     }
   }
 }
