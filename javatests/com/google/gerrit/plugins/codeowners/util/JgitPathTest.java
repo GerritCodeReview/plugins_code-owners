@@ -57,4 +57,29 @@ public class JgitPathTest extends AbstractCodeOwnersTest {
     assertThat(JgitPath.of("foo/bar/OWNERS").getAsAbsolutePath())
         .isEqualTo(Paths.get("/foo/bar/OWNERS"));
   }
+
+  @Test
+  public void testToString() throws Exception {
+    String path = "foo/bar/baz.md";
+    assertThat(JgitPath.of(path).toString()).isEqualTo(path);
+    assertThat(JgitPath.of("/" + path).toString()).isEqualTo(path);
+  }
+
+  @Test
+  public void testEquals() throws Exception {
+    String path = "foo/bar/baz.md";
+    assertThat(JgitPath.of(path)).isEqualTo(JgitPath.of(path));
+    assertThat(JgitPath.of("/" + path)).isEqualTo(JgitPath.of(path));
+    assertThat(JgitPath.of("/" + path)).isNotEqualTo(JgitPath.of("foo/bar/baz.txt"));
+    assertThat(JgitPath.of("/" + path)).isNotEqualTo(new Object());
+  }
+
+  @Test
+  public void testHashCode() throws Exception {
+    String path = "foo/bar/baz.md";
+    assertThat(JgitPath.of(path).hashCode()).isEqualTo(JgitPath.of(path).hashCode());
+    assertThat(JgitPath.of("/" + path).hashCode()).isEqualTo(JgitPath.of(path).hashCode());
+    assertThat(JgitPath.of("/" + path).hashCode())
+        .isNotEqualTo(JgitPath.of("foo/bar/baz.txt").hashCode());
+  }
 }
