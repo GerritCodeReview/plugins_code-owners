@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -30,6 +31,8 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
+import com.google.gerrit.server.project.ProjectState;
+import com.google.gerrit.server.restapi.project.DeleteRef;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -57,6 +60,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
   @Mock private Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback;
 
   @Inject private ProjectOperations projectOperations;
+  @Inject private DeleteRef deleteRef;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
   private CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
@@ -734,6 +738,15 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
 
     verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void refsMetaConfigBranchIsMissing() throws Exception {
+    ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
+    deleteRef.deleteSingleRef(projectState, RefNames.REFS_CONFIG);
+
+    visit("master", "/foo/bar/baz.md");
+    verifyZeroInteractions(visitor);
   }
 
   private void visit(String branchName, String path)
