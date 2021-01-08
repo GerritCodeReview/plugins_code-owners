@@ -36,7 +36,6 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
-import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -46,7 +45,7 @@ import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link GeneralConfig}. */
+/** Tests for {@link com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig}. */
 public class GeneralConfigTest extends AbstractCodeOwnersTest {
   private GeneralConfig generalConfig;
 
