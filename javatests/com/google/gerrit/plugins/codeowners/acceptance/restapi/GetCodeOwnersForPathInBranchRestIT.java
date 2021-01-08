@@ -14,7 +14,9 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 
+import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.extensions.restapi.IdString;
+import org.junit.Test;
 
 /**
  * Acceptance test for the {@link
@@ -34,5 +36,15 @@ public class GetCodeOwnersForPathInBranchRestIT extends AbstractGetCodeOwnersFor
         IdString.fromDecoded(project.get()),
         IdString.fromDecoded("master"),
         IdString.fromDecoded(path));
+  }
+
+  @Test
+  public void cannotListCodeOwners() throws Exception {
+    RestResponse r =
+        adminRestSession.get(
+            String.format(
+                "/projects/%s/branches/%s/code_owners/",
+                IdString.fromDecoded(project.get()), IdString.fromDecoded("master")));
+    r.assertNotFound();
   }
 }
