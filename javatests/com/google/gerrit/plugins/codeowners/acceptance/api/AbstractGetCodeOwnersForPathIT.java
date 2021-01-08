@@ -1041,6 +1041,33 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   }
 
   @Test
+  public void getAllUsersAsCodeOwners_explicitlyMentionedCodeOwnersArePreferred() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // Add a code owner config that assigns code ownership to user2 and all users.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user2.email())
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // Query code owners with limits, "*" is resolved to random users, but user2 should always be
+    // included since this user is set explicitly as code owner
+    List<CodeOwnerInfo> codeOwnerInfos =
+        queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    assertThat(codeOwnerInfos).hasSize(2);
+    assertThatList(codeOwnerInfos).comparingElementsUsing(hasAccountId()).contains(user2.id());
+
+    codeOwnerInfos = queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
+    assertThatList(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id());
+  }
+
+  @Test
   public void getCodeOwnersProvidingASeedMakesSortOrderStableAcrocssRequests() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
