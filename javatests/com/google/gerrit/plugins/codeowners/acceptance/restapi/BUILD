@@ -18,6 +18,7 @@ acceptance_tests(
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/restapi",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
