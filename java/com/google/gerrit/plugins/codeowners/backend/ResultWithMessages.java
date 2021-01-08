@@ -33,11 +33,6 @@ public abstract class ResultWithMessages<T> {
   /** Gets the messages. */
   public abstract ImmutableList<String> messages();
 
-  /** Creates a {@link ResultWithMessages} instance without messages. */
-  public static <T> ResultWithMessages<T> create(T result) {
-    return create(result, ImmutableList.of());
-  }
-
   /** Creates a {@link ResultWithMessages} instance with a single message. */
   public static <T> ResultWithMessages<T> create(T result, String message) {
     requireNonNull(message, "message");
