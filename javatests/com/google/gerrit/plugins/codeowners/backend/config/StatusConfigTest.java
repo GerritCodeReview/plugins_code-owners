@@ -97,9 +97,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.disabled", value = "INVALID")
   public void isDisabledForProject_invalidValueInGerritConfigIsIgnored() throws Exception {
-    Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "invalid");
-    assertThat(statusConfig.isDisabledForProject(cfg, project)).isFalse();
+    assertThat(statusConfig.isDisabledForProject(new Config(), project)).isFalse();
   }
 
   @Test
