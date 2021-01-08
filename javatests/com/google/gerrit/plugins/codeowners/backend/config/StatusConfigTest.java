@@ -26,7 +26,6 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
@@ -34,7 +33,7 @@ import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link StatusConfig}. */
+/** Tests for {@link com.google.gerrit.plugins.codeowners.backend.config.StatusConfig}. */
 public class StatusConfigTest extends AbstractCodeOwnersTest {
   private StatusConfig statusConfig;
 
