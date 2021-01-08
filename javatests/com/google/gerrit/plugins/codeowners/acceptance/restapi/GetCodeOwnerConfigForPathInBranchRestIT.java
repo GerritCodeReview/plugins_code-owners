@@ -39,6 +39,17 @@ import org.junit.Test;
 public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
+  public void cannotListCodeOwnerConfigs() throws Exception {
+    RestResponse r =
+        adminRestSession.get(
+            String.format(
+                "/projects/%s/branches/%s/code_owners.config/",
+                IdString.fromDecoded(project.get()), IdString.fromDecoded("master")));
+    r.assertNotFound();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getCodeOwnerConfigsForInvalidPath() throws Exception {
     RestResponse r =
         adminRestSession.get(
