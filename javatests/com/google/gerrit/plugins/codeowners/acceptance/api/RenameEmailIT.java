@@ -143,6 +143,15 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void requiresAuthenticatedUser() throws Exception {
+    requestScopeOperations.setApiUserAnonymous();
+    AuthException authException =
+        assertThrows(
+            AuthException.class, () -> renameEmail(project, "master", new RenameEmailInput()));
+    assertThat(authException).hasMessageThat().contains("Authentication required");
+  }
+
+  @Test
   public void renameEmailRequiresDirectPushPermissionsForNonProjectOwner() throws Exception {
     String secondaryEmail = "user-foo@example.com";
     accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
