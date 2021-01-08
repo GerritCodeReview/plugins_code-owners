@@ -125,6 +125,14 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void isDisabledForBranchForConfigWithEmptyValue() throws Exception {
+    Config cfg = new Config();
+    cfg.setStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, ImmutableList.of(""));
+    assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
+        .isFalse();
+  }
+
+  @Test
   public void isDisabledForBranch_exactRef() throws Exception {
     Config cfg = new Config();
     cfg.setStringList(
