@@ -19,12 +19,11 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Test;
 
-/** Tests for {@link JgitPath}. */
+/** Tests for {@link com.google.gerrit.plugins.codeowners.util.JgitPath}. */
 public class JgitPathTest extends AbstractCodeOwnersTest {
   @Test
   public void getJgitPathOfStringPath() throws Exception {
