@@ -18,6 +18,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPlug
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
@@ -215,7 +216,7 @@ public class StatusConfig {
   private boolean isDisabledForBranch(
       String[] refPatternList, String branch, String warningMsgForInvalidRefPattern) {
     for (String refPattern : refPatternList) {
-      if (refPattern == null) {
+      if (Strings.isNullOrEmpty(refPattern)) {
         continue;
       }
       try {
