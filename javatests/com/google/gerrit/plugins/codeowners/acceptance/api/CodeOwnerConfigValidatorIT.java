@@ -1355,13 +1355,15 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         r,
         "invalid code owner config files",
         String.format(
-            "invalid %s import in '%s': '%s' does not exist (project = %s, branch = master)",
+            "invalid %s import in '%s': '%s' does not exist (project = %s, branch = master,"
+                + " revision = %s)",
             importType.getType(),
             codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
             codeOwnerConfigOperations
                 .codeOwnerConfig(keyOfNonExistingCodeOwnerConfig)
                 .getFilePath(),
-            project.get()));
+            project.get(),
+            r.getCommit().name()));
   }
 
   @Test

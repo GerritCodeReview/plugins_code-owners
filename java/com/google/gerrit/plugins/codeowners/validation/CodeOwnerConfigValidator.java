@@ -872,10 +872,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
             importType,
             codeOwnerConfigFilePath,
             String.format(
-                "'%s' does not exist (project = %s, branch = %s)",
+                "'%s' does not exist (project = %s, branch = %s, revision = %s)",
                 codeOwnerConfigReference.filePath(),
                 keyOfImportedCodeOwnerConfig.branchNameKey().project().get(),
-                keyOfImportedCodeOwnerConfig.branchNameKey().shortName()));
+                keyOfImportedCodeOwnerConfig.branchNameKey().shortName(),
+                revision.get().name()));
       }
     } catch (StorageException storageException) {
       if (getInvalidConfigCause(storageException).isPresent()) {
