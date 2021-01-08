@@ -280,7 +280,6 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
                     data-suggestion-index$="[[suggestionIndex]]"
                     data-owner-index$="[[ownerIndex]]"
                     account="[[owner.account]]"
-                    hide-hovercard
                     selected$="[[isSelected(owner)]]"
                     on-click="toggleAccount">
                   </gr-account-label>
