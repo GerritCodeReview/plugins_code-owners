@@ -129,8 +129,9 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
             ImmutableList.of(
                 fatal(
                     String.format(
-                        "invalid code owner config file '%s':\n  %s",
+                        "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
                         codeOwnerConfigPath,
+                        project,
                         getParsingErrorMessage(
                             ImmutableMap.of(
                                 FindOwnersBackend.class,
@@ -458,8 +459,9 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
         ImmutableList.of(
             fatal(
                 String.format(
-                    "invalid code owner config file '%s':\n  %s",
+                    "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
                     pathOfNonParseableCodeOwnerConfig,
+                    project,
                     getParsingErrorMessage(
                         ImmutableMap.of(
                             FindOwnersBackend.class,

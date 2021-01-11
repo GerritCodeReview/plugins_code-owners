@@ -90,7 +90,8 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
                     "owners_config {\n  owner_sets {\nINVALID_LINE\n  }\n}\n"));
     assertThat(exception.getFullMessage(ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME))
         .isEqualTo(
-            "invalid code owner config file '/OWNERS_METADATA':\n" + "  4:3: Expected \"{\".");
+            "invalid code owner config file '/OWNERS_METADATA' (project = project, branch = master):\n"
+                + "  4:3: Expected \"{\".");
   }
 
   @Test
