@@ -46,6 +46,30 @@
       },
       "revId": "547cb5fcaa7c9152c1a91341db07e835967681a8",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "504609e0_babc2ea1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-11T14:21:32Z",
+      "side": 1,
+      "message": "Also the old code was not throwing an error, but it logged it as error and returned a rule error. I think it\u0027s fine leaving as it is.",
+      "parentUuid": "776dc617_6ae92e62",
+      "range": {
+        "startLine": 7,
+        "startChar": 28,
+        "endLine": 7,
+        "endChar": 31
+      },
+      "revId": "547cb5fcaa7c9152c1a91341db07e835967681a8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
