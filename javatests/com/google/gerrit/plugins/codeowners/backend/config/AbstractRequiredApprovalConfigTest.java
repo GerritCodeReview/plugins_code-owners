@@ -22,9 +22,6 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.backend.config.AbstractRequiredApprovalConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
-import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.ProjectLevelConfig;
@@ -32,9 +29,16 @@ import com.google.gerrit.server.project.ProjectState;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Test;
 
-/** Tests for subclasses of {@link AbstractRequiredApprovalConfig}. */
+/**
+ * Tests for subclasses of {@link
+ * com.google.gerrit.plugins.codeowners.backend.config.AbstractRequiredApprovalConfig}.
+ */
 public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwnersTest {
-  /** Must return the {@link AbstractRequiredApprovalConfig} that should be tested. */
+  /**
+   * Must return the {@link
+   * com.google.gerrit.plugins.codeowners.backend.config.AbstractRequiredApprovalConfig} that should
+   * be tested.
+   */
   protected abstract AbstractRequiredApprovalConfig getRequiredApprovalConfig();
 
   protected void testCannotGetIfGlobalConfigIsInvalid(String invalidValue) throws Exception {

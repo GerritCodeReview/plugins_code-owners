@@ -21,15 +21,12 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.AbstractRequiredApprovalConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
-import com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig;
 import com.google.gerrit.server.project.ProjectState;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link RequiredApprovalConfig}. */
+/** Tests for {@link com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig}. */
 public class RequiredApprovalConfigTest extends AbstractRequiredApprovalConfigTest {
   private RequiredApprovalConfig requiredApprovalConfig;
 

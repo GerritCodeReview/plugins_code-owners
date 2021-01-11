@@ -40,14 +40,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
-import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
-import com.google.gerrit.plugins.codeowners.backend.config.OverrideApprovalConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
-import com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.IdentifiedUser;
@@ -61,7 +53,10 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link CodeOwnersPluginConfiguration}. */
+/**
+ * Tests for {@link
+ * com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration}.
+ */
 public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @Inject private ProjectOperations projectOperations;
 
