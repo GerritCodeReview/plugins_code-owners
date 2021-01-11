@@ -623,4 +623,26 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
                     + "* %s\n",
                 admin.fullName(), path));
   }
+
+  @Test
+  public void changeMessageNotExtendedIfUsersPostsOnOldPatchSet() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+
+    // create a second patch set
+    amendChange(changeId);
+
+    // vote on the first patch set
+    gApi.changes().id(changeId).revision(1).review(ReviewInput.recommend());
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
+  }
 }
