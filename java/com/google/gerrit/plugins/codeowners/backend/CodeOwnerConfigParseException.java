@@ -40,7 +40,12 @@ public class CodeOwnerConfigParseException extends ValidationException {
   /** Returns all validation as a single, formatted string. */
   public String getFullMessage(String defaultCodeOwnerConfigFileName) {
     StringBuilder sb = new StringBuilder(getMessage());
-    sb.append(" '").append(codeOwnerConfigKey.filePath(defaultCodeOwnerConfigFileName)).append("'");
+    sb.append(
+        String.format(
+            " '%s' (project = %s, branch = %s)",
+            codeOwnerConfigKey.filePath(defaultCodeOwnerConfigFileName),
+            codeOwnerConfigKey.project(),
+            codeOwnerConfigKey.shortBranchName()));
     if (!messages.isEmpty()) {
       sb.append(':');
       for (ValidationError msg : messages) {

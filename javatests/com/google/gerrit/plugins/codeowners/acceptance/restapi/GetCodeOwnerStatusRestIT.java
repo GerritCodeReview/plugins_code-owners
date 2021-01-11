@@ -83,7 +83,8 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
     assertThat(r.getEntityContent())
         .contains(
             String.format(
-                "invalid code owner config file %s (project = %s, branch = refs/heads/master)",
+                "* invalid code owner config file '%s' (project = %s, branch = master):\n"
+                    + "  invalid line: INVALID",
                 filePath, project.get()));
   }
 
