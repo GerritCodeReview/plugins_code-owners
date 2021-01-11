@@ -22,6 +22,30 @@
       },
       "revId": "547cb5fcaa7c9152c1a91341db07e835967681a8",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "776dc617_6ae92e62",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T12:46:21Z",
+      "side": 1,
+      "message": "Done (I don\u0027t really mind if you don\u0027t edit it)",
+      "parentUuid": "03eda3b4_3aea780e",
+      "range": {
+        "startLine": 7,
+        "startChar": 28,
+        "endLine": 7,
+        "endChar": 31
+      },
+      "revId": "547cb5fcaa7c9152c1a91341db07e835967681a8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
