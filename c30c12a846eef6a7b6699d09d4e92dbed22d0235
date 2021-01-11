@@ -1,0 +1,90 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f2bde64e_485a46e3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T11:19:54Z",
+      "side": 1,
+      "message": "cool, just some nits",
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "34a1864b_0add4b74",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T11:19:54Z",
+      "side": 1,
+      "message": "this filter method has some side effects here, I think it\u0027s better to do separately.",
+      "range": {
+        "startLine": 217,
+        "startChar": 18,
+        "endLine": 217,
+        "endChar": 60
+      },
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "68d8d11c_a0528080",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OptionalResultWithMessages.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T11:19:54Z",
+      "side": 1,
+      "message": "if",
+      "range": {
+        "startLine": 44,
+        "startChar": 50,
+        "endLine": 44,
+        "endChar": 52
+      },
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ab2bfb48_233abb35",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ResultWithMessages.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T11:19:54Z",
+      "side": 1,
+      "message": "This seems a bit redundant, can we use OptionalResultWithMessages for all purposes? (even when the Result is mandatory)",
+      "range": {
+        "startLine": 29,
+        "startChar": 22,
+        "endLine": 29,
+        "endChar": 40
+      },
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
