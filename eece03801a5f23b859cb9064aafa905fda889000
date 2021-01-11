@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "59eb09b4_af979f5c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/BranchCodeOwnersImpl.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T12:33:43Z",
+      "side": 1,
+      "message": "This looks a bit unconventional. Can you return CodeOwnerCheckInfo here?",
+      "range": {
+        "startLine": 90,
+        "startChar": 9,
+        "endLine": 90,
+        "endChar": 30
+      },
+      "revId": "eece03801a5f23b859cb9064aafa905fda889000",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0c3330d2_a48d6d11",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerCheckInfo.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 39,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T12:33:43Z",
+      "side": 1,
+      "message": "these Booleans are always set, right?\nIf that\u0027s the case it is better to use boolean (not Boolean).",
+      "range": {
+        "startLine": 39,
+        "startChar": 9,
+        "endLine": 39,
+        "endChar": 16
+      },
+      "revId": "eece03801a5f23b859cb9064aafa905fda889000",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c67371d_6764afc9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T12:33:43Z",
+      "side": 1,
+      "message": "export to private method isGlobalCodeOwner()\n(messages can probably just be a class variable)",
+      "range": {
+        "startLine": 172,
+        "startChar": 32,
+        "endLine": 181,
+        "endChar": 5
+      },
+      "revId": "eece03801a5f23b859cb9064aafa905fda889000",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ada628a4_ce52945e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T12:33:43Z",
+      "side": 1,
+      "message": "export to method isResolvable()",
+      "range": {
+        "startLine": 183,
+        "startChar": 27,
+        "endLine": 199,
+        "endChar": 7
+      },
+      "revId": "eece03801a5f23b859cb9064aafa905fda889000",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b3199468_faa9774b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 208,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T12:33:43Z",
+      "side": 1,
+      "message": "is this useful? This doesn\u0027t provide any new information.",
+      "range": {
+        "startLine": 203,
+        "startChar": 0,
+        "endLine": 208,
+        "endChar": 0
+      },
+      "revId": "eece03801a5f23b859cb9064aafa905fda889000",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
