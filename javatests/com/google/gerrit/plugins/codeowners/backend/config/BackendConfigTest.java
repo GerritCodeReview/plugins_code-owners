@@ -26,8 +26,6 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
-import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -37,7 +35,7 @@ import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link BackendConfig}. */
+/** Tests for {@link com.google.gerrit.plugins.codeowners.backend.config.BackendConfig}. */
 public class BackendConfigTest extends AbstractCodeOwnersTest {
   private BackendConfig backendConfig;
 
