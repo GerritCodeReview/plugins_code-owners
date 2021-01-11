@@ -272,6 +272,70 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void
+      changeMessageListsPathsThatAreStillApproved_approvalDowngraded_implicitApprovalsEnabled()
+          throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    approve(changeId);
+
+    // Downgrade the approval from Code-Review+2 to Code-Review+1
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are still explicitly code-owner"
+                    + " approved by %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void
+      changeMessageListsPathsThatAreStillApproved_approvalUpgraded_implicitApprovalsEnabled()
+          throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    // Upgrade the approval from Code-Review+1 to Code-Review+2
+    approve(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+2\n\n"
+                    + "By voting Code-Review+2 the following files are still explicitly code-owner"
+                    + " approved by %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
+  }
+
+  @Test
   public void changeMessageListsPathsThatAreStillApproved_approvalDowngraded() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
