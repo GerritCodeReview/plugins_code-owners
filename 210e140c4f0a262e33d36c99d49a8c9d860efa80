@@ -22,6 +22,30 @@
       },
       "revId": "210e140c4f0a262e33d36c99d49a8c9d860efa80",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72f5d66a_8698ff68",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 381,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-11T14:36:41Z",
+      "side": 1,
+      "message": "This is covered by the test that is newly added in this change. Without this line the test would be flaky.\n\nWhen the test list code owners with limit\u003d2 it expects 2 results (l. 1061), the user that was explicitly set as code owner + 1 random user. Without this line here, the random user could be the same user as the user that was explicitly set as code owner. Since codeOwners is a Set, they would be de-duped and we would return only 1 result. So the assertion that expects 2 results would fail.\n\nAt the moment I can\u0027t think of any other test for this.",
+      "parentUuid": "290f753a_d85e9cbf",
+      "range": {
+        "startLine": 381,
+        "startChar": 0,
+        "endLine": 381,
+        "endChar": 65
+      },
+      "revId": "210e140c4f0a262e33d36c99d49a8c9d860efa80",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
