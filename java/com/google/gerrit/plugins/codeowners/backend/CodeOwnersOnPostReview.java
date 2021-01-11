@@ -182,7 +182,17 @@ class CodeOwnersOnPostReview implements OnPostReview {
                 newVote, user.getName()));
       }
     } else {
-      return Optional.empty();
+      throw new IllegalStateException(
+          String.format(
+              "code owner approval was neither newly applied nor removed nor up- or downgraded:"
+                  + " project = %s, change = %s, patch set = %d, oldApprvals = %s, approvals = %s,"
+                  + " requiredApproval = %s",
+              changeNotes.getProjectName(),
+              changeNotes.getChangeId(),
+              patchSet.id().get(),
+              oldApprovals,
+              approvals,
+              requiredApproval));
     }
 
     if (ownedPaths.size() <= maxPathsInChangeMessage) {
