@@ -243,7 +243,7 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void changeMessageListsPathsThatAreStillApproved() throws Exception {
+  public void changeMessageListsPathsThatAreStillApproved_approvalUpgraded() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -266,6 +266,35 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
             String.format(
                 "Patch Set 1: Code-Review+2\n\n"
                     + "By voting Code-Review+2 the following files are still code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
+  }
+
+  @Test
+  public void changeMessageListsPathsThatAreStillApproved_approvalDowngraded() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    approve(changeId);
+
+    // Downgrade the approval from Code-Review+2 to Code-Review+1
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are still code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
                 admin.fullName(), path));
