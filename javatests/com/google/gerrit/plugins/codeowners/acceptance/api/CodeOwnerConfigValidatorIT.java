@@ -407,8 +407,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         r,
         "invalid code owner config files",
         String.format(
-            "invalid code owner config file '%s':\n  %s",
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            project,
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -526,8 +527,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         r,
         "invalid code owner config files",
         String.format(
-            "invalid code owner config file '%s':\n  %s",
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            project,
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -640,8 +642,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         r,
         "invalid code owner config files",
         String.format(
-            "invalid code owner config file '%s':\n  %s",
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            project,
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -670,8 +673,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         r,
         "invalid code owner config files",
         String.format(
-            "invalid code owner config file '%s':\n  %s",
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
+            project,
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
@@ -679,8 +683,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                     ProtoBackend.class,
                     "1:8: expected \"{\""))),
         String.format(
-            "invalid code owner config file '%s':\n  %s",
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
+            project,
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
