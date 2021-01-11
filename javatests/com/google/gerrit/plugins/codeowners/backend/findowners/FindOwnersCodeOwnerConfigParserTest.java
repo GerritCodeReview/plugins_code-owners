@@ -140,10 +140,12 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                         EMAIL_1, "@example.com", "admin@", "admin@example@com", EMAIL_2)));
     assertThat(exception.getFullMessage(FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME))
         .isEqualTo(
-            "invalid code owner config file '/OWNERS':\n"
-                + "  invalid line: @example.com\n"
-                + "  invalid line: admin@\n"
-                + "  invalid line: admin@example@com");
+            String.format(
+                "invalid code owner config file '/OWNERS' (project = %s, branch = master):\n"
+                    + "  invalid line: @example.com\n"
+                    + "  invalid line: admin@\n"
+                    + "  invalid line: admin@example@com",
+                project));
   }
 
   @Test
@@ -158,9 +160,11 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                     getCodeOwnerConfig(EMAIL_1, "INVALID", "NOT_AN_EMAIL", EMAIL_2)));
     assertThat(exception.getFullMessage(FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME))
         .isEqualTo(
-            "invalid code owner config file '/OWNERS':\n"
-                + "  invalid line: INVALID\n"
-                + "  invalid line: NOT_AN_EMAIL");
+            String.format(
+                "invalid code owner config file '/OWNERS' (project = %s, branch = master):\n"
+                    + "  invalid line: INVALID\n"
+                    + "  invalid line: NOT_AN_EMAIL",
+                project));
   }
 
   @Test
@@ -596,7 +600,9 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     assertThat(exception.getFullMessage(FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME))
         .isEqualTo(
             String.format(
-                "invalid code owner config file '/OWNERS':\n" + "  invalid line: %s", invalidLine));
+                "invalid code owner config file '/OWNERS' (project = %s, branch = master):\n"
+                    + "  invalid line: %s",
+                project, invalidLine));
   }
 
   @Test
