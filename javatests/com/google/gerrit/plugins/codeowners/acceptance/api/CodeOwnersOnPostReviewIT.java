@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -24,7 +25,9 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -895,6 +898,26 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     // vote on the first patch set
     gApi.changes().id(changeId).revision(1).review(ReviewInput.recommend());
 
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
+  }
+
+  @Test
+  public void changeMessageNotExtendedIfDestinationBranchWasDeleted() throws Exception {
+    String branchName = "tempBranch";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    String changeId = createChange("refs/for/" + branchName).getChangeId();
+
+    DeleteBranchesInput input = new DeleteBranchesInput();
+    input.branches = ImmutableList.of(branchName);
+    gApi.projects().name(project.get()).deleteBranches(input);
+
+    // Approve by a code-owner.
+    recommend(changeId);
+
+    // If the destination branch of the change no longer exits, the owned paths cannot be computed.
+    // Hence the change message cannot be extended in this case.
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
   }

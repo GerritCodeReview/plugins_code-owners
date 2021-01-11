@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.PatchSet;
-import com.google.gerrit.extensions.restapi.ResourceConflictException;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
@@ -262,7 +262,12 @@ class CodeOwnersOnPostReview implements OnPostReview {
           .map(PathCodeOwnerStatus::path)
           .sorted(comparing(Path::toString))
           .collect(toImmutableList());
-    } catch (IOException | ResourceConflictException | PatchListNotAvailableException e) {
+    } catch (RestApiException e) {
+      logger.atFine().withCause(e).log(
+          "Couldn't compute owned paths of change %s for account %s",
+          changeNotes.getChangeId(), accountId.get());
+      return ImmutableList.of();
+    } catch (IOException | PatchListNotAvailableException e) {
       logger.atSevere().withCause(e).log(
           "Failed to compute owned paths of change %s for account %s",
           changeNotes.getChangeId(), accountId.get());
