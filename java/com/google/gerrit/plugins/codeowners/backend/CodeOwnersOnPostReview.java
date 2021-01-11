@@ -86,8 +86,11 @@ class CodeOwnersOnPostReview implements OnPostReview {
     RequiredApproval requiredApproval =
         codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
 
-    if (!oldApprovals.containsKey(requiredApproval.labelType().getName())) {
-      // if oldApprovals doesn't contain the label, the label was not changed
+    if (oldApprovals.get(requiredApproval.labelType().getName()) == null) {
+      // If oldApprovals doesn't contain the label or if the labels value in it is null, the label
+      // was not changed.
+      // This either means that the user only voted on unrelated labels, or that the user applied
+      // the exact same code owner approval again, that was already present.
       return Optional.empty();
     }
 
