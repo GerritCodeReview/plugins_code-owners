@@ -271,11 +271,7 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String changeId =
-        createChange(
-                "Test Change",
-                ImmutableMap.of("bar/foo.baz", "file content", "bar/baz.foo", "file content"))
-            .getChangeId();
+    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
 
     recommend(changeId);
 
