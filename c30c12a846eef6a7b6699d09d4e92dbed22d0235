@@ -43,6 +43,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "06aaccf4_26d38134",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-11T12:24:25Z",
+      "side": 1,
+      "message": "Already before this change, this filter had side effects (see line 2019 below). The same is true for the filter above (l. 209). So I think this is fine for now. If we don\u0027t want any side effects from filter methods, we should rewrite this and remove all side effects. However this would mean that we would need to iterate multiple times over the stream and hence it would get more expensive. So I\u0027m not sure if we should really do it?",
+      "parentUuid": "34a1864b_0add4b74",
+      "range": {
+        "startLine": 217,
+        "startChar": 18,
+        "endLine": 217,
+        "endChar": 60
+      },
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "68d8d11c_a0528080",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/OptionalResultWithMessages.java",
         "patchSetId": 8
@@ -54,6 +78,30 @@
       "writtenOn": "2021-01-11T11:19:54Z",
       "side": 1,
       "message": "if",
+      "range": {
+        "startLine": 44,
+        "startChar": 50,
+        "endLine": 44,
+        "endChar": 52
+      },
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1f8afcad_6e7cabbb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OptionalResultWithMessages.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-11T12:24:25Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68d8d11c_a0528080",
       "range": {
         "startLine": 44,
         "startChar": 50,
@@ -77,6 +125,30 @@
       "writtenOn": "2021-01-11T11:19:54Z",
       "side": 1,
       "message": "This seems a bit redundant, can we use OptionalResultWithMessages for all purposes? (even when the Result is mandatory)",
+      "range": {
+        "startLine": 29,
+        "startChar": 22,
+        "endLine": 29,
+        "endChar": 40
+      },
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7920dcc1_cf93722a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ResultWithMessages.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-11T12:24:25Z",
+      "side": 1,
+      "message": "Hm, I think it\u0027s possible. I don\u0027t mind much. Done.",
+      "parentUuid": "ab2bfb48_233abb35",
       "range": {
         "startLine": 29,
         "startChar": 22,
