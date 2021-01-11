@@ -25,13 +25,12 @@ import com.google.gerrit.entities.LabelValue;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.util.time.TimeUtil;
 import java.util.Arrays;
 import org.junit.Test;
 
-/** Tests for {@link RequiredApproval}. */
+/** Tests for {@link com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval}. */
 public class RequiredApprovalTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotCheckIsCodeOwnerApprovalForNullPatchSetApproval() throws Exception {
