@@ -65,6 +65,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ddf2834_9b486e9c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-11T12:37:03Z",
+      "side": 1,
+      "message": "hmm, yea hadn\u0027t considered the complexity.\nI\u0027m fine with not doing it.",
+      "parentUuid": "06aaccf4_26d38134",
+      "range": {
+        "startLine": 217,
+        "startChar": 18,
+        "endLine": 217,
+        "endChar": 60
+      },
+      "revId": "c30c12a846eef6a7b6699d09d4e92dbed22d0235",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "68d8d11c_a0528080",
