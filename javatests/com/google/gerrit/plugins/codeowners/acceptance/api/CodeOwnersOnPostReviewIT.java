@@ -15,15 +15,20 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
+import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
 import org.junit.Test;
@@ -32,6 +37,9 @@ import org.junit.Test;
  * Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnersOnPostReview}.
  */
 public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
+  @Inject private RequestScopeOperations requestScopeOperations;
+  @Inject private ProjectOperations projectOperations;
+
   @Test
   @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
   public void changeMessageNotExtendedIfCodeOwnersFuctionalityIsDisabled() throws Exception {
@@ -76,6 +84,162 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
                     + " %s:\n"
                     + "* %s\n",
                 admin.fullName(), path));
+  }
+
+  @Test
+  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgain() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    int messageCount = gApi.changes().id(changeId).get().messages.size();
+
+    // Apply the Code-Review+1 approval again
+    recommend(changeId);
+
+    // Check that no new change message was added.
+    // Gerrit code omits the change message if no vote was changed.
+    assertThat(gApi.changes().id(changeId).get().messages.size()).isEqualTo(messageCount);
+  }
+
+  @Test
+  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithOtherLabel()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
+    gApi.projects().name(project.get()).label("Other").create(input).get();
+
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Other")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    // Apply the Code-Review+1 approval again and add an unrelated vote.
+    ReviewInput reviewInput = ReviewInput.recommend();
+    reviewInput.labels.put("Other", (short) 1);
+    gApi.changes().id(changeId).current().review(reviewInput);
+
+    // The message is unchanged, since reapplying the same code owner approval is ignored by Gerrit
+    // core (the change message only mentions the new vote, but not the reapplied vote).
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Other+1");
+  }
+
+  @Test
+  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithComment()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
+    gApi.projects().name(project.get()).label("Other").create(input).get();
+
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Other")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    // Apply the Code-Review+1 approval again and add a comment.
+    ReviewInput.CommentInput commentInput = new ReviewInput.CommentInput();
+    commentInput.line = 1;
+    commentInput.message = "some comment";
+    commentInput.path = path;
+    ReviewInput reviewInput = ReviewInput.recommend();
+    reviewInput.comments = reviewInput.comments = new HashMap<>();
+    reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
+    gApi.changes().id(changeId).current().review(reviewInput);
+
+    // The message is unchanged, since reapplying the same code owner approval is ignored by Gerrit
+    // core (the change message only mentions the comment, but not the reapplied vote).
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1:\n\n" + "(1 comment)");
+  }
+
+  @Test
+  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedByOtherCodeOwner()
+      throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
+
+    // Apply the Code-Review+1 by another code owner
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId);
+
+    messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                user.fullName(), path));
   }
 
   @Test
