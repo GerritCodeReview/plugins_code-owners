@@ -54,18 +54,14 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
         newInvalidPluginConfigurationException();
     assertThat(getUserMessages(invalidPluginConfigurationException))
         .containsExactly(invalidPluginConfigurationException.getMessage());
-
-    // TODO(ekempin): Make this assertion work
-    // assertThat(getUserMessages(newExceptionWithCause(invalidPluginConfigurationException)))
-    //    .containsExactly(invalidPluginConfigurationException.getMessage());
+    assertThat(getUserMessages(newExceptionWithCause(invalidPluginConfigurationException)))
+        .containsExactly(invalidPluginConfigurationException.getMessage());
 
     ConfigInvalidException configInvalidException = newConfigInvalidException();
     assertThat(getUserMessages(configInvalidException))
         .containsExactly(configInvalidException.getMessage());
-
-    // TODO(ekempin): Make this assertion work
-    // assertThat(getUserMessages(newExceptionWithCause(configInvalidException)))
-    //    .containsExactly(configInvalidException.getMessage());
+    assertThat(getUserMessages(newExceptionWithCause(configInvalidException)))
+        .containsExactly(configInvalidException.getMessage());
 
     assertThat(getUserMessages(new Exception())).isEmpty();
     assertThat(getUserMessages(newExceptionWithCause(new Exception()))).isEmpty();

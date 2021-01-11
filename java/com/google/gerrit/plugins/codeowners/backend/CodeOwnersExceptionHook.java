@@ -20,6 +20,7 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook;
 import java.util.Optional;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 
 /**
  * Class to define the HTTP response status code and message for exceptions that can occur for all
@@ -43,10 +44,18 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
 
   @Override
   public ImmutableList<String> getUserMessages(Throwable throwable, @Nullable String traceId) {
-    if (isInvalidPluginConfigurationException(throwable)
-        || isInvalidCodeOwnerConfigException(throwable)) {
-      return ImmutableList.of(throwable.getMessage());
+    Optional<InvalidPluginConfigurationException> invalidPluginConfigurationException =
+        getInvalidPluginConfigurationCause(throwable);
+    if (invalidPluginConfigurationException.isPresent()) {
+      return ImmutableList.of(invalidPluginConfigurationException.get().getMessage());
     }
+
+    Optional<ConfigInvalidException> configInvalidException =
+        CodeOwners.getInvalidConfigCause(throwable);
+    if (configInvalidException.isPresent()) {
+      return ImmutableList.of(configInvalidException.get().getMessage());
+    }
+
     return ImmutableList.of();
   }
 
@@ -60,8 +69,15 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
   }
 
   private static boolean isInvalidPluginConfigurationException(Throwable throwable) {
+    return getInvalidPluginConfigurationCause(throwable).isPresent();
+  }
+
+  private static Optional<InvalidPluginConfigurationException> getInvalidPluginConfigurationCause(
+      Throwable throwable) {
     return Throwables.getCausalChain(throwable).stream()
-        .anyMatch(t -> t instanceof InvalidPluginConfigurationException);
+        .filter(t -> t instanceof InvalidPluginConfigurationException)
+        .map(t -> (InvalidPluginConfigurationException) t)
+        .findFirst();
   }
 
   private static boolean isInvalidCodeOwnerConfigException(Throwable throwable) {
