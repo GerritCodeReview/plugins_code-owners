@@ -141,6 +141,24 @@
       "parentUuid": "89a9db2e_6b2c44f5",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4588ce78_e812f7e0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
+      },
+      "writtenOn": "2021-01-12T15:01:29Z",
+      "side": 1,
+      "message": "Yes, you could even change it in plugin itself:\n\n  diff --git a/javatests/com/google/gerrit/plugins/codeowners/acceptance/api/BUILD b/javatests/com/google/gerrit/plugins/codeowners/acceptance/api/BUILD\nindex cccf418..4843349 100644\n--- a/javatests/com/google/gerrit/plugins/codeowners/acceptance/api/BUILD\n+++ b/javatests/com/google/gerrit/plugins/codeowners/acceptance/api/BUILD\n@@ -6,6 +6,7 @@ package(\n )\n \n [acceptance_tests(\n+    vm_args \u003d [\"-Dfile.encoding\u003dUTF-8\", \"-Dsun.jnu.encoding\u003dUTF-8\"],\n     srcs \u003d [f],\n     group \u003d f[:f.index(\".\")],\n     deps \u003d [\n\n\nI did it too and I confirm that this test is still failing. Apparently something is still wrong. We should extract small reproducer test/program.",
+      "parentUuid": "6ab98852_42836852",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
