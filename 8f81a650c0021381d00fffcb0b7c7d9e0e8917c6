@@ -51,6 +51,24 @@
       "parentUuid": "245ca5b6_9b801771",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1520d13a_5cc288b9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
+      },
+      "writtenOn": "2021-01-12T14:29:24Z",
+      "side": 1,
+      "message": "Apparently I added -Dfile.encoding\u003dUTF-8 to JGit Bazel build from day one: [1].\n\n[1] https://git.eclipse.org/r/c/jgit/jgit/+/93346/10/org.eclipse.jgit.test/tests.bzl#50",
+      "parentUuid": "99715b0c_5348410d",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
