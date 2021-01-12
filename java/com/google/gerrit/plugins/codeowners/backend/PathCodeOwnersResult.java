@@ -71,7 +71,7 @@ public abstract class PathCodeOwnersResult {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return MoreObjects.toStringHelper(this)
         .add("path", path())
         .add("codeOwnerConfig", codeOwnerConfig())
