@@ -287,7 +287,7 @@ public class GeneralConfig {
         return pluginConfig.getEnum(
             SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for fallback code owners in '%s.config' of project %s."
                 + " Falling back to global config.",
             fallbackCodeOwnersString, pluginName, project.get());
@@ -298,7 +298,7 @@ public class GeneralConfig {
       return pluginConfigFromGerritConfig.getEnum(
           KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for fallback code owners in gerrit.config (parameter"
               + " plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_FALLBACK_CODE_OWNERS),
@@ -332,7 +332,7 @@ public class GeneralConfig {
             KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
             DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for max paths in change messages in '%s.config' of"
                 + " project %s. Falling back to global config.",
             maxPathInChangeMessagesString, pluginName, project.get());
@@ -343,7 +343,7 @@ public class GeneralConfig {
       return pluginConfigFromGerritConfig.getInt(
           KEY_MAX_PATHS_IN_CHANGE_MESSAGES, DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for max paths in change messages in gerrit.config (parameter"
               + " plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
@@ -401,7 +401,7 @@ public class GeneralConfig {
         return pluginConfig.getEnum(
             SECTION_CODE_OWNERS, null, key, CodeOwnerConfigValidationPolicy.TRUE);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
                 + " of project %s. Falling back to global config.",
             codeOwnerConfigValidationPolicyString, pluginName, project.get());
@@ -411,7 +411,7 @@ public class GeneralConfig {
     try {
       return pluginConfigFromGerritConfig.getEnum(key, CodeOwnerConfigValidationPolicy.TRUE);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for the code owner config validation policy in gerrit.config"
               + " (parameter plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(key),
@@ -447,7 +447,7 @@ public class GeneralConfig {
             KEY_MERGE_COMMIT_STRATEGY,
             MergeCommitStrategy.ALL_CHANGED_FILES);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for merge commit stategy in '%s.config' of project %s."
                 + " Falling back to global config or default value.",
             mergeCommitStrategyString, pluginName, project.get());
@@ -458,7 +458,7 @@ public class GeneralConfig {
       return pluginConfigFromGerritConfig.getEnum(
           KEY_MERGE_COMMIT_STRATEGY, MergeCommitStrategy.ALL_CHANGED_FILES);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for merge commit stategy in gerrit.config (parameter plugin.%s.%s)."
               + " Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_MERGE_COMMIT_STRATEGY),
