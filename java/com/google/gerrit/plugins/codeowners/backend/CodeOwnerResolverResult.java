@@ -66,7 +66,7 @@ public abstract class CodeOwnerResolverResult {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return MoreObjects.toStringHelper(this)
         .add("codeOwners", codeOwners())
         .add("ownedByAllUsers", ownedByAllUsers())
