@@ -19,8 +19,11 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSu
 import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject.assertThatCollection;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
@@ -260,5 +263,46 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
     assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  public void changeIsNotSubmittableIfDestinationBranchWasDeleted() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String branchName = "tempBranch";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    String changeId = createChange("refs/for/" + branchName).getChangeId();
+
+    // Approve by a code-owner.
+    approve(changeId);
+
+    DeleteBranchesInput input = new DeleteBranchesInput();
+    input.branches = ImmutableList.of(branchName);
+    gApi.projects().name(project.get()).deleteBranches(input);
+
+    ChangeInfo changeInfo = gApi.changes().id(changeId).get(ListChangesOption.SUBMITTABLE);
+    assertThat(changeInfo.submittable).isFalse();
+
+    // Check that the submit requirement.
+    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+        assertThatCollection(changeInfo.requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
+
+    // Try to submit the change.
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class, () -> gApi.changes().id(changeId).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("destination branch \"refs/heads/%s\" not found.", branchName));
   }
 }
