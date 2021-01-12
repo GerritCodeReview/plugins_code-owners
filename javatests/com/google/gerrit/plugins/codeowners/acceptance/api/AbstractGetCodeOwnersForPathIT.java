@@ -65,7 +65,11 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
    */
   protected static final ImmutableList<String> TEST_PATHS =
       ImmutableList.of(
-          "/foo/bar.md", "/foo/bar/baz.md", "/foo/bar/config.txt", "/foo/bar/main.config");
+          "/foo/bar.md",
+          "/foo/bar/baz.md",
+          "/foo/bar/config.txt",
+          "/foo/bar/main.config",
+          "/unicode/äöü/🥤.txt");
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private AccountOperations accountOperations;
@@ -1134,5 +1138,21 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
           .containsExactlyElementsIn(expectedAccountIds)
           .inOrder();
     }
+  }
+
+  @Test
+  public void getCodeOwnersForUnicodePath() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    assertThat(queryCodeOwners("/unicode/äöü/🥤.txt"))
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id())
+        .inOrder();
   }
 }
