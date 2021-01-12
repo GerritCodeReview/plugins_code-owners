@@ -69,6 +69,42 @@
       "parentUuid": "99715b0c_5348410d",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "16b31168_22630f22",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-12T14:33:37Z",
+      "side": 1,
+      "message": "Thanks for the pointers!\nI wish we could avoid setting these system properties. I\u0027m asking myself why there is no Paths.get(path, \"UTF-8\") method...",
+      "parentUuid": "9e8344ec_87f22be0",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4faeda2f_ec690a37",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-12T14:33:37Z",
+      "side": 1,
+      "message": "Nice, is there a similar place in Gerrit where we could add this?",
+      "parentUuid": "1520d13a_5cc288b9",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
