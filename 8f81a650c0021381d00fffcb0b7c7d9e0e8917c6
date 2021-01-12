@@ -105,6 +105,24 @@
       "parentUuid": "1520d13a_5cc288b9",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "89a9db2e_6b2c44f5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-12T14:48:11Z",
+      "side": 1,
+      "message": "I tried adding this in:\n\n  --- a/javatests/com/google/gerrit/acceptance/tests.bzl\n  +++ b/javatests/com/google/gerrit/acceptance/tests.bzl\n  @@ -4,7 +4,7 @@ def acceptance_tests(\n           group,\n           deps \u003d [],\n           labels \u003d [],\n  -         vm_args \u003d [\"-Xmx256m\"],\n  +        vm_args \u003d [\"-Xmx256m\", \"-Dfile.encoding\u003dUTF-8\", \"-Dsun.jnu.encoding\u003dUTF-8\"],\n           **kwargs):\n       junit_tests(\n           name \u003d group,\n\nbut it didn\u0027t help.",
+      "parentUuid": "4faeda2f_ec690a37",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
