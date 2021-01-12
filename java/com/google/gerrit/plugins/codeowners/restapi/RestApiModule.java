@@ -19,6 +19,8 @@ import static com.google.gerrit.server.change.RevisionResource.REVISION_KIND;
 import static com.google.gerrit.server.project.BranchResource.BRANCH_KIND;
 import static com.google.gerrit.server.project.ProjectResource.PROJECT_KIND;
 
+import com.google.gerrit.extensions.annotations.Exports;
+import com.google.gerrit.extensions.config.CapabilityDefinition;
 import com.google.gerrit.extensions.registration.DynamicMap;
 
 /** Guice module that binds the REST API for the code-owners plugin. */
@@ -32,6 +34,10 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
     get(BRANCH_KIND, "code_owners.config_files").to(GetCodeOwnerConfigFiles.class);
     get(BRANCH_KIND, "code_owners.branch_config").to(GetCodeOwnerBranchConfig.class);
     post(BRANCH_KIND, "code_owners.rename").to(RenameEmail.class);
+
+    bind(CapabilityDefinition.class)
+        .annotatedWith(Exports.named(CheckCodeOwnerCapability.ID))
+        .to(CheckCodeOwnerCapability.class);
     get(BRANCH_KIND, "code_owners.check").to(CheckCodeOwner.class);
 
     factory(CodeOwnerJson.Factory.class);
