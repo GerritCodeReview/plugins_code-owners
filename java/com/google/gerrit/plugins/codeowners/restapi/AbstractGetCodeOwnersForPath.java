@@ -370,13 +370,17 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     logger.atFine().log("filling up with random users");
     codeOwners.addAll(
         filterCodeOwners(
-            rsrc,
-            // ask for 2 times the number of users that we need so that we still have enough
-            // suggestions when some users are removed by the filterCodeOwners call or if the
-            // returned users were already present in codeOwners
-            getRandomVisibleUsers(2 * limit - codeOwners.size())
-                .map(CodeOwner::create)
-                .collect(toImmutableSet())));
+                rsrc,
+                // ask for 2 times the number of users that we need so that we still have enough
+                // suggestions when some users are removed by the filterCodeOwners call or if the
+                // returned users were already present in codeOwners
+                getRandomVisibleUsers(2 * limit - codeOwners.size())
+                    .map(CodeOwner::create)
+                    .collect(toImmutableSet()))
+            .stream()
+            .filter(codeOwner -> !codeOwners.contains(codeOwner))
+            .limit(limit - codeOwners.size())
+            .collect(toImmutableSet()));
   }
 
   /**

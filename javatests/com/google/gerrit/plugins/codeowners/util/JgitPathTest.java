@@ -19,12 +19,11 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.Test;
 
-/** Tests for {@link JgitPath}. */
+/** Tests for {@link com.google.gerrit.plugins.codeowners.util.JgitPath}. */
 public class JgitPathTest extends AbstractCodeOwnersTest {
   @Test
   public void getJgitPathOfStringPath() throws Exception {
@@ -56,5 +55,30 @@ public class JgitPathTest extends AbstractCodeOwnersTest {
   public void getPathAsAbsolutePath() throws Exception {
     assertThat(JgitPath.of("foo/bar/OWNERS").getAsAbsolutePath())
         .isEqualTo(Paths.get("/foo/bar/OWNERS"));
+  }
+
+  @Test
+  public void testToString() throws Exception {
+    String path = "foo/bar/baz.md";
+    assertThat(JgitPath.of(path).toString()).isEqualTo(path);
+    assertThat(JgitPath.of("/" + path).toString()).isEqualTo(path);
+  }
+
+  @Test
+  public void testEquals() throws Exception {
+    String path = "foo/bar/baz.md";
+    assertThat(JgitPath.of(path)).isEqualTo(JgitPath.of(path));
+    assertThat(JgitPath.of("/" + path)).isEqualTo(JgitPath.of(path));
+    assertThat(JgitPath.of("/" + path)).isNotEqualTo(JgitPath.of("foo/bar/baz.txt"));
+    assertThat(JgitPath.of("/" + path)).isNotEqualTo(new Object());
+  }
+
+  @Test
+  public void testHashCode() throws Exception {
+    String path = "foo/bar/baz.md";
+    assertThat(JgitPath.of(path).hashCode()).isEqualTo(JgitPath.of(path).hashCode());
+    assertThat(JgitPath.of("/" + path).hashCode()).isEqualTo(JgitPath.of(path).hashCode());
+    assertThat(JgitPath.of("/" + path).hashCode())
+        .isNotEqualTo(JgitPath.of("foo/bar/baz.txt").hashCode());
   }
 }
