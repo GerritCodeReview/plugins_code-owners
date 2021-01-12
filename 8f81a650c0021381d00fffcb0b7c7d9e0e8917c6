@@ -16,6 +16,23 @@
       "message": "David, maybe you have can idea how to do this?\n\nThe newly added test with the unicode filename succeeds when I run it in Eclipse, but it fails when I run it from command-line with Bazel.\n\nThe failure is caused by:\njava.nio.file.InvalidPathException: Malformed input or input contains unmappable characters: /unicode/äöü/🥤.txt\n\tat java.base/sun.nio.fs.UnixPath.encode(UnixPath.java:145)\n\tat java.base/sun.nio.fs.UnixPath.\u003cinit\u003e(UnixPath.java:69)\n\tat java.base/sun.nio.fs.UnixFileSystem.getPath(UnixFileSystem.java:279)\n\tat java.base/java.nio.file.Path.of(Path.java:147)\n\tat java.base/java.nio.file.Paths.get(Paths.java:69)\n\tat com.google.gerrit.plugins.codeowners.api.CodeOwners$QueryRequest.get(CodeOwners.java:69)\n        ...\n\nIf I understand [1,2] correctly, I need to set -Dfile.encoding\u003dUTF-8 and maybe also -Dsun.jnu.encoding\u003dUTF-8 to make this work. I tried doing this via:\n\nbazel test //plugins/code-owners/... --jvmopt\u003d\"-Dsun.jnu.encoding\u003dUTF-8\" --jvmopt\u003d\"-Dfile.encoding\u003dUTF-8\"\n\nbut it\u0027s still failing with the same exception.\n\nDo you have an idea about this?\n\n[1] https://stackoverflow.com/questions/39185613/java-nio-file-invalidpathexception-malformed-input-or-input-contains-unmappable\n[2] https://stackoverflow.com/questions/361975/setting-the-default-java-character-encoding\n",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9e8344ec_87f22be0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
+      },
+      "writtenOn": "2021-01-12T14:16:04Z",
+      "side": 1,
+      "message": "That sounds familiar, check these issues: [1], [2]. I also saw the similar failures in JGit.\nCan you run test in JGit repository with bazel?\n\n  $ bazel test //...\n\nI would suggest to extract reproducer and add your case to the existing bazel issue.\n\n[1] https://github.com/bazelbuild/bazel/issues/2705\n[2] https://github.com/bazelbuild/bazel/issues/2550\n",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
