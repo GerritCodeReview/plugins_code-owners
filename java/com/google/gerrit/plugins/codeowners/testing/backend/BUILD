@@ -15,6 +15,7 @@ java_library(
         "//lib:jgit-junit",
         "//lib/guice",
         "//lib/guice:guice-assistedinject",
-        "//plugins/code-owners:code-owners__plugin",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )

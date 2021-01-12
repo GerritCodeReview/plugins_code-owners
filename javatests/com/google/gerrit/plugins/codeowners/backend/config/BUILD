@@ -13,8 +13,9 @@ acceptance_tests(
     group = "config",
     deps = [
         ":testbases",
-        "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
 )
@@ -29,8 +30,8 @@ java_library(
         "//lib:guava",
         "//lib:jgit",
         "//lib/truth",
-        "//plugins/code-owners:code-owners__plugin",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
 )
