@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.common;
 /** Strategy that defines for merge commits which files require code owner approvals. */
 public enum MergeCommitStrategy {
   /**
-   * All files which differ between the merge commmit that is being reviewed and its first parent
+   * All files which differ between the merge commit that is being reviewed and its first parent
    * commit (which is the HEAD of the destination branch) require code owner approvals.
    *
    * <p>Using this strategy is the safest option, but requires code owners to also approve files
@@ -30,7 +30,7 @@ public enum MergeCommitStrategy {
   ALL_CHANGED_FILES,
 
   /**
-   * Only files which differ between the merge commmit that is being reviewed and the auto merge
+   * Only files which differ between the merge commit that is being reviewed and the auto merge
    * commit (the result of automatically merging the 2 parent commits, may contain Git conflict
    * markers) require code owner approvals.
    *
