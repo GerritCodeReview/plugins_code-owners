@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.common.Nullable;
-import com.google.gerrit.plugins.codeowners.config.InvalidPluginConfigurationException;
+import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook;
 import java.util.Optional;
 

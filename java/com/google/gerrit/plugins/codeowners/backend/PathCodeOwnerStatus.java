@@ -15,7 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import java.nio.file.Path;
 
 /** Code owner status for a particular path that has been modified in a change. */

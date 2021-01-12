@@ -29,8 +29,8 @@ import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject;
 import org.junit.Test;
 

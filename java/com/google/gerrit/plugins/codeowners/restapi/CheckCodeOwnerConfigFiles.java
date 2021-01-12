@@ -38,7 +38,7 @@ import com.google.gerrit.plugins.codeowners.api.CheckCodeOwnerConfigFilesInput;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
-import com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
