@@ -208,7 +208,7 @@ public class CodeOwnersPluginConfiguration {
   /**
    * Checks whether an implicit code owner approval from the last uploader is assumed.
    *
-   * @param project the project for it should be checked whether implict approvals are enabled
+   * @param project the project for it should be checked whether implicit approvals are enabled
    * @return whether an implicit code owner approval from the last uploader is assumed
    */
   public boolean areImplicitApprovalsEnabled(Project.NameKey project) {
