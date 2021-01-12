@@ -219,6 +219,66 @@ Non-parseable code owner config files are omitted from the response, unless the
   ]
 ```
 
+### <a id="check-code-owner">Check Code Owner
+_'GET /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.check/'_
+
+Checks the code ownership of a user for a path in a branch.
+
+The following request parameters can be specified:
+
+| Field Name  |           | Description |
+| ----------- | --------- | ----------- |
+| `email`     | mandatory | Email for which the code ownership should be checked.
+| `path`      | mandatory | Path for which the code ownership should be checked.
+| `user`      | optional  | User for which the code owner visibility should be checked. If not specified the code owner visibility is not checked. Can be used to investigate why a code owner is not shown/suggested to this user.
+
+Requires that the caller has the [Administrate
+Server](../../../Documentation/access-control.html#capability_administrateServer)
+global capability.
+
+This REST endpoint is intended to investigate code owner configurations that do
+not work as intended. The response contains debug logs that may point out issues
+with the code owner configuration. For example, with this REST endpoint it is
+possible to find out why a certain email that is listed as code owner in a code
+owner config file is ignored (e.g. because it is ambiguous or because it belongs
+to an inactive account).
+
+#### Request
+
+```
+  GET /projects/foo%2Fbar/branches/master/code_owners.check?email=xyz@example.com&path=/foo/bar/baz.md HTTP/1.0
+```
+
+#### Response
+
+As response a [CodeOwnerCheckInfo](#code-owner-check-info) entity is returned.
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "is_code_owner": "false",
+    "is_resolvable": "false",
+    "code_owner_config_file_paths": [
+      "/OWNERS",
+    ],
+    "is_default_code_owner": "false",
+    "is_global_code_owner": "false",
+    "debug_logs": [
+      "checking code owner config file foo/bar:master:/OWNERS",
+      "found email xyz@example.com as code owner in /OWNERS",
+      "trying to resolve email xyz@example.com",
+      "resolving code owner reference CodeOwnerReference{email=xyz@example.com}",
+      "all domains are allowed",
+      "cannot resolve code owner email xyz@example.com: email is ambiguous",
+      "email xyz@example.com is not a code owner of path '/foo/bar/baz.md'"
+    ]
+  }
+```
+
 ### <a id="rename-email-in-code-owner-config-files">Rename Email In Code Owner Config Files
 _'POST /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/branches/[\{branch-id\}](../../../Documentation/rest-api-projects.html#branch-id)/code_owners.rename/'_
 
@@ -617,10 +677,25 @@ The `CheckCodeOwnerConfigFilesInRevisionInput` allows to set options for the
 
 ---
 
+### <a id="code-owner-check-info"> CodeOwnerCheckInfo
+The `CodeOwnerCheckInfo` entity contains the result of checking the code
+ownership of a user for a path in a branch.
+
+| Field Name      | Description |
+| --------------- | ----------- |
+| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see field `code_owner_config_file_paths`) or the email is configured as default code owner (see field `is_default_code_owner` or the email is configured as global code owner (see field `is_global_code_owner`).
+| `is_resolvable` | Whether the given email is resolvable for the specified user or the calling user if no user was specified.
+| `code_owner_config_file_paths` | Paths of the code owner config files that assign code ownership to the specified email and path as a list. Note that if code ownership is assigned to the email via a code owner config files, but the email is not resolvable (see field `is_resolvable` field), the user is not a code owner.
+| `is_default_code_owner` | Whether the given email is configured as a default code owner in the code owner config file in `refs/meta/config`. Note that if the email is configured as default code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
+| `is_global_code_owner` | Whether the given email is configured as a global
+code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
+| `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner.
+
+---
+
 ### <a id="code-owner-config-info"> CodeOwnerConfigInfo
 The `CodeOwnerConfigInfo` entity contains information about a code owner config
 for a path.
-
 
 | Field Name  |          | Description |
 | ----------- | -------- | ----------- |

@@ -31,6 +31,7 @@ public interface BranchCodeOwners {
   /** Create a request to retrieve code owner config files from the branch. */
   CodeOwnerConfigFilesRequest codeOwnerConfigFiles() throws RestApiException;
 
+  /** Request to retrieve code owner config files from the branch. */
   abstract class CodeOwnerConfigFilesRequest {
     private boolean includeNonParsableFiles;
     private String email;
@@ -57,7 +58,7 @@ public interface BranchCodeOwners {
       return this;
     }
 
-    /** Returns the email that should appear in the returned code owner config files/ */
+    /** Returns the email that should appear in the returned code owner config files. */
     @Nullable
     public String getEmail() {
       return email;
@@ -74,19 +75,82 @@ public interface BranchCodeOwners {
       return this;
     }
 
-    /** Returns the path glob that should be matched by the returned code owner config files/ */
+    /** Returns the path glob that should be matched by the returned code owner config files. */
     @Nullable
     public String getPath() {
       return path;
     }
 
-    /** Executes the request and retrieves the paths of the requested code owner config file */
+    /** Executes the request and retrieves the paths of the requested code owner config file. */
     public abstract List<String> paths() throws RestApiException;
   }
 
   /** Renames an email in the code owner config files of the branch. */
   RenameEmailResultInfo renameEmailInCodeOwnerConfigFiles(RenameEmailInput input)
       throws RestApiException;
+
+  /** Checks the code ownership of a user for a path in a branch. */
+  CodeOwnerCheckRequest checkCodeOwner() throws RestApiException;
+
+  /** Request for checking the code ownership of a user for a path in a branch. */
+  abstract class CodeOwnerCheckRequest {
+    private String email;
+    private String path;
+    private String user;
+
+    /**
+     * Sets the email for which the code ownership should be checked.
+     *
+     * @param email the email for which the code ownership should be checked
+     */
+    public CodeOwnerCheckRequest email(String email) {
+      this.email = email;
+      return this;
+    }
+
+    /** Returns the email for which the code ownership should be checked. */
+    @Nullable
+    public String getEmail() {
+      return email;
+    }
+
+    /**
+     * Sets the path for which the code ownership should be checked.
+     *
+     * @param path the path for which the code ownership should be checked
+     */
+    public CodeOwnerCheckRequest path(String path) {
+      this.path = path;
+      return this;
+    }
+
+    /** Returns the path for which the code ownership should be checked. */
+    @Nullable
+    public String getPath() {
+      return path;
+    }
+
+    /**
+     * Sets the user for which the code owner visibility should be checked.
+     *
+     * <p>If not specified the code owner visibility is not checked.
+     *
+     * @param user the user for which the code owner visibility should be checked
+     */
+    public CodeOwnerCheckRequest user(@Nullable String user) {
+      this.user = user;
+      return this;
+    }
+
+    /** Returns the user for which the code owner visibility should be checked. */
+    @Nullable
+    public String getUser() {
+      return user;
+    }
+
+    /** Executes the request and retrieves the result. */
+    public abstract CodeOwnerCheckInfo check() throws RestApiException;
+  }
 
   /**
    * A default implementation which allows source compatibility when adding new methods to the
@@ -106,6 +170,11 @@ public interface BranchCodeOwners {
     @Override
     public RenameEmailResultInfo renameEmailInCodeOwnerConfigFiles(RenameEmailInput input)
         throws RestApiException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public CodeOwnerCheckRequest checkCodeOwner() throws RestApiException {
       throw new NotImplementedException();
     }
   }
