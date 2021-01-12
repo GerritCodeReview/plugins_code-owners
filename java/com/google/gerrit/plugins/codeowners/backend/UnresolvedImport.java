@@ -51,7 +51,7 @@ public abstract class UnresolvedImport {
   }
 
   @Override
-  public String toString() {
+  public final String toString() {
     return MoreObjects.toStringHelper(this)
         .add("keyOfImportingCodeOwnerConfig", keyOfImportingCodeOwnerConfig())
         .add("keyOfImportedCodeOwnerConfig", keyOfImportedCodeOwnerConfig())
