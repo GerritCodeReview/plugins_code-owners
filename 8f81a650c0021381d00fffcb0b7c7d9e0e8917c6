@@ -177,6 +177,24 @@
       "parentUuid": "4588ce78_e812f7e0",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "380a52de_6cd8ffea",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
+      },
+      "writtenOn": "2021-01-13T09:31:26Z",
+      "side": 1,
+      "message": "Thanks for update, Edwin. Still, it would be interesting to try to understand, why the test is passing in Eclipse. Can it be, that some other properties are set in Eclipse? May be just dump them all and compare with the ones from Bazel environment?",
+      "parentUuid": "8a14360a_3fb210af",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
