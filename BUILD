@@ -20,6 +20,7 @@ gerrit_plugin(
         "Gerrit-PluginName: code-owners",
         "Gerrit-Module: com.google.gerrit.plugins.codeowners.module.Module",
         "Gerrit-HttpModule: com.google.gerrit.plugins.codeowners.module.HttpModule",
+        "Gerrit-BatchModule: com.google.gerrit.plugins.codeowners.module.BatchModule",
     ],
     resource_jars = [":code-owners-fe-static"],
     resource_strip_prefix = "plugins/code-owners/resources",
