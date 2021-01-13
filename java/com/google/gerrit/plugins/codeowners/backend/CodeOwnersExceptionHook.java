@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook;
+import java.nio.file.InvalidPathException;
 import java.util.Optional;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 
@@ -39,7 +40,8 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
   @Override
   public boolean skipRetryWithTrace(String actionType, String actionName, Throwable throwable) {
     return isInvalidPluginConfigurationException(throwable)
-        || isInvalidCodeOwnerConfigException(throwable);
+        || isInvalidCodeOwnerConfigException(throwable)
+        || isInvalidPathException(throwable);
   }
 
   @Override
@@ -56,13 +58,19 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
       return ImmutableList.of(configInvalidException.get().getMessage());
     }
 
+    Optional<InvalidPathException> invalidPathException = getInvalidPathException(throwable);
+    if (invalidPathException.isPresent()) {
+      return ImmutableList.of(invalidPathException.get().getMessage());
+    }
+
     return ImmutableList.of();
   }
 
   @Override
   public Optional<Status> getStatus(Throwable throwable) {
     if (isInvalidPluginConfigurationException(throwable)
-        || isInvalidCodeOwnerConfigException(throwable)) {
+        || isInvalidCodeOwnerConfigException(throwable)
+        || isInvalidPathException(throwable)) {
       return Optional.of(Status.create(409, "Conflict"));
     }
     return Optional.empty();
@@ -74,9 +82,22 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
 
   private static Optional<InvalidPluginConfigurationException> getInvalidPluginConfigurationCause(
       Throwable throwable) {
+    return getInvalidPluginConfigurationCause(InvalidPluginConfigurationException.class, throwable);
+  }
+
+  private static boolean isInvalidPathException(Throwable throwable) {
+    return getInvalidPathException(throwable).isPresent();
+  }
+
+  private static Optional<InvalidPathException> getInvalidPathException(Throwable throwable) {
+    return getInvalidPluginConfigurationCause(InvalidPathException.class, throwable);
+  }
+
+  private static <T extends Throwable> Optional<T> getInvalidPluginConfigurationCause(
+      Class<T> exceptionClass, Throwable throwable) {
     return Throwables.getCausalChain(throwable).stream()
-        .filter(t -> t instanceof InvalidPluginConfigurationException)
-        .map(t -> (InvalidPluginConfigurationException) t)
+        .filter(exceptionClass::isInstance)
+        .map(exceptionClass::cast)
         .findFirst();
   }
 
