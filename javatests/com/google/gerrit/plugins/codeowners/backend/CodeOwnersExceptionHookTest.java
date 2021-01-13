@@ -21,6 +21,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook.Status;
+import java.nio.file.InvalidPathException;
 import java.util.Optional;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.junit.Before;
@@ -44,6 +45,9 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
     assertThat(skipRetryWithTrace(newConfigInvalidException())).isTrue();
     assertThat(skipRetryWithTrace(newExceptionWithCause(newConfigInvalidException()))).isTrue();
 
+    assertThat(skipRetryWithTrace(newInvalidPathException())).isTrue();
+    assertThat(skipRetryWithTrace(newExceptionWithCause(newInvalidPathException()))).isTrue();
+
     assertThat(skipRetryWithTrace(new Exception())).isFalse();
     assertThat(skipRetryWithTrace(newExceptionWithCause(new Exception()))).isFalse();
   }
@@ -63,6 +67,12 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
     assertThat(getUserMessages(newExceptionWithCause(configInvalidException)))
         .containsExactly(configInvalidException.getMessage());
 
+    InvalidPathException invalidPathException = newInvalidPathException();
+    assertThat(getUserMessages(invalidPathException))
+        .containsExactly(invalidPathException.getMessage());
+    assertThat(getUserMessages(newExceptionWithCause(invalidPathException)))
+        .containsExactly(invalidPathException.getMessage());
+
     assertThat(getUserMessages(new Exception())).isEmpty();
     assertThat(getUserMessages(newExceptionWithCause(new Exception()))).isEmpty();
   }
@@ -79,6 +89,11 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
 
     assertThat(getStatus(newConfigInvalidException())).value().isEqualTo(conflictStatus);
     assertThat(getStatus(newExceptionWithCause(newConfigInvalidException())))
+        .value()
+        .isEqualTo(conflictStatus);
+
+    assertThat(getStatus(newInvalidPathException())).value().isEqualTo(conflictStatus);
+    assertThat(getStatus(newExceptionWithCause(newInvalidPathException())))
         .value()
         .isEqualTo(conflictStatus);
 
@@ -108,5 +123,9 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
 
   private ConfigInvalidException newConfigInvalidException() {
     return new ConfigInvalidException("message");
+  }
+
+  private InvalidPathException newInvalidPathException() {
+    return new InvalidPathException("input", "reason");
   }
 }
