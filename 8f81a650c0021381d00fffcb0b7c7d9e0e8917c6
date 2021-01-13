@@ -159,6 +159,24 @@
       "parentUuid": "6ab98852_42836852",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a14360a_3fb210af",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-13T08:46:36Z",
+      "side": 1,
+      "message": "David, thanks a lot for this discussion. This was very helpful!\n\nFrom [1] (section \"What about file.encoding?\") I understand that the file.encoding system property doesn\u0027t have any effect on the encoding of file names. [1] says that this is rather controlled via the LANG and LC_CTYPE environment variables. So I\u0027ve tried this:\n\n  $ bazel test //plugins/code-owners/... --test_env\u003dLANG\u003den_US.iso88591 --test_env\u003dLC_CTYPE\u003dUTF-8\n\nbut still no success. At this point I\u0027m punting on this, as supporting unicode characters in file names is not of high prio for us.\n\nAs a mitigation I\u0027ve implemented [2] for now.\n\n[1] https://jonisalonen.com/2012/java-and-file-names-with-invalid-characters/ \n[2] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/293625",
+      "parentUuid": "4588ce78_e812f7e0",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
