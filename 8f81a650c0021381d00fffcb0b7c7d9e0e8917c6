@@ -249,6 +249,24 @@
       "parentUuid": "adf48055_cc3946b6",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e79367ec_42bbe2c2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-14T13:13:01Z",
+      "side": 1,
+      "message": "Yes, adding \"test --test_env\u003dLANG\u003den_US.UTF-8\" in .bazelrc works.\nHowever if possible, I would prefer to set this only for this one test that needs it.",
+      "parentUuid": "8a8379b2_9dab5eaa",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
