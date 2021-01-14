@@ -15,13 +15,17 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.assertThatList;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static java.util.stream.Collectors.toList;
+import static org.junit.Assert.fail;
 
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
@@ -51,6 +55,63 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
   @Override
   protected CodeOwners getCodeOwnersApi() throws RestApiException {
     return codeOwnersApiFactory.branch(project, "master");
+  }
+
+  @Test
+  public void getCodeOwnersOrderNotDefinedIfCodeOwnersHaveTheSameScoring() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+    TestAccount user3 = accountCreator.create("user3", "user3@example.com", "User3", null);
+    TestAccount user4 = accountCreator.create("user4", "user4@example.com", "User4", null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user2.email())
+        .addCodeOwnerEmail(user3.email())
+        .addCodeOwnerEmail(user4.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    List<CodeOwnerInfo> codeOwnerInfos = queryCodeOwners("/foo/bar.md");
+    assertThat(codeOwnerInfos)
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id(), user3.id(), user4.id());
+
+    // The first code owner in the result should be user as user has the best distance score.
+    assertThatList(codeOwnerInfos).element(0).hasAccountIdThat().isEqualTo(user.id());
+
+    // The order of the other code owners is random since they have the same score.
+    // Check that the order of the code owners with the same score is different for further requests
+    // at least once.
+    List<Account.Id> accountIdsInRetrievedOrder1 =
+        codeOwnerInfos.stream().map(info -> Account.id(info.account._accountId)).collect(toList());
+    boolean foundOtherOrder = false;
+    for (int i = 0; i < 10; i++) {
+      codeOwnerInfos = queryCodeOwners("/foo/bar.md");
+      List<Account.Id> accountIdsInRetrievedOrder2 =
+          codeOwnerInfos.stream()
+              .map(info -> Account.id(info.account._accountId))
+              .collect(toList());
+      if (!accountIdsInRetrievedOrder1.equals(accountIdsInRetrievedOrder2)) {
+        foundOtherOrder = true;
+        break;
+      }
+    }
+    if (!foundOtherOrder) {
+      fail(
+          String.format(
+              "expected different order, but order was always %s", accountIdsInRetrievedOrder1));
+    }
   }
 
   @Test

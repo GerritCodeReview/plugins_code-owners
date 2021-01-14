@@ -142,6 +142,10 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     parseHexOptions();
     validateLimit();
 
+    if (!seed.isPresent()) {
+      seed = getDefaultSeed(rsrc);
+    }
+
     // The distance that applies to code owners that are defined in the root code owner
     // configuration.
     int rootDistance = rsrc.getPath().getNameCount();
@@ -248,6 +252,18 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    */
   protected Stream<CodeOwner> filterCodeOwners(R rsrc, Stream<CodeOwner> codeOwners) {
     return codeOwners;
+  }
+
+  /**
+   * Returns the seed that should by default be used for sorting, if none was specified on the
+   * request.
+   *
+   * <p>If {@link Optional#empty()} is returned, a random seed will be used.
+   *
+   * @param rsrc resource on which the request is being performed
+   */
+  protected Optional<Long> getDefaultSeed(R rsrc) {
+    return Optional.empty();
   }
 
   private Stream<CodeOwner> getVisibleCodeOwners(R rsrc, ImmutableSet<CodeOwner> allCodeOwners) {

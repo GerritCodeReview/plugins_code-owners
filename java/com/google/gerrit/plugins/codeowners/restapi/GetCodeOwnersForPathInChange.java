@@ -31,6 +31,7 @@ import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -75,6 +76,12 @@ public class GetCodeOwnersForPathInChange
   public Response<List<CodeOwnerInfo>> apply(CodeOwnersInChangeCollection.PathResource rsrc)
       throws RestApiException, PermissionBackendException {
     return super.applyImpl(rsrc);
+  }
+
+  @Override
+  protected Optional<Long> getDefaultSeed(CodeOwnersInChangeCollection.PathResource rsrc) {
+    // use the change number as seed so that the sort order for a change is always stable
+    return Optional.of(Long.valueOf(rsrc.getRevisionResource().getChange().getId().get()));
   }
 
   @Override

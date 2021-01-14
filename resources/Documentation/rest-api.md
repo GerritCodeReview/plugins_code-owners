@@ -568,6 +568,10 @@ The following code owners are filtered out additionally:
 * service users (members of the `Service Users` group)
 * the change owner (since the change owner cannot be added as reviewer)
 
+In addition, by default the change number is used as seed if none was specified.
+This way the sort order on a change is always the same for files that have the
+exact same code owners (requires that the limit is the same on all requests).
+
 ### <a id="check-code-owner-config-files-in-revision">Check Code Owner Config Files In Revision
 _'POST /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners.check_config'_
 
