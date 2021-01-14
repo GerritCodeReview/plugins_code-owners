@@ -213,6 +213,24 @@
       "parentUuid": "380a52de_6cd8ffea",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "adf48055_cc3946b6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-14T12:25:15Z",
+      "side": 1,
+      "message": "This helped!\n\nRunning the tests with\n\n  $ bazel test //plugins/code-owners/... --test_env\u003dLANG\u003den_US.UTF-8\n\nmakes them succeed.\n\nIs there a way to set this test_env within a BUILD file?",
+      "parentUuid": "8198f6a2_66c75fea",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
