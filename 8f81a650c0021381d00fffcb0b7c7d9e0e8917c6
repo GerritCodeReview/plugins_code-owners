@@ -231,6 +231,24 @@
       "parentUuid": "8198f6a2_66c75fea",
       "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8a8379b2_9dab5eaa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
+      },
+      "writtenOn": "2021-01-14T12:41:08Z",
+      "side": 1,
+      "message": "See: [1]. We do have already:\n\n  build --action_env\u003dPATH\n\nYou could add to gerrit-owkrspace/.bazelrc something like:\n\n  --test_env\u003dLANG\n\nWould this help?\n\n[1] https://bazel.build/designs/2016/06/21/environment.html",
+      "parentUuid": "adf48055_cc3946b6",
+      "revId": "8f81a650c0021381d00fffcb0b7c7d9e0e8917c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
