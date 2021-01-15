@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerCheckInfoSubject.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
@@ -612,8 +611,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
 
   @Test
   public void debugLogsContainUnresolvedImports() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReference =
         CodeOwnerConfigReference.create(
