@@ -59,7 +59,7 @@ public class CodeOwnerInfoSubject extends Subject {
     return ListSubject.assertThat(codeOwnerInfos, codeOwnerInfos());
   }
 
-  private static Factory<CodeOwnerInfoSubject, CodeOwnerInfo> codeOwnerInfos() {
+  public static Factory<CodeOwnerInfoSubject, CodeOwnerInfo> codeOwnerInfos() {
     return CodeOwnerInfoSubject::new;
   }
 
