@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance;
 
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.truth.TruthJUnit.assume;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
@@ -24,6 +25,7 @@ import com.google.gerrit.plugins.codeowners.api.impl.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.api.impl.ProjectCodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
 import org.eclipse.jgit.lib.Config;
@@ -76,6 +78,8 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
   protected ChangeCodeOwnersFactory changeCodeOwnersApiFactory;
   protected ProjectCodeOwnersFactory projectCodeOwnersApiFactory;
 
+  private BackendConfig backendConfig;
+
   @Before
   public void baseSetup() throws Exception {
     codeOwnerConfigOperations =
@@ -85,5 +89,15 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
     changeCodeOwnersApiFactory = plugin.getSysInjector().getInstance(ChangeCodeOwnersFactory.class);
     projectCodeOwnersApiFactory =
         plugin.getSysInjector().getInstance(ProjectCodeOwnersFactory.class);
+    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
+  }
+
+  protected void skipTestIfImportsNotSupportedByCodeOwnersBackend() {
+    // the proto backend doesn't support imports
+    assumeThatCodeOwnersBackendIsNotProtoBackend();
+  }
+
+  protected void assumeThatCodeOwnersBackendIsNotProtoBackend() {
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
   }
 }
