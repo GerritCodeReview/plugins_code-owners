@@ -49,6 +49,13 @@ public class RestApiModule extends com.google.gerrit.extensions.restapi.RestApiM
     child(REVISION_KIND, "code_owners").to(CodeOwnersInChangeCollection.class);
     get(CodeOwnersInChangeCollection.PathResource.PATH_KIND).to(GetCodeOwnersForPathInChange.class);
 
+    // TODO(ekempin): Remove this once all callers were adapted to the new response format of
+    // GetCodeOwnersForPathInChange.
+    DynamicMap.mapOf(binder(), CodeOwnersInChangeCollectionLegacy.PathResource.PATH_KIND);
+    child(REVISION_KIND, "code_owners.legacy").to(CodeOwnersInChangeCollectionLegacy.class);
+    get(CodeOwnersInChangeCollectionLegacy.PathResource.PATH_KIND)
+        .to(GetCodeOwnersForPathInChangeLegacy.class);
+
     get(CHANGE_KIND, "code_owners.status").to(GetCodeOwnerStatus.class);
 
     post(REVISION_KIND, "code_owners.check_config").to(CheckCodeOwnerConfigFilesInRevision.class);
