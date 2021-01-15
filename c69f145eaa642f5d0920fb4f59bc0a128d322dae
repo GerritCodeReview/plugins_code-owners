@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7483f1c_3bb68f57",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-15T14:03:47Z",
+      "side": 1,
+      "message": "Good point. Done.",
+      "parentUuid": "5b961682_59198a39",
+      "range": {
+        "startLine": 185,
+        "startChar": 16,
+        "endLine": 185,
+        "endChar": 37
+      },
+      "revId": "c69f145eaa642f5d0920fb4f59bc0a128d322dae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ad4a72ed_c8d84ed7",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-01-15T13:51:42Z",
       "side": 1,
       "message": "neither newly applied, removed, upgraded nor downgraded (I think that\u0027s the correct grammar).",
+      "range": {
+        "startLine": 187,
+        "startChar": 39,
+        "endLine": 187,
+        "endChar": 94
+      },
+      "revId": "c69f145eaa642f5d0920fb4f59bc0a128d322dae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "be56d1cf_4d2d55a6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-15T14:03:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ad4a72ed_c8d84ed7",
       "range": {
         "startLine": 187,
         "startChar": 39,
