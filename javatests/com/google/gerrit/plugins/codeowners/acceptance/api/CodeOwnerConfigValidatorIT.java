@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
@@ -152,8 +151,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void canUploadConfigWithoutIssues_withImport() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
@@ -198,8 +196,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void canUploadConfigWithoutIssues_withImportFromOtherProject() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
@@ -243,8 +240,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void canUploadConfigWithoutIssues_withImportFromOtherProjectAndBranch() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
@@ -292,8 +288,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   public void
       canUploadConfigWithImportOfConfigThatIsAddedInSameCommit_importModeGlobalCodeOwnersOnly()
           throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig = createCodeOwnerConfigKey("/foo/");
@@ -332,8 +327,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   public void canUploadConfigWithImportOfConfigThatIsAddedInSameCommit_importModeAll()
       throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig = createCodeOwnerConfigKey("/foo/");
@@ -1040,8 +1034,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportFromNonExistingProject(
       CodeOwnerConfigImportType importType) throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // create a code owner config that imports a code owner config from a non-existing project
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
@@ -1087,8 +1080,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportFromNonVisibleProject(CodeOwnerConfigImportType importType)
       throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // create a non-visible project with a code owner config file that we try to import
     Project.NameKey nonVisibleProject =
@@ -1150,8 +1142,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportFromHiddenProject(CodeOwnerConfigImportType importType)
       throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // create a hidden project with a code owner config file
     Project.NameKey hiddenProject =
@@ -1210,8 +1201,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportFromNonExistingBranch(CodeOwnerConfigImportType importType)
       throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // create a code owner config that imports a code owner config from a non-existing branch
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
@@ -1258,8 +1248,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportFromNonVisibleBranch(CodeOwnerConfigImportType importType)
       throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
 
@@ -1323,8 +1312,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportOfNonCodeOwnerConfigFile(
       CodeOwnerConfigImportType importType) throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // create a code owner config that imports a non code owner config file
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
@@ -1368,8 +1356,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportOfNonExistingCodeOwnerConfig(
       CodeOwnerConfigImportType importType) throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // create a code owner config that imports a non-existing code owner config
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
@@ -1421,8 +1408,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private void testUploadConfigWithImportOfNonParseableCodeOwnerConfig(
       CodeOwnerConfigImportType importType) throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
         CodeOwnerConfig.Key.create(project, "master", "/foo/");
@@ -1629,8 +1615,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
   public void canUploadAndSubmitConfigWithUnresolvableImports() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
 
@@ -1685,8 +1670,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
   @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
   public void rejectConfigOptionsAreIgnoredIfValidationIsDisabled() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
 
