@@ -23,7 +23,6 @@ import com.google.gerrit.plugins.codeowners.api.BranchCodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CheckCodeOwnerConfigFilesInput;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.ProjectCodeOwners;
-import com.google.gerrit.plugins.codeowners.api.ProjectCodeOwners.CheckCodeOwnerConfigFilesRequest;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFiles;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerProjectConfig;
 import com.google.gerrit.server.project.BranchResource;
