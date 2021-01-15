@@ -16,6 +16,24 @@
       "message": "I\u0027m assuming Marian is ok with this behaviour",
       "revId": "97f68227fbb40e28d7063da48eaa9a8b616e065e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "550b6ef2_02d6fbda",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-15T13:45:52Z",
+      "side": 1,
+      "message": "Yes, how it\u0027s now it should be better for him too.",
+      "parentUuid": "37fb6c58_8a5d5d2b",
+      "revId": "97f68227fbb40e28d7063da48eaa9a8b616e065e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
