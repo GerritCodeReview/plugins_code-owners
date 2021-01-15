@@ -22,7 +22,7 @@ import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -35,7 +35,6 @@ import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.io.IOException;
-import java.util.List;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.InvalidObjectIdException;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -93,7 +92,7 @@ public class GetCodeOwnersForPathInBranch
   }
 
   @Override
-  public Response<List<CodeOwnerInfo>> apply(CodeOwnersInBranchCollection.PathResource rsrc)
+  public Response<CodeOwnersInfo> apply(CodeOwnersInBranchCollection.PathResource rsrc)
       throws RestApiException, PermissionBackendException, IOException {
     if (revision != null) {
       validateRevision(rsrc.getBranch(), revision);

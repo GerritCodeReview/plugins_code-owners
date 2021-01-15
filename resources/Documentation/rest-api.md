@@ -421,7 +421,8 @@ The following request parameters can be specified:
 | `seed`       | optional | Seed, as a long value, that should be used to shuffle code owners that have the same score. Can be used to make the sort order stable across several requests, e.g. to get the same set of random code owners for different file paths that have the same code owners. Important: the sort order is only stable if the requests use the same seed **and** the same limit. In addition, the sort order is not guaranteed to be stable if new accounts are created in between the requests, or if the account visibility is changed.
 | `revision`   | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners from this branch, but imports from other branches or repositories as well as default and global code owners from `refs/meta/config` are still read from the current revisions. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
 
-As a response a list of [CodeOwnerInfo](#code-owner-info) entities is returned.
+As a response a [CodeOwnersInfo](#code-owners-info) entity is returned that
+contains a list of code owners as [CodeOwnerInfo](#code-owner-info) entities.
 The returned code owners are sorted by an internal score that expresses how good
 the code owners are considered as reviewers/approvers for the path. Code owners
 with higher scores are returned first. If code owners have the same score the
@@ -429,6 +430,7 @@ order is random. If the path is owned by all users (e.g. the code ownership is
 assigned to '*') a random set of (visible) users is returned, as many as are
 needed to fill up the requested limit.
 
+#### <a id="scores">
 The following factors are taken into account for computing the scores of the
 listed code owners:
 
@@ -453,18 +455,20 @@ considered.
   Content-Type: application/json; charset=UTF-8
 
   )]}'
-  [
-    {
-      "account": {
-        "_account_id": 1000096
-      }
-    },
-    {
-      "account": {
-        "_account_id": 1001439
+  {
+    "code_owners": [
+      {
+        "account": {
+          "_account_id": 1000096
+        }
       },
-    }
-  ]
+      {
+        "account": {
+          "_account_id": 1001439
+        },
+      }
+    ]
+  }
 ```
 
 #### <a id="batch-list-code-owners"> Batch Request
@@ -780,6 +784,14 @@ functionality is disabled for a project or for any branch.
 | ---------- | ------- | ----------- |
 | `disabled` | optional | Whether the code owners functionality is disabled for the project. If `true` the code owners API is disabled and submitting changes doesn't require code owner approvals. Not set if `false`.
 | `disabled_branches` | optional | Branches for which the code owners functionality is disabled. Configurations for non-existing and non-visible branches are omitted. Not set if the `disabled` field is `true` or if no branch specific status configuration is returned.
+
+### <a id="code-owners-info"> CodeOwnersInfo
+The `CodeOwnersInfo` entity contains information about a list of code owners.
+
+| Field Name    | Description |
+| ------------- | ----------- |
+| `code_owners` | List of code owners as [CodeOwnerInfo](#code-owner-info)
+entities. The code owners are sorted by [score](#scores).
 
 ### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
 The `FileCodeOwnerStatusInfo` entity describes the code owner statuses for a
