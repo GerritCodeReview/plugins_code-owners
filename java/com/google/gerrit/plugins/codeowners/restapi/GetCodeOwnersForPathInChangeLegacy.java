@@ -102,10 +102,14 @@ public class GetCodeOwnersForPathInChangeLegacy
     seed.ifPresent(getCodeOwnersForPathInChange::setSeed);
     options.forEach(getCodeOwnersForPathInChange::addOption);
     hexOptions.forEach(getCodeOwnersForPathInChange::setOptionFlagsHex);
-    return getCodeOwnersForPathInChange.apply(
-        CodeOwnersInChangeCollection.PathResource.parse(
-            resource.getRevisionResource(),
-            resource.getRevision(),
-            IdString.fromDecoded(resource.getPath().toString())));
+    return Response.ok(
+        getCodeOwnersForPathInChange
+            .apply(
+                CodeOwnersInChangeCollection.PathResource.parse(
+                    resource.getRevisionResource(),
+                    resource.getRevision(),
+                    IdString.fromDecoded(resource.getPath().toString())))
+            .value()
+            .codeOwners);
   }
 }

@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -56,7 +55,7 @@ public interface CodeOwners {
      *     exist
      * @return the code owners for the given path
      */
-    public abstract List<CodeOwnerInfo> get(Path path) throws RestApiException;
+    public abstract CodeOwnersInfo get(Path path) throws RestApiException;
 
     /**
      * Lists the code owners for the given path.
@@ -65,7 +64,7 @@ public interface CodeOwners {
      *     exist
      * @return the code owners for the given path
      */
-    public List<CodeOwnerInfo> get(String path) throws RestApiException {
+    public CodeOwnersInfo get(String path) throws RestApiException {
       return get(Paths.get(path));
     }
 
