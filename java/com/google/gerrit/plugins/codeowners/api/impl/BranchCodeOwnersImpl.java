@@ -18,8 +18,6 @@ import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.BranchCodeOwners;
-import com.google.gerrit.plugins.codeowners.api.BranchCodeOwners.CodeOwnerCheckRequest;
-import com.google.gerrit.plugins.codeowners.api.BranchCodeOwners.CodeOwnerConfigFilesRequest;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerBranchConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
 import com.google.gerrit.plugins.codeowners.api.RenameEmailInput;
