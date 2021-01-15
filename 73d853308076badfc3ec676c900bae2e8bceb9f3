@@ -46,6 +46,30 @@
       },
       "revId": "73d853308076badfc3ec676c900bae2e8bceb9f3",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c292a0a0_12b1b5da",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 748,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-15T14:13:18Z",
+      "side": 1,
+      "message": "Also added this as comment, so that the test is easier to understand.",
+      "parentUuid": "422b0fac_dcb81f55",
+      "range": {
+        "startLine": 748,
+        "startChar": 11,
+        "endLine": 748,
+        "endChar": 17
+      },
+      "revId": "73d853308076badfc3ec676c900bae2e8bceb9f3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
