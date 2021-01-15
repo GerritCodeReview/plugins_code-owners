@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -196,8 +195,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   private void testIssuesInCodeOwnerConfigFile(ConsistencyProblemInfo.Status expectedStatus)
       throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // Create some code owner config files with issues.
     CodeOwnerConfig.Key keyOfInvalidConfig1 =
@@ -393,8 +391,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void validateExactFile() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // Create some code owner config files with issues.
     CodeOwnerConfig.Key keyOfInvalidConfig1 =
@@ -466,8 +463,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
 
   @Test
   public void validateFilesMatchingGlob() throws Exception {
-    // imports are not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     // Create some code owner config files with issues.
     codeOwnerConfigOperations
