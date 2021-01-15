@@ -18,9 +18,8 @@ import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 
 import com.google.gerrit.extensions.restapi.IdString;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
-import com.google.gerrit.plugins.codeowners.api.CodeOwners.QueryRequest;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.restapi.CodeOwnersInBranchCollection;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.gerrit.server.project.BranchResource;
@@ -28,7 +27,6 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import java.nio.file.Path;
-import java.util.List;
 
 /** Implementation of the {@link CodeOwners} API for a branch. */
 public class CodeOwnersInBranchImpl implements CodeOwners {
@@ -54,7 +52,7 @@ public class CodeOwnersInBranchImpl implements CodeOwners {
   public QueryRequest query() {
     return new QueryRequest() {
       @Override
-      public List<CodeOwnerInfo> get(Path path) throws RestApiException {
+      public CodeOwnersInfo get(Path path) throws RestApiException {
         try {
           GetCodeOwnersForPathInBranch getCodeOwners = getCodeOwnersProvider.get();
           getOptions().forEach(getCodeOwners::addOption);

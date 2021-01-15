@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.restapi;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.collect.ImmutableSet;
@@ -27,11 +28,10 @@ import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Inject;
 import java.util.Arrays;
-import java.util.List;
 import org.junit.Test;
 
 /**
@@ -93,13 +93,17 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
                 "o=" + ListAccountsOption.DETAILS.name(),
                 "o=" + ListAccountsOption.ALL_EMAILS.name()));
     r.assertOK();
-    List<CodeOwnerInfo> codeOwnerInfos =
-        newGson().fromJson(r.getReader(), new TypeToken<List<CodeOwnerInfo>>() {}.getType());
-    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
-    assertThat(codeOwnerInfos)
+    CodeOwnersInfo codeOwnersInfo =
+        newGson().fromJson(r.getReader(), new TypeToken<CodeOwnersInfo>() {}.getType());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountName())
         .containsExactly(admin.fullName());
-    assertThat(Iterables.getOnlyElement(codeOwnerInfos).account.secondaryEmails)
+    assertThat(Iterables.getOnlyElement(codeOwnersInfo.codeOwners).account.secondaryEmails)
         .containsExactly(secondaryEmail);
   }
 
@@ -127,13 +131,17 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
                         ImmutableSet.of(
                             ListAccountsOption.DETAILS, ListAccountsOption.ALL_EMAILS))));
     r.assertOK();
-    List<CodeOwnerInfo> codeOwnerInfos =
-        newGson().fromJson(r.getReader(), new TypeToken<List<CodeOwnerInfo>>() {}.getType());
-    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
-    assertThat(codeOwnerInfos)
+    CodeOwnersInfo codeOwnersInfo =
+        newGson().fromJson(r.getReader(), new TypeToken<CodeOwnersInfo>() {}.getType());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountName())
         .containsExactly(admin.fullName());
-    assertThat(Iterables.getOnlyElement(codeOwnerInfos).account.secondaryEmails)
+    assertThat(Iterables.getOnlyElement(codeOwnersInfo.codeOwners).account.secondaryEmails)
         .containsExactly(secondaryEmail);
   }
 
