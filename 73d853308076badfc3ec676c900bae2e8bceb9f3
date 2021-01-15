@@ -22,6 +22,30 @@
       },
       "revId": "73d853308076badfc3ec676c900bae2e8bceb9f3",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "422b0fac_dcb81f55",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchyTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 748,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-15T13:37:12Z",
+      "side": 1,
+      "message": "No. Visiting \u0027/foo/bar/baz.md\u0027 in master will callback for these OWNERS files (if they exist):\n\n1. \u0027/foo/bar/OWNERS\u0027 in master\n2. \u0027/foo/OWNERS\u0027 in master\n3. \u0027/OWNERS\u0027 in master\n4. \u0027/OWNERS\u0027 in refs/meta/config (this is where the default code owners are loaded from)\n\nThis test is making sure that trying to load 4. doesn\u0027t fail if refs/meta/config doesn\u0027t exist.",
+      "parentUuid": "ff93ed7d_04601a5b",
+      "range": {
+        "startLine": 748,
+        "startChar": 11,
+        "endLine": 748,
+        "endChar": 17
+      },
+      "revId": "73d853308076badfc3ec676c900bae2e8bceb9f3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
