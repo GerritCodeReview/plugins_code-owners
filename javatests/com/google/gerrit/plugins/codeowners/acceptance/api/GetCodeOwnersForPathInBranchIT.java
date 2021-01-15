@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.TestAccount;
@@ -26,12 +27,11 @@ import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.inject.Inject;
-import java.util.List;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Test;
 
@@ -76,16 +76,20 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
     assertThat(revision1).isNotEqualTo(revision2);
 
     // For the first revision we expect that only 'admin' is returned as code owner.
-    List<CodeOwnerInfo> codeOwnerInfos =
+    CodeOwnersInfo codeOwnersInfo =
         queryCodeOwners(
             getCodeOwnersApi().query().forRevision(revision1.name()), "/foo/bar/baz.md");
-    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(admin.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
 
     // For the second revision we expect that 'admin' and 'user' are returned as code owners.
-    codeOwnerInfos =
+    codeOwnersInfo =
         queryCodeOwners(
             getCodeOwnersApi().query().forRevision(revision2.name()), "/foo/bar/baz.md");
-    assertThat(codeOwnerInfos)
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id());
   }
@@ -151,6 +155,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
 
     // Expect that 'serviceUser' is included.
     assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), serviceUser.id());
   }
@@ -166,6 +171,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
         .addMember(serviceUser.id())
         .update();
     assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(serviceUser.id());
   }

@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.toMap;
 
@@ -30,11 +31,10 @@ import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
-import java.util.List;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -88,7 +88,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Override
-  protected List<CodeOwnerInfo> queryCodeOwners(CodeOwners.QueryRequest queryRequest, String path)
+  protected CodeOwnersInfo queryCodeOwners(CodeOwners.QueryRequest queryRequest, String path)
       throws RestApiException {
     assertWithMessage("test path %s was not registered", path)
         .that(gApi.changes().id(changeId).current().files())
@@ -109,9 +109,12 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
     String path = "/foo/bar/baz.txt";
     String changeId = createChangeWithFileDeletion(path);
 
-    List<CodeOwnerInfo> codeOwnerInfos =
+    CodeOwnersInfo codeOwnersInfo =
         codeOwnersApiFactory.change(changeId, "current").query().get(path);
-    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(user.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id());
   }
 
   @Test
@@ -138,15 +141,17 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
     String newPath = "/foo/new/bar.txt";
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
-    List<CodeOwnerInfo> codeOwnerInfosNewPath =
+    CodeOwnersInfo codeOwnersInfoNewPath =
         codeOwnersApiFactory.change(changeId, "current").query().get(newPath);
-    assertThat(codeOwnerInfosNewPath)
+    assertThat(codeOwnersInfoNewPath)
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
 
-    List<CodeOwnerInfo> codeOwnerInfosOldPath =
+    CodeOwnersInfo codeOwnersInfoOldPath =
         codeOwnersApiFactory.change(changeId, "current").query().get(oldPath);
-    assertThat(codeOwnerInfosOldPath)
+    assertThat(codeOwnersInfoOldPath)
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id());
   }
@@ -184,9 +189,12 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
     // Check that 'user' is anyway suggested as code owner for the file in the private change since
     // by adding 'user' as reviewer the change would get visible to 'user'.
     requestScopeOperations.setApiUser(changeOwner.id());
-    List<CodeOwnerInfo> codeOwnerInfos =
+    CodeOwnersInfo codeOwnersInfo =
         codeOwnersApiFactory.change(changeId, "current").query().get(TEST_PATHS.get(0));
-    assertThat(codeOwnerInfos).comparingElementsUsing(hasAccountId()).containsExactly(user.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id());
   }
 
   @Test
@@ -206,6 +214,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
 
     // Check that both code owners are suggested.
     assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), serviceUser.id());
 
@@ -218,6 +227,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
 
     // Expect that 'serviceUser' is filtered out now.
     assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id());
   }
@@ -232,7 +242,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .forUpdate()
         .addMember(serviceUser.id())
         .update();
-    assertThat(queryCodeOwners("/foo/bar/baz.md")).isEmpty();
+    assertThat(queryCodeOwners("/foo/bar/baz.md")).hasCodeOwnersThat().isEmpty();
   }
 
   @Test
@@ -247,6 +257,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .create();
 
     assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
   }

@@ -32,7 +32,7 @@ import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
@@ -137,7 +137,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     this.hexOptions = new HashSet<>();
   }
 
-  protected Response<List<CodeOwnerInfo>> applyImpl(R rsrc)
+  protected Response<CodeOwnersInfo> applyImpl(R rsrc)
       throws AuthException, BadRequestException, PermissionBackendException {
     parseHexOptions();
     validateLimit();
@@ -208,10 +208,12 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       }
     }
 
-    return Response.ok(
+    CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
+    codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners))));
+            .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners)));
+    return Response.ok(codeOwnersInfo);
   }
 
   private CodeOwnerResolverResult getGlobalCodeOwners(Project.NameKey projectName) {
