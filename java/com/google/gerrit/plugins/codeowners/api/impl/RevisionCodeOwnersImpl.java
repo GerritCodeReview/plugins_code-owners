@@ -20,7 +20,6 @@ import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyP
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CheckCodeOwnerConfigFilesInRevisionInput;
 import com.google.gerrit.plugins.codeowners.api.RevisionCodeOwners;
-import com.google.gerrit.plugins.codeowners.api.RevisionCodeOwners.CheckCodeOwnerConfigFilesRequest;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFilesInRevision;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.inject.Inject;
