@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37fb6c58_8a5d5d2b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-15T13:44:13Z",
+      "side": 1,
+      "message": "I\u0027m assuming Marian is ok with this behaviour",
+      "revId": "97f68227fbb40e28d7063da48eaa9a8b616e065e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
