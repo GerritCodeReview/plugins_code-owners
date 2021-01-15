@@ -18,7 +18,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
-import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
@@ -30,7 +30,6 @@ import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -73,7 +72,7 @@ public class GetCodeOwnersForPathInChange
   }
 
   @Override
-  public Response<List<CodeOwnerInfo>> apply(CodeOwnersInChangeCollection.PathResource rsrc)
+  public Response<CodeOwnersInfo> apply(CodeOwnersInChangeCollection.PathResource rsrc)
       throws RestApiException, PermissionBackendException {
     return super.applyImpl(rsrc);
   }
