@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5b961682_59198a39",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-15T13:51:42Z",
+      "side": 1,
+      "message": "is that a great idea?\nMaybe logger.atError() instead?\n\nIf we ever see this exception thrown, reply will fail, wouldn\u0027t it? That\u0027s not great.",
+      "range": {
+        "startLine": 185,
+        "startChar": 16,
+        "endLine": 185,
+        "endChar": 37
+      },
+      "revId": "c69f145eaa642f5d0920fb4f59bc0a128d322dae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ad4a72ed_c8d84ed7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 187,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-15T13:51:42Z",
+      "side": 1,
+      "message": "neither newly applied, removed, upgraded nor downgraded (I think that\u0027s the correct grammar).",
+      "range": {
+        "startLine": 187,
+        "startChar": 39,
+        "endLine": 187,
+        "endChar": 94
+      },
+      "revId": "c69f145eaa642f5d0920fb4f59bc0a128d322dae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
