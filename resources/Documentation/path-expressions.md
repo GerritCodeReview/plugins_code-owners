@@ -37,9 +37,9 @@ See [below](#examples) for examples.
 | To Match | Glob | Simple Path Expression |
 | -------- | ---- | ---------------------- |
 | Concrete file in current folder | `BUILD` | `BUILD` |
-| File type in current folder | `*.md` | `*.md` |
+| File type in current folder | not possible | `*.md` |
 | Concrete file in the current folder and in all subfolders | `{**/,}BUILD` | needs 2 expressions: `BUILD` + `.../BUILD` |
-| File type in the current folder and in all subfolder | `**.md` | `....md` |
+| File type in the current folder and in all subfolders | `**.md` or `*.md` | `....md` |
 | All files in a subfolder | `my-folder/**` | `my-folder/...` |
 | All “foo-<1-digit-number>.txt” files in all subfolders | `{**/,}foo-[0-9].txt` | not possible |
 | All “foo-<n-digit-number>.txt” files in all subfolders | not possible | not possible |
