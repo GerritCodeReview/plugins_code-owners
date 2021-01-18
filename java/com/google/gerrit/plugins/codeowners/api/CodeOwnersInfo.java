@@ -26,4 +26,11 @@ import java.util.List;
 public class CodeOwnersInfo {
   /** List of code owners. */
   public List<CodeOwnerInfo> codeOwners;
+
+  /**
+   * Whether the path is owned by all users.
+   *
+   * <p>Not set if {@code false}.
+   */
+  public Boolean ownedByAllUsers;
 }

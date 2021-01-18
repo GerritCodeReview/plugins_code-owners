@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 import org.kohsuke.args4j.Option;
 
@@ -157,6 +158,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     CodeOwnerScoring.Builder distanceScoring = CodeOwnerScore.DISTANCE.createScoring(maxDistance);
 
     Set<CodeOwner> codeOwners = new HashSet<>();
+    AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
         rsrc.getRevision(),
@@ -167,6 +169,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
           codeOwners.addAll(filterCodeOwners(rsrc, pathCodeOwners.codeOwners()));
 
           if (pathCodeOwners.ownedByAllUsers()) {
+            ownedByAllUsers.set(true);
             fillUpWithRandomUsers(rsrc, codeOwners, limit);
 
             if (codeOwners.size() < limit) {
@@ -191,15 +194,13 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               .forEach(
                   localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
-          // If codeOwners.size() >= limit we have gathered enough code owners and do not need to
-          // look at further code owner configs.
-          // We can abort here, since all further code owners will have a lower distance scoring
-          // and hence they would appear at the end of the sorted code owners list and be dropped
-          // due to the limit.
-          return codeOwners.size() < limit;
+          // If codeOwners.size() >= limit we have gathered enough code owners, but we still need to
+          // inspect the further code owner configs to know if the path is maybe owned by all user
+          // (in which case we need to set the ownedByAllUsers flag in the response).
+          return true;
         });
 
-    if (codeOwners.size() < limit) {
+    if (codeOwners.size() < limit || !ownedByAllUsers.get()) {
       CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
       globalCodeOwners
           .codeOwners()
@@ -208,6 +209,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       codeOwners.addAll(filterCodeOwners(rsrc, globalCodeOwners.codeOwners()));
 
       if (globalCodeOwners.ownedByAllUsers()) {
+        ownedByAllUsers.set(true);
         fillUpWithRandomUsers(rsrc, codeOwners, limit);
       }
     }
@@ -217,6 +219,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         codeOwnerJsonFactory
             .create(getFillOptions())
             .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners)));
+    codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     return Response.ok(codeOwnersInfo);
   }
 
