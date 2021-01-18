@@ -653,6 +653,12 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasAccountIdThat()
         .isAnyOf(user.id(), user2.id(), admin.id());
     assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
+
+    // Query code owners without resolving all users.
+    codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(false), "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 
   @Test
@@ -1116,6 +1122,37 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
+  }
+
+  @Test
+  public void getAllUsersAsCodeOwners_withoutResolvingAllUsers() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail("*")
+        .create();
+
+    // If resolveAllUsers = false, only 'user' should be returned as code owner.
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(false), "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
+
+    // If resolveAllUsers = true, the result includes 'admin' in addition to 'user' which has code
+    // ownership explicitly assigned.
+    codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), admin.id());
     assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 

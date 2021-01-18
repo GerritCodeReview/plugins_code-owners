@@ -85,6 +85,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
   private int limit = DEFAULT_LIMIT;
   private Optional<Long> seed = Optional.empty();
+  private boolean resolveAllUsers = true;
 
   @Option(
       name = "-o",
@@ -115,6 +116,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       usage = "seed that should be used to shuffle code owners that have the same score")
   public void setSeed(long seed) {
     this.seed = Optional.of(seed);
+  }
+
+  @Option(
+      name = "--resolve-all-users",
+      usage =
+          "whether code ownerships that are assigned to all users should be resolved to random"
+              + " users")
+  public void setResolveAllUsers(boolean resolveAllUsers) {
+    this.resolveAllUsers = resolveAllUsers;
   }
 
   protected AbstractGetCodeOwnersForPath(
@@ -381,10 +391,13 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    *
    * <p>Must be only used to complete the suggestion list when it is found that the path is owned by
    * all user.
+   *
+   * <p>No-op if code ownership for all users should not be resolved.
    */
   private void fillUpWithRandomUsers(R rsrc, Set<CodeOwner> codeOwners, int limit) {
-    if (codeOwners.size() >= limit) {
-      // limit is already reach, we don't need to add further suggestions
+    if (!resolveAllUsers || codeOwners.size() >= limit) {
+      // code ownership for all users should not be resolved or the limit has already been reached
+      // so that we don't need to add further suggestions
       return;
     }
 
