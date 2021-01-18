@@ -788,9 +788,10 @@ functionality is disabled for a project or for any branch.
 ### <a id="code-owners-info"> CodeOwnersInfo
 The `CodeOwnersInfo` entity contains information about a list of code owners.
 
-| Field Name    | Description |
-| ------------- | ----------- |
-| `code_owners` | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by [score](#scores).
+| Field Name    |          | Description |
+| ------------- | -------- | ----------- |
+| `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by [score](#scores).
+| `owned_by_all_users` | optional | Whether the path is owned by all users. Not set if `false`.
 
 ### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
 The `FileCodeOwnerStatusInfo` entity describes the code owner statuses for a
