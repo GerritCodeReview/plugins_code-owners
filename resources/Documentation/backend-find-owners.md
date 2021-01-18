@@ -14,7 +14,7 @@ contains the `OWNERS` file, and all its subdirectories (except if a subdirectory
 contains an `OWNERS` file that disables the inheritance of code owners from the
 parent directories via the [set noparent](#setNoparent) keyword).
 
-<a id="defaultCodeOwnerConfiguration">
+### <a id="defaultCodeOwnerConfiguration">
 Default code owners that apply to all branches can be defined in an `OWNERS`
 file in the root directory of the `refs/meta/config` branch. This `OWNERS` file
 is the parent of the root `OWNERS` files in all branches. This means if a root
@@ -245,7 +245,7 @@ directory and the subdirectories.
   john.doe@example.com
   per-file docs.config,*.md=richard.roe@example.com
 ```
-\
+
 ##### <a id="doNotUsePathExpressionsForSubdirectories">
 **NOTE:** It is discouraged to use path expressions that explicitly name
 subdirectories such as `my-subdir/*` as they will break when the subdirectory
