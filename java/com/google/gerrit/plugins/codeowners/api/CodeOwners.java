@@ -47,6 +47,7 @@ public interface CodeOwners {
     private Integer limit;
     private String revision;
     private Long seed;
+    private Boolean resolveAllUsers;
 
     /**
      * Lists the code owners for the given path.
@@ -103,6 +104,18 @@ public interface CodeOwners {
     }
 
     /**
+     * Sets whether code ownerships that are assigned to all users should be resolved to random
+     * users.
+     *
+     * @param resolveAllUsers whether code ownerships that are assigned to all users should be
+     *     resolved to random users
+     */
+    public QueryRequest setResolveAllUsers(boolean resolveAllUsers) {
+      this.resolveAllUsers = resolveAllUsers;
+      return this;
+    }
+
+    /**
      * Sets the branch revision from which the code owner configs should be read.
      *
      * <p>Not supported for querying code owners for a path in a change.
@@ -127,6 +140,13 @@ public interface CodeOwners {
     /** Returns the seed that should be used to shuffle code owners that have the same score. */
     public Optional<Long> getSeed() {
       return Optional.ofNullable(seed);
+    }
+
+    /**
+     * Whether code ownerships that are assigned to all users should be resolved to random users.
+     */
+    public Optional<Boolean> getResolveAllUsers() {
+      return Optional.ofNullable(resolveAllUsers);
     }
 
     /** Returns the branch revision from which the code owner configs should be read. */
