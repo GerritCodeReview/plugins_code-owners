@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.codeOwnerInfos;
 import static com.google.gerrit.truth.ListSubject.elements;
 
+import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
@@ -51,6 +52,10 @@ public class CodeOwnersInfoSubject extends Subject {
     return check("codeOwners()")
         .about(elements())
         .thatCustom(codeOwnersInfo().codeOwners, codeOwnerInfos());
+  }
+
+  public BooleanSubject hasOwnedByAllUsersThat() {
+    return check("ownedByAllUsers").that(codeOwnersInfo().ownedByAllUsers);
   }
 
   private CodeOwnersInfo codeOwnersInfo() {

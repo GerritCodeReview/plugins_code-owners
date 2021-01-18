@@ -45,6 +45,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerCo
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.inject.Inject;
@@ -104,8 +105,11 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .folderPath("/abc/def/")
         .addCodeOwnerEmail(admin.email())
         .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
         .create();
-    assertThat(queryCodeOwners("/foo/bar/baz.md")).hasCodeOwnersThat().isEmpty();
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isNull();
   }
 
   @Test
@@ -156,6 +160,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountName())
         .containsExactly(null, null, null);
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isNull();
   }
 
   @Test
@@ -186,15 +191,16 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addCodeOwnerEmail(user.email())
         .create();
 
-    // 3. code owner config that makes "admin" a code owner, but for this test this code owner
-    // config is ignored, since the 2. code owner config ignores code owners from parent code owner
-    // configs
+    // 3. code owner config that makes "admin" a code owner and assigns code ownership to all users,
+    // but for this test this code owner config is ignored, since the 2. code owner config ignores
+    // code owners from parent code owner configs
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
         .branch("master")
         .folderPath("/")
         .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
         .create();
 
     // Assert the code owners for "/foo/bar/baz.md". This evaluates the code owner configs in the
@@ -208,6 +214,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user.id())
         .inOrder();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isNull();
   }
 
   @Test
@@ -629,6 +636,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id(), user2.id(), admin.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // Query code owners with a limit.
     requestScopeOperations.setApiUser(user.id());
@@ -644,6 +652,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .element(1)
         .hasAccountIdThat()
         .isAnyOf(user.id(), user2.id(), admin.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 
   @Test
@@ -922,6 +931,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id(), user2.id(), admin.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // Query code owners with a limit.
     requestScopeOperations.setApiUser(user.id());
@@ -937,6 +947,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .element(1)
         .hasAccountIdThat()
         .isAnyOf(user.id(), user2.id(), admin.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 
   @Test
@@ -963,6 +974,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
@@ -971,6 +983,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user3.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // admin can see all users
     requestScopeOperations.setApiUser(admin.id());
@@ -979,6 +992,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id(), user3.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // Query code owners with a limit, user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
@@ -989,6 +1003,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .element(0)
         .hasAccountIdThat()
         .isAnyOf(user2.id(), user3.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 
   @Test
@@ -1023,6 +1038,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id(), user2.id(), user3.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
@@ -1031,6 +1047,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user3.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // admin can see all users
     requestScopeOperations.setApiUser(admin.id());
@@ -1039,6 +1056,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id(), user3.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
     // Query code owners with a limit, user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
@@ -1049,6 +1067,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .element(0)
         .hasAccountIdThat()
         .isAnyOf(user2.id(), user3.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 
   @Test
@@ -1069,6 +1088,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     requestScopeOperations.setApiUser(user.id());
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 
   @Test
@@ -1096,6 +1116,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(admin.id(), user.id(), user2.id());
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 
   @Test
@@ -1204,5 +1225,93 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
           .containsExactlyElementsIn(expectedAccountIds)
           .inOrder();
     }
+  }
+
+  @Test
+  public void allUsersOwnershipThatIsAssignedInParentIsConsideredEvenIfLimitWasAlreadyReached()
+      throws Exception {
+    // Create some code owner configs.
+    // The order below reflects the order in which the code owner configs are evaluated.
+
+    // 1. code owner config that makes "user" a code owner, inheriting code owners from parent code
+    // owner configs is enabled by default
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // 2. code owner config that makes "admin" a code owner, inheriting code owners from parent code
+    // owner configs is enabled by default
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // 3. code owner config that makes all users code owners
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
+        .create();
+
+    // Query code owners for "/foo/bar/baz.md" with limit 2. After inspecting code owner config 1.
+    // and 2. enough code owners are found to satisfy the limit, but code owner config 3. is still
+    // inspected so that the ownedByAllUsers field in the response gets set.
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), admin.id())
+        .inOrder();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void allUsersOwnershipThatIsAssignedAsGlobalOwnerIsConsideredEvenIfLimitWasAlreadyReached()
+      throws Exception {
+    // Create some code owner configs.
+    // The order below reflects the order in which the code owner configs are evaluated.
+
+    // 1. code owner config that makes "user" a code owner, inheriting code owners from parent code
+    // owner configs is enabled by default
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // 2. code owner config that makes "admin" a code owner, inheriting code owners from parent code
+    // owner configs is enabled by default
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // Query code owners for "/foo/bar/baz.md" with limit 2. After inspecting code owner config 1.
+    // and 2. enough code owners are found to satisfy the limit, but global code owners are still
+    // inspected so that the ownedByAllUsers field in the response gets set.
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), admin.id())
+        .inOrder();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 }
