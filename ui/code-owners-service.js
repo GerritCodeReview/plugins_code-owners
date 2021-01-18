@@ -277,7 +277,11 @@ export class OwnersFetcher {
     try {
       const owners = await this.codeOwnerApi.listOwnersForPath(changeId,
           filePath);
-      this._fetchedOwners.get(filePath).owners = new Set(owners);
+      // In the upcoming backend changes, the api will return an object instead
+      // of array. While this transition is in progress, the frontend supports
+      // both API - the old one and the new one.
+      this._fetchedOwners.get(filePath).owners = new Set(
+          owners instanceof Array ? owners : owners.code_owners);
     } catch (e) {
       this._fetchedOwners.get(filePath).error = e;
     }
