@@ -63,6 +63,7 @@ public class CodeOwnersInChangeImpl implements CodeOwners {
           getOptions().forEach(getCodeOwners::addOption);
           getLimit().ifPresent(getCodeOwners::setLimit);
           getSeed().ifPresent(getCodeOwners::setSeed);
+          getResolveAllUsers().ifPresent(getCodeOwners::setResolveAllUsers);
           CodeOwnersInChangeCollection.PathResource pathInChangeResource =
               codeOwnersInChangeCollection.parse(
                   revisionResource, IdString.fromDecoded(path.toString()));
