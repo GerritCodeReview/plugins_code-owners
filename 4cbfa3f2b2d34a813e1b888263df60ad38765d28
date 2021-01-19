@@ -3,6 +3,23 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "c5337095_2280ebf5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-19T16:39:54Z",
+      "side": 1,
+      "message": "Do not submit yet. It looks like we can directly switch to the new response format. Our stakeholder said that breaking this one caller is not an issue for them.",
+      "revId": "4cbfa3f2b2d34a813e1b888263df60ad38765d28",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "2f370652_ff0d5036",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInChangeLegacy.java",
         "patchSetId": 7
