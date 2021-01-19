@@ -53,6 +53,7 @@ no validation is done when:
   blocking all uploads, to reduce the risk of breaking the plugin configuration
   `code-owner.config` files are validated too)
 
+## <a id="howCodeOwnerConfigsCanGetIssuesAfterSubmit">
 In addition it is possible that [code owner config
 files](user-guide.hmtl#codeOwnerConfigFiles) get issues after they have been
 submitted:
