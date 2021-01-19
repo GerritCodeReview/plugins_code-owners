@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2f370652_ff0d5036",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInChangeLegacy.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-19T14:46:29Z",
+      "side": 1,
+      "message": "can this extend AbstractGetCodeOwnersForPath? Then these will not be needed.\n\nHmm, actually resolving this since I step 3 will be problematic if you do that.",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 0
+      },
+      "revId": "4cbfa3f2b2d34a813e1b888263df60ad38765d28",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "65d12389_790c7486",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnersForPathInChangeLegacyRestIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-19T14:46:29Z",
+      "side": 1,
+      "message": "this class doesn\u0027t look like a copy of GetCodeOwnersForPathInChangeIT. Wasn\u0027t that the idea?",
+      "range": {
+        "startLine": 44,
+        "startChar": 13,
+        "endLine": 44,
+        "endChar": 53
+      },
+      "revId": "4cbfa3f2b2d34a813e1b888263df60ad38765d28",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ba5a575b_5f6654db",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnersForPathInChangeLegacyRestIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-19T14:46:29Z",
+      "side": 1,
+      "message": "omit?",
+      "range": {
+        "startLine": 44,
+        "startChar": 47,
+        "endLine": 44,
+        "endChar": 51
+      },
+      "revId": "4cbfa3f2b2d34a813e1b888263df60ad38765d28",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
