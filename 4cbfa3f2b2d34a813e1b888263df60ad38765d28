@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5bcfaeef_2731f235",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInChangeLegacy.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-19T15:02:22Z",
+      "side": 1,
+      "message": "Unfortunately extending AbstractGetCodeOwnersForPath does not work if we want to return a different Info object from the apply method. That\u0027s what I tried first :/",
+      "parentUuid": "2f370652_ff0d5036",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 86,
+        "endChar": 0
+      },
+      "revId": "4cbfa3f2b2d34a813e1b888263df60ad38765d28",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "65d12389_790c7486",
@@ -60,6 +84,54 @@
       "writtenOn": "2021-01-19T14:46:29Z",
       "side": 1,
       "message": "omit?",
+      "range": {
+        "startLine": 44,
+        "startChar": 47,
+        "endLine": 44,
+        "endChar": 51
+      },
+      "revId": "4cbfa3f2b2d34a813e1b888263df60ad38765d28",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "da8e25ab_c70c86cb",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnersForPathInChangeLegacyRestIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-19T15:02:22Z",
+      "side": 1,
+      "message": "No, it\u0027s not supposed to be a copy of this class. This test is rather making sure that GetCodeOwnersForPathInChangeLegacy correctly forwards all request parameters to the wrapped GetCodeOwnersForPathInChange.",
+      "parentUuid": "65d12389_790c7486",
+      "range": {
+        "startLine": 44,
+        "startChar": 13,
+        "endLine": 44,
+        "endChar": 53
+      },
+      "revId": "4cbfa3f2b2d34a813e1b888263df60ad38765d28",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9962cf3c_d1c110c9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetCodeOwnersForPathInChangeLegacyRestIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-19T15:02:22Z",
+      "side": 1,
+      "message": "The \"Rest\" part was intentionally added, since the test directly call the REST API, rather than using the Java API (we don\u0027t want to add Java API for this REST endpoint since it is anyway removed again).",
+      "parentUuid": "ba5a575b_5f6654db",
       "range": {
         "startLine": 44,
         "startChar": 47,
