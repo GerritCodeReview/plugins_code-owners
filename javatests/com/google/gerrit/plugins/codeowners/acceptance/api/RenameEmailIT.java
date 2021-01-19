@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
@@ -41,8 +40,6 @@ import com.google.gerrit.plugins.codeowners.api.RenameEmailInput;
 import com.google.gerrit.plugins.codeowners.api.RenameEmailResultInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFileUpdateScanner;
-import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.restapi.RenameEmail;
 import com.google.inject.Inject;
 import java.util.Optional;
@@ -62,12 +59,10 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
   @Inject private ProjectOperations projectOperations;
   @Inject private RequestScopeOperations requestScopeOperations;
 
-  private BackendConfig backendConfig;
   private CodeOwnerConfigFileUpdateScanner codeOwnerConfigFileUpdateScanner;
 
   @Before
   public void setup() throws Exception {
-    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
     codeOwnerConfigFileUpdateScanner =
         plugin.getSysInjector().getInstance(CodeOwnerConfigFileUpdateScanner.class);
   }
@@ -179,8 +174,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmail_noUpdateIfEmailIsNotContainedInCodeOwnerConfigs() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -210,8 +204,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameOwnEmailWithDirectPushPermission() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey1 =
         codeOwnerConfigOperations
@@ -263,8 +256,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameOtherEmailWithDirectPushPermission() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey1 =
         codeOwnerConfigOperations
@@ -323,8 +315,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameOwnEmailAsProjectOwner() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey1 =
         codeOwnerConfigOperations
@@ -368,8 +359,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameOtherEmailAsProjectOwner() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey1 =
         codeOwnerConfigOperations
@@ -413,8 +403,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmail_callingUserBecomesCommitAuthor() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -438,8 +427,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmailWithDefaultCommitMessage() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -463,8 +451,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmailWithSpecifiedCommitMessage() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -489,8 +476,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmail_specifiedCommitMessageIsTrimmed() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -516,8 +502,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmail_lineCommentsArePreserved() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
@@ -580,8 +565,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmail_inlineCommentsArePreserved() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
@@ -642,8 +626,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
 
   @Test
   public void renameEmail_emailInCommentIsReplaced() throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
@@ -687,8 +670,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
   @Test
   public void renameEmail_emailThatContainsEmailToBeReplacesAsSubstringStaysIntact()
       throws Exception {
-    // renaming email is not supported for the proto backend
-    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
     TestAccount otherUser1 =
         accountCreator.create(
@@ -744,5 +726,10 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
         .project(projectName)
         .branch(branchName)
         .renameEmailInCodeOwnerConfigFiles(input);
+  }
+
+  private void skipTestIfRenameEmailNotSupportedByCodeOwnersBackend() {
+    // the proto backend doesn't support renaming emails
+    assumeThatCodeOwnersBackendIsNotProtoBackend();
   }
 }

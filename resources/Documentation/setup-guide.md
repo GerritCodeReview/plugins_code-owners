@@ -26,6 +26,8 @@ FAQ's:
 
 * [How to update the code-owners.config file for a project](#updateCodeOwnersConfig)
 * [How to check if the code owners functionality is enabled for a project or branch](#checkIfEnabled)
+* [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
+* [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
 
 Recommendations about further configuration parameters can be found in the
 [config guide](config-guide.html).
@@ -405,6 +407,53 @@ alternatively open the following URLs in a browser:\
 `https://<host>/projects/<project-name>/branches/<branch-name>/code_owners.branch_config`\
 `https://<host>/projects/<project-name>/code_owners.project_config`\
 (remember to URL-encode the project-name and branch-name)
+
+##### <a id="avoidIssuesWithCodeOwnerConfigs">How to avoid issues with code owner config files
+
+To avoid issues with code owner config files it's highly recommended to keep the
+[validation](validation.html) of code owner config files that is performed on
+receive commits and submit enabled, as it prevents that issues are newly
+introduced to code owner config files. Whether this validation is enabled and
+whether code owner config files with new issues are rejected is controlled by
+the following configuration parameters:
+
+* [plugin.@PLUGIN@.enableValidationOnCommitReceived](config.html#pluginCodeOwnersEnableValidationOnCommitReceived)
+* [plugin.@PLUGIN@.enableValidationOnSubmit](config.html#pluginCodeOwnersEnableValidationOnSubmit)
+* [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](config.html#pluginCodeOwnersRejectNonResolvableCodeOwners)
+* [plugin.@PLUGIN@.rejectNonResolvableImports](config.html#pluginCodeOwnersRejectNonResolvableImports)
+
+Since code owner config files can also get
+[issues](validation.html#howCodeOwnerConfigsCanGetIssuesAfterSubmit) after they
+have been submitted, host administrators and project owners are also recommended
+to regularly check the existing code owner config files for issues by calling
+the [Check Code Owner Config File REST
+endpoint](rest-api.html#check-code-owner-config-files) (e.g. from a cronjob) and
+then fix the reported issues.
+
+##### <a id="investigateIssuesWithCodeOwnerConfigs">How to investigate issues with code owner config files
+
+If code owners config files are not working as expected, this is either caused
+by:
+
+* issues in the code owner config files
+* a bug in the @PLUGIN@ plugin
+
+Since code owner config files are part of the source code, any issues with them
+should be investigated and fixed by the project owners and host administrators.
+To do this they can:
+
+* Check the code owner config files for issues by calling the [Check Code Owner
+  Config File REST endpoint](rest-api.html#check-code-owner-config-files)
+* Check the code ownership of a user for a certain path by calling the [Check
+  Code Owner REST endpoint](rest-api.html#check-code-owner) (requires the caller
+  to be host administrator or have the [Check Code Owner
+  capability](#checkCodeOwner)).
+
+Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
+only after issues with the code owner config files have been excluded.
+
+Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
+owner config files in the first place.
 
 ---
 

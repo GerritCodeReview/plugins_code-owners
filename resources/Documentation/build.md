@@ -10,13 +10,13 @@ From the Gerrit source tree issue the command:
 ```
   bazel build plugins/@PLUGIN@
 ```
-
+\
 The output is created in
 
 ```
   bazel-bin/plugins/@PLUGIN@/@PLUGIN@.jar
 ```
-
+\
 To execute the tests run:
 
 ```
