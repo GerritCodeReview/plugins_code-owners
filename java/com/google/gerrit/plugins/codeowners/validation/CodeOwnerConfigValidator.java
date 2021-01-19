@@ -29,6 +29,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -125,6 +126,7 @@ import org.eclipse.jgit.revwalk.RevWalk;
 public class CodeOwnerConfigValidator implements CommitValidationListener, MergeValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private final String pluginName;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
@@ -137,6 +139,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
   @Inject
   CodeOwnerConfigValidator(
+      @PluginName String pluginName,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
       ChangedFiles changedFiles,
@@ -146,6 +149,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       ChangeNotes.Factory changeNotesFactory,
       PatchSetUtil patchSetUtil,
       IdentifiedUser.GenericFactory userFactory) {
+    this.pluginName = pluginName;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
@@ -178,6 +182,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         validationResult =
             Optional.of(
                 ValidationResult.create(
+                    pluginName,
                     "skipping validation of code owner config files",
                     new CommitValidationMessage(
                         "code owners config validation is disabled", ValidationMessage.Type.HINT)));
@@ -246,6 +251,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         validationResult =
             Optional.of(
                 ValidationResult.create(
+                    pluginName,
                     "skipping validation of code owner config files",
                     new CommitValidationMessage(
                         "code owners config validation is disabled", ValidationMessage.Type.HINT)));
@@ -300,6 +306,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     if (codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
       return Optional.of(
           ValidationResult.create(
+              pluginName,
               "skipping validation of code owner config files",
               new CommitValidationMessage(
                   "code-owners functionality is disabled", ValidationMessage.Type.HINT)));
@@ -307,6 +314,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     if (codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(branchNameKey.project())) {
       return Optional.of(
           ValidationResult.create(
+              pluginName,
               "modifying code owner config files not allowed",
               new CommitValidationMessage(
                   "code owner config files are configured to be read-only",
@@ -352,6 +360,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // validate the code owner config files
       return Optional.of(
           ValidationResult.create(
+              pluginName,
               modifiedCodeOwnerConfigFiles.stream()
                   .flatMap(
                       changedFile ->
@@ -375,6 +384,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               e.getMessage()));
       return Optional.of(
           ValidationResult.create(
+              pluginName,
               "skipping validation of code owner config files",
               new CommitValidationMessage(
                   "code-owners plugin configuration is invalid,"
@@ -477,7 +487,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         // config parseable, it is a good update even if the code owner config still contains
         // issues. Hence in this case we downgrade all validation errors in the new version to
         // warnings so that the update is not blocked.
-        return validateCodeOwnerConfig(user, codeOwnerBackend, codeOwnerConfig)
+        return validateCodeOwnerConfig(
+                branchNameKey.project(), user, codeOwnerBackend, codeOwnerConfig)
             .map(CodeOwnerConfigValidator::downgradeErrorToWarning);
       }
 
@@ -488,9 +499,14 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     // Validate the parsed code owner config.
     if (baseCodeOwnerConfig.isPresent()) {
       return validateCodeOwnerConfig(
-          user, codeOwnerBackend, codeOwnerConfig, baseCodeOwnerConfig.get());
+          branchNameKey.project(),
+          user,
+          codeOwnerBackend,
+          codeOwnerConfig,
+          baseCodeOwnerConfig.get());
     }
-    return validateCodeOwnerConfig(user, codeOwnerBackend, codeOwnerConfig);
+    return validateCodeOwnerConfig(
+        branchNameKey.project(), user, codeOwnerBackend, codeOwnerConfig);
   }
 
   /**
@@ -655,6 +671,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * <p>Validation errors that exist in both code owner configs are returned as warning (because
    * they are not newly introduced by the given code owner config).
    *
+   * @param project the name of the project
    * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerBackend the code owner backend from which the code owner configs were loaded
    * @param codeOwnerConfig the code owner config that should be validated
@@ -663,6 +680,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *     empty stream if there are no issues
    */
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
+      Project.NameKey project,
       IdentifiedUser user,
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig codeOwnerConfig,
@@ -671,9 +689,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     requireNonNull(baseCodeOwnerConfig, "baseCodeOwnerConfig");
 
     ImmutableSet<CommitValidationMessage> issuesInBaseVersion =
-        validateCodeOwnerConfig(user, codeOwnerBackend, baseCodeOwnerConfig)
+        validateCodeOwnerConfig(project, user, codeOwnerBackend, baseCodeOwnerConfig)
             .collect(toImmutableSet());
-    return validateCodeOwnerConfig(user, codeOwnerBackend, codeOwnerConfig)
+    return validateCodeOwnerConfig(project, user, codeOwnerBackend, codeOwnerConfig)
         .map(
             commitValidationMessage ->
                 issuesInBaseVersion.contains(commitValidationMessage)
@@ -684,6 +702,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   /**
    * Validates the given code owner config and returns validation issues as stream.
    *
+   * @param project the name of the project
    * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerBackend the code owner backend from which the code owner config was loaded
    * @param codeOwnerConfig the code owner config that should be validated
@@ -691,17 +710,22 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *     empty stream if there are no issues
    */
   public Stream<CommitValidationMessage> validateCodeOwnerConfig(
-      IdentifiedUser user, CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig codeOwnerConfig) {
+      Project.NameKey project,
+      IdentifiedUser user,
+      CodeOwnerBackend codeOwnerBackend,
+      CodeOwnerConfig codeOwnerConfig) {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     return Streams.concat(
         validateCodeOwnerReferences(
-            user, codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig),
-        validateImports(codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig));
+            project, user, codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig),
+        validateImports(
+            project, codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig));
   }
 
   /**
    * Validates the code owner references of the given code owner config.
    *
+   * @param project the name of the project
    * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner references
@@ -711,12 +735,16 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *     empty stream if there are no issues
    */
   private Stream<CommitValidationMessage> validateCodeOwnerReferences(
-      IdentifiedUser user, Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
+      Project.NameKey project,
+      IdentifiedUser user,
+      Path codeOwnerConfigFilePath,
+      CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.codeOwnerSets().stream()
         .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
         .map(
             codeOwnerReference ->
-                validateCodeOwnerReference(user, codeOwnerConfigFilePath, codeOwnerReference))
+                validateCodeOwnerReference(
+                    project, user, codeOwnerConfigFilePath, codeOwnerReference))
         .filter(Optional::isPresent)
         .map(Optional::get);
   }
@@ -724,6 +752,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   /**
    * Validates a code owner reference.
    *
+   * @param project the name of the project
    * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner reference
@@ -732,10 +761,14 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *     Optional#empty()} if there is no issue
    */
   private Optional<CommitValidationMessage> validateCodeOwnerReference(
-      IdentifiedUser user, Path codeOwnerConfigFilePath, CodeOwnerReference codeOwnerReference) {
+      Project.NameKey project,
+      IdentifiedUser user,
+      Path codeOwnerConfigFilePath,
+      CodeOwnerReference codeOwnerReference) {
     CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get().forUser(user);
     if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email()).get()) {
-      return error(
+      return nonResolvableCodeOwner(
+          project,
           String.format(
               "the domain of the code owner email '%s' in '%s' is not allowed for code owners",
               codeOwnerReference.email(), codeOwnerConfigFilePath));
@@ -752,7 +785,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     // CodeOwerResolver for details). We intentionally return the same generic message in all these
     // cases so that uploaders cannot probe emails for existence (e.g. they cannot add an email and
     // conclude from the error message whether the email exists).
-    return error(
+    return nonResolvableCodeOwner(
+        project,
         String.format(
             "code owner email '%s' in '%s' cannot be resolved for %s",
             codeOwnerReference.email(), codeOwnerConfigFilePath, user.getLoggableName()));
@@ -761,6 +795,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   /**
    * Validates the imports of the given code owner config.
    *
+   * @param project the name of the project
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config
    * @param codeOwnerConfig the code owner config for which the imports should be validated
@@ -768,12 +803,13 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *     if there are no issues
    */
   private Stream<CommitValidationMessage> validateImports(
-      Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
+      Project.NameKey project, Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
     return Streams.concat(
             codeOwnerConfig.imports().stream()
                 .map(
                     codeOwnerConfigReference ->
                         validateCodeOwnerConfigReference(
+                            project,
                             codeOwnerConfigFilePath,
                             codeOwnerConfig.key(),
                             codeOwnerConfig.revision(),
@@ -784,6 +820,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .map(
                     codeOwnerConfigReference ->
                         validateCodeOwnerConfigReference(
+                            project,
                             codeOwnerConfigFilePath,
                             codeOwnerConfig.key(),
                             codeOwnerConfig.revision(),
@@ -796,6 +833,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   /**
    * Validates a code owner config reference.
    *
+   * @param project the name of the project
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config reference
    * @param keyOfImportingCodeOwnerConfig key of the importing code owner config
@@ -807,6 +845,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *     Optional#empty()} if there is no issue
    */
   private Optional<CommitValidationMessage> validateCodeOwnerConfigReference(
+      Project.NameKey project,
       Path codeOwnerConfigFilePath,
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       ObjectId codeOwnerConfigRevision,
@@ -821,14 +860,16 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // we intentionally use the same error message for non-existing and non-readable projects so
       // that uploaders cannot probe for the existence of projects (e.g. deduce from the error
       // message whether a project exists)
-      return invalidImport(
+      return nonResolvableImport(
+          project,
           importType,
           codeOwnerConfigFilePath,
           String.format("project '%s' not found", keyOfImportedCodeOwnerConfig.project().get()));
     }
 
     if (!projectState.get().statePermitsRead()) {
-      return invalidImport(
+      return nonResolvableImport(
+          project,
           importType,
           codeOwnerConfigFilePath,
           String.format(
@@ -844,7 +885,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // we intentionally use the same error message for non-existing and non-readable branches so
       // that uploaders cannot probe for the existence of branches (e.g. deduce from the error
       // message whether a branch exists)
-      return invalidImport(
+      return nonResolvableImport(
+          project,
           importType,
           codeOwnerConfigFilePath,
           String.format(
@@ -857,7 +899,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         codeOwnersPluginConfiguration.getBackend(keyOfImportedCodeOwnerConfig.branchNameKey());
     if (!codeOwnerBackend.isCodeOwnerConfigFile(
         keyOfImportedCodeOwnerConfig.project(), codeOwnerConfigReference.fileName())) {
-      return invalidImport(
+      return nonResolvableImport(
+          project,
           importType,
           codeOwnerConfigFilePath,
           String.format(
@@ -868,7 +911,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       if (!codeOwnerBackend
           .getCodeOwnerConfig(keyOfImportedCodeOwnerConfig, revision.get())
           .isPresent()) {
-        return invalidImport(
+        return nonResolvableImport(
+            project,
             importType,
             codeOwnerConfigFilePath,
             String.format(
@@ -881,7 +925,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     } catch (StorageException storageException) {
       if (getInvalidConfigCause(storageException).isPresent()) {
         // The imported code owner config is non-parseable.
-        return invalidImport(
+        return nonResolvableImport(
+            project,
             importType,
             codeOwnerConfigFilePath,
             String.format(
@@ -944,16 +989,29 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
   }
 
-  private Optional<CommitValidationMessage> invalidImport(
-      CodeOwnerConfigImportType importType, Path codeOwnerConfigFilePath, String message) {
-    return error(
-        String.format(
-            "invalid %s import in '%s': %s",
-            importType.getType(), codeOwnerConfigFilePath, message));
+  private Optional<CommitValidationMessage> nonResolvableImport(
+      Project.NameKey project,
+      CodeOwnerConfigImportType importType,
+      Path codeOwnerConfigFilePath,
+      String message) {
+    return Optional.of(
+        new CommitValidationMessage(
+            String.format(
+                "invalid %s import in '%s': %s",
+                importType.getType(), codeOwnerConfigFilePath, message),
+            codeOwnersPluginConfiguration.rejectNonResolvableImports(project)
+                ? ValidationMessage.Type.ERROR
+                : ValidationMessage.Type.WARNING));
   }
 
-  private Optional<CommitValidationMessage> error(String message) {
-    return Optional.of(new CommitValidationMessage(message, ValidationMessage.Type.ERROR));
+  private Optional<CommitValidationMessage> nonResolvableCodeOwner(
+      Project.NameKey project, String message) {
+    return Optional.of(
+        new CommitValidationMessage(
+            message,
+            codeOwnersPluginConfiguration.rejectNonResolvableCodeOwners(project)
+                ? ValidationMessage.Type.ERROR
+                : ValidationMessage.Type.WARNING));
   }
 
   /** The result of validating code owner config files. */
@@ -963,21 +1021,26 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         "code owner config files validated, no issues found";
     private static final String INVALID_MSG = "invalid code owner config files";
 
+    abstract String pluginName();
+
     abstract String summaryMessage();
 
     abstract ImmutableList<CommitValidationMessage> validationMessages();
 
     static ValidationResult create(
-        String summaryMessage, CommitValidationMessage commitValidationMessage) {
+        String pluginName, String summaryMessage, CommitValidationMessage commitValidationMessage) {
       return new AutoValue_CodeOwnerConfigValidator_ValidationResult(
-          summaryMessage, ImmutableList.of(commitValidationMessage));
+          pluginName, summaryMessage, ImmutableList.of(commitValidationMessage));
     }
 
-    static ValidationResult create(Stream<CommitValidationMessage> validationMessagesStream) {
+    static ValidationResult create(
+        String pluginName, Stream<CommitValidationMessage> validationMessagesStream) {
       ImmutableList<CommitValidationMessage> validationMessages =
           validationMessagesStream.collect(toImmutableList());
       return new AutoValue_CodeOwnerConfigValidator_ValidationResult(
-          validationMessages.isEmpty() ? NO_ISSUES_MSG : INVALID_MSG, validationMessages);
+          pluginName,
+          validationMessages.isEmpty() ? NO_ISSUES_MSG : INVALID_MSG,
+          validationMessages);
     }
 
     /**
@@ -992,7 +1055,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     List<CommitValidationMessage> processForOnCommitReceived(boolean dryRun)
         throws CommitValidationException {
       if (!dryRun && hasError()) {
-        throw new CommitValidationException(summaryMessage(), validationMessages());
+        throw new CommitValidationException(
+            withPluginName(summaryMessage()), withPluginName(validationMessages()));
       }
 
       return validationMessagesWithIncludedSummaryMessage();
@@ -1033,8 +1097,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       return ImmutableList.<CommitValidationMessage>builder()
           .add(
               new CommitValidationMessage(
-                  summaryMessage(), getValidationMessageTypeForSummaryMessage()))
-          .addAll(validationMessages())
+                  withPluginName(summaryMessage()), getValidationMessageTypeForSummaryMessage()))
+          .addAll(withPluginName(validationMessages()))
           .build();
     }
 
@@ -1082,7 +1146,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
      */
     private String getMessage(List<CommitValidationMessage> validationMessages) {
       checkState(!validationMessages.isEmpty(), "expected at least 1 validation message");
-      StringBuilder msgBuilder = new StringBuilder(summaryMessage()).append(":");
+      StringBuilder msgBuilder = new StringBuilder(withPluginName(summaryMessage())).append(":");
       for (CommitValidationMessage msg : validationMessages) {
         msgBuilder
             .append("\n  ")
@@ -1091,6 +1155,17 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
             .append(msg.getMessage());
       }
       return msgBuilder.toString();
+    }
+
+    private String withPluginName(String message) {
+      return "[" + pluginName() + "] " + message;
+    }
+
+    private ImmutableList<CommitValidationMessage> withPluginName(
+        ImmutableList<CommitValidationMessage> validationMessages) {
+      return validationMessages.stream()
+          .map(msg -> new CommitValidationMessage(withPluginName(msg.getMessage()), msg.getType()))
+          .collect(toImmutableList());
     }
   }
 }

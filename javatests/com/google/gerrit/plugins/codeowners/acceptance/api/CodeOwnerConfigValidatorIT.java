@@ -469,7 +469,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files:\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 unknownEmail,
@@ -807,10 +807,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
     String abbreviatedCommit = abbreviateName(r.getCommit());
     r.assertErrorStatus(
-        String.format("commit %s: %s", abbreviatedCommit, "invalid code owner config files"));
+        String.format(
+            "commit %s: [code-owners] %s", abbreviatedCommit, "invalid code owner config files"));
     r.assertMessage(
         String.format(
-            "error: commit %s: %s",
+            "error: commit %s: [code-owners] %s",
             abbreviatedCommit,
             String.format(
                 "code owner email '%s' in '%s' cannot be resolved for %s",
@@ -821,7 +822,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     // the pre-existing issue is returned as warning
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
+            "warning: commit %s: [code-owners] code owner email '%s' in '%s' cannot be resolved for %s",
             abbreviatedCommit,
             unknownEmail1,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
@@ -866,7 +867,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files:\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 unknownEmail,
@@ -915,7 +916,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertOkStatus();
     r.assertMessage(
         String.format(
-            "error: commit %s: %s",
+            "error: commit %s: [code-owners] %s",
             abbreviatedCommit,
             String.format(
                 "code owner email '%s' in '%s' cannot be resolved for %s",
@@ -926,7 +927,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     // the pre-existing issue is returned as warning
     r.assertMessage(
         String.format(
-            "warning: commit %s: code owner email '%s' in '%s' cannot be resolved for %s",
+            "warning: commit %s: [code-owners] code owner email '%s' in '%s' cannot be resolved"
+                + " for %s",
             abbreviatedCommit,
             unknownEmail1,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
@@ -979,7 +981,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files:\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
                 admin.email(),
@@ -1594,6 +1596,139 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  public void canUploadAndSubmitConfigWithUnresolvableCodeOwners() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // upload a code owner config that has issues (non-resolvable code owners)
+    String unknownEmail = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .build()));
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "code owner email '%s' in '%s' cannot be resolved for %s",
+            unknownEmail,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+
+    // submit the change
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void canUploadAndSubmitConfigWithUnresolvableImports() throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+
+    // upload a code owner config that has issues (non-resolvable imports)
+    Project.NameKey nonExistingProject = Project.nameKey("non-existing");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonExistingProject, "master", "/"))
+                    .getFilePath())
+            .setProject(nonExistingProject)
+            .build();
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(keyOfImportingCodeOwnerConfig, TEST_REVISION)
+                    .addImport(codeOwnerConfigReference)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder()
+                            .addPathExpression("foo")
+                            .addImport(codeOwnerConfigReference)
+                            .build())
+                    .build()));
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid %s import in '%s': project '%s' not found",
+            CodeOwnerConfigImportType.GLOBAL.getType(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
+            nonExistingProject.get()),
+        String.format(
+            "invalid %s import in '%s': project '%s' not found",
+            CodeOwnerConfigImportType.PER_FILE.getType(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
+            nonExistingProject.get()));
+
+    // submit the change
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "true")
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "true")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
+  public void rejectConfigOptionsAreIgnoredIfValidationIsDisabled() throws Exception {
+    // imports are not supported for the proto backend
+    assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
+
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+
+    // upload a code owner config that has issues (non-resolvable code owners and non-resolvable
+    // imports)
+    String unknownEmail = "non-existing-email@example.com";
+    Project.NameKey nonExistingProject = Project.nameKey("non-existing");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonExistingProject, "master", "/"))
+                    .getFilePath())
+            .setProject(nonExistingProject)
+            .build();
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(keyOfImportingCodeOwnerConfig, TEST_REVISION)
+                    .addImport(codeOwnerConfigReference)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder()
+                            .addPathExpression("foo")
+                            .addImport(codeOwnerConfigReference)
+                            .build())
+                    .build()));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+
+    // submit the change
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
   private CodeOwnerConfig createCodeOwnerConfigWithImport(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       CodeOwnerConfigImportType importType,
@@ -1658,7 +1793,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String hint : hints) {
       pushResult.assertMessage(
-          String.format("hint: commit %s: %s", abbreviateName(pushResult.getCommit()), hint));
+          String.format(
+              "hint: commit %s: [code-owners] %s", abbreviateName(pushResult.getCommit()), hint));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("error");
@@ -1670,7 +1806,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String error : errors) {
       pushResult.assertMessage(
-          String.format("fatal: commit %s: %s", abbreviateName(pushResult.getCommit()), error));
+          String.format(
+              "fatal: commit %s: [code-owners] %s", abbreviateName(pushResult.getCommit()), error));
     }
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
@@ -1682,7 +1819,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String error : errors) {
       pushResult.assertMessage(
-          String.format("error: commit %s: %s", abbreviateName(pushResult.getCommit()), error));
+          String.format(
+              "error: commit %s: [code-owners] %s", abbreviateName(pushResult.getCommit()), error));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("warning");
@@ -1694,7 +1832,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertOkStatus();
     for (String warning : warnings) {
       pushResult.assertMessage(
-          String.format("warning: commit %s: %s", abbreviateName(pushResult.getCommit()), warning));
+          String.format(
+              "warning: commit %s: [code-owners] %s",
+              abbreviateName(pushResult.getCommit()), warning));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("error");
@@ -1704,9 +1844,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private void assertErrorWithMessages(
       PushOneCommit.Result pushResult, String summaryMessage, String... errors) throws Exception {
     String abbreviatedCommit = abbreviateName(pushResult.getCommit());
-    pushResult.assertErrorStatus(String.format("commit %s: %s", abbreviatedCommit, summaryMessage));
+    pushResult.assertErrorStatus(
+        String.format("commit %s: [code-owners] %s", abbreviatedCommit, summaryMessage));
     for (String error : errors) {
-      pushResult.assertMessage(String.format("error: commit %s: %s", abbreviatedCommit, error));
+      pushResult.assertMessage(
+          String.format("error: commit %s: [code-owners] %s", abbreviatedCommit, error));
     }
     pushResult.assertNotMessage("fatal");
     pushResult.assertNotMessage("warning");
@@ -1716,9 +1858,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private void assertFatalWithMessages(
       PushOneCommit.Result pushResult, String summaryMessage, String... errors) throws Exception {
     String abbreviatedCommit = abbreviateName(pushResult.getCommit());
-    pushResult.assertErrorStatus(String.format("commit %s: %s", abbreviatedCommit, summaryMessage));
+    pushResult.assertErrorStatus(
+        String.format("commit %s: [code-owners] %s", abbreviatedCommit, summaryMessage));
     for (String error : errors) {
-      pushResult.assertMessage(String.format("fatal: commit %s: %s", abbreviatedCommit, error));
+      pushResult.assertMessage(
+          String.format("fatal: commit %s: [code-owners] %s", abbreviatedCommit, error));
     }
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");

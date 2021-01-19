@@ -82,6 +82,13 @@ public class GeneralConfig {
 
   @VisibleForTesting static final int DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES = 100;
 
+  @VisibleForTesting
+  public static final String KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS =
+      "rejectNonResolvableCodeOwners";
+
+  @VisibleForTesting
+  public static final String KEY_REJECT_NON_RESOLVABLE_IMPORTS = "rejectNonResolvableImports";
+
   private final String pluginName;
   private final PluginConfig pluginConfigFromGerritConfig;
 
@@ -208,20 +215,58 @@ public class GeneralConfig {
    * Gets the read-only configuration from the given plugin config with fallback to {@code
    * gerrit.config}.
    *
-   * <p>The read-only controls whether code owner config files are read-only and all modifications
-   * of code owner config files should be rejected.
+   * <p>The read-only configuration controls whether code owner config files are read-only and all
+   * modifications of code owner config files should be rejected.
    *
    * @param pluginConfig the plugin config from which the read-only configuration should be read.
    * @return whether code owner config files are read-only
    */
   boolean getReadOnly(Config pluginConfig) {
-    requireNonNull(pluginConfig, "pluginConfig");
+    return getBooleanConfig(pluginConfig, KEY_READ_ONLY, false);
+  }
 
-    if (pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY) != null) {
-      return pluginConfig.getBoolean(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, false);
+  /**
+   * Gets the reject-non-resolvable-code-owners configuration from the given plugin config with
+   * fallback to {@code gerrit.config}.
+   *
+   * <p>The reject-non-resolvable-code-owners configuration controls whether code owner config files
+   * with newly added non-resolvable code owners should be rejected on commit received and on
+   * submit.
+   *
+   * @param pluginConfig the plugin config from which the reject-non-resolvable-code-owners
+   *     configuration should be read.
+   * @return whether code owner config files with newly added non-resolvable code owners should be
+   *     rejected on commit received and on submit
+   */
+  boolean getRejectNonResolvableCodeOwners(Config pluginConfig) {
+    return getBooleanConfig(pluginConfig, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, true);
+  }
+
+  /**
+   * Gets the reject-non-resolvable-imports configuration from the given plugin config with fallback
+   * to {@code gerrit.config}.
+   *
+   * <p>The reject-non-resolvable-imports configuration controls whether code owner config files
+   * with newly added non-resolvable imports should be rejected on commit received and on submit.
+   *
+   * @param pluginConfig the plugin config from which the reject-non-resolvable-imports
+   *     configuration should be read.
+   * @return whether code owner config files with newly added non-resolvable imports should be
+   *     rejected on commit received and on submit
+   */
+  boolean getRejectNonResolvableImports(Config pluginConfig) {
+    return getBooleanConfig(pluginConfig, KEY_REJECT_NON_RESOLVABLE_IMPORTS, true);
+  }
+
+  private boolean getBooleanConfig(Config pluginConfig, String key, boolean defaultValue) {
+    requireNonNull(pluginConfig, "pluginConfig");
+    requireNonNull(key, "key");
+
+    if (pluginConfig.getString(SECTION_CODE_OWNERS, null, key) != null) {
+      return pluginConfig.getBoolean(SECTION_CODE_OWNERS, null, key, defaultValue);
     }
 
-    return pluginConfigFromGerritConfig.getBoolean(KEY_READ_ONLY, false);
+    return pluginConfigFromGerritConfig.getBoolean(key, defaultValue);
   }
 
   /**
@@ -242,7 +287,7 @@ public class GeneralConfig {
         return pluginConfig.getEnum(
             SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for fallback code owners in '%s.config' of project %s."
                 + " Falling back to global config.",
             fallbackCodeOwnersString, pluginName, project.get());
@@ -253,7 +298,7 @@ public class GeneralConfig {
       return pluginConfigFromGerritConfig.getEnum(
           KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for fallback code owners in gerrit.config (parameter"
               + " plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_FALLBACK_CODE_OWNERS),
@@ -287,7 +332,7 @@ public class GeneralConfig {
             KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
             DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for max paths in change messages in '%s.config' of"
                 + " project %s. Falling back to global config.",
             maxPathInChangeMessagesString, pluginName, project.get());
@@ -298,7 +343,7 @@ public class GeneralConfig {
       return pluginConfigFromGerritConfig.getInt(
           KEY_MAX_PATHS_IN_CHANGE_MESSAGES, DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for max paths in change messages in gerrit.config (parameter"
               + " plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
@@ -356,7 +401,7 @@ public class GeneralConfig {
         return pluginConfig.getEnum(
             SECTION_CODE_OWNERS, null, key, CodeOwnerConfigValidationPolicy.TRUE);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
                 + " of project %s. Falling back to global config.",
             codeOwnerConfigValidationPolicyString, pluginName, project.get());
@@ -366,7 +411,7 @@ public class GeneralConfig {
     try {
       return pluginConfigFromGerritConfig.getEnum(key, CodeOwnerConfigValidationPolicy.TRUE);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for the code owner config validation policy in gerrit.config"
               + " (parameter plugin.%s.%s). Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(key),
@@ -402,7 +447,7 @@ public class GeneralConfig {
             KEY_MERGE_COMMIT_STRATEGY,
             MergeCommitStrategy.ALL_CHANGED_FILES);
       } catch (IllegalArgumentException e) {
-        logger.atWarning().log(
+        logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for merge commit stategy in '%s.config' of project %s."
                 + " Falling back to global config or default value.",
             mergeCommitStrategyString, pluginName, project.get());
@@ -413,7 +458,7 @@ public class GeneralConfig {
       return pluginConfigFromGerritConfig.getEnum(
           KEY_MERGE_COMMIT_STRATEGY, MergeCommitStrategy.ALL_CHANGED_FILES);
     } catch (IllegalArgumentException e) {
-      logger.atWarning().log(
+      logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for merge commit stategy in gerrit.config (parameter plugin.%s.%s)."
               + " Falling back to default value %s.",
           pluginConfigFromGerritConfig.getString(KEY_MERGE_COMMIT_STRATEGY),
