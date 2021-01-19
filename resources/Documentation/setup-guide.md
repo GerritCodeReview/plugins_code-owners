@@ -22,15 +22,10 @@ The following configuration steps are recommended:
 9. [Stop using the find-owners Prolog submit rule](#stopUsingFindOwners)
 10. [Add an initial code owner configuration at root level](#configureCodeOwners)
 
-FAQ's:
-
-* [How to update the code-owners.config file for a project](#updateCodeOwnersConfig)
-* [How to check if the code owners functionality is enabled for a project or branch](#checkIfEnabled)
-* [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
-* [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
-
 Recommendations about further configuration parameters can be found in the
 [config guide](config-guide.html).
+
+Please also heck out the [config FAQs](config-faqs.html).
 
 ### <a id="configureCodeOwnersBackend">1. Configure the code owners backend that should be used
 
@@ -58,8 +53,8 @@ Example global configuration in `gerrit.config` that configures the
 \
 To configure a backend on project-level
 [codeOwners.backend](config.html#codeOwnersBackend) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch can be set (requires to be a project owner).
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch can be set (requires to be a project owner).
 
 Example per-project configuration in `code-owners.config` that configures the
 [proto](backend-proto.html) backend:
@@ -71,8 +66,8 @@ Example per-project configuration in `code-owners.config` that configures the
 \
 It's also possible to configure backends per branch by setting
 [codeOwners.\<branch\>.backend](config.html#codeOwnersBranchBackend) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch (requires to be a project owner).
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch (requires to be a project owner).
 
 Example per-branch configuration in `code-owners.config` that configures the
 [proto](backend-proto.html) backend:
@@ -108,7 +103,7 @@ To disable the code owners functionality globally, set
 ```
 \
 Alternatively you may set [codeOwners.disabled](config.html#codeOwnersDisabled)
-in the [code-owners.config](#updateCodeOwnersConfig) file in the
+in the [code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch of the `All-Projects` project to `true` (requires to
 be a host admin).
 
@@ -122,8 +117,8 @@ be a host admin).
 
 Enable the code owners functionality on project-level by setting
 [codeOwners.disabled](config.html#codeOwnersDisabled) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch to `false` (requires to be a project owner).
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch to `false` (requires to be a project owner).
 
 `code-owners.config`:
 ```
@@ -143,15 +138,15 @@ This is the default.
 If needed, unset
 [plugin.code-owners.disabled](config.html#pluginCodeOwnersDisabled) in
 `gerrit.config` and [codeOwners.disabled](config.html#codeOwnersDisabled) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch of the `All-Projects` project).
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch of the `All-Projects` project).
 
 ###### b) Disable the code owners functionality in the projects/repositories that should not use code owners
 
 Disable the code owners functionality on project-level by setting
 [codeOwners.disabled](config.html#codeOwnersDisabled) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch to `true` (requires to be a project owner).
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch to `true` (requires to be a project owner).
 
 `code-owners.config`:
 ```
@@ -169,9 +164,9 @@ for all branches (which is the default configuration).
 
 To opt-out branches from using code owners set
 [codeOwners.disabledBranch](config.html#codeOwnersDisabledBranch) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch to a regular expression that matches the branches that should be
-opted-out (requires to be a project owner).
+[code-owners.config](config.faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch to a regular expression that matches the branches that
+should be opted-out (requires to be a project owner).
 
 `code-owners.config`:
 ```
@@ -188,8 +183,8 @@ Otherwise you can configure the required code owner approval globally by setting
 [plugin.code-owners.requiredApproval](config.html#pluginCodeOwnersRequiredApproval)
 in `gerrit.config` (requires to be a host admin) or per project by setting
 [codeOwners.requiredApproval](config.html#codeOwnersRequiredApproval) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch (requires to be a project owner).
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch (requires to be a project owner).
 
 Example global configuration in `gerrit.config` that requires `Code-Review+2` as
 code owner approval:
@@ -254,8 +249,8 @@ an override. This can be done globally by setting
 [plugin.code-owners.overrideApproval](config.html#pluginCodeOwnersOverrideApproval)
 in `gerrit.config` (requires to be a host admin) or per project by setting
 [codeOwners.overrideApproval](config.html#codeOwnersOverrideApproval) in the
-[code-owners.config](#updateCodeOwnersConfig) file in the `refs/meta/config`
-branch (requires to be a project owner).
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+`refs/meta/config` branch (requires to be a project owner).
 
 Example global configuration in `gerrit.config` that requires
 `Owners-Override+1` for a code owner override:
@@ -364,96 +359,6 @@ changes (e.g. if it is not parseable).
 recommended to validate them via the [Check code owners files REST
 endpoint](rest-api.html#check-code-owner-config-files) and fix the reported
 issues.
-
-### <a id="faq">FAQ's
-
-##### <a id="updateCodeOwnersConfig">How to update the code-owners.config file for a project
-
-The project-level configuration of the `code-owners` plugin is done in the
-`code-owners.config` file that is stored in the `refs/meta/config` branch of a
-project. If it is not present, all configuration parameters are inherited from
-the parent projects or the global configuration.
-
-The `code-owners.config` file has the format of a Git config file (same as the
-`project.config` file).
-
-To update the `code-owners.config` file do (requires to be a project owner):
-
-* clone the repository
-* fetch and checkout the `refs/meta/config` branch (e.g. `git fetch origin
-  refs/meta/config && git checkout FETCH_HEAD`)
-* create or edit the `code-owners.config` file
-* commit the changes
-* push the newly created commit back to the `refs/meta/config` branch (e.g. `git
-  push origin HEAD:refs/meta/config`)
-
-##### <a id="checkIfEnabled">How to check if the code owners functionality is enabled for a project or branch
-
-To check if the code owners functionality is enabled for a single branch, use
-the [Get Code Owner Branch Config](rest-api.html#get-code-owner-branch-config)
-REST endpoint and inspect the
-[disabled](rest-api.html#code-owner-branch-config-info) field in the response
-(if it is not present, the code owners functionality is enabled).
-
-To check if the code owners functionality is enabled for a project or for
-multiple branches, use the [Get Code Owner Project
-Config](rest-api.html#get-code-owner-project-config) REST endpoint and inspect
-the [status](rest-api.html#code-owners-status-info) in the response (an empty
-status means that the code owners functionality is enabled for all branches of
-the project).
-
-You can invoke the REST endpoints via `curl` from the command-line or
-alternatively open the following URLs in a browser:\
-`https://<host>/projects/<project-name>/branches/<branch-name>/code_owners.branch_config`\
-`https://<host>/projects/<project-name>/code_owners.project_config`\
-(remember to URL-encode the project-name and branch-name)
-
-##### <a id="avoidIssuesWithCodeOwnerConfigs">How to avoid issues with code owner config files
-
-To avoid issues with code owner config files it's highly recommended to keep the
-[validation](validation.html) of code owner config files that is performed on
-receive commits and submit enabled, as it prevents that issues are newly
-introduced to code owner config files. Whether this validation is enabled and
-whether code owner config files with new issues are rejected is controlled by
-the following configuration parameters:
-
-* [plugin.@PLUGIN@.enableValidationOnCommitReceived](config.html#pluginCodeOwnersEnableValidationOnCommitReceived)
-* [plugin.@PLUGIN@.enableValidationOnSubmit](config.html#pluginCodeOwnersEnableValidationOnSubmit)
-* [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](config.html#pluginCodeOwnersRejectNonResolvableCodeOwners)
-* [plugin.@PLUGIN@.rejectNonResolvableImports](config.html#pluginCodeOwnersRejectNonResolvableImports)
-
-Since code owner config files can also get
-[issues](validation.html#howCodeOwnerConfigsCanGetIssuesAfterSubmit) after they
-have been submitted, host administrators and project owners are also recommended
-to regularly check the existing code owner config files for issues by calling
-the [Check Code Owner Config File REST
-endpoint](rest-api.html#check-code-owner-config-files) (e.g. from a cronjob) and
-then fix the reported issues.
-
-##### <a id="investigateIssuesWithCodeOwnerConfigs">How to investigate issues with code owner config files
-
-If code owners config files are not working as expected, this is either caused
-by:
-
-* issues in the code owner config files
-* a bug in the @PLUGIN@ plugin
-
-Since code owner config files are part of the source code, any issues with them
-should be investigated and fixed by the project owners and host administrators.
-To do this they can:
-
-* Check the code owner config files for issues by calling the [Check Code Owner
-  Config File REST endpoint](rest-api.html#check-code-owner-config-files)
-* Check the code ownership of a user for a certain path by calling the [Check
-  Code Owner REST endpoint](rest-api.html#check-code-owner) (requires the caller
-  to be host administrator or have the [Check Code Owner
-  capability](#checkCodeOwner)).
-
-Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
-only after issues with the code owner config files have been excluded.
-
-Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
-owner config files in the first place.
 
 ---
 
