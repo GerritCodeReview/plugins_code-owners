@@ -6,6 +6,8 @@ customize its behavior. These configuration parameters are described in the
 recommendations for the configuration, but doesn't cover all configuration
 parameters.
 
+Please also check out the [config FAQs](config-faqs.html).
+
 ## <a id="requiredConfiguration">Required Configuration
 
 **Before** installing/enabling the plugin, or enabling the code owners
