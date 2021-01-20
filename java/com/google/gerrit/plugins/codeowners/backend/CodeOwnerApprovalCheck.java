@@ -15,9 +15,12 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -28,6 +31,7 @@ import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
+import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
@@ -105,6 +109,29 @@ public class CodeOwnerApprovalCheck {
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.approvalsUtil = approvalsUtil;
+  }
+
+  public ImmutableList<Path> getOwnedPaths(ChangeNotes changeNotes, Account.Id accountId) {
+    try {
+      return getFileStatusesForAccount(changeNotes, accountId)
+          .flatMap(
+              fileCodeOwnerStatus ->
+                  Stream.of(
+                          fileCodeOwnerStatus.newPathStatus(), fileCodeOwnerStatus.oldPathStatus())
+                      .filter(Optional::isPresent)
+                      .map(Optional::get))
+          .filter(pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
+          .map(PathCodeOwnerStatus::path)
+          .sorted(comparing(Path::toString))
+          .collect(toImmutableList());
+    } catch (RestApiException e) {
+      logger.atFine().withCause(e).log(
+          "Couldn't compute owned paths of change %s for account %s",
+          changeNotes.getChangeId(), accountId.get());
+      return ImmutableList.of();
+    } catch (IOException | PatchListNotAvailableException e) {
+      throw new StorageException(e);
+    }
   }
 
   /**

@@ -15,26 +15,19 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.toImmutableList;
-import static java.util.Comparator.comparing;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.PatchSet;
-import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
-import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.notedb.ChangeNotes;
-import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.restapi.change.OnPostReview;
 import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
@@ -113,7 +106,8 @@ class CodeOwnersOnPostReview implements OnPostReview {
 
     LabelVote newVote = getNewVote(requiredApproval, approvals);
 
-    ImmutableList<Path> ownedPaths = getOwnedPaths(changeNotes, user.getAccountId());
+    ImmutableList<Path> ownedPaths =
+        codeOwnerApprovalCheck.getOwnedPaths(changeNotes, user.getAccountId());
     if (ownedPaths.isEmpty()) {
       // the user doesn't own any of the modified paths
       return Optional.empty();
@@ -245,32 +239,5 @@ class CodeOwnersOnPostReview implements OnPostReview {
         labelName,
         approvals);
     return LabelVote.create(labelName, approvals.get(labelName));
-  }
-
-  private ImmutableList<Path> getOwnedPaths(ChangeNotes changeNotes, Account.Id accountId) {
-    try {
-      return codeOwnerApprovalCheck
-          .getFileStatusesForAccount(changeNotes, accountId)
-          .flatMap(
-              fileCodeOwnerStatus ->
-                  Stream.of(
-                          fileCodeOwnerStatus.newPathStatus(), fileCodeOwnerStatus.oldPathStatus())
-                      .filter(Optional::isPresent)
-                      .map(Optional::get))
-          .filter(pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
-          .map(PathCodeOwnerStatus::path)
-          .sorted(comparing(Path::toString))
-          .collect(toImmutableList());
-    } catch (RestApiException e) {
-      logger.atFine().withCause(e).log(
-          "Couldn't compute owned paths of change %s for account %s",
-          changeNotes.getChangeId(), accountId.get());
-      return ImmutableList.of();
-    } catch (IOException | PatchListNotAvailableException e) {
-      logger.atSevere().withCause(e).log(
-          "Failed to compute owned paths of change %s for account %s",
-          changeNotes.getChangeId(), accountId.get());
-      return ImmutableList.of();
-    }
   }
 }
