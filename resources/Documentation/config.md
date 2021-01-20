@@ -315,14 +315,21 @@ Parameters that are not set for a project are inherited from the parent project.
         By default `NONE`.
 
 <a id="pluginCodeOwnersMaxPathsInChangeMessages">plugin.@PLUGIN@.maxPathsInChangeMessages</a>
-:       When a user votes on the [code owners
-        label](#pluginCodeOwnersRequiredApproval) the paths that are affected by
-        the vote are listed in the change message that is posted when the vote
-        is applied.\
+:       The @PLUGIN@ plugin lists owned paths in change messages when:
+        \
+        1. A code owner votes on the [code owners
+        label](#pluginCodeOwnersRequiredApproval):\
+        The paths that are affected by the vote are listed in the change message
+        that is posted when the vote is applied.\
+        \
+        2. A code owner is added as reviewer:\
+        The paths that are owned by the reviewer are posted as a change
+        message.\
+        \
         This configuration parameter controls the maximum number of paths that
         are included in change messages. This is to prevent that the change
         messages become too big for large changes that touch many files.\
-        Setting the value to `0` disables including affected paths into change
+        Setting the value to `0` disables including owned paths into change
         messages.\
         Can be overridden per project by setting
         [codeOwners.maxPathsInChangeMessages](#codeOwnersMaxPathsInChangeMessages)
@@ -612,14 +619,21 @@ Parameters that are not set for a project are inherited from the parent project.
         in `gerrit.config` is used.
 
 <a id="codeOwnersMaxPathsInChangeMessages">codeOwners.maxPathsInChangeMessages</a>
-:       When a user votes on the [code owners
-        label](#codeOwnersRequiredApproval) the paths that are affected by the
-        vote are listed in the change message that is posted when the vote is
-        applied.\
+:       The @PLUGIN@ plugin lists owned paths in change messages when:
+        \
+        1. A code owner votes on the [code owners
+        label](#pluginCodeOwnersRequiredApproval):\
+        The paths that are affected by the vote are listed in the change message
+        that is posted when the vote is applied.\
+        \
+        2. A code owner is added as reviewer:\
+        The paths that are owned by the reviewer are posted as a change
+        message.\
+        \
         This configuration parameter controls the maximum number of paths that
         are included in change messages. This is to prevent that the change
         messages become too big for large changes that touch many files.\
-        Setting the value to `0` disables including affected paths into change
+        Setting the value to `0` disables including owned paths into change
         messages.\
         Overrides the global setting
         [plugin.@PLUGIN@.maxPathsInChangeMessages](#pluginCodeOwnersMaxPathsInChangeMessages)
