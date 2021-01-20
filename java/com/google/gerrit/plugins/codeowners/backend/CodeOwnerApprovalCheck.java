@@ -28,6 +28,7 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
@@ -112,19 +113,19 @@ public class CodeOwnerApprovalCheck {
   }
 
   /**
-   * Returns the paths of the files in the current patch set of the given change that are owned by
-   * the specified account.
+   * Returns the paths of the files in the given patch set that are owned by the specified account.
    *
    * @param changeNotes the change notes for which the owned files should be returned
+   * @param patchSet the patch set for which the owned files should be returned
    * @param accountId account ID of the code owner for which the owned files should be returned
-   * @return the paths of the files in the current patch set of the given change that are owned by
-   *     the specified account
+   * @return the paths of the files in the given patch set that are owned by the specified account
    * @throws ResourceConflictException if the destination branch of the change no longer exists
    */
-  public ImmutableList<Path> getOwnedPaths(ChangeNotes changeNotes, Account.Id accountId)
+  public ImmutableList<Path> getOwnedPaths(
+      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId)
       throws ResourceConflictException {
     try {
-      return getFileStatusesForAccount(changeNotes, accountId)
+      return getFileStatusesForAccount(changeNotes, patchSet, accountId)
           .flatMap(
               fileCodeOwnerStatus ->
                   Stream.of(
@@ -275,15 +276,16 @@ public class CodeOwnerApprovalCheck {
    * <p>The purpose of this method is to find the files/paths in a change that are owned by the
    * given account.
    *
-   * @param changeNotes the notes of the change for which the current code owner statuses should be
-   *     returned
+   * @param changeNotes the notes of the change for which the code owner statuses should be returned
+   * @param patchSet the patch set for which the code owner statuses should be returned
    * @param accountId the ID of the account for which an approval should be assumed
    */
   @VisibleForTesting
   public Stream<FileCodeOwnerStatus> getFileStatusesForAccount(
-      ChangeNotes changeNotes, Account.Id accountId)
+      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
+    requireNonNull(patchSet, "patchSet");
     requireNonNull(accountId, "accountId");
     try (TraceTimer traceTimer =
         TraceContext.newTimer(
@@ -291,6 +293,7 @@ public class CodeOwnerApprovalCheck {
             Metadata.builder()
                 .projectName(changeNotes.getProjectName().get())
                 .changeId(changeNotes.getChangeId().get())
+                .patchSetId(patchSet.id().get())
                 .build())) {
       RequiredApproval requiredApproval =
           codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
@@ -310,9 +313,7 @@ public class CodeOwnerApprovalCheck {
           "isBootstrapping = %s (isProjectOwner = %s)", isBootstrapping, isProjectOwner);
       if (isBootstrapping && isProjectOwner) {
         // Return all paths as approved.
-        return changedFiles
-            .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
-            .stream()
+        return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
             .map(
                 changedFile ->
                     FileCodeOwnerStatus.create(
@@ -330,9 +331,7 @@ public class CodeOwnerApprovalCheck {
                                         oldPath, CodeOwnerStatus.APPROVED))));
       }
 
-      return changedFiles
-          .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
-          .stream()
+      return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
           .map(
               changedFile ->
                   getFileStatus(

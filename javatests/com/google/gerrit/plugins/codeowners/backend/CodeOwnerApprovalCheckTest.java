@@ -56,7 +56,7 @@ import org.junit.Test;
  * <p>Further tests with fallback code owners are implemented in {@link
  * CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest} and the functionality of {@link
  * CodeOwnerApprovalCheck#getFileStatusesForAccount(ChangeNotes,
- * com.google.gerrit.entities.Account.Id)} is covered by {@link
+ * com.google.gerrit.entities.PatchSet, com.google.gerrit.entities.Account.Id)} is covered by {@link
  * CodeOwnerApprovalCheckForAccountTest}.
  */
 public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {

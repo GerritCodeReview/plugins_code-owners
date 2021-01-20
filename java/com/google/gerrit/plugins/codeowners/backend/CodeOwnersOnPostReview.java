@@ -109,7 +109,9 @@ class CodeOwnersOnPostReview implements OnPostReview {
 
     ImmutableList<Path> ownedPaths;
     try {
-      ownedPaths = codeOwnerApprovalCheck.getOwnedPaths(changeNotes, user.getAccountId());
+      ownedPaths =
+          codeOwnerApprovalCheck.getOwnedPaths(
+              changeNotes, changeNotes.getCurrentPatchSet(), user.getAccountId());
     } catch (RestApiException e) {
       logger.atFine().withCause(e).log(
           "Couldn't compute owned paths of change %s for account %s",

@@ -19,10 +19,13 @@ import static com.google.gerrit.server.api.ApiUtil.asRestApiException;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CheckCodeOwnerConfigFilesInRevisionInput;
+import com.google.gerrit.plugins.codeowners.api.OwnedPathsInfo;
 import com.google.gerrit.plugins.codeowners.api.RevisionCodeOwners;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFilesInRevision;
+import com.google.gerrit.plugins.codeowners.restapi.GetOwnedPaths;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +37,16 @@ public class RevisionCodeOwnersImpl implements RevisionCodeOwners {
   }
 
   private final CheckCodeOwnerConfigFilesInRevision checkCodeOwnerConfigFilesInRevision;
+  private final Provider<GetOwnedPaths> getOwnedPathsProvider;
   private final RevisionResource revisionResource;
 
   @Inject
   public RevisionCodeOwnersImpl(
       CheckCodeOwnerConfigFilesInRevision checkCodeOwnerConfigFilesInRevision,
+      Provider<GetOwnedPaths> getOwnedPathsProvider,
       @Assisted RevisionResource revisionResource) {
     this.checkCodeOwnerConfigFilesInRevision = checkCodeOwnerConfigFilesInRevision;
+    this.getOwnedPathsProvider = getOwnedPathsProvider;
     this.revisionResource = revisionResource;
   }
 
@@ -57,6 +63,22 @@ public class RevisionCodeOwnersImpl implements RevisionCodeOwners {
           return checkCodeOwnerConfigFilesInRevision.apply(revisionResource, input).value();
         } catch (Exception e) {
           throw asRestApiException("Cannot check code owner config files", e);
+        }
+      }
+    };
+  }
+
+  @Override
+  public OwnedPathsRequest getOwnedPaths() throws RestApiException {
+    return new OwnedPathsRequest() {
+      @Override
+      public OwnedPathsInfo get() throws RestApiException {
+        try {
+          GetOwnedPaths getOwnedPaths = getOwnedPathsProvider.get();
+          getOwnedPaths.setUser(getUser());
+          return getOwnedPaths.apply(revisionResource).value();
+        } catch (Exception e) {
+          throw asRestApiException("Cannot get owned paths", e);
         }
       }
     };
