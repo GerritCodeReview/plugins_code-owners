@@ -143,7 +143,9 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
 
       ImmutableList<Path> ownedPaths;
       try {
-        ownedPaths = codeOwnerApprovalCheck.getOwnedPaths(changeNotes, reviewerAccountId);
+        ownedPaths =
+            codeOwnerApprovalCheck.getOwnedPaths(
+                changeNotes, changeNotes.getCurrentPatchSet(), reviewerAccountId);
       } catch (RestApiException e) {
         logger.atFine().withCause(e).log(
             "Couldn't compute owned paths of change %s for account %s",

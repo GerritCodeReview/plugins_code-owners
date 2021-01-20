@@ -577,6 +577,42 @@ In addition, by default the change number is used as seed if none was specified.
 This way the sort order on a change is always the same for files that have the
 exact same code owners (requires that the limit is the same on all requests).
 
+### <a id="get-owned-files">Get Owned Files
+_'GET /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/owned_paths'_
+
+Lists the files of the revision that are owned by the specified user (see `user`
+request parameter below).
+
+The following request parameters can be specified:
+
+| Field Name  |           | Description |
+| ----------- | --------- | ----------- |
+| `user`      | mandatory | user for which the owned paths should be returned
+
+#### Request
+
+```
+  GET /changes/20187/revisions/current/owned_paths?user=foo.bar@example.com HTTP/1.0
+```
+
+#### Response
+
+As a response a [OwnedPathsInfo](#owned-paths-info) entity is returned.
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "owned_paths": [
+      "/foo/bar/baz.md",
+      "/foo/baz/bar.md",
+    ]
+  }
+```
+
 ### <a id="check-code-owner-config-files-in-revision">Check Code Owner Config Files In Revision
 _'POST /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners.check_config'_
 
@@ -814,6 +850,14 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.html#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
 | `override_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to request a code owner override.
 |`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `ALL_USER`: Paths for which no code owners are defined are owned by all users.
+
+### <a id="owned-paths-info"> OwnedPathsInfo
+The `OwnedPathsInfo` entity contains paths that are owned by a user.
+
+
+| Field Name    | Description |
+| ------------- | ----------- |
+| `owned_paths` | The owned paths as absolute paths, sorted alphabetically.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path
