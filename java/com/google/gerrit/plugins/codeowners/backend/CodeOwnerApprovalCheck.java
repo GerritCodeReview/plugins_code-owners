@@ -15,9 +15,13 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -105,6 +109,25 @@ public class CodeOwnerApprovalCheck {
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.approvalsUtil = approvalsUtil;
+  }
+
+  public ImmutableList<Path> getOwnedPaths(ChangeNotes changeNotes, Account.Id accountId)
+      throws ResourceConflictException {
+    try {
+      return getFileStatusesForAccount(changeNotes, accountId)
+          .flatMap(
+              fileCodeOwnerStatus ->
+                  Stream.of(
+                          fileCodeOwnerStatus.newPathStatus(), fileCodeOwnerStatus.oldPathStatus())
+                      .filter(Optional::isPresent)
+                      .map(Optional::get))
+          .filter(pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
+          .map(PathCodeOwnerStatus::path)
+          .sorted(comparing(Path::toString))
+          .collect(toImmutableList());
+    } catch (IOException | PatchListNotAvailableException e) {
+      throw new StorageException(e);
+    }
   }
 
   /**
@@ -246,6 +269,7 @@ public class CodeOwnerApprovalCheck {
    *     returned
    * @param accountId the ID of the account for which an approval should be assumed
    */
+  @VisibleForTesting
   public Stream<FileCodeOwnerStatus> getFileStatusesForAccount(
       ChangeNotes changeNotes, Account.Id accountId)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
