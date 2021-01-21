@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "295a4a64_f78044c6",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-21T09:30:51Z",
+      "side": 1,
+      "message": "do you have metrics to track this?",
+      "range": {
+        "startLine": 26,
+        "startChar": 63,
+        "endLine": 27,
+        "endChar": 14
+      },
+      "revId": "07747c9a297821c4f64700e09cf3d1755c9b757a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c2b7ca6_4791b8a1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-21T09:30:51Z",
+      "side": 1,
+      "message": "nit: (codeOwners.size() \u003c limit || !ownedByAllUsers.get()) ?",
+      "range": {
+        "startLine": 200,
+        "startChar": 17,
+        "endLine": 200,
+        "endChar": 21
+      },
+      "revId": "07747c9a297821c4f64700e09cf3d1755c9b757a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
