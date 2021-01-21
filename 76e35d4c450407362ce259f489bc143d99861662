@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b0cb6763_76b1004b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-21T09:37:35Z",
+      "side": 1,
+      "message": "nit: has",
+      "range": {
+        "startLine": 399,
+        "startChar": 74,
+        "endLine": 399,
+        "endChar": 76
+      },
+      "revId": "76e35d4c450407362ce259f489bc143d99861662",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "589c4e9c_82f72876",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 399,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-21T09:37:35Z",
+      "side": 1,
+      "message": "nit: reached",
+      "range": {
+        "startLine": 399,
+        "startChar": 85,
+        "endLine": 399,
+        "endChar": 90
+      },
+      "revId": "76e35d4c450407362ce259f489bc143d99861662",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9d996f2f_00f651be",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1108,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-21T09:37:35Z",
+      "side": 1,
+      "message": "is this needed in the test below?\nEither way remove this from here or add it there",
+      "range": {
+        "startLine": 1103,
+        "startChar": 0,
+        "endLine": 1108,
+        "endChar": 0
+      },
+      "revId": "76e35d4c450407362ce259f489bc143d99861662",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
