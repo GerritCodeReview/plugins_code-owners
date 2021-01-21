@@ -140,6 +140,30 @@
       },
       "revId": "76e35d4c450407362ce259f489bc143d99861662",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d003b64f_d3cf5784",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 1108,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-21T10:54:00Z",
+      "side": 1,
+      "message": "woops, I missed the GerritConfig in this test :-)\nMakes sense.",
+      "parentUuid": "b746087c_fa42683c",
+      "range": {
+        "startLine": 1103,
+        "startChar": 0,
+        "endLine": 1108,
+        "endChar": 0
+      },
+      "revId": "76e35d4c450407362ce259f489bc143d99861662",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
