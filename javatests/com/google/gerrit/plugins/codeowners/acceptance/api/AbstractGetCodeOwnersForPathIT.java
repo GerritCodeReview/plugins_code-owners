@@ -1100,12 +1100,6 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   @Test
   @GerritConfig(name = "accounts.visibility", value = "NONE")
   public void getAllUsersAsCodeOwners_withViewAllAccounts() throws Exception {
-    // Allow all users to view all accounts.
-    projectOperations
-        .allProjectsForUpdate()
-        .add(allowCapability(GlobalCapability.VIEW_ALL_ACCOUNTS).group(REGISTERED_USERS))
-        .update();
-
     TestAccount user2 = accountCreator.user2();
 
     // Add a code owner config that makes all users code owners.
@@ -1117,7 +1111,22 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addCodeOwnerEmail("*")
         .create();
 
+    requestScopeOperations.setApiUser(user.id());
+
+    // Since accounts.visibility = NONE, no account is visible and hence the list of code owners is
+    // empty.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
+
+    // Allow all users to view all accounts.
+    projectOperations
+        .allProjectsForUpdate()
+        .add(allowCapability(GlobalCapability.VIEW_ALL_ACCOUNTS).group(REGISTERED_USERS))
+        .update();
+
+    // If VIEW_ALL_ACCOUNTS is assigned, all accounts are visible now.
+    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
