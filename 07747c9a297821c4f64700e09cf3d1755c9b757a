@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "4289f13a_702a5710",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 5
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-21T10:04:25Z",
+      "side": 1,
+      "message": "No, but already now there are cases where we iterate over all relevant code owner config files, and as far as we know, there is no performance issue with this.",
+      "parentUuid": "295a4a64_f78044c6",
+      "range": {
+        "startLine": 26,
+        "startChar": 63,
+        "endLine": 27,
+        "endChar": 14
+      },
+      "revId": "07747c9a297821c4f64700e09cf3d1755c9b757a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "4c2b7ca6_4791b8a1",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
         "patchSetId": 5
@@ -37,6 +61,30 @@
       "writtenOn": "2021-01-21T09:30:51Z",
       "side": 1,
       "message": "nit: (codeOwners.size() \u003c limit || !ownedByAllUsers.get()) ?",
+      "range": {
+        "startLine": 200,
+        "startChar": 17,
+        "endLine": 200,
+        "endChar": 21
+      },
+      "revId": "07747c9a297821c4f64700e09cf3d1755c9b757a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3a2497a4_ca73359d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 200,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-21T10:04:25Z",
+      "side": 1,
+      "message": "At this place ownedByAllUsers.get() is always false.\nIf it was true we would leave the method above in line 185.",
+      "parentUuid": "4c2b7ca6_4791b8a1",
       "range": {
         "startLine": 200,
         "startChar": 17,
