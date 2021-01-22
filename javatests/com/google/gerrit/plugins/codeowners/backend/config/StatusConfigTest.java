@@ -28,7 +28,6 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -266,9 +265,7 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                statusConfig.validateProjectLevelConfig(
-                    null, new ProjectLevelConfig.Bare("code-owners.config")));
+            () -> statusConfig.validateProjectLevelConfig(null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -284,16 +281,15 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void validateEmptyProjectLevelConfig() throws Exception {
     ImmutableList<CommitValidationMessage> commitValidationMessage =
-        statusConfig.validateProjectLevelConfig(
-            "code-owners.config", new ProjectLevelConfig.Bare("code-owners.config"));
+        statusConfig.validateProjectLevelConfig("code-owners.config", new Config());
     assertThat(commitValidationMessage).isEmpty();
   }
 
   @Test
   public void validateValidProjectLevelConfig() throws Exception {
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig().setBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, true);
-    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "refs/heads/master");
+    Config cfg = new Config();
+    cfg.setBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, true);
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "refs/heads/master");
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         statusConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessage).isEmpty();
@@ -301,8 +297,8 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void validateInvalidProjectLevelConfig_invalidDisabledValue() throws Exception {
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "INVALID");
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         statusConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);
@@ -317,8 +313,8 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void validateInvalidProjectLevelConfig_invalidDisabledBranch() throws Exception {
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/[");
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "^refs/heads/[");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         statusConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);

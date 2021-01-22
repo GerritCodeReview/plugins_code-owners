@@ -48,6 +48,7 @@ public class CodeOwnersRestApiBindingsIT extends AbstractCodeOwnersTest {
   private static final ImmutableList<RestCall> PROJECT_ENDPOINTS =
       ImmutableList.of(
           RestCall.get("/projects/%s/code-owners~code_owners.project_config"),
+          RestCall.put("/projects/%s/code-owners~code_owners.project_config"),
           RestCall.post("/projects/%s/code_owners.check_config"));
 
   private static final ImmutableList<RestCall> BRANCH_ENDPOINTS =

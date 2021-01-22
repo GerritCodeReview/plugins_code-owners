@@ -37,13 +37,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.eclipse.jgit.errors.ConfigInvalidException;
+import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 
 /** Validates modifications to the {@code code-owners.config} file in {@code refs/meta/config}. */
 @Singleton
-class CodeOwnersPluginConfigValidator implements CommitValidationListener {
+public class CodeOwnersPluginConfigValidator implements CommitValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final String pluginName;
@@ -97,7 +98,12 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
 
       ProjectState projectState = getProjectState(project, receiveEvent.commit);
       ProjectLevelConfig.Bare cfg = loadConfig(project, fileName, receiveEvent.commit);
-      validateConfig(projectState, fileName, cfg);
+      ImmutableList<CommitValidationMessage> validationMessages =
+          validateConfig(projectState, fileName, cfg.getConfig());
+      if (!validationMessages.isEmpty()) {
+        throw new CommitValidationException(
+            exceptionMessage(fileName, cfg.getRevision()), validationMessages);
+      }
       return ImmutableList.of();
     } catch (IOException | ConfigInvalidException | PatchListNotAvailableException e) {
       String errorMessage =
@@ -160,11 +166,10 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
    * @param projectState the project state
    * @param fileName the name of the config file
    * @param cfg the project-level code-owners configuration that should be validated
-   * @throws CommitValidationException throw if there are any validation errors
+   * @return list of messages with validation issues, empty list if there are no issues
    */
-  private void validateConfig(
-      ProjectState projectState, String fileName, ProjectLevelConfig.Bare cfg)
-      throws CommitValidationException {
+  public ImmutableList<CommitValidationMessage> validateConfig(
+      ProjectState projectState, String fileName, Config cfg) {
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
     validationMessages.addAll(backendConfig.validateProjectLevelConfig(fileName, cfg));
     validationMessages.addAll(generalConfig.validateProjectLevelConfig(fileName, cfg));
@@ -173,10 +178,7 @@ class CodeOwnersPluginConfigValidator implements CommitValidationListener {
         requiredApprovalConfig.validateProjectLevelConfig(projectState, fileName, cfg));
     validationMessages.addAll(
         overrideApprovalConfig.validateProjectLevelConfig(projectState, fileName, cfg));
-    if (!validationMessages.isEmpty()) {
-      throw new CommitValidationException(
-          exceptionMessage(fileName, cfg.getRevision()), validationMessages);
-    }
+    return ImmutableList.copyOf(validationMessages);
   }
 
   /**

@@ -28,7 +28,6 @@ import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.RefPatternMatcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -78,21 +77,21 @@ public class StatusConfig {
    *     validation errors
    */
   ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
-      String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
+      String fileName, Config projectLevelConfig) {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
 
     try {
-      projectLevelConfig.getConfig().getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
+      projectLevelConfig.getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
     } catch (IllegalArgumentException e) {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
                   "Disabled value '%s' that is configured in %s.config (parameter %s.%s) is"
                       + " invalid.",
-                  projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, null, KEY_DISABLED),
+                  projectLevelConfig.getString(SECTION_CODE_OWNERS, null, KEY_DISABLED),
                   pluginName,
                   SECTION_CODE_OWNERS,
                   KEY_DISABLED),
@@ -100,9 +99,7 @@ public class StatusConfig {
     }
 
     for (String refPattern :
-        projectLevelConfig
-            .getConfig()
-            .getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
+        projectLevelConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH)) {
       try {
         RefPatternMatcher.getMatcher(refPattern).match("refs/heads/master", null);
       } catch (PatternSyntaxException e) {
