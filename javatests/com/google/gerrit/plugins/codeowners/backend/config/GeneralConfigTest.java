@@ -42,7 +42,6 @@ import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPoli
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -400,9 +399,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () ->
-                generalConfig.validateProjectLevelConfig(
-                    null, new ProjectLevelConfig.Bare("code-owners.config")));
+            () -> generalConfig.validateProjectLevelConfig(null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -418,20 +415,18 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void validateEmptyProjectLevelConfig() throws Exception {
     ImmutableList<CommitValidationMessage> commitValidationMessage =
-        generalConfig.validateProjectLevelConfig(
-            "code-owners.config", new ProjectLevelConfig.Bare("code-owners.config"));
+        generalConfig.validateProjectLevelConfig("code-owners.config", new Config());
     assertThat(commitValidationMessage).isEmpty();
   }
 
   @Test
   public void validateValidProjectLevelConfig() throws Exception {
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig()
-        .setString(
-            SECTION_CODE_OWNERS,
-            null,
-            KEY_MERGE_COMMIT_STRATEGY,
-            MergeCommitStrategy.ALL_CHANGED_FILES.name());
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        null,
+        KEY_MERGE_COMMIT_STRATEGY,
+        MergeCommitStrategy.ALL_CHANGED_FILES.name());
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         generalConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessage).isEmpty();
@@ -439,8 +434,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void validateInvalidProjectLevelConfig_invalidMergeCommitStrategy() throws Exception {
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig().setString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         generalConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);

@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Test;
@@ -129,9 +128,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
             () ->
                 getRequiredApprovalConfig()
                     .validateProjectLevelConfig(
-                        /* projectState= */ null,
-                        "code-owners.config",
-                        new ProjectLevelConfig.Bare("code-owners.config")));
+                        /* projectState= */ null, "code-owners.config", new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("projectState");
   }
 
@@ -143,10 +140,7 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
             NullPointerException.class,
             () ->
                 getRequiredApprovalConfig()
-                    .validateProjectLevelConfig(
-                        projectState,
-                        /* fileName= */ null,
-                        new ProjectLevelConfig.Bare("code-owners.config")));
+                    .validateProjectLevelConfig(projectState, /* fileName= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -168,23 +162,19 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         getRequiredApprovalConfig()
-            .validateProjectLevelConfig(
-                projectState,
-                "code-owners.config",
-                new ProjectLevelConfig.Bare("code-owners.config"));
+            .validateProjectLevelConfig(projectState, "code-owners.config", new Config());
     assertThat(commitValidationMessage).isEmpty();
   }
 
   @Test
   public void validateValidProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig()
-        .setString(
-            SECTION_CODE_OWNERS,
-            /* subsection= */ null,
-            getRequiredApprovalConfig().getConfigKey(),
-            "Code-Review+2");
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        getRequiredApprovalConfig().getConfigKey(),
+        "Code-Review+2");
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         getRequiredApprovalConfig()
             .validateProjectLevelConfig(projectState, "code-owners.config", cfg);
@@ -194,13 +184,12 @@ public abstract class AbstractRequiredApprovalConfigTest extends AbstractCodeOwn
   @Test
   public void validateInvalidProjectLevelConfig() throws Exception {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare("code-owners.config");
-    cfg.getConfig()
-        .setString(
-            SECTION_CODE_OWNERS,
-            /* subsection= */ null,
-            getRequiredApprovalConfig().getConfigKey(),
-            "INVALID");
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        getRequiredApprovalConfig().getConfigKey(),
+        "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         getRequiredApprovalConfig()
             .validateProjectLevelConfig(projectState, "code-owners.config", cfg);

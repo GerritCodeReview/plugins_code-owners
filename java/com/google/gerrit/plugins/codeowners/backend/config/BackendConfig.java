@@ -29,7 +29,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -88,14 +87,13 @@ public class BackendConfig {
    *     validation errors
    */
   ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
-      String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
+      String fileName, Config projectLevelConfig) {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
 
-    String backendName =
-        projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
+    String backendName = projectLevelConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
     if (backendName != null) {
       if (!lookupBackend(backendName).isPresent()) {
         validationMessages.add(
@@ -107,9 +105,8 @@ public class BackendConfig {
       }
     }
 
-    for (String subsection : projectLevelConfig.getConfig().getSubsections(SECTION_CODE_OWNERS)) {
-      backendName =
-          projectLevelConfig.getConfig().getString(SECTION_CODE_OWNERS, subsection, KEY_BACKEND);
+    for (String subsection : projectLevelConfig.getSubsections(SECTION_CODE_OWNERS)) {
+      backendName = projectLevelConfig.getString(SECTION_CODE_OWNERS, subsection, KEY_BACKEND);
       if (backendName != null) {
         if (!lookupBackend(backendName).isPresent()) {
           validationMessages.add(

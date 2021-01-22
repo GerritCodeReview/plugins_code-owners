@@ -63,6 +63,44 @@ that REST endpoint is much faster if the project contains many branches.
   }
 ```
 
+### <a id="update-code-owner-project-config">Update Code Owner Project Config
+_'PUT /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/code_owners.project_config'_
+
+Updates the code owner project configuration.
+
+The configuration parameters that should be updated must be specified in the
+request body in a [CodeOwnerProjectConfigInput](#code-owner-project-config-info)
+entity.
+
+#### Request
+
+```
+  PUT /projects/foo%2Fbar/code_owners.project_config HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "disabled": "true"
+  }
+```
+
+#### Response
+
+As a response the updated code owner project config is returned as
+[CodeOwnerProjectConfigInfo](#code-owner-project-config-info) entity.
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "status": {
+      "disabled": "true"
+    }
+  }
+```
+
 ### <a id="check-code-owner-config-files">Check Code Owner Config Files
 _'POST /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/code_owners.check_config'_
 
@@ -784,6 +822,20 @@ configuration.
 | `backend`  | optional | The code owner backend configuration as [BackendInfo](#backend-info) entity. Not set if `status.disabled` is `true`.
 | `required_approval` | optional | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval. Not set if `status.disabled` is `true`.
 | `override_approval` | optional | Approvals that count as override for the code owners submit check as a list of [RequiredApprovalInfo](#required-approval-info) entities. If multiple approvals are returned, any of them is sufficient to override the code owners submit check. All returned override approvals are guarenteed to have distinct label names. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
+
+---
+
+### <a id="code-owner-project-config-input"> CodeOwnerProjectConfigInput
+The `CodeOwnerProjectConfigInput` entity specifies which parameters in the
+`code-owner.project` file in `refs/meta/config` should be updated.
+
+If a field in this input is not set, the corresponding parameter in the
+`code-owners.config` file is not updated.
+
+| Field Name |          | Description |
+| ---------- | -------- | ----------- |
+| `disabled` | optional | Whether the code owners functionality should be disabled/enabled for the project.
+| `disabled_branch` | optional | List of branches for which the code owners functionality is disabled. Can be exact refs, ref patterns or regular expressions. Overrides any existing disabled branch configuration.
 
 ---
 
