@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.UseClockStep;
@@ -168,6 +169,23 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
             "invalid config:\n"
                 + "* Disabled branch '^refs/heads/[' that is configured in code-owners.config"
                 + " (parameter codeOwners.disabledBranch) is invalid: Unclosed character class");
+  }
+
+  @Test
+  public void setFileExtension() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).isEmpty();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.fileExtension = "foo";
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.fileExtension).isEqualTo("foo");
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).value().isEqualTo("foo");
+
+    input.fileExtension = "";
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.fileExtension).isNull();
+    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).isEmpty();
   }
 
   @Test
