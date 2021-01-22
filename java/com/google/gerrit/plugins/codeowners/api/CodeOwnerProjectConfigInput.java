@@ -40,4 +40,25 @@ public class CodeOwnerProjectConfigInput {
 
   /** The file extension that should be used for code owner config files in this project. */
   public String fileExtension;
+
+  /**
+   * The approval that is required from code owners.
+   *
+   * <p>The required approval must be specified in the format {@code <label-name>+<label-value>}.
+   *
+   * <p>If an empty string is provided the required approval configuration is unset. Unsetting the
+   * required approval means that the inherited required approval configuration or the default
+   * required approval ({@code Code-Review+1}) will apply.
+   *
+   * <p>In contrast to providing an empty string, providing {@code null} (or not setting the value)
+   * means that the required approval configuration is not updated.
+   */
+  public String requiredApproval;
+
+  /**
+   * The approvals that count as override for the code owners submit check.
+   *
+   * <p>The override approvals must be specified in the format {@code <label-name>+<label-value>}.
+   */
+  public List<String> overrideApprovals;
 }
