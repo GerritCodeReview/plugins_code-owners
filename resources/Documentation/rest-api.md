@@ -836,6 +836,7 @@ If a field in this input is not set, the corresponding parameter in the
 | ---------- | -------- | ----------- |
 | `disabled` | optional | Whether the code owners functionality should be disabled/enabled for the project.
 | `disabled_branch` | optional | List of branches for which the code owners functionality is disabled. Can be exact refs, ref patterns or regular expressions. Overrides any existing disabled branch configuration.
+| `file_extension` | optional | The file extension that should be used for code owner config files in this project.
 
 ---
 

@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.backend.config.StatusConfig.KEY_DISABLED;
 import static com.google.gerrit.plugins.codeowners.backend.config.StatusConfig.KEY_DISABLED_BRANCH;
 
@@ -102,6 +103,11 @@ public class PutCodeOwnerProjectConfig
             /* subsection= */ null,
             KEY_DISABLED_BRANCH,
             input.disabledBranches);
+      }
+
+      if (input.fileExtension != null) {
+        codeOwnersConfig.setString(
+            SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION, input.fileExtension);
       }
 
       codeOwnersProjectConfigFile.commit(metaDataUpdate);

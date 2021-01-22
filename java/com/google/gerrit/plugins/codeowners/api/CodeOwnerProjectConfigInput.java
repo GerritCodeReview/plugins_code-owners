@@ -37,4 +37,7 @@ public class CodeOwnerProjectConfigInput {
    * <p>Overrides any existing disabled branch configuration.
    */
   public List<String> disabledBranches;
+
+  /** The file extension that should be used for code owner config files in this project. */
+  public String fileExtension;
 }
