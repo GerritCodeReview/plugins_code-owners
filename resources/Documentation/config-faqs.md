@@ -25,6 +25,9 @@ To update the `code-owners.config` file do (requires to be a project owner):
 * push the newly created commit back to the `refs/meta/config` branch (e.g. `git
   push origin HEAD:refs/meta/config`)
 
+Some of the configuration parameters can also be set via the [Update Code Owner
+Project Config REST endpoint](rest-api.html#update-code-owner-project-config).
+
 ## <a id="checkIfEnabled">How to check if the code owners functionality is enabled for a project or branch
 
 To check if the code owners functionality is enabled for a single branch, use
