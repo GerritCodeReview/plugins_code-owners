@@ -31,6 +31,15 @@ public interface ProjectCodeOwners {
   /** Returns the code owner project configuration. */
   CodeOwnerProjectConfigInfo getConfig() throws RestApiException;
 
+  /**
+   * Update the code owner project configuration.
+   *
+   * @param input the input specifying which parameters should be updated
+   * @return the update code owner project configuration
+   */
+  CodeOwnerProjectConfigInfo updateConfig(CodeOwnerProjectConfigInput input)
+      throws RestApiException;
+
   /** Create a request to check the code owner config files in the project. */
   CheckCodeOwnerConfigFilesRequest checkCodeOwnerConfigFiles() throws RestApiException;
 
@@ -143,6 +152,12 @@ public interface ProjectCodeOwners {
   class NotImplemented implements ProjectCodeOwners {
     @Override
     public CodeOwnerProjectConfigInfo getConfig() throws RestApiException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public CodeOwnerProjectConfigInfo updateConfig(CodeOwnerProjectConfigInput input)
+        throws RestApiException {
       throw new NotImplementedException();
     }
 
