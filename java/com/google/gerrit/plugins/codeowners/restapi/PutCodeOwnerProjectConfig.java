@@ -16,6 +16,8 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
+import static com.google.gerrit.plugins.codeowners.backend.config.OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL;
+import static com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig.KEY_REQUIRED_APPROVAL;
 import static com.google.gerrit.plugins.codeowners.backend.config.StatusConfig.KEY_DISABLED;
 import static com.google.gerrit.plugins.codeowners.backend.config.StatusConfig.KEY_DISABLED_BRANCH;
 
@@ -116,6 +118,27 @@ public class PutCodeOwnerProjectConfig
       if (input.fileExtension != null) {
         codeOwnersConfig.setString(
             SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION, input.fileExtension);
+      }
+
+      if (input.requiredApproval != null) {
+        if (input.requiredApproval.isEmpty()) {
+          codeOwnersConfig.unset(
+              SECTION_CODE_OWNERS, /* subsection= */ null, KEY_REQUIRED_APPROVAL);
+        } else {
+          codeOwnersConfig.setString(
+              SECTION_CODE_OWNERS,
+              /* subsection= */ null,
+              KEY_REQUIRED_APPROVAL,
+              input.requiredApproval);
+        }
+      }
+
+      if (input.overrideApprovals != null) {
+        codeOwnersConfig.setStringList(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_OVERRIDE_APPROVAL,
+            input.overrideApprovals);
       }
 
       validateConfig(projectResource.getProjectState(), codeOwnersConfig);

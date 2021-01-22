@@ -837,6 +837,8 @@ If a field in this input is not set, the corresponding parameter in the
 | `disabled` | optional | Whether the code owners functionality should be disabled/enabled for the project.
 | `disabled_branch` | optional | List of branches for which the code owners functionality is disabled. Can be exact refs, ref patterns or regular expressions. Overrides any existing disabled branch configuration.
 | `file_extension` | optional | The file extension that should be used for code owner config files in this project.
+| `required_approval` | optional | The approval that is required from code owners. Must be specified in the format "\<label-name\>+\<label-value\>".
+| `override_approvals` | optional | The approvals that count as override for the code owners submit check. Must be specified in the format "\<label-name\>+\<label-value\>".
 
 ---
 

@@ -15,22 +15,26 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.UseClockStep;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInput;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.restapi.project.DeleteRef;
 import com.google.inject.Inject;
@@ -186,6 +190,100 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.fileExtension).isNull();
     assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).isEmpty();
+  }
+
+  @Test
+  public void setRequiredApproval() throws Exception {
+    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(1);
+
+    String otherLabel = "Other";
+    LabelDefinitionInput labelInput = new LabelDefinitionInput();
+    labelInput.values = ImmutableMap.of("+2", "Approval", "+1", "LGTM", " 0", "No Vote");
+    gApi.projects().name(project.get()).label(otherLabel).create(labelInput).get();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.requiredApproval = otherLabel + "+2";
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.requiredApproval.label).isEqualTo(otherLabel);
+    assertThat(updatedConfig.requiredApproval.value).isEqualTo(2);
+    requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo(otherLabel);
+    assertThat(requiredApproval).hasValueThat().isEqualTo(2);
+
+    input.requiredApproval = "";
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.requiredApproval.label).isEqualTo("Code-Review");
+    assertThat(updatedConfig.requiredApproval.value).isEqualTo(1);
+    requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApproval).hasValueThat().isEqualTo(1);
+  }
+
+  @Test
+  public void setInvalidRequiredApproval() throws Exception {
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.requiredApproval = "Non-Existing-Label+2";
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> projectCodeOwnersApiFactory.project(project).updateConfig(input));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "invalid config:\n"
+                    + "* Required approval 'Non-Existing-Label+2' that is configured in"
+                    + " code-owners.config (parameter codeOwners.requiredApproval) is invalid:"
+                    + " Label Non-Existing-Label doesn't exist for project %s.",
+                project));
+  }
+
+  @Test
+  public void setOverrideApproval() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+
+    String overrideLabel1 = "Bypass-Owners";
+    String overrideLabel2 = "Owners-Override";
+    createOwnersOverrideLabel(overrideLabel1);
+    createOwnersOverrideLabel(overrideLabel2);
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.overrideApprovals = ImmutableList.of(overrideLabel1 + "+1", overrideLabel2 + "+1");
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.overrideApproval).hasSize(2);
+    assertThat(updatedConfig.overrideApproval.get(0).label).isEqualTo(overrideLabel1);
+    assertThat(updatedConfig.overrideApproval.get(0).value).isEqualTo(1);
+    assertThat(updatedConfig.overrideApproval.get(1).label).isEqualTo(overrideLabel2);
+    assertThat(updatedConfig.overrideApproval.get(1).value).isEqualTo(1);
+    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).hasSize(2);
+
+    input.overrideApprovals = ImmutableList.of();
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.overrideApproval).isNull();
+    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+  }
+
+  @Test
+  public void setInvalidOverrideApproval() throws Exception {
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.overrideApprovals = ImmutableList.of("Non-Existing-Label+2");
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> projectCodeOwnersApiFactory.project(project).updateConfig(input));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "invalid config:\n"
+                    + "* Required approval 'Non-Existing-Label+2' that is configured in"
+                    + " code-owners.config (parameter codeOwners.overrideApproval) is invalid:"
+                    + " Label Non-Existing-Label doesn't exist for project %s.",
+                project));
   }
 
   @Test
