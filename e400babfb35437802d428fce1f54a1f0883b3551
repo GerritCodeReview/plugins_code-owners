@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3a540a5b_8256dc9c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfigValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 101,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-25T17:46:02Z",
+      "side": 1,
+      "message": "this refactor (and some other) seem not very related to this change\n\nEdit: since I already reviewed it anyway, no need to really move it to a new change.",
+      "range": {
+        "startLine": 101,
+        "startChar": 6,
+        "endLine": 101,
+        "endChar": 63
+      },
+      "revId": "e400babfb35437802d428fce1f54a1f0883b3551",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ee0fbd5d_376d56c6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/PutCodeOwnerProjectConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-25T17:46:02Z",
+      "side": 1,
+      "message": "2021",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "e400babfb35437802d428fce1f54a1f0883b3551",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
