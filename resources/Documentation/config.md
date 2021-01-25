@@ -36,7 +36,7 @@ Parameters that are not set for a project are inherited from the parent project.
         This allows branches to opt-out of the code owners functionality.\
         Can be set multiple times.\
         Can be overridden per project by setting
-        [codeOwners.disabledBrancg](#codeOwnersDisabledBranch) in
+        [codeOwners.disabledBranch](#codeOwnersDisabledBranch) in
         `@PLUGIN@.config`.\
         By default unset.
 
