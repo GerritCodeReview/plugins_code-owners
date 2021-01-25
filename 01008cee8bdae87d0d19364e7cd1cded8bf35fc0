@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d2f71bb7_6a06a3e1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnersOnAddReviewerIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-25T16:57:49Z",
+      "side": 1,
+      "message": "Another test: can you see what happens if you add a reviewer AND vote at the same time? Are both change messages added without issues?",
+      "range": {
+        "startLine": 33,
+        "startChar": 10,
+        "endLine": 33,
+        "endChar": 12
+      },
+      "revId": "01008cee8bdae87d0d19364e7cd1cded8bf35fc0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bd072613_de547c05",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnersOnAddReviewerIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-25T16:57:49Z",
+      "side": 1,
+      "message": "Another test: can you try adding a reviewer in a different way? (via PostReview)",
+      "range": {
+        "startLine": 33,
+        "startChar": 13,
+        "endLine": 33,
+        "endChar": 38
+      },
+      "revId": "01008cee8bdae87d0d19364e7cd1cded8bf35fc0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
