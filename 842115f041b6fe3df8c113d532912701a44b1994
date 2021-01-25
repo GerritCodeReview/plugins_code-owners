@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f212304_0de4bc47",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInput.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-25T18:40:40Z",
+      "side": 1,
+      "message": "explain the difference between empty and null",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 97
+      },
+      "revId": "842115f041b6fe3df8c113d532912701a44b1994",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b7dec010_dc2d1f0b",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-25T18:40:40Z",
+      "side": 1,
+      "message": "explain the difference between empty and null",
+      "range": {
+        "startLine": 840,
+        "startChar": 0,
+        "endLine": 840,
+        "endChar": 148
+      },
+      "revId": "842115f041b6fe3df8c113d532912701a44b1994",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
