@@ -11,7 +11,17 @@ In addition some configuration can be done on the project level in
 `@PLUGIN@.config` files that are stored in the `refs/meta/config` branches of
 the projects.
 
-Parameters that are not set for a project are inherited from the parent project.
+Parameters that are not set for a project are inherited from the parent project
+or the global configuration in `gerrit.config`.
+
+A config setting on project level overrides the corresponsing setting that is
+inherited from parent projects and the global configuration in `gerrit.config`.
+
+**NOTE:** Some configuration parameters have a list of values and can be
+specified multiple times (e.g. `disabledBranch`). If such a value is set on
+project level it means that the complete inherited list is overridden. It's
+*not* possible to just add a value to the inherited list, but if this is wanted
+the complete list with the additional value has to be set on project level.
 
 # <a id="globalConfiguration">Global configuration in gerrit.config</a>
 
