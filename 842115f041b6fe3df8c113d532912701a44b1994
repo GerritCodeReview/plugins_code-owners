@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "824b9621_10c37e2c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInput.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-26T10:14:11Z",
+      "side": 1,
+      "message": "Oh, good reminder! Done.",
+      "parentUuid": "1f212304_0de4bc47",
+      "range": {
+        "startLine": 47,
+        "startChar": 0,
+        "endLine": 47,
+        "endChar": 97
+      },
+      "revId": "842115f041b6fe3df8c113d532912701a44b1994",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b7dec010_dc2d1f0b",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-01-25T18:40:40Z",
       "side": 1,
       "message": "explain the difference between empty and null",
+      "range": {
+        "startLine": 840,
+        "startChar": 0,
+        "endLine": 840,
+        "endChar": 148
+      },
+      "revId": "842115f041b6fe3df8c113d532912701a44b1994",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "56ac6c88_10a1ea7c",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 840,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-26T10:14:11Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b7dec010_dc2d1f0b",
       "range": {
         "startLine": 840,
         "startChar": 0,
