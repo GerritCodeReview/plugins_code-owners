@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.config.FactoryModule;
+import com.google.gerrit.extensions.events.ReviewerAddedListener;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.DynamicSet;
 import com.google.gerrit.server.ExceptionHook;
@@ -47,6 +48,7 @@ public class BackendModule extends FactoryModule {
 
     DynamicSet.bind(binder(), ExceptionHook.class).to(CodeOwnersExceptionHook.class);
     DynamicSet.bind(binder(), OnPostReview.class).to(CodeOwnersOnPostReview.class);
+    DynamicSet.bind(binder(), ReviewerAddedListener.class).to(CodeOwnersOnAddReviewer.class);
   }
 
   @Provides

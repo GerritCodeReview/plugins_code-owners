@@ -63,6 +63,44 @@ that REST endpoint is much faster if the project contains many branches.
   }
 ```
 
+### <a id="update-code-owner-project-config">Update Code Owner Project Config
+_'PUT /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/code_owners.project_config'_
+
+Updates the code owner project configuration.
+
+The configuration parameters that should be updated must be specified in the
+request body in a [CodeOwnerProjectConfigInput](#code-owner-project-config-info)
+entity.
+
+#### Request
+
+```
+  PUT /projects/foo%2Fbar/code_owners.project_config HTTP/1.0
+  Content-Type: application/json; charset=UTF-8
+
+  {
+    "disabled": "true"
+  }
+```
+
+#### Response
+
+As a response the updated code owner project config is returned as
+[CodeOwnerProjectConfigInfo](#code-owner-project-config-info) entity.
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "status": {
+      "disabled": "true"
+    }
+  }
+```
+
 ### <a id="check-code-owner-config-files">Check Code Owner Config Files
 _'POST /projects/[\{project-name\}](../../../Documentation/rest-api-projects.html#project-name)/code_owners.check_config'_
 
@@ -577,6 +615,42 @@ In addition, by default the change number is used as seed if none was specified.
 This way the sort order on a change is always the same for files that have the
 exact same code owners (requires that the limit is the same on all requests).
 
+### <a id="get-owned-files">Get Owned Files
+_'GET /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/owned_paths'_
+
+Lists the files of the revision that are owned by the specified user (see `user`
+request parameter below).
+
+The following request parameters can be specified:
+
+| Field Name  |           | Description |
+| ----------- | --------- | ----------- |
+| `user`      | mandatory | user for which the owned paths should be returned
+
+#### Request
+
+```
+  GET /changes/20187/revisions/current/owned_paths?user=foo.bar@example.com HTTP/1.0
+```
+
+#### Response
+
+As a response a [OwnedPathsInfo](#owned-paths-info) entity is returned.
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "owned_paths": [
+      "/foo/bar/baz.md",
+      "/foo/baz/bar.md",
+    ]
+  }
+```
+
 ### <a id="check-code-owner-config-files-in-revision">Check Code Owner Config Files In Revision
 _'POST /changes/[\{change-id}](../../../Documentation/rest-api-changes.html#change-id)/revisions/[\{revison-id\}](../../../Documentation/rest-api-changes.html#revision-id)/code_owners.check_config'_
 
@@ -751,6 +825,23 @@ configuration.
 
 ---
 
+### <a id="code-owner-project-config-input"> CodeOwnerProjectConfigInput
+The `CodeOwnerProjectConfigInput` entity specifies which parameters in the
+`code-owner.project` file in `refs/meta/config` should be updated.
+
+If a field in this input is not set, the corresponding parameter in the
+`code-owners.config` file is not updated.
+
+| Field Name |          | Description |
+| ---------- | -------- | ----------- |
+| `disabled` | optional | Whether the code owners functionality should be disabled/enabled for the project.
+| `disabled_branch` | optional | List of branches for which the code owners functionality is disabled. Can be exact refs, ref patterns or regular expressions. Overrides any existing disabled branch configuration.
+| `file_extension` | optional | The file extension that should be used for code owner config files in this project.
+| `required_approval` | optional | The approval that is required from code owners. Must be specified in the format "\<label-name\>+\<label-value\>". If an empty string is provided the required approval configuration is unset. Unsetting the required approval means that the inherited required approval configuration or the default required approval (`Code-Review+1`) will apply. In contrast to providing an empty string, providing `null` (or not setting the value) means that the required approval configuration is not updated.
+| `override_approvals` | optional | The approvals that count as override for the code owners submit check. Must be specified in the format "\<label-name\>+\<label-value\>".
+
+---
+
 ### <a id="code-owner-reference-info"> CodeOwnerReferenceInfo
 The `CodeOwnerReferenceInfo` entity contains information about a code owner
 reference in a code owner config.
@@ -814,6 +905,14 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.html#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
 | `override_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to request a code owner override.
 |`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `ALL_USER`: Paths for which no code owners are defined are owned by all users.
+
+### <a id="owned-paths-info"> OwnedPathsInfo
+The `OwnedPathsInfo` entity contains paths that are owned by a user.
+
+
+| Field Name    | Description |
+| ------------- | ----------- |
+| `owned_paths` | The owned paths as absolute paths, sorted alphabetically.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path

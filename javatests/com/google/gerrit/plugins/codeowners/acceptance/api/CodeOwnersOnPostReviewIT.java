@@ -110,7 +110,7 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     recommend(changeId);
 
     // Check that no new change message was added.
-    // Gerrit code omits the change message if no vote was changed.
+    // Gerrit core omits the change message if no vote was changed.
     assertThat(gApi.changes().id(changeId).get().messages.size()).isEqualTo(messageCount);
   }
 

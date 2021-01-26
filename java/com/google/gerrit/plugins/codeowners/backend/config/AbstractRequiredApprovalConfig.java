@@ -22,7 +22,6 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
 import org.eclipse.jgit.lib.Config;
 
@@ -115,15 +114,14 @@ abstract class AbstractRequiredApprovalConfig {
    *     validation errors
    */
   ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
-      ProjectState projectState, String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
+      ProjectState projectState, String fileName, Config projectLevelConfig) {
     requireNonNull(projectState, "projectState");
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     String[] requiredApprovals =
-        projectLevelConfig
-            .getConfig()
-            .getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
+        projectLevelConfig.getStringList(
+            SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
     ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
     for (String requiredApproval : requiredApprovals) {
       try {

@@ -11,7 +11,17 @@ In addition some configuration can be done on the project level in
 `@PLUGIN@.config` files that are stored in the `refs/meta/config` branches of
 the projects.
 
-Parameters that are not set for a project are inherited from the parent project.
+Parameters that are not set for a project are inherited from the parent project
+or the global configuration in `gerrit.config`.
+
+A config setting on project level overrides the corresponsing setting that is
+inherited from parent projects and the global configuration in `gerrit.config`.
+
+**NOTE:** Some configuration parameters have a list of values and can be
+specified multiple times (e.g. `disabledBranch`). If such a value is set on
+project level it means that the complete inherited list is overridden. It's
+*not* possible to just add a value to the inherited list, but if this is wanted
+the complete list with the additional value has to be set on project level.
 
 # <a id="globalConfiguration">Global configuration in gerrit.config</a>
 
@@ -315,14 +325,21 @@ Parameters that are not set for a project are inherited from the parent project.
         By default `NONE`.
 
 <a id="pluginCodeOwnersMaxPathsInChangeMessages">plugin.@PLUGIN@.maxPathsInChangeMessages</a>
-:       When a user votes on the [code owners
-        label](#pluginCodeOwnersRequiredApproval) the paths that are affected by
-        the vote are listed in the change message that is posted when the vote
-        is applied.\
+:       The @PLUGIN@ plugin lists owned paths in change messages when:
+        \
+        1. A code owner votes on the [code owners
+        label](#pluginCodeOwnersRequiredApproval):\
+        The paths that are affected by the vote are listed in the change message
+        that is posted when the vote is applied.\
+        \
+        2. A code owner is added as reviewer:\
+        The paths that are owned by the reviewer are posted as a change
+        message.\
+        \
         This configuration parameter controls the maximum number of paths that
         are included in change messages. This is to prevent that the change
         messages become too big for large changes that touch many files.\
-        Setting the value to `0` disables including affected paths into change
+        Setting the value to `0` disables including owned paths into change
         messages.\
         Can be overridden per project by setting
         [codeOwners.maxPathsInChangeMessages](#codeOwnersMaxPathsInChangeMessages)
@@ -337,7 +354,8 @@ Parameters that are not set for a project are inherited from the parent project.
         This allows projects to opt-out of the code owners functionality.\
         Overrides the global setting
         [plugin.@PLUGIN@.disabled](#pluginCodeOwnersDisabled) in
-        `gerrit.config`.\
+        `gerrit.config` and the `codeOwners.disabled` setting from parent
+        projects.\
         By default `false`.
 
 <a id="codeOwnersDisabledBranch">codeOwners.disabledBranch</a>
@@ -351,12 +369,17 @@ Parameters that are not set for a project are inherited from the parent project.
         approvals.\
         This allows branches to opt-out of the code owners functionality.\
         Can be set multiple times.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.disabledBranch](#pluginCodeOwnersDisabledBranch) in
+        `gerrit.config` and the `codeOwners.disabledBranch` setting from parent
+        projects.\
         By default unset.
 
 <a id="codeOwnersBackend">codeOwners.backend</a>
 :       The code owners backend that should be used for the project.\
         Overrides the global setting
-        [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`.\
+        [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`
+        and the `codeOwners.backend` setting from parent projects.\
         Can be overridden per branch by setting
         [codeOwners.\<branch\>.backend](#codeOwnersBranchBackend).\
         The supported code owner backends are listed at the
@@ -377,7 +400,8 @@ Parameters that are not set for a project are inherited from the parent project.
         The branch can be the short or full name. If both configurations exist
         the one for the full name takes precedence.\
         Overrides the per repository setting
-        [codeOwners.backend](#codeOwnersBackend).\
+        [codeOwners.backend](#codeOwnersBackend) and the
+        `codeOwners.\<branch\>.backend` setting from parent projects.\
         The supported code owner backends are listed at the
         [Backends](backends.html) page.\
         If not set, the project level configuration
@@ -400,7 +424,8 @@ Parameters that are not set for a project are inherited from the parent project.
         files are ignored.\
         Overrides the global setting
         [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
-        `gerrit.config`.\
+        `gerrit.config` and the `codeOwners.fileExtension` setting from parent
+        projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
         `gerrit.config` is used.
@@ -412,7 +437,8 @@ Parameters that are not set for a project are inherited from the parent project.
         users can discover the override instructions easily.\
         Overrides the global setting
         [plugin.@PLUGIN@.overrideInfoUrl](#pluginCodeOwnersOverrideInfoUrl) in
-        `gerrit.config`.\
+        `gerrit.config` and the `codeOwners.overrideInfoUrl` setting from parent
+        projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.overrideInfoUrl](#pluginCodeOwnersOverrideInfoUrl) in
         `gerrit.config` is used.
@@ -434,7 +460,8 @@ Parameters that are not set for a project are inherited from the parent project.
         self-approve their own changes by voting on the change.\
         Overrides the global setting
         [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersenableImplicitApprovals)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.enableImplicitApprovals` setting
+        from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersenableImplicitApprovals)
         in `gerrit.config` is used.
@@ -449,7 +476,8 @@ Parameters that are not set for a project are inherited from the parent project.
         Can be specified multiple time to set multiple global code owners.\
         Overrides the global setting
         [plugin.@PLUGIN@.globalCodeOwner](#pluginCodeOwnersGlobalCodeOwner) in
-        `gerrit.config`.\
+        `gerrit.config` and the `codeOwners.globalCodeOwner` setting from parent
+        projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.globalCodeOwner](#pluginCodeOwnersGlobalCodeOwner) in
         `gerrit.config` is used.
@@ -458,7 +486,8 @@ Parameters that are not set for a project are inherited from the parent project.
 :       Whether code owner config files are read-only.\
         Overrides the global setting
         [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
-        `gerrit.config`.\
+        `gerrit.config` and the `codeOwners.readOnly` setting from parent
+        projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
         `gerrit.config` is used.
@@ -475,7 +504,8 @@ Parameters that are not set for a project are inherited from the parent project.
         config files in open changes as part of a pre-submit validation.\
         Overrides the global setting
         [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.enableValidationOnCommitReceived`
+        setting from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
         in `gerrit.config` is used.
@@ -491,7 +521,8 @@ Parameters that are not set for a project are inherited from the parent project.
         Disabling the submit validation is not recommended.\
         Overrides the global setting
         [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.enableValidationOnSubmit` setting
+        from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
         in `gerrit.config` is used.
@@ -509,7 +540,8 @@ Parameters that are not set for a project are inherited from the parent project.
         or [enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit).
         Overrides the global setting
         [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](#pluginCodeOwnersRejectNonResolvableCodeOwners)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.rejectNonResolvableCodeOwners`
+        setting from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](#pluginCodeOwnersRejectNonResolvableCodeOwners)
         in `gerrit.config` is used.
@@ -526,7 +558,8 @@ Parameters that are not set for a project are inherited from the parent project.
         or [enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit).
         Overrides the global setting
         [plugin.@PLUGIN@.rejectNonResolvableImports](#pluginCodeOwnersRejectNonResolvableImports)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.rejectNonResolvableImports`
+        setting from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.rejectNonResolvableImports](#pluginCodeOwnersRejectNonResolvableImports)
         in `gerrit.config` is used.
@@ -551,7 +584,8 @@ Parameters that are not set for a project are inherited from the parent project.
         owners check.\
         Overrides the global setting
         [plugin.@PLUGIN@.requiredApproval](#pluginCodeOwnersRequiredApproval) in
-        `gerrit.config`.\
+        `gerrit.config` and the `codeOwners.requiredApproval` setting from
+        parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.requiredApproval](#pluginCodeOwnersRequiredApproval) in
         `gerrit.config` is used.
@@ -578,7 +612,8 @@ Parameters that are not set for a project are inherited from the parent project.
         ignored for the code owners check.\
         Overrides the global setting
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
-        `gerrit.config`.\
+        `gerrit.config` and the `codeOwners.overrideApproval` setting from
+        parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
         `gerrit.config` is used.
@@ -591,7 +626,8 @@ Parameters that are not set for a project are inherited from the parent project.
         for an explanation of these values).\
         Overrides the global setting
         [plugin.@PLUGIN@.mergeCommitStrategy](#pluginCodeOwnersMergeCommitStrategy)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.mergeCommitStrategy` setting from
+        parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.mergeCommitStrategy](#pluginCodeOwnersMergeCommitStrategy)
         in `gerrit.config` is used.
@@ -606,24 +642,33 @@ Parameters that are not set for a project are inherited from the parent project.
         for an explanation of these values).\
         Overrides the global setting
         [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.fallbackCodeOwners` setting from
+        parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
         in `gerrit.config` is used.
 
 <a id="codeOwnersMaxPathsInChangeMessages">codeOwners.maxPathsInChangeMessages</a>
-:       When a user votes on the [code owners
-        label](#codeOwnersRequiredApproval) the paths that are affected by the
-        vote are listed in the change message that is posted when the vote is
-        applied.\
+:       The @PLUGIN@ plugin lists owned paths in change messages when:
+        \
+        1. A code owner votes on the [code owners
+        label](#pluginCodeOwnersRequiredApproval):\
+        The paths that are affected by the vote are listed in the change message
+        that is posted when the vote is applied.\
+        \
+        2. A code owner is added as reviewer:\
+        The paths that are owned by the reviewer are posted as a change
+        message.\
+        \
         This configuration parameter controls the maximum number of paths that
         are included in change messages. This is to prevent that the change
         messages become too big for large changes that touch many files.\
-        Setting the value to `0` disables including affected paths into change
+        Setting the value to `0` disables including owned paths into change
         messages.\
         Overrides the global setting
         [plugin.@PLUGIN@.maxPathsInChangeMessages](#pluginCodeOwnersMaxPathsInChangeMessages)
-        in `gerrit.config`.\
+        in `gerrit.config` and the `codeOwners.maxPathsInChangeMessages` setting
+        from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.maxPathsInChangeMessages](#pluginCodeOwnersMaxPathsInChangeMessages)
         in `gerrit.config` is used.\

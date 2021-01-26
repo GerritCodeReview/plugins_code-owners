@@ -33,7 +33,6 @@ import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
@@ -107,28 +106,25 @@ public class GeneralConfig {
    *     validation errors
    */
   ImmutableList<CommitValidationMessage> validateProjectLevelConfig(
-      String fileName, ProjectLevelConfig.Bare projectLevelConfig) {
+      String fileName, Config projectLevelConfig) {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
     List<CommitValidationMessage> validationMessages = new ArrayList<>();
 
     try {
-      projectLevelConfig
-          .getConfig()
-          .getEnum(
-              SECTION_CODE_OWNERS,
-              null,
-              KEY_MERGE_COMMIT_STRATEGY,
-              MergeCommitStrategy.ALL_CHANGED_FILES);
+      projectLevelConfig.getEnum(
+          SECTION_CODE_OWNERS,
+          null,
+          KEY_MERGE_COMMIT_STRATEGY,
+          MergeCommitStrategy.ALL_CHANGED_FILES);
     } catch (IllegalArgumentException e) {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
                   "Merge commit strategy '%s' that is configured in %s (parameter %s.%s) is invalid.",
-                  projectLevelConfig
-                      .getConfig()
-                      .getString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY),
+                  projectLevelConfig.getString(
+                      SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY),
                   fileName,
                   SECTION_CODE_OWNERS,
                   KEY_MERGE_COMMIT_STRATEGY),
@@ -136,17 +132,14 @@ public class GeneralConfig {
     }
 
     try {
-      projectLevelConfig
-          .getConfig()
-          .getEnum(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
+      projectLevelConfig.getEnum(
+          SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
     } catch (IllegalArgumentException e) {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
                   "The value for fallback code owners '%s' that is configured in %s (parameter %s.%s) is invalid.",
-                  projectLevelConfig
-                      .getConfig()
-                      .getString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS),
+                  projectLevelConfig.getString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS),
                   fileName,
                   SECTION_CODE_OWNERS,
                   KEY_FALLBACK_CODE_OWNERS),
@@ -154,22 +147,19 @@ public class GeneralConfig {
     }
 
     try {
-      projectLevelConfig
-          .getConfig()
-          .getInt(
-              SECTION_CODE_OWNERS,
-              null,
-              KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
-              DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+      projectLevelConfig.getInt(
+          SECTION_CODE_OWNERS,
+          null,
+          KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+          DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
     } catch (IllegalArgumentException e) {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
                   "The value for max paths in change messages '%s' that is configured in %s"
                       + " (parameter %s.%s) is invalid.",
-                  projectLevelConfig
-                      .getConfig()
-                      .getString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
+                  projectLevelConfig.getString(
+                      SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
                   fileName,
                   SECTION_CODE_OWNERS,
                   KEY_MAX_PATHS_IN_CHANGE_MESSAGES),

@@ -4,6 +4,7 @@
 * [How to check if the code owners functionality is enabled for a project or branch](#checkIfEnabled)
 * [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
 * [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
+* [How to setup code owner overrides](#setupOverrides)
 
 ## <a id="updateCodeOwnersConfig">How to update the code-owners.config file for a project
 
@@ -24,6 +25,9 @@ To update the `code-owners.config` file do (requires to be a project owner):
 * commit the changes
 * push the newly created commit back to the `refs/meta/config` branch (e.g. `git
   push origin HEAD:refs/meta/config`)
+
+Some of the configuration parameters can also be set via the [Update Code Owner
+Project Config REST endpoint](rest-api.html#update-code-owner-project-config).
 
 ## <a id="checkIfEnabled">How to check if the code owners functionality is enabled for a project or branch
 
@@ -92,6 +96,41 @@ only after issues with the code owner config files have been excluded.
 
 Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
 owner config files in the first place.
+
+## <a id="setupOverrides">How to setup code owner overrides
+
+To setup code owner overrides do:
+
+### 1. Define a label that should count as code owner override:
+
+Create a [review label](../../../Documentation/config-labels.html)
+via the [Create Label REST
+endpoint](../../../Documentation/rest-api-projects.html#create-label):
+
+```
+  curl -X PUT -d '{"commit_message": "Create Owners-Override Label", "values": {" 0": "No Override", "+1": "Override"}}' --header "Content-Type: application/json" https://<gerrit-host>/a/projects/<project-name>/labels/Owners-Override
+```
+
+### 2. Configure this label as override approval:
+
+Configure the override label via the [Update Code Owner Project Config REST
+endpoint](rest-api.html#update-code-owner-project-config):
+
+```
+  curl -X PUT -d '{"override_approvals": ["Owners-Override+1"]}' --header "Content-Type: application/json" https://<gerrit-host>/a/projects/<project-name>/code_owners.project_config
+```
+\
+Also see the description of the
+[override_approval](config.html#codeOwnersOverrideApproval) configuration
+parameter.
+
+### 3. Assign permissions to vote on the override approval:
+
+Go to the access screen of your project in the Gerrit web UI and assign
+permissions to vote on the override label.
+
+Alternatively the permissions can also be assigned via the [Set Access REST
+endpoint](../../../Documentation/rest-api-projects.html#set-access).
 
 ---
 

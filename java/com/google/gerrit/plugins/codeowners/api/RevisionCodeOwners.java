@@ -34,6 +34,11 @@ public interface RevisionCodeOwners {
    */
   CheckCodeOwnerConfigFilesRequest checkCodeOwnerConfigFiles() throws RestApiException;
 
+  /**
+   * Retrieves the paths of the revision that owned by the user that is specified in the request.
+   */
+  OwnedPathsRequest getOwnedPaths() throws RestApiException;
+
   /** Request to check code owner config files. */
   abstract class CheckCodeOwnerConfigFilesRequest {
     private String path;
@@ -88,6 +93,25 @@ public interface RevisionCodeOwners {
     public abstract Map<String, List<ConsistencyProblemInfo>> check() throws RestApiException;
   }
 
+  /** Request to check code owner config files. */
+  abstract class OwnedPathsRequest {
+    private String user;
+
+    /** Sets the user for which the owned paths should be retrieved. */
+    public OwnedPathsRequest forUser(String user) {
+      this.user = user;
+      return this;
+    }
+
+    /** Returns the user for which the owned paths should be retrieved. */
+    public String getUser() {
+      return user;
+    }
+
+    /** Executes the request and retrieves the paths that are owned by the user. */
+    public abstract OwnedPathsInfo get() throws RestApiException;
+  }
+
   /**
    * A default implementation which allows source compatibility when adding new methods to the
    * interface.
@@ -95,6 +119,11 @@ public interface RevisionCodeOwners {
   class NotImplemented implements RevisionCodeOwners {
     @Override
     public CheckCodeOwnerConfigFilesRequest checkCodeOwnerConfigFiles() throws RestApiException {
+      throw new NotImplementedException();
+    }
+
+    @Override
+    public OwnedPathsRequest getOwnedPaths() throws RestApiException {
       throw new NotImplementedException();
     }
   }
