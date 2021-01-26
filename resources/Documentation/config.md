@@ -358,6 +358,9 @@ Parameters that are not set for a project are inherited from the parent project.
         approvals.\
         This allows branches to opt-out of the code owners functionality.\
         Can be set multiple times.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.disabledBranch](#pluginCodeOwnersDisabledBranch) in
+        `gerrit.config`.\
         By default unset.
 
 <a id="codeOwnersBackend">codeOwners.backend</a>
