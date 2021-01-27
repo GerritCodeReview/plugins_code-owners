@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.backend.config.OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL;
 import static com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig.KEY_REQUIRED_APPROVAL;
@@ -139,6 +140,14 @@ public class PutCodeOwnerProjectConfig
             /* subsection= */ null,
             KEY_OVERRIDE_APPROVAL,
             input.overrideApprovals);
+      }
+
+      if (input.fallbackCodeOwners != null) {
+        codeOwnersConfig.setEnum(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_FALLBACK_CODE_OWNERS,
+            input.fallbackCodeOwners);
       }
 
       validateConfig(projectResource.getProjectState(), codeOwnersConfig);

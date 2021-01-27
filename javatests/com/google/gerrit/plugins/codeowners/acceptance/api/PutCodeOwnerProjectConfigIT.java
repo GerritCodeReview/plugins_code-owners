@@ -33,6 +33,7 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInput;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.project.ProjectState;
@@ -284,6 +285,26 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
                     + " code-owners.config (parameter codeOwners.overrideApproval) is invalid:"
                     + " Label Non-Existing-Label doesn't exist for project %s.",
                 project));
+  }
+
+  @Test
+  public void setFallbackCodeOwners() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.NONE);
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.fallbackCodeOwners = FallbackCodeOwners.ALL_USERS;
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.fallbackCodeOwners).isEqualTo(FallbackCodeOwners.ALL_USERS);
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
+
+    input.fallbackCodeOwners = FallbackCodeOwners.NONE;
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.fallbackCodeOwners).isEqualTo(FallbackCodeOwners.NONE);
+    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+        .isEqualTo(FallbackCodeOwners.NONE);
   }
 
   @Test
