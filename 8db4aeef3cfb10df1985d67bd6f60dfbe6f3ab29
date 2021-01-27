@@ -16,6 +16,23 @@
       "message": "Thanks.",
       "revId": "8db4aeef3cfb10df1985d67bd6f60dfbe6f3ab29",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "96a5ec3d_12d55906",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-01-27T10:56:26Z",
+      "side": 1,
+      "message": "failing since it\u0027s not taking into account the gerrit core change.",
+      "revId": "8db4aeef3cfb10df1985d67bd6f60dfbe6f3ab29",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
