@@ -146,8 +146,8 @@ the complete list with the additional value has to be set on project level.
 <a id="pluginCodeOwnersEnableValidationOnSubmit">plugin.@PLUGIN@.enableValidationOnSubmit</a>
 :       Policy for validating code owner config files when a change is
         submitted. Allowed values are `true` (the code owner config file
-        validation is enabled and the submit of invalid code owner config files
-        is rejected), `false` (the code owner config file validation is
+        validation is enabled and the submission of invalid code owner config
+        files is rejected), `false` (the code owner config file validation is
         disabled, invalid code owner config files are not rejected) and
         `dry_run` (code owner config files are validated, but invalid code owner
         config files are not rejected).\

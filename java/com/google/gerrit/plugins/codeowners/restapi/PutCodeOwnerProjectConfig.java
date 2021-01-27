@@ -15,8 +15,18 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_READ_ONLY;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS;
 import static com.google.gerrit.plugins.codeowners.backend.config.OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL;
 import static com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfig.KEY_REQUIRED_APPROVAL;
 import static com.google.gerrit.plugins.codeowners.backend.config.StatusConfig.KEY_DISABLED;
@@ -148,6 +158,83 @@ public class PutCodeOwnerProjectConfig
             /* subsection= */ null,
             KEY_FALLBACK_CODE_OWNERS,
             input.fallbackCodeOwners);
+      }
+
+      if (input.globalCodeOwners != null) {
+        codeOwnersConfig.setStringList(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_GLOBAL_CODE_OWNER,
+            input.globalCodeOwners);
+      }
+
+      if (input.mergeCommitStrategy != null) {
+        codeOwnersConfig.setEnum(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_MERGE_COMMIT_STRATEGY,
+            input.mergeCommitStrategy);
+      }
+
+      if (input.implicitApprovals != null) {
+        codeOwnersConfig.setBoolean(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_ENABLE_IMPLICIT_APPROVALS,
+            input.implicitApprovals);
+      }
+
+      if (input.overrideInfoUrl != null) {
+        codeOwnersConfig.setString(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_OVERRIDE_INFO_URL,
+            input.overrideInfoUrl);
+      }
+
+      if (input.readOnly != null) {
+        codeOwnersConfig.setBoolean(
+            SECTION_CODE_OWNERS, /* subsection= */ null, KEY_READ_ONLY, input.readOnly);
+      }
+
+      if (input.enableValidationOnCommitReceived != null) {
+        codeOwnersConfig.setEnum(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+            input.enableValidationOnCommitReceived);
+      }
+
+      if (input.enableValidationOnSubmit != null) {
+        codeOwnersConfig.setEnum(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_ENABLE_VALIDATION_ON_SUBMIT,
+            input.enableValidationOnSubmit);
+      }
+
+      if (input.rejectNonResolvableCodeOwners != null) {
+        codeOwnersConfig.setBoolean(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+            input.rejectNonResolvableCodeOwners);
+      }
+
+      if (input.rejectNonResolvableImports != null) {
+        codeOwnersConfig.setBoolean(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+            input.rejectNonResolvableImports);
+      }
+
+      if (input.maxPathsInChangeMessages != null) {
+        codeOwnersConfig.setInt(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
+            input.maxPathsInChangeMessages);
       }
 
       validateConfig(projectResource.getProjectState(), codeOwnersConfig);
