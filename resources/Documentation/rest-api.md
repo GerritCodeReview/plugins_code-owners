@@ -840,6 +840,16 @@ If a field in this input is not set, the corresponding parameter in the
 | `required_approval` | optional | The approval that is required from code owners. Must be specified in the format "\<label-name\>+\<label-value\>". If an empty string is provided the required approval configuration is unset. Unsetting the required approval means that the inherited required approval configuration or the default required approval (`Code-Review+1`) will apply. In contrast to providing an empty string, providing `null` (or not setting the value) means that the required approval configuration is not updated.
 | `override_approvals` | optional | The approvals that count as override for the code owners submit check. Must be specified in the format "\<label-name\>+\<label-value\>".
 | `fallback_code_owners` | optional | Policy that controls who should own paths that have no code owners defined.
+| `global_code_owners` | optional | List of emails of users that should be a code owner globally across all branches.
+| `merge_commit_strategy` | optional | Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
+| `implicit_approvals` | optional | Whether an implicit code owner approval from the last uploader is assumed.
+| `override_info_url` | optional | URL for a page that provides project/host-specific information about how to request a code owner override.
+| `read_only` | optional | Whether code owner config files are read-only.
+| `enable_validation_on_commit_received` | optional | Policy for validating code owner config files when a commit is received. Allowed values are `true` (the code owner config file validation is enabled and the upload of invalid code owner config files is rejected), `false` (the code owner config file validation is disabled, invalid code owner config files are not rejected) and `dry_run` (code owner config files are validated, but invalid code owner config files are not rejected).
+| `enable_validation_on_submit` | optional | Policy for validating code owner config files when a change is submitted. Allowed values are `true` (the code owner config file validation is enabled and the upload of invalid code owner config files is rejected), `false` (the code owner config file validation is disabled, invalid code owner config files are not rejected) and `dry_run` (code owner config files are validated, but invalid code owner config files are not rejected).
+| `reject_non_resolvable_code_owners` | optional | Whether modifications of code owner config files that newly add non-resolvable code owners should be rejected on commit received and submit.
+| `reject_non_resolvable_imports` | optional | Whether modifications of code owner config files that newly add non-resolvable imports should be rejected on commit received an submit.
+| `max_paths_in_change_messages` | optional | The maximum number of paths that are included in change messages. Setting the value to `0` disables including owned paths into change messages.
 
 ---
 

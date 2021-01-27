@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
@@ -33,9 +34,13 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerProjectConfigInput;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
+import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.restapi.project.DeleteRef;
 import com.google.inject.Inject;
@@ -305,6 +310,156 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(updatedConfig.general.fallbackCodeOwners).isEqualTo(FallbackCodeOwners.NONE);
     assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
         .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  public void setGlobalCodeOwners() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getGlobalCodeOwners(project)).isEmpty();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.globalCodeOwners = ImmutableList.of(user.email(), "foo.bar@example.com");
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(
+            codeOwnersPluginConfiguration.getGlobalCodeOwners(project).stream()
+                .map(CodeOwnerReference::email)
+                .collect(toImmutableSet()))
+        .containsExactly(user.email(), "foo.bar@example.com");
+
+    input.globalCodeOwners = ImmutableList.of();
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getGlobalCodeOwners(project)).isEmpty();
+  }
+
+  @Test
+  public void setMergeCommitStrategy() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.mergeCommitStrategy = MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION;
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.mergeCommitStrategy)
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+
+    input.mergeCommitStrategy = MergeCommitStrategy.ALL_CHANGED_FILES;
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.mergeCommitStrategy)
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+        .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  public void setImplicitApprovals() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isFalse();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.implicitApprovals = true;
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.implicitApprovals).isTrue();
+    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isTrue();
+
+    input.implicitApprovals = false;
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.implicitApprovals).isNull();
+    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isFalse();
+  }
+
+  @Test
+  public void setOverrideInfoUrl() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getOverrideInfoUrl(project)).isEmpty();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.overrideInfoUrl = "http://foo.bar";
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.overrideInfoUrl).isEqualTo("http://foo.bar");
+    assertThat(codeOwnersPluginConfiguration.getOverrideInfoUrl(project))
+        .value()
+        .isEqualTo("http://foo.bar");
+
+    input.overrideInfoUrl = "";
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.overrideInfoUrl).isNull();
+    assertThat(codeOwnersPluginConfiguration.getOverrideInfoUrl(project)).isEmpty();
+  }
+
+  @Test
+  public void setReadOnly() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(project)).isFalse();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.readOnly = true;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(project)).isTrue();
+
+    input.readOnly = false;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(project)).isFalse();
+  }
+
+  @Test
+  public void setEnableValidationOnCommitReceived() throws Exception {
+    assertThat(
+            codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                project))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.enableValidationOnCommitReceived = CodeOwnerConfigValidationPolicy.FALSE;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(
+            codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                project))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+
+    input.enableValidationOnCommitReceived = CodeOwnerConfigValidationPolicy.TRUE;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(
+            codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                project))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+  }
+
+  @Test
+  public void setEnableValidationOnSubmit() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(project))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.enableValidationOnSubmit = CodeOwnerConfigValidationPolicy.FALSE;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(project))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+
+    input.enableValidationOnSubmit = CodeOwnerConfigValidationPolicy.TRUE;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(project))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+  }
+
+  @Test
+  public void setMaxPathsInChangeMessages() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project))
+        .isEqualTo(GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.maxPathsInChangeMessages = 10;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(10);
+
+    input.maxPathsInChangeMessages = 0;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(0);
+
+    input.maxPathsInChangeMessages = GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project))
+        .isEqualTo(GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
   }
 
   @Test
