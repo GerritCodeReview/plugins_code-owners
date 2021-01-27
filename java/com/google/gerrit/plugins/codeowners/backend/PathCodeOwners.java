@@ -24,10 +24,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.server.logging.Metadata;
-import com.google.gerrit.server.logging.TraceContext;
-import com.google.gerrit.server.logging.TraceContext.TraceTimer;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
@@ -54,15 +53,18 @@ public class PathCodeOwners {
 
   @Singleton
   public static class Factory {
+    private final CodeOwnerMetrics codeOwnerMetrics;
     private final ProjectCache projectCache;
     private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
     private final CodeOwners codeOwners;
 
     @Inject
     Factory(
+        CodeOwnerMetrics codeOwnerMetrics,
         ProjectCache projectCache,
         CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
         CodeOwners codeOwners) {
+      this.codeOwnerMetrics = codeOwnerMetrics;
       this.projectCache = projectCache;
       this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
       this.codeOwners = codeOwners;
@@ -71,6 +73,7 @@ public class PathCodeOwners {
     public PathCodeOwners create(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
       requireNonNull(codeOwnerConfig, "codeOwnerConfig");
       return new PathCodeOwners(
+          codeOwnerMetrics,
           projectCache,
           codeOwners,
           codeOwnerConfig,
@@ -85,6 +88,7 @@ public class PathCodeOwners {
           .map(
               codeOwnerConfig ->
                   new PathCodeOwners(
+                      codeOwnerMetrics,
                       projectCache,
                       codeOwners,
                       codeOwnerConfig,
@@ -118,6 +122,7 @@ public class PathCodeOwners {
     }
   }
 
+  private final CodeOwnerMetrics codeOwnerMetrics;
   private final ProjectCache projectCache;
   private final CodeOwners codeOwners;
   private final CodeOwnerConfig codeOwnerConfig;
@@ -127,11 +132,13 @@ public class PathCodeOwners {
   private PathCodeOwnersResult pathCodeOwnersResult;
 
   private PathCodeOwners(
+      CodeOwnerMetrics codeOwnerMetrics,
       ProjectCache projectCache,
       CodeOwners codeOwners,
       CodeOwnerConfig codeOwnerConfig,
       Path path,
       PathExpressionMatcher pathExpressionMatcher) {
+    this.codeOwnerMetrics = requireNonNull(codeOwnerMetrics, "codeOwnerMetrics");
     this.projectCache = requireNonNull(projectCache, "projectCache");
     this.codeOwners = requireNonNull(codeOwners, "codeOwners");
     this.codeOwnerConfig = requireNonNull(codeOwnerConfig, "codeOwnerConfig");
@@ -187,13 +194,7 @@ public class PathCodeOwners {
       return this.pathCodeOwnersResult;
     }
 
-    try (TraceTimer traceTimer =
-        TraceContext.newTimer(
-            "Resolve code owner config",
-            Metadata.builder()
-                .projectName(codeOwnerConfig.key().project().get())
-                .filePath(path.toString())
-                .build())) {
+    try (Timer0.Context ctx = codeOwnerMetrics.resolveCodeOwnerConfig.start()) {
       logger.atFine().log(
           "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key());
 
@@ -249,14 +250,9 @@ public class PathCodeOwners {
       CodeOwnerConfig importingCodeOwnerConfig,
       CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
     ImmutableList.Builder<UnresolvedImport> unresolvedImports = ImmutableList.builder();
-    try (TraceTimer traceTimer =
-        TraceContext.newTimer(
-            "Resolve code owner config imports",
-            Metadata.builder()
-                .projectName(codeOwnerConfig.key().project().get())
-                .branchName(codeOwnerConfig.key().ref())
-                .filePath(codeOwnerConfig.key().filePath("<default>").toString())
-                .build())) {
+    try (Timer0.Context ctx = codeOwnerMetrics.resolveCodeOwnerConfigImports.start()) {
+      logger.atFine().log("resolve imports of codeOwnerConfig %s", importingCodeOwnerConfig.key());
+
       // To detect cyclic dependencies we keep track of all seen code owner configs.
       Set<CodeOwnerConfig.Key> seenCodeOwnerConfigs = new HashSet<>();
       seenCodeOwnerConfigs.add(codeOwnerConfig.key());
@@ -278,17 +274,10 @@ public class PathCodeOwners {
         CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
             createKeyForImportedCodeOwnerConfig(
                 importingCodeOwnerConfig.key(), codeOwnerConfigReference);
-        try (TraceTimer traceTimer2 =
-            TraceContext.newTimer(
-                "Resolve code owner config import",
-                Metadata.builder()
-                    .projectName(keyOfImportedCodeOwnerConfig.project().get())
-                    .branchName(keyOfImportedCodeOwnerConfig.ref())
-                    .filePath(
-                        keyOfImportedCodeOwnerConfig
-                            .filePath(codeOwnerConfigReference.fileName())
-                            .toString())
-                    .build())) {
+        try (Timer0.Context ctx2 = codeOwnerMetrics.resolveCodeOwnerConfigImport.start()) {
+          logger.atFine().log(
+              "resolve import of code owner config %s", keyOfImportedCodeOwnerConfig);
+
           Optional<ProjectState> projectState =
               projectCache.get(keyOfImportedCodeOwnerConfig.project());
           if (!projectState.isPresent()) {

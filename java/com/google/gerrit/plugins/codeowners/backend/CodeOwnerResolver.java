@@ -25,7 +25,9 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.AccountCache;
@@ -33,9 +35,6 @@ import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.server.account.externalids.ExternalId;
 import com.google.gerrit.server.account.externalids.ExternalIds;
-import com.google.gerrit.server.logging.Metadata;
-import com.google.gerrit.server.logging.TraceContext;
-import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -62,6 +61,7 @@ public class CodeOwnerResolver {
   private final AccountCache accountCache;
   private final AccountControl.Factory accountControlFactory;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   // Enforce visibility by default.
   private boolean enforceVisibility = true;
@@ -79,7 +79,8 @@ public class CodeOwnerResolver {
       ExternalIds externalIds,
       AccountCache accountCache,
       AccountControl.Factory accountControlFactory,
-      PathCodeOwners.Factory pathCodeOwnersFactory) {
+      PathCodeOwners.Factory pathCodeOwnersFactory,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
@@ -87,6 +88,7 @@ public class CodeOwnerResolver {
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   /**
@@ -147,15 +149,10 @@ public class CodeOwnerResolver {
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
-    try (TraceTimer traceTimer =
-        TraceContext.newTimer(
-            "Resolve path code owners",
-            Metadata.builder()
-                .projectName(codeOwnerConfig.key().project().get())
-                .branchName(codeOwnerConfig.key().ref())
-                .filePath(codeOwnerConfig.key().fileName().orElse("<default>"))
-                .build())) {
-      logger.atFine().log("resolving path code owners for path %s", absolutePath);
+    try (Timer0.Context ctx = codeOwnerMetrics.resolvePathCodeOwners.start()) {
+      logger.atFine().log(
+          "resolve path code owners (code owner config = %s, path = %s)",
+          codeOwnerConfig.key(), absolutePath);
       PathCodeOwnersResult pathCodeOwnersResult =
           pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).resolveCodeOwnerConfig();
       return resolve(

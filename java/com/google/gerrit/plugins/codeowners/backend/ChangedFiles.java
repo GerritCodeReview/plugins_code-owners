@@ -23,9 +23,11 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Patch;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.client.DiffPreferencesInfo.Whitespace;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.patch.PatchListCache;
@@ -60,15 +62,18 @@ public class ChangedFiles {
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final PatchListCache patchListCache;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
   public ChangedFiles(
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      PatchListCache patchListCache) {
+      PatchListCache patchListCache,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.patchListCache = patchListCache;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   /**
@@ -139,12 +144,14 @@ public class ChangedFiles {
     logger.atFine().log(
         "computing changed files for revision %s in project %s", revCommit.name(), project);
 
-    if (revCommit.getParentCount() > 1
-        && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
-      return computeByComparingAgainstAutoMerge(project, revCommit);
-    }
+    try (Timer0.Context ctx = codeOwnerMetrics.computeChangedFiles.start()) {
+      if (revCommit.getParentCount() > 1
+          && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
+        return computeByComparingAgainstAutoMerge(project, revCommit);
+      }
 
-    return computeByComparingAgainstFirstParent(repoConfig, revWalk, revCommit);
+      return computeByComparingAgainstFirstParent(repoConfig, revWalk, revCommit);
+    }
   }
 
   /**
