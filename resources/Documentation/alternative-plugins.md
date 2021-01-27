@@ -12,6 +12,24 @@ Similar functionality is provided by the following plugins:
 **Repository:** [plugins/find-owners](https://gerrit-review.googlesource.com/admin/repos/plugins/find-owners)\
 **Documentation:** [about](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/about.md), [syntax](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md), [REST API](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/rest-api.md), [config](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/config.md)
 
+### <a id="findOwnersCompatibility">Compatibility with the code-owners plugin
+
+The [find-owners](backend-find-owners.html) backend in the`code-owners` plugin
+supports the same syntax for `OWNERS` files as the `find-owners` plugin.  This
+means that existing `OWNERS` files continue to work with the `code-owners`
+plugin and no migration for the `OWNERS` files is required.
+
+**IMPORTANT:** When migrating to the `code-owners` plugin, make sure that it is
+correctly configured (see [setup guide](setup-guide.html)).
+
+**NOTE:** The REST API of the `code-owners` plugin is completely different than
+the REST API of the `find-owners` plugin. This means callers of the REST API
+must be adapted to the new API.
+
+**NOTE:** The `OWNERS` syntax in the `code-owners` plugin supports some
+additional features. This means that `OWNERS` files that work with the
+`code-owners` plugin may not work with the `find-owners` plugin.
+
 ### <a id="findOwnersFunctionality">Functionality
 
 * Basic support for defining code owners:
