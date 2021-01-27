@@ -83,8 +83,7 @@ class CodeOwnersOnPostReview implements OnPostReview {
     if (oldApprovals.get(requiredApproval.labelType().getName()) == null) {
       // If oldApprovals doesn't contain the label or if the labels value in it is null, the label
       // was not changed.
-      // This either means that the user only voted on unrelated labels, or that the user applied
-      // the exact same code owner approval again, that was already present.
+      // This means that the user only voted on unrelated labels.
       return Optional.empty();
     }
 

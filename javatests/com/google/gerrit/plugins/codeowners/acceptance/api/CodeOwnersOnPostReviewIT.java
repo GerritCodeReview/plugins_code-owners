@@ -90,7 +90,7 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgain() throws Exception {
+  public void changeMessageExtended_sameCodeOwnerApprovalAppliedAgain() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -109,13 +109,22 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     // Apply the Code-Review+1 approval again
     recommend(changeId);
 
-    // Check that no new change message was added.
-    // Gerrit core omits the change message if no vote was changed.
-    assertThat(gApi.changes().id(changeId).get().messages.size()).isEqualTo(messageCount);
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    // Check that a new change message was added.
+    assertThat(messages.size()).isEqualTo(messageCount + 1);
+
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are still code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
   }
 
   @Test
-  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithOtherLabel()
+  public void changeMessageExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithOtherLabel()
       throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
@@ -153,11 +162,18 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     // The message is unchanged, since reapplying the same code owner approval is ignored by Gerrit
     // core (the change message only mentions the new vote, but not the reapplied vote).
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
-    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Other+1");
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1 Other+1\n\n"
+                    + "By voting Code-Review+1 the following files are still code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
   }
 
   @Test
-  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithComment()
+  public void changeMessageExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithComment()
       throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
@@ -193,14 +209,21 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     commentInput.message = "some comment";
     commentInput.path = path;
     ReviewInput reviewInput = ReviewInput.recommend();
-    reviewInput.comments = reviewInput.comments = new HashMap<>();
+    reviewInput.comments = new HashMap<>();
     reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
     gApi.changes().id(changeId).current().review(reviewInput);
 
     // The message is unchanged, since reapplying the same code owner approval is ignored by Gerrit
     // core (the change message only mentions the comment, but not the reapplied vote).
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
-    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1:\n\n" + "(1 comment)");
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n(1 comment)\n\n"
+                    + "By voting Code-Review+1 the following files are still code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
   }
 
   @Test
@@ -864,7 +887,7 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     commentInput.message = "some comment";
     commentInput.path = path;
     ReviewInput reviewInput = ReviewInput.recommend();
-    reviewInput.comments = reviewInput.comments = new HashMap<>();
+    reviewInput.comments = new HashMap<>();
     reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
     gApi.changes().id(changeId).current().review(reviewInput);
 
