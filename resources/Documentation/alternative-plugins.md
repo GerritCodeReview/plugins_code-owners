@@ -3,8 +3,7 @@
 Similar functionality is provided by the following plugins:
 
 * [find-owners](#findOwners) plugin
-* [owners](https://gerrit-review.googlesource.com/admin/repos/plugins/owners)
-  plugin
+* [owners](#owners) plugin
 
 ## <a id="findOwners">find-owners plugin (deprecated)
 
@@ -64,6 +63,36 @@ additional features. This means that `OWNERS` files that work with the
         * `GET /changes/<change-id>/owners`
         * Delegates to Action REST endpoint (see above)
     * Also see [REST endpoint documentation](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/rest-api.md)
+
+## <a id="owners">owners plugin + owners-autoassign plugin
+
+**Status:** maintained by the Gerrit open source community (no Google involvement)\
+**Repository:** [plugins/owners](https://gerrit-review.googlesource.com/admin/repos/plugins/owners)\
+**Documentation:** [readme](https://gerrit.googlesource.com/plugins/owners/+/master/README.md), [config & syntax](https://gerrit.googlesource.com/plugins/owners/+/master/owners/src/main/resources/Documentation/config.md)
+
+### <a id="ownersFunctionality">Functionality
+
+* Basic support for defining code owners in the source branch and globally for
+  a repository:
+    * Code owners can be specified in `OWNERS` files that can appear in any
+      directory in the source branch.
+    * Code owners can be specified on repository level by an `OWNERS` file in
+      the `refs/meta/config` branch.
+    * Code owners can be specified by email or full name.
+    * Groups can be specified as code owners (by group name and group UUID).
+    * Inheritance from parent directories is supported and can be disabled.
+    * Regular expressions can be used.
+    * Syntax is based on YAML.
+    * See [documentation](https://gerrit.googlesource.com/plugins/owners/+/master/owners/src/main/resources/Documentation/config.md) for the supported syntax.
+<br><br>
+* Prolog rule to prevent submitting changes without code owner approvals.
+    * The label on which code owners must vote is configurable.
+<br><br>
+* The UI visualizes whose approval is needed for submit.
+    * Implemented by the `need` description of the Prolog rule, which will be
+      shown in the UI (the plugin doesn't contain any UI code)
+<br><br>
+* Auto-adding of code owners as reviewers.
 
 ---
 
