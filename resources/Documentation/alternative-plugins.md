@@ -70,6 +70,20 @@ additional features. This means that `OWNERS` files that work with the
 **Repository:** [plugins/owners](https://gerrit-review.googlesource.com/admin/repos/plugins/owners)\
 **Documentation:** [readme](https://gerrit.googlesource.com/plugins/owners/+/master/README.md), [config & syntax](https://gerrit.googlesource.com/plugins/owners/+/master/owners/src/main/resources/Documentation/config.md)
 
+### <a id="ownersCompatibility">Compatibility with the code-owners plugin
+
+The `OWNERS` sytax that is used by the `owners` plugin is **not** compatible
+with the `code-owners` plugin. This means any migration from the `owners` plugin
+to the `code-owners` plugin (and vice versa) requires migrating all existing
+`OWNERS` files.
+
+**NOTE:** It would be feasible to implement a new [backend](backends.html) in
+the `code-owners` plugin that supports the syntax of the `owners` plugin
+(contributions are welcome).
+
+**NOTE:** The `owners` plugin supports groups as code owners, which are not
+supported by the `code-owners` plugin.
+
 ### <a id="ownersFunctionality">Functionality
 
 * Basic support for defining code owners in the source branch and globally for
