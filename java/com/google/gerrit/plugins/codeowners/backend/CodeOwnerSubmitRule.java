@@ -23,10 +23,9 @@ import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.server.logging.Metadata;
-import com.google.gerrit.server.logging.TraceContext;
-import com.google.gerrit.server.logging.TraceContext.TraceTimer;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.query.change.ChangeData;
@@ -56,13 +55,16 @@ class CodeOwnerSubmitRule implements SubmitRule {
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
   CodeOwnerSubmitRule(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
+      CodeOwnerApprovalCheck codeOwnerApprovalCheck,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   @Override
@@ -70,13 +72,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
     try {
       requireNonNull(changeData, "changeData");
 
-      try (TraceTimer traceTimer =
-          TraceContext.newTimer(
-              "Run code owner submit rule",
-              Metadata.builder()
-                  .projectName(changeData.project().get())
-                  .changeId(changeData.getId().get())
-                  .build())) {
+      try (Timer0.Context ctx = codeOwnerMetrics.runCodeOwnerSubmitRule.start()) {
+        logger.atFine().log(
+            "run code owner submit rule (project = %s, change = %d)",
+            changeData.project().get(), changeData.getId().get());
+
         if (codeOwnersPluginConfiguration.isDisabled(changeData.change().getDest())) {
           logger.atFine().log(
               "code owners functionality is disabled for branch %s", changeData.change().getDest());
