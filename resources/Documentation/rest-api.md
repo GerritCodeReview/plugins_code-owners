@@ -839,6 +839,7 @@ If a field in this input is not set, the corresponding parameter in the
 | `file_extension` | optional | The file extension that should be used for code owner config files in this project.
 | `required_approval` | optional | The approval that is required from code owners. Must be specified in the format "\<label-name\>+\<label-value\>". If an empty string is provided the required approval configuration is unset. Unsetting the required approval means that the inherited required approval configuration or the default required approval (`Code-Review+1`) will apply. In contrast to providing an empty string, providing `null` (or not setting the value) means that the required approval configuration is not updated.
 | `override_approvals` | optional | The approvals that count as override for the code owners submit check. Must be specified in the format "\<label-name\>+\<label-value\>".
+| `fallback_code_owners` | optional | Policy that controls who should own paths that have no code owners defined.
 
 ---
 

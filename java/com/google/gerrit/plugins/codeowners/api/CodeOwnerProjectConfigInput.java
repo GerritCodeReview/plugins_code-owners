@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import java.util.List;
 
 /**
@@ -61,4 +62,7 @@ public class CodeOwnerProjectConfigInput {
    * <p>The override approvals must be specified in the format {@code <label-name>+<label-value>}.
    */
   public List<String> overrideApprovals;
+
+  /** Policy that controls who should own paths that have no code owners defined. */
+  public FallbackCodeOwners fallbackCodeOwners;
 }
