@@ -159,8 +159,6 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     reviewInput.labels.put("Other", (short) 1);
     gApi.changes().id(changeId).current().review(reviewInput);
 
-    // The message is unchanged, since reapplying the same code owner approval is ignored by Gerrit
-    // core (the change message only mentions the new vote, but not the reapplied vote).
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
@@ -213,8 +211,6 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
     reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
     gApi.changes().id(changeId).current().review(reviewInput);
 
-    // The message is unchanged, since reapplying the same code owner approval is ignored by Gerrit
-    // core (the change message only mentions the comment, but not the reapplied vote).
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
