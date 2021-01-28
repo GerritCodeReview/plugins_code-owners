@@ -5,6 +5,8 @@
 * [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
 * [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
 * [How to setup code owner overrides](#setupOverrides)
+* [What's the best place to keep the global plugin
+  configuration](#globalPluginConfiguration)
 
 ## <a id="updateCodeOwnersConfig">How to update the code-owners.config file for a project
 
@@ -131,6 +133,25 @@ permissions to vote on the override label.
 
 Alternatively the permissions can also be assigned via the [Set Access REST
 endpoint](../../../Documentation/rest-api-projects.html#set-access).
+
+## <a id="globalPluginConfiguration">What's the best place to keep the global plugin configuration
+
+The global plugin configuration can either be maintained in the
+[gerrit.config](config.html) file or in the
+[code-owners.config](config.html#projectLevelConfigFile) file in the
+`refs/meta/config` branch of the `All-Projects` project. From the perspective of
+the code-owners plugin both places are equally good. However which place is
+preferred can depend on the system setup, e.g. changes to `gerrit.config` may be
+harder to do and require a multi-day rollout, whereas changes of the
+`All-Projects` configuration can be done through the [REST
+API](rest-api.html#update-code-owner-project-config) and are always instant.
+
+**NOTE:** Any configuration that is done in `All-Projects` overrides the
+corresponding configuration that is inherited from `gerrit.config`.
+
+**NOTE:** There are a few configuration parameters (e.g. for [allowed email
+domains](config.html#pluginCodeOwnersAllowedEmailDomain)) that cannot be set on
+project level and hence must be set in `gerrit.config`.
 
 ---
 
