@@ -47,7 +47,8 @@ public class BackendModule extends FactoryModule {
     install(new CodeOwnerSubmitRule.Module());
 
     DynamicSet.bind(binder(), ExceptionHook.class).to(CodeOwnersExceptionHook.class);
-    DynamicSet.bind(binder(), OnPostReview.class).to(CodeOwnersOnPostReview.class);
+    DynamicSet.bind(binder(), OnPostReview.class).to(OnCodeOwnerApproval.class);
+    DynamicSet.bind(binder(), OnPostReview.class).to(OnCodeOwnerOverride.class);
     DynamicSet.bind(binder(), ReviewerAddedListener.class).to(CodeOwnersOnAddReviewer.class);
   }
 

@@ -35,7 +35,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
- * Callback that is invoked on post review.
+ * Callback that is invoked on post review and that extends the change message if a code owner
+ * approval was changed.
  *
  * <p>If a code owner approval was added, removed or changed, include in the change message that is
  * being posted on vote, which of the files:
@@ -47,14 +48,14 @@ import java.util.stream.Stream;
  * </ul>
  */
 @Singleton
-class CodeOwnersOnPostReview implements OnPostReview {
+class OnCodeOwnerApproval implements OnPostReview {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
 
   @Inject
-  CodeOwnersOnPostReview(
+  OnCodeOwnerApproval(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
