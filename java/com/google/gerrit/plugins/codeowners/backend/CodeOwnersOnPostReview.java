@@ -196,6 +196,7 @@ class CodeOwnersOnPostReview implements OnPostReview {
           oldApprovals,
           approvals,
           requiredApproval);
+      return Optional.empty();
     }
 
     if (ownedPaths.size() <= maxPathsInChangeMessage) {
