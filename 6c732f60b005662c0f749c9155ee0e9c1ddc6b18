@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7fa1816e_d84c6513",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerProjectConfigInput.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-28T09:34:51Z",
+      "side": 1,
+      "message": "Really good catch! Thanks for noticing.\n\nDone.",
+      "parentUuid": "0a1fafb6_fc0c343e",
+      "range": {
+        "startLine": 95,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 0
+      },
+      "revId": "6c732f60b005662c0f749c9155ee0e9c1ddc6b18",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f91b83b0_8eb2b216",
@@ -47,6 +71,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2b66c8f_3fa0e64d",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 843,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-28T09:34:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f91b83b0_8eb2b216",
+      "range": {
+        "startLine": 843,
+        "startChar": 75,
+        "endLine": 843,
+        "endChar": 87
+      },
+      "revId": "6c732f60b005662c0f749c9155ee0e9c1ddc6b18",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "cda1060b_aeeb8b4e",
@@ -60,6 +108,30 @@
       "writtenOn": "2021-01-27T15:19:13Z",
       "side": 1,
       "message": "submission?",
+      "range": {
+        "startLine": 849,
+        "startChar": 203,
+        "endLine": 849,
+        "endChar": 209
+      },
+      "revId": "6c732f60b005662c0f749c9155ee0e9c1ddc6b18",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f44b14fd_fdf21551",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 849,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-28T09:34:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "cda1060b_aeeb8b4e",
       "range": {
         "startLine": 849,
         "startChar": 203,
