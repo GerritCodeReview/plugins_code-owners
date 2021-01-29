@@ -161,10 +161,11 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
 
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message)
-        .isEqualTo(
+        .containsMatch("Patch Set 1:(?=.*Other\\+1)(?=.*Code\\-Review\\+1)");
+    assertThat(Iterables.getLast(messages).message)
+        .contains(
             String.format(
-                "Patch Set 1: Code-Review+1 Other+1\n\n"
-                    + "By voting Code-Review+1 the following files are still code-owner approved by"
+                "By voting Code-Review+1 the following files are still code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
                 admin.fullName(), path));
