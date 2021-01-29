@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4ef6f015_472c2ec3",
+        "filename": "resources/Documentation/path-expressions.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-29T13:41:20Z",
+      "side": 1,
+      "message": "Yes, using \"**\" should not be a problem.\nWith the prefix the glob is \"{**/,}**\" which translates to \"**/**\" or \"**\".",
+      "parentUuid": "57e032a1_fcda7660",
+      "range": {
+        "startLine": 11,
+        "startChar": 71,
+        "endLine": 12,
+        "endChar": 39
+      },
+      "revId": "77a3af89a9701c9808c9748f89b785c55e8ba038",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "aad9b5bd_16de9be2",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-01-29T13:19:11Z",
       "side": 1,
       "message": "I didn\u0027t get that.",
+      "range": {
+        "startLine": 46,
+        "startChar": 46,
+        "endLine": 46,
+        "endChar": 108
+      },
+      "revId": "77a3af89a9701c9808c9748f89b785c55e8ba038",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "07beee9d_c3658c80",
+        "filename": "resources/Documentation/path-expressions.md",
+        "patchSetId": 4
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-01-29T13:41:20Z",
+      "side": 1,
+      "message": "You cannot use \"my-folder/**\" to only match files under \"my-folder/\". Since the glob is prefixed with \"{**/,}\" also \"**/my-folder/**\" would be matched. If you want to match only files under \"my-folder/\", you can create a \"my-folder/OWNERS\" file instead of using a glob.\n\nI rephrased it. Hope it\u0027s clearer now.",
+      "parentUuid": "aad9b5bd_16de9be2",
       "range": {
         "startLine": 46,
         "startChar": 46,
