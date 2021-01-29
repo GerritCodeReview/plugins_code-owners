@@ -14,8 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import org.junit.Test;
 
 /** Tests for {@link FindOwnersGlobMatcher}. */
@@ -25,67 +23,68 @@ public class FindOwnersGlobMatcherTest extends GlobMatcherTest {
     return FindOwnersGlobMatcher.INSTANCE;
   }
 
-  @Test
-  public void singleStarInGlobIsReplacedWithDoubleStar() throws Exception {
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("*.md"))
-        .isEqualTo("**.md");
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("foo/*.md"))
-        .isEqualTo("foo/**.md");
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("*/foo/*.md"))
-        .isEqualTo("**/foo/**.md");
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("foo/*"))
-        .isEqualTo("foo/**");
-  }
-
-  @Test
-  public void doubleStarInGlobIsNotReplaced() throws Exception {
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("**.md"))
-        .isEqualTo("**.md");
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("foo/**.md"))
-        .isEqualTo("foo/**.md");
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("**/foo/**.md"))
-        .isEqualTo("**/foo/**.md");
-  }
-
-  @Test
-  public void tripleStarInGlobIsNotReplaced() throws Exception {
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("***.md"))
-        .isEqualTo("***.md");
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("foo/***.md"))
-        .isEqualTo("foo/***.md");
-    assertThat(FindOwnersGlobMatcher.INSTANCE.replaceSingleStarWithDoubleStar("***/foo/***.md"))
-        .isEqualTo("***/foo/***.md");
-  }
-
   /**
-   * This test differs from the base class ({@link GlobMatcherTest}), since for {@link
-   * FindOwnersGlobMatcher} {@code *} also matches slashes and the test in the base class has an
-   * assertion that checks that slashes are not matched by {@code *}.
+   * This test differs from the base class ({@link GlobMatcherTest}), since {@link
+   * FindOwnersGlobMatcher} matches globs against any subdirectory and the test in the base class
+   * checks that subdirectories are not matched.
    */
   @Test
   @Override
-  public void matchFileTypeInCurrentFolder() throws Exception {
-    String pathExpression = "*.md";
-    assertMatch(pathExpression, "README.md", "config.md");
-    assertNoMatch(pathExpression, "README", "README.md5");
-  }
-
-  @Test
-  public void matchFileTypeInCurrentFolderAndAllSubfoldersBySingleStar() throws Exception {
+  public void matchFileType() throws Exception {
     String pathExpression = "*.md";
     assertMatch(pathExpression, "README.md", "config.md", "foo/README.md", "foo/bar/README.md");
     assertNoMatch(pathExpression, "README", "README.md5");
   }
 
+  /**
+   * This test differs from the base class ({@link GlobMatcherTest}), since {@link
+   * FindOwnersGlobMatcher} matches globs against any subdirectory and the test in the base class
+   * checks that subdirectories are not matched.
+   */
   @Test
-  public void matchAllFilesInSubfolderBySingleStar() throws Exception {
-    String pathExpression = "foo/*";
+  @Override
+  public void matchConcreteFile() throws Exception {
+    String pathExpression = "BUILD";
+    assertMatch(pathExpression, "BUILD", "foo/BUILD", "foo/bar/BUILD");
+    assertNoMatch(pathExpression, "README", "BUILD2");
+  }
+
+  /**
+   * This test differs from the base class ({@link GlobMatcherTest}), since {@link
+   * FindOwnersGlobMatcher} matches globs against any subdirectory and the test in the base class
+   * checks that subdirectories are not matched.
+   */
+  @Test
+  @Override
+  public void matchAllFilesInSubfolder() throws Exception {
+    String pathExpression = "foo/**";
     assertMatch(
         pathExpression,
         "foo/README.md",
         "foo/config.txt",
         "foo/bar/README.md",
-        "foo/bar/baz/README.md");
-    assertNoMatch(pathExpression, "README", "foo2/README");
+        "foo/bar/baz/README.md",
+        "bar/foo/README.md",
+        "bar/foo/config.txt",
+        "bar/foo/bar/README.md",
+        "bar/foo/bar/baz/README.md");
+    assertNoMatch(pathExpression, "README", "foo2/README", "bar/README", "bar/foo2/README");
+  }
+
+  /**
+   * This test differs from the base class ({@link GlobMatcherTest}), since {@link
+   * FindOwnersGlobMatcher} matches globs against any subdirectory and the test in the base class
+   * checks that subdirectories are not matched.
+   */
+  @Test
+  @Override
+  public void matchPattern() throws Exception {
+    String pathExpression = "{**/,}foo-[1-4].txt";
+    assertMatch(pathExpression, "foo-1.txt", "foo-2.txt", "sub/foo-3.txt", "sub/sub/foo-4.txt");
+    assertNoMatch(pathExpression, "foo-5.txt", "foo-11.txt");
+
+    String pathExpression2 = "foo-[1-4].txt";
+    assertMatch(pathExpression2, "foo-1.txt", "foo-2.txt", "sub/foo-3.txt", "sub/sub/foo-4.txt");
+    assertNoMatch(pathExpression2, "foo-5.txt", "foo-11.txt");
   }
 }
