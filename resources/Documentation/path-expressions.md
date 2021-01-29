@@ -7,15 +7,18 @@ to only apply to a subset of files in a directory (e.g. see
 
 Which syntax is used depends on the used code owner backend:
 
-* [find-owners](backend-find-owners.html) backend: uses [globs](#globs)
-* [proto](backend-proto.html) backend: uses
-  [simple path expressions](#simplePathExpressions)
+* [find-owners](backend-find-owners.html) backend:
+  uses [globs](#globs), but each glob is automatically prefixed with `{**/,}`
+  so that subfolders are always matched (e.g. `*.md` matches all md files in all
+  subfolders, rather then only md files in the current folder)
+* [proto](backend-proto.html) backend:
+  uses [simple path expressions](#simplePathExpressions)
 
 ## <a id="globs">Globs
 
 Globs support the following wildcards:
 
-* `*`/`**`: matches any string, including slashes
+* `*`: matches any string, including slashes
 * `?`: matches any character
 * `[abc]`: matches one character given in the bracket
 * `[a-c]`: matches one character from the range given in the bracket
@@ -34,15 +37,15 @@ See [below](#examples) for examples.
 
 ## <a id="examples">Examples
 
-| To Match | Glob | Simple Path Expression |
-| -------- | ---- | ---------------------- |
-| Concrete file in current folder | `BUILD` | `BUILD` |
-| File type in current folder | not possible | `*.md` |
-| Concrete file in the current folder and in all subfolders | `{**/,}BUILD` | needs 2 expressions: `BUILD` + `.../BUILD` |
-| File type in the current folder and in all subfolders | `**.md` or `*.md` | `....md` |
-| All files in a subfolder | `my-folder/**` | `my-folder/...` |
-| All “foo-<1-digit-number>.txt” files in all subfolders | `{**/,}foo-[0-9].txt` | not possible |
-| All “foo-<n-digit-number>.txt” files in all subfolders | not possible | not possible |
+| To Match | Glob | find-owners | Simple Path Expression |
+| -------- | ---- | ----------- | ---------------------- |
+| Concrete file in current folder | `BUILD` | not possible | `BUILD` |
+| File type in current folder | `*.md` | not possible | `*.md` |
+| Concrete file in the current folder and in all subfolders | `{**/,}BUILD` | `BUILD` | needs 2 expressions: `BUILD` + `.../BUILD` |
+| File type in the current folder and in all subfolders | `**.md` | `*.md` or `**.md` | `....md` |
+| All files in a subfolder | `my-folder/**` | not possible, instead define an `OWNERS` file in the subfolder | `my-folder/...` |
+| All “foo-<1-digit-number>.txt” files in all subfolders | `{**/,}foo-[0-9].txt` | `foo-[0-9].txt` |not possible |
+| All “foo-<n-digit-number>.txt” files in all subfolders | not possible | not possible | not possible
 
 ---
 
