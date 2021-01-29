@@ -855,6 +855,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         PathCodeOwners.createKeyForImportedCodeOwnerConfig(
             keyOfImportingCodeOwnerConfig, codeOwnerConfigReference);
 
+    if (isSelfImport(keyOfImportingCodeOwnerConfig, keyOfImportedCodeOwnerConfig)) {
+      return nonResolvableImport(
+          project, importType, codeOwnerConfigFilePath, "code owner config cannot import itself");
+    }
+
     Optional<ProjectState> projectState = projectCache.get(keyOfImportedCodeOwnerConfig.project());
     if (!projectState.isPresent() || !isProjectReadable(keyOfImportedCodeOwnerConfig)) {
       // we intentionally use the same error message for non-existing and non-readable projects so
@@ -942,6 +947,21 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
     // no issue found
     return Optional.empty();
+  }
+
+  /** Whether the importing code owner config is the same as the imported code owner config. */
+  private boolean isSelfImport(
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+    return keyOfImportingCodeOwnerConfig.project().equals(keyOfImportedCodeOwnerConfig.project())
+        && keyOfImportingCodeOwnerConfig.ref().equals(keyOfImportedCodeOwnerConfig.ref())
+        && codeOwnersPluginConfiguration
+            .getBackend(keyOfImportingCodeOwnerConfig.branchNameKey())
+            .getFilePath(keyOfImportingCodeOwnerConfig)
+            .equals(
+                codeOwnersPluginConfiguration
+                    .getBackend(keyOfImportedCodeOwnerConfig.branchNameKey())
+                    .getFilePath(keyOfImportedCodeOwnerConfig));
   }
 
   private boolean isProjectReadable(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
