@@ -855,6 +855,14 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         PathCodeOwners.createKeyForImportedCodeOwnerConfig(
             keyOfImportingCodeOwnerConfig, codeOwnerConfigReference);
 
+    if (isSelfImport(keyOfImportingCodeOwnerConfig, keyOfImportedCodeOwnerConfig)) {
+      return nonResolvableImport(
+          importType,
+          codeOwnerConfigFilePath,
+          "code owner config imports itself",
+          ValidationMessage.Type.WARNING);
+    }
+
     Optional<ProjectState> projectState = projectCache.get(keyOfImportedCodeOwnerConfig.project());
     if (!projectState.isPresent() || !isProjectReadable(keyOfImportedCodeOwnerConfig)) {
       // we intentionally use the same error message for non-existing and non-readable projects so
@@ -944,6 +952,21 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     return Optional.empty();
   }
 
+  /** Whether the importing code owner config is the same as the imported code owner config. */
+  private boolean isSelfImport(
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
+    return keyOfImportingCodeOwnerConfig.project().equals(keyOfImportedCodeOwnerConfig.project())
+        && keyOfImportingCodeOwnerConfig.ref().equals(keyOfImportedCodeOwnerConfig.ref())
+        && codeOwnersPluginConfiguration
+            .getBackend(keyOfImportingCodeOwnerConfig.branchNameKey())
+            .getFilePath(keyOfImportingCodeOwnerConfig)
+            .equals(
+                codeOwnersPluginConfiguration
+                    .getBackend(keyOfImportedCodeOwnerConfig.branchNameKey())
+                    .getFilePath(keyOfImportedCodeOwnerConfig));
+  }
+
   private boolean isProjectReadable(CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig) {
     try {
       return permissionBackend
@@ -994,14 +1017,26 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerConfigImportType importType,
       Path codeOwnerConfigFilePath,
       String message) {
+    return nonResolvableImport(
+        importType,
+        codeOwnerConfigFilePath,
+        message,
+        codeOwnersPluginConfiguration.rejectNonResolvableImports(project)
+            ? ValidationMessage.Type.ERROR
+            : ValidationMessage.Type.WARNING);
+  }
+
+  private Optional<CommitValidationMessage> nonResolvableImport(
+      CodeOwnerConfigImportType importType,
+      Path codeOwnerConfigFilePath,
+      String message,
+      ValidationMessage.Type validationMessageType) {
     return Optional.of(
         new CommitValidationMessage(
             String.format(
                 "invalid %s import in '%s': %s",
                 importType.getType(), codeOwnerConfigFilePath, message),
-            codeOwnersPluginConfiguration.rejectNonResolvableImports(project)
-                ? ValidationMessage.Type.ERROR
-                : ValidationMessage.Type.WARNING));
+            validationMessageType));
   }
 
   private Optional<CommitValidationMessage> nonResolvableCodeOwner(
