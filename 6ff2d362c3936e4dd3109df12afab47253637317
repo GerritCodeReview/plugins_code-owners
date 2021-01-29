@@ -16,6 +16,24 @@
       "message": "Edwin just fixed that :-)\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/295025",
       "revId": "6ff2d362c3936e4dd3109df12afab47253637317",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7c208536_5f705d83",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1118500
+      },
+      "writtenOn": "2021-01-29T08:58:57Z",
+      "side": 1,
+      "message": "Oh no, he was 5 mins earlier 😞\nAlso, I think my fix is better",
+      "parentUuid": "9d46f149_d2e76b03",
+      "revId": "6ff2d362c3936e4dd3109df12afab47253637317",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
