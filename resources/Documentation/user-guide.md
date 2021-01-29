@@ -102,6 +102,14 @@ definition of the required label. If the label definition has
 [ignoreSelfApproval](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
 enabled, code owner approvals of the patch set uploader are ignored.
 
+**NOTE:** Code owner approvals are always applied on the whole change / patch
+set and count for all files in the change / patch set. It is not possible to
+approve individual files only. This means code owners should always review all
+files in the change / patch set before applying their approval. E.g. it is
+discouraged to only review the owned files, since the set of owned files can
+change if `OWNERS` files in the destination branch are changed after the
+approval has been applied.
+
 ## <a id="codeOwnerOverride">Code owner override
 
 Usually some privileged users, such as sheriffs, are allowed to override the

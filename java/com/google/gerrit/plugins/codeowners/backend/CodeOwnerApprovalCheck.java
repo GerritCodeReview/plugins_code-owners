@@ -33,15 +33,14 @@ import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.ApprovalsUtil;
 import com.google.gerrit.server.git.GitRepositoryManager;
-import com.google.gerrit.server.logging.Metadata;
-import com.google.gerrit.server.logging.TraceContext;
-import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
@@ -91,6 +90,7 @@ public class CodeOwnerApprovalCheck {
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final ApprovalsUtil approvalsUtil;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
   CodeOwnerApprovalCheck(
@@ -101,7 +101,8 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
-      ApprovalsUtil approvalsUtil) {
+      ApprovalsUtil approvalsUtil,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.permissionBackend = permissionBackend;
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -110,6 +111,7 @@ public class CodeOwnerApprovalCheck {
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.approvalsUtil = approvalsUtil;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   /**
@@ -200,13 +202,11 @@ public class CodeOwnerApprovalCheck {
   public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
-    try (TraceTimer traceTimer =
-        TraceContext.newTimer(
-            "Compute file statuses",
-            Metadata.builder()
-                .projectName(changeNotes.getProjectName().get())
-                .changeId(changeNotes.getChangeId().get())
-                .build())) {
+    try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
+      logger.atFine().log(
+          "compute file statuses (project = %s, change = %d)",
+          changeNotes.getProjectName(), changeNotes.getChangeId().get());
+
       boolean enableImplicitApprovalFromUploader =
           codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName());
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
@@ -287,14 +287,14 @@ public class CodeOwnerApprovalCheck {
     requireNonNull(changeNotes, "changeNotes");
     requireNonNull(patchSet, "patchSet");
     requireNonNull(accountId, "accountId");
-    try (TraceTimer traceTimer =
-        TraceContext.newTimer(
-            "Compute file statuses for account",
-            Metadata.builder()
-                .projectName(changeNotes.getProjectName().get())
-                .changeId(changeNotes.getChangeId().get())
-                .patchSetId(patchSet.id().get())
-                .build())) {
+    try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatusesForAccount.start()) {
+      logger.atFine().log(
+          "compute file statuses for account %d (project = %s, change = %d, patch set = %d)",
+          accountId.get(),
+          changeNotes.getProjectName(),
+          changeNotes.getChangeId().get(),
+          patchSet.id().get());
+
       RequiredApproval requiredApproval =
           codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
       logger.atFine().log("requiredApproval = %s", requiredApproval);

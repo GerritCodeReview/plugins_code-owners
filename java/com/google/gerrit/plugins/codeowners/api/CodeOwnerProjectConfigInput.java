@@ -15,6 +15,8 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
+import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import java.util.List;
 
 /**
@@ -65,4 +67,43 @@ public class CodeOwnerProjectConfigInput {
 
   /** Policy that controls who should own paths that have no code owners defined. */
   public FallbackCodeOwners fallbackCodeOwners;
+
+  /** Emails of users that should be code owners globally across all branches. */
+  public List<String> globalCodeOwners;
+
+  /** Strategy that defines for merge commits which files require code owner approvals. */
+  public MergeCommitStrategy mergeCommitStrategy;
+
+  /** Whether an implicit code owner approval from the last uploader is assumed. */
+  public Boolean implicitApprovals;
+
+  /**
+   * URL for a page that provides project/host-specific information about how to request a code
+   * owner override.
+   */
+  public String overrideInfoUrl;
+
+  /** Whether code owner config files are read-only. */
+  public Boolean readOnly;
+
+  /** Policy for validating code owner config files when a commit is received. */
+  public CodeOwnerConfigValidationPolicy enableValidationOnCommitReceived;
+
+  /** Policy for validating code owner config files when a change is submitted. */
+  public CodeOwnerConfigValidationPolicy enableValidationOnSubmit;
+
+  /**
+   * Whether modifications of code owner config files that newly add non-resolvable code owners
+   * should be rejected on commit received and submit.
+   */
+  public Boolean rejectNonResolvableCodeOwners;
+
+  /**
+   * Whether modifications of code owner config files that newly add non-resolvable imports should
+   * be rejected on commit received an submit.
+   */
+  public Boolean rejectNonResolvableImports;
+
+  /** The maximum number of paths that are included in change messages. */
+  public Integer maxPathsInChangeMessages;
 }
