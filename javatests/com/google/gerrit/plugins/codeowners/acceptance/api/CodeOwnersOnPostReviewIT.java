@@ -34,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
@@ -161,13 +162,19 @@ public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
 
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message)
-        .isEqualTo(
-            String.format(
-                "Patch Set 1: Code-Review+1 Other+1\n\n"
-                    + "By voting Code-Review+1 the following files are still code-owner approved by"
-                    + " %s:\n"
-                    + "* %s\n",
-                admin.fullName(), path));
+        .matches(
+            Pattern.quote("Patch Set 1: ")
+                + "("
+                + Pattern.quote("Code-Review+1 Other+1")
+                + "|"
+                + Pattern.quote("Other+1 Code-Review+1")
+                + ")"
+                + Pattern.quote(
+                    String.format(
+                        "\n\nBy voting Code-Review+1 the following files are still code-owner approved by"
+                            + " %s:\n"
+                            + "* %s\n",
+                        admin.fullName(), path)));
   }
 
   @Test
