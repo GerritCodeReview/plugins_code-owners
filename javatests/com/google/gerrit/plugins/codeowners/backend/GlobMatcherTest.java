@@ -24,17 +24,17 @@ public class GlobMatcherTest extends AbstractPathExpressionMatcherTest {
   }
 
   @Test
-  public void matchConcreteFileInCurrentFolder() throws Exception {
+  public void matchConcreteFile() throws Exception {
     String pathExpression = "BUILD";
     assertMatch(pathExpression, "BUILD");
-    assertNoMatch(pathExpression, "README", "BUILD2", "foo/BUILD");
+    assertNoMatch(pathExpression, "README", "BUILD2", "foo/BUILD", "foo/bar/BUILD");
   }
 
   @Test
-  public void matchFileTypeInCurrentFolder() throws Exception {
+  public void matchFileType() throws Exception {
     String pathExpression = "*.md";
     assertMatch(pathExpression, "README.md", "config.md");
-    assertNoMatch(pathExpression, "README", "README.md5", "foo/README.md");
+    assertNoMatch(pathExpression, "README", "README.md5", "foo/README.md", "foo/bar/README.md");
   }
 
   @Test
@@ -60,7 +60,16 @@ public class GlobMatcherTest extends AbstractPathExpressionMatcherTest {
         "foo/config.txt",
         "foo/bar/README.md",
         "foo/bar/baz/README.md");
-    assertNoMatch(pathExpression, "README", "foo2/README");
+    assertNoMatch(
+        pathExpression,
+        "README",
+        "foo2/README",
+        "bar/README",
+        "bar/foo2/README",
+        "bar/foo/README.md",
+        "bar/foo/config.txt",
+        "bar/foo/bar/README.md",
+        "bar/foo/bar/baz/README.md");
   }
 
   @Test
@@ -68,5 +77,9 @@ public class GlobMatcherTest extends AbstractPathExpressionMatcherTest {
     String pathExpression = "{**/,}foo-[1-4].txt";
     assertMatch(pathExpression, "foo-1.txt", "foo-2.txt", "sub/foo-3.txt", "sub/sub/foo-4.txt");
     assertNoMatch(pathExpression, "foo-5.txt", "foo-11.txt");
+
+    String pathExpression2 = "foo-[1-4].txt";
+    assertMatch(pathExpression2, "foo-1.txt", "foo-2.txt");
+    assertNoMatch(pathExpression2, "foo-5.txt", "foo-11.txt", "sub/foo-3.txt", "sub/sub/foo-4.txt");
   }
 }
