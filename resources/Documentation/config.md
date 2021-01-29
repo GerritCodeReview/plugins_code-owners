@@ -4,7 +4,7 @@ The global configuration of the @PLUGIN@ plugin is stored in the `gerrit.config`
 file in the `plugin.@PLUGIN@` subsection.
 
 This page describes all available configuration parameters. For configuration
-recommendations please consult the [config guide](#config-guide.html).
+recommendations please consult the [config guide](config-guide.html).
 
 ## <a id="projectLevelConfigFile">
 In addition some configuration can be done on the project level in
