@@ -22,6 +22,30 @@
       },
       "revId": "39c9789daffd8acba7c43f7492fd1711a9ec56f0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37c25518_08efcda5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-01T14:08:22Z",
+      "side": 1,
+      "message": "We could warn about this too, but it\u0027s a bit more work. For now we don\u0027t consider this as important and we want to do it only if a stakeholder requests this.",
+      "parentUuid": "4769a184_2db460e3",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 53
+      },
+      "revId": "39c9789daffd8acba7c43f7492fd1711a9ec56f0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
