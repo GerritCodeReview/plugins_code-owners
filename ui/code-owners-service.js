@@ -60,6 +60,25 @@ const UserRole = {
   OTHER: 'OTHER',
 };
 
+// TODO: Try to remove it. The ResponseError and getErrorMessage duplicates
+// code from the gr-plugin-rest-api.ts. This code is required because
+// we want custom error processing in some functions. For details see
+// the original gr-plugin-rest-api.ts file/
+
+class ResponseError extends Error {
+  constructor(response) {
+    super();
+    this.response = response;
+  }
+}
+
+async function getErrorMessage(response) {
+  const text = await response.text();
+  return text ?
+    `${response.status}: ${text}` :
+    `${response.status}`;
+}
+
 /**
  * Responsible for communicating with the rest-api
  *
@@ -118,19 +137,42 @@ class CodeOwnerApi {
    * @param {string} branch
    */
   async getBranchConfig(project, branch) {
-    const config = await this.restApi.get(
-        `/projects/${encodeURIComponent(project)}/` +
-        `branches/${encodeURIComponent(branch)}/` +
-        `code_owners.branch_config`
-    );
-    if (config.override_approval && !(config.override_approval instanceof Array)) {
-      // In the upcoming backend changes, the override_approval will be changed
-      // to array with (possible) multiple items.
-      // While this transition is in progress, the frontend supports both API -
-      // the old one and the new one.
-      return {...config, override_approval: [config.override_approval]};
+    const errFn = (response, error) => {
+      if (error) throw error;
+      if (response) throw new ResponseError(response);
+      throw new Error('Generic REST API error');
     }
-    return config;
+    try {
+      const config = await this.restApi.send(
+          'GET',
+          `/projects/${encodeURIComponent(project)}/` +
+          `branches/${encodeURIComponent(branch)}/` +
+          `code_owners.branch_config`,
+          undefined,
+          errFn
+      );
+      if (config.override_approval && !(config.override_approval
+          instanceof Array)) {
+        // In the upcoming backend changes, the override_approval will be changed
+        // to array with (possible) multiple items.
+        // While this transition is in progress, the frontend supports both API -
+        // the old one and the new one.
+        return {...config, override_approval: [config.override_approval]};
+      }
+      return config;
+    } catch(err) {
+      if (err instanceof ResponseError) {
+        if (err.response.status === 404) {
+          // The 404 error means that the branch doesn't exist and
+          // the plugin should be disabled.
+          return {disabled: true};
+        }
+        return getErrorMessage(err.response).then(msg => {
+          throw new Error(msg);
+        });
+      }
+      throw err;
+    }
   }
 }
 
