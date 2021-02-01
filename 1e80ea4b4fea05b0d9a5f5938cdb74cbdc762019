@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f6bbadf7_fe1984ee",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OnCodeOwnerOverride.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-01T13:26:12Z",
+      "side": 1,
+      "message": "can\u0027t they ever be sticky?\nI guess it\u0027s an entire separate change but I think either:\n1. It should be documented when setting up the override config that it should never copy over votes (it\u0027s technically possible to make it copy over)\nOR\n2. Make sure it\u0027s supported if it\u0027s configed to copy over.",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 0
+      },
+      "revId": "1e80ea4b4fea05b0d9a5f5938cdb74cbdc762019",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
