@@ -37,9 +37,7 @@ import java.util.HashMap;
 import java.util.regex.Pattern;
 import org.junit.Test;
 
-/**
- * Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerApproval}.
- */
+/** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerApproval}. */
 public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
