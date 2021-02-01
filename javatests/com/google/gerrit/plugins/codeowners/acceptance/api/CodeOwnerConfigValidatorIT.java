@@ -1023,6 +1023,102 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void uploadConfigWithGlobalSelfImportReportsAWarning() throws Exception {
+    testUploadConfigWithSelfImport(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void uploadConfigWithPerFileSelfImportReportsAWarning() throws Exception {
+    testUploadConfigWithSelfImport(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithSelfImport(CodeOwnerConfigImportType importType)
+      throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // create a code owner config that imports itself
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                    .getFilePath())
+            .setProject(project)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid %s import in '%s': code owner config imports itself",
+            importType.getType(),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getFilePath()));
+  }
+
+  @Test
+  public void canUploadConfigWithGlobalImportOfFileWithExtensionFromSameFolder() throws Exception {
+    testUploadConfigWithImportOfFileWithExtensionFromSameFolder(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void canUploadConfigWithPerFileImportOfFileWithExtensionFromSameFolder() throws Exception {
+    testUploadConfigWithImportOfFileWithExtensionFromSameFolder(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportOfFileWithExtensionFromSameFolder(
+      CodeOwnerConfigImportType importType) throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // create a code owner config that imports a code owner config from the same folder but with an
+    // extension in the file name
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .fileName(getCodeOwnerConfigFileName() + "_extension")
+            .addCodeOwnerEmail(user.email())
+            .create();
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+    testRepo.reset(projectOperations.project(project).getHead("master"));
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getFilePath())
+            .setProject(project)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    r.assertOkStatus();
+  }
+
+  @Test
   public void cannotUploadConfigWithGlobalImportFromNonExistingProject() throws Exception {
     testUploadConfigWithImportFromNonExistingProject(CodeOwnerConfigImportType.GLOBAL);
   }
@@ -1762,6 +1858,16 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private String abbreviateName(AnyObjectId id) throws Exception {
     return ObjectIds.abbreviateName(id, testRepo.getRevWalk().getObjectReader());
+  }
+
+  private String getCodeOwnerConfigFileName() {
+    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
+    if (backend instanceof FindOwnersBackend) {
+      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
+    } else if (backend instanceof ProtoBackend) {
+      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
+    }
+    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
   }
 
   private static void assertOkWithoutMessages(PushOneCommit.Result pushResult) {

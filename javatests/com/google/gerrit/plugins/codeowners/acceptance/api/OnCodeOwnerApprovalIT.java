@@ -38,9 +38,9 @@ import java.util.regex.Pattern;
 import org.junit.Test;
 
 /**
- * Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnersOnPostReview}.
+ * Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerApproval}.
  */
-public class CodeOwnersOnPostReviewIT extends AbstractCodeOwnersIT {
+public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
 
