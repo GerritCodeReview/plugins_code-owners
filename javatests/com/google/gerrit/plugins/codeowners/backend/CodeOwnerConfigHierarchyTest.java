@@ -540,7 +540,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(
                 CodeOwnerSet.builder()
                     .setIgnoreGlobalAndParentCodeOwners()
-                    .addPathExpression(testPathExpressions.matchFileTypeInCurrentFolder("txt"))
+                    .addPathExpression(testPathExpressions.matchFileType("txt"))
                     .addCodeOwnerEmail(admin.email())
                     .build())
             .create();

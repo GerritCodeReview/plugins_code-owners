@@ -226,12 +226,12 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .folderPath("/foo/bar/")
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
-                .addPathExpression(testPathExpressions.matchFileTypeInCurrentFolder("txt"))
+                .addPathExpression(testPathExpressions.matchFileType("txt"))
                 .addCodeOwnerEmail(admin.email())
                 .build())
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
-                .addPathExpression(testPathExpressions.matchFileTypeInCurrentFolder("md"))
+                .addPathExpression(testPathExpressions.matchFileType("md"))
                 .addCodeOwnerEmail(user.email())
                 .build())
         .create();

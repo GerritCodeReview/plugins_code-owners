@@ -41,16 +41,20 @@ public class TestPathExpressions {
   }
 
   /**
-   * Creates a path expression that matches all files of the given file type in the current folder.
+   * Creates a path expression that matches all files of the given file type in the current folder
+   * and all subfolders.
    *
    * @param fileType the file type
    */
-  public String matchFileTypeInCurrentFolder(String fileType) {
+  public String matchFileType(String fileType) {
     PathExpressionMatcher pathExpressionMatcher = getPathExpressionMatcher();
-    if (pathExpressionMatcher instanceof GlobMatcher
-        || pathExpressionMatcher instanceof FindOwnersGlobMatcher
-        || pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
+    if (pathExpressionMatcher instanceof GlobMatcher) {
+      return "**." + fileType;
+    } else if (pathExpressionMatcher instanceof FindOwnersGlobMatcher) {
       return "*." + fileType;
+    } else if (pathExpressionMatcher instanceof SimplePathExpressionMatcher) {
+      // '...' (matches any string, including slashes), followed by '.<file-type>'
+      return "...." + fileType;
     }
     throw new IllegalStateException(
         String.format(
