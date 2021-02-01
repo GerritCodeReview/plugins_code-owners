@@ -22,6 +22,30 @@
       },
       "revId": "1e80ea4b4fea05b0d9a5f5938cdb74cbdc762019",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "87a3090a_0afcabe1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OnCodeOwnerOverride.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-01T14:01:37Z",
+      "side": 1,
+      "message": "Override approvals can be sticky, and it\u0027s not unlikely that they are configured as sticky.\nIf overrides are sticky they are correctly taken into account when computing the code owner statuses. So this should be fine (it\u0027s also covered by tests).\n\nThe question here is, if someone grants an override on an outdated patch set, should the change message say that the code-owners submit requirement is overridden now?\nI guess the best behaviour would be to have this message, but only if the override approval is actually sticky (this means if the label was configured as sticky and if the diff between the outdated patch set and the current patch set is so that stickyness applies). Doing this is possible, but I\u0027m not sure if it\u0027s worth the effort at this point. Granting an override approval on an outdated patch set should be rather rare, and if it happens it\u0027s not a big issue if the change message is not extended in this case. So I would leave this as it is for now, but you are right there is a special case that is not handled yet.",
+      "parentUuid": "f6bbadf7_fe1984ee",
+      "range": {
+        "startLine": 65,
+        "startChar": 0,
+        "endLine": 69,
+        "endChar": 0
+      },
+      "revId": "1e80ea4b4fea05b0d9a5f5938cdb74cbdc762019",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
