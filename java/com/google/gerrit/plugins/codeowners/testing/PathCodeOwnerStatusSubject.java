@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.PathSubject.paths;
-import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
@@ -26,16 +25,6 @@ import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 
 /** {@link Subject} for doing assertions on {@link PathCodeOwnerStatus}s. */
 public class PathCodeOwnerStatusSubject extends Subject {
-  /**
-   * Starts fluent chain to do assertions on a {@link PathCodeOwnerStatus}.
-   *
-   * @param pathCodeOwnerStatus the {@link PathCodeOwnerStatus} on which assertions should be done
-   * @return the created {@link PathCodeOwnerStatusSubject}
-   */
-  public static PathCodeOwnerStatusSubject assertThat(PathCodeOwnerStatus pathCodeOwnerStatus) {
-    return assertAbout(pathCodeOwnerStatuses()).that(pathCodeOwnerStatus);
-  }
-
   /**
    * Creates subject factory for mapping {@link PathCodeOwnerStatus}es to {@link
    * PathCodeOwnerStatusSubject}s.

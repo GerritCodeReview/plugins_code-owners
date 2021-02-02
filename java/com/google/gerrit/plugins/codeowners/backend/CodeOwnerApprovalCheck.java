@@ -47,6 +47,7 @@ import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
+import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -222,7 +223,15 @@ public class CodeOwnerApprovalCheck {
           codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
       boolean hasOverride = hasOverride(overrideApprovals, changeNotes, patchSetUploader);
       logger.atFine().log(
-          "hasOverride = %s (overrideApprovals = %s)", hasOverride, overrideApprovals);
+          "hasOverride = %s (overrideApprovals = %s)",
+          hasOverride,
+          overrideApprovals.stream()
+              .map(
+                  overrideApproval ->
+                      String.format(
+                          "%s (ignoreSelfApproval = %s)",
+                          overrideApproval, overrideApproval.labelType().isIgnoreSelfApproval()))
+              .collect(toImmutableList()));
 
       BranchNameKey branch = changeNotes.getChange().getDest();
       ObjectId revision = getDestBranchRevision(changeNotes.getChange());
@@ -934,6 +943,9 @@ public class CodeOwnerApprovalCheck {
                                   .labelType()
                                   .getLabelId()
                                   .equals(approval.key().labelId()))) {
+                logger.atFine().log(
+                    "Filtered out self-override %s of patch set uploader",
+                    LabelVote.create(approval.label(), approval.value()));
                 return false;
               }
               return true;

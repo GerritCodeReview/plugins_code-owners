@@ -24,8 +24,6 @@ import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.truth.ListSubject;
-import com.google.gerrit.truth.OptionalSubject;
-import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link RequiredApproval}s. */
 public class RequiredApprovalSubject extends Subject {
@@ -37,17 +35,6 @@ public class RequiredApprovalSubject extends Subject {
    */
   public static RequiredApprovalSubject assertThat(RequiredApproval requiredApproval) {
     return assertAbout(requiredApprovals()).that(requiredApproval);
-  }
-
-  /**
-   * Starts a fluent chain to do assertions on an {@link Optional} {@link RequiredApproval}.
-   *
-   * @param requiredApproval optional required approval on which assertions should be done
-   * @return the created {@link OptionalSubject}
-   */
-  public static OptionalSubject<RequiredApprovalSubject, RequiredApproval> assertThat(
-      Optional<RequiredApproval> requiredApproval) {
-    return OptionalSubject.assertThat(requiredApproval, requiredApprovals());
   }
 
   /**
