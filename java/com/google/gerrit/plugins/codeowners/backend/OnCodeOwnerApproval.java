@@ -124,6 +124,18 @@ class OnCodeOwnerApproval implements OnPostReview {
       return Optional.empty();
     }
 
+    if (isIgnoredDueToSelfApproval(user, patchSet, requiredApproval)) {
+      if (isCodeOwnerApprovalNewlyApplied(requiredApproval, oldApprovals, newVote)
+          || isCodeOwnerApprovalUpOrDowngraded(requiredApproval, oldApprovals, newVote)) {
+        return Optional.of(
+            String.format(
+                "The vote %s is ignored as code-owner approval since the label doesn't allow"
+                    + " self approval of the patch set uploader.",
+                newVote));
+      }
+      return Optional.empty();
+    }
+
     boolean hasImplicitApprovalByUser =
         codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName())
             && patchSet.uploader().equals(user.getAccountId());
@@ -220,6 +232,12 @@ class OnCodeOwnerApproval implements OnPostReview {
 
   private void appendPaths(StringBuilder message, Stream<Path> pathsToAppend) {
     pathsToAppend.forEach(path -> message.append(String.format("* %s\n", JgitPath.of(path).get())));
+  }
+
+  private boolean isIgnoredDueToSelfApproval(
+      IdentifiedUser user, PatchSet patchSet, RequiredApproval requiredApproval) {
+    return patchSet.uploader().equals(user.getAccountId())
+        && requiredApproval.labelType().isIgnoreSelfApproval();
   }
 
   private boolean isCodeOwnerApprovalNewlyApplied(

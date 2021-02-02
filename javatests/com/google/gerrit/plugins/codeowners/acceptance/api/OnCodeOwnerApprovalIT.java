@@ -945,4 +945,115 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
   }
+
+  @Test
+  public void changeMessageExtendedIfCodeOwnerApprovalIsIgnoredDueToSelfApproval()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+
+    String changeId = createChange().getChangeId();
+
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            "Patch Set 1: Code-Review+1\n\n"
+                + "The vote Code-Review+1 is ignored as code-owner approval since the label"
+                + " doesn't allow self approval of the patch set uploader.\n");
+  }
+
+  @Test
+  public void changeMessageExtendedIfUpgradedCodeOwnerApprovalIsIgnoredDueToSelfApproval()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+
+    String changeId = createChange().getChangeId();
+
+    recommend(changeId);
+
+    // Upgrade the approval from Code-Review+1 to Code-Review+2
+    approve(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            "Patch Set 1: Code-Review+2\n\n"
+                + "The vote Code-Review+2 is ignored as code-owner approval since the label"
+                + " doesn't allow self approval of the patch set uploader.\n");
+  }
+
+  @Test
+  public void changeMessageExtendedIfDowngradedCodeOwnerApprovalIsIgnoredDueToSelfApproval()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+
+    String changeId = createChange().getChangeId();
+
+    approve(changeId);
+
+    // Downgrade the approval from Code-Review+2 to Code-Review+1
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            "Patch Set 1: Code-Review+1\n\n"
+                + "The vote Code-Review+1 is ignored as code-owner approval since the label"
+                + " doesn't allow self approval of the patch set uploader.\n");
+  }
+
+  @Test
+  public void changeMessageNotExtendedIfIgnoredCodeOwnerApprovalIsRemoved() throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+
+    String changeId = createChange().getChangeId();
+
+    recommend(changeId);
+
+    // Remove the code-owner approval
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Code-Review", 0));
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: -Code-Review");
+  }
+
+  @Test
+  public void changeMessageExtendedIfNonSelfApprovalCodeOwnerApprovalIsApplied() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                user.fullName(), path));
+  }
 }
