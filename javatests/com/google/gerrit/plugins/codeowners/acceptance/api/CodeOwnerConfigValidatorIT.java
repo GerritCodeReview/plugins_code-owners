@@ -648,6 +648,41 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void cannotUpdateConfigToBeNonParseable() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    r.assertOkStatus();
+
+    r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            "INVALID");
+    assertFatalWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            project,
+            getParsingErrorMessage(
+                ImmutableMap.of(
+                    FindOwnersBackend.class,
+                    "invalid line: INVALID",
+                    ProtoBackend.class,
+                    "1:8: expected \"{\""))));
+  }
+
+  @Test
   public void issuesAreReportedForAllInvalidConfigs() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey1 = createCodeOwnerConfigKey("/");
     CodeOwnerConfig.Key codeOwnerConfigKey2 = createCodeOwnerConfigKey("/foo/bar/");
