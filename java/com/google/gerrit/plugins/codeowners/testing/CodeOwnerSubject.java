@@ -14,31 +14,18 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.ComparableSubject;
-import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
-import com.google.gerrit.truth.ListSubject;
-import com.google.gerrit.truth.NullAwareCorrespondence;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /** {@link Subject} for doing assertions on {@link CodeOwner}s. */
 public class CodeOwnerSubject extends Subject {
-  /**
-   * Constructs a {@link Correspondence} that maps {@link CodeOwner}s to {@link
-   * com.google.gerrit.entities.Account.Id}s.
-   */
-  public static final Correspondence<CodeOwner, Account.Id> hasAccountId() {
-    return NullAwareCorrespondence.transforming(CodeOwner::accountId, "has account ID");
-  }
-
   /**
    * Starts fluent chain to do assertions on a {@link CodeOwner}.
    *
@@ -58,16 +45,6 @@ public class CodeOwnerSubject extends Subject {
   public static OptionalSubject<CodeOwnerSubject, CodeOwner> assertThat(
       Optional<CodeOwner> codeOwner) {
     return OptionalSubject.assertThat(codeOwner, codeOwners());
-  }
-
-  /**
-   * Starts fluent chain to do assertions on a stream of {@link CodeOwner}s.
-   *
-   * @param codeOwners stream of code owners on which assertions should be done
-   * @return the created {@link ListSubject}
-   */
-  public static ListSubject<CodeOwnerSubject, CodeOwner> assertThat(Stream<CodeOwner> codeOwners) {
-    return ListSubject.assertThat(codeOwners.collect(toImmutableList()), codeOwners());
   }
 
   /** Creates subject factory for mapping {@link CodeOwner}s to {@link CodeOwnerSubject}s. */

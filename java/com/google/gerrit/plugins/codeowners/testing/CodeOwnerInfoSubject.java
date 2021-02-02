@@ -14,8 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
-import static com.google.common.truth.Truth.assertAbout;
-
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
@@ -23,9 +21,7 @@ import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
-import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.NullAwareCorrespondence;
-import java.util.List;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerInfo}s. */
 public class CodeOwnerInfoSubject extends Subject {
@@ -42,21 +38,6 @@ public class CodeOwnerInfoSubject extends Subject {
   public static final Correspondence<CodeOwnerInfo, String> hasAccountName() {
     return NullAwareCorrespondence.transforming(
         codeOwnerInfo -> codeOwnerInfo.account.name, "has account name");
-  }
-
-  /**
-   * Starts fluent chain to do assertions on a {@link CodeOwnerInfo}.
-   *
-   * @param codeOwnerInfo the code owner info on which assertions should be done
-   * @return the created {@link CodeOwnerInfoSubject}
-   */
-  public static CodeOwnerInfoSubject assertThat(CodeOwnerInfo codeOwnerInfo) {
-    return assertAbout(codeOwnerInfos()).that(codeOwnerInfo);
-  }
-
-  public static ListSubject<CodeOwnerInfoSubject, CodeOwnerInfo> assertThatList(
-      List<CodeOwnerInfo> codeOwnerInfos) {
-    return ListSubject.assertThat(codeOwnerInfos, codeOwnerInfos());
   }
 
   public static Factory<CodeOwnerInfoSubject, CodeOwnerInfo> codeOwnerInfos() {

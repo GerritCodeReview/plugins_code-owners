@@ -53,10 +53,6 @@ public class OptionalResultWithMessagesSubject extends Subject {
     this.optionalResultWithMessages = optionalResultWithMessages;
   }
 
-  public void isPresent() {
-    check("result()").about(optionals()).that(optionalResultWithMessages().result()).isPresent();
-  }
-
   public void isEmpty() {
     check("result()").about(optionals()).that(optionalResultWithMessages().result()).isEmpty();
   }

@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
-import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementSubject.submitRecordRequirements;
 import static com.google.gerrit.truth.ListSubject.elements;
 
@@ -29,16 +28,6 @@ import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link SubmitRecord}s. */
 public class SubmitRecordSubject extends Subject {
-  /**
-   * Starts fluent chain to do assertions on a {@link SubmitRecord}.
-   *
-   * @param submitRecord the {@link SubmitRecord} on which assertions should be done
-   * @return the created {@link SubmitRecordSubject}
-   */
-  public static SubmitRecordSubject assertThat(SubmitRecord submitRecord) {
-    return assertAbout(submitRecords()).that(submitRecord);
-  }
-
   /**
    * Starts fluent chain to do assertions on an {@link Optional} {@link SubmitRecord}.
    *
