@@ -14,9 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.common.base.MoreObjects;
 import com.google.gerrit.extensions.common.AccountInfo;
-import java.util.Objects;
 
 /**
  * Representation of a code owner in the REST API.
@@ -26,23 +24,4 @@ import java.util.Objects;
 public class CodeOwnerInfo {
   /** The account of the code owner. */
   public AccountInfo account;
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(account);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof CodeOwnerInfo)) {
-      return false;
-    }
-    CodeOwnerInfo other = (CodeOwnerInfo) o;
-    return Objects.equals(account, other.account);
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this).add("account", account).toString();
-  }
 }

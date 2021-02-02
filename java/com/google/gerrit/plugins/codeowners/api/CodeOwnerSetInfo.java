@@ -14,9 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.common.base.MoreObjects;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Representation of a {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet} in the REST
@@ -31,23 +29,4 @@ public class CodeOwnerSetInfo {
    * <p>Not set if there are no code owners defined in this code owner set.
    */
   public List<CodeOwnerReferenceInfo> codeOwners;
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(codeOwners);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof CodeOwnerSetInfo)) {
-      return false;
-    }
-    CodeOwnerSetInfo other = (CodeOwnerSetInfo) o;
-    return Objects.equals(codeOwners, other.codeOwners);
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this).add("codeOwners", codeOwners).toString();
-  }
 }

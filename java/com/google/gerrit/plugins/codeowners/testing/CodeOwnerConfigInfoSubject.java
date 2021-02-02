@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetInfoSubject.codeOwnerSetInfos;
 import static com.google.gerrit.truth.ListSubject.elements;
@@ -24,9 +25,11 @@ import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerSetInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
-import com.google.gerrit.plugins.codeowners.restapi.CodeOwnerConfigJson;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.truth.ListSubject;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 import com.google.gerrit.truth.OptionalSubject;
+import java.util.List;
 import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerConfigInfo}s. */
@@ -93,9 +96,21 @@ public class CodeOwnerConfigInfoSubject extends Subject {
    *     corresponds to the {@link CodeOwnerConfigInfo} of this subject
    */
   public void correspondsTo(CodeOwnerConfig codeOwnerConfig) {
-    check("codeOwnerInfo()")
-        .that(codeOwnerConfigInfo())
-        .isEqualTo(CodeOwnerConfigJson.format(codeOwnerConfig));
+    hasIgnoreParentCodeOwnersThat().isEqualTo(codeOwnerConfig.ignoreParentCodeOwners());
+    hasCodeOwnerSetsThat()
+        .comparingElementsUsing(
+            NullAwareCorrespondence.<CodeOwnerSetInfo, List<String>>transforming(
+                codeOwnerSetInfo ->
+                    codeOwnerSetInfo.codeOwners.stream()
+                        .map(codeOwnerReferenceInfo -> codeOwnerReferenceInfo.email)
+                        .collect(toImmutableList()),
+                "has code owners"))
+        .containsExactly(
+            codeOwnerConfig.codeOwnerSets().stream()
+                .flatMap(
+                    codeOwnerSet ->
+                        codeOwnerSet.codeOwners().stream().map(CodeOwnerReference::email))
+                .collect(toImmutableList()));
   }
 
   private CodeOwnerConfigInfo codeOwnerConfigInfo() {

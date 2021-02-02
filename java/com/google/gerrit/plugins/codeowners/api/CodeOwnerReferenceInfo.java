@@ -14,9 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.common.base.MoreObjects;
-import java.util.Objects;
-
 /**
  * Representation of a {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference} in
  * the REST API.
@@ -26,23 +23,4 @@ import java.util.Objects;
 public class CodeOwnerReferenceInfo {
   /** The email of the code owner. */
   public String email;
-
-  @Override
-  public int hashCode() {
-    return Objects.hashCode(email);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (!(o instanceof CodeOwnerReferenceInfo)) {
-      return false;
-    }
-    CodeOwnerReferenceInfo other = (CodeOwnerReferenceInfo) o;
-    return Objects.equals(email, other.email);
-  }
-
-  @Override
-  public String toString() {
-    return MoreObjects.toStringHelper(this).add("email", email).toString();
-  }
 }
