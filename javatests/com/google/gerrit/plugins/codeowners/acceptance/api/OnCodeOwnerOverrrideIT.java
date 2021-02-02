@@ -389,9 +389,9 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                 + ")"
                 + Pattern.quote(
                     String.format(
-                        "\n\nBy voting Owners-Override+1 the code-owners submit requirement is"
+                        "\n\nBy voting Global-Override+1 the code-owners submit requirement is"
                             + " overridden by %s\n\n"
-                            + "By voting Global-Override+1 the code-owners submit requirement is"
+                            + "By voting Owners-Override+1 the code-owners submit requirement is"
                             + " overridden by %s\n",
                         admin.fullName(), admin.fullName())));
   }

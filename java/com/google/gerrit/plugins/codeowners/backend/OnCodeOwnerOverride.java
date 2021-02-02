@@ -15,9 +15,11 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Comparator.comparing;
 
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -67,8 +69,10 @@ class OnCodeOwnerOverride implements OnPostReview {
       return Optional.empty();
     }
 
-    ImmutableSet<RequiredApproval> overrideApprovals =
-        codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
+    ImmutableList<RequiredApproval> overrideApprovals =
+        codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName()).stream()
+            .sorted(comparing(RequiredApproval::toString))
+            .collect(toImmutableList());
 
     List<String> messages = new ArrayList<>();
     for (RequiredApproval overrideApproval : overrideApprovals) {
