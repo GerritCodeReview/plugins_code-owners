@@ -22,6 +22,30 @@
       },
       "revId": "84c5ed35cc44e9047b3f7027402702e8f0fedae1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e9143650_c96e21bb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestPathExpressions.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-02T08:03:17Z",
+      "side": 1,
+      "message": "Yeah, I also find \"....\" hard to read, that\u0027s why I added a comment here.\n\nFor SimplePathExpressionMatcher \"...\" is the equivalent of \"**\" in globs, both match any string, including slashes (see [1]). This means the equivalent of \"**.md\" is \"....md\" (\u0027**\u0027 replaced with \"...\"). Also see the examples in the table at [1]. I\u0027m not a fan of this syntax, but that\u0027s what we use internally. I also clarified with the Piper team that \"....\u003cfile-type\u003e\" is really read as \"...\" (matches any string, including slashes), followed by \u0027.\u003cfile-type\u003e\u0027, rather than \".\" followed by \"...\" (matches any string, including slashes) and followed by \"\u003cfile-type\u003e\".\n\nAnything I can do to make this clearer?\n\n[1] https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/path-expressions.md#simple-path-expressions",
+      "parentUuid": "70b4f563_275f4f86",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 0
+      },
+      "revId": "84c5ed35cc44e9047b3f7027402702e8f0fedae1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
