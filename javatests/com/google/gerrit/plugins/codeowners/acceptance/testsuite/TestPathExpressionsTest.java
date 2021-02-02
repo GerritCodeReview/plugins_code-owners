@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
@@ -33,7 +34,6 @@ import com.google.inject.Key;
 import com.google.inject.util.Providers;
 import java.nio.file.Path;
 import java.util.Optional;
-import javax.annotation.Nullable;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
