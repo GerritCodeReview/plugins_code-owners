@@ -30,11 +30,15 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.MergeInput;
+import com.google.gerrit.extensions.registration.DynamicMap;
+import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
+import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -43,16 +47,24 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportType;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
+import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
+import com.google.inject.Key;
+import com.google.inject.util.Providers;
+import java.nio.file.Path;
+import java.util.Optional;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,6 +79,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private BackendConfig backendConfig;
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
   private ProtoCodeOwnerConfigParser protoCodeOwnerConfigParser;
+  private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
@@ -75,6 +88,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         plugin.getSysInjector().getInstance(FindOwnersCodeOwnerConfigParser.class);
     protoCodeOwnerConfigParser =
         plugin.getSysInjector().getInstance(ProtoCodeOwnerConfigParser.class);
+    codeOwnerBackends =
+        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
@@ -1844,6 +1859,57 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
+  public void pushFailsOnInternalError() throws Exception {
+    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
+      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
+      r.assertErrorStatus("internal error");
+    }
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "DRY_RUN")
+  public void pushSucceedsOnInternalErrorIfValidationIsDoneAsDryRun() throws Exception {
+    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
+      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
+      r.assertOkStatus();
+    }
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
+  public void submitFailsOnInternalError() throws Exception {
+    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
+      disableCodeOwnersForProject(project);
+      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
+      r.assertOkStatus();
+      enableCodeOwnersForProject(project);
+      approve(r.getChangeId());
+      IllegalStateException exception =
+          assertThrows(
+              IllegalStateException.class,
+              () -> gApi.changes().id(r.getChangeId()).current().submit());
+      assertThat(exception).hasMessageThat().isEqualTo(FailingCodeOwnerBackend.EXCEPTION_MESSAGE);
+    }
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "DRY_RUN")
+  public void submitSucceedsOnInternalErrorIfValidationIsDoneAsDryRun() throws Exception {
+    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
+      disableCodeOwnersForProject(project);
+      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
+      r.assertOkStatus();
+      enableCodeOwnersForProject(project);
+      approve(r.getChangeId());
+      gApi.changes().id(r.getChangeId()).current().submit();
+      assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+    }
+  }
+
   private CodeOwnerConfig createCodeOwnerConfigWithImport(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       CodeOwnerConfigImportType importType,
@@ -1992,5 +2058,46 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
     pushResult.assertNotMessage("hint");
+  }
+
+  private AutoCloseable registerTestBackend(CodeOwnerBackend codeOwnerBackend) {
+    RegistrationHandle registrationHandle =
+        ((PrivateInternals_DynamicMapImpl<CodeOwnerBackend>) codeOwnerBackends)
+            .put("gerrit", FailingCodeOwnerBackend.ID, Providers.of(codeOwnerBackend));
+    return registrationHandle::remove;
+  }
+
+  private static class FailingCodeOwnerBackend implements CodeOwnerBackend {
+    static final String ID = "test-backend";
+    static final String EXCEPTION_MESSAGE = "failure from test";
+
+    @Override
+    public boolean isCodeOwnerConfigFile(NameKey project, String fileName) {
+      throw new IllegalStateException(EXCEPTION_MESSAGE);
+    }
+
+    @Override
+    public Optional<CodeOwnerConfig> getCodeOwnerConfig(
+        CodeOwnerConfig.Key codeOwnerConfigKey, RevWalk revWalk, ObjectId revision) {
+      return Optional.empty();
+    }
+
+    @Override
+    public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
+      return codeOwnerConfigKey.filePath("OWNERS");
+    }
+
+    @Override
+    public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
+        CodeOwnerConfig.Key codeOwnerConfigKey,
+        CodeOwnerConfigUpdate codeOwnerConfigUpdate,
+        IdentifiedUser currentUser) {
+      return Optional.empty();
+    }
+
+    @Override
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+      return Optional.empty();
+    }
   }
 }
