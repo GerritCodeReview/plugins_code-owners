@@ -153,16 +153,6 @@ public interface CodeOwners {
     public Optional<String> getRevision() {
       return Optional.ofNullable(revision);
     }
-
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder(getClass().getSimpleName()).append('{');
-      if (!options.isEmpty()) {
-        sb.append("options=").append(options);
-      }
-      sb.append('}');
-      return sb.toString();
-    }
   }
 
   /**

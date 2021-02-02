@@ -32,11 +32,6 @@ public interface ChangeCodeOwners {
   }
 
   /** Returns the revision-level code owners API for the given revision. */
-  default RevisionCodeOwners revision(int id) throws RestApiException {
-    return revision(Integer.toString(id));
-  }
-
-  /** Returns the revision-level code owners API for the given revision. */
   RevisionCodeOwners revision(String id) throws RestApiException;
 
   /**
