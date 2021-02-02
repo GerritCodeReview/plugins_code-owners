@@ -46,6 +46,30 @@
       },
       "revId": "84c5ed35cc44e9047b3f7027402702e8f0fedae1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1a9d9832_48a09806",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/testsuite/TestPathExpressions.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-02T11:22:19Z",
+      "side": 1,
+      "message": "3 dots + 1 dot \u003d 4 dots, I see. This is indeed confusing :-)\nI think you did the best you can, the documentation helps.",
+      "parentUuid": "e9143650_c96e21bb",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 58,
+        "endChar": 0
+      },
+      "revId": "84c5ed35cc44e9047b3f7027402702e8f0fedae1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
