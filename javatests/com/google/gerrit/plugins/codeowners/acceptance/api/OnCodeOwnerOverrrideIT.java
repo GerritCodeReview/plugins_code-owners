@@ -434,4 +434,174 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                     + "* %s\n",
                 admin.fullName(), path));
   }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeMessageExtendedIfCodeOwnersOverrideIsIgnoredDueToSelfApproval()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    String changeId = createChange().getChangeId();
+
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            "Patch Set 1: Owners-Override+1\n\n"
+                + "The vote Owners-Override+1 is ignored as override approval since the label"
+                + " doesn't allow self approval of the patch set uploader.\n");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeMessageExtendedIfUpgradedCodeOwnersOverrideIsIgnoredDueToSelfApproval()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+2", "Override", "+1", "Override", " 0", "No Override");
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 2)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    String changeId = createChange().getChangeId();
+
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Upgrade the approval from Owners-Override+1 to Owners-Override+2
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 2));
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            "Patch Set 1: Owners-Override+2\n\n"
+                + "The vote Owners-Override+2 is ignored as override approval since the label"
+                + " doesn't allow self approval of the patch set uploader.\n");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeMessageExtendedIfDowngradedCodeOwnersOverrideIsIgnoredDueToSelfApproval()
+      throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+2", "Override", "+1", "Override", " 0", "No Override");
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 2)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    String changeId = createChange().getChangeId();
+
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 2));
+
+    // Downgrade the approval from Owners-Override+2 to Owners-Override+1
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            "Patch Set 1: Owners-Override+1\n\n"
+                + "The vote Owners-Override+1 is ignored as override approval since the label"
+                + " doesn't allow self approval of the patch set uploader.\n");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeMessageNotExtendedIfIgnoredCodeOwnersOverrideIsRemoved() throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    String changeId = createChange().getChangeId();
+
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    // Remove the override approval
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: -Owners-Override");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeMessageExtendedIfNonSelfApprovalCodeOwnersOverrideIsApplied() throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
+    input.ignoreSelfApproval = true;
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(0, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    String changeId = createChange().getChangeId();
+
+    requestScopeOperations.setApiUser(user.id());
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Owners-Override+1\n\n"
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
+                user.fullName()));
+  }
 }

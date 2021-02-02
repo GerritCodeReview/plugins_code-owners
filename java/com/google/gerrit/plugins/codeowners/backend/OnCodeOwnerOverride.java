@@ -98,6 +98,18 @@ class OnCodeOwnerOverride implements OnPostReview {
       RequiredApproval overrideApproval) {
     LabelVote newVote = getNewVote(overrideApproval, approvals);
 
+    if (isIgnoredDueToSelfApproval(user, patchSet, overrideApproval)) {
+      if (isCodeOwnerOverrideNewlyApplied(overrideApproval, oldApprovals, newVote)
+          || isCodeOwnerOverrideUpOrDowngraded(overrideApproval, oldApprovals, newVote)) {
+        return Optional.of(
+            String.format(
+                "The vote %s is ignored as override approval since the label doesn't allow"
+                    + " self approval of the patch set uploader.",
+                newVote));
+      }
+      return Optional.empty();
+    }
+
     if (isCodeOwnerOverrideNewlyApplied(overrideApproval, oldApprovals, newVote)) {
       return Optional.of(
           String.format(
@@ -132,6 +144,12 @@ class OnCodeOwnerOverride implements OnPostReview {
         approvals,
         overrideApproval);
     return Optional.empty();
+  }
+
+  private boolean isIgnoredDueToSelfApproval(
+      IdentifiedUser user, PatchSet patchSet, RequiredApproval requiredApproval) {
+    return patchSet.uploader().equals(user.getAccountId())
+        && requiredApproval.labelType().isIgnoreSelfApproval();
   }
 
   private boolean isCodeOwnerOverrideNewlyApplied(
