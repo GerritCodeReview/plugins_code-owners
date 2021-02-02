@@ -457,7 +457,7 @@ The following request parameters can be specified:
 | `O`          | optional | [Account option](../../../Documentation/rest-api-accounts.html#query-options) in hex. For the explanation see `o` parameter.
 | `limit`\|`n` | optional | Limit defining how many code owners should be returned at most. By default 10.
 | `seed`       | optional | Seed, as a long value, that should be used to shuffle code owners that have the same score. Can be used to make the sort order stable across several requests, e.g. to get the same set of random code owners for different file paths that have the same code owners. Important: the sort order is only stable if the requests use the same seed **and** the same limit. In addition, the sort order is not guaranteed to be stable if new accounts are created in between the requests, or if the account visibility is changed.
-| `resolve-all-users` | optional | Whether code ownerships that are assigned to all users should be resolved to random users. If not set, `true` by default.
+| `resolve-all-users` | optional | Whether code ownerships that are assigned to all users should be resolved to random users. If not set, `true` by default. Also see the [sorting example](#sortingExample) below to see how this parameter affects the returned code owners.
 | `revision`   | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners from this branch, but imports from other branches or repositories as well as default and global code owners from `refs/meta/config` are still read from the current revisions. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
 
 As a response a [CodeOwnersInfo](#code-owners-info) entity is returned that
@@ -466,10 +466,12 @@ The returned code owners are sorted by an internal score that expresses how good
 the code owners are considered as reviewers/approvers for the path. Code owners
 with higher scores are returned first. If code owners have the same score the
 order is random. If the path is owned by all users (e.g. the code ownership is
-assigned to '*') a random set of (visible) users is returned, as many as are
-needed to fill up the requested limit.
+assigned to '*') and `resolve-all-users` is set to `true` a random set of
+(visible) users is returned, as many as are needed to fill up the requested
+limit.
 
-#### <a id="scores">
+#### <a id="scoringFactors">Scoring Factors
+
 The following factors are taken into account for computing the scores of the
 listed code owners:
 
@@ -479,6 +481,42 @@ listed code owners:
 
 Other factors like OOO state, recent review activity or code authorship are not
 considered.
+
+**NOTE:** The scores for the code owners are not exposed via the REST API but
+only influence the sort order.
+
+#### <a id="sortingExample">Sorting Example
+
+The returned code owners are sorted by an internal score that is computed from
+multiple [scoring factors](#scoringFactors) (the higher the score the better).
+Code owners that have the same score are ordered randomly.
+
+E.g. lets’s say there are the following code owners and scores:
+
+- User A -> score 0
+- User B -> score 0
+- User C -> score 1
+- `*` (aka all users) -> score 1
+- User D -> score 2
+- User E -> score 3
+- User F -> score 4
+
+If the request is done with `resolve-all-users=true` and `limit=5` the following
+code owners are returned in this order:
+
+1\. + 2. [score=0] User A and User B (random order since they have the same score)\
+3\. [score=1] User C\
+4\. + 5. [score=1] 2 Random Users (because `*` is resolved to random users since `resolve-all-users` is `true`)\
+* `owned_by_all_users` in the response is `true`
+
+If the request is done with `resolve-all-users=false` and `limit=5` the following
+code owners are returned in this order:
+
+1\. + 2. [score=0] User A and User B (random order since they have the same score)\
+3\. [score=1] User C\
+4\. [score=2] User D\
+5\. [score=3] User E\
+* `owned_by_all_users` in the response is `true`
 
 #### Request
 
@@ -893,7 +931,7 @@ The `CodeOwnersInfo` entity contains information about a list of code owners.
 
 | Field Name    |          | Description |
 | ------------- | -------- | ----------- |
-| `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by [score](#scores).
+| `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by a score that is computed from mutliple [scoring factors](#scoringFactors).
 | `owned_by_all_users` | optional | Whether the path is owned by all users. Not set if `false`.
 
 ### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
