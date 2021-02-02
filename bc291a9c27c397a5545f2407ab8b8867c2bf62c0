@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e4b269f_3d3da110",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 475,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-02T11:51:08Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "5f53eb49_fba37c45",
+      "range": {
+        "startLine": 475,
+        "startChar": 63,
+        "endLine": 475,
+        "endChar": 68
+      },
+      "revId": "bc291a9c27c397a5545f2407ab8b8867c2bf62c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d5ff226c_6030540a",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-02-02T11:46:29Z",
       "side": 1,
       "message": "even if there is no limit it\u0027s the same result, isn\u0027t it?",
+      "range": {
+        "startLine": 511,
+        "startChar": 58,
+        "endLine": 511,
+        "endChar": 67
+      },
+      "revId": "bc291a9c27c397a5545f2407ab8b8867c2bf62c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fcbfc19c_7bfb4b46",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 511,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-02T11:51:08Z",
+      "side": 1,
+      "message": "Ah yes, let me add another User with score 4 above so that this makes more sense. Done.",
+      "parentUuid": "d5ff226c_6030540a",
       "range": {
         "startLine": 511,
         "startChar": 58,
