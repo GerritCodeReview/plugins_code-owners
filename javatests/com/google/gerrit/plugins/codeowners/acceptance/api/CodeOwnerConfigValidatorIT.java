@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
@@ -100,6 +101,23 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void canUploadConfigWithoutIssues() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // Create a code owner config without issues.
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    assertOkWithHints(r, "code owner config files validated, no issues found");
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  public void canUploadConfigWithoutIssuesInInitialCommit() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
     // Create a code owner config without issues.
