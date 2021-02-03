@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9e6f645b_dac739e9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnersPluginConfigValidatorIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-03T15:38:05Z",
+      "side": 1,
+      "message": "another test:\nvalidationFailsOnRebaseChange_changeThatCreatesInvalidCodeOwnerConfig?",
+      "range": {
+        "startLine": 570,
+        "startChar": 14,
+        "endLine": 570,
+        "endChar": 85
+      },
+      "revId": "618409f2e4e6667c733ce31c293d2489172e31ee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
