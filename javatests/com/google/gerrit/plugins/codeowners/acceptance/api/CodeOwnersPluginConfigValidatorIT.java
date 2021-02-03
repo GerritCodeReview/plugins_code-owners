@@ -17,12 +17,16 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.acceptance.GitUtil.fetch;
 import static com.google.gerrit.acceptance.GitUtil.pushHead;
+import static com.google.gerrit.extensions.client.ListChangesOption.CURRENT_REVISION;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.acceptance.GitUtil;
+import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
@@ -530,6 +534,75 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
         .contains(
             "The value for max paths in change messages 'INVALID' that is configured in"
                 + " code-owners.config (parameter codeOwners.maxPathsInChangeMessages) is invalid.");
+  }
+
+  @Test
+  public void validationDoesntFailOnRebaseChange_unrelatedChange() throws Exception {
+    // Create two changes for refs/meta/config both with the same parent.
+    GitUtil.fetch(testRepo, RefNames.REFS_CONFIG + ":config");
+    testRepo.reset("config");
+    PushOneCommit push =
+        pushFactory.create(admin.newIdent(), testRepo, "Change 1", "a.txt", "content");
+    PushOneCommit.Result r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+    r.assertOkStatus();
+    String changeId1 = r.getChangeId();
+
+    testRepo.reset("config");
+    push = pushFactory.create(admin.newIdent(), testRepo, "Change 2", "b.txt", "content");
+    r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+    r.assertOkStatus();
+    String changeId2 = r.getChangeId();
+
+    // Approve and submit the first change
+    approve(changeId1);
+    gApi.changes().id(changeId1).current().submit();
+
+    // Rebase the second change, throws an exception if the code owner plugin config validation
+    // fails.
+    gApi.changes().id(changeId2).rebase();
+
+    // Second change should have 2 patch sets now.
+    ChangeInfo changeInfo = gApi.changes().id(changeId2).get(CURRENT_REVISION);
+    assertThat(changeInfo.revisions.get(changeInfo.currentRevision)._number).isEqualTo(2);
+  }
+
+  @Test
+  public void validationDoesntFailOnRebaseChange_changeThatUpdatesTheCodeOwnersConfig()
+      throws Exception {
+    // Create two changes for refs/meta/config both with the same parent.
+    GitUtil.fetch(testRepo, RefNames.REFS_CONFIG + ":config");
+    testRepo.reset("config");
+    PushOneCommit push =
+        pushFactory.create(admin.newIdent(), testRepo, "Change 1", "a,txt", "content");
+    PushOneCommit.Result r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+    r.assertOkStatus();
+    String changeId1 = r.getChangeId();
+
+    testRepo.reset("config");
+    Config cfg = new Config();
+    cfg.setEnum(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        FallbackCodeOwners.ALL_USERS);
+    push =
+        pushFactory.create(
+            admin.newIdent(), testRepo, "Change 2", "code-owners.config", cfg.toText());
+    r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+    r.assertOkStatus();
+    String changeId2 = r.getChangeId();
+
+    // Approve and submit the first change
+    approve(changeId1);
+    gApi.changes().id(changeId1).current().submit();
+
+    // Rebase the second change, throws an exception if the code owner plugin config validation
+    // fails.
+    gApi.changes().id(changeId2).rebase();
+
+    // Second change should have 2 patch sets now.
+    ChangeInfo changeInfo = gApi.changes().id(changeId2).get(CURRENT_REVISION);
+    assertThat(changeInfo.revisions.get(changeInfo.currentRevision)._number).isEqualTo(2);
   }
 
   private void fetchRefsMetaConfig() throws Exception {
