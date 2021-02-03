@@ -16,13 +16,12 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
+import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.events.CommitReceivedEvent;
-import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -39,8 +38,6 @@ import java.util.List;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.Repository;
-import org.eclipse.jgit.revwalk.RevCommit;
 
 /** Validates modifications to the {@code code-owners.config} file in {@code refs/meta/config}. */
 @Singleton
@@ -48,7 +45,6 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final String pluginName;
-  private final GitRepositoryManager repoManager;
   private final ProjectConfig.Factory projectConfigFactory;
   private final ProjectState.Factory projectStateFactory;
   private final ChangedFiles changedFiles;
@@ -61,7 +57,6 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
   @Inject
   CodeOwnersPluginConfigValidator(
       @PluginName String pluginName,
-      GitRepositoryManager repoManager,
       ProjectConfig.Factory projectConfigFactory,
       ProjectState.Factory projectStateFactory,
       ChangedFiles changedFiles,
@@ -71,7 +66,6 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
       RequiredApprovalConfig requiredApprovalConfig,
       OverrideApprovalConfig overrideApprovalConfig) {
     this.pluginName = pluginName;
-    this.repoManager = repoManager;
     this.projectConfigFactory = projectConfigFactory;
     this.projectStateFactory = projectStateFactory;
     this.changedFiles = changedFiles;
@@ -86,18 +80,17 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
   public ImmutableList<CommitValidationMessage> onCommitReceived(CommitReceivedEvent receiveEvent)
       throws CommitValidationException {
     String fileName = pluginName + ".config";
-    Project.NameKey project = receiveEvent.project.getNameKey();
 
     try {
       if (!receiveEvent.refName.equals(RefNames.REFS_CONFIG)
-          || !isFileChanged(project, receiveEvent.commit, fileName)) {
+          || !isFileChanged(receiveEvent, fileName)) {
         // the code-owners.config file in refs/meta/config was not modified, hence we do not need to
         // validate it
         return ImmutableList.of();
       }
 
-      ProjectState projectState = getProjectState(project, receiveEvent.commit);
-      ProjectLevelConfig.Bare cfg = loadConfig(project, fileName, receiveEvent.commit);
+      ProjectState projectState = getProjectState(receiveEvent);
+      ProjectLevelConfig.Bare cfg = loadConfig(receiveEvent, fileName);
       ImmutableList<CommitValidationMessage> validationMessages =
           validateConfig(projectState, fileName, cfg.getConfig());
       if (!validationMessages.isEmpty()) {
@@ -109,52 +102,57 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
       String errorMessage =
           String.format(
               "failed to validate file %s for revision %s in ref %s of project %s",
-              fileName, receiveEvent.commit.getName(), RefNames.REFS_CONFIG, project);
+              fileName,
+              receiveEvent.commit.getName(),
+              RefNames.REFS_CONFIG,
+              receiveEvent.project.getNameKey());
       logger.atSevere().withCause(e).log(errorMessage);
       throw new CommitValidationException(errorMessage, e);
     }
   }
 
-  private ProjectState getProjectState(Project.NameKey projectName, RevCommit commit)
+  private ProjectState getProjectState(CommitReceivedEvent receiveEvent)
       throws IOException, ConfigInvalidException {
-    try (Repository repo = repoManager.openRepository(projectName)) {
-      ProjectConfig projectConfig = projectConfigFactory.create(projectName);
-      projectConfig.load(repo, commit);
-      return projectStateFactory.create(projectConfig.getCacheable());
-    }
+    ProjectConfig projectConfig = projectConfigFactory.create(receiveEvent.project.getNameKey());
+    projectConfig.load(receiveEvent.revWalk, receiveEvent.commit);
+    return projectStateFactory.create(projectConfig.getCacheable());
   }
 
   /**
    * Whether the given file was changed in the given revision.
    *
-   * @param project the name of the project
-   * @param revision the revision
+   * @param receiveEvent the receive event
    * @param fileName the name of the file
    */
-  private boolean isFileChanged(Project.NameKey project, ObjectId revision, String fileName)
+  private boolean isFileChanged(CommitReceivedEvent receiveEvent, String fileName)
       throws IOException, PatchListNotAvailableException {
-    return changedFiles.compute(project, revision).stream()
+    return changedFiles
+        .compute(
+            receiveEvent.project.getNameKey(),
+            receiveEvent.repoConfig,
+            receiveEvent.revWalk,
+            receiveEvent.commit,
+            MergeCommitStrategy.ALL_CHANGED_FILES)
+        .stream()
         .anyMatch(changedFile -> changedFile.hasNewPath(JgitPath.of(fileName).getAsAbsolutePath()));
   }
 
   /**
    * Loads the configuration from the file and revision.
    *
-   * @param project the project name
+   * @param receiveEvent the receive event
    * @param fileName the name of the config file
-   * @param revision the revision from which the configuration should be loaded
    * @return the loaded configuration
    * @throws CommitValidationException thrown if the configuration is invalid and cannot be parsed
    */
-  private ProjectLevelConfig.Bare loadConfig(
-      Project.NameKey project, String fileName, ObjectId revision)
+  private ProjectLevelConfig.Bare loadConfig(CommitReceivedEvent receiveEvent, String fileName)
       throws CommitValidationException, IOException {
     ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare(fileName);
-    try (Repository git = repoManager.openRepository(project)) {
-      cfg.load(project, git, revision);
+    try {
+      cfg.load(receiveEvent.project.getNameKey(), receiveEvent.revWalk, receiveEvent.commit);
     } catch (ConfigInvalidException e) {
       throw new CommitValidationException(
-          exceptionMessage(fileName, revision),
+          exceptionMessage(fileName, receiveEvent.commit),
           new CommitValidationMessage(e.getMessage(), ValidationMessage.Type.ERROR));
     }
     return cfg;
