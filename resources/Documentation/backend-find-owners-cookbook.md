@@ -61,9 +61,9 @@ users](backend-find-owners.html#allUsers) instead ([example](#exemptFiles)).
 
 ### <a id="defineCodeOwnersForAFile">Define code owners for a certain file
 
-Using the [per-file](backend-find-owners.html#perFile) restriction prefix it is
-possible to define code owners for a certain file, e.g. for the `BUILD` file in
-the current directory:
+By using the [per-file](backend-find-owners.html#perFile) restriction prefix it
+is possible to define code owners for a certain file (in the current directory
+and all its subdirectories), e.g. for the `BUILD` file:
 
 ```
   per-file BUILD=tina.toe@example.com
@@ -121,14 +121,6 @@ can grant code owner approval on them. To [exempt matched files from requiring
 code owner approvals](#exemptFiles), assign the code ownership to [all
 users](backend-find-owners.html#allUsers) instead ([example](#exemptFiles)).
 
-If files with a given name should be matched in the current directory and all
-its subdirectories, the [per-file](backend-find-owners.html#perFile) line must
-have path expression that matches these file:
-
-```
-  per-file {**/,}BUILD=tina.toe@example.com,martha.moe@example.com
-```
-\
 **NOTE:** The syntax for path expressions / globs is explained
 [here](path-expressions.html#globs).
 
