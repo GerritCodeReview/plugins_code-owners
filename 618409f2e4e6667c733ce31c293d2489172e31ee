@@ -22,6 +22,30 @@
       },
       "revId": "618409f2e4e6667c733ce31c293d2489172e31ee",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a11f712f_486dd236",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnersPluginConfigValidatorIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 570,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-04T09:54:01Z",
+      "side": 1,
+      "message": "Since uploading an invalid code-owners.config file is rejected, we cannot have a change with an invalid code-owners.config and then rebase it.\n\nWhat we can do is, create 2 conflicting changes with a valid code-owners.config, then submit the one change and rebase the other with allowing conflicts. Then the conflict markers in the code-owners.config file make it invalid.\n\nDone.",
+      "parentUuid": "9e6f645b_dac739e9",
+      "range": {
+        "startLine": 570,
+        "startChar": 14,
+        "endLine": 570,
+        "endChar": 85
+      },
+      "revId": "618409f2e4e6667c733ce31c293d2489172e31ee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
