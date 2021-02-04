@@ -24,11 +24,15 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
 import java.nio.file.Paths;
 import java.util.Optional;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.errors.MissingObjectException;
+import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -403,6 +407,42 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
       // Check that no commit was created.
       assertThat(getHead(repo, codeOwnerConfigKey.ref())).isEqualTo(origHead);
     }
+  }
+
+  @Test
+  public void cannotUpdateInvalidCodeOwnerConfig() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+
+    // create an invalid code owner config
+    try (TestRepository<Repository> testRepo =
+        new TestRepository<>(repoManager.openRepository(codeOwnerConfigKey.project()))) {
+      Ref ref = testRepo.getRepository().exactRef(codeOwnerConfigKey.ref());
+      RevCommit head = testRepo.getRevWalk().parseCommit(ref.getObjectId());
+      testRepo.update(
+          codeOwnerConfigKey.ref(),
+          testRepo
+              .commit()
+              .parent(head)
+              .message("Add invalid test code owner config")
+              .add(JgitPath.of(codeOwnerConfigKey.filePath(getFileName())).get(), "INVALID"));
+    }
+
+    // Try to update the code owner config.
+    StorageException exception =
+        assertThrows(
+            StorageException.class,
+            () ->
+                codeOwnerBackend.upsertCodeOwnerConfig(
+                    codeOwnerConfigKey,
+                    CodeOwnerConfigUpdate.builder()
+                        .setCodeOwnerSetsModification(
+                            CodeOwnerSetModification.addToOnlySet(user.email()))
+                        .build(),
+                    /* currentUser= */ null));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("failed to upsert code owner config %s", codeOwnerConfigKey));
+    assertThat(exception).hasCauseThat().isInstanceOf(ConfigInvalidException.class);
   }
 
   @Test
