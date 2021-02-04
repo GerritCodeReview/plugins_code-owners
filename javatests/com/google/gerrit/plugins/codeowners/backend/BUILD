@@ -38,11 +38,13 @@ java_library(
         "//java/com/google/gerrit/testing:gerrit-test-util",
         "//lib:guava",
         "//lib:jgit",
+        "//lib:jgit-junit",
         "//lib/truth",
         "//lib/truth:truth-java8-extension",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing/backend:testutil",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )
