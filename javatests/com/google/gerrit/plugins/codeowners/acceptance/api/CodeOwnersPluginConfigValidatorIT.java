@@ -22,6 +22,7 @@ import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubje
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.PushOneCommit;
@@ -30,6 +31,7 @@ import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.RebaseInput;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
+import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
@@ -53,6 +55,10 @@ import org.junit.Test;
 
 /**
  * Tests for {@code com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfigValidator}.
+ *
+ * <p>Unit tests for {@code
+ * com.google.gerrit.plugins.codeowners.config.CodeOwnersPluginConfigValidator} are contained in
+ * {@code com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigValidatorTest}.
  */
 public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   private CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
@@ -659,6 +665,33 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
             String.format(
                 "Invalid config file code-owners.config in project %s in branch %s",
                 project, RefNames.REFS_CONFIG));
+  }
+
+  @Test
+  public void validatorForProjectConfigIsInvokedBeforeCodeOwnersConfigValidator() throws Exception {
+    fetchRefsMetaConfig();
+    Config cfg = new Config();
+    cfg.setEnum(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        FallbackCodeOwners.ALL_USERS);
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Change 1",
+            ImmutableMap.of("code-owners.config", cfg.toText(), "project.config", "INVALID"));
+    PushOneCommit.Result r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+
+    // The invalid project.config is rejected by the project config validator in Gerrit core before
+    // CodeOwnersPluginConfigValidator is invoked (if CodeOwnersPluginConfigValidator would be
+    // invoked first it would fail with a ConfigInvalidException and the message would be "internal
+    // error").
+    r.assertMessage(
+        String.format(
+            "commit %s: invalid project configuration",
+            ObjectIds.abbreviateName(r.getCommit(), testRepo.getRevWalk().getObjectReader())));
   }
 
   private void fetchRefsMetaConfig() throws Exception {
