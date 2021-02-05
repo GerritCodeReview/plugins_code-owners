@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0f82a751_13c4ec6c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractFileBasedCodeOwnerBackendTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-05T09:49:44Z",
+      "side": 1,
+      "message": "can you make it a better message? \"because the code owner config is invalid and can\u0027t be parsed\"?",
+      "range": {
+        "startLine": 444,
+        "startChar": 34,
+        "endLine": 444,
+        "endChar": 71
+      },
+      "revId": "372ad4cdb4369361955de21b55b0944d9d1b7daf",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
