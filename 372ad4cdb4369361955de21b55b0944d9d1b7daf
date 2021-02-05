@@ -22,6 +22,30 @@
       },
       "revId": "372ad4cdb4369361955de21b55b0944d9d1b7daf",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "91def760_ef5659eb",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractFileBasedCodeOwnerBackendTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 444,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-05T12:07:32Z",
+      "side": 1,
+      "message": "This message is already there as message of the cause. I added an assertion for it.\nThe StorageException that wraps the ConfigInvalidException can also be triggered for other reasons than an invalid config, hence its message needs to stay generic.",
+      "parentUuid": "0f82a751_13c4ec6c",
+      "range": {
+        "startLine": 444,
+        "startChar": 34,
+        "endLine": 444,
+        "endChar": 71
+      },
+      "revId": "372ad4cdb4369361955de21b55b0944d9d1b7daf",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
