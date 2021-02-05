@@ -356,7 +356,7 @@ public class PathCodeOwners {
             Set<CodeOwnerConfigReference> transitiveImports = new HashSet<>();
             transitiveImports.addAll(importedCodeOwnerConfig.imports());
             transitiveImports.addAll(
-                importedCodeOwnerConfig.codeOwnerSets().stream()
+                getMatchingPerFileCodeOwnerSets(importedCodeOwnerConfig)
                     .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
                     .collect(toImmutableSet()));
 

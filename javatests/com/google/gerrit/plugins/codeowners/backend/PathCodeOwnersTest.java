@@ -1661,6 +1661,96 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void onlyMatchingTransitivePerFileImportsAreImported() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create importing config with global import
+    CodeOwnerConfig.Key rootCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addImport(
+                CodeOwnerConfigReference.create(
+                    CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS"))
+            .create();
+
+    // create imported config with 2 per file imports, one for *.md files and one for *.txt
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("*.md")
+                .addImport(
+                    CodeOwnerConfigReference.create(
+                        CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/md/OWNERS"))
+                .build())
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("*.txt")
+                .addImport(
+                    CodeOwnerConfigReference.create(
+                        CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/txt/OWNERS"))
+                .build())
+        .create();
+
+    // create config with global code owner that is imported by the imported config for *.md files
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/md/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create config with global code owner that is imported by the imported config for *.txt files
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/txt/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // Expectation for foo.xyz file: code owners is empty since foo.xyz neither matches *.md nor
+    // *.txt
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.xyz"));
+    assertThat(pathCodeOwners).isPresent();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners()).isEmpty();
+
+    // Expectation for foo.md file: code owners contains only user since foo.md only matches *.md
+    pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(user.email());
+
+    // Expectation for foo.txt file: code owners contains only user2 since foo.txt only matches
+    // *.txt
+    pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            rootCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.txt"));
+    assertThat(pathCodeOwners).isPresent();
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(user2.email());
+  }
+
+  @Test
   public void cannotMatchAgainstNullCodeOwnerSet() throws Exception {
     NullPointerException npe =
         assertThrows(
