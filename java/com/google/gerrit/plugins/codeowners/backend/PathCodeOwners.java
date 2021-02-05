@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toSet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -344,10 +345,11 @@ public class PathCodeOwners {
                 .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
           }
 
+          ImmutableSet<CodeOwnerSet> matchingPerFileCodeOwnerSets =
+              getMatchingPerFileCodeOwnerSets(importedCodeOwnerConfig).collect(toImmutableSet());
           if (importMode.importPerFileCodeOwnerSets()) {
             logger.atFine().log("import per-file code owners");
-            getMatchingPerFileCodeOwnerSets(importedCodeOwnerConfig)
-                .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+            matchingPerFileCodeOwnerSets.forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
           }
 
           if (importMode.resolveImportsOfImport()
@@ -356,7 +358,7 @@ public class PathCodeOwners {
             Set<CodeOwnerConfigReference> transitiveImports = new HashSet<>();
             transitiveImports.addAll(importedCodeOwnerConfig.imports());
             transitiveImports.addAll(
-                importedCodeOwnerConfig.codeOwnerSets().stream()
+                matchingPerFileCodeOwnerSets.stream()
                     .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
                     .collect(toImmutableSet()));
 
