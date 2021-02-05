@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8ed52eeb_b3b4e107",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 349,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-05T14:00:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "169c1f9c_e874f60c",
+      "range": {
+        "startLine": 349,
+        "startChar": 12,
+        "endLine": 349,
+        "endChar": 68
+      },
+      "revId": "e43bebf996f9b9ec840b30522bb9e824c902c9c7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "202ae6a6_cc791e6f",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-02-05T13:43:50Z",
       "side": 1,
       "message": "Just verifying, was this broken before your fix?",
+      "range": {
+        "startLine": 1721,
+        "startChar": 0,
+        "endLine": 1728,
+        "endChar": 0
+      },
+      "revId": "e43bebf996f9b9ec840b30522bb9e824c902c9c7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7312b526_01be8245",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1728,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-05T14:00:36Z",
+      "side": 1,
+      "message": "Yes, for all 3 cases (foo.xyz, foo.md and foo.txt) it was returning user + user2 before this fix.",
+      "parentUuid": "202ae6a6_cc791e6f",
       "range": {
         "startLine": 1721,
         "startChar": 0,
