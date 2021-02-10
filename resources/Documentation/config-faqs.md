@@ -91,7 +91,7 @@ To do this they can:
 * Check the code ownership of a user for a certain path by calling the [Check
   Code Owner REST endpoint](rest-api.html#check-code-owner) (requires the caller
   to be host administrator or have the [Check Code Owner
-  capability](#checkCodeOwner)).
+  capability](rest-api.html#checkCodeOwner)).
 
 Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
 only after issues with the code owner config files have been excluded.
