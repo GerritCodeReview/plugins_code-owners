@@ -7,6 +7,7 @@
 * [How to setup code owner overrides](#setupOverrides)
 * [What's the best place to keep the global plugin
   configuration](#globalPluginConfiguration)
+* [How to make unicode characters in file paths work?](#unicodeCharsInFilePaths)
 
 ## <a id="updateCodeOwnersConfig">How to update the code-owners.config file for a project
 
@@ -152,6 +153,20 @@ corresponding configuration that is inherited from `gerrit.config`.
 **NOTE:** There are a few configuration parameters (e.g. for [allowed email
 domains](config.html#pluginCodeOwnersAllowedEmailDomain)) that cannot be set on
 project level and hence must be set in `gerrit.config`.
+
+## <a id="unicodeCharsInFilePaths">How to make unicode characters in file paths work?
+
+The @PLUGIN@ plugin uses the Java NIO API which reads the default character
+encoding from the system language settings. On Unix this means the `LANG` and
+`LC_CTYPE` environment variables (setting one of them is sufficent). To enable
+unicode characters in file paths e.g. set: `LANG=en_US.UTF-8`
+
+If paths are used that are not valid according to the system language setting
+(e.g. if a path contains unicode characters but `LANG` is `en_US.iso88591`)
+the Java NIO API throws a `java.nio.file.InvalidPathException` with the message
+`Malformed input or input contains unmappable characters`. If such an exception
+occurs code-owner requests return `409 Conflict`, telling the user about the
+invalid path.
 
 ---
 
