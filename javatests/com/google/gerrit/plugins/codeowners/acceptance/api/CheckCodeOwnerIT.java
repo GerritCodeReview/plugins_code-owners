@@ -31,12 +31,14 @@ import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
@@ -67,10 +69,12 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
 
   private BackendConfig backendConfig;
+  private TestPathExpressions testPathExpressions;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
+    testPathExpressions = plugin.getSysInjector().getInstance(TestPathExpressions.class);
   }
 
   @Test
@@ -639,6 +643,122 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "master",
                 getCodeOwnerConfigFilePath(codeOwnerConfigKey.folderPath().toString()),
                 projectOperations.project(project).getHead("master").name()));
+  }
+
+  @Test
+  public void checkPerFileCodeOwner() throws Exception {
+    TestAccount txtOwner =
+        accountCreator.create(
+            "txtCodeOwner", "txtCodeOwner@example.com", "Txt Code Owner", /* displayName= */ null);
+    TestAccount mdOwner =
+        accountCreator.create(
+            "mdCodeOwner", "mdCodeOwner@example.com", "Md Code Owner", /* displayName= */ null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("txt"))
+                .addCodeOwnerEmail(txtOwner.email())
+                .build())
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(mdOwner.email())
+                .build())
+        .create();
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, mdOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigFilePathsThat()
+        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "per-file code owner set with path expressions [%s] matches",
+                testPathExpressions.matchFileType("md")),
+            String.format(
+                "found email %s as code owner in %s",
+                mdOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
+            String.format("resolved to account %s", mdOwner.id()));
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatDoNotContainAnyOf(
+            String.format(
+                "per-file code owner set with path expressions [%s] matches",
+                testPathExpressions.matchFileType("txt")));
+  }
+
+  @Test
+  public void checkPerFileCodeOwnerWhenParentCodeOwnersAreIgnored() throws Exception {
+    skipTestIfIgnoreParentCodeOwnersNotSupportedByCodeOwnersBackend();
+
+    TestAccount fileCodeOwner =
+        accountCreator.create(
+            "fileCodeOwner",
+            "fileCodeOwner@example.com",
+            "File Code Owner",
+            /* displayName= */ null);
+    TestAccount folderCodeOwner =
+        accountCreator.create(
+            "folderCodeOwner",
+            "folderCodeOwner@example.com",
+            "Folder Code Owner",
+            /* displayName= */ null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(folderCodeOwner.email())
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .setIgnoreGlobalAndParentCodeOwners()
+                .addCodeOwnerEmail(fileCodeOwner.email())
+                .build())
+        .create();
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, folderCodeOwner.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "per-file code owner set with path expressions [%s] matches",
+                testPathExpressions.matchFileType("md")),
+            String.format(
+                "found matching per-file code owner set (with path expressions = [%s]) that ignores"
+                    + " parent code owners, hence ignoring the folder code owners",
+                testPathExpressions.matchFileType("md")));
+
+    checkCodeOwnerInfo = checkCodeOwner(path, fileCodeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigFilePathsThat()
+        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "per-file code owner set with path expressions [%s] matches",
+                testPathExpressions.matchFileType("md")),
+            String.format(
+                "found matching per-file code owner set (with path expressions = [%s]) that ignores"
+                    + " parent code owners, hence ignoring the folder code owners",
+                testPathExpressions.matchFileType("md")),
+            String.format(
+                "found email %s as code owner in %s",
+                fileCodeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
+            String.format("resolved to account %s", fileCodeOwner.id()));
   }
 
   private CodeOwnerCheckInfo checkCodeOwner(String path, String email) throws RestApiException {

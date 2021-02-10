@@ -87,6 +87,12 @@ public class CodeOwnerCheckInfoSubject extends Subject {
     }
   }
 
+  public void hasDebugLogsThatDoNotContainAnyOf(String... expectedMessages) {
+    for (String expectedMessage : expectedMessages) {
+      check("debugLogs").that(codeOwnerCheckInfo().debugLogs).doesNotContain(expectedMessage);
+    }
+  }
+
   public IterableSubject hasDebugLogsThat() {
     return check("debugLogs").that(codeOwnerCheckInfo().debugLogs);
   }

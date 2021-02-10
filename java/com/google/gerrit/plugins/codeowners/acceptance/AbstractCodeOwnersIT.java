@@ -97,6 +97,11 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
     assumeThatCodeOwnersBackendIsNotProtoBackend();
   }
 
+  protected void skipTestIfIgnoreParentCodeOwnersNotSupportedByCodeOwnersBackend() {
+    // the proto backend doesn't support ignoring parent code owners
+    assumeThatCodeOwnersBackendIsNotProtoBackend();
+  }
+
   protected void assumeThatCodeOwnersBackendIsNotProtoBackend() {
     assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
   }

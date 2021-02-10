@@ -34,6 +34,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -202,13 +203,22 @@ public class PathCodeOwners {
       CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder =
           CodeOwnerConfig.builder(codeOwnerConfig.key(), codeOwnerConfig.revision());
 
+      List<String> messages = new ArrayList<>();
+
       // Add all data from the importing code owner config.
       resolvedCodeOwnerConfigBuilder.setIgnoreParentCodeOwners(
           codeOwnerConfig.ignoreParentCodeOwners());
       getGlobalCodeOwnerSets(codeOwnerConfig)
           .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
       getMatchingPerFileCodeOwnerSets(codeOwnerConfig)
-          .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+          .forEach(
+              codeOwnerSet -> {
+                messages.add(
+                    String.format(
+                        "per-file code owner set with path expressions %s matches",
+                        codeOwnerSet.pathExpressions()));
+                resolvedCodeOwnerConfigBuilder.addCodeOwnerSet(codeOwnerSet);
+              });
 
       List<UnresolvedImport> unresolvedImports =
           resolveImports(codeOwnerConfig, resolvedCodeOwnerConfigBuilder);
@@ -219,9 +229,19 @@ public class PathCodeOwners {
       // ignoreGlobalAndParentCodeOwners flag set to true.
       // In this case also set ignoreParentCodeOwners to true, so that we do not need to inspect the
       // ignoreGlobalAndParentCodeOwners flags again.
-      if (getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
-          .anyMatch(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)) {
-        logger.atFine().log("remove global code owner sets and set ignoreParentCodeOwners to true");
+      Optional<CodeOwnerSet> matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners =
+          getMatchingPerFileCodeOwnerSets(resolvedCodeOwnerConfig)
+              .filter(CodeOwnerSet::ignoreGlobalAndParentCodeOwners)
+              .findAny();
+      if (matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners.isPresent()) {
+        logger.atFine().log("remove folder code owner sets and set ignoreParentCodeOwners to true");
+        messages.add(
+            String.format(
+                "found matching per-file code owner set (with path expressions = %s) that ignores"
+                    + " parent code owners, hence ignoring the folder code owners",
+                matchingPerFileCodeOwnerSetThatIgnoresGlobalAndParentCodeOwners
+                    .get()
+                    .pathExpressions()));
         resolvedCodeOwnerConfig =
             resolvedCodeOwnerConfig
                 .toBuilder()
@@ -236,7 +256,7 @@ public class PathCodeOwners {
       this.pathCodeOwnersResult =
           OptionalResultWithMessages.create(
               PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig, unresolvedImports),
-              ImmutableList.of());
+              messages);
       logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
       return this.pathCodeOwnersResult;
     }
