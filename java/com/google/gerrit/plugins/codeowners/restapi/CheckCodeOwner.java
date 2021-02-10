@@ -131,13 +131,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
         ObjectId.fromString(branchResource.getRevision()),
         absolutePath,
         codeOwnerConfig -> {
-          Path codeOwnerConfigFilePath = codeOwners.getFilePath(codeOwnerConfig.key());
           messages.add(
               String.format(
-                  "checking code owner config file %s:%s:%s",
-                  codeOwnerConfig.key().project(),
-                  codeOwnerConfig.key().shortBranchName(),
-                  codeOwnerConfigFilePath));
+                  "checking code owner config file %s", codeOwnerConfig.key().format(codeOwners)));
           OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult =
               pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).resolveCodeOwnerConfig();
           messages.addAll(pathCodeOwnersResult.messages());
@@ -160,6 +156,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                       "found email %s as code owner in default code owner config", email));
               isDefaultCodeOwner.set(true);
             } else {
+              Path codeOwnerConfigFilePath = codeOwners.getFilePath(codeOwnerConfig.key());
               messages.add(
                   String.format(
                       "found email %s as code owner in %s", email, codeOwnerConfigFilePath));

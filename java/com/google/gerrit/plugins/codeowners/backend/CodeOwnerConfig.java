@@ -306,6 +306,11 @@ public abstract class CodeOwnerConfig {
       return folderPath().resolve(fileName().orElse(defaultCodeOwnerConfigFileName));
     }
 
+    /** User-readable string representing of this code owner config key. */
+    public String format(CodeOwners codeOwners) {
+      return String.format("%s:%s:%s", project(), shortBranchName(), codeOwners.getFilePath(this));
+    }
+
     /**
      * Creates a builder from this code owner config key.
      *
