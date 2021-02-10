@@ -133,7 +133,7 @@ public class ProtoCodeOwnerConfigParser implements CodeOwnerConfigParser {
       for (CodeOwnerSet codeOwnerSet : codeOwnerConfig.codeOwnerSets()) {
         checkState(
             !codeOwnerSet.ignoreGlobalAndParentCodeOwners(),
-            "ignoreGlobaleAndParentCodeOwners is not supported");
+            "ignoreGlobalAndParentCodeOwners is not supported");
         OwnerSet.Builder ownerSetProtoBuilder = ownersConfigProtoBuilder.addOwnerSetsBuilder();
         ownerSetProtoBuilder.addAllPathExpressions(codeOwnerSet.pathExpressions());
         codeOwnerSet.codeOwners().stream()

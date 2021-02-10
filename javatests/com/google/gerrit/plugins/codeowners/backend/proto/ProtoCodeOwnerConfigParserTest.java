@@ -178,7 +178,7 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
             () -> codeOwnerConfigParser.formatAsString(codeOwnerConfig));
     assertThat(exception)
         .hasMessageThat()
-        .isEqualTo("ignoreGlobaleAndParentCodeOwners is not supported");
+        .isEqualTo("ignoreGlobalAndParentCodeOwners is not supported");
   }
 
   @Test
