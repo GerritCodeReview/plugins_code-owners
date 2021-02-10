@@ -631,8 +631,15 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, user.email());
     assertThat(checkCodeOwnerInfo)
-        .hasDebugLogsThat()
-        .contains(
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "Code owner config %s:%s:%s imports:\n"
+                    + "* %s (global import, import mode = ALL)\n"
+                    + "  * failed to resolve (code owner config not found)",
+                project,
+                "master",
+                getCodeOwnerConfigFilePath(codeOwnerConfigKey.folderPath().toString()),
+                unresolvableCodeOwnerConfigReference.filePath()),
             String.format(
                 "The import of %s:%s:%s in %s:%s:%s cannot be resolved:"
                     + " code owner config does not exist (revision = %s)",
@@ -642,6 +649,56 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 project,
                 "master",
                 getCodeOwnerConfigFilePath(codeOwnerConfigKey.folderPath().toString()),
+                projectOperations.project(project).getHead("master").name()));
+  }
+
+  @Test
+  public void debugLogsContainUnresolvedTransitiveImports() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath(ROOT_PATH)
+        .addImport(
+            CodeOwnerConfigReference.create(
+                CodeOwnerConfigImportMode.ALL, "/foo/" + getCodeOwnerConfigFileName()))
+        .create();
+
+    CodeOwnerConfigReference unresolvableCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.ALL, "non-existing/" + getCodeOwnerConfigFileName());
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addImport(unresolvableCodeOwnerConfigReference)
+        .create();
+
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, user.email());
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "Code owner config %s:%s:%s imports:\n"
+                    + "* %s (global import, import mode = ALL)\n"
+                    + "  * %s (global import, import mode = ALL)\n"
+                    + "    * failed to resolve (code owner config not found)",
+                project,
+                "master",
+                getCodeOwnerConfigFilePath("/"),
+                getCodeOwnerConfigFilePath("/foo/"),
+                unresolvableCodeOwnerConfigReference.filePath()),
+            String.format(
+                "The import of %s:%s:%s in %s:%s:%s cannot be resolved:"
+                    + " code owner config does not exist (revision = %s)",
+                project,
+                "master",
+                JgitPath.of(unresolvableCodeOwnerConfigReference.filePath()).getAsAbsolutePath(),
+                project,
+                "master",
+                getCodeOwnerConfigFilePath("/foo/"),
                 projectOperations.project(project).getHead("master").name()));
   }
 
@@ -759,6 +816,170 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "found email %s as code owner in %s",
                 fileCodeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
             String.format("resolved to account %s", fileCodeOwner.id()));
+  }
+
+  @Test
+  public void checkCodeOwnerFromImportedConfig() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addImport(
+            CodeOwnerConfigReference.create(
+                CodeOwnerConfigImportMode.ALL, "/bar/" + getCodeOwnerConfigFileName()))
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addImport(
+            CodeOwnerConfigReference.create(
+                CodeOwnerConfigImportMode.ALL, "/baz/" + getCodeOwnerConfigFileName()))
+        .create();
+
+    setAsCodeOwners("/baz/", codeOwner);
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigFilePathsThat()
+        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "Code owner config %s:%s:/foo/%s imports:\n"
+                    + "* /bar/%s (global import, import mode = ALL)\n"
+                    + "  * /baz/%s (global import, import mode = ALL)",
+                project,
+                "master",
+                getCodeOwnerConfigFileName(),
+                getCodeOwnerConfigFileName(),
+                getCodeOwnerConfigFileName()),
+            String.format(
+                "found email %s as code owner in %s",
+                codeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
+            String.format("resolved to account %s", codeOwner.id()));
+  }
+
+  @Test
+  public void checkCodeOwnerFromImportedPerFileConfig() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    TestAccount mdCodeOwner =
+        accountCreator.create(
+            "mdCodeOwner", "mdCodeOwner@example.com", "Md Code Owner", /* displayName= */ null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addImport(
+            CodeOwnerConfigReference.create(
+                CodeOwnerConfigImportMode.ALL, "/bar/" + getCodeOwnerConfigFileName()))
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addImport(
+                    CodeOwnerConfigReference.create(
+                        CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                        "/baz/" + getCodeOwnerConfigFileName()))
+                .build())
+        .create();
+
+    setAsCodeOwners("/baz/", mdCodeOwner);
+
+    // 1. check for mdCodeOwner and path of an md file
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, mdCodeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigFilePathsThat()
+        .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "Code owner config %s:%s:/foo/%s imports:\n"
+                    + "* /bar/%s (global import, import mode = ALL)\n"
+                    + "  * per-file code owner set with path expressions [%s] matches\n"
+                    + "  * /baz/%s (per-file import, import mode = GLOBAL_CODE_OWNER_SETS_ONLY,"
+                    + " path expressions = [%s])",
+                project,
+                "master",
+                getCodeOwnerConfigFileName(),
+                getCodeOwnerConfigFileName(),
+                testPathExpressions.matchFileType("md"),
+                getCodeOwnerConfigFileName(),
+                testPathExpressions.matchFileType("md")),
+            String.format(
+                "found email %s as code owner in %s",
+                mdCodeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
+            String.format("resolved to account %s", mdCodeOwner.id()));
+
+    // 2. check for user and path of an md file
+    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "Code owner config %s:%s:/foo/%s imports:\n"
+                    + "* /bar/%s (global import, import mode = ALL)\n"
+                    + "  * per-file code owner set with path expressions [%s] matches\n"
+                    + "  * /baz/%s (per-file import, import mode = GLOBAL_CODE_OWNER_SETS_ONLY,"
+                    + " path expressions = [%s])",
+                project,
+                "master",
+                getCodeOwnerConfigFileName(),
+                getCodeOwnerConfigFileName(),
+                testPathExpressions.matchFileType("md"),
+                getCodeOwnerConfigFileName(),
+                testPathExpressions.matchFileType("md")),
+            String.format("resolved to account %s", user.id()));
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatDoNotContainAnyOf(
+            String.format(
+                "found email %s as code owner in %s",
+                user.email(), getCodeOwnerConfigFilePath("/foo/")));
+
+    // 3. check for mdCodeOwner and path of an txt file
+    path = "/foo/bar/baz.txt";
+    checkCodeOwnerInfo = checkCodeOwner(path, mdCodeOwner.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "Code owner config %s:%s:/foo/%s imports:\n"
+                    + "* /bar/%s (global import, import mode = ALL)",
+                project, "master", getCodeOwnerConfigFileName(), getCodeOwnerConfigFileName()),
+            String.format("resolved to account %s", mdCodeOwner.id()));
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatDoNotContainAnyOf(
+            String.format(
+                "found email %s as code owner in %s",
+                mdCodeOwner.email(), getCodeOwnerConfigFilePath("/foo/")));
   }
 
   private CodeOwnerCheckInfo checkCodeOwner(String path, String email) throws RestApiException {
