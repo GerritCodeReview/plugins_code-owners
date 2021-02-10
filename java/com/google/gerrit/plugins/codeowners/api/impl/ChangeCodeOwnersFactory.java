@@ -64,7 +64,7 @@ public class ChangeCodeOwnersFactory {
     try {
       return changesCollection.parse(TopLevelResource.INSTANCE, IdString.fromDecoded(changeId));
     } catch (Exception e) {
-      throw asRestApiException("Cannot retrieve revision", e);
+      throw asRestApiException("Cannot retrieve change", e);
     }
   }
 }
