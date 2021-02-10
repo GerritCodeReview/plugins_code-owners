@@ -34,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.OptionalResultWithMessages;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnersResult;
+import com.google.gerrit.plugins.codeowners.backend.UnresolvedImportFormatter;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
@@ -68,6 +69,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
   private final CodeOwners codeOwners;
   private final AccountsCollection accountsCollection;
+  private final UnresolvedImportFormatter unresolvedImportFormatter;
 
   private String email;
   private String path;
@@ -83,7 +85,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       PathCodeOwners.Factory pathCodeOwnersFactory,
       Provider<CodeOwnerResolver> codeOwnerResolverProvider,
       CodeOwners codeOwners,
-      AccountsCollection accountsCollection) {
+      AccountsCollection accountsCollection,
+      UnresolvedImportFormatter unresolvedImportFormatter) {
     this.checkCodeOwnerCapability = checkCodeOwnerCapability;
     this.permissionBackend = permissionBackend;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -92,6 +95,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     this.codeOwnerResolverProvider = codeOwnerResolverProvider;
     this.codeOwners = codeOwners;
     this.accountsCollection = accountsCollection;
+    this.unresolvedImportFormatter = unresolvedImportFormatter;
   }
 
   @Option(name = "--email", usage = "email for which the code ownership should be checked")
@@ -142,7 +146,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               .unresolvedImports()
               .forEach(
                   unresolvedImport ->
-                      messages.add(unresolvedImport.format(codeOwnersPluginConfiguration)));
+                      messages.add(unresolvedImportFormatter.format(unresolvedImport)));
           Optional<CodeOwnerReference> codeOwnerReference =
               pathCodeOwnersResult.get().getPathCodeOwners().stream()
                   .filter(cor -> cor.email().equals(email))

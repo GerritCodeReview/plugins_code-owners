@@ -62,6 +62,7 @@ public class CodeOwnerResolver {
   private final AccountControl.Factory accountControlFactory;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
   private final CodeOwnerMetrics codeOwnerMetrics;
+  private final UnresolvedImportFormatter unresolvedImportFormatter;
 
   // Enforce visibility by default.
   private boolean enforceVisibility = true;
@@ -80,7 +81,8 @@ public class CodeOwnerResolver {
       AccountCache accountCache,
       AccountControl.Factory accountControlFactory,
       PathCodeOwners.Factory pathCodeOwnersFactory,
-      CodeOwnerMetrics codeOwnerMetrics) {
+      CodeOwnerMetrics codeOwnerMetrics,
+      UnresolvedImportFormatter unresolvedImportFormatter) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
@@ -89,6 +91,7 @@ public class CodeOwnerResolver {
     this.accountControlFactory = accountControlFactory;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
     this.codeOwnerMetrics = codeOwnerMetrics;
+    this.unresolvedImportFormatter = unresolvedImportFormatter;
   }
 
   /**
@@ -206,7 +209,7 @@ public class CodeOwnerResolver {
     AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
     List<String> messages = new ArrayList<>(pathCodeOwnersMessages);
     unresolvedImports.forEach(
-        unresolvedImport -> messages.add(unresolvedImport.format(codeOwnersPluginConfiguration)));
+        unresolvedImport -> messages.add(unresolvedImportFormatter.format(unresolvedImport)));
     ImmutableSet<CodeOwner> codeOwners =
         codeOwnerReferences.stream()
             .filter(

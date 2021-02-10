@@ -75,6 +75,19 @@ public abstract class CodeOwnerConfigReference {
     return filePath().getFileName().toString();
   }
 
+  /** User-readable string representing this code owner config reference. */
+  public String format() {
+    StringBuilder formatted = new StringBuilder();
+    if (project().isPresent()) {
+      formatted.append(project().get()).append(":");
+    }
+    if (branch().isPresent()) {
+      formatted.append(branch().get()).append(":");
+    }
+    formatted.append(filePath());
+    return formatted.toString();
+  }
+
   /**
    * Creates a builder from this code owner config reference.
    *

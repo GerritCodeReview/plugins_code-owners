@@ -16,7 +16,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.base.MoreObjects;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 
 /** Information about an unresolved import. */
 @AutoValue
@@ -32,23 +31,6 @@ public abstract class UnresolvedImport {
 
   /** Message explaining why the code owner config reference couldn't be resolved. */
   public abstract String message();
-
-  /** Returns a user-readable string representation of this unresolved import. */
-  public String format(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
-    return String.format(
-        "The import of %s:%s:%s in %s:%s:%s cannot be resolved: %s",
-        keyOfImportedCodeOwnerConfig().project(),
-        keyOfImportedCodeOwnerConfig().shortBranchName(),
-        codeOwnersPluginConfiguration
-            .getBackend(keyOfImportedCodeOwnerConfig().branchNameKey())
-            .getFilePath(keyOfImportedCodeOwnerConfig()),
-        keyOfImportingCodeOwnerConfig().project(),
-        keyOfImportingCodeOwnerConfig().shortBranchName(),
-        codeOwnersPluginConfiguration
-            .getBackend(keyOfImportingCodeOwnerConfig().branchNameKey())
-            .getFilePath(keyOfImportingCodeOwnerConfig()),
-        message());
-  }
 
   @Override
   public final String toString() {
