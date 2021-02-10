@@ -138,15 +138,17 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                   codeOwnerConfig.key().project(),
                   codeOwnerConfig.key().shortBranchName(),
                   codeOwnerConfigFilePath));
-          PathCodeOwnersResult pathCodeOwnersResult =
+          OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult =
               pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).resolveCodeOwnerConfig();
+          messages.addAll(pathCodeOwnersResult.messages());
           pathCodeOwnersResult
+              .get()
               .unresolvedImports()
               .forEach(
                   unresolvedImport ->
                       messages.add(unresolvedImport.format(codeOwnersPluginConfiguration)));
           Optional<CodeOwnerReference> codeOwnerReference =
-              pathCodeOwnersResult.getPathCodeOwners().stream()
+              pathCodeOwnersResult.get().getPathCodeOwners().stream()
                   .filter(cor -> cor.email().equals(email))
                   .findAny();
           if (codeOwnerReference.isPresent()) {
@@ -165,11 +167,11 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             }
           }
 
-          if (pathCodeOwnersResult.ignoreParentCodeOwners()) {
+          if (pathCodeOwnersResult.get().ignoreParentCodeOwners()) {
             messages.add("parent code owners are ignored");
           }
 
-          return !pathCodeOwnersResult.ignoreParentCodeOwners();
+          return !pathCodeOwnersResult.get().ignoreParentCodeOwners();
         });
 
     boolean isGlobalCodeOwner = isGlobalCodeOwner(branchResource.getNameKey());

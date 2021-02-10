@@ -130,7 +130,7 @@ public class PathCodeOwners {
   private final Path path;
   private final PathExpressionMatcher pathExpressionMatcher;
 
-  private PathCodeOwnersResult pathCodeOwnersResult;
+  private OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult;
 
   private PathCodeOwners(
       CodeOwnerMetrics codeOwnerMetrics,
@@ -190,7 +190,7 @@ public class PathCodeOwners {
    *
    * @return the resolved code owner config
    */
-  public PathCodeOwnersResult resolveCodeOwnerConfig() {
+  public OptionalResultWithMessages<PathCodeOwnersResult> resolveCodeOwnerConfig() {
     if (this.pathCodeOwnersResult != null) {
       return this.pathCodeOwnersResult;
     }
@@ -234,7 +234,9 @@ public class PathCodeOwners {
       }
 
       this.pathCodeOwnersResult =
-          PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig, unresolvedImports);
+          OptionalResultWithMessages.create(
+              PathCodeOwnersResult.create(path, resolvedCodeOwnerConfig, unresolvedImports),
+              ImmutableList.of());
       logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
       return this.pathCodeOwnersResult;
     }

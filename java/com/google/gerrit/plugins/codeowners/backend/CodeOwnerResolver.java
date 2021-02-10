@@ -153,10 +153,12 @@ public class CodeOwnerResolver {
       logger.atFine().log(
           "resolve path code owners (code owner config = %s, path = %s)",
           codeOwnerConfig.key(), absolutePath);
-      PathCodeOwnersResult pathCodeOwnersResult =
+      OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult =
           pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).resolveCodeOwnerConfig();
       return resolve(
-          pathCodeOwnersResult.getPathCodeOwners(), pathCodeOwnersResult.unresolvedImports());
+          pathCodeOwnersResult.get().getPathCodeOwners(),
+          pathCodeOwnersResult.get().unresolvedImports(),
+          pathCodeOwnersResult.messages());
     }
   }
 
@@ -178,7 +180,10 @@ public class CodeOwnerResolver {
    * @see #resolve(CodeOwnerReference)
    */
   public CodeOwnerResolverResult resolve(Set<CodeOwnerReference> codeOwnerReferences) {
-    return resolve(codeOwnerReferences, /* unresolvedImports= */ ImmutableList.of());
+    return resolve(
+        codeOwnerReferences,
+        /* unresolvedImports= */ ImmutableList.of(),
+        /* pathCodeOwnersMessages= */ ImmutableList.of());
   }
 
   /**
@@ -186,16 +191,20 @@ public class CodeOwnerResolver {
    *
    * @param codeOwnerReferences the code owner references that should be resolved
    * @param unresolvedImports list of unresolved imports
+   * @param pathCodeOwnersMessages messages that were collected when resolving path code owners
    * @return the {@link CodeOwner} for the given code owner references
    * @see #resolve(CodeOwnerReference)
    */
   private CodeOwnerResolverResult resolve(
-      Set<CodeOwnerReference> codeOwnerReferences, List<UnresolvedImport> unresolvedImports) {
+      Set<CodeOwnerReference> codeOwnerReferences,
+      List<UnresolvedImport> unresolvedImports,
+      ImmutableList<String> pathCodeOwnersMessages) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
     requireNonNull(unresolvedImports, "unresolvedImports");
+    requireNonNull(pathCodeOwnersMessages, "pathCodeOwnersMessages");
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
     AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
-    List<String> messages = new ArrayList<>();
+    List<String> messages = new ArrayList<>(pathCodeOwnersMessages);
     unresolvedImports.forEach(
         unresolvedImport -> messages.add(unresolvedImport.format(codeOwnersPluginConfiguration)));
     ImmutableSet<CodeOwner> codeOwners =

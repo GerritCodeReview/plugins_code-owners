@@ -131,7 +131,7 @@ public class CodeOwnerConfigHierarchy {
         boolean visitFurtherCodeOwnerConfigs =
             codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
         boolean ignoreParentCodeOwners =
-            pathCodeOwners.get().resolveCodeOwnerConfig().ignoreParentCodeOwners();
+            pathCodeOwners.get().resolveCodeOwnerConfig().get().ignoreParentCodeOwners();
         if (ignoreParentCodeOwners) {
           parentCodeOwnersIgnoredCallback.accept(codeOwnerConfigKey);
         }
