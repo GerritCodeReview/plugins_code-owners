@@ -22,6 +22,30 @@
       },
       "revId": "432ae1380056036d314c8be3a92c8431d9c420a0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6d0b3613_d53d530b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 237,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-11T21:43:51Z",
+      "side": 1,
+      "message": "Global code owners here are the same as folder code owners.\n\nThe term \"global code owners\" is a bit ambiguous:\n\n1. Global code owners that apply across repositories, those are configured in the code-owners.config or gerrit.config and not in OWNERS files, hence they are not of interest here.\n\n2. folder code owners that own all files in a folder, in contrast to per-file code owners, these are the ones we deal with here, so \"folder code owners\" is just the name for global owners in OWNERS files that we documented for users at [1], so while I was here I adapted this log statement to that documented naming (actually ignoreGlobalAndParentCodeOwners should probably be called ignoreFolderAndParentCodeOwners, but then \"ignoreGlobalAndParentCodeOwners\" is the term that Piper intends to use for this and we want to be consistent with them).\n\n[1] https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/config-guide.md#recommendations-for-defining-code-owners",
+      "parentUuid": "b911d007_b5763505",
+      "range": {
+        "startLine": 237,
+        "startChar": 36,
+        "endLine": 237,
+        "endChar": 42
+      },
+      "revId": "432ae1380056036d314c8be3a92c8431d9c420a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
