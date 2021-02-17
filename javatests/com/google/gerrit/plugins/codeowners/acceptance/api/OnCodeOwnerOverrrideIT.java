@@ -76,7 +76,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
-  public void changeMessageExtendedIfCodeOwnersOverrideIsReApplied() throws Exception {
+  public void changeMessageNotExtendedIfCodeOwnersOverrideIsReApplied() throws Exception {
     createOwnersOverrideLabel();
 
     String changeId = createChange().getChangeId();
@@ -88,16 +88,9 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
     // Apply the Owners-Override+1 approval again
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
 
-    // Check that a new change message was added.
+    // Check that a no new change message was added.
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
-    assertThat(messages.size()).isEqualTo(messageCount + 1);
-
-    assertThat(Iterables.getLast(messages).message)
-        .isEqualTo(
-            String.format(
-                "Patch Set 1: Owners-Override+1\n\n"
-                    + "By voting Owners-Override+1 the code-owners submit requirement is still overridden by %s\n",
-                admin.fullName()));
+    assertThat(messages.size()).isEqualTo(messageCount);
   }
 
   @Test
