@@ -110,14 +110,15 @@ public abstract class CodeOwnerScoring {
   }
 
   /**
-   * Returns a comparator to sort code owners by the scorings collected in this {@link
-   * CodeOwnerScoring} instance.
+   * Computes the weighted scoring for a code owner.
    *
-   * <p>Code owners with higher scoring come first. The order of code owners with the same scoring
-   * is undefined.
+   * <p>The result of {@link #scoring(CodeOwner)} multiplied with the {@code score().weight()}.
+   *
+   * @param codeOwner for which the weighted scoring should be computed
+   * @return the weighted scoring for the code owner
    */
-  public Comparator<CodeOwner> comparingByScoring() {
-    return Comparator.comparingDouble(this::scoring).reversed();
+  public double weightedScoring(CodeOwner codeOwner) {
+    return score().weight() * scoring(codeOwner);
   }
 
   /**
