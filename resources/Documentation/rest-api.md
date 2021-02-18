@@ -478,6 +478,12 @@ listed code owners:
 * distance of the code owner config file that defines the code owner to the
   path for which code owners are listed (the lower the distance the better the
   code owner)
+* whether the code owner is a reviewer of the change (only when listing code
+  owners for a change)
+
+The distance score has a lower weight than the is-reviewer score, hence when
+listing code owners for a change, code owners that are reviewers are always
+returned first.
 
 Other factors like OOO state, recent review activity or code authorship are not
 considered.

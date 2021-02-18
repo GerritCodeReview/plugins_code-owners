@@ -324,4 +324,69 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
   }
+
+  @Test
+  public void codeOwnersThatAreReviewersAreReturnedFirst() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // None of the code owners is a reviewer, hence the sorting is done only by distance.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id(), user.id(), admin.id())
+        .inOrder();
+
+    // Add admin as reviewer, now admin should be returned first.
+    gApi.changes().id(changeId).addReviewer(admin.email());
+    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user2.id(), user.id())
+        .inOrder();
+
+    // Add user as reviewer, now user and admin should be returned first (user before admin, because
+    // user has a better distance score).
+    gApi.changes().id(changeId).addReviewer(user.email());
+    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), admin.id(), user2.id())
+        .inOrder();
+
+    // If all code owners are reviewers, only the distance score matters for the sorting.
+    gApi.changes().id(changeId).addReviewer(user2.email());
+    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id(), user.id(), admin.id())
+        .inOrder();
+  }
 }

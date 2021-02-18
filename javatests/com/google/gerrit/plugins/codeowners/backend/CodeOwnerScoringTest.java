@@ -19,8 +19,6 @@ import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -107,46 +105,5 @@ public class CodeOwnerScoringTest extends AbstractCodeOwnersTest {
                 .build()
                 .scoring(CodeOwner.create(admin.id())))
         .isZero();
-  }
-
-  @Test
-  public void sortCodeOwnersByScorings() throws Exception {
-    CodeOwner codeOwner1 = CodeOwner.create(admin.id());
-    CodeOwner codeOwner2 = CodeOwner.create(user.id());
-    CodeOwner codeOwner3 = CodeOwner.create(accountCreator.user2().id());
-
-    ArrayList<CodeOwner> codeOwners = new ArrayList<>();
-    codeOwners.add(codeOwner1);
-    codeOwners.add(codeOwner2);
-    codeOwners.add(codeOwner3);
-
-    // lower distance is better
-    Comparator<CodeOwner> comparator =
-        CodeOwnerScoring.builder(CodeOwnerScore.DISTANCE, 100)
-            .putValueForCodeOwner(codeOwner1, 50)
-            .putValueForCodeOwner(codeOwner2, 100)
-            .putValueForCodeOwner(codeOwner3, 0)
-            .build()
-            .comparingByScoring();
-    codeOwners.sort(comparator);
-    assertThat(codeOwners).containsExactly(codeOwner3, codeOwner1, codeOwner2).inOrder();
-  }
-
-  @Test
-  public void sortCodeOwnersByScoringsIfAnyCodeOwnerHasNoScoring() throws Exception {
-    CodeOwner codeOwner1 = CodeOwner.create(admin.id());
-    CodeOwner codeOwner2 = CodeOwner.create(user.id());
-
-    ArrayList<CodeOwner> codeOwners = new ArrayList<>();
-    codeOwners.add(codeOwner1);
-    codeOwners.add(codeOwner2);
-
-    Comparator<CodeOwner> comparator =
-        CodeOwnerScoring.builder(CodeOwnerScore.DISTANCE, 100)
-            .putValueForCodeOwner(codeOwner2, 50)
-            .build()
-            .comparingByScoring();
-    codeOwners.sort(comparator);
-    assertThat(codeOwners).containsExactly(codeOwner2, codeOwner1).inOrder();
   }
 }
