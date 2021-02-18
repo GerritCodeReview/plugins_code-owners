@@ -38,6 +38,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolverResult;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.AccountControl;
@@ -190,9 +191,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
                   limit, codeOwners.size());
             }
 
-            // We already found that the path is owned by all users. Hence we do not need to check
-            // if there are further code owners in higher-level code owner configs.
-            return false;
+            return true;
           }
 
           int distance =
@@ -204,9 +203,6 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               .forEach(
                   localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
-          // If codeOwners.size() >= limit we have gathered enough code owners, but we still need to
-          // inspect the further code owner configs to know if the path is maybe owned by all user
-          // (in which case we need to set the ownedByAllUsers flag in the response).
           return true;
         });
 
@@ -228,7 +224,11 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(sortAndLimit(distanceScoring.build(), ImmutableSet.copyOf(codeOwners)));
+            .format(
+                sortAndLimit(
+                    rsrc,
+                    CodeOwnerScorings.create(distanceScoring.build()),
+                    ImmutableSet.copyOf(codeOwners)));
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     return Response.ok(codeOwnersInfo);
   }
@@ -348,10 +348,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   }
 
   private ImmutableList<CodeOwner> sortAndLimit(
-      CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
-    return sortCodeOwners(seed, distanceScoring, codeOwners)
-        .limit(limit)
-        .collect(toImmutableList());
+      R rsrc, CodeOwnerScorings scorings, ImmutableSet<CodeOwner> codeOwners) {
+    return sortCodeOwners(rsrc, seed, scorings, codeOwners).limit(limit).collect(toImmutableList());
   }
 
   /**
@@ -361,14 +359,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    *
    * <p>The order of code owners with the same distance score is random.
    *
+   * @param rsrc resource on which this REST endpoint is invoked
    * @param seed seed that should be used to randomize the order
-   * @param distanceScoring the distance scorings for the code owners
+   * @param scorings the scorings for the code owners
    * @param codeOwners the code owners that should be sorted
    * @return the sorted code owners
    */
-  private static Stream<CodeOwner> sortCodeOwners(
-      Optional<Long> seed, CodeOwnerScoring distanceScoring, ImmutableSet<CodeOwner> codeOwners) {
-    return randomizeOrder(seed, codeOwners).sorted(distanceScoring.comparingByScoring());
+  protected Stream<CodeOwner> sortCodeOwners(
+      R rsrc, Optional<Long> seed, CodeOwnerScorings scorings, ImmutableSet<CodeOwner> codeOwners) {
+    return randomizeOrder(seed, codeOwners).sorted(scorings.comparingByScorings());
   }
 
   /**

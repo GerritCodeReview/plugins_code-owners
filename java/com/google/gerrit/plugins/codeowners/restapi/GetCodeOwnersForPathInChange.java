@@ -14,7 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REVIEWER_SCORING_VALUE;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
+
+import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -22,10 +27,14 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.ServiceUserClassifier;
+import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
@@ -81,6 +90,35 @@ public class GetCodeOwnersForPathInChange
   protected Optional<Long> getDefaultSeed(CodeOwnersInChangeCollection.PathResource rsrc) {
     // use the change number as seed so that the sort order for a change is always stable
     return Optional.of(Long.valueOf(rsrc.getRevisionResource().getChange().getId().get()));
+  }
+
+  /**
+   * This method is overridden to add scorings for the {@link CodeOwnerScore#IS_REVIEWER} score that
+   * only applies if code owners are suggested on changes.
+   */
+  @Override
+  protected Stream<CodeOwner> sortCodeOwners(
+      CodeOwnersInChangeCollection.PathResource rsrc,
+      Optional<Long> seed,
+      CodeOwnerScorings scorings,
+      ImmutableSet<CodeOwner> codeOwners) {
+    // Add scorings for IS_REVIEWER score.
+    ImmutableSet<Account.Id> reviewers =
+        rsrc.getRevisionResource()
+            .getNotes()
+            .getReviewers()
+            .byState(ReviewerStateInternal.REVIEWER);
+    CodeOwnerScoring.Builder isReviewerScoring = CodeOwnerScore.IS_REVIEWER.createScoring();
+    codeOwners.forEach(
+        codeOwner ->
+            isReviewerScoring.putValueForCodeOwner(
+                codeOwner,
+                reviewers.contains(codeOwner.accountId())
+                    ? IS_REVIEWER_SCORING_VALUE
+                    : NO_REVIEWER_SCORING_VALUE));
+    scorings = CodeOwnerScorings.appendScoring(scorings, isReviewerScoring.build());
+
+    return super.sortCodeOwners(rsrc, seed, scorings, codeOwners);
   }
 
   @Override
