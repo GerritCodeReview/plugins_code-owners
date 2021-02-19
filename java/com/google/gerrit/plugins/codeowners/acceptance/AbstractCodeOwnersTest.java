@@ -210,27 +210,6 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   }
 
   /**
-   * Creates an arbitrary code owner config file.
-   *
-   * <p>Can be used to create an arbitrary code owner config in order to avoid entering the
-   * bootstrapping code path in {@link
-   * com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalCheck}.
-   */
-  protected void createArbitraryCodeOwnerConfigFile() throws Exception {
-    TestAccount arbitraryUser =
-        accountCreator.create(
-            "arbitrary-user", "arbitrary-user@example.com", "Arbitrary User", null);
-
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/arbitrary/path/")
-        .addCodeOwnerEmail(arbitraryUser.email())
-        .create();
-  }
-
-  /**
    * Creates a non-parseable code owner config file at the given path.
    *
    * @param path path of the code owner config file

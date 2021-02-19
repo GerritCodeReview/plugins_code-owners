@@ -845,7 +845,6 @@ configuration.
 | `backend_id`| optional | ID of the code owner backend that is configured for the branch. Not set if `disabled` is `true`.
 | `required_approval` | optional | The approval that is required from code owners to approve the files in a change as [RequiredApprovalInfo](#required-approval-info) entity. The required approval defines which approval counts as code owner approval. Any approval on this label with a value >= the given value is considered as code owner approval. Not set if `disabled` is `true`.
 | `override_approval` | optional | Approvals that count as override for the code owners submit check as a list of [RequiredApprovalInfo](#required-approval-info) entities (sorted alphabetically). If multiple approvals are returned, any of them is sufficient to override the code owners submit check. All returned override approvals are guarenteed to have distinct label names. Any approval on these labels with a value >= the given values is considered as code owner override. If unset, overriding the code owners submit check is disabled. Not set if `disabled` is `true`.
-| `no_code_owners_defined` | optional | Whether the branch doesn't contain any code owner config file yet. If a branch doesn't contain any code owner config file yet, the projects owners are considered as code owners. Once a first code owner config file is added to the branch, the project owners are no longer code owners (unless code ownership is granted to them via the code owner config file). Not set if `false` or if `disabled` is `true`.
 
 ---
 

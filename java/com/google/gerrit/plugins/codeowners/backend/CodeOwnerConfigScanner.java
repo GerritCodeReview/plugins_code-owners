@@ -27,7 +27,6 @@ import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
@@ -67,26 +66,6 @@ public class CodeOwnerConfigScanner {
       boolean includeDefaultCodeOwnerConfig) {
     this.includeDefaultCodeOwnerConfig = includeDefaultCodeOwnerConfig;
     return this;
-  }
-
-  /**
-   * Whether there is at least one code owner config file in the given project and branch.
-   *
-   * @param branchNameKey the project and branch for which if should be checked if it contains any
-   *     code owner config file
-   * @return {@code true} if there is at least one code owner config file in the given project and
-   *     branch, otherwise {@code false}
-   */
-  public boolean containsAnyCodeOwnerConfigFile(BranchNameKey branchNameKey) {
-    AtomicBoolean found = new AtomicBoolean(false);
-    visit(
-        branchNameKey,
-        codeOwnerConfig -> {
-          found.set(true);
-          return false;
-        },
-        (codeOwnerConfigFilePath, configInvalidException) -> found.set(true));
-    return found.get();
   }
 
   /**

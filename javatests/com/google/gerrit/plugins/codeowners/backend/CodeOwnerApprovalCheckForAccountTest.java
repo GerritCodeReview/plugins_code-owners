@@ -58,10 +58,6 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
 
   @Test
   public void notApprovedByUser() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
@@ -217,10 +213,8 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
   }
 
   @Test
-  public void notApprovedByUser_bootstrapping() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  public void notApprovedByUser_projectOwnersAreFallbackCodeOwner() throws Exception {
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
@@ -241,10 +235,8 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
   }
 
   @Test
-  public void approvedByProjectOwner_bootstrapping() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  public void approvedByProjectOwner_projectOwnersAreFallbackCodeOwner() throws Exception {
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
@@ -268,10 +260,6 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
   @Test
   public void approvedByFallbackCodeOwner() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
@@ -324,31 +312,6 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-  }
-
-  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
-  @Test
-  public void approvedByFallbackCodeOwner_bootstrappingMode() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
-    ChangeNotes changeNotes = getChangeNotes(changeId);
-
-    // Verify that the file would be approved by the user since the user is a fallback code owner.
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
-            changeNotes, changeNotes.getCurrentPatchSet(), user.id());
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
   }
 
   private ChangeNotes getChangeNotes(String changeId) throws Exception {

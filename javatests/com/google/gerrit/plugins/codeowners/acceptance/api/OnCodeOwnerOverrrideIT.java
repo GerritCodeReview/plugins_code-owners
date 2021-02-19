@@ -393,6 +393,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void changeMessageExtendedIfCodeOwnersOverrideAndCodeOwnerApprovalAreAppliedTogether()
       throws Exception {
+    setAsRootCodeOwners(admin);
+
     createOwnersOverrideLabel();
 
     String path = "foo/bar.baz";

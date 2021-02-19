@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.RebaseInput;
@@ -546,6 +547,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/meta/config")
   public void validationDoesntFailOnRebaseChange_unrelatedChange() throws Exception {
     // Create two changes for refs/meta/config both with the same parent.
     GitUtil.fetch(testRepo, RefNames.REFS_CONFIG + ":config");
@@ -576,6 +578,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/meta/config")
   public void validationDoesntFailOnRebaseChange_changeThatUpdatesTheCodeOwnersConfig()
       throws Exception {
     // Create two changes for refs/meta/config both with the same parent.
@@ -615,6 +618,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/meta/config")
   public void validationFailsOnRebaseChange_changeThatCreatesInvalidCodeOwnerConfig()
       throws Exception {
     // Create two changes for refs/meta/config both with the same parent.

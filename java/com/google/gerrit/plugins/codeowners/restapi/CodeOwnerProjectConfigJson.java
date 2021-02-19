@@ -33,7 +33,6 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.GeneralInfo;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -51,16 +50,13 @@ import java.util.stream.Stream;
 @Singleton
 public class CodeOwnerProjectConfigJson {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
   private final Provider<ListBranches> listBranches;
 
   @Inject
   CodeOwnerProjectConfigJson(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       Provider<ListBranches> listBranches) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
-    this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
     this.listBranches = listBranches;
   }
 
@@ -97,12 +93,6 @@ public class CodeOwnerProjectConfigJson {
             codeOwnersPluginConfiguration.getBackend(branchResource.getBranchKey()).getClass());
     info.requiredApproval = formatRequiredApprovalInfo(branchResource.getNameKey());
     info.overrideApproval = formatOverrideApprovalInfo(branchResource.getNameKey());
-
-    boolean noCodeOwnersDefined =
-        !codeOwnerConfigScannerFactory
-            .create()
-            .containsAnyCodeOwnerConfigFile(branchResource.getBranchKey());
-    info.noCodeOwnersDefined = noCodeOwnersDefined ? noCodeOwnersDefined : null;
 
     return info;
   }

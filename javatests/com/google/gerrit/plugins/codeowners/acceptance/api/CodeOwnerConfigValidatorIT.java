@@ -163,6 +163,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void canSubmitConfigWithoutIssues() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
     // Create a code owner config without issues.
@@ -467,6 +469,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
   public void onReceiveCommitValidationDisabled() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     // upload a change with a code owner config that has issues (non-resolvable code owners)
     String unknownEmail = "non-existing-email@example.com";
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
@@ -895,6 +899,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void cannotSubmitConfigWithNewIssues() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
     // disable the code owners functionality so that we can upload a a change with a code owner
@@ -1003,6 +1009,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
   public void cannotSubmitConfigWithCodeOwnersThatAreNotVisibleToThePatchSetUploader()
       throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
     // visible to this user since they do not share any group.
     TestAccount user2 = accountCreator.user2();
@@ -1055,6 +1063,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
   public void canSubmitConfigWithCodeOwnersThatAreNotVisibleToTheSubmitterButVisibleToTheUploader()
       throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
     // visible to this user since they do not share any group.
     TestAccount user2 = accountCreator.user2();
@@ -1702,6 +1712,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   private void testCanSubmitNonParseableConfig() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
     // disable the code owners functionality so that we can upload a non-parseable code owner config
@@ -1737,6 +1749,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   private void testCanSubmitConfigWithIssues() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
     // disable the code owners functionality so that we can upload a code owner config with issues
@@ -1767,6 +1781,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
   public void canUploadAndSubmitConfigWithUnresolvableCodeOwners() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
     // upload a code owner config that has issues (non-resolvable code owners)
@@ -1797,6 +1813,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
   public void canUploadAndSubmitConfigWithUnresolvableImports() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
     skipTestIfImportsNotSupportedByCodeOwnersBackend();
 
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
@@ -1853,6 +1871,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
   public void rejectConfigOptionsAreIgnoredIfValidationIsDisabled() throws Exception {
     skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    setAsDefaultCodeOwners(admin);
 
     CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
 
@@ -1916,6 +1936,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
   public void submitFailsOnInternalError() throws Exception {
     try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
       disableCodeOwnersForProject(project);
@@ -1934,6 +1955,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
   @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "DRY_RUN")
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
   public void submitSucceedsOnInternalErrorIfValidationIsDoneAsDryRun() throws Exception {
     try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
       disableCodeOwnersForProject(project);

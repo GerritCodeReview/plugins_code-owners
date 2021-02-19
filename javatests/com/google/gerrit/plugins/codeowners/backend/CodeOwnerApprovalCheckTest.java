@@ -45,8 +45,6 @@ import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.stream.Stream;
-import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
-import org.eclipse.jgit.junit.TestRepository;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -85,10 +83,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileAddition_insufficientReviewers() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     TestAccount user2 = accountCreator.user2();
 
     Path path = Paths.get("/foo/bar.baz");
@@ -119,10 +113,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileModification_insufficientReviewers() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     TestAccount user2 = accountCreator.user2();
 
     Path path = Paths.get("/foo/bar.baz");
@@ -155,10 +145,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileDeletion_insufficientReviewers() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     TestAccount user2 = accountCreator.user2();
 
     Path path = Paths.get("/foo/bar.baz");
@@ -188,10 +174,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileRename_insufficientReviewers() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     TestAccount user2 = accountCreator.user2();
 
     Path oldPath = Paths.get("/foo/old.bar");
@@ -947,24 +929,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void approvedByGlobalCodeOwner() throws Exception {
-    testApprovedByGlobalCodeOwner(/* bootstrappingMode= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
-  public void approvedByGlobalCodeOwner_bootstrappingMode() throws Exception {
-    testApprovedByGlobalCodeOwner(/* bootstrappingMode= */ true);
-  }
-
-  private void testApprovedByGlobalCodeOwner(boolean bootstrappingMode) throws Exception {
     // Create a bot user that is a global code owner.
     TestAccount bot =
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
-
-    if (!bootstrappingMode) {
-      // Create a code owner config file so that we are not in the bootstrapping mode.
-      createArbitraryCodeOwnerConfigFile();
-    }
 
     // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -1008,42 +975,20 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void globalCodeOwner_noImplicitApproval() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ false);
+    testImplicitlyApprovedByGlobalCodeOwner(/* implicitApprovalsEnabled= */ false);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void globalCodeOwner_withImplicitApproval() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ false);
+    testImplicitlyApprovedByGlobalCodeOwner(/* implicitApprovalsEnabled= */ true);
   }
 
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
-  public void globalCodeOwner_noImplicitApproval_bootstrappingMode() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ true);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
-  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void globalCodeOwner_withImplicitApproval_bootstrappingMode() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ true);
-  }
-
-  private void testImplicitlyApprovedByGlobalCodeOwner(
-      boolean implicitApprovalsEnabled, boolean bootstrappingMode) throws Exception {
+  private void testImplicitlyApprovedByGlobalCodeOwner(boolean implicitApprovalsEnabled)
+      throws Exception {
     TestAccount bot =
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
-
-    if (!bootstrappingMode) {
-      // Create a code owner config file so that we are not in the bootstrapping mode.
-      createArbitraryCodeOwnerConfigFile();
-    }
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -1068,24 +1013,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
   public void globalCodeOwnerAsReviewer() throws Exception {
-    testGlobalCodeOwnerAsReviewer(/* bootstrappingMode= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
-  public void globalCodeOwnerAsReviewer_bootstrappingMode() throws Exception {
-    testGlobalCodeOwnerAsReviewer(/* bootstrappingMode= */ true);
-  }
-
-  private void testGlobalCodeOwnerAsReviewer(boolean bootstrappingMode) throws Exception {
     // Create a bot user that is a global code owner.
     TestAccount bot =
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
-
-    if (!bootstrappingMode) {
-      // Create a code owner config file so that we are not in the bootstrapping mode.
-      createArbitraryCodeOwnerConfigFile();
-    }
 
     // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -1143,22 +1073,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void approvedByAnyoneWhenEveryoneIsGlobalCodeOwner() throws Exception {
-    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
-  public void approvedByAnyoneWhenEveryoneIsGlobalCodeOwner_bootstrappingMode() throws Exception {
-    testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ true);
-  }
-
-  private void testApprovedByAnyoneWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
-      throws Exception {
-    if (!bootstrappingMode) {
-      // Create a code owner config file so that we are not in the bootstrapping mode.
-      createArbitraryCodeOwnerConfigFile();
-    }
-
     // Create a change.
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -1197,7 +1111,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void everyoneIsGlobalCodeOwner_noImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ false);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
@@ -1205,31 +1119,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void everyoneIsGlobalCodeOwner_withImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
-  public void everyoneIsGlobalCodeOwner_noImplicitApproval_bootstrappingMode() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ false, /* bootstrappingMode= */ true);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
-  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void everyoneIsGlobalCodeOwner_withImplicitApproval_bootstrappingMode() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ true, /* bootstrappingMode= */ true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-      boolean implicitApprovalsEnabled, boolean bootstrappingMode) throws Exception {
-    if (!bootstrappingMode) {
-      // Create a code owner config file so that we are not in the bootstrapping mode.
-      createArbitraryCodeOwnerConfigFile();
-    }
-
+      boolean implicitApprovalsEnabled) throws Exception {
     // Create a change as a user that is a code owner only through the global code ownership.
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -1253,22 +1147,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void anyReviewerWhenEveryoneIsGlobalCodeOwner() throws Exception {
-    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
-  public void anyReviewerWhenEveryoneIsGlobalCodeOwner_bootstrappingMode() throws Exception {
-    testAnyReviewerWhenEveryoneIsGlobalCodeOwner(/* bootstrappingMode= */ true);
-  }
-
-  private void testAnyReviewerWhenEveryoneIsGlobalCodeOwner(boolean bootstrappingMode)
-      throws Exception {
-    if (!bootstrappingMode) {
-      // Create a code owner config file so that we are not in the bootstrapping mode.
-      createArbitraryCodeOwnerConfigFile();
-    }
-
     // Create a change as a user that is a code owner only through the global code ownership.
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
@@ -1340,10 +1218,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void getStatus_overrideApprovesAllFiles() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     createOwnersOverrideLabel();
 
     // Create a change.
@@ -1392,10 +1266,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       name = "plugin.code-owners.overrideApproval",
       values = {"Owners-Override+1", "Another-Override+1"})
   public void getStatus_anyOverrideApprovesAllFiles() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     createOwnersOverrideLabel();
     createOwnersOverrideLabel("Another-Override");
 
@@ -1516,10 +1386,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void isSubmittableIfOverrideIsPresent() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     createOwnersOverrideLabel();
 
     // Create a change.
@@ -1550,10 +1416,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       name = "plugin.code-owners.overrideApproval",
       values = {"Owners-Override+1", "Another-Override+1"})
   public void isSubmittableIfAnyOverrideIsPresent() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     createOwnersOverrideLabel();
     createOwnersOverrideLabel("Another-Override");
 
@@ -1590,316 +1452,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // With override approval the change is submittable.
     assertThat(codeOwnerApprovalCheck.isSubmittable(getChangeNotes(changeId))).isTrue();
-  }
-
-  @Test
-  public void bootstrappingGetStatus_insufficientReviewers() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    TestAccount user2 = accountCreator.user2();
-    TestAccount user3 =
-        accountCreator.create("user3", "user3@example.com", "User3", /* displayName= */ null);
-
-    // Create change with a user that is not a project owner.
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
-
-    // Add a reviewer that is not a project owner.
-    gApi.changes().id(changeId).addReviewer(user2.email());
-
-    // Add a Code-Review+1 (= code owner approval) from a user that is not a project owner.
-    requestScopeOperations.setApiUser(user3.id());
-    recommend(changeId);
-
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
-  }
-
-  @Test
-  public void bootstrappingGetStatus_pending() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    TestAccount user2 = accountCreator.user2();
-
-    // Create change with a user that is not a project owner.
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
-
-    // Add a reviewer that is a project owner.
-    gApi.changes().id(changeId).addReviewer(admin.email());
-
-    // Add a Code-Review+1 (= code owner approval) from a user that is not a project owner.
-    requestScopeOperations.setApiUser(user2.id());
-    recommend(changeId);
-
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
-  }
-
-  @Test
-  public void bootstrappingGetStatus_approved() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    // Create change with a user that is not a project owner.
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
-
-    // Add a Code-Review+1 from a project owner (by default this counts as code owner approval).
-    requestScopeOperations.setApiUser(admin.id());
-    recommend(changeId);
-
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
-  }
-
-  @Test
-  public void bootstrappingGetStatus_noImplicitApprovalByPatchSetUploader() throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(
-        /* implicitApprovalsEnabled= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void bootstrappingGetStatus_withImplicitApprovalByPatchSetUploader() throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(
-        /* implicitApprovalsEnabled= */ true);
-  }
-
-  private void testImplicitApprovalByPatchSetUploaderOnBootstrappingGetStatus(
-      boolean implicitApprovalsEnabled) throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    // Create change with a user that is not a project owner.
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
-
-    // Amend change with a user that is a project owner.
-    amendChange(admin, changeId);
-
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(
-            implicitApprovalsEnabled
-                ? CodeOwnerStatus.APPROVED
-                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void bootstrappingGetStatus_noImplicitlyApprovalByChangeOwner() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    // Create change with a user that is a project owner.
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
-
-    // Amend change with a user that is not a project owner.
-    amendChange(user, changeId);
-
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
-  public void bootstrappingGetStatus_overrideApprovesAllFiles() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    createOwnersOverrideLabel();
-
-    // Create a change with a user that is not a project owner.
-    TestRepository<InMemoryRepository> testRepo = cloneProject(project, user);
-    String changeId =
-        pushFactory
-            .create(
-                user.newIdent(),
-                testRepo,
-                "Test Change",
-                ImmutableMap.of(
-                    "foo/baz.config", "content",
-                    "bar/baz.config", "other content"))
-            .to("refs/for/master")
-            .getChangeId();
-
-    // Without Owners-Override approval the expected status is INSUFFICIENT_REVIEWERS.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus :
-        codeOwnerApprovalCheck
-            .getFileStatuses(getChangeNotes(changeId))
-            .collect(toImmutableList())) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    }
-
-    // Add an override approval.
-    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
-
-    // With Owners-Override approval the expected status is APPROVED.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus :
-        codeOwnerApprovalCheck
-            .getFileStatuses(getChangeNotes(changeId))
-            .collect(toImmutableList())) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.APPROVED);
-    }
-  }
-
-  @Test
-  @GerritConfig(
-      name = "plugin.code-owners.overrideApproval",
-      values = {"Owners-Override+1", "Another-Override+1"})
-  public void bootstrappingGetStatus_anyOverrideApprovesAllFiles() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    createOwnersOverrideLabel();
-    createOwnersOverrideLabel("Another-Override");
-
-    // Create a change with a user that is not a project owner.
-    TestRepository<InMemoryRepository> testRepo = cloneProject(project, user);
-    String changeId =
-        pushFactory
-            .create(
-                user.newIdent(),
-                testRepo,
-                "Test Change",
-                ImmutableMap.of(
-                    "foo/baz.config", "content",
-                    "bar/baz.config", "other content"))
-            .to("refs/for/master")
-            .getChangeId();
-
-    // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus :
-        codeOwnerApprovalCheck
-            .getFileStatuses(getChangeNotes(changeId))
-            .collect(toImmutableList())) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    }
-
-    // Add an override approval (by a user that is not a project owners, and hence no code owner).
-    requestScopeOperations.setApiUser(user.id());
-    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
-
-    // With override approval the expected status is APPROVED.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus :
-        codeOwnerApprovalCheck
-            .getFileStatuses(getChangeNotes(changeId))
-            .collect(toImmutableList())) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.APPROVED);
-    }
-
-    // Delete the override approval.
-    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
-
-    // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus :
-        codeOwnerApprovalCheck
-            .getFileStatuses(getChangeNotes(changeId))
-            .collect(toImmutableList())) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    }
-
-    // Add another override approval.
-    gApi.changes().id(changeId).current().review(new ReviewInput().label("Another-Override", 1));
-
-    // With override approval the expected status is APPROVED.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus :
-        codeOwnerApprovalCheck
-            .getFileStatuses(getChangeNotes(changeId))
-            .collect(toImmutableList())) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.APPROVED);
-    }
   }
 
   @Test
@@ -2000,10 +1552,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.copyAnyScore = true;
     gApi.projects().name(project.get()).label("Owners-Override").update(input);
-
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
 
     // Create a change as a user that is not a code owner.
     Path path = Paths.get("/foo/bar.baz");
@@ -2166,7 +1714,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void noBootstrappingIfDefaultCodeOwnerConfigExists() throws Exception {
+  public void projectOwnersAreNoCodeOwnersIfDefaultCodeOwnerConfigExists() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
     setAsDefaultCodeOwners(user);
@@ -2193,8 +1741,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     approve(changeId);
 
-    // Verify that the file is still approved yet (since we are not in bootstrapping mode, the
-    // project owner doesn't count as code owner).
+    // Verify that the file is not approved yet
     fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
     fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);

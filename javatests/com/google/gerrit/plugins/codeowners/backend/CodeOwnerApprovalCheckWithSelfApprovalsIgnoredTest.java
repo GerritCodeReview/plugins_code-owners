@@ -274,10 +274,6 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
   @Test
   public void notOverriddenByUploaderWhoIsChangeOwner() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     TestAccount changeOwner =
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
@@ -317,10 +313,6 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
   @Test
   public void overridenByChangeOwnerThatIsNotUploader() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     TestAccount changeOwner =
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
@@ -363,10 +355,6 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
   @Test
   public void notOverridenByUploader() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     TestAccount changeOwner =
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);

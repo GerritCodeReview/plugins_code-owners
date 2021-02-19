@@ -301,12 +301,17 @@ the complete list with the additional value has to be set on project level.
         owners hasn't been explicity disabled in a relevant code owner config
         file and if there are no unresolved imports.\
         \
-        Can be `NONE` or `ALL_USERS`.\
+        Can be `NONE`, `PROJECT_OWNERS` or `ALL_USERS`.\
         \
         `NONE`:\
         Paths for which no code owners are defined are owned by no one. This
         means changes that touch these files can only be submitted with a code
         owner override.\
+        \
+        `PROJECT_OWNERS`:\
+        Paths for which no code owners are defined are owned by the project
+        owners. This means changes to these paths can be approved by the project
+        owners.\
         \
         `ALL_USERS`:\
         Paths for which no code owners are defined are owned by all users. This
@@ -318,6 +323,9 @@ the complete list with the additional value has to be set on project level.
         mistakes with configuring code owners can easily happen. This is why
         this option is intended to be only used if requiring code owner
         approvals should not be enforced.\
+        \
+        Please note that fallback code owners are not suggested as code owners
+        in the UI.
         \
         Can be overridden per project by setting
         [codeOwners.fallbackCodeOwners](#codeOwnersFallbackCodeOwners) in
@@ -637,7 +645,7 @@ the complete list with the additional value has to be set on project level.
         defined. This policy only applies if the inheritance of parent code
         owners hasn't been explicity disabled in a relevant code owner config
         file and if there are no unresolved imports.\
-        Can be `NONE` or `ALL_USERS` (see
+        Can be `NONE`, `PROJECT_OWNERS` or `ALL_USERS` (see
         [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
         for an explanation of these values).\
         Overrides the global setting

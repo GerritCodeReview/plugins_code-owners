@@ -63,16 +63,4 @@ public class CodeOwnerBranchConfigInfo {
    * <p>Not set if {@link #disabled} is {@code true}.
    */
   public List<RequiredApprovalInfo> overrideApproval;
-
-  /**
-   * Whether the branch doesn't contain any code owner config file yet.
-   *
-   * <p>If a branch doesn't contain any code owner config file yet, the projects owners are
-   * considered as code owners. Once a first code owner config file is added to the branch, the
-   * project owners are no longer code owners (unless code ownership is granted to them via the code
-   * owner config file).
-   *
-   * <p>Not set if {@code false} or if {@link #disabled} is {@code true}.
-   */
-  public Boolean noCodeOwnersDefined;
 }
