@@ -34,7 +34,6 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.regex.Pattern;
 import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerApproval}. */
@@ -89,7 +88,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void changeMessageExtended_sameCodeOwnerApprovalAppliedAgain() throws Exception {
+  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgain() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -109,21 +108,21 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     recommend(changeId);
 
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
-    // Check that a new change message was added.
-    assertThat(messages.size()).isEqualTo(messageCount + 1);
+    // Check that no new change message was added.
+    assertThat(messages.size()).isEqualTo(messageCount);
 
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
                 "Patch Set 1: Code-Review+1\n\n"
-                    + "By voting Code-Review+1 the following files are still code-owner approved by"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
                 admin.fullName(), path));
   }
 
   @Test
-  public void changeMessageExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithOtherLabel()
+  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithOtherLabel()
       throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
@@ -153,30 +152,27 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
 
     recommend(changeId);
 
-    // Apply the Code-Review+1 approval again and add an unrelated vote.
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
+
+    // Apply the Code-Review+1 approval again and add an unrelated vote (Code-Review+1 is ignored).
     ReviewInput reviewInput = ReviewInput.recommend();
     reviewInput.labels.put("Other", (short) 1);
     gApi.changes().id(changeId).current().review(reviewInput);
 
-    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
-    assertThat(Iterables.getLast(messages).message)
-        .matches(
-            Pattern.quote("Patch Set 1: ")
-                + "("
-                + Pattern.quote("Code-Review+1 Other+1")
-                + "|"
-                + Pattern.quote("Other+1 Code-Review+1")
-                + ")"
-                + Pattern.quote(
-                    String.format(
-                        "\n\nBy voting Code-Review+1 the following files are still code-owner approved by"
-                            + " %s:\n"
-                            + "* %s\n",
-                        admin.fullName(), path)));
+    messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Other+1");
   }
 
   @Test
-  public void changeMessageExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithComment()
+  public void changeMessageNotExtended_sameCodeOwnerApprovalAppliedAgainTogetherWithComment()
       throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+1", "Other", " 0", "Approved");
@@ -206,7 +202,17 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
 
     recommend(changeId);
 
-    // Apply the Code-Review+1 approval again and add a comment.
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                admin.fullName(), path));
+
+    // Apply the Code-Review+1 approval again and add a comment (Code-Review +1 is ignored)
     ReviewInput.CommentInput commentInput = new ReviewInput.CommentInput();
     commentInput.line = 1;
     commentInput.message = "some comment";
@@ -216,15 +222,8 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
     gApi.changes().id(changeId).current().review(reviewInput);
 
-    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
-    assertThat(Iterables.getLast(messages).message)
-        .isEqualTo(
-            String.format(
-                "Patch Set 1: Code-Review+1\n\n(1 comment)\n\n"
-                    + "By voting Code-Review+1 the following files are still code-owner approved by"
-                    + " %s:\n"
-                    + "* %s\n",
-                admin.fullName(), path));
+    messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1:\n\n(1 comment)");
   }
 
   @Test
