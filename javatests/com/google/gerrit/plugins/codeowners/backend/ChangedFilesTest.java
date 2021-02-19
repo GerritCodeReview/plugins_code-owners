@@ -176,6 +176,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   private void testComputeForMergeChange(MergeCommitStrategy mergeCommitStrategy) throws Exception {
+    setAsRootCodeOwners(admin);
+
     String file1 = "foo/a.txt";
     String file2 = "bar/b.txt";
 
@@ -264,6 +266,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
   private void testComputeForMergeChangeThatContainsADeletedFileAsConflictResolution()
       throws Exception {
+    setAsRootCodeOwners(admin);
+
     String file = "foo/a.txt";
 
     // Create a base change.

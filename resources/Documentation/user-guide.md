@@ -169,16 +169,6 @@ owner (if [configured](config.html#pluginCodeOwnersFallbackCodeOwners)) or with
 a [code owner override](#codeOwnerOverride). Please note that fallback code
 owners are not included in the [code owner suggestion](#codeOwnerSuggestion).
 
-If the destination branch doesn't contain any [code owner config
-file](#codeOwnerConfigFiles) at all yet and the project also doesn't have a
-[default code owner config file](backend-find-owners.html#defaultCodeOwnerConfiguration),
-the project owners are considered as code owners and can grant [code owner
-approvals](#codeOwnerApproval) for all files. This is to allow bootstrapping
-code owners and should be only a temporary state until the first [code owner
-config file](#codeOwnerConfigFiles) is added.  Please note that the [code owner
-suggestion](#codeOwnerSuggestion) isn't working if no code owners are defined
-yet (project owners will not be suggested in this case).
-
 ## <a id="renames">Renames
 
 A rename is treated as a deletion at the old path and a creation at the new

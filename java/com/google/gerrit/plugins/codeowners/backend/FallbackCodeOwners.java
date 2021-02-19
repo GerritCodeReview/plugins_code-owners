@@ -32,5 +32,11 @@ public enum FallbackCodeOwners {
    * with configuring code owners can easily happen. This is why this option is intended to be only
    * used if requiring code owner approvals should not be enforced.
    */
-  ALL_USERS;
+  ALL_USERS,
+
+  /**
+   * Paths for which no code owners are defined are owned by the project owners. This means changes
+   * to these paths can be approved by the project owners.
+   */
+  PROJECT_OWNERS;
 }

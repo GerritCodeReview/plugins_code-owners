@@ -87,7 +87,6 @@ public class CodeOwnerApprovalCheck {
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ChangedFiles changedFiles;
-  private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final ApprovalsUtil approvalsUtil;
@@ -99,7 +98,6 @@ public class CodeOwnerApprovalCheck {
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       ChangedFiles changedFiles,
-      CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ApprovalsUtil approvalsUtil,
@@ -108,7 +106,6 @@ public class CodeOwnerApprovalCheck {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.changedFiles = changedFiles;
-    this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.approvalsUtil = approvalsUtil;
@@ -244,13 +241,6 @@ public class CodeOwnerApprovalCheck {
               .resolveGlobalCodeOwners(changeNotes.getProjectName());
       logger.atFine().log("global code owners = %s", globalCodeOwners);
 
-      // If the branch doesn't contain any code owner config file yet, we apply special logic
-      // (project owners count as code owners) to allow bootstrapping the code owner configuration
-      // in the branch.
-      boolean isBootstrapping =
-          !codeOwnerConfigScannerFactory.create().containsAnyCodeOwnerConfigFile(branch);
-      logger.atFine().log("isBootstrapping = %s", isBootstrapping);
-
       ImmutableSet<Account.Id> reviewerAccountIds =
           getReviewerAccountIds(requiredApproval, changeNotes, patchSetUploader);
       ImmutableSet<Account.Id> approverAccountIds =
@@ -271,7 +261,6 @@ public class CodeOwnerApprovalCheck {
                       reviewerAccountIds,
                       approverAccountIds,
                       hasOverride,
-                      isBootstrapping,
                       changedFile));
     }
   }
@@ -312,15 +301,12 @@ public class CodeOwnerApprovalCheck {
       ObjectId revision = getDestBranchRevision(changeNotes.getChange());
       logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
-      // If the branch doesn't contain any code owner config file yet, we apply special logic
-      // (project owners count as code owners) to allow bootstrapping the code owner configuration
-      // in the branch.
-      boolean isBootstrapping =
-          !codeOwnerConfigScannerFactory.create().containsAnyCodeOwnerConfigFile(branch);
       boolean isProjectOwner = isProjectOwner(changeNotes.getProjectName(), accountId);
+      FallbackCodeOwners fallbackCodeOwners =
+          codeOwnersPluginConfiguration.getFallbackCodeOwners(branch.project());
       logger.atFine().log(
-          "isBootstrapping = %s (isProjectOwner = %s)", isBootstrapping, isProjectOwner);
-      if (isBootstrapping && isProjectOwner) {
+          "fallbackCodeOwner = %s, isProjectOwner = %s", fallbackCodeOwners, isProjectOwner);
+      if (fallbackCodeOwners.equals(FallbackCodeOwners.PROJECT_OWNERS) && isProjectOwner) {
         // Return all paths as approved.
         return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
             .map(
@@ -357,7 +343,6 @@ public class CodeOwnerApprovalCheck {
                       // Assume an explicit approval of the given account.
                       /* approverAccountIds= */ ImmutableSet.of(accountId),
                       /* hasOverride= */ false,
-                      /* isBootstrapping= */ false,
                       changedFile));
     }
   }
@@ -371,7 +356,6 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       boolean hasOverride,
-      boolean isBootstrapping,
       ChangedFile changedFile) {
     logger.atFine().log("computing file status for %s", changedFile);
 
@@ -390,7 +374,6 @@ public class CodeOwnerApprovalCheck {
                         reviewerAccountIds,
                         approverAccountIds,
                         hasOverride,
-                        isBootstrapping,
                         newPath));
 
     // Compute the code owner status for the old path, if the file was deleted or renamed.
@@ -411,7 +394,6 @@ public class CodeOwnerApprovalCheck {
                   reviewerAccountIds,
                   approverAccountIds,
                   hasOverride,
-                  isBootstrapping,
                   changedFile.oldPath().get()));
     }
 
@@ -430,7 +412,6 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       boolean hasOverride,
-      boolean isBootstrapping,
       Path absolutePath) {
     logger.atFine().log("computing path status for %s", absolutePath);
 
@@ -440,179 +421,6 @@ public class CodeOwnerApprovalCheck {
           absolutePath, CodeOwnerStatus.APPROVED.name());
       return PathCodeOwnerStatus.create(absolutePath, CodeOwnerStatus.APPROVED);
     }
-
-    return isBootstrapping
-        ? getPathCodeOwnerStatusBootstrappingMode(
-            branch,
-            globalCodeOwners,
-            enableImplicitApprovalFromUploader,
-            patchSetUploader,
-            reviewerAccountIds,
-            approverAccountIds,
-            absolutePath)
-        : getPathCodeOwnerStatusRegularMode(
-            branch,
-            globalCodeOwners,
-            enableImplicitApprovalFromUploader,
-            patchSetUploader,
-            revision,
-            reviewerAccountIds,
-            approverAccountIds,
-            absolutePath);
-  }
-
-  /**
-   * Gets the code owner status for the given path when the branch doesn't contain any code owner
-   * config file yet (bootstrapping mode).
-   *
-   * <p>If we are in bootstrapping mode we consider project owners as code owners. This allows
-   * bootstrapping the code owner configuration in the branch.
-   */
-  private PathCodeOwnerStatus getPathCodeOwnerStatusBootstrappingMode(
-      BranchNameKey branch,
-      CodeOwnerResolverResult globalCodeOwners,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader,
-      ImmutableSet<Account.Id> reviewerAccountIds,
-      ImmutableSet<Account.Id> approverAccountIds,
-      Path absolutePath) {
-    logger.atFine().log("computing path status for %s (bootstrapping mode)", absolutePath);
-
-    CodeOwnerStatus codeOwnerStatus = CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
-    if (isApprovedBootstrappingMode(
-        branch.project(),
-        absolutePath,
-        globalCodeOwners,
-        approverAccountIds,
-        enableImplicitApprovalFromUploader,
-        patchSetUploader)) {
-      codeOwnerStatus = CodeOwnerStatus.APPROVED;
-    } else if (isPendingBootstrappingMode(
-        branch.project(), absolutePath, globalCodeOwners, reviewerAccountIds)) {
-      codeOwnerStatus = CodeOwnerStatus.PENDING;
-    }
-
-    // Since there are no code owner config files in bootstrapping mode, fallback code owners also
-    // apply if they are configured. We can skip checking them if we already found that the file was
-    // approved.
-    if (codeOwnerStatus != CodeOwnerStatus.APPROVED) {
-      codeOwnerStatus =
-          getCodeOwnerStatusForFallbackCodeOwners(
-              codeOwnerStatus,
-              branch.project(),
-              enableImplicitApprovalFromUploader,
-              reviewerAccountIds,
-              approverAccountIds,
-              absolutePath);
-    }
-
-    PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus);
-    logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
-    return pathCodeOwnerStatus;
-  }
-
-  private boolean isApprovedBootstrappingMode(
-      Project.NameKey projectName,
-      Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
-      ImmutableSet<Account.Id> approverAccountIds,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader) {
-    return (enableImplicitApprovalFromUploader
-            && isImplicitlyApprovedBootstrappingMode(
-                projectName, absolutePath, globalCodeOwners, patchSetUploader))
-        || isExplicitlyApprovedBootstrappingMode(
-            projectName, absolutePath, globalCodeOwners, approverAccountIds);
-  }
-
-  private boolean isImplicitlyApprovedBootstrappingMode(
-      Project.NameKey projectName,
-      Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
-      Account.Id patchSetUploader) {
-    requireNonNull(
-        patchSetUploader, "patchSetUploader must be set if implicit approvals are enabled");
-    if (isProjectOwner(projectName, patchSetUploader)) {
-      // The uploader of the patch set is a project owner and thus a code owner. This means there
-      // is an implicit code owner approval from the patch set uploader so that the path is
-      // automatically approved.
-      logger.atFine().log(
-          "%s was implicitly approved by the patch set uploader who is a project owner",
-          absolutePath);
-      return true;
-    }
-
-    if (globalCodeOwners.ownedByAllUsers()
-        || globalCodeOwners.codeOwnersAccountIds().contains(patchSetUploader)) {
-      // If the uploader of the patch set is a global code owner, there is an implicit code owner
-      // approval from the patch set uploader so that the path is automatically approved.
-      logger.atFine().log(
-          "%s was implicitly approved by the patch set uploader who is a global owner",
-          absolutePath);
-      return true;
-    }
-
-    return false;
-  }
-
-  private boolean isExplicitlyApprovedBootstrappingMode(
-      Project.NameKey projectName,
-      Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
-      ImmutableSet<Account.Id> approverAccountIds) {
-    if (!Collections.disjoint(approverAccountIds, globalCodeOwners.codeOwnersAccountIds())
-        || (globalCodeOwners.ownedByAllUsers() && !approverAccountIds.isEmpty())) {
-      // At least one of the global code owners approved the change.
-      logger.atFine().log("%s was approved by a global code owner", absolutePath);
-      return true;
-    }
-
-    if (approverAccountIds.stream()
-        .anyMatch(approverAccountId -> isProjectOwner(projectName, approverAccountId))) {
-      // At least one of the approvers is a project owner and thus a code owner.
-      logger.atFine().log("%s was approved by a project owner", absolutePath);
-      return true;
-    }
-
-    return false;
-  }
-
-  private boolean isPendingBootstrappingMode(
-      Project.NameKey projectName,
-      Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
-      ImmutableSet<Account.Id> reviewerAccountIds) {
-    if (reviewerAccountIds.stream()
-        .anyMatch(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))) {
-      // At least one of the reviewers is a project owner and thus a code owner.
-      logger.atFine().log("%s is owned by a reviewer who is project owner", absolutePath);
-      return true;
-    }
-
-    if (isPending(absolutePath, globalCodeOwners, reviewerAccountIds)) {
-      // At least one of the reviewers is a global code owner.
-      logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Gets the code owner status for the given path when the branch contains at least one code owner
-   * config file (regular mode).
-   */
-  private PathCodeOwnerStatus getPathCodeOwnerStatusRegularMode(
-      BranchNameKey branch,
-      CodeOwnerResolverResult globalCodeOwners,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader,
-      ObjectId revision,
-      ImmutableSet<Account.Id> reviewerAccountIds,
-      ImmutableSet<Account.Id> approverAccountIds,
-      Path absolutePath) {
-    logger.atFine().log("computing path status for %s (regular mode)", absolutePath);
 
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -687,8 +495,10 @@ public class CodeOwnerApprovalCheck {
         codeOwnerStatus.set(
             getCodeOwnerStatusForFallbackCodeOwners(
                 codeOwnerStatus.get(),
-                branch.project(),
+                branch,
+                globalCodeOwners,
                 enableImplicitApprovalFromUploader,
+                patchSetUploader,
                 reviewerAccountIds,
                 approverAccountIds,
                 absolutePath));
@@ -702,17 +512,140 @@ public class CodeOwnerApprovalCheck {
   }
 
   /**
+   * Gets the code owner status for the given path when project owners are configured as fallback
+   * code owners.
+   */
+  private CodeOwnerStatus getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
+      BranchNameKey branch,
+      CodeOwnerResolverResult globalCodeOwners,
+      boolean enableImplicitApprovalFromUploader,
+      @Nullable Account.Id patchSetUploader,
+      ImmutableSet<Account.Id> reviewerAccountIds,
+      ImmutableSet<Account.Id> approverAccountIds,
+      Path absolutePath) {
+    logger.atFine().log(
+        "computing code owner status for %s with project owners as fallback code owners",
+        absolutePath);
+
+    CodeOwnerStatus codeOwnerStatus = CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
+    if (isApprovedByProjectOwnerOrGlobalOwner(
+        branch.project(),
+        absolutePath,
+        globalCodeOwners,
+        approverAccountIds,
+        enableImplicitApprovalFromUploader,
+        patchSetUploader)) {
+      codeOwnerStatus = CodeOwnerStatus.APPROVED;
+    } else if (isPendingByProjectOwnerOrGlobalOwner(
+        branch.project(), absolutePath, globalCodeOwners, reviewerAccountIds)) {
+      codeOwnerStatus = CodeOwnerStatus.PENDING;
+    }
+
+    logger.atFine().log("codeOwnerStatus = %s", codeOwnerStatus);
+    return codeOwnerStatus;
+  }
+
+  private boolean isApprovedByProjectOwnerOrGlobalOwner(
+      Project.NameKey projectName,
+      Path absolutePath,
+      CodeOwnerResolverResult globalCodeOwners,
+      ImmutableSet<Account.Id> approverAccountIds,
+      boolean enableImplicitApprovalFromUploader,
+      @Nullable Account.Id patchSetUploader) {
+    return (enableImplicitApprovalFromUploader
+            && isImplicitlyApprovedByProjectOwnerOrGlobalOwner(
+                projectName, absolutePath, globalCodeOwners, patchSetUploader))
+        || isExplicitlyApprovedByProjectOwnerOrGlobalOwner(
+            projectName, absolutePath, globalCodeOwners, approverAccountIds);
+  }
+
+  private boolean isImplicitlyApprovedByProjectOwnerOrGlobalOwner(
+      Project.NameKey projectName,
+      Path absolutePath,
+      CodeOwnerResolverResult globalCodeOwners,
+      Account.Id patchSetUploader) {
+    requireNonNull(
+        patchSetUploader, "patchSetUploader must be set if implicit approvals are enabled");
+    if (isProjectOwner(projectName, patchSetUploader)) {
+      // The uploader of the patch set is a project owner and thus a code owner. This means there
+      // is an implicit code owner approval from the patch set uploader so that the path is
+      // automatically approved.
+      logger.atFine().log(
+          "%s was implicitly approved by the patch set uploader who is a project owner",
+          absolutePath);
+      return true;
+    }
+
+    if (globalCodeOwners.ownedByAllUsers()
+        || globalCodeOwners.codeOwnersAccountIds().contains(patchSetUploader)) {
+      // If the uploader of the patch set is a global code owner, there is an implicit code owner
+      // approval from the patch set uploader so that the path is automatically approved.
+      logger.atFine().log(
+          "%s was implicitly approved by the patch set uploader who is a global owner",
+          absolutePath);
+      return true;
+    }
+
+    return false;
+  }
+
+  private boolean isExplicitlyApprovedByProjectOwnerOrGlobalOwner(
+      Project.NameKey projectName,
+      Path absolutePath,
+      CodeOwnerResolverResult globalCodeOwners,
+      ImmutableSet<Account.Id> approverAccountIds) {
+    if (!Collections.disjoint(approverAccountIds, globalCodeOwners.codeOwnersAccountIds())
+        || (globalCodeOwners.ownedByAllUsers() && !approverAccountIds.isEmpty())) {
+      // At least one of the global code owners approved the change.
+      logger.atFine().log("%s was approved by a global code owner", absolutePath);
+      return true;
+    }
+
+    if (approverAccountIds.stream()
+        .anyMatch(approverAccountId -> isProjectOwner(projectName, approverAccountId))) {
+      // At least one of the approvers is a project owner and thus a code owner.
+      logger.atFine().log("%s was approved by a project owner", absolutePath);
+      return true;
+    }
+
+    return false;
+  }
+
+  private boolean isPendingByProjectOwnerOrGlobalOwner(
+      Project.NameKey projectName,
+      Path absolutePath,
+      CodeOwnerResolverResult globalCodeOwners,
+      ImmutableSet<Account.Id> reviewerAccountIds) {
+    if (reviewerAccountIds.stream()
+        .anyMatch(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))) {
+      // At least one of the reviewers is a project owner and thus a code owner.
+      logger.atFine().log("%s is owned by a reviewer who is project owner", absolutePath);
+      return true;
+    }
+
+    if (isPending(absolutePath, globalCodeOwners, reviewerAccountIds)) {
+      // At least one of the reviewers is a global code owner.
+      logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Computes the code owner status for the given path based on the configured fallback code owners.
    */
   private CodeOwnerStatus getCodeOwnerStatusForFallbackCodeOwners(
       CodeOwnerStatus codeOwnerStatus,
-      Project.NameKey project,
+      BranchNameKey branch,
+      CodeOwnerResolverResult globalCodeOwners,
       boolean enableImplicitApprovalFromUploader,
+      @Nullable Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       Path absolutePath) {
     FallbackCodeOwners fallbackCodeOwners =
-        codeOwnersPluginConfiguration.getFallbackCodeOwners(project);
+        codeOwnersPluginConfiguration.getFallbackCodeOwners(branch.project());
     logger.atFine().log(
         "getting code owner status for fallback code owners (fallback code owners = %s)",
         fallbackCodeOwners);
@@ -720,6 +653,15 @@ public class CodeOwnerApprovalCheck {
       case NONE:
         logger.atFine().log("no fallback code owners");
         return codeOwnerStatus;
+      case PROJECT_OWNERS:
+        return getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
+            branch,
+            globalCodeOwners,
+            enableImplicitApprovalFromUploader,
+            patchSetUploader,
+            reviewerAccountIds,
+            approverAccountIds,
+            absolutePath);
       case ALL_USERS:
         return getCodeOwnerStatusIfAllUsersAreCodeOwners(
             enableImplicitApprovalFromUploader,

@@ -8,6 +8,7 @@ import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestPlugin;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListChangesOption;
@@ -31,6 +32,7 @@ public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
   @Inject private RequestScopeOperations requestScopeOperations;
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
   public void invokeCodeOwnerSubmitRule() throws Exception {
     // Upload a change as a non-code owner.
     TestRepository<InMemoryRepository> testRepo = cloneProject(project, user);
@@ -58,8 +60,8 @@ public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
-    // Approve by a project owner who is code owner since there is no code owner config file yet,
-    // and hence we are in bootstrapping mode.
+    // Approve by a project owner who is code owner since project owners are configured as fallback
+    // code owners.
     requestScopeOperations.setApiUser(admin.id());
     approve(changeId);
 

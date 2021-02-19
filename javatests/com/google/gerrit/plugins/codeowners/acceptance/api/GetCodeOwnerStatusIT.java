@@ -79,10 +79,6 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getCodeOwnerStatusIfCodeOwnersFunctionalityIsDisabled() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     disableCodeOwnersForProject(project);
     String path = "foo/bar.baz";
     String changeId = createChange("Change Adding A File", path, "file content").getChangeId();

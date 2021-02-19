@@ -36,7 +36,7 @@ import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link CodeOwnerApprovalCheck} with fallback code owners. */
+/** Tests for {@link CodeOwnerApprovalCheck} with ALL_USERS as fallback code owners. */
 public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     extends AbstractCodeOwnersTest {
   @Inject private ChangeNotes.Factory changeNotesFactory;
@@ -229,10 +229,6 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
   @Test
   public void approvedByFallbackCodeOwner() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
@@ -281,91 +277,9 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void implicitlyApprovedByFallbackCodeOwner() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
-
-    // Verify that the file is approved (the change owner is a code owner and implicit approvals are
-    // enabled).
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
-  }
-
-  @Test
-  public void approvedByFallbackCodeOwner_bootstrappingMode() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    TestAccount user2 = accountCreator.user2();
-
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
-
-    // Verify that the file is not approved yet (the change owner is a code owner, but
-    // implicit approvals are disabled).
-    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-
-    // Add a user a fallback code owner as reviewer.
-    gApi.changes().id(changeId).addReviewer(user2.email());
-
-    // Verify that the status is pending now .
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
-
-    // Add a Code-Review+1 (= code owner approval) from a fallback code owner.
-    requestScopeOperations.setApiUser(user2.id());
-    recommend(changeId);
-
-    // Verify that the status is approved now
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
-    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void implicitlyApprovedByFallbackCodeOwner_bootstrappingMode() throws Exception {
-    // since no code owner config exists we are entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
 
     // Verify that the file is approved (the change owner is a code owner and implicit approvals are
     // enabled).

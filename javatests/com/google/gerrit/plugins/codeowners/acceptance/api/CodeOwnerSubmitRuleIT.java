@@ -82,10 +82,6 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
   @Test
   public void changeWithInsufficentReviewersIsNotSubmittable() throws Exception {
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
-
     String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
 
     // Approve by a non-code-owner.
@@ -225,10 +221,6 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void changeWithOverrideApprovalIsSubmittable() throws Exception {
     createOwnersOverrideLabel();
-
-    // create arbitrary code owner config to avoid entering the bootstrapping code path in
-    // CodeOwnerApprovalCheck
-    createArbitraryCodeOwnerConfigFile();
 
     String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
 

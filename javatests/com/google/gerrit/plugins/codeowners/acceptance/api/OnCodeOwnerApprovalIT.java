@@ -949,6 +949,8 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   @Test
   public void changeMessageExtendedIfCodeOwnerApprovalIsIgnoredDueToSelfApproval()
       throws Exception {
+    setAsRootCodeOwners(admin);
+
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.ignoreSelfApproval = true;
     gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
@@ -968,6 +970,8 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   @Test
   public void changeMessageExtendedIfUpgradedCodeOwnerApprovalIsIgnoredDueToSelfApproval()
       throws Exception {
+    setAsRootCodeOwners(admin);
+
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.ignoreSelfApproval = true;
     gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
@@ -990,6 +994,8 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   @Test
   public void changeMessageExtendedIfDowngradedCodeOwnerApprovalIsIgnoredDueToSelfApproval()
       throws Exception {
+    setAsRootCodeOwners(admin);
+
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.ignoreSelfApproval = true;
     gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
