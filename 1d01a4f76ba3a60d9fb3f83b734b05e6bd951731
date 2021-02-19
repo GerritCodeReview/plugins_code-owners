@@ -76,6 +76,69 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6922e894_d5d2aa7e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-19T16:19:03Z",
+      "side": 1,
+      "message": "LGTM with nits",
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "285f5d7e_190befa1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-19T16:19:03Z",
+      "side": 1,
+      "message": "isImplicitlyApprovedByProjectOwnerOrGlobalOwner checks that it\u0027s not null, so this (and all the other methods) shouldn\u0027t annotate nullable.",
+      "range": {
+        "startLine": 554,
+        "startChar": 6,
+        "endLine": 554,
+        "endChar": 43
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f9547cf9_250c209c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-19T16:19:03Z",
+      "side": 1,
+      "message": "rename this to \"isPendingByGlobalOwner\"?",
+      "range": {
+        "startLine": 626,
+        "startChar": 8,
+        "endLine": 626,
+        "endChar": 17
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "72bc1190_92b23cf5",
@@ -113,6 +176,30 @@
       "side": 1,
       "message": "\u003e should this class and \n\u003e CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest.java inherit from the \u003e same base class and run the same tests just with different fallback code owners?\n\nMaybe, it\u0027s always so much trouble with BUILD files to have base classes for test. Not sure if it\u0027s worth the effort.\n\n\u003e Some of the tests here seem a bit unrelated to fallback code owners,\n\u003e e.g why are tests about global code owner related to fallback code owner?\n\nThey are making sure that an approval from global owners is still respected if no code owners are defined and fallbackCodeOwners is set to PROJECT_OWNERS.\n\nFWIW we had these test for the bootstrapping mode before and they are just moved over here.",
       "parentUuid": "72bc1190_92b23cf5",
+      "range": {
+        "startLine": 48,
+        "startChar": 13,
+        "endLine": 48,
+        "endChar": 76
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6dd73cdb_b2ea249d",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-19T16:19:03Z",
+      "side": 1,
+      "message": "I\u0027m surprised I didn\u0027t see some tests in this class e.g \nnotApprovedByFallbackCodeOwnerIfParentCodeOwnersIgnored as in CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest. I guess it\u0027s not super important, though.",
+      "parentUuid": "c0892df0_da979a94",
       "range": {
         "startLine": 48,
         "startChar": 13,
