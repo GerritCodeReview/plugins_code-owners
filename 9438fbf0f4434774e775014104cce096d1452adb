@@ -74,6 +74,30 @@
       },
       "revId": "9438fbf0f4434774e775014104cce096d1452adb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "96132050_e404f125",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1645,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T12:01:04Z",
+      "side": 1,
+      "message": "Yes, with the changes it reproduced the issue :)",
+      "parentUuid": "e1fc7c89_6fc673a0",
+      "range": {
+        "startLine": 1645,
+        "startChar": 15,
+        "endLine": 1645,
+        "endChar": 70
+      },
+      "revId": "9438fbf0f4434774e775014104cce096d1452adb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
