@@ -31,7 +31,6 @@ import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.metrics.Timer0;
@@ -142,7 +141,11 @@ public class CodeOwnerApprovalCheck {
           .sorted(comparing(Path::toString))
           .collect(toImmutableList());
     } catch (IOException | PatchListNotAvailableException e) {
-      throw new StorageException(e);
+      throw new CodeOwnersInternalServerErrorException(
+          String.format(
+              "failed to compute owned paths of patch set %s for account %d",
+              patchSet.id(), accountId.get()),
+          e);
     }
   }
 
@@ -346,7 +349,7 @@ public class CodeOwnerApprovalCheck {
       return changeNotes.getChange().getRevertOf() != null
           && pureRevertCache.isPureRevert(changeNotes);
     } catch (BadRequestException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format(
               "failed to check if change %s in project %s is a pure revert",
               changeNotes.getChangeId(), changeNotes.getProjectName()),
@@ -697,7 +700,7 @@ public class CodeOwnerApprovalCheck {
             absolutePath);
     }
 
-    throw new StorageException(
+    throw new CodeOwnersInternalServerErrorException(
         String.format("unknown fallback code owners configured: %s", fallbackCodeOwners));
   }
 
@@ -784,7 +787,7 @@ public class CodeOwnerApprovalCheck {
       }
       return isProjectOwner;
     } catch (PermissionBackendException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format(
               "failed to check owner permission of project %s for account %d",
               project.get(), accountId.get()),
