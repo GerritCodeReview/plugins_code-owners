@@ -20,7 +20,6 @@ import com.google.common.base.Throwables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.IdentifiedUser;
@@ -122,10 +121,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
         }
       }
     } catch (IOException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
     } catch (ConfigInvalidException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format(
               "invalid code owner config file %s (project = %s, branch = %s)",
               codeOwnerConfigKey.filePath(defaultFileName),
@@ -207,7 +206,8 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
           .call();
     } catch (Exception e) {
       Throwables.throwIfUnchecked(e);
-      throw new StorageException(e);
+      throw new CodeOwnersInternalServerErrorException(
+          String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
     }
   }
 
@@ -231,7 +231,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
       return codeOwnerConfigFile.getLoadedCodeOwnerConfig();
     } catch (IOException | ConfigInvalidException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
     }
   }
@@ -255,7 +255,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
     } catch (Throwable t) {
       metaDataUpdate.close();
       Throwables.throwIfUnchecked(t);
-      throw new StorageException("Failed to create MetaDataUpdate", t);
+      throw new CodeOwnersInternalServerErrorException("Failed to create MetaDataUpdate", t);
     }
   }
 }

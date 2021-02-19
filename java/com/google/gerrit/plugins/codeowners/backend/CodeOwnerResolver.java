@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
@@ -357,7 +356,8 @@ public class CodeOwnerResolver {
     try {
       extIds = externalIds.byEmail(email);
     } catch (IOException e) {
-      throw new StorageException(String.format("cannot resolve code owner email %s", email), e);
+      throw new CodeOwnersInternalServerErrorException(
+          String.format("cannot resolve code owner email %s", email), e);
     }
 
     if (extIds.isEmpty()) {
@@ -481,7 +481,7 @@ public class CodeOwnerResolver {
                   email, accountState.account().id(), currentUser.get().getLoggableName()));
         }
       } catch (PermissionBackendException e) {
-        throw new StorageException(
+        throw new CodeOwnersInternalServerErrorException(
             String.format(
                 "failed to test the %s global capability", GlobalPermission.MODIFY_ACCOUNT),
             e);

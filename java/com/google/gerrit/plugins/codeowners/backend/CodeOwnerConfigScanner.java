@@ -21,7 +21,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
@@ -141,12 +140,12 @@ public class CodeOwnerConfigScanner {
         CodeOwnerConfig codeOwnerConfig;
         try {
           codeOwnerConfig = treeWalk.getCodeOwnerConfig();
-        } catch (StorageException storageException) {
+        } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
           Optional<ConfigInvalidException> configInvalidException =
-              getInvalidConfigCause(storageException);
+              getInvalidConfigCause(codeOwnersInternalServerErrorException);
           if (!configInvalidException.isPresent()) {
             // Propagate any failure that is not related to the contents of the code owner config.
-            throw storageException;
+            throw codeOwnersInternalServerErrorException;
           }
 
           // The code owner config is invalid and cannot be parsed.
@@ -161,7 +160,7 @@ public class CodeOwnerConfigScanner {
         }
       }
     } catch (IOException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format(
               "Failed to scan for code owner configs in branch %s of project %s",
               branchNameKey.branch(), branchNameKey.project()),

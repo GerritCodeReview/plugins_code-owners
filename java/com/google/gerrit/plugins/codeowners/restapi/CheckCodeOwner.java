@@ -18,7 +18,6 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.IdString;
@@ -32,6 +31,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.OptionalResultWithMessages;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
@@ -275,7 +275,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
         | AuthException
         | IOException
         | ConfigInvalidException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format("failed if email %s is owner of project %s", email, projectName.get()), e);
     }
   }

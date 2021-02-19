@@ -63,6 +63,14 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
       return ImmutableList.of(invalidPathException.get().getMessage());
     }
 
+    // This must be done last since some of the exceptions we handle above may be wrapped in a
+    // CodeOwnersInternalServerErrorException.
+    Optional<CodeOwnersInternalServerErrorException> codeOwnersInternalServerErrorException =
+        getCodeOwnersInternalServerErrorException(throwable);
+    if (codeOwnersInternalServerErrorException.isPresent()) {
+      return ImmutableList.of(codeOwnersInternalServerErrorException.get().getUserVisibleMessage());
+    }
+
     return ImmutableList.of();
   }
 
@@ -76,13 +84,18 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
     return Optional.empty();
   }
 
+  private static Optional<CodeOwnersInternalServerErrorException>
+      getCodeOwnersInternalServerErrorException(Throwable throwable) {
+    return getCause(CodeOwnersInternalServerErrorException.class, throwable);
+  }
+
   private static boolean isInvalidPluginConfigurationException(Throwable throwable) {
     return getInvalidPluginConfigurationCause(throwable).isPresent();
   }
 
   private static Optional<InvalidPluginConfigurationException> getInvalidPluginConfigurationCause(
       Throwable throwable) {
-    return getInvalidPluginConfigurationCause(InvalidPluginConfigurationException.class, throwable);
+    return getCause(InvalidPluginConfigurationException.class, throwable);
   }
 
   private static boolean isInvalidPathException(Throwable throwable) {
@@ -90,10 +103,10 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
   }
 
   public static Optional<InvalidPathException> getInvalidPathException(Throwable throwable) {
-    return getInvalidPluginConfigurationCause(InvalidPathException.class, throwable);
+    return getCause(InvalidPathException.class, throwable);
   }
 
-  private static <T extends Throwable> Optional<T> getInvalidPluginConfigurationCause(
+  private static <T extends Throwable> Optional<T> getCause(
       Class<T> exceptionClass, Throwable throwable) {
     return Throwables.getCausalChain(throwable).stream()
         .filter(exceptionClass::isInstance)

@@ -21,7 +21,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -200,7 +199,8 @@ public class CodeOwnerConfigHierarchy {
         logger.atFine().log("code owner config %s not found", metaCodeOwnerConfigKey);
       }
     } catch (IOException e) {
-      throw new StorageException(String.format("failed to read %s", metaCodeOwnerConfigKey), e);
+      throw new CodeOwnersInternalServerErrorException(
+          String.format("failed to read %s", metaCodeOwnerConfigKey), e);
     }
   }
 }
