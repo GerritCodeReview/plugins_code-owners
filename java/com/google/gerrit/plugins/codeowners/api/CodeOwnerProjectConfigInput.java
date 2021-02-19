@@ -86,6 +86,9 @@ public class CodeOwnerProjectConfigInput {
   /** Whether code owner config files are read-only. */
   public Boolean readOnly;
 
+  /** Whether pure revert changes are exempted from needing code owner approvals for submit. */
+  public Boolean exemptPureReverts;
+
   /** Policy for validating code owner config files when a commit is received. */
   public CodeOwnerConfigValidationPolicy enableValidationOnCommitReceived;
 

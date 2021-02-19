@@ -1911,6 +1911,96 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .isEqualTo(CodeOwnerStatus.APPROVED);
   }
 
+  @Test
+  public void pureRevertsAreNotExemptedByDefault() throws Exception {
+    setAsRootCodeOwners(admin);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+
+    // Revert the change
+    String changeIdOfRevert = gApi.changes().id(changeId).revert().get().changeId;
+
+    // Check that the file is not approved.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeIdOfRevert));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasOldPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptPureReverts", value = "true")
+  public void pureRevertsAreExemptedIfConfigured() throws Exception {
+    setAsRootCodeOwners(admin);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+
+    // Revert the change
+    String changeIdOfRevert = gApi.changes().id(changeId).revert().get().changeId;
+
+    // Check that the file is approved since it's a pure revert.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeIdOfRevert));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasOldPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasOldPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptPureReverts", value = "true")
+  public void nonPureRevertsAreNotExempted() throws Exception {
+    setAsRootCodeOwners(admin);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+
+    // Revert the change
+    String changeIdOfRevert = gApi.changes().id(changeId).revert().get().changeId;
+
+    // Amend change to make it a non-pure revert change.
+    amendChange(
+        changeIdOfRevert,
+        "refs/for/master",
+        admin,
+        testRepo,
+        "Revert change",
+        JgitPath.of(path).get(),
+        "other content");
+
+    // Check that the file is not approved.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeIdOfRevert));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
     return changeNotesFactory.create(project, Change.id(gApi.changes().id(changeId).get()._number));
   }

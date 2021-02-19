@@ -20,6 +20,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPT_PURE_REVERTS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
@@ -129,6 +130,38 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, "false");
     assertThat(generalConfig.getReadOnly(cfg)).isFalse();
+  }
+
+  @Test
+  public void cannotGetExemptPureRevertsForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getExemptPureReverts(/* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noExemptPureRevertsConfiguration() throws Exception {
+    assertThat(generalConfig.getExemptPureReverts(new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptPureReverts", value = "true")
+  public void
+      exemptPureRevertsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.getExemptPureReverts(new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptPureReverts", value = "true")
+  public void
+      exemptPureRevertsConfigurationInPluginConfigOverridesExemptPureRevertsConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_EXEMPT_PURE_REVERTS, "false");
+    assertThat(generalConfig.getExemptPureReverts(cfg)).isFalse();
   }
 
   @Test

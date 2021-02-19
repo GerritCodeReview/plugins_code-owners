@@ -117,6 +117,18 @@ public class CodeOwnersPluginConfiguration {
   }
 
   /**
+   * Checks whether pure revert changes are exempted from needing code owner approvals for submit.
+   *
+   * @param project the project for which it should be checked whether pure revert changes are
+   *     exempted from needing code owner approvals for submit
+   * @return whether pure revert changes are exempted from needing code owner approvals for submit
+   */
+  public boolean arePureRevertsExempted(Project.NameKey project) {
+    requireNonNull(project, "project");
+    return generalConfig.getExemptPureReverts(getPluginConfig(project));
+  }
+
+  /**
    * Checks whether newly added non-resolvable code owners should be rejected on commit received and
    * submit.
    *
