@@ -28,7 +28,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
@@ -37,6 +36,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportType;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
@@ -397,7 +397,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   + " (project = %s, branch = %s)",
               revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
       logger.atSevere().withCause(e).log(errorMessage);
-      throw new StorageException(errorMessage, e);
+      throw new CodeOwnersInternalServerErrorException(errorMessage, e);
     }
   }
 
@@ -435,7 +435,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     CodeOwnerConfig codeOwnerConfig;
     try {
       // Load the code owner config. If the code owner config is not parsable this will fail with a
-      // InvalidConfigException (wrapped in a StorageException) that we handle below.
+      // InvalidConfigException (wrapped in a CodeOwnersInternalServerErrorException) that we handle
+      // below.
       CodeOwnerConfig.Key codeOwnerConfigKey =
           createCodeOwnerConfigKey(branchNameKey, changedFile.newPath().get());
       codeOwnerConfig =
@@ -451,13 +452,13 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                           String.format(
                               "code owner config %s not found in revision %s",
                               codeOwnerConfigKey, revCommit.name())));
-    } catch (StorageException storageException) {
+    } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
       // Loading the code owner config has failed.
       Optional<ConfigInvalidException> configInvalidException =
-          getInvalidConfigCause(storageException);
+          getInvalidConfigCause(codeOwnersInternalServerErrorException);
       if (!configInvalidException.isPresent()) {
         // Propagate any failure that is not related to the contents of the code owner config.
-        throw storageException;
+        throw codeOwnersInternalServerErrorException;
       }
 
       // The exception was caused by a ConfigInvalidException. This means loading the code owner
@@ -481,8 +482,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     try {
       baseCodeOwnerConfig =
           getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revWalk, revCommit);
-    } catch (StorageException storageException) {
-      if (getInvalidConfigCause(storageException).isPresent()) {
+    } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
+      if (getInvalidConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
         // The base code owner config is non-parseable. Since the update makes the code owner
         // config parseable, it is a good update even if the code owner config still contains
         // issues. Hence in this case we downgrade all validation errors in the new version to
@@ -493,7 +494,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       }
 
       // Propagate any exception that was not caused by the content of the code owner config.
-      throw storageException;
+      throw codeOwnersInternalServerErrorException;
     }
 
     // Validate the parsed code owner config.
@@ -529,8 +530,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   /**
    * Loads and returns the base code owner config if it exists.
    *
-   * <p>Throws a {@link ConfigInvalidException} (wrapped in a {@link StorageException} if the base
-   * code owner config exists, but is not parseable.
+   * <p>Throws a {@link ConfigInvalidException} (wrapped in a {@link
+   * CodeOwnersInternalServerErrorException} if the base code owner config exists, but is not
+   * parseable.
    *
    * @param codeOwnerBackend the code owner backend from which the base code owner config can be
    *     loaded
@@ -614,16 +616,16 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         // is introduced by the new commit and we should block uploading it, which we achieve by
         // setting the validation message type to fatal.
         return ValidationMessage.Type.FATAL;
-      } catch (StorageException storageException) {
+      } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
         // Loading the base code owner config has failed.
-        if (getInvalidConfigCause(storageException).isPresent()) {
+        if (getInvalidConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
           // The code owner config was already non-parseable before, hence we do not need to
           // block the upload if the code owner config is still non-parseable.
           // Using warning as type means that uploads are not blocked.
           return ValidationMessage.Type.WARNING;
         }
         // Propagate any failure that is not related to the contents of the code owner config.
-        throw storageException;
+        throw codeOwnersInternalServerErrorException;
       }
     }
 
@@ -952,8 +954,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 keyOfImportedCodeOwnerConfig.branchNameKey().shortName(),
                 revision.get().name()));
       }
-    } catch (StorageException storageException) {
-      if (getInvalidConfigCause(storageException).isPresent()) {
+    } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
+      if (getInvalidConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
         // The imported code owner config is non-parseable.
         return nonResolvableImport(
             project,
@@ -967,7 +969,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       }
 
       // Propagate any exception that was not caused by the content of the code owner config.
-      throw storageException;
+      throw codeOwnersInternalServerErrorException;
     }
 
     // no issue found
@@ -996,7 +998,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           .project(keyOfImportedCodeOwnerConfig.project())
           .test(ProjectPermission.ACCESS);
     } catch (PermissionBackendException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           "failed to check read permission for project of imported code owner config", e);
     }
   }
@@ -1009,7 +1011,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           .ref(keyOfImportedCodeOwnerConfig.ref())
           .test(RefPermission.READ);
     } catch (PermissionBackendException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           "failed to check read permission for branch of imported code owner config", e);
     }
   }
@@ -1030,7 +1032,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       return Optional.ofNullable(repo.exactRef(keyOfImportedCodeOwnerConfig.ref()))
           .map(Ref::getObjectId);
     } catch (IOException e) {
-      throw new StorageException("failed to read revision of import code owner config", e);
+      throw new CodeOwnersInternalServerErrorException(
+          "failed to read revision of import code owner config", e);
     }
   }
 

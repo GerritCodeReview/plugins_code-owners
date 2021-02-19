@@ -24,7 +24,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.client.ListOption;
 import com.google.gerrit.extensions.common.AccountVisibility;
@@ -39,6 +38,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolverResult;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
@@ -449,7 +449,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
       throw new IllegalStateException("unknown account visibility setting: " + accountVisibility);
     } catch (IOException | PermissionBackendException e) {
-      throw new StorageException("failed to get visible users", e);
+      throw new CodeOwnersInternalServerErrorException("failed to get visible users", e);
     }
   }
 

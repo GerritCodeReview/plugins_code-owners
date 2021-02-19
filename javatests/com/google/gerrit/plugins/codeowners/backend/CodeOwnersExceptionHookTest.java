@@ -48,6 +48,12 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
     assertThat(skipRetryWithTrace(newInvalidPathException())).isTrue();
     assertThat(skipRetryWithTrace(newExceptionWithCause(newInvalidPathException()))).isTrue();
 
+    assertThat(skipRetryWithTrace(new CodeOwnersInternalServerErrorException("msg"))).isFalse();
+    assertThat(
+            skipRetryWithTrace(
+                newExceptionWithCause(new CodeOwnersInternalServerErrorException("msg"))))
+        .isFalse();
+
     assertThat(skipRetryWithTrace(new Exception())).isFalse();
     assertThat(skipRetryWithTrace(newExceptionWithCause(new Exception()))).isFalse();
   }
@@ -72,6 +78,13 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
         .containsExactly(invalidPathException.getMessage());
     assertThat(getUserMessages(newExceptionWithCause(invalidPathException)))
         .containsExactly(invalidPathException.getMessage());
+
+    CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException =
+        new CodeOwnersInternalServerErrorException("msg");
+    assertThat(getUserMessages(codeOwnersInternalServerErrorException))
+        .containsExactly(codeOwnersInternalServerErrorException.getUserVisibleMessage());
+    assertThat(getUserMessages(newExceptionWithCause(codeOwnersInternalServerErrorException)))
+        .containsExactly(codeOwnersInternalServerErrorException.getUserVisibleMessage());
 
     assertThat(getUserMessages(new Exception())).isEmpty();
     assertThat(getUserMessages(newExceptionWithCause(new Exception()))).isEmpty();
@@ -99,6 +112,10 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
 
     assertThat(getStatus(new Exception())).isEmpty();
     assertThat(getStatus(newExceptionWithCause(new Exception()))).isEmpty();
+
+    assertThat(getStatus(new CodeOwnersInternalServerErrorException("msg"))).isEmpty();
+    assertThat(getStatus(newExceptionWithCause(new CodeOwnersInternalServerErrorException("msg"))))
+        .isEmpty();
   }
 
   private boolean skipRetryWithTrace(Exception exception) {

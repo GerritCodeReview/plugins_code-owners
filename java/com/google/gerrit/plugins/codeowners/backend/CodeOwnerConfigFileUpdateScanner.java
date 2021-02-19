@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
-import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.git.RefUpdateUtil;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
@@ -138,7 +137,7 @@ public class CodeOwnerConfigFileUpdateScanner {
       updateBranch(branchNameKey.branch(), repository, revision, commitId);
       return Optional.of(rw.parseCommit(commitId));
     } catch (IOException e) {
-      throw new StorageException(
+      throw new CodeOwnersInternalServerErrorException(
           String.format(
               "Failed to scan for code owner configs in branch %s of project %s",
               branchNameKey.branch(), branchNameKey.project()),
