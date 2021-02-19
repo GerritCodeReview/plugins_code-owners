@@ -143,6 +143,18 @@ the complete list with the additional value has to be set on project level.
         `@PLUGIN@.config`.\
         By default `false`.
 
+<a id="pluginCodeOwnersExemptPureReverts">plugin.@PLUGIN@.exemptPureReverts</a>
+:       Whether pure revert changes are exempted from needing code owner
+        approvals for submit.\
+        Only works for pure reverts which have been created through the Gerrit
+        [REST API](../../../Documentation/rest-api-change.html#revert-change)
+        (but not for pure reverts which were done locally and then pushed to
+        Gerrit).\
+        Can be overridden per project by setting
+        [codeOwners.exemptPureReverts](#codeOwnersExemptPureReverts) in
+        `@PLUGIN@.config`.\
+        By default `false`.
+
 <a id="pluginCodeOwnersEnableValidationOnCommitReceived">plugin.@PLUGIN@.enableValidationOnCommitReceived</a>
 :       Policy for validating code owner config files when a commit is received.
         Allowed values are `true` (the code owner config file validation is
@@ -513,6 +525,21 @@ the complete list with the additional value has to be set on project level.
         If not set, the global setting
         [plugin.@PLUGIN@.readOnly](#pluginCodeOwnersReadOnly) in
         `gerrit.config` is used.
+
+<a id="codeOwnersExemptPureReverts">codeOwners.exemptPureReverts</a>
+:       Whether pure revert changes are exempted from needing code owner
+        approvals for submit.\
+        Only works for pure reverts which have been created through the Gerrit
+        [REST API](../../../Documentation/rest-api-change.html#revert-change)
+        (but not for pure reverts which were done locally and then pushed to
+        Gerrit).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.exemptPureReverts](#pluginCodeOwnersExemptPureReverts)
+        in `gerrit.config` and the `codeOwners.exemptPureReverts` setting from
+        parent projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.exemptPureReverts](#pluginCodeOwnersExemptPureReverts)
+        in `gerrit.config` is used.
 
 <a id="codeOwnersEnableValidationOnCommitReceived">codeOwners.enableValidationOnCommitReceived</a>
 :       Policy for validating code owner config files when a commit is received.

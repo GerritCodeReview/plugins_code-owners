@@ -60,6 +60,7 @@ public class GeneralConfig {
   @VisibleForTesting public static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
   @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
   @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
+  @VisibleForTesting public static final String KEY_EXEMPT_PURE_REVERTS = "exemptPureReverts";
   @VisibleForTesting public static final String KEY_FALLBACK_CODE_OWNERS = "fallbackCodeOwners";
 
   @VisibleForTesting
@@ -214,6 +215,20 @@ public class GeneralConfig {
    */
   boolean getReadOnly(Config pluginConfig) {
     return getBooleanConfig(pluginConfig, KEY_READ_ONLY, false);
+  }
+
+  /**
+   * Gets the exempt-pure-reverts configuration from the given plugin config with fallback to {@code
+   * gerrit.config}.
+   *
+   * <p>The exempt-pure-reverts configuration controls whether pure revert changes are exempted from
+   * needing code owner approvals for submit.
+   *
+   * @param pluginConfig the plugin config from which the read-only configuration should be read.
+   * @return whether pure reverts are exempted from needing code owner approvals for submit
+   */
+  boolean getExemptPureReverts(Config pluginConfig) {
+    return getBooleanConfig(pluginConfig, KEY_EXEMPT_PURE_REVERTS, /* defaultValue= */ false);
   }
 
   /**
