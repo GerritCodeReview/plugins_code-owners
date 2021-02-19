@@ -41,6 +41,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigScanner;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator;
 import com.google.gerrit.server.CurrentUser;
+import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -54,6 +55,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * REST endpoint that checks/validates the code owner config files in a project.
@@ -72,6 +75,7 @@ public class CheckCodeOwnerConfigFiles
 
   private final Provider<CurrentUser> currentUser;
   private final PermissionBackend permissionBackend;
+  private final GitRepositoryManager repoManager;
   private final Provider<ListBranches> listBranches;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory;
@@ -81,12 +85,14 @@ public class CheckCodeOwnerConfigFiles
   public CheckCodeOwnerConfigFiles(
       Provider<CurrentUser> currentUser,
       PermissionBackend permissionBackend,
+      GitRepositoryManager repoManager,
       Provider<ListBranches> listBranches,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigScanner.Factory codeOwnerConfigScannerFactory,
       CodeOwnerConfigValidator codeOwnerConfigValidator) {
     this.currentUser = currentUser;
     this.permissionBackend = permissionBackend;
+    this.repoManager = repoManager;
     this.listBranches = listBranches;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerConfigScannerFactory = codeOwnerConfigScannerFactory;
@@ -120,20 +126,23 @@ public class CheckCodeOwnerConfigFiles
 
     validateInput(projectResource.getNameKey(), branches, input);
 
-    ImmutableMap.Builder<String, Map<String, List<ConsistencyProblemInfo>>> resultsByBranchBuilder =
-        ImmutableMap.builder();
-    branches.stream()
-        .filter(branchNameKey -> shouldValidateBranch(input, branchNameKey))
-        .filter(
-            branchNameKey ->
-                validateDisabledBranches(input)
-                    || !codeOwnersPluginConfiguration.isDisabled(branchNameKey))
-        .forEach(
-            branchNameKey ->
-                resultsByBranchBuilder.put(
-                    branchNameKey.branch(),
-                    checkBranch(input.path, branchNameKey, input.verbosity)));
-    return Response.ok(resultsByBranchBuilder.build());
+    try (Repository repo = repoManager.openRepository(projectResource.getNameKey());
+        RevWalk revWalk = new RevWalk(repo)) {
+      ImmutableMap.Builder<String, Map<String, List<ConsistencyProblemInfo>>>
+          resultsByBranchBuilder = ImmutableMap.builder();
+      branches.stream()
+          .filter(branchNameKey -> shouldValidateBranch(input, branchNameKey))
+          .filter(
+              branchNameKey ->
+                  validateDisabledBranches(input)
+                      || !codeOwnersPluginConfiguration.isDisabled(branchNameKey))
+          .forEach(
+              branchNameKey ->
+                  resultsByBranchBuilder.put(
+                      branchNameKey.branch(),
+                      checkBranch(revWalk, input.path, branchNameKey, input.verbosity)));
+      return Response.ok(resultsByBranchBuilder.build());
+    }
   }
 
   private ImmutableSet<BranchNameKey> branches(ProjectResource projectResource)
@@ -145,6 +154,7 @@ public class CheckCodeOwnerConfigFiles
   }
 
   private Map<String, List<ConsistencyProblemInfo>> checkBranch(
+      RevWalk revWalk,
       String pathGlob,
       BranchNameKey branchNameKey,
       @Nullable ConsistencyProblemInfo.Status verbosity) {
@@ -162,7 +172,11 @@ public class CheckCodeOwnerConfigFiles
               problemsByPath.putAll(
                   codeOwnerBackend.getFilePath(codeOwnerConfig.key()).toString(),
                   checkCodeOwnerConfig(
-                      branchNameKey.project(), codeOwnerBackend, codeOwnerConfig, verbosity));
+                      branchNameKey.project(),
+                      revWalk,
+                      codeOwnerBackend,
+                      codeOwnerConfig,
+                      verbosity));
               return true;
             },
             (codeOwnerConfigFilePath, configInvalidException) -> {
@@ -178,12 +192,17 @@ public class CheckCodeOwnerConfigFiles
 
   private ImmutableList<ConsistencyProblemInfo> checkCodeOwnerConfig(
       Project.NameKey project,
+      RevWalk revWalk,
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig codeOwnerConfig,
       @Nullable ConsistencyProblemInfo.Status verbosity) {
     return codeOwnerConfigValidator
         .validateCodeOwnerConfig(
-            project, currentUser.get().asIdentifiedUser(), codeOwnerBackend, codeOwnerConfig)
+            project,
+            revWalk,
+            currentUser.get().asIdentifiedUser(),
+            codeOwnerBackend,
+            codeOwnerConfig)
         .map(
             commitValidationMessage ->
                 createConsistencyProblemInfo(commitValidationMessage, verbosity))

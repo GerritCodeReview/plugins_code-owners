@@ -1643,16 +1643,34 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   private void testValidateMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
     // Create another branch.
     String branchName = "stable";
     createBranch(BranchNameKey.create(project, branchName));
 
-    // Create a code owner config file in the other branch.
+    // Create a code owner config file in the other branch that can be imported.
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(branchName)
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.create(
+            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath());
+
+    // Create a code owner config file in the other branch that contains an import.
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
         .branch(branchName)
         .folderPath("/")
+        .addImport(codeOwnerConfigReference)
         .addCodeOwnerEmail(user.email())
         .create();
 
