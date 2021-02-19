@@ -403,6 +403,20 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void setExemptPureReverts() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.arePureRevertsExempted(project)).isFalse();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.exemptPureReverts = true;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.arePureRevertsExempted(project)).isTrue();
+
+    input.exemptPureReverts = false;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.arePureRevertsExempted(project)).isFalse();
+  }
+
+  @Test
   public void setEnableValidationOnCommitReceived() throws Exception {
     assertThat(
             codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(

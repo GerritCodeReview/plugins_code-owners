@@ -32,6 +32,7 @@ import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.exceptions.StorageException;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -41,6 +42,7 @@ import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.ApprovalsUtil;
 import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.git.PureRevertCache;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
@@ -87,6 +89,7 @@ public class CodeOwnerApprovalCheck {
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ChangedFiles changedFiles;
+  private final PureRevertCache pureRevertCache;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final ApprovalsUtil approvalsUtil;
@@ -98,6 +101,7 @@ public class CodeOwnerApprovalCheck {
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       ChangedFiles changedFiles,
+      PureRevertCache pureRevertCache,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ApprovalsUtil approvalsUtil,
@@ -106,6 +110,7 @@ public class CodeOwnerApprovalCheck {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.changedFiles = changedFiles;
+    this.pureRevertCache = pureRevertCache;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.approvalsUtil = approvalsUtil;
@@ -204,6 +209,11 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log(
           "compute file statuses (project = %s, change = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get());
+
+      if (codeOwnersPluginConfiguration.arePureRevertsExempted(changeNotes.getProjectName())
+          && isPureRevert(changeNotes)) {
+        return getAllPathsAsApproved(changeNotes, changeNotes.getCurrentPatchSet());
+      }
 
       boolean enableImplicitApprovalFromUploader =
           codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName());
@@ -307,23 +317,7 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log(
           "fallbackCodeOwner = %s, isProjectOwner = %s", fallbackCodeOwners, isProjectOwner);
       if (fallbackCodeOwners.equals(FallbackCodeOwners.PROJECT_OWNERS) && isProjectOwner) {
-        // Return all paths as approved.
-        return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
-            .map(
-                changedFile ->
-                    FileCodeOwnerStatus.create(
-                        changedFile,
-                        changedFile
-                            .newPath()
-                            .map(
-                                newPath ->
-                                    PathCodeOwnerStatus.create(newPath, CodeOwnerStatus.APPROVED)),
-                        changedFile
-                            .oldPath()
-                            .map(
-                                oldPath ->
-                                    PathCodeOwnerStatus.create(
-                                        oldPath, CodeOwnerStatus.APPROVED))));
+        return getAllPathsAsApproved(changeNotes, patchSet);
       }
 
       return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
@@ -345,6 +339,39 @@ public class CodeOwnerApprovalCheck {
                       /* hasOverride= */ false,
                       changedFile));
     }
+  }
+
+  private boolean isPureRevert(ChangeNotes changeNotes) throws IOException {
+    try {
+      return changeNotes.getChange().getRevertOf() != null
+          && pureRevertCache.isPureRevert(changeNotes);
+    } catch (BadRequestException e) {
+      throw new StorageException(
+          String.format(
+              "failed to check if change %s in project %s is a pure revert",
+              changeNotes.getChangeId(), changeNotes.getProjectName()),
+          e);
+    }
+  }
+
+  private Stream<FileCodeOwnerStatus> getAllPathsAsApproved(
+      ChangeNotes changeNotes, PatchSet patchSet)
+      throws IOException, PatchListNotAvailableException {
+    return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
+        .map(
+            changedFile ->
+                FileCodeOwnerStatus.create(
+                    changedFile,
+                    changedFile
+                        .newPath()
+                        .map(
+                            newPath ->
+                                PathCodeOwnerStatus.create(newPath, CodeOwnerStatus.APPROVED)),
+                    changedFile
+                        .oldPath()
+                        .map(
+                            oldPath ->
+                                PathCodeOwnerStatus.create(oldPath, CodeOwnerStatus.APPROVED))));
   }
 
   private FileCodeOwnerStatus getFileStatus(
