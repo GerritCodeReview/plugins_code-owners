@@ -58,6 +58,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "98a55626_45d3021a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T15:33:05Z",
+      "side": 1,
+      "message": "Yes, I did this.",
+      "parentUuid": "dca5d717_551a3154",
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "72bc1190_92b23cf5",
@@ -71,6 +89,30 @@
       "writtenOn": "2021-02-19T15:14:02Z",
       "side": 1,
       "message": "should this class and CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest.java inherit from the same base class and run the same tests just with different fallback code owners?\n\nSome tests should still be different (e.g approve with a project owner rather than with someone random), but other than that, they can be the same?\n\nSome of the tests here seem a bit unrelated to fallback code owners, e.g why are tests about global code owner related to fallback code owner?",
+      "range": {
+        "startLine": 48,
+        "startChar": 13,
+        "endLine": 48,
+        "endChar": 76
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c0892df0_da979a94",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T15:33:05Z",
+      "side": 1,
+      "message": "\u003e should this class and \n\u003e CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest.java inherit from the \u003e same base class and run the same tests just with different fallback code owners?\n\nMaybe, it\u0027s always so much trouble with BUILD files to have base classes for test. Not sure if it\u0027s worth the effort.\n\n\u003e Some of the tests here seem a bit unrelated to fallback code owners,\n\u003e e.g why are tests about global code owner related to fallback code owner?\n\nThey are making sure that an approval from global owners is still respected if no code owners are defined and fallbackCodeOwners is set to PROJECT_OWNERS.\n\nFWIW we had these test for the bootstrapping mode before and they are just moved over here.",
+      "parentUuid": "72bc1190_92b23cf5",
       "range": {
         "startLine": 48,
         "startChar": 13,
