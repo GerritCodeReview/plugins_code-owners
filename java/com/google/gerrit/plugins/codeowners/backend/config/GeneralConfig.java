@@ -18,7 +18,6 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -57,38 +56,24 @@ import org.eclipse.jgit.lib.Config;
 public class GeneralConfig {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  @VisibleForTesting public static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
-  @VisibleForTesting public static final String KEY_FILE_EXTENSION = "fileExtension";
-  @VisibleForTesting public static final String KEY_READ_ONLY = "readOnly";
-  @VisibleForTesting public static final String KEY_EXEMPT_PURE_REVERTS = "exemptPureReverts";
-  @VisibleForTesting public static final String KEY_FALLBACK_CODE_OWNERS = "fallbackCodeOwners";
-
-  @VisibleForTesting
+  public static final String KEY_FILE_EXTENSION = "fileExtension";
+  public static final String KEY_READ_ONLY = "readOnly";
+  public static final String KEY_EXEMPT_PURE_REVERTS = "exemptPureReverts";
+  public static final String KEY_FALLBACK_CODE_OWNERS = "fallbackCodeOwners";
   public static final String KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED =
       "enableValidationOnCommitReceived";
-
-  @VisibleForTesting
   public static final String KEY_ENABLE_VALIDATION_ON_SUBMIT = "enableValidationOnSubmit";
-
-  @VisibleForTesting
   public static final String KEY_MAX_PATHS_IN_CHANGE_MESSAGES = "maxPathsInChangeMessages";
-
-  @VisibleForTesting public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
-  @VisibleForTesting public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
-
-  @VisibleForTesting
+  public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
+  public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
-
-  @VisibleForTesting public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
-
-  @VisibleForTesting public static final int DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES = 100;
-
-  @VisibleForTesting
+  public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
+  public static final int DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES = 100;
   public static final String KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS =
       "rejectNonResolvableCodeOwners";
-
-  @VisibleForTesting
   public static final String KEY_REJECT_NON_RESOLVABLE_IMPORTS = "rejectNonResolvableImports";
+
+  private static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
 
   private final String pluginName;
   private final PluginConfig pluginConfigFromGerritConfig;
