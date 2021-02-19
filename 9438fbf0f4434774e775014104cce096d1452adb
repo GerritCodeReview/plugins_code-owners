@@ -16,6 +16,41 @@
       "message": "is this ready for review?\nChecking because of the Zool failure",
       "revId": "9438fbf0f4434774e775014104cce096d1452adb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "91acbf82_7c510601",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T11:40:21Z",
+      "side": 1,
+      "message": "Verified manually since CI is broken.",
+      "revId": "9438fbf0f4434774e775014104cce096d1452adb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "58160019_d356c6d8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T11:40:21Z",
+      "side": 1,
+      "message": "Yes please review! Zuul seems to be broken since a while 😞",
+      "parentUuid": "392ee8f6_cfbc7814",
+      "revId": "9438fbf0f4434774e775014104cce096d1452adb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
