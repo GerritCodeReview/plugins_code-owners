@@ -41,6 +41,23 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a73c48d_81a3819c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T15:25:37Z",
+      "side": 1,
+      "message": "CI is still broken.",
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "72bc1190_92b23cf5",
