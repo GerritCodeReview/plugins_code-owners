@@ -51,6 +51,29 @@
       "parentUuid": "392ee8f6_cfbc7814",
       "revId": "9438fbf0f4434774e775014104cce096d1452adb",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e1fc7c89_6fc673a0",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1645,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-19T11:56:23Z",
+      "side": 1,
+      "message": "just confirming, did you verify this new test failed before your change?",
+      "range": {
+        "startLine": 1645,
+        "startChar": 15,
+        "endLine": 1645,
+        "endChar": 70
+      },
+      "revId": "9438fbf0f4434774e775014104cce096d1452adb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
