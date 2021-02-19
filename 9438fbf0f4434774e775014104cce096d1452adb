@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aebb718c_82b42ea9",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 172,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-19T15:14:02Z",
+      "side": 0,
+      "message": "should you also update the user-guide regarding this new PROJECT_OWNERS option?",
+      "range": {
+        "startLine": 172,
+        "startChar": 0,
+        "endLine": 172,
+        "endChar": 64
+      },
+      "revId": "9438fbf0f4434774e775014104cce096d1452adb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
