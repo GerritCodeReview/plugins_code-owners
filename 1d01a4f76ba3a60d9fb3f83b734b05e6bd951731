@@ -93,6 +93,29 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "bb23b02c_414f77a9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 341,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T16:51:31Z",
+      "side": 1,
+      "message": "Here patchSetUploader is null.\npatchSetUploader is only guaranteed to be non-null if enableImplicitApprovalFromUploader \u003d\u003d true (but here enableImplicitApprovalFromUploader is false).",
+      "range": {
+        "startLine": 340,
+        "startChar": 21,
+        "endLine": 341,
+        "endChar": 51
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "285f5d7e_190befa1",
@@ -116,6 +139,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "98cb285f_ddaba50e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T16:51:31Z",
+      "side": 1,
+      "message": "Yeah, I agree that this a bit non-obvious. It\u0027s like this:\n- if enableImplicitApprovalFromUploader \u003d\u003d true, then patchSetUploader is guaranteed to be non-null\n- if enableImplicitApprovalFromUploader \u003d\u003d false, then patchSetUploader may be null (see comment above)\n\nSo inside this method we can observe both patchSetUploader \u003d\u003d null and patchSetUploader !\u003d null, hence the @Nullable annotation is correct.\n\nFor isImplicitlyApprovedByProjectOwnerOrGlobalOwner we do not allows patchSetUploader to be nullable since this method must only be invoked if enableImplicitApprovalFromUploader \u003d\u003d true and then patchSetUploader is guaranteed to be non-null.\n\nI agree that this deserves better code documentation or some refactoring, which I can add in a follow-up change. For this change it\u0027s nothing new, as it was already like this before. Hence marking as resolved, but I\u0027ll follow up.",
+      "parentUuid": "285f5d7e_190befa1",
+      "range": {
+        "startLine": 554,
+        "startChar": 6,
+        "endLine": 554,
+        "endChar": 43
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f9547cf9_250c209c",
@@ -129,6 +176,30 @@
       "writtenOn": "2021-02-19T16:19:03Z",
       "side": 1,
       "message": "rename this to \"isPendingByGlobalOwner\"?",
+      "range": {
+        "startLine": 626,
+        "startChar": 8,
+        "endLine": 626,
+        "endChar": 17
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f37b601b_0537fdae",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 626,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T16:51:31Z",
+      "side": 1,
+      "message": "No, this method checks isPending for the code owners that you pass in. Here we pass in the global code owners, but in another place we pass in non-global code owners.",
+      "parentUuid": "f9547cf9_250c209c",
       "range": {
         "startLine": 626,
         "startChar": 8,
@@ -200,6 +271,30 @@
       "side": 1,
       "message": "I\u0027m surprised I didn\u0027t see some tests in this class e.g \nnotApprovedByFallbackCodeOwnerIfParentCodeOwnersIgnored as in CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest. I guess it\u0027s not super important, though.",
       "parentUuid": "c0892df0_da979a94",
+      "range": {
+        "startLine": 48,
+        "startChar": 13,
+        "endLine": 48,
+        "endChar": 76
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ac548d37_8ea26643",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-19T16:51:31Z",
+      "side": 1,
+      "message": "You are right that some test are probably still missing here. I have a todo to come back to the CodeOwnerApprovalCheck* tests to clean them up and make them more consistent. I will check which tests are missing then.",
+      "parentUuid": "6dd73cdb_b2ea249d",
       "range": {
         "startLine": 48,
         "startChar": 13,
