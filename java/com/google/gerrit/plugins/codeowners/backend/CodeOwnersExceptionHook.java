@@ -89,7 +89,7 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
     return getInvalidPathException(throwable).isPresent();
   }
 
-  private static Optional<InvalidPathException> getInvalidPathException(Throwable throwable) {
+  public static Optional<InvalidPathException> getInvalidPathException(Throwable throwable) {
     return getInvalidPluginConfigurationCause(InvalidPathException.class, throwable);
   }
 

@@ -34,6 +34,7 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
+import java.nio.file.InvalidPathException;
 import java.util.Optional;
 
 /** Submit rule that checks that all files in a change have been approved by their code owners. */
@@ -98,6 +99,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
             String.format(
                 " for patch set %d of change %d",
                 changeData.currentPatchSet().id().get(), changeData.change().getId().get());
+      }
+      Optional<InvalidPathException> invalidPathException =
+          CodeOwnersExceptionHook.getInvalidPathException(t);
+      if (invalidPathException.isPresent()) {
+        errorMessage += String.format(" (cause: %s)", invalidPathException.get().getMessage());
       }
       errorMessage += ".";
       logger.atSevere().withCause(t).log(errorMessage);
