@@ -33,7 +33,8 @@ public class CodeOwnerCheckInfo {
    *   <li>any code owner config file assigns codeownership to the email for the path (see {@link
    *       #codeOwnerConfigFilePaths}) or the email is configured as default code owner (see {@link
    *       CodeOwnerCheckInfo#isDefaultCodeOwner} field) or the email is configured as global code
-   *       owner (see {@link #isGlobalCodeOwner} field)
+   *       owner (see {@link #isGlobalCodeOwner} field) or the user is a fallback code owner (see
+   *       {@link #isFallbackCodeOwner} field)
    * </ul>
    */
   public boolean isCodeOwner;
@@ -52,6 +53,19 @@ public class CodeOwnerCheckInfo {
    * not resolvable (see {@link #isResolvable} field), the user is not a code owner.
    */
   public List<String> codeOwnerConfigFilePaths;
+
+  /**
+   * Whether the given email is a fallback code owner of the specified path in the branch.
+   *
+   * <p>True if:
+   *
+   * <ul>
+   *   <li>the given email is resolvable (see {@link #isResolvable}) and
+   *   <li>no code owners are defined for the specified path in the branch and
+   *   <li>parent code owners are not ignored and
+   *   <li>the user is a fallback code owner according to the configured fallback code owner policy
+   */
+  public boolean isFallbackCodeOwner;
 
   /**
    * Whether the given email is configured as a default code owner.

@@ -53,6 +53,14 @@ public class CodeOwnerCheckInfoSubject extends Subject {
     check("isCodeOwner").that(codeOwnerCheckInfo().isCodeOwner).isFalse();
   }
 
+  public void isFallbackCodeOwner() {
+    check("isFallbackCodeOwner").that(codeOwnerCheckInfo().isFallbackCodeOwner).isTrue();
+  }
+
+  public void isNotFallbackCodeOwner() {
+    check("isFallbackCodeOwner").that(codeOwnerCheckInfo().isFallbackCodeOwner).isFalse();
+  }
+
   public void isResolvable() {
     check("isResolvable").that(codeOwnerCheckInfo().isResolvable).isTrue();
   }
