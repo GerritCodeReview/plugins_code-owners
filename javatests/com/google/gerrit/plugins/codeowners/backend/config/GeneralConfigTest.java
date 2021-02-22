@@ -59,7 +59,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetFileExtensionForNullPluginConfig() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> generalConfig.getFileExtension(null));
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getFileExtension(/* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
@@ -79,7 +81,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
   public void fileExtensionInPluginConfigOverridesFileExtensionInGerritConfig() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_FILE_EXTENSION, "bar");
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION, "bar");
     assertThat(generalConfig.getFileExtension(cfg)).value().isEqualTo("bar");
   }
 
@@ -128,7 +130,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void readOnlyConfigurationInPluginConfigOverridesReadOnlyConfigurationInGerritConfig()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_READ_ONLY, "false");
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_READ_ONLY, "false");
     assertThat(generalConfig.getReadOnly(cfg)).isFalse();
   }
 
@@ -160,7 +162,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       rejectNonResolvableCodeOwnersConfigurationInPluginConfigOverridesRejectNonResolvableCodeOwnersConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, "true");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, "true");
     assertThat(generalConfig.getRejectNonResolvableCodeOwners(cfg)).isTrue();
   }
 
@@ -192,7 +195,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       rejectNonResolvableImportsConfigurationInPluginConfigOverridesRejectNonResolvableImportsConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_REJECT_NON_RESOLVABLE_IMPORTS, "true");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* scubsection= */ null, KEY_REJECT_NON_RESOLVABLE_IMPORTS, "true");
     assertThat(generalConfig.getRejectNonResolvableImports(cfg)).isTrue();
   }
 
@@ -203,7 +207,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
-                    null, new Config()));
+                    /* project= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -212,7 +216,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(project, null));
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
+                    project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
@@ -241,7 +247,11 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       enableValidationOnCommitReceivedConfigurationInPluginConfigOverridesEnableValidationOnCommitReceivedConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "true");
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+        "true");
     assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(project, cfg))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
@@ -251,7 +261,11 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void invalidEnableValidationOnCommitReceivedConfigurationInPluginConfigIsIgnored()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "INVALID");
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+        "INVALID");
     assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(project, cfg))
         .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
   }
@@ -271,7 +285,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(null, new Config()));
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(
+                    /* project= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -280,7 +296,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(project, null));
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(
+                    project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
@@ -305,7 +323,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       enableValidationOnSubmitConfigurationInPluginConfigOverridesEnableValidationOnSubmitConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_SUBMIT, "true");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_ENABLE_VALIDATION_ON_SUBMIT, "true");
     assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(project, cfg))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
@@ -315,7 +334,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void invalidEnableValidationOnSubmitConfigurationInPluginConfigIsIgnored()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_VALIDATION_ON_SUBMIT, "INVALID");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_ENABLE_VALIDATION_ON_SUBMIT, "INVALID");
     assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(project, cfg))
         .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
   }
@@ -332,7 +352,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void cannotGetMergeCommitStrategyForNullPluginConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> generalConfig.getMergeCommitStrategy(project, null));
+            NullPointerException.class,
+            () -> generalConfig.getMergeCommitStrategy(project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
@@ -341,7 +362,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.getMergeCommitStrategy(null, new Config()));
+            () -> generalConfig.getMergeCommitStrategy(/* project= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -370,7 +391,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS,
-        null,
+        /* subsection= */ null,
         KEY_MERGE_COMMIT_STRATEGY,
         MergeCommitStrategy.ALL_CHANGED_FILES.name());
     assertThat(generalConfig.getMergeCommitStrategy(project, cfg))
@@ -383,7 +404,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       value = "FILES_WITH_CONFLICT_RESOLUTION")
   public void invalidMergeCommitStrategyInPluginConfigIsIgnored() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
     assertThat(generalConfig.getMergeCommitStrategy(project, cfg))
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
   }
@@ -400,7 +422,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.validateProjectLevelConfig(null, new Config()));
+            () -> generalConfig.validateProjectLevelConfig(/*project= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -409,7 +431,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.validateProjectLevelConfig("code-owners.config", null));
+            () ->
+                generalConfig.validateProjectLevelConfig(
+                    "code-owners.config", /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("projectLevelConfig");
   }
 
@@ -425,7 +449,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS,
-        null,
+        /* subsection= */ null,
         KEY_MERGE_COMMIT_STRATEGY,
         MergeCommitStrategy.ALL_CHANGED_FILES.name());
     ImmutableList<CommitValidationMessage> commitValidationMessage =
@@ -436,7 +460,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void validateInvalidProjectLevelConfig_invalidMergeCommitStrategy() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MERGE_COMMIT_STRATEGY, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
         generalConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessages).hasSize(1);
@@ -488,7 +513,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       enableImplicitApprovalsConfigurationInPluginConfigOverridesEnableImplicitApprovalsConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS, "false");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_ENABLE_IMPLICIT_APPROVALS, "false");
     assertThat(generalConfig.getEnableImplicitApprovals(project, cfg))
         .isEqualTo(EnableImplicitApprovals.FALSE);
   }
@@ -498,7 +524,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void invalidEnableImplicitApprovalsConfigurationInPluginConfigIsIgnored()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS, "INVALID");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_ENABLE_IMPLICIT_APPROVALS, "INVALID");
     assertThat(generalConfig.getEnableImplicitApprovals(project, cfg))
         .isEqualTo(EnableImplicitApprovals.TRUE);
   }
@@ -514,7 +541,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetGlobalCodeOwnersForNullPluginConfig() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> generalConfig.getGlobalCodeOwners(null));
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getGlobalCodeOwners(/* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
@@ -542,7 +571,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void globalCodeOnwersInPluginConfigOverrideGlobalCodeOwnersInGerritConfig()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_GLOBAL_CODE_OWNER, "bot3@example.com");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER, "bot3@example.com");
     assertThat(generalConfig.getGlobalCodeOwners(cfg))
         .containsExactly(CodeOwnerReference.create("bot3@example.com"));
   }
@@ -550,7 +580,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotGetOverrideInfoUrlForNullPluginConfig() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> generalConfig.getOverrideInfoUrl(null));
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getOverrideInfoUrl(/* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
@@ -573,7 +605,11 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void overrideInfoUrlInPluginConfigOverridesOverrideInfoUrlInGerritConfig()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_OVERRIDE_INFO_URL, "http://bar.example.com");
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_OVERRIDE_INFO_URL,
+        "http://bar.example.com");
     assertThat(generalConfig.getOverrideInfoUrl(cfg)).value().isEqualTo("http://bar.example.com");
   }
 
@@ -614,7 +650,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void fallbackCodeOwnersInPluginConfigOverridesFallbackCodeOwnersInGerritConfig()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, "NONE");
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FALLBACK_CODE_OWNERS, "NONE");
     assertThat(generalConfig.getFallbackCodeOwners(project, cfg))
         .isEqualTo(FallbackCodeOwners.NONE);
   }
@@ -623,7 +659,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
   public void globalFallbackOnwersUsedIfInvalidFallbackCodeOwnersConfigured() throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, "INVALID");
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FALLBACK_CODE_OWNERS, "INVALID");
     assertThat(generalConfig.getFallbackCodeOwners(project, cfg))
         .isEqualTo(FallbackCodeOwners.ALL_USERS);
   }
@@ -672,7 +708,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       maxPathsInChangeMessagesInPluginConfigOverridesMaxPathsInChangeMessagesInGerritConfig()
           throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES, "10");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES, "10");
     assertThat(generalConfig.getMaxPathsInChangeMessages(project, cfg)).isEqualTo(10);
   }
 
@@ -681,7 +718,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void globalMaxPathsInChangeMessagesUsedIfInvalidMaxPathsInChangeMessagesConfigured()
       throws Exception {
     Config cfg = new Config();
-    cfg.setString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES, "INVALID");
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES, "INVALID");
     assertThat(generalConfig.getMaxPathsInChangeMessages(project, cfg)).isEqualTo(50);
   }
 
