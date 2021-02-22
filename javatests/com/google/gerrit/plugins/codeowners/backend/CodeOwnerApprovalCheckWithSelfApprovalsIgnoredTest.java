@@ -273,6 +273,65 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "forced")
+  public void implicitlyApprovedByUploaderWhoIsChangeOwner() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+    setAsRootCodeOwners(codeOwner);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(codeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Verify that the file is approved.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "forced")
+  public void implicitlyApprovedByUploader() throws Exception {
+    TestAccount changeOwner =
+        accountCreator.create(
+            "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
+
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+    setAsRootCodeOwners(codeOwner);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Upload another patch set by a code owner.
+    amendChange(codeOwner, changeId);
+
+    // Verify that the file is approved.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+  }
+
+  @Test
   public void notOverriddenByUploaderWhoIsChangeOwner() throws Exception {
     TestAccount changeOwner =
         accountCreator.create(

@@ -37,6 +37,7 @@ import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
@@ -449,16 +450,27 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotGetEnableImplicitApprovalsForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getEnableImplicitApprovals(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
   public void cannotGetEnableImplicitApprovalsForNullPluginConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> generalConfig.getEnableImplicitApprovals(null));
+            NullPointerException.class,
+            () -> generalConfig.getEnableImplicitApprovals(project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
   public void noEnableImplicitApprovalsConfiguration() throws Exception {
-    assertThat(generalConfig.getEnableImplicitApprovals(new Config())).isFalse();
+    assertThat(generalConfig.getEnableImplicitApprovals(project, new Config()))
+        .isEqualTo(EnableImplicitApprovals.FALSE);
   }
 
   @Test
@@ -466,7 +478,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void
       enableImplicitApprovalsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
           throws Exception {
-    assertThat(generalConfig.getEnableImplicitApprovals(new Config())).isTrue();
+    assertThat(generalConfig.getEnableImplicitApprovals(project, new Config()))
+        .isEqualTo(EnableImplicitApprovals.TRUE);
   }
 
   @Test
@@ -476,7 +489,26 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
           throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS, "false");
-    assertThat(generalConfig.getEnableImplicitApprovals(cfg)).isFalse();
+    assertThat(generalConfig.getEnableImplicitApprovals(project, cfg))
+        .isEqualTo(EnableImplicitApprovals.FALSE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void invalidEnableImplicitApprovalsConfigurationInPluginConfigIsIgnored()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS, "INVALID");
+    assertThat(generalConfig.getEnableImplicitApprovals(project, cfg))
+        .isEqualTo(EnableImplicitApprovals.TRUE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "INVALID")
+  public void invalidEnableImplicitApprovalsConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(generalConfig.getEnableImplicitApprovals(project, cfg))
+        .isEqualTo(EnableImplicitApprovals.FALSE);
   }
 
   @Test

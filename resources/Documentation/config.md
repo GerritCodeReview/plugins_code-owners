@@ -91,22 +91,37 @@ the complete list with the additional value has to be set on project level.
 <a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplictApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
-        This setting has no effect if self approvals from the last uploader are
-        ignored because the [required label](#pluginCodeOwnersRequiredApproval)
-        is configured to [ignore self
-        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        \
+        Can be `FALSE`, `TRUE` or `FORCED`.\
+        \
+        `FALSE`:\
+        Implicit code-owner approvals of the the patch set uploader are
+        disabled.\
+        \
+        `TRUE`:\
+        Implicit code-owner approvals of the patch set uploader are enabled, but
+        only if the configured [required
+        label](#pluginCodeOwnersRequiredApproval) is not configured to [ignore
+        self approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
         from the uploader.\
-        If enabled, code owners need to be aware of their implicit approval when
-        they upload new patch sets for other users (e.g. if a contributor pushes
-        a change to a wrong branch and a code owner helps them to get it rebased
-        onto the correct branch, the rebased change has implicit approvals from
-        the code owner, since the code owner is the uploader).\
+        \
+        `FORCED`:\
+        Implicit code-owner approvals of the patch set uploader are enabled,
+        even if the configured [required
+        label](#pluginCodeOwnersRequiredApproval) disallows self approvals.\
+        \
+        If enabled/enforced, code owners need to be aware of their implicit
+        approval when they upload new patch sets for other users (e.g. if a
+        contributor pushes a change to a wrong branch and a code owner helps
+        them to get it rebased onto the correct branch, the rebased change has
+        implicit approvals from the code owner, since the code owner is the
+        uploader).\
         If implicit code owner approvals are disabled, code owners can still
         self-approve their own changes by voting on the change.\
         Can be overridden per project by setting
         [codeOwners.enableImplictApprovals](#codeOwnersEnableImplicitApprovals)
         in `@PLUGIN@.config`.\
-        By default `false`.
+        By default `FALSE`.
 
 <a id="pluginCodeOwnersGlobalCodeOwner">plugin.@PLUGIN@.globalCodeOwner</a>
 :       The email of a user that should be a code owner globally across all
@@ -454,16 +469,15 @@ the complete list with the additional value has to be set on project level.
 <a id="codeOwnersEnableImplicitApprovals">codeOwners.enableImplicitApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
-        This setting has no effect if self approvals from the last uploader are
-        ignored because the [required label](#codeOwnersRequiredApproval)
-        is configured to [ignore self
-        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
-        from the uploader.\
-        If enabled, code owners need to be aware of their implicit approval when
-        they upload new patch sets for other users (e.g. if a contributor pushes
-        a change to a wrong branch and a code owner helps them to get it rebased
-        onto the correct branch, the rebased change has implicit approvals from
-        the code owner, since the code owner is the uploader).\
+        Can be `FALSE`, `TRUE` or `FORCED` (see
+        [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersEnableImplicitApprovals)
+        for an explanation of these values).\
+        If enabled/enforced, code owners need to be aware of their implicit
+        approval when they upload new patch sets for other users (e.g. if a
+        contributor pushes a change to a wrong branch and a code owner helps
+        them to get it rebased onto the correct branch, the rebased change has
+        implicit approvals from the code owner, since the code owner is the
+        uploader).\
         If implicit code owner approvals are disabled, code owners can still
         self-approve their own changes by voting on the change.\
         Overrides the global setting

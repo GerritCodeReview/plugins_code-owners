@@ -29,6 +29,7 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
@@ -213,15 +214,30 @@ public class CodeOwnersPluginConfiguration {
    */
   public boolean areImplicitApprovalsEnabled(Project.NameKey project) {
     requireNonNull(project, "project");
-    LabelType requiredLabel = getRequiredApproval(project).labelType();
-    if (requiredLabel.isIgnoreSelfApproval()) {
-      logger.atFine().log(
-          "ignoring implicit approval configuration on project %s since the label of the required"
-              + " approval (%s) is configured to ignore self approvals",
-          project, requiredLabel);
-      return false;
+    EnableImplicitApprovals enableImplicitApprovals =
+        generalConfig.getEnableImplicitApprovals(project, getPluginConfig(project));
+    switch (enableImplicitApprovals) {
+      case FALSE:
+        logger.atFine().log("implicit approvals on project %s are disabled", project);
+        return false;
+      case TRUE:
+        LabelType requiredLabel = getRequiredApproval(project).labelType();
+        if (requiredLabel.isIgnoreSelfApproval()) {
+          logger.atFine().log(
+              "ignoring implicit approval configuration on project %s since the label of the required"
+                  + " approval (%s) is configured to ignore self approvals",
+              project, requiredLabel);
+          return false;
+        }
+        return true;
+      case FORCED:
+        logger.atFine().log("implicit approvals on project %s are enforced", project);
+        return true;
     }
-    return generalConfig.getEnableImplicitApprovals(getPluginConfig(project));
+    throw new IllegalStateException(
+        String.format(
+            "unknown value %s for enableImplicitApprovals configuration in project %s",
+            enableImplicitApprovals, project));
   }
 
   /**

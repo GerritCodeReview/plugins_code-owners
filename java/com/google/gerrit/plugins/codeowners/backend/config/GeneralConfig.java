@@ -26,6 +26,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
+import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
@@ -463,17 +464,44 @@ public class GeneralConfig {
    * Gets whether an implicit code owner approval from the last uploader is assumed from the given
    * plugin config with fallback to {@code gerrit.config}.
    *
+   * @param project the name of the project for which the configuration should be read
    * @param pluginConfig the plugin config from which the configuration should be read.
    * @return whether an implicit code owner approval from the last uploader is assumed
    */
-  boolean getEnableImplicitApprovals(Config pluginConfig) {
+  EnableImplicitApprovals getEnableImplicitApprovals(Project.NameKey project, Config pluginConfig) {
+    requireNonNull(project, "project");
     requireNonNull(pluginConfig, "pluginConfig");
 
-    return pluginConfig.getBoolean(
-        SECTION_CODE_OWNERS,
-        null,
-        KEY_ENABLE_IMPLICIT_APPROVALS,
-        pluginConfigFromGerritConfig.getBoolean(KEY_ENABLE_IMPLICIT_APPROVALS, false));
+    String enableImplicitApprovalsString =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS);
+    if (enableImplicitApprovalsString != null) {
+      try {
+        return pluginConfig.getEnum(
+            SECTION_CODE_OWNERS,
+            null,
+            KEY_ENABLE_IMPLICIT_APPROVALS,
+            EnableImplicitApprovals.FALSE);
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().withCause(e).log(
+            "Ignoring invalid value %s for enabling implicit approvals in '%s.config' of project"
+                + " %s. Falling back to global config or default value.",
+            enableImplicitApprovalsString, pluginName, project.get());
+      }
+    }
+
+    try {
+      return pluginConfigFromGerritConfig.getEnum(
+          KEY_ENABLE_IMPLICIT_APPROVALS, EnableImplicitApprovals.FALSE);
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().withCause(e).log(
+          "Ignoring invalid value %s for enabling implict approvals in gerrit.config (parameter"
+              + " plugin.%s.%s). Falling back to default value %s.",
+          pluginConfigFromGerritConfig.getString(KEY_ENABLE_IMPLICIT_APPROVALS),
+          pluginName,
+          KEY_ENABLE_IMPLICIT_APPROVALS,
+          EnableImplicitApprovals.FALSE);
+      return EnableImplicitApprovals.FALSE;
+    }
   }
 
   /**
