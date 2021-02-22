@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6d718e36_79867d6f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-22T18:33:42Z",
+      "side": 1,
+      "message": "This exception is only triggered if a developer adds a new value to the EnableImplicitApprovals enum and forgets to handle it here. But this causes a warning in the code and should also be caught by ErrorProne, so it\u0027s unlikely to happen, and if it happens it should really fail.\n\n\u003e If someone configures \"falsse\" (typo), will that cause an outage?\n\u003e Maybe take the default value and log a severe error?\nNo, this is an enum and cannot have any other value than the ones that we have defined in the EnableImplicitApprovals class. Invalid values are handled inside the generalConfig.getEnableImplicitApprovals(project, getPluginConfig(project)) call which converts the configured string into the enum. If the string doesn\u0027t match any of the enum values, we fall back to the default value already there. This is also covered by a test in GeneralConfigTest.",
+      "parentUuid": "949f12b9_6ec9e246",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 0
+      },
+      "revId": "819b662ba222646cc8cb015b8d91811b71f9eac4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "30f11c2d_a7597645",
@@ -47,6 +71,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "40fda7d7_bb5bca65",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-22T18:33:42Z",
+      "side": 1,
+      "message": "No, atWarning is intended here. This situation is gracefully handled by falling back to the value in gerrit.config. This way it\u0027s not causing any error, and hence it shouldn\u0027t be atSevere.",
+      "parentUuid": "30f11c2d_a7597645",
+      "range": {
+        "startLine": 485,
+        "startChar": 15,
+        "endLine": 485,
+        "endChar": 24
+      },
+      "revId": "819b662ba222646cc8cb015b8d91811b71f9eac4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3b4803eb_46d81f2d",
@@ -60,6 +108,30 @@
       "writtenOn": "2021-02-22T17:25:19Z",
       "side": 1,
       "message": "atSevere/atError?",
+      "range": {
+        "startLine": 496,
+        "startChar": 13,
+        "endLine": 496,
+        "endChar": 22
+      },
+      "revId": "819b662ba222646cc8cb015b8d91811b71f9eac4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f6b7584d_bde1e57e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-22T18:33:42Z",
+      "side": 1,
+      "message": "Same here, atWarning is intended as this situation is gracefully handled by falling back to the default value. This way it\u0027s not causing any error, and hence it shouldn\u0027t be atSevere.",
+      "parentUuid": "3b4803eb_46d81f2d",
       "range": {
         "startLine": 496,
         "startChar": 13,
