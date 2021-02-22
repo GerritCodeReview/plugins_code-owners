@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "96e028c3_55675656",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:53:19Z",
+      "side": 1,
+      "message": "nit: comment",
+      "range": {
+        "startLine": 230,
+        "startChar": 67,
+        "endLine": 230,
+        "endChar": 72
+      },
+      "revId": "7ecb5768dca509406e0750a30ea6ffa9dab53654",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bbbfdca1_ed190b38",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:53:19Z",
+      "side": 1,
+      "message": "I\u0027ve checked how PureRevertCache#load is computed, and I\u0027m not sure that\u0027s true. Maybe those reverts also count as pure? (test if unsure as well)\n\nBtw, I am not sure how efficient this PureRevert cache is. If it\u0027s not efficient, maybe you can consider to use revert_of field, and then check if any new patch-sets were created that are CODE_CHANGE? Then it will count only Gerrit reverts, too (is it a good side-effect?)",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 137,
+        "endChar": 14
+      },
+      "revId": "7ecb5768dca509406e0750a30ea6ffa9dab53654",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
