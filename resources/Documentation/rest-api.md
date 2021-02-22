@@ -303,6 +303,7 @@ As response a [CodeOwnerCheckInfo](#code-owner-check-info) entity is returned.
     "code_owner_config_file_paths": [
       "/OWNERS",
     ],
+    "is_fallback_code_owner": "false",
     "is_default_code_owner": "false",
     "is_global_code_owner": "false",
     "debug_logs": [
@@ -804,9 +805,10 @@ ownership of a user for a path in a branch.
 
 | Field Name      | Description |
 | --------------- | ----------- |
-| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see field `code_owner_config_file_paths`) or the email is configured as default code owner (see field `is_default_code_owner` or the email is configured as global code owner (see field `is_global_code_owner`).
+| `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see field `code_owner_config_file_paths`) or the email is configured as default code owner (see field `is_default_code_owner` or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).
 | `is_resolvable` | Whether the given email is resolvable for the specified user or the calling user if no user was specified.
 | `code_owner_config_file_paths` | Paths of the code owner config files that assign code ownership to the specified email and path as a list. Note that if code ownership is assigned to the email via a code owner config files, but the email is not resolvable (see field `is_resolvable` field), the user is not a code owner.
+| `is_fallback_code_owner` | Whether the given email is a fallback code owner of the specified path in the branch.
 | `is_default_code_owner` | Whether the given email is configured as a default code owner in the code owner config file in `refs/meta/config`. Note that if the email is configured as default code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_global_code_owner` | Whether the given email is configured as a global
 code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.

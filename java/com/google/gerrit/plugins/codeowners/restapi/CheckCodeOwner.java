@@ -18,6 +18,7 @@ import static java.util.stream.Collectors.toList;
 
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.exceptions.StorageException;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.IdString;
@@ -31,6 +32,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.OptionalResultWithMessages;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnersResult;
@@ -38,8 +40,10 @@ import com.google.gerrit.plugins.codeowners.backend.UnresolvedImportFormatter;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.account.AccountResource;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.restapi.account.AccountsCollection;
 import com.google.inject.Inject;
@@ -130,6 +134,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     List<Path> codeOwnerConfigFilePaths = new ArrayList<>();
     AtomicBoolean isCodeOwnershipAssignedToEmail = new AtomicBoolean(false);
     AtomicBoolean isDefaultCodeOwner = new AtomicBoolean(false);
+    AtomicBoolean hasRevelantCodeOwnerDefinitions = new AtomicBoolean(false);
+    AtomicBoolean parentCodeOwnersAreIgnored = new AtomicBoolean(false);
     codeOwnerConfigHierarchy.visit(
         branchResource.getBranchKey(),
         ObjectId.fromString(branchResource.getRevision()),
@@ -166,10 +172,17 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                       "found email %s as code owner in %s", email, codeOwnerConfigFilePath));
               codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
             }
+          } else if (codeOwnerResolverProvider
+              .get()
+              .enforceVisibility(false)
+              .resolvePathCodeOwners(codeOwnerConfig, absolutePath)
+              .hasRevelantCodeOwnerDefinitions()) {
+            hasRevelantCodeOwnerDefinitions.set(true);
           }
 
           if (pathCodeOwnersResult.get().ignoreParentCodeOwners()) {
             messages.add("parent code owners are ignored");
+            parentCodeOwnersAreIgnored.set(true);
           }
 
           return !pathCodeOwnersResult.get().ignoreParentCodeOwners();
@@ -185,11 +198,19 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     boolean isResolvable = isResolvableResult.get();
     messages.addAll(isResolvableResult.messages());
 
+    boolean isFallbackCodeOwner =
+        !isCodeOwnershipAssignedToEmail.get()
+            && !hasRevelantCodeOwnerDefinitions.get()
+            && !parentCodeOwnersAreIgnored.get()
+            && isFallbackCodeOwner(branchResource.getNameKey());
+
     CodeOwnerCheckInfo codeOwnerCheckInfo = new CodeOwnerCheckInfo();
-    codeOwnerCheckInfo.isCodeOwner = isCodeOwnershipAssignedToEmail.get() && isResolvable;
+    codeOwnerCheckInfo.isCodeOwner =
+        (isCodeOwnershipAssignedToEmail.get() || isFallbackCodeOwner) && isResolvable;
     codeOwnerCheckInfo.isResolvable = isResolvable;
     codeOwnerCheckInfo.codeOwnerConfigFilePaths =
         codeOwnerConfigFilePaths.stream().map(Path::toString).collect(toList());
+    codeOwnerCheckInfo.isFallbackCodeOwner = isFallbackCodeOwner && isResolvable;
     codeOwnerCheckInfo.isDefaultCodeOwner = isDefaultCodeOwner.get();
     codeOwnerCheckInfo.isGlobalCodeOwner = isGlobalCodeOwner;
     codeOwnerCheckInfo.debugLogs = messages;
@@ -221,6 +242,41 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
         .filter(cor -> cor.email().equals(email))
         .findAny()
         .isPresent();
+  }
+
+  private boolean isFallbackCodeOwner(Project.NameKey projectName) {
+    FallbackCodeOwners fallbackCodeOwners =
+        codeOwnersPluginConfiguration.getFallbackCodeOwners(projectName);
+    switch (fallbackCodeOwners) {
+      case NONE:
+        return false;
+      case PROJECT_OWNERS:
+        return isProjectOwner(projectName);
+      case ALL_USERS:
+        return true;
+    }
+    throw new IllegalStateException(
+        String.format(
+            "unknown value %s for fallbackCodeOwners in project %s",
+            fallbackCodeOwners.name(), projectName));
+  }
+
+  private boolean isProjectOwner(Project.NameKey projectName) {
+    try {
+      AccountResource accountResource =
+          accountsCollection.parse(TopLevelResource.INSTANCE, IdString.fromDecoded(email));
+      return permissionBackend
+          .absentUser(accountResource.getUser().getAccountId())
+          .project(projectName)
+          .test(ProjectPermission.WRITE_CONFIG);
+    } catch (PermissionBackendException
+        | ResourceNotFoundException
+        | AuthException
+        | IOException
+        | ConfigInvalidException e) {
+      throw new StorageException(
+          String.format("failed if email %s is owner of project %s", email, projectName.get()), e);
+    }
   }
 
   private OptionalResultWithMessages<Boolean> isResolvable() {

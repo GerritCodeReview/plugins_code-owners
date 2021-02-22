@@ -1028,6 +1028,100 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasDebugLogsThatDoNotContainAnyOf(String.format("email %s", mdCodeOwner.email()));
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void checkFallbackCodeOwner_AllUsers() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    // 1. Check for a file to which fallback code owners do not apply because code owners are
+    // defined
+    String path = "/foo/bar/baz.md";
+
+    // 1a. by a code owner
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
+
+    // 1b. by a non code owner
+    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
+
+    // 2. Check for a file to which fallback code owners apply because no code owners are defined
+    path = "/other/bar/baz.md";
+    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isFallbackCodeOwner();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  public void checkFallbackCodeOwner_ProjectOwners() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    // 1. Check for a file to which fallback code owners do not apply because code owners are
+    // defined
+    String path = "/foo/bar/baz.md";
+
+    // 1a. by a code owner
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
+
+    // 1b. by a project owner
+    checkCodeOwnerInfo = checkCodeOwner(path, admin.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
+
+    // 1c. by a non code owner
+    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
+
+    // 2. Check for a file to which fallback code owners apply because no code owners are defined
+    path = "/other/bar/baz.md";
+
+    // 2b. by a project owner
+    checkCodeOwnerInfo = checkCodeOwner(path, admin.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isFallbackCodeOwner();
+
+    // 2b. by a non project owner
+    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void noFallbackCodeOwnerIfParentCodeOwnersIgnored() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .ignoreParentCodeOwners()
+        .create();
+
+    // 1. Check for a file to which parent code owners are ignored
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, user.email());
+    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
+
+    // 2. Check for a file to which parent code owners are not ignored
+    path = "/other/bar/baz.md";
+    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isFallbackCodeOwner();
+  }
+
   private CodeOwnerCheckInfo checkCodeOwner(String path, String email) throws RestApiException {
     return checkCodeOwner(path, email, null);
   }
