@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "949f12b9_6ec9e246",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:25:19Z",
+      "side": 1,
+      "message": "this is probably not the first instance, but I\u0027m always a bit afraid of code like this. If someone configures \"falsse\" (typo), will that cause an outage?\n\nMaybe take the default value and log a severe error?\n\n\nEdit: oh, I see that when you use this method you catch this exception. Better not to throw the exception in the first place then? Since this is a runtime exception, it\u0027s likely that a future user of this method will forget to catch this exception.",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 0
+      },
+      "revId": "819b662ba222646cc8cb015b8d91811b71f9eac4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "30f11c2d_a7597645",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 485,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:25:19Z",
+      "side": 1,
+      "message": "atSevere/atError?",
+      "range": {
+        "startLine": 485,
+        "startChar": 15,
+        "endLine": 485,
+        "endChar": 24
+      },
+      "revId": "819b662ba222646cc8cb015b8d91811b71f9eac4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3b4803eb_46d81f2d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 496,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:25:19Z",
+      "side": 1,
+      "message": "atSevere/atError?",
+      "range": {
+        "startLine": 496,
+        "startChar": 13,
+        "endLine": 496,
+        "endChar": 22
+      },
+      "revId": "819b662ba222646cc8cb015b8d91811b71f9eac4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
