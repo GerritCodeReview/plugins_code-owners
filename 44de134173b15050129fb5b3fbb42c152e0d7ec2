@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "56200194_a96ea21a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:37:38Z",
+      "side": 1,
+      "message": "Should there be a test to ensure this false is needed?",
+      "range": {
+        "startLine": 177,
+        "startChar": 15,
+        "endLine": 177,
+        "endChar": 39
+      },
+      "revId": "44de134173b15050129fb5b3fbb42c152e0d7ec2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7caaf3d4_306360ad",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:37:38Z",
+      "side": 1,
+      "message": "(as opposed to the other comment in the other change, here it\u0027s good to throw this exception since it can only happen if the enum changes, and can\u0027t happen due to a config change).",
+      "range": {
+        "startLine": 258,
+        "startChar": 0,
+        "endLine": 262,
+        "endChar": 0
+      },
+      "revId": "44de134173b15050129fb5b3fbb42c152e0d7ec2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "302b07f1_956a6b95",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:37:38Z",
+      "side": 1,
+      "message": "I guess a comment is warranted that this means \"project owner\".",
+      "range": {
+        "startLine": 271,
+        "startChar": 16,
+        "endLine": 271,
+        "endChar": 46
+      },
+      "revId": "44de134173b15050129fb5b3fbb42c152e0d7ec2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3a4a8452_11026cc5",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T17:37:38Z",
+      "side": 1,
+      "message": "..and no code owners are defined for this specified path in the branch?",
+      "range": {
+        "startLine": 811,
+        "startChar": 29,
+        "endLine": 811,
+        "endChar": 114
+      },
+      "revId": "44de134173b15050129fb5b3fbb42c152e0d7ec2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
