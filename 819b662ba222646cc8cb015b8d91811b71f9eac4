@@ -48,6 +48,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "65ace6b8_45f2adbc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 241,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-22T18:40:17Z",
+      "side": 1,
+      "message": "ah, woops, that\u0027s the same as the enum that on a follow-up change I said is fine as opposed to this :-)\n\nGot it, thanks.",
+      "parentUuid": "6d718e36_79867d6f",
+      "range": {
+        "startLine": 237,
+        "startChar": 0,
+        "endLine": 241,
+        "endChar": 0
+      },
+      "revId": "819b662ba222646cc8cb015b8d91811b71f9eac4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "30f11c2d_a7597645",
