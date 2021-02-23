@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "60c6aa98_4ef0bdea",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T13:40:22Z",
+      "side": 1,
+      "message": "It\u0027s really the max value. The values per code owner are added on the returned CodeOwnerScoring via the putValueForCodeOwner(CodeOwner codeOwner, int value) method. putValueForCodeOwner will fail for any value that is greater than this maxValue that we provide to CodeOwnerScoring.builder here.",
+      "parentUuid": "df195818_c15153e2",
+      "range": {
+        "startLine": 120,
+        "startChar": 52,
+        "endLine": 120,
+        "endChar": 60
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "5a037972_0899810c",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-02-23T10:53:26Z",
       "side": 1,
       "message": "Isn\u0027t this better? :\nmaxValue \u003d\u003d null ? Optional.empty() : Optional.of(maxValue);",
+      "range": {
+        "startLine": 157,
+        "startChar": 11,
+        "endLine": 157,
+        "endChar": 30
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "74d561a6_0816f834",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T13:40:22Z",
+      "side": 1,
+      "message": "Why? Optional.ofNullable(..) does exactly this and is shorter and easier to read :)",
+      "parentUuid": "5a037972_0899810c",
       "range": {
         "startLine": 157,
         "startChar": 11,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "78e5ee6c_d28052c7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T13:40:22Z",
+      "side": 1,
+      "message": "Oh yes, I forget to add it. Thanks for reminding!\n\nDone.",
+      "parentUuid": "b4269fd2_00e0f4bf",
+      "range": {
+        "startLine": 25,
+        "startChar": 22,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9e83b492_22ec9a2b",
@@ -93,6 +165,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0d8f3859_fb27b32a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T13:40:22Z",
+      "side": 1,
+      "message": "Yeah, this looks like a copy\u0026paste left over.\n\nDone",
+      "parentUuid": "9e83b492_22ec9a2b",
+      "range": {
+        "startLine": 26,
+        "startChar": 10,
+        "endLine": 26,
+        "endChar": 44
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ae99afc0_34191aea",
@@ -106,6 +202,30 @@
       "writtenOn": "2021-02-23T10:53:26Z",
       "side": 1,
       "message": "It\u0027s a bit surprising that this code is not in the same place as the code that calculates distance. Should it be moved there? It\u0027s a bit strange to override this method just to add this new logic.",
+      "range": {
+        "startLine": 96,
+        "startChar": 30,
+        "endLine": 96,
+        "endChar": 44
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2ecf3f53_a51c5b93",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInChange.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T13:40:22Z",
+      "side": 1,
+      "message": "There are 2 REST endpoints to list code owners:\n1. list code owners for a path in a branch\n2. list code owners for a path in a change\n\nIn both cases we calculate the distance score (which is why this code is in the AbstractGetCodeOwnersForPath base class), but reviewers exist only on a change which is why the IS_REVIEWER score is only added for 2. This is the class that implements 2. and hence this code is here.\n\nIt\u0027s a bit similar to the filtering code below that also adds logic that only applies when suggesting code owners on changes (it also overrides the inherited filterCodeOwners method).\n\nEarlier the special handling for changes was in the base class (using instanceof to check on which of kind of resource the call was made), but then we agreed it\u0027s better to separate this logic better and move the code here 😊\n\nAdded a comment to make this clearer.",
+      "parentUuid": "ae99afc0_34191aea",
       "range": {
         "startLine": 96,
         "startChar": 30,
