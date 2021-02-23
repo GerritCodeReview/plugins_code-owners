@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "df195818_c15153e2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-23T10:53:26Z",
+      "side": 1,
+      "message": "isn\u0027t this just \"value\"? (same for @param comment above)",
+      "range": {
+        "startLine": 120,
+        "startChar": 52,
+        "endLine": 120,
+        "endChar": 60
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5a037972_0899810c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-23T10:53:26Z",
+      "side": 1,
+      "message": "Isn\u0027t this better? :\nmaxValue \u003d\u003d null ? Optional.empty() : Optional.of(maxValue);",
+      "range": {
+        "startLine": 157,
+        "startChar": 11,
+        "endLine": 157,
+        "endChar": 30
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b4269fd2_00e0f4bf",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-23T10:53:26Z",
+      "side": 1,
+      "message": "does this class need a short javadoc?",
+      "range": {
+        "startLine": 25,
+        "startChar": 22,
+        "endLine": 25,
+        "endChar": 39
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9e83b492_22ec9a2b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-23T10:53:26Z",
+      "side": 1,
+      "message": "I think this can be omitted or improved",
+      "range": {
+        "startLine": 26,
+        "startChar": 10,
+        "endLine": 26,
+        "endChar": 44
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae99afc0_34191aea",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetCodeOwnersForPathInChange.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 96,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-23T10:53:26Z",
+      "side": 1,
+      "message": "It\u0027s a bit surprising that this code is not in the same place as the code that calculates distance. Should it be moved there? It\u0027s a bit strange to override this method just to add this new logic.",
+      "range": {
+        "startLine": 96,
+        "startChar": 30,
+        "endLine": 96,
+        "endChar": 44
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
