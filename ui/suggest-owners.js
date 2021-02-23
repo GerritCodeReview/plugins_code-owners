@@ -135,6 +135,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
         }
         .suggestion-row-indicator[visible] iron-icon {
           color: var(--link-color);
+          vertical-align: middle;
         }
         .suggestion-group-name {
           width: 200px;
