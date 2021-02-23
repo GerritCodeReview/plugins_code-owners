@@ -117,7 +117,7 @@ public class GeneralConfig {
     try {
       projectLevelConfig.getEnum(
           SECTION_CODE_OWNERS,
-          null,
+          /* subsection= */ null,
           KEY_MERGE_COMMIT_STRATEGY,
           MergeCommitStrategy.ALL_CHANGED_FILES);
     } catch (IllegalArgumentException e) {
@@ -126,7 +126,7 @@ public class GeneralConfig {
               String.format(
                   "Merge commit strategy '%s' that is configured in %s (parameter %s.%s) is invalid.",
                   projectLevelConfig.getString(
-                      SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY),
+                      SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MERGE_COMMIT_STRATEGY),
                   fileName,
                   SECTION_CODE_OWNERS,
                   KEY_MERGE_COMMIT_STRATEGY),
@@ -135,13 +135,17 @@ public class GeneralConfig {
 
     try {
       projectLevelConfig.getEnum(
-          SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
+          SECTION_CODE_OWNERS,
+          /* subsection= */ null,
+          KEY_FALLBACK_CODE_OWNERS,
+          FallbackCodeOwners.NONE);
     } catch (IllegalArgumentException e) {
       validationMessages.add(
           new CommitValidationMessage(
               String.format(
                   "The value for fallback code owners '%s' that is configured in %s (parameter %s.%s) is invalid.",
-                  projectLevelConfig.getString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS),
+                  projectLevelConfig.getString(
+                      SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FALLBACK_CODE_OWNERS),
                   fileName,
                   SECTION_CODE_OWNERS,
                   KEY_FALLBACK_CODE_OWNERS),
@@ -151,7 +155,7 @@ public class GeneralConfig {
     try {
       projectLevelConfig.getInt(
           SECTION_CODE_OWNERS,
-          null,
+          /* subsection= */ null,
           KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
           DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
     } catch (IllegalArgumentException e) {
@@ -161,7 +165,9 @@ public class GeneralConfig {
                   "The value for max paths in change messages '%s' that is configured in %s"
                       + " (parameter %s.%s) is invalid.",
                   projectLevelConfig.getString(
-                      SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
+                      SECTION_CODE_OWNERS,
+                      /* subsection= */ null,
+                      KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
                   fileName,
                   SECTION_CODE_OWNERS,
                   KEY_MAX_PATHS_IN_CHANGE_MESSAGES),
@@ -181,7 +187,8 @@ public class GeneralConfig {
   Optional<String> getFileExtension(Config pluginConfig) {
     requireNonNull(pluginConfig, "pluginConfig");
 
-    String fileExtension = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_FILE_EXTENSION);
+    String fileExtension =
+        pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION);
     if (fileExtension != null) {
       return Optional.of(fileExtension);
     }
@@ -214,7 +221,7 @@ public class GeneralConfig {
    * @return whether code owner config files are read-only
    */
   boolean getReadOnly(Config pluginConfig) {
-    return getBooleanConfig(pluginConfig, KEY_READ_ONLY, false);
+    return getBooleanConfig(pluginConfig, KEY_READ_ONLY, /* defaultValue= */ false);
   }
 
   /**
@@ -245,7 +252,8 @@ public class GeneralConfig {
    *     rejected on commit received and on submit
    */
   boolean getRejectNonResolvableCodeOwners(Config pluginConfig) {
-    return getBooleanConfig(pluginConfig, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, true);
+    return getBooleanConfig(
+        pluginConfig, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, /* defaultValue= */ true);
   }
 
   /**
@@ -261,15 +269,17 @@ public class GeneralConfig {
    *     rejected on commit received and on submit
    */
   boolean getRejectNonResolvableImports(Config pluginConfig) {
-    return getBooleanConfig(pluginConfig, KEY_REJECT_NON_RESOLVABLE_IMPORTS, true);
+    return getBooleanConfig(
+        pluginConfig, KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* defaultValue= */ true);
   }
 
   private boolean getBooleanConfig(Config pluginConfig, String key, boolean defaultValue) {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(key, "key");
 
-    if (pluginConfig.getString(SECTION_CODE_OWNERS, null, key) != null) {
-      return pluginConfig.getBoolean(SECTION_CODE_OWNERS, null, key, defaultValue);
+    if (pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, key) != null) {
+      return pluginConfig.getBoolean(
+          SECTION_CODE_OWNERS, /* subsection= */ null, key, defaultValue);
     }
 
     return pluginConfigFromGerritConfig.getBoolean(key, defaultValue);
@@ -287,11 +297,15 @@ public class GeneralConfig {
     requireNonNull(pluginConfig, "pluginConfig");
 
     String fallbackCodeOwnersString =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS);
+        pluginConfig.getString(
+            SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FALLBACK_CODE_OWNERS);
     if (fallbackCodeOwnersString != null) {
       try {
         return pluginConfig.getEnum(
-            SECTION_CODE_OWNERS, null, KEY_FALLBACK_CODE_OWNERS, FallbackCodeOwners.NONE);
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_FALLBACK_CODE_OWNERS,
+            FallbackCodeOwners.NONE);
       } catch (IllegalArgumentException e) {
         logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for fallback code owners in '%s.config' of project %s."
@@ -329,12 +343,13 @@ public class GeneralConfig {
     requireNonNull(pluginConfig, "pluginConfig");
 
     String maxPathInChangeMessagesString =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES);
+        pluginConfig.getString(
+            SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MAX_PATHS_IN_CHANGE_MESSAGES);
     if (maxPathInChangeMessagesString != null) {
       try {
         return pluginConfig.getInt(
             SECTION_CODE_OWNERS,
-            null,
+            /* subsection= */ null,
             KEY_MAX_PATHS_IN_CHANGE_MESSAGES,
             DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
       } catch (IllegalArgumentException e) {
@@ -401,11 +416,11 @@ public class GeneralConfig {
     requireNonNull(pluginConfig, "pluginConfig");
 
     String codeOwnerConfigValidationPolicyString =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, key);
+        pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, key);
     if (codeOwnerConfigValidationPolicyString != null) {
       try {
         return pluginConfig.getEnum(
-            SECTION_CODE_OWNERS, null, key, CodeOwnerConfigValidationPolicy.TRUE);
+            SECTION_CODE_OWNERS, /* subsection= */ null, key, CodeOwnerConfigValidationPolicy.TRUE);
       } catch (IllegalArgumentException e) {
         logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
@@ -444,12 +459,13 @@ public class GeneralConfig {
     requireNonNull(pluginConfig, "pluginConfig");
 
     String mergeCommitStrategyString =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_MERGE_COMMIT_STRATEGY);
+        pluginConfig.getString(
+            SECTION_CODE_OWNERS, /* subsection= */ null, KEY_MERGE_COMMIT_STRATEGY);
     if (mergeCommitStrategyString != null) {
       try {
         return pluginConfig.getEnum(
             SECTION_CODE_OWNERS,
-            null,
+            /* subsection= */ null,
             KEY_MERGE_COMMIT_STRATEGY,
             MergeCommitStrategy.ALL_CHANGED_FILES);
       } catch (IllegalArgumentException e) {
@@ -488,12 +504,13 @@ public class GeneralConfig {
     requireNonNull(pluginConfig, "pluginConfig");
 
     String enableImplicitApprovalsString =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_ENABLE_IMPLICIT_APPROVALS);
+        pluginConfig.getString(
+            SECTION_CODE_OWNERS, /* subsection= */ null, KEY_ENABLE_IMPLICIT_APPROVALS);
     if (enableImplicitApprovalsString != null) {
       try {
         return pluginConfig.getEnum(
             SECTION_CODE_OWNERS,
-            null,
+            /* subsection= */ null,
             KEY_ENABLE_IMPLICIT_APPROVALS,
             EnableImplicitApprovals.FALSE);
       } catch (IllegalArgumentException e) {
@@ -529,9 +546,11 @@ public class GeneralConfig {
   ImmutableSet<CodeOwnerReference> getGlobalCodeOwners(Config pluginConfig) {
     requireNonNull(pluginConfig, "pluginConfig");
 
-    if (pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_GLOBAL_CODE_OWNER) != null) {
+    if (pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER)
+        != null) {
       return Arrays.stream(
-              pluginConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_GLOBAL_CODE_OWNER))
+              pluginConfig.getStringList(
+                  SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER))
           .map(CodeOwnerReference::create)
           .collect(toImmutableSet());
     }
@@ -554,7 +573,8 @@ public class GeneralConfig {
   Optional<String> getOverrideInfoUrl(Config pluginConfig) {
     requireNonNull(pluginConfig, "pluginConfig");
 
-    String fileExtension = pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_OVERRIDE_INFO_URL);
+    String fileExtension =
+        pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_OVERRIDE_INFO_URL);
     if (fileExtension != null) {
       return Optional.of(fileExtension);
     }
