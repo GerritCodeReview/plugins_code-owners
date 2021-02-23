@@ -179,13 +179,13 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           height: 16px;
         }
         gr-account-label {
-          background-color: var(--background-color-tertiary);
           display: inline-block;
           padding: var(--spacing-xs) var(--spacing-m);
           user-select: none;
           border: 1px solid transparent;
           --label-border-radius: 8px;
           --account-max-length: 100px;
+          border: 1px solid var(--border-color);
         }
         gr-account-label:focus {
           outline: none;
