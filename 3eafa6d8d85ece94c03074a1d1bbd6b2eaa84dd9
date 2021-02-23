@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc723ae1_c68e07d2",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2021-02-23T16:37:54Z",
+      "side": 1,
+      "message": "vertical-align: middle does not actually align in the middle. And I have tried avoiding it as much as possible. I don\u0027t have a change at hand for reproducing, but assuming that you have 26px line-height and 20px icon, then what you should do instead is\n\n  vertical-align: top;\n  position: relative;\n  top: 3px; // (26-20)/2",
+      "revId": "3eafa6d8d85ece94c03074a1d1bbd6b2eaa84dd9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
