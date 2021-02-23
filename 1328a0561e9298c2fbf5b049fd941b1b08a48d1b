@@ -95,6 +95,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f37f05b_134fa577",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScore.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-23T13:47:08Z",
+      "side": 1,
+      "message": "oh, I thought it does something like Optional(null), but good.",
+      "parentUuid": "74d561a6_0816f834",
+      "range": {
+        "startLine": 157,
+        "startChar": 11,
+        "endLine": 157,
+        "endChar": 30
+      },
+      "revId": "1328a0561e9298c2fbf5b049fd941b1b08a48d1b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b4269fd2_00e0f4bf",
