@@ -1157,6 +1157,18 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
   }
 
+  @Test
+  public void noEmptyDebugLogs() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).hasDebugLogsThatDoNotContainAnyOf("");
+  }
+
   private CodeOwnerCheckInfo checkCodeOwner(String path, String email) throws RestApiException {
     return checkCodeOwner(path, email, null);
   }

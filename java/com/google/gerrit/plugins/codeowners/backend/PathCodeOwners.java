@@ -446,7 +446,9 @@ public class PathCodeOwners {
     if (message.endsWith("\n")) {
       message = message.substring(0, message.length() - 1);
     }
-    return OptionalResultWithMessages.create(unresolvedImports.build(), ImmutableList.of(message));
+    return OptionalResultWithMessages.create(
+        unresolvedImports.build(),
+        !message.isEmpty() ? ImmutableList.of(message) : ImmutableList.of());
   }
 
   private Set<CodeOwnerConfigImport> getGlobalImports(
