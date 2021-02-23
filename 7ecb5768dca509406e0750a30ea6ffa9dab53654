@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "dd80f070_bddb5f7a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 230,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T10:42:29Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96e028c3_55675656",
+      "range": {
+        "startLine": 230,
+        "startChar": 67,
+        "endLine": 230,
+        "endChar": 72
+      },
+      "revId": "7ecb5768dca509406e0750a30ea6ffa9dab53654",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "bbbfdca1_ed190b38",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-02-22T17:53:19Z",
       "side": 1,
       "message": "I\u0027ve checked how PureRevertCache#load is computed, and I\u0027m not sure that\u0027s true. Maybe those reverts also count as pure? (test if unsure as well)\n\nBtw, I am not sure how efficient this PureRevert cache is. If it\u0027s not efficient, maybe you can consider to use revert_of field, and then check if any new patch-sets were created that are CODE_CHANGE? Then it will count only Gerrit reverts, too (is it a good side-effect?)",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 137,
+        "endChar": 14
+      },
+      "revId": "7ecb5768dca509406e0750a30ea6ffa9dab53654",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1a4d59da_322c082e",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T10:42:29Z",
+      "side": 1,
+      "message": "\u003e I\u0027ve checked how PureRevertCache#load is computed, and I\u0027m not sure that\u0027s true.\n\u003e Maybe those reverts also count as pure? (test if unsure as well)\n\nThe pure revert cache supports detecting them as pure reverts, but only if you provide it the SHA1 of the original commit that has been reverted (via the PureRevertCache#isPureRevert(Project.NameKey, ObjectId, ObjectId) method). For the code owner approval check our only source for the SHA1 of the original commit is the revert_of field. If it\u0027s not set, we cannot detect whether it\u0027s a pure revert (see method PureRevertCache#isPureRevert(ChangeNotes) that we use). The revert_of field is only populated when a revert is done through the Gerrit REST API, but not if you push a locally created revert commit. So I think this statement here is correct.\n\n\u003e Btw, I am not sure how efficient this PureRevert cache is.\nSince it\u0027s a cache it should be fine and I would rather not like to reimplement the detection of a pure revert in another place. If it is sufficient to claim that a change is a pure revert only by checking if the revert_of field is present, then this is what the PureRevertCache should do. On a first sight I agree with you that this might actually be sufficient, but that would be a change that needs to be done in Gerrit core.",
+      "parentUuid": "bbbfdca1_ed190b38",
       "range": {
         "startLine": 136,
         "startChar": 8,
