@@ -26,6 +26,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "a3582a76_d8f2e2ea",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T09:40:46Z",
+      "side": 1,
+      "message": "Yeah, you are right that this is not covered by a test yet. I added a test and found that this is actually not needed, since the .hasRevelantCodeOwnerDefinitions() call already takes unresolvable code owners into account.",
+      "parentUuid": "56200194_a96ea21a",
+      "range": {
+        "startLine": 177,
+        "startChar": 15,
+        "endLine": 177,
+        "endChar": 39
+      },
+      "revId": "44de134173b15050129fb5b3fbb42c152e0d7ec2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "7caaf3d4_306360ad",
         "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
         "patchSetId": 1
@@ -94,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fdd30d17_cf2f03b4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T09:40:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "302b07f1_956a6b95",
+      "range": {
+        "startLine": 271,
+        "startChar": 16,
+        "endLine": 271,
+        "endChar": 46
+      },
+      "revId": "44de134173b15050129fb5b3fbb42c152e0d7ec2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3a4a8452_11026cc5",
@@ -107,6 +155,30 @@
       "writtenOn": "2021-02-22T17:37:38Z",
       "side": 1,
       "message": "..and no code owners are defined for this specified path in the branch?",
+      "range": {
+        "startLine": 811,
+        "startChar": 29,
+        "endLine": 811,
+        "endChar": 114
+      },
+      "revId": "44de134173b15050129fb5b3fbb42c152e0d7ec2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bf298be8_4d29158e",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 811,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-23T09:40:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3a4a8452_11026cc5",
       "range": {
         "startLine": 811,
         "startChar": 29,
