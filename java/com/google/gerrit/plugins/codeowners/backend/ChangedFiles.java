@@ -59,6 +59,8 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 public class ChangedFiles {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
+  private static int MAX_CHANGED_FILES_TO_LOG = 25;
+
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final PatchListCache patchListCache;
@@ -203,7 +205,14 @@ public class ChangedFiles {
       List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
       ImmutableSet<ChangedFile> changedFiles =
           diffEntries.stream().map(ChangedFile::create).collect(toImmutableSet());
-      logger.atFine().log("changed files = %s", changedFiles);
+      if (changedFiles.size() <= MAX_CHANGED_FILES_TO_LOG) {
+        logger.atFine().log("changed files = %s", changedFiles);
+      } else {
+        logger.atFine().log(
+            "changed files = %s (and %d more)",
+            changedFiles.asList().subList(0, MAX_CHANGED_FILES_TO_LOG),
+            changedFiles.size() - MAX_CHANGED_FILES_TO_LOG);
+      }
       return changedFiles;
     }
   }
