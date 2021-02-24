@@ -344,9 +344,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "found email %s as code owner in %s",
                 orphanedEmail, getCodeOwnerConfigFilePath(ROOT_PATH)),
             String.format(
-                "cannot resolve code owner email %s: email belongs to account %s,"
-                    + " but no account with this ID exists",
-                orphanedEmail, accountId));
+                "cannot resolve account %s for email %s: account does not exists",
+                accountId, orphanedEmail),
+            String.format(
+                "cannot resolve code owner email %s: no active account with this email found",
+                orphanedEmail));
   }
 
   @Test

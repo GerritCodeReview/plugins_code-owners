@@ -102,7 +102,7 @@ following checks are performed:
       setting)
     * it is a non-visible secondary email
     * there is no account that has this email assigned
-    * it is ambiguous (the same email is assigned to multiple accounts)
+    * it is ambiguous (the same email is assigned to multiple active accounts)
     * it has an email domain that is disallowed (see
       [allowedEmailDomain](config.html#pluginCodeOwnersAllowedEmailDomain))
       configuration
