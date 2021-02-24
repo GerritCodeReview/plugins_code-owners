@@ -22,6 +22,30 @@
       },
       "revId": "ba6cd40cdaed246b80a461a2da3e3fa095de448f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cdbbde0d_67d93159",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 393,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-24T17:15:07Z",
+      "side": 1,
+      "message": "Yes. It means there was an orphaned external ID (external ID pointing to a non-existing account). In the debug logs this case is already recorded by lookupAccount method (l. 421) and if no active account is found we get another debug log at l. 369. So we do not need to log anything here if accountStateResult is not present.",
+      "parentUuid": "8f209a84_78c3f90a",
+      "range": {
+        "startLine": 393,
+        "startChar": 0,
+        "endLine": 393,
+        "endChar": 43
+      },
+      "revId": "ba6cd40cdaed246b80a461a2da3e3fa095de448f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
