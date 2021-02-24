@@ -73,6 +73,10 @@ class CodeOwnerSubmitRule implements SubmitRule {
     try {
       requireNonNull(changeData, "changeData");
 
+      if (changeData.change().isClosed()) {
+        return Optional.empty();
+      }
+
       try (Timer0.Context ctx = codeOwnerMetrics.runCodeOwnerSubmitRule.start()) {
         logger.atFine().log(
             "run code owner submit rule (project = %s, change = %d)",

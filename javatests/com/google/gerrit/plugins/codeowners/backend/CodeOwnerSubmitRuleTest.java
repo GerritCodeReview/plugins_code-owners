@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.Change;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRecordSubject;
@@ -46,6 +47,34 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
   public void emptyIfCodeOwnersFunctionalityIsDisabled() throws Exception {
     disableCodeOwnersForProject(project);
     ChangeData changeData = createChange().getChange();
+    assertThat(codeOwnerSubmitRule.evaluate(changeData)).isEmpty();
+  }
+
+  @Test
+  public void emptyIfChangeIdClosed() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    Change change = createChange("Change Adding A File", path, "file content").getChange().change();
+    String changeId = change.getKey().get();
+
+    // Add a Code-Review+1 from a code owner (by default this counts as code owner approval).
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId);
+
+    // Approve and submit.
+    requestScopeOperations.setApiUser(admin.id());
+    approve(changeId);
+    gApi.changes().id(changeId).current().submit();
+
+    // Run the code owners submit rule on the closed change.
+    ChangeData changeData = changeDataFactory.create(project, change.getId());
     assertThat(codeOwnerSubmitRule.evaluate(changeData)).isEmpty();
   }
 
