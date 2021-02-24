@@ -202,7 +202,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
           // The validation was executed as dry-run and failures during the validation should not
           // cause an error. Hence we swallow the exception here.
-          logger.atFine().withCause(e).log(
+          logger.atWarning().withCause(e).log(
               "ignoring failure during validation of code owner config files in revision %s"
                   + " (project = %s, branch = %s) because the validation was performed as dry-run",
               receiveEvent.commit.getName(),

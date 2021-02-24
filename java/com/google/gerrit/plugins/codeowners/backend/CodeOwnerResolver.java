@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
@@ -302,24 +303,14 @@ public class CodeOwnerResolver {
       return OptionalResultWithMessages.createEmpty(messages);
     }
 
-    OptionalResultWithMessages<Account.Id> lookupEmailResult = lookupEmail(email);
-    messages.addAll(lookupEmailResult.messages());
-    if (lookupEmailResult.isEmpty()) {
+    OptionalResultWithMessages<AccountState> activeAccountResult =
+        lookupActiveAccountForEmail(email);
+    messages.addAll(activeAccountResult.messages());
+    if (activeAccountResult.isEmpty()) {
       return OptionalResultWithMessages.createEmpty(messages);
     }
 
-    Account.Id accountId = lookupEmailResult.get();
-    OptionalResultWithMessages<AccountState> lookupAccountResult = lookupAccount(accountId, email);
-    messages.addAll(lookupAccountResult.messages());
-    if (lookupAccountResult.isEmpty()) {
-      return OptionalResultWithMessages.createEmpty(messages);
-    }
-
-    AccountState accountState = lookupAccountResult.get();
-    if (!accountState.account().isActive()) {
-      messages.add(String.format("account %s for email %s is inactive", accountId, email));
-      return OptionalResultWithMessages.createEmpty(messages);
-    }
+    AccountState accountState = activeAccountResult.get();
     if (enforceVisibility) {
       OptionalResultWithMessages<Boolean> isVisibleResult = isVisible(accountState, email);
       messages.addAll(isVisibleResult.messages());
@@ -343,15 +334,15 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Looks up an email and returns the ID of the account to which it belongs.
+   * Looks up an email and returns the ID of the active account to which it belongs.
    *
-   * <p>If the email is ambiguous (it belongs to multiple accounts) it is considered as
-   * non-resolvable and {@link Optional#empty()} is returned.
+   * <p>If the email is ambiguous (it belongs to multiple active accounts) it is considered as
+   * non-resolvable and empty result is returned.
    *
    * @param email the email that should be looked up
    * @return the ID of the account to which the email belongs if was found
    */
-  private OptionalResultWithMessages<Account.Id> lookupEmail(String email) {
+  private OptionalResultWithMessages<AccountState> lookupActiveAccountForEmail(String email) {
     ImmutableSet<ExternalId> extIds;
     try {
       extIds = externalIds.byEmail(email);
@@ -366,12 +357,51 @@ public class CodeOwnerResolver {
               "cannot resolve code owner email %s: no account with this email exists", email));
     }
 
-    if (extIds.stream().map(ExternalId::accountId).distinct().count() > 1) {
-      return OptionalResultWithMessages.createEmpty(
-          String.format("cannot resolve code owner email %s: email is ambiguous", email));
+    List<String> messages = new ArrayList<>();
+    OptionalResultWithMessages<ImmutableSet<AccountState>> activeAccountsResult =
+        lookupActiveAccounts(extIds, email);
+    ImmutableSet<AccountState> activeAccounts = activeAccountsResult.get();
+    messages.addAll(activeAccountsResult.messages());
+
+    if (activeAccounts.isEmpty()) {
+      messages.add(
+          String.format(
+              "cannot resolve code owner email %s: no active account with this email found",
+              email));
+      return OptionalResultWithMessages.createEmpty(messages);
     }
 
-    return OptionalResultWithMessages.create(extIds.stream().findFirst().get().accountId());
+    if (activeAccounts.size() > 1) {
+      messages.add(String.format("cannot resolve code owner email %s: email is ambiguous", email));
+      return OptionalResultWithMessages.createEmpty(messages);
+    }
+
+    return OptionalResultWithMessages.create(Iterables.getOnlyElement(activeAccounts));
+  }
+
+  private OptionalResultWithMessages<ImmutableSet<AccountState>> lookupActiveAccounts(
+      ImmutableSet<ExternalId> extIds, String email) {
+    ImmutableSet<OptionalResultWithMessages<AccountState>> accountStateResults =
+        extIds.stream()
+            .map(externalId -> lookupAccount(externalId.accountId(), externalId.email()))
+            .collect(toImmutableSet());
+
+    ImmutableSet.Builder<AccountState> activeAccounts = ImmutableSet.builder();
+    List<String> messages = new ArrayList<>();
+    for (OptionalResultWithMessages<AccountState> accountStateResult : accountStateResults) {
+      messages.addAll(accountStateResult.messages());
+      if (accountStateResult.isPresent()) {
+        AccountState accountState = accountStateResult.get();
+        if (accountState.account().isActive()) {
+          activeAccounts.add(accountState);
+        } else {
+          messages.add(
+              String.format(
+                  "account %s for email %s is inactive", accountState.account().id(), email));
+        }
+      }
+    }
+    return OptionalResultWithMessages.create(activeAccounts.build(), messages);
   }
 
   /**
@@ -388,9 +418,7 @@ public class CodeOwnerResolver {
     if (!accountState.isPresent()) {
       return OptionalResultWithMessages.createEmpty(
           String.format(
-              "cannot resolve code owner email %s: email belongs to account %s,"
-                  + " but no account with this ID exists",
-              email, accountId));
+              "cannot resolve account %s for email %s: account does not exists", accountId, email));
     }
     return OptionalResultWithMessages.create(accountState.get());
   }

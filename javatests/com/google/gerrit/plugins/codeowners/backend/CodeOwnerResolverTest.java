@@ -121,6 +121,28 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void resolveCodeOwnerReferenceForAmbiguousEmailIfOtherAccountIsInactive()
+      throws Exception {
+    // Create an external ID for 'user' account that has the same email as the 'admin' account.
+    accountsUpdate
+        .get()
+        .update(
+            "Test update",
+            user.id(),
+            (a, u) ->
+                u.addExternalId(
+                    ExternalId.create(
+                        "foo", "bar", user.id(), admin.email(), /* hashedPassword= */ null)));
+
+    // Deactivate the 'user' account.
+    accountOperations.account(user.id()).forUpdate().inactive().update();
+
+    OptionalResultWithMessages<CodeOwner> result =
+        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(admin.email()));
+    assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
+  }
+
+  @Test
   public void resolveCodeOwnerReferenceForAmbiguousEmail() throws Exception {
     // Create an external ID for 'user' account that has the same email as the 'admin' account.
     accountsUpdate
@@ -159,10 +181,13 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
-        .contains(
+        .containsAnyOf(
             String.format(
-                "cannot resolve code owner email %s: email belongs to account %s, but no account with this ID exists",
-                email, accountId));
+                "cannot resolve account %s for email %s: account does not exists",
+                accountId, email),
+            String.format(
+                "cannost resolve code owner email %s: no active account with this email found",
+                email));
   }
 
   @Test

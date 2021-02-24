@@ -35,7 +35,7 @@ import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.update.BatchUpdate;
 import com.google.gerrit.server.update.BatchUpdateOp;
 import com.google.gerrit.server.update.ChangeContext;
-import com.google.gerrit.server.update.UpdateException;
+import com.google.gerrit.server.update.RetryHelper;
 import com.google.gerrit.server.util.time.TimeUtil;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -61,7 +61,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private final Provider<CurrentUser> userProvider;
-  private final BatchUpdate.Factory batchUpdateFactory;
+  private final RetryHelper retryHelper;
   private final ChangeNotes.Factory changeNotesFactory;
   private final AccountCache accountCache;
   private final ChangeMessagesUtil changeMessageUtil;
@@ -71,14 +71,14 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerApprovalCheck codeOwnerApprovalCheck,
       Provider<CurrentUser> userProvider,
-      BatchUpdate.Factory batchUpdateFactory,
+      RetryHelper retryHelper,
       ChangeNotes.Factory changeNotesFactory,
       AccountCache accountCache,
       ChangeMessagesUtil changeMessageUtil) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
     this.userProvider = userProvider;
-    this.batchUpdateFactory = batchUpdateFactory;
+    this.retryHelper = retryHelper;
     this.changeNotesFactory = changeNotesFactory;
     this.accountCache = accountCache;
     this.changeMessageUtil = changeMessageUtil;
@@ -95,11 +95,20 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       return;
     }
 
-    try (BatchUpdate batchUpdate =
-        batchUpdateFactory.create(projectName, userProvider.get(), TimeUtil.nowTs())) {
-      batchUpdate.addOp(changeId, new Op(event.getReviewers()));
-      batchUpdate.execute();
-    } catch (RestApiException | UpdateException e) {
+    try {
+      retryHelper
+          .changeUpdate(
+              "addCodeOwnersMessageOnAddReviewer",
+              updateFactory -> {
+                try (BatchUpdate batchUpdate =
+                    updateFactory.create(projectName, userProvider.get(), TimeUtil.nowTs())) {
+                  batchUpdate.addOp(changeId, new Op(event.getReviewers()));
+                  batchUpdate.execute();
+                }
+                return null;
+              })
+          .call();
+    } catch (Exception e) {
       logger.atSevere().withCause(e).log(
           String.format(
               "Failed to post code-owners change message for reviewer on change %s in project %s.",
