@@ -48,6 +48,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "942a09a4_7398507a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnPostReview.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 185,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-24T12:59:02Z",
+      "side": 1,
+      "message": "Just wanted to say thanks for making me change this. \nThis case is actually happening in prd, and thanks to changing this no user got impacted.",
+      "parentUuid": "d7483f1c_3bb68f57",
+      "range": {
+        "startLine": 185,
+        "startChar": 16,
+        "endLine": 185,
+        "endChar": 37
+      },
+      "revId": "c69f145eaa642f5d0920fb4f59bc0a128d322dae",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ad4a72ed_c8d84ed7",
