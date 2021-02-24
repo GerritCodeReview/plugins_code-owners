@@ -1061,4 +1061,28 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "* %s\n",
                 user.fullName(), path));
   }
+
+  @Test
+  public void changeMessageNotExtendedIfNonApprovalIsDowngraded() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    // Apply the Code-Review-1.
+    gApi.changes().id(changeId).current().review(ReviewInput.dislike());
+
+    // Change Code-Review-1 to Code-Review-2
+    gApi.changes().id(changeId).current().review(ReviewInput.reject());
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review-2");
+  }
 }

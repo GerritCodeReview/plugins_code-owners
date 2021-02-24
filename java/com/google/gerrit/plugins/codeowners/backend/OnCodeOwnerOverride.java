@@ -20,7 +20,6 @@ import static java.util.Comparator.comparing;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
@@ -44,8 +43,6 @@ import java.util.Optional;
  */
 @Singleton
 class OnCodeOwnerOverride implements OnPostReview {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
 
   @Inject
@@ -82,8 +79,7 @@ class OnCodeOwnerOverride implements OnPostReview {
         continue;
       }
 
-      buildMessageForCodeOwnerOverride(
-              user, changeNotes, patchSet, oldApprovals, approvals, overrideApproval)
+      buildMessageForCodeOwnerOverride(user, patchSet, oldApprovals, approvals, overrideApproval)
           .ifPresent(messages::add);
     }
 
@@ -95,7 +91,6 @@ class OnCodeOwnerOverride implements OnPostReview {
 
   private Optional<String> buildMessageForCodeOwnerOverride(
       IdentifiedUser user,
-      ChangeNotes changeNotes,
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals,
@@ -137,16 +132,7 @@ class OnCodeOwnerOverride implements OnPostReview {
               "By voting %s the code-owners submit requirement is still overridden by %s",
               newVote, user.getName()));
     }
-    logger.atSevere().log(
-        "code owner override was neither newly applied, removed, upgraded nor downgraded:"
-            + " project = %s, change = %s, patch set = %d, oldApprvals = %s, approvals = %s,"
-            + " requiredApproval = %s",
-        changeNotes.getProjectName(),
-        changeNotes.getChangeId(),
-        patchSet.id().get(),
-        oldApprovals,
-        approvals,
-        overrideApproval);
+    // non-approval was downgraded (e.g. -1 to -2)
     return Optional.empty();
   }
 

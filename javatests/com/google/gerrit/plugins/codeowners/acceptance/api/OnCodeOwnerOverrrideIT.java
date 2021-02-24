@@ -599,4 +599,45 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                     + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
                 user.fullName()));
   }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void changeMessageNotExtendedIfNonApprovalIsDowngraded() throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values =
+        ImmutableMap.of("+1", "Override", " 0", "No Override", "-1", "Dislike", "-2", "Blocked");
+    gApi.projects().name(project.get()).label("Owners-Override").create(input);
+
+    // Allow to vote on the Owners-Override label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Owners-Override")
+                .range(-2, 1)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", -1));
+
+    // Downgrade the vote from -1 to -2.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", -2));
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Owners-Override-2");
+  }
 }
