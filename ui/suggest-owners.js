@@ -181,13 +181,16 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           height: 16px;
         }
         gr-account-label {
-          background-color: var(--background-color-tertiary);
           display: inline-block;
           padding: var(--spacing-xs) var(--spacing-m);
           user-select: none;
           border: 1px solid transparent;
           --label-border-radius: 8px;
-          --account-max-length: 100px;
+          /* account-max-length defines the max text width inside account-label.
+           With 60px the gr-account-label always has width <= 100px and 5 labels
+           are always fit in a single row */
+          --account-max-length: 60px;
+          border: 1px solid var(--border-color);
         }
         gr-account-label:focus {
           outline: none;
