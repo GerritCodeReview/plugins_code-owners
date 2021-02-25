@@ -422,6 +422,15 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotResolvePathCodeOwnersOfNullPathCodeOwners() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> codeOwnerResolver.get().resolvePathCodeOwners(/* pathCodeOwners= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pathCodeOwners");
+  }
+
+  @Test
   public void cannotResolvePathCodeOwnersForRelativePath() throws Exception {
     String relativePath = "foo/bar.md";
     CodeOwnerConfig codeOwnerConfig =

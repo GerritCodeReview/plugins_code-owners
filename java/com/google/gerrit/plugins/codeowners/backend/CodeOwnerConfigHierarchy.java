@@ -101,10 +101,39 @@ public class CodeOwnerConfigHierarchy {
       Path absolutePath,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor,
       Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
+    requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
+    PathCodeOwnersVisitor pathCodeOwnersVisitor =
+        pathCodeOwners -> codeOwnerConfigVisitor.visit(pathCodeOwners.getCodeOwnerConfig());
+    visit(
+        branchNameKey,
+        revision,
+        absolutePath,
+        pathCodeOwnersVisitor,
+        parentCodeOwnersIgnoredCallback);
+  }
+
+  /**
+   * Visits the path code owners in the given branch that apply for the given path by following the
+   * path hierarchy from the given path up to the root folder.
+   *
+   * @param branchNameKey project and branch from which the code owner configs should be visited
+   * @param revision the branch revision from which the code owner configs should be loaded
+   * @param absolutePath the path for which the code owner configs should be visited; the path must
+   *     be absolute; can be the path of a file or folder; the path may or may not exist
+   * @param pathCodeOwnersVisitor visitor that should be invoked for the applying path code owners
+   * @param parentCodeOwnersIgnoredCallback callback that is invoked for the first visited code
+   *     owner config that ignores parent code owners
+   */
+  public void visit(
+      BranchNameKey branchNameKey,
+      ObjectId revision,
+      Path absolutePath,
+      PathCodeOwnersVisitor pathCodeOwnersVisitor,
+      Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
     requireNonNull(branchNameKey, "branch");
     requireNonNull(revision, "revision");
     requireNonNull(absolutePath, "absolutePath");
-    requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
+    requireNonNull(pathCodeOwnersVisitor, "pathCodeOwnersVisitor");
     requireNonNull(parentCodeOwnersIgnoredCallback, "parentCodeOwnersIgnoredCallback");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
 
@@ -127,8 +156,7 @@ public class CodeOwnerConfigHierarchy {
           pathCodeOwnersFactory.create(codeOwnerConfigKey, revision, absolutePath);
       if (pathCodeOwners.isPresent()) {
         logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
-        boolean visitFurtherCodeOwnerConfigs =
-            codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
+        boolean visitFurtherCodeOwnerConfigs = pathCodeOwnersVisitor.visit(pathCodeOwners.get());
         boolean ignoreParentCodeOwners =
             pathCodeOwners.get().resolveCodeOwnerConfig().get().ignoreParentCodeOwners();
         if (ignoreParentCodeOwners) {
@@ -155,7 +183,7 @@ public class CodeOwnerConfigHierarchy {
 
     if (!RefNames.REFS_CONFIG.equals(branchNameKey.branch())) {
       visitCodeOwnerConfigInRefsMetaConfig(
-          branchNameKey.project(), absolutePath, codeOwnerConfigVisitor);
+          branchNameKey.project(), absolutePath, pathCodeOwnersVisitor);
     }
   }
 
@@ -174,11 +202,10 @@ public class CodeOwnerConfigHierarchy {
    *     the {@code refs/meta/config} branch
    * @param absolutePath the path for which the code owner configs should be visited; the path must
    *     be absolute; can be the path of a file or folder; the path may or may not exist
-   * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
-   *     configs
+   * @param pathCodeOwnersVisitor visitor that should be invoked
    */
   private void visitCodeOwnerConfigInRefsMetaConfig(
-      Project.NameKey project, Path absolutePath, CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
+      Project.NameKey project, Path absolutePath, PathCodeOwnersVisitor pathCodeOwnersVisitor) {
     CodeOwnerConfig.Key metaCodeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, RefNames.REFS_CONFIG, "/");
     logger.atFine().log("visiting code owner config %s", metaCodeOwnerConfigKey);
@@ -194,7 +221,7 @@ public class CodeOwnerConfigHierarchy {
           pathCodeOwnersFactory.create(metaCodeOwnerConfigKey, metaRevision, absolutePath);
       if (pathCodeOwners.isPresent()) {
         logger.atFine().log("visit code owner config %s", metaCodeOwnerConfigKey);
-        codeOwnerConfigVisitor.visit(pathCodeOwners.get().getCodeOwnerConfig());
+        pathCodeOwnersVisitor.visit(pathCodeOwners.get());
       } else {
         logger.atFine().log("code owner config %s not found", metaCodeOwnerConfigKey);
       }

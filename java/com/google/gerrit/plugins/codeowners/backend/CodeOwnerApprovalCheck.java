@@ -503,38 +503,39 @@ public class CodeOwnerApprovalCheck {
           branch,
           revision,
           absolutePath,
-          codeOwnerConfig -> {
-            CodeOwnerResolverResult codeOwners = getCodeOwners(codeOwnerConfig, absolutePath);
-            logger.atFine().log(
-                "code owners = %s (code owner config folder path = %s, file name = %s)",
-                codeOwners,
-                codeOwnerConfig.key().folderPath(),
-                codeOwnerConfig.key().fileName().orElse("<default>"));
+          (PathCodeOwnersVisitor)
+              pathCodeOwners -> {
+                CodeOwnerResolverResult codeOwners = resolveCodeOwners(pathCodeOwners);
+                logger.atFine().log(
+                    "code owners = %s (code owner config folder path = %s, file name = %s)",
+                    codeOwners,
+                    pathCodeOwners.getCodeOwnerConfig().key().folderPath(),
+                    pathCodeOwners.getCodeOwnerConfig().key().fileName().orElse("<default>"));
 
-            if (codeOwners.hasRevelantCodeOwnerDefinitions()) {
-              hasRevelantCodeOwnerDefinitions.set(true);
-            }
+                if (codeOwners.hasRevelantCodeOwnerDefinitions()) {
+                  hasRevelantCodeOwnerDefinitions.set(true);
+                }
 
-            if (isApproved(
-                absolutePath,
-                codeOwners,
-                approverAccountIds,
-                enableImplicitApprovalFromUploader,
-                patchSetUploader)) {
-              codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
-              return false;
-            } else if (isPending(absolutePath, codeOwners, reviewerAccountIds)) {
-              codeOwnerStatus.set(CodeOwnerStatus.PENDING);
+                if (isApproved(
+                    absolutePath,
+                    codeOwners,
+                    approverAccountIds,
+                    enableImplicitApprovalFromUploader,
+                    patchSetUploader)) {
+                  codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
+                  return false;
+                } else if (isPending(absolutePath, codeOwners, reviewerAccountIds)) {
+                  codeOwnerStatus.set(CodeOwnerStatus.PENDING);
 
-              // We need to continue to check if any of the higher-level code owners approved the
-              // change.
-              return true;
-            }
+                  // We need to continue to check if any of the higher-level code owners approved
+                  // the change.
+                  return true;
+                }
 
-            // We need to continue to check if any of the higher-level code owners approved the
-            // change or is a reviewer.
-            return true;
-          },
+                // We need to continue to check if any of the higher-level code owners approved the
+                // change or is a reviewer.
+                return true;
+              },
           codeOwnerConfigKey -> {
             logger.atFine().log(
                 "code owner config %s ignores parent code owners for %s",
@@ -822,17 +823,12 @@ public class CodeOwnerApprovalCheck {
   }
 
   /**
-   * Gets the code owners that own the given path according to the given code owner config.
+   * Resolves the given path code owners.
    *
-   * @param codeOwnerConfig the code owner config from which the code owners should be retrieved
-   * @param absolutePath the path for which the code owners should be retrieved
+   * @param pathCodeOwners the path code owners that should be resolved
    */
-  private CodeOwnerResolverResult getCodeOwners(
-      CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
-    return codeOwnerResolver
-        .get()
-        .enforceVisibility(false)
-        .resolvePathCodeOwners(codeOwnerConfig, absolutePath);
+  private CodeOwnerResolverResult resolveCodeOwners(PathCodeOwners pathCodeOwners) {
+    return codeOwnerResolver.get().enforceVisibility(false).resolvePathCodeOwners(pathCodeOwners);
   }
 
   /**

@@ -156,6 +156,11 @@ public class PathCodeOwners {
     return codeOwnerConfig;
   }
 
+  /** Returns the absolute path for which code owners were computed. */
+  public Path getPath() {
+    return path;
+  }
+
   /**
    * Resolves the {@link #codeOwnerConfig}.
    *

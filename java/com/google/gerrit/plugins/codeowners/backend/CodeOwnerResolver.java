@@ -138,6 +138,10 @@ public class CodeOwnerResolver {
    * Resolves the code owners from the given code owner config for the given path from {@link
    * CodeOwnerReference}s to a {@link CodeOwner}s.
    *
+   * <p>If the code owner config has already been resolved to {@link PathCodeOwners}, prefer calling
+   * {@link #resolvePathCodeOwners(PathCodeOwners)} instead, so that {@link PathCodeOwners} do not
+   * need to be created again.
+   *
    * <p>Non-resolvable code owners are filtered out.
    *
    * @param codeOwnerConfig the code owner config for which the local owners for the given path
@@ -151,13 +155,27 @@ public class CodeOwnerResolver {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
+    return resolvePathCodeOwners(pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath));
+  }
+
+  /**
+   * Resolves the the given path code owners from {@link CodeOwnerReference}s to a {@link
+   * CodeOwner}s.
+   *
+   * <p>Non-resolvable code owners are filtered out.
+   *
+   * @param pathCodeOwners the path code owners that should be resolved
+   * @return the resolved code owners
+   */
+  public CodeOwnerResolverResult resolvePathCodeOwners(PathCodeOwners pathCodeOwners) {
+    requireNonNull(pathCodeOwners, "pathCodeOwners");
 
     try (Timer0.Context ctx = codeOwnerMetrics.resolvePathCodeOwners.start()) {
       logger.atFine().log(
           "resolve path code owners (code owner config = %s, path = %s)",
-          codeOwnerConfig.key(), absolutePath);
+          pathCodeOwners.getCodeOwnerConfig().key(), pathCodeOwners.getPath());
       OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult =
-          pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).resolveCodeOwnerConfig();
+          pathCodeOwners.resolveCodeOwnerConfig();
       return resolve(
           pathCodeOwnersResult.get().getPathCodeOwners(),
           pathCodeOwnersResult.get().unresolvedImports(),
