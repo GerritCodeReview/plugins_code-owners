@@ -7,7 +7,11 @@ usage and performance of the code owners functionality.
 
 * `compute_changed_files`:
   Latency for computing changed files.
+* `compute_file_status`:
+  Latency for computing the file status for one file.
 * `compute_file_statuses`:
+  Latency for computing file statuses for all files in a change.
+* `compute_owned_paths`:
   Latency for computing file statuses.
 * `compute_owned_paths`:
   Latency for computing the files in a change that are owned by a user.

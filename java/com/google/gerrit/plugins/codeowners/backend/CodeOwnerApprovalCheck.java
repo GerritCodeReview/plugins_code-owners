@@ -410,50 +410,53 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> approverAccountIds,
       boolean hasOverride,
       ChangedFile changedFile) {
-    logger.atFine().log("computing file status for %s", changedFile);
+    try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatus.start()) {
+      logger.atFine().log("computing file status for %s", changedFile);
 
-    // Compute the code owner status for the new path, if there is a new path.
-    Optional<PathCodeOwnerStatus> newPathStatus =
-        changedFile
-            .newPath()
-            .map(
-                newPath ->
-                    getPathCodeOwnerStatus(
-                        branch,
-                        revision,
-                        globalCodeOwners,
-                        enableImplicitApprovalFromUploader,
-                        patchSetUploader,
-                        reviewerAccountIds,
-                        approverAccountIds,
-                        hasOverride,
-                        newPath));
+      // Compute the code owner status for the new path, if there is a new path.
+      Optional<PathCodeOwnerStatus> newPathStatus =
+          changedFile
+              .newPath()
+              .map(
+                  newPath ->
+                      getPathCodeOwnerStatus(
+                          branch,
+                          revision,
+                          globalCodeOwners,
+                          enableImplicitApprovalFromUploader,
+                          patchSetUploader,
+                          reviewerAccountIds,
+                          approverAccountIds,
+                          hasOverride,
+                          newPath));
 
-    // Compute the code owner status for the old path, if the file was deleted or renamed.
-    Optional<PathCodeOwnerStatus> oldPathStatus = Optional.empty();
-    if (changedFile.isDeletion() || changedFile.isRename()) {
-      checkState(changedFile.oldPath().isPresent(), "old path must be present for deletion/rename");
-      logger.atFine().log(
-          "file was %s (old path = %s)",
-          changedFile.isDeletion() ? "deleted" : "renamed", changedFile.oldPath().get());
-      oldPathStatus =
-          Optional.of(
-              getPathCodeOwnerStatus(
-                  branch,
-                  revision,
-                  globalCodeOwners,
-                  enableImplicitApprovalFromUploader,
-                  patchSetUploader,
-                  reviewerAccountIds,
-                  approverAccountIds,
-                  hasOverride,
-                  changedFile.oldPath().get()));
+      // Compute the code owner status for the old path, if the file was deleted or renamed.
+      Optional<PathCodeOwnerStatus> oldPathStatus = Optional.empty();
+      if (changedFile.isDeletion() || changedFile.isRename()) {
+        checkState(
+            changedFile.oldPath().isPresent(), "old path must be present for deletion/rename");
+        logger.atFine().log(
+            "file was %s (old path = %s)",
+            changedFile.isDeletion() ? "deleted" : "renamed", changedFile.oldPath().get());
+        oldPathStatus =
+            Optional.of(
+                getPathCodeOwnerStatus(
+                    branch,
+                    revision,
+                    globalCodeOwners,
+                    enableImplicitApprovalFromUploader,
+                    patchSetUploader,
+                    reviewerAccountIds,
+                    approverAccountIds,
+                    hasOverride,
+                    changedFile.oldPath().get()));
+      }
+
+      FileCodeOwnerStatus fileCodeOwnerStatus =
+          FileCodeOwnerStatus.create(changedFile, newPathStatus, oldPathStatus);
+      logger.atFine().log("fileCodeOwnerStatus = %s", fileCodeOwnerStatus);
+      return fileCodeOwnerStatus;
     }
-
-    FileCodeOwnerStatus fileCodeOwnerStatus =
-        FileCodeOwnerStatus.create(changedFile, newPathStatus, oldPathStatus);
-    logger.atFine().log("fileCodeOwnerStatus = %s", fileCodeOwnerStatus);
-    return fileCodeOwnerStatus;
   }
 
   private PathCodeOwnerStatus getPathCodeOwnerStatus(
