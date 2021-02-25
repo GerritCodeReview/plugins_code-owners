@@ -65,7 +65,7 @@ block the submission (unless it's a veto vote which is configured independently
 of the `@PLUGIN@` plugin).
 
 It's possible to configure that for changes/patch-sets that are uploaded by a
-code owner an implict code owner approval from the uploader is assumed. In this
+code owner an implicit code owner approval from the uploader is assumed. In this
 case, if a code owner only touches files that they own, no approval from other
 code owners is required. If this is configured, it is important that code owners
 are aware of their implicit approval when they upload new patch sets for other

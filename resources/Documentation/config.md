@@ -88,7 +88,7 @@ the complete list with the additional value has to be set on project level.
         `@PLUGIN@.config`.\
         By default unset (no override info URL).
 
-<a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplictApprovals</a>
+<a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplicitApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
         \
@@ -119,7 +119,7 @@ the complete list with the additional value has to be set on project level.
         If implicit code owner approvals are disabled, code owners can still
         self-approve their own changes by voting on the change.\
         Can be overridden per project by setting
-        [codeOwners.enableImplictApprovals](#codeOwnersEnableImplicitApprovals)
+        [codeOwners.enableImplicitApprovals](#codeOwnersEnableImplicitApprovals)
         in `@PLUGIN@.config`.\
         By default `FALSE`.
 
