@@ -107,23 +107,33 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotGetReadOnlyForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getReadOnly(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
   public void cannotGetReadOnlyForNullPluginConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> generalConfig.getReadOnly(/* pluginConfig= */ null));
+            NullPointerException.class,
+            () -> generalConfig.getReadOnly(project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
   public void noReadOnlyConfiguration() throws Exception {
-    assertThat(generalConfig.getReadOnly(new Config())).isFalse();
+    assertThat(generalConfig.getReadOnly(project, new Config())).isFalse();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.readOnly", value = "true")
   public void readOnlyConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
       throws Exception {
-    assertThat(generalConfig.getReadOnly(new Config())).isTrue();
+    assertThat(generalConfig.getReadOnly(project, new Config())).isTrue();
   }
 
   @Test
@@ -132,7 +142,30 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_READ_ONLY, "false");
-    assertThat(generalConfig.getReadOnly(cfg)).isFalse();
+    assertThat(generalConfig.getReadOnly(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.readOnly", value = "true")
+  public void invalidReadOnlyConfigurationInPluginConfigIsIgnored() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_READ_ONLY, "INVALID");
+    assertThat(generalConfig.getReadOnly(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.readOnly", value = "INVALID")
+  public void invalidReadOnlyConfigurationInGerritConfigIsIgnored() throws Exception {
+    assertThat(generalConfig.getReadOnly(project, new Config())).isFalse();
+  }
+
+  @Test
+  public void cannotGetExemptPureRevertsForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getExemptPureReverts(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
   @Test
@@ -140,13 +173,13 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.getExemptPureReverts(/* pluginConfig= */ null));
+            () -> generalConfig.getExemptPureReverts(project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
   public void noExemptPureRevertsConfiguration() throws Exception {
-    assertThat(generalConfig.getExemptPureReverts(new Config())).isFalse();
+    assertThat(generalConfig.getExemptPureReverts(project, new Config())).isFalse();
   }
 
   @Test
@@ -154,7 +187,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void
       exemptPureRevertsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
           throws Exception {
-    assertThat(generalConfig.getExemptPureReverts(new Config())).isTrue();
+    assertThat(generalConfig.getExemptPureReverts(project, new Config())).isTrue();
   }
 
   @Test
@@ -164,7 +197,31 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
           throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_EXEMPT_PURE_REVERTS, "false");
-    assertThat(generalConfig.getExemptPureReverts(cfg)).isFalse();
+    assertThat(generalConfig.getExemptPureReverts(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptPureReverts", value = "true")
+  public void invalidExemptPureRevertsInPluginConfigIsIgnored() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPT_PURE_REVERTS, "INVALID");
+    assertThat(generalConfig.getExemptPureReverts(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptPureReverts", value = "INVALID")
+  public void invalidExemptPureRevertsConfigurationInGerritConfigIsIgnored() throws Exception {
+    assertThat(generalConfig.getExemptPureReverts(project, new Config())).isFalse();
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableCodeOwnersForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getRejectNonResolvableCodeOwners(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
   @Test
@@ -172,13 +229,14 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.getRejectNonResolvableCodeOwners(/* pluginConfig= */ null));
+            () ->
+                generalConfig.getRejectNonResolvableCodeOwners(project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
   public void noRejectNonResolvableCodeOwnersConfiguration() throws Exception {
-    assertThat(generalConfig.getRejectNonResolvableCodeOwners(new Config())).isTrue();
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(project, new Config())).isTrue();
   }
 
   @Test
@@ -186,7 +244,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void
       rejectNonResolvableCodeOwnersConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
           throws Exception {
-    assertThat(generalConfig.getRejectNonResolvableCodeOwners(new Config())).isFalse();
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(project, new Config())).isFalse();
   }
 
   @Test
@@ -197,7 +255,35 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, /* subsection= */ null, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, "true");
-    assertThat(generalConfig.getRejectNonResolvableCodeOwners(cfg)).isTrue();
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  public void invalidRejectNonResolvableCodeOwnersInPluginConfigIsIgnored() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        "INVALID");
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "INVALID")
+  public void invalidRejectNonResolvableCodeOwnersConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(generalConfig.getRejectNonResolvableCodeOwners(project, new Config())).isTrue();
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableImportsForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getRejectNonResolvableImports(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
   @Test
@@ -205,13 +291,13 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.getRejectNonResolvableImports(/* pluginConfig= */ null));
+            () -> generalConfig.getRejectNonResolvableImports(project, /* pluginConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
   }
 
   @Test
   public void noRejectNonResolvableImportsConfiguration() throws Exception {
-    assertThat(generalConfig.getRejectNonResolvableImports(new Config())).isTrue();
+    assertThat(generalConfig.getRejectNonResolvableImports(project, new Config())).isTrue();
   }
 
   @Test
@@ -219,7 +305,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void
       rejectNonResolvableImportsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
           throws Exception {
-    assertThat(generalConfig.getRejectNonResolvableImports(new Config())).isFalse();
+    assertThat(generalConfig.getRejectNonResolvableImports(project, new Config())).isFalse();
   }
 
   @Test
@@ -230,7 +316,23 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, /* scubsection= */ null, KEY_REJECT_NON_RESOLVABLE_IMPORTS, "true");
-    assertThat(generalConfig.getRejectNonResolvableImports(cfg)).isTrue();
+    assertThat(generalConfig.getRejectNonResolvableImports(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  public void invalidRejectNonResolvableImportsInPluginConfigIsIgnored() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_REJECT_NON_RESOLVABLE_IMPORTS, "INVALID");
+    assertThat(generalConfig.getRejectNonResolvableImports(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "INVALID")
+  public void invalidRejectNonResolvableImportsConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(generalConfig.getRejectNonResolvableImports(project, new Config())).isTrue();
   }
 
   @Test
