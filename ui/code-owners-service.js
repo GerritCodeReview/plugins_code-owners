@@ -109,7 +109,7 @@ class CodeOwnerApi {
   listOwnersForPath(changeId, path) {
     return this.restApi.get(
         `/changes/${changeId}/revisions/current/code_owners` +
-        `/${encodeURIComponent(path)}?limit=5&o=DETAILS`
+        `/${encodeURIComponent(path)}?limit=5&o=DETAILS&resolve-all-users=true`
     );
   }
 
