@@ -22,6 +22,30 @@
       },
       "revId": "c89084b6bc061d64c1663336938430c0b6331e9a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1a39d71c_2175fd07",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-02-25T10:49:24Z",
+      "side": 1,
+      "message": "Actually this is a case that is not detected by our reindex flumes, so it\u0027s not automatic even for us. The index flumes also cannot afford to reindex that many changes when the config is changed. FWIW we have the same issue with label definitions, e.g. if you change the function of a label that is defined in All-Projects (then potentially all open changes of the host might get stale).",
+      "parentUuid": "eb8794a4_90a89c84",
+      "range": {
+        "startLine": 37,
+        "startChar": 61,
+        "endLine": 38,
+        "endChar": 31
+      },
+      "revId": "c89084b6bc061d64c1663336938430c0b6331e9a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
