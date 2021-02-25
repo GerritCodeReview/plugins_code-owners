@@ -14,8 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -64,7 +62,7 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
       throws RestApiException, IOException, PermissionBackendException,
           PatchListNotAvailableException {
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatuses(changeResource.getNotes()).collect(toImmutableSet());
+        codeOwnerApprovalCheck.getFileStatusesAsSet(changeResource.getNotes());
     return Response.ok(
         CodeOwnerStatusInfoJson.format(
             changeResource.getNotes().getCurrentPatchSet().id(), fileCodeOwnerStatuses));

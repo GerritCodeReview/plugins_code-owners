@@ -26,7 +26,9 @@ import com.google.inject.Singleton;
 public class CodeOwnerMetrics {
   public final Timer0 computeChangedFiles;
   public final Timer0 computeFileStatuses;
-  public final Timer0 computeFileStatusesForAccount;
+  public final Timer0 computeOwnedPaths;
+  public final Timer0 prepareFileStatusComputation;
+  public final Timer0 prepareFileStatusComputationForAccount;
   public final Timer0 resolveCodeOwnerConfig;
   public final Timer0 resolveCodeOwnerConfigImport;
   public final Timer0 resolveCodeOwnerConfigImports;
@@ -43,7 +45,14 @@ public class CodeOwnerMetrics {
         createLatencyTimer("compute_changed_files", "Latency for computing changed files");
     this.computeFileStatuses =
         createLatencyTimer("compute_file_statuses", "Latency for computing file statuses");
-    this.computeFileStatusesForAccount =
+    this.computeOwnedPaths =
+        createLatencyTimer(
+            "compute_owned_paths",
+            "Latency for computing the files in a change that are owned by a user");
+    this.prepareFileStatusComputation =
+        createLatencyTimer(
+            "prepare_file_status_computation", "Latency for preparing the file status computation");
+    this.prepareFileStatusComputationForAccount =
         createLatencyTimer(
             "compute_file_statuses_for_account",
             "Latency for computing file statuses for an account");

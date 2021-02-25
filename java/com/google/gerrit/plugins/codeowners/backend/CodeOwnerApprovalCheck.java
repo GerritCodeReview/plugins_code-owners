@@ -128,7 +128,13 @@ public class CodeOwnerApprovalCheck {
   public ImmutableList<Path> getOwnedPaths(
       ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId)
       throws ResourceConflictException {
-    try {
+    try (Timer0.Context ctx = codeOwnerMetrics.computeOwnedPaths.start()) {
+      logger.atFine().log(
+          "compute owned paths for account %d (project = %s, change = %d, patch set = %d)",
+          accountId.get(),
+          changeNotes.getProjectName(),
+          changeNotes.getChangeId().get(),
+          patchSet.id().get());
       return getFileStatusesForAccount(changeNotes, patchSet, accountId)
           .flatMap(
               fileCodeOwnerStatus ->
@@ -181,6 +187,22 @@ public class CodeOwnerApprovalCheck {
 
   /**
    * Gets the code owner statuses for all files/paths that were changed in the current revision of
+   * the given change as a set.
+   *
+   * @see #getFileStatuses(ChangeNotes)
+   */
+  public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(ChangeNotes changeNotes)
+      throws ResourceConflictException, IOException, PatchListNotAvailableException {
+    try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
+      logger.atFine().log(
+          "compute file statuses (project = %s, change = %d)",
+          changeNotes.getProjectName(), changeNotes.getChangeId().get());
+      return getFileStatuses(changeNotes).collect(toImmutableSet());
+    }
+  }
+
+  /**
+   * Gets the code owner statuses for all files/paths that were changed in the current revision of
    * the given change.
    *
    * <p>The code owner statuses tell the user which code owner approvals are still missing in order
@@ -208,9 +230,9 @@ public class CodeOwnerApprovalCheck {
   public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
-    try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
+    try (Timer0.Context ctx = codeOwnerMetrics.prepareFileStatusComputation.start()) {
       logger.atFine().log(
-          "compute file statuses (project = %s, change = %d)",
+          "prepare stream to compute file statuses (project = %s, change = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get());
 
       if (codeOwnersPluginConfiguration.arePureRevertsExempted(changeNotes.getProjectName())
@@ -298,9 +320,10 @@ public class CodeOwnerApprovalCheck {
     requireNonNull(changeNotes, "changeNotes");
     requireNonNull(patchSet, "patchSet");
     requireNonNull(accountId, "accountId");
-    try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatusesForAccount.start()) {
+    try (Timer0.Context ctx = codeOwnerMetrics.prepareFileStatusComputationForAccount.start()) {
       logger.atFine().log(
-          "compute file statuses for account %d (project = %s, change = %d, patch set = %d)",
+          "prepare stream to compute file statuses for account %d (project = %s, change = %d,"
+              + " patch set = %d)",
           accountId.get(),
           changeNotes.getProjectName(),
           changeNotes.getChangeId().get(),
