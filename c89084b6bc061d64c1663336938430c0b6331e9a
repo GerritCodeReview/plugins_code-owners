@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eb8794a4_90a89c84",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-02-25T10:43:44Z",
+      "side": 1,
+      "message": "at Google this happens also automatically, worth mentioning?",
+      "range": {
+        "startLine": 37,
+        "startChar": 61,
+        "endLine": 38,
+        "endChar": 31
+      },
+      "revId": "c89084b6bc061d64c1663336938430c0b6331e9a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
