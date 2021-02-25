@@ -202,11 +202,12 @@ public class GeneralConfig {
    * <p>The read-only configuration controls whether code owner config files are read-only and all
    * modifications of code owner config files should be rejected.
    *
+   * @param project the project for which the read-only configuration should be read
    * @param pluginConfig the plugin config from which the read-only configuration should be read.
    * @return whether code owner config files are read-only
    */
-  boolean getReadOnly(Config pluginConfig) {
-    return getBooleanConfig(pluginConfig, KEY_READ_ONLY, /* defaultValue= */ false);
+  boolean getReadOnly(Project.NameKey project, Config pluginConfig) {
+    return getBooleanConfig(project, pluginConfig, KEY_READ_ONLY, /* defaultValue= */ false);
   }
 
   /**
@@ -216,11 +217,13 @@ public class GeneralConfig {
    * <p>The exempt-pure-reverts configuration controls whether pure revert changes are exempted from
    * needing code owner approvals for submit.
    *
+   * @param project the project for which the exempt-pure-revert configuration should be read
    * @param pluginConfig the plugin config from which the read-only configuration should be read.
    * @return whether pure reverts are exempted from needing code owner approvals for submit
    */
-  boolean getExemptPureReverts(Config pluginConfig) {
-    return getBooleanConfig(pluginConfig, KEY_EXEMPT_PURE_REVERTS, /* defaultValue= */ false);
+  boolean getExemptPureReverts(Project.NameKey project, Config pluginConfig) {
+    return getBooleanConfig(
+        project, pluginConfig, KEY_EXEMPT_PURE_REVERTS, /* defaultValue= */ false);
   }
 
   /**
@@ -231,14 +234,16 @@ public class GeneralConfig {
    * with newly added non-resolvable code owners should be rejected on commit received and on
    * submit.
    *
+   * @param project the project for which the freject-non-resolvable-code-owners configuration
+   *     should be read
    * @param pluginConfig the plugin config from which the reject-non-resolvable-code-owners
    *     configuration should be read.
    * @return whether code owner config files with newly added non-resolvable code owners should be
    *     rejected on commit received and on submit
    */
-  boolean getRejectNonResolvableCodeOwners(Config pluginConfig) {
+  boolean getRejectNonResolvableCodeOwners(Project.NameKey project, Config pluginConfig) {
     return getBooleanConfig(
-        pluginConfig, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, /* defaultValue= */ true);
+        project, pluginConfig, KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, /* defaultValue= */ true);
   }
 
   /**
@@ -248,26 +253,46 @@ public class GeneralConfig {
    * <p>The reject-non-resolvable-imports configuration controls whether code owner config files
    * with newly added non-resolvable imports should be rejected on commit received and on submit.
    *
+   * @param project the project for which the freject-non-resolvable-imports configuration should be
+   *     read
    * @param pluginConfig the plugin config from which the reject-non-resolvable-imports
    *     configuration should be read.
    * @return whether code owner config files with newly added non-resolvable imports should be
    *     rejected on commit received and on submit
    */
-  boolean getRejectNonResolvableImports(Config pluginConfig) {
+  boolean getRejectNonResolvableImports(Project.NameKey project, Config pluginConfig) {
     return getBooleanConfig(
-        pluginConfig, KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* defaultValue= */ true);
+        project, pluginConfig, KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* defaultValue= */ true);
   }
 
-  private boolean getBooleanConfig(Config pluginConfig, String key, boolean defaultValue) {
+  private boolean getBooleanConfig(
+      Project.NameKey project, Config pluginConfig, String key, boolean defaultValue) {
+    requireNonNull(project, "project");
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(key, "key");
 
-    if (pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, key) != null) {
-      return pluginConfig.getBoolean(
-          SECTION_CODE_OWNERS, /* subsection= */ null, key, defaultValue);
+    String value = pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, key);
+    if (value != null) {
+      try {
+        return pluginConfig.getBoolean(
+            SECTION_CODE_OWNERS, /* subsection= */ null, key, defaultValue);
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().withCause(e).log(
+            "Ignoring invalid value %s for %s in '%s.config' of project %s."
+                + " Falling back to global config.",
+            value, key, pluginName, project.get());
+      }
     }
 
-    return pluginConfigFromGerritConfig.getBoolean(key, defaultValue);
+    try {
+      return pluginConfigFromGerritConfig.getBoolean(key, defaultValue);
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().withCause(e).log(
+          "Ignoring invalid value %s for %s in gerrit.config (parameter"
+              + " plugin.%s.%s). Falling back to default value %s.",
+          pluginConfigFromGerritConfig.getString(key), key, pluginName, key, defaultValue);
+      return defaultValue;
+    }
   }
 
   /**

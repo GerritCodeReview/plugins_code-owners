@@ -23,6 +23,23 @@ project level it means that the complete inherited list is overridden. It's
 *not* possible to just add a value to the inherited list, but if this is wanted
 the complete list with the additional value has to be set on project level.
 
+## <a id="staleIndexOnConfigChanges">
+**NOTE:** Some configuration changes can lead to changes becoming stale in the
+change index. E.g. if an additional branch is newly exempted in `gerrit.config`
+or in the `code-owners.config` of a parent project, the submittability of
+changes for that branch in child projects may change (since they no longer
+require code owner approvals), but it's not feasible to reindex all affected
+changes when this config change is done (as config changes can potentially
+affect all open changes on the host and reindexing that many changes would be
+too expensive). In this case the affected changes will be become stale in the
+change index (e.g. the change index contains outdated submit records) and as a
+result of this you may not observe the effects of the config change on all
+changes immediately, but only when they have been reindexed (which happens on
+any modification of the changes). If needed, you may force the reindexing of a
+change by calling the [Index
+Changes](../../../Documentation/rest-api-changes.html#index-change) REST
+endpoint or by touching the change (e.g. by adding a comment).
+
 # <a id="globalConfiguration">Global configuration in gerrit.config</a>
 
 <a id="pluginCodeOwnersDisabled">plugin.@PLUGIN@.disabled</a>

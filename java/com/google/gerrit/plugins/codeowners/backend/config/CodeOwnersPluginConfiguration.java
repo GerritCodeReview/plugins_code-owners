@@ -114,7 +114,7 @@ public class CodeOwnersPluginConfiguration {
    */
   public boolean areCodeOwnerConfigsReadOnly(Project.NameKey project) {
     requireNonNull(project, "project");
-    return generalConfig.getReadOnly(getPluginConfig(project));
+    return generalConfig.getReadOnly(project, getPluginConfig(project));
   }
 
   /**
@@ -126,7 +126,7 @@ public class CodeOwnersPluginConfiguration {
    */
   public boolean arePureRevertsExempted(Project.NameKey project) {
     requireNonNull(project, "project");
-    return generalConfig.getExemptPureReverts(getPluginConfig(project));
+    return generalConfig.getExemptPureReverts(project, getPluginConfig(project));
   }
 
   /**
@@ -140,7 +140,7 @@ public class CodeOwnersPluginConfiguration {
    */
   public boolean rejectNonResolvableCodeOwners(Project.NameKey project) {
     requireNonNull(project, "project");
-    return generalConfig.getRejectNonResolvableCodeOwners(getPluginConfig(project));
+    return generalConfig.getRejectNonResolvableCodeOwners(project, getPluginConfig(project));
   }
 
   /**
@@ -154,7 +154,7 @@ public class CodeOwnersPluginConfiguration {
    */
   public boolean rejectNonResolvableImports(Project.NameKey project) {
     requireNonNull(project, "project");
-    return generalConfig.getRejectNonResolvableImports(getPluginConfig(project));
+    return generalConfig.getRejectNonResolvableImports(project, getPluginConfig(project));
   }
 
   /**
