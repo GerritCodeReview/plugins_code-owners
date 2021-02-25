@@ -31,7 +31,9 @@ usage and performance of the code owners functionality.
 ## <a id="counterMetrics"> Counter Metrics
 
 * `count_code_owner_config_reads`:
-  Total number of code owner config reads.
+  Total number of code owner config reads from backend.
+* `count_code_owner_config_cache_reads`:
+  Total number of code owner config reads from cache.
 
 ---
 

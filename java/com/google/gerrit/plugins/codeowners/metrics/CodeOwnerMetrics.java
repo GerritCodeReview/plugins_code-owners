@@ -40,6 +40,7 @@ public class CodeOwnerMetrics {
 
   // counter metrics
   public final Counter0 countCodeOwnerConfigReads;
+  public final Counter0 countCodeOwnerConfigCacheReads;
 
   private final MetricMaker metricMaker;
 
@@ -88,7 +89,13 @@ public class CodeOwnerMetrics {
 
     // counter metrics
     this.countCodeOwnerConfigReads =
-        createCounter("count_code_owner_config_reads", "Total number of code owner config reads");
+        createCounter(
+            "count_code_owner_config_reads",
+            "Total number of code owner config reads from backend");
+    this.countCodeOwnerConfigCacheReads =
+        createCounter(
+            "count_code_owner_config_cache_reads",
+            "Total number of code owner config reads from cache");
   }
 
   private Timer0 createLatencyTimer(String name, String description) {

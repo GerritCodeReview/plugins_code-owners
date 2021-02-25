@@ -145,7 +145,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               String.format(
                   "checking code owner config file %s", codeOwnerConfig.key().format(codeOwners)));
           OptionalResultWithMessages<PathCodeOwnersResult> pathCodeOwnersResult =
-              pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath).resolveCodeOwnerConfig();
+              pathCodeOwnersFactory
+                  .createWithoutCache(codeOwnerConfig, absolutePath)
+                  .resolveCodeOwnerConfig();
           messages.addAll(pathCodeOwnersResult.messages());
           pathCodeOwnersResult
               .get()

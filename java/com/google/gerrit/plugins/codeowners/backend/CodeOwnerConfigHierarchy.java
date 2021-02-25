@@ -23,7 +23,6 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -44,18 +43,21 @@ import org.eclipse.jgit.revwalk.RevWalk;
  * using {@code set noparent} in the root code owner config if the {@code find-owners} backend is
  * used).
  */
-@Singleton
 public class CodeOwnerConfigHierarchy {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final GitRepositoryManager repoManager;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
+  private final TransientCodeOwnerConfigCache transientCodeOwnerConfigCache;
 
   @Inject
   CodeOwnerConfigHierarchy(
-      GitRepositoryManager repoManager, PathCodeOwners.Factory pathCodeOwnersFactory) {
+      GitRepositoryManager repoManager,
+      PathCodeOwners.Factory pathCodeOwnersFactory,
+      TransientCodeOwnerConfigCache transientCodeOwnerConfigCache) {
     this.repoManager = repoManager;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
+    this.transientCodeOwnerConfigCache = transientCodeOwnerConfigCache;
   }
 
   /**
@@ -153,7 +155,8 @@ public class CodeOwnerConfigHierarchy {
       CodeOwnerConfig.Key codeOwnerConfigKey =
           CodeOwnerConfig.Key.create(branchNameKey, ownerConfigFolder);
       Optional<PathCodeOwners> pathCodeOwners =
-          pathCodeOwnersFactory.create(codeOwnerConfigKey, revision, absolutePath);
+          pathCodeOwnersFactory.create(
+              transientCodeOwnerConfigCache, codeOwnerConfigKey, revision, absolutePath);
       if (pathCodeOwners.isPresent()) {
         logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
         boolean visitFurtherCodeOwnerConfigs = pathCodeOwnersVisitor.visit(pathCodeOwners.get());
@@ -218,7 +221,8 @@ public class CodeOwnerConfigHierarchy {
       }
       RevCommit metaRevision = rw.parseCommit(ref.getObjectId());
       Optional<PathCodeOwners> pathCodeOwners =
-          pathCodeOwnersFactory.create(metaCodeOwnerConfigKey, metaRevision, absolutePath);
+          pathCodeOwnersFactory.create(
+              transientCodeOwnerConfigCache, metaCodeOwnerConfigKey, metaRevision, absolutePath);
       if (pathCodeOwners.isPresent()) {
         logger.atFine().log("visit code owner config %s", metaCodeOwnerConfigKey);
         pathCodeOwnersVisitor.visit(pathCodeOwners.get());

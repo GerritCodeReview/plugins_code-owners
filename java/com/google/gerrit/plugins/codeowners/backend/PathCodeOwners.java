@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.metrics.Timer0;
@@ -73,11 +74,12 @@ public class PathCodeOwners {
       this.codeOwners = codeOwners;
     }
 
-    public PathCodeOwners create(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
+    public PathCodeOwners createWithoutCache(CodeOwnerConfig codeOwnerConfig, Path absolutePath) {
       requireNonNull(codeOwnerConfig, "codeOwnerConfig");
       return new PathCodeOwners(
           codeOwnerMetrics,
           projectCache,
+          /* transientCodeOwnerConfigCache= */ null,
           codeOwners,
           codeOwnerConfig,
           absolutePath,
@@ -85,14 +87,21 @@ public class PathCodeOwners {
     }
 
     public Optional<PathCodeOwners> create(
-        CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision, Path absolutePath) {
-      return codeOwners
+        TransientCodeOwnerConfigCache transientCodeOwnerConfigCache,
+        CodeOwnerConfig.Key codeOwnerConfigKey,
+        ObjectId revision,
+        Path absolutePath) {
+      requireNonNull(transientCodeOwnerConfigCache, "transientCodeOwnerConfigCache");
+      requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+      requireNonNull(revision, "revision");
+      return transientCodeOwnerConfigCache
           .get(codeOwnerConfigKey, revision)
           .map(
               codeOwnerConfig ->
                   new PathCodeOwners(
                       codeOwnerMetrics,
                       projectCache,
+                      transientCodeOwnerConfigCache,
                       codeOwners,
                       codeOwnerConfig,
                       absolutePath,
@@ -127,6 +136,7 @@ public class PathCodeOwners {
 
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final ProjectCache projectCache;
+  private final CodeOwnerConfigLoader codeOwnerConfigLoader;
   private final CodeOwners codeOwners;
   private final CodeOwnerConfig codeOwnerConfig;
   private final Path path;
@@ -137,12 +147,15 @@ public class PathCodeOwners {
   private PathCodeOwners(
       CodeOwnerMetrics codeOwnerMetrics,
       ProjectCache projectCache,
+      @Nullable TransientCodeOwnerConfigCache transientCodeOwnerConfigCache,
       CodeOwners codeOwners,
       CodeOwnerConfig codeOwnerConfig,
       Path path,
       PathExpressionMatcher pathExpressionMatcher) {
     this.codeOwnerMetrics = requireNonNull(codeOwnerMetrics, "codeOwnerMetrics");
     this.projectCache = requireNonNull(projectCache, "projectCache");
+    this.codeOwnerConfigLoader =
+        transientCodeOwnerConfigCache != null ? transientCodeOwnerConfigCache : codeOwners;
     this.codeOwners = requireNonNull(codeOwners, "codeOwners");
     this.codeOwnerConfig = requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     this.path = requireNonNull(path, "path");
@@ -356,8 +369,8 @@ public class PathCodeOwners {
 
           Optional<CodeOwnerConfig> mayBeImportedCodeOwnerConfig =
               revision.isPresent()
-                  ? codeOwners.get(keyOfImportedCodeOwnerConfig, revision.get())
-                  : codeOwners.getFromCurrentRevision(keyOfImportedCodeOwnerConfig);
+                  ? codeOwnerConfigLoader.get(keyOfImportedCodeOwnerConfig, revision.get())
+                  : codeOwnerConfigLoader.getFromCurrentRevision(keyOfImportedCodeOwnerConfig);
 
           if (!mayBeImportedCodeOwnerConfig.isPresent()) {
             unresolvedImports.add(

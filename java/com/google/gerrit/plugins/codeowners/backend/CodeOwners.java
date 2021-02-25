@@ -36,7 +36,7 @@ import org.eclipse.jgit.lib.ObjectId;
  * that we avoid code repetition in the code owner backends.
  */
 @Singleton
-public class CodeOwners {
+public class CodeOwners implements CodeOwnerConfigLoader {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerMetrics codeOwnerMetrics;
 
@@ -48,14 +48,7 @@ public class CodeOwners {
     this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
-  /**
-   * Retrieves the code owner config for the given key from the given branch revision.
-   *
-   * @param codeOwnerConfigKey the key of the code owner config that should be retrieved
-   * @param revision the branch revision from which the code owner config should be loaded
-   * @return the code owner config for the given key if it exists, otherwise {@link
-   *     Optional#empty()}
-   */
+  @Override
   public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     requireNonNull(revision, "revision");
@@ -65,13 +58,7 @@ public class CodeOwners {
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
   }
 
-  /**
-   * Retrieves the code owner config for the given key from the current revision of the branch.
-   *
-   * @param codeOwnerConfigKey the key of the code owner config that should be retrieved
-   * @return the code owner config for the given key if it exists, otherwise {@link
-   *     Optional#empty()}
-   */
+  @Override
   public Optional<CodeOwnerConfig> getFromCurrentRevision(CodeOwnerConfig.Key codeOwnerConfigKey) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     codeOwnerMetrics.countCodeOwnerConfigReads.increment();
