@@ -7,10 +7,18 @@ usage and performance of the code owners functionality.
 
 * `compute_changed_files`:
   Latency for computing changed files.
+* `compute_file_status`:
+  Latency for computing the file status for one file.
 * `compute_file_statuses`:
+  Latency for computing file statuses for all files in a change.
+* `compute_owned_paths`:
   Latency for computing file statuses.
-* `compute_file_statuses_for_account`:
-  Latency for computing file statuses for an account.
+* `compute_owned_paths`:
+  Latency for computing the files in a change that are owned by a user.
+* `prepare_file_status_computation`:
+  Latency for preparing the file status computation.
+* `prepare_file_status_computation_for_account`:
+  Latency for preparing the file status computation for an account.
 * `resolve_code_owner_config`:
   Latency for resolving a code owner config file.
 * `resolve_code_owner_config_import`:
