@@ -239,7 +239,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   }
 
   private boolean isGlobalCodeOwner(Project.NameKey projectName) {
-    return codeOwnersPluginConfiguration.getGlobalCodeOwners(projectName).stream()
+    return codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners()
+        .stream()
         .filter(cor -> cor.email().equals(email))
         .findAny()
         .isPresent();
@@ -247,7 +248,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
 
   private boolean isFallbackCodeOwner(Project.NameKey projectName) {
     FallbackCodeOwners fallbackCodeOwners =
-        codeOwnersPluginConfiguration.getFallbackCodeOwners(projectName);
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getFallbackCodeOwners();
     switch (fallbackCodeOwners) {
       case NONE:
         return false;

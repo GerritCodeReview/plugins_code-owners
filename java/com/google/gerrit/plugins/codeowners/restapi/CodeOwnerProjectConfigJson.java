@@ -65,7 +65,7 @@ public class CodeOwnerProjectConfigJson {
     CodeOwnerProjectConfigInfo info = new CodeOwnerProjectConfigInfo();
     info.status = formatStatusInfo(projectResource);
 
-    if (codeOwnersPluginConfiguration.isDisabled(projectResource.getNameKey())) {
+    if (codeOwnersPluginConfiguration.getProjectConfig(projectResource.getNameKey()).isDisabled()) {
       return info;
     }
 
@@ -80,7 +80,10 @@ public class CodeOwnerProjectConfigJson {
   CodeOwnerBranchConfigInfo format(BranchResource branchResource) {
     CodeOwnerBranchConfigInfo info = new CodeOwnerBranchConfigInfo();
 
-    boolean disabled = codeOwnersPluginConfiguration.isDisabled(branchResource.getBranchKey());
+    boolean disabled =
+        codeOwnersPluginConfiguration
+            .getProjectConfig(branchResource.getNameKey())
+            .isDisabled(branchResource.getBranchKey().branch());
     info.disabled = disabled ? disabled : null;
 
     if (disabled) {
@@ -90,7 +93,10 @@ public class CodeOwnerProjectConfigJson {
     info.general = formatGeneralInfo(branchResource.getNameKey());
     info.backendId =
         CodeOwnerBackendId.getBackendId(
-            codeOwnersPluginConfiguration.getBackend(branchResource.getBranchKey()).getClass());
+            codeOwnersPluginConfiguration
+                .getProjectConfig(branchResource.getNameKey())
+                .getBackend(branchResource.getBranchKey().branch())
+                .getClass());
     info.requiredApproval = formatRequiredApprovalInfo(branchResource.getNameKey());
     info.overrideApproval = formatOverrideApprovalInfo(branchResource.getNameKey());
 
@@ -100,15 +106,20 @@ public class CodeOwnerProjectConfigJson {
   private GeneralInfo formatGeneralInfo(Project.NameKey projectName) {
     GeneralInfo generalInfo = new GeneralInfo();
     generalInfo.fileExtension =
-        codeOwnersPluginConfiguration.getFileExtension(projectName).orElse(null);
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getFileExtension().orElse(null);
     generalInfo.mergeCommitStrategy =
-        codeOwnersPluginConfiguration.getMergeCommitStrategy(projectName);
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getMergeCommitStrategy();
     generalInfo.implicitApprovals =
-        codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(projectName) ? true : null;
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).areImplicitApprovalsEnabled()
+            ? true
+            : null;
     generalInfo.overrideInfoUrl =
-        codeOwnersPluginConfiguration.getOverrideInfoUrl(projectName).orElse(null);
+        codeOwnersPluginConfiguration
+            .getProjectConfig(projectName)
+            .getOverrideInfoUrl()
+            .orElse(null);
     generalInfo.fallbackCodeOwners =
-        codeOwnersPluginConfiguration.getFallbackCodeOwners(projectName);
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getFallbackCodeOwners();
     return generalInfo;
   }
 
@@ -117,7 +128,9 @@ public class CodeOwnerProjectConfigJson {
       throws RestApiException, PermissionBackendException, IOException {
     CodeOwnersStatusInfo info = new CodeOwnersStatusInfo();
     info.disabled =
-        codeOwnersPluginConfiguration.isDisabled(projectResource.getNameKey()) ? true : null;
+        codeOwnersPluginConfiguration.getProjectConfig(projectResource.getNameKey()).isDisabled()
+            ? true
+            : null;
 
     if (info.disabled == null) {
       ImmutableList<BranchNameKey> disabledBranches = getDisabledBranches(projectResource);
@@ -135,7 +148,10 @@ public class CodeOwnerProjectConfigJson {
     BackendInfo info = new BackendInfo();
     info.id =
         CodeOwnerBackendId.getBackendId(
-            codeOwnersPluginConfiguration.getBackend(projectResource.getNameKey()).getClass());
+            codeOwnersPluginConfiguration
+                .getProjectConfig(projectResource.getNameKey())
+                .getBackend()
+                .getClass());
 
     ImmutableMap<String, String> idsByBranch =
         getBackendIdsPerBranch(projectResource).entrySet().stream()
@@ -147,14 +163,15 @@ public class CodeOwnerProjectConfigJson {
   }
 
   private RequiredApprovalInfo formatRequiredApprovalInfo(Project.NameKey projectName) {
-    return formatRequiredApproval(codeOwnersPluginConfiguration.getRequiredApproval(projectName));
+    return formatRequiredApproval(
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getRequiredApproval());
   }
 
   @VisibleForTesting
   @Nullable
   ImmutableList<RequiredApprovalInfo> formatOverrideApprovalInfo(Project.NameKey projectName) {
     ImmutableList<RequiredApprovalInfo> overrideApprovalInfos =
-        codeOwnersPluginConfiguration.getOverrideApproval(projectName).stream()
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getOverrideApproval().stream()
             .sorted(comparing(requiredApproval -> requiredApproval.toString()))
             .map(CodeOwnerProjectConfigJson::formatRequiredApproval)
             .collect(toImmutableList());
@@ -174,7 +191,11 @@ public class CodeOwnerProjectConfigJson {
   private ImmutableList<BranchNameKey> getDisabledBranches(ProjectResource projectResource)
       throws RestApiException, PermissionBackendException, IOException {
     return branches(projectResource)
-        .filter(codeOwnersPluginConfiguration::isDisabled)
+        .filter(
+            branchNameKey ->
+                codeOwnersPluginConfiguration
+                    .getProjectConfig(branchNameKey.project())
+                    .isDisabled(branchNameKey.branch()))
         .collect(toImmutableList());
   }
 
@@ -187,7 +208,10 @@ public class CodeOwnerProjectConfigJson {
                 Function.identity(),
                 branchNameKey ->
                     CodeOwnerBackendId.getBackendId(
-                        codeOwnersPluginConfiguration.getBackend(branchNameKey).getClass())));
+                        codeOwnersPluginConfiguration
+                            .getProjectConfig(branchNameKey.project())
+                            .getBackend(branchNameKey.branch())
+                            .getClass())));
   }
 
   private Stream<BranchNameKey> branches(ProjectResource projectResource)

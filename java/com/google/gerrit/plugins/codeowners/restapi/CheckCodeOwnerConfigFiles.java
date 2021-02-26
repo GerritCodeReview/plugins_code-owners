@@ -135,7 +135,9 @@ public class CheckCodeOwnerConfigFiles
           .filter(
               branchNameKey ->
                   validateDisabledBranches(input)
-                      || !codeOwnersPluginConfiguration.isDisabled(branchNameKey))
+                      || !codeOwnersPluginConfiguration
+                          .getProjectConfig(branchNameKey.project())
+                          .isDisabled(branchNameKey.branch()))
           .forEach(
               branchNameKey ->
                   resultsByBranchBuilder.put(
@@ -159,7 +161,10 @@ public class CheckCodeOwnerConfigFiles
       BranchNameKey branchNameKey,
       @Nullable ConsistencyProblemInfo.Status verbosity) {
     ListMultimap<String, ConsistencyProblemInfo> problemsByPath = LinkedListMultimap.create();
-    CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
+    CodeOwnerBackend codeOwnerBackend =
+        codeOwnersPluginConfiguration
+            .getProjectConfig(branchNameKey.project())
+            .getBackend(branchNameKey.branch());
     codeOwnerConfigScannerFactory
         .create()
         // Do not check the default code owner config file in refs/meta/config, as this config is
@@ -260,7 +265,7 @@ public class CheckCodeOwnerConfigFiles
         }
 
         if ((input.validateDisabledBranches == null || !input.validateDisabledBranches)
-            && codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
+            && codeOwnersPluginConfiguration.getProjectConfig(projectName).isDisabled(branchName)) {
           throw new BadRequestException(
               String.format(
                   "code owners functionality for branch %s is disabled,"

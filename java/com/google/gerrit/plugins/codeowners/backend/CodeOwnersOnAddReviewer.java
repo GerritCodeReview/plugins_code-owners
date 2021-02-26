@@ -19,7 +19,6 @@ import static java.util.stream.Collectors.joining;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
-import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.ChangeMessage;
 import com.google.gerrit.entities.Project;
@@ -88,10 +87,12 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
   public void onReviewersAdded(Event event) {
     Change.Id changeId = Change.id(event.getChange()._number);
     Project.NameKey projectName = Project.nameKey(event.getChange().project);
-    BranchNameKey branchNameKey = BranchNameKey.create(projectName, event.getChange().branch);
 
-    if (codeOwnersPluginConfiguration.isDisabled(branchNameKey)
-        || codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(projectName) <= 0) {
+    if (codeOwnersPluginConfiguration
+            .getProjectConfig(projectName)
+            .isDisabled(event.getChange().branch)
+        || codeOwnersPluginConfiguration.getProjectConfig(projectName).getMaxPathsInChangeMessages()
+            <= 0) {
       return;
     }
 
@@ -176,7 +177,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               reviewerAccount.getName()));
 
       int maxPathsInChangeMessage =
-          codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(projectName);
+          codeOwnersPluginConfiguration.getProjectConfig(projectName).getMaxPathsInChangeMessages();
       if (ownedPaths.size() <= maxPathsInChangeMessage) {
         appendPaths(message, ownedPaths.stream());
       } else {

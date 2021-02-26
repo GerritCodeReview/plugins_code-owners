@@ -237,7 +237,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     CodeOwnerResolverResult globalCodeOwners =
         codeOwnerResolver
             .get()
-            .resolve(codeOwnersPluginConfiguration.getGlobalCodeOwners(projectName));
+            .resolve(
+                codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners());
     logger.atFine().log("including global code owners = %s", globalCodeOwners);
     return globalCodeOwners;
   }

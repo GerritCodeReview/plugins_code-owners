@@ -82,7 +82,9 @@ class CodeOwnerSubmitRule implements SubmitRule {
             "run code owner submit rule (project = %s, change = %d)",
             changeData.project().get(), changeData.getId().get());
 
-        if (codeOwnersPluginConfiguration.isDisabled(changeData.change().getDest())) {
+        if (codeOwnersPluginConfiguration
+            .getProjectConfig(changeData.project())
+            .isDisabled(changeData.change().getDest().branch())) {
           logger.atFine().log(
               "code owners functionality is disabled for branch %s", changeData.change().getDest());
           return Optional.empty();

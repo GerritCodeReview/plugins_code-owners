@@ -106,7 +106,10 @@ public class CodeOwnerConfigScanner {
     requireNonNull(codeOwnerConfigVisitor, "codeOwnerConfigVisitor");
     requireNonNull(invalidCodeOwnerConfigCallback, "invalidCodeOwnerConfigCallback");
 
-    CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
+    CodeOwnerBackend codeOwnerBackend =
+        codeOwnersPluginConfiguration
+            .getProjectConfig(branchNameKey.project())
+            .getBackend(branchNameKey.branch());
     logger.atFine().log(
         "scanning code owner files in branch %s of project %s (path glob = %s)",
         branchNameKey.branch(), branchNameKey.project(), pathGlob);

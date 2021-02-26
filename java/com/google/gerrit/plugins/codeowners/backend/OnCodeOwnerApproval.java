@@ -69,7 +69,9 @@ class OnCodeOwnerApproval implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals) {
-    if (codeOwnersPluginConfiguration.isDisabled(changeNotes.getChange().getDest())) {
+    if (codeOwnersPluginConfiguration
+        .getProjectConfig(changeNotes.getProjectName())
+        .isDisabled(changeNotes.getChange().getDest().branch())) {
       return Optional.empty();
     }
 
@@ -79,7 +81,9 @@ class OnCodeOwnerApproval implements OnPostReview {
     }
 
     RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(changeNotes.getProjectName())
+            .getRequiredApproval();
 
     if (oldApprovals.get(requiredApproval.labelType().getName()) == null) {
       // If oldApprovals doesn't contain the label or if the labels value in it is null, the label
@@ -100,7 +104,9 @@ class OnCodeOwnerApproval implements OnPostReview {
       Map<String, Short> approvals,
       RequiredApproval requiredApproval) {
     int maxPathsInChangeMessage =
-        codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(changeNotes.getProjectName());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(changeNotes.getProjectName())
+            .getMaxPathsInChangeMessages();
     if (maxPathsInChangeMessage <= 0) {
       return Optional.empty();
     }
@@ -137,7 +143,9 @@ class OnCodeOwnerApproval implements OnPostReview {
     }
 
     boolean hasImplicitApprovalByUser =
-        codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName())
+        codeOwnersPluginConfiguration
+                .getProjectConfig(changeNotes.getProjectName())
+                .areImplicitApprovalsEnabled()
             && patchSet.uploader().equals(user.getAccountId());
 
     boolean noLongerExplicitlyApproved = false;

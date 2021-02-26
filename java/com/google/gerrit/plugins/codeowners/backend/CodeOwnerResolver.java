@@ -191,7 +191,8 @@ public class CodeOwnerResolver {
    * @return the resolved global code owners of the given project
    */
   public CodeOwnerResolverResult resolveGlobalCodeOwners(Project.NameKey projectName) {
-    return resolve(codeOwnersPluginConfiguration.getGlobalCodeOwners(projectName));
+    return resolve(
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners());
   }
 
   /**

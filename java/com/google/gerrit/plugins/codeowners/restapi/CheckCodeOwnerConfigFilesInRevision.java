@@ -84,7 +84,9 @@ public class CheckCodeOwnerConfigFilesInRevision
         input.path);
 
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(revisionResource.getChange().getDest());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(revisionResource.getProject())
+            .getBackend(revisionResource.getChange().getDest().branch());
 
     IdentifiedUser uploader = genericUserFactory.create(revisionResource.getPatchSet().uploader());
     logger.atFine().log("uploader = %s", uploader.getLoggableName());

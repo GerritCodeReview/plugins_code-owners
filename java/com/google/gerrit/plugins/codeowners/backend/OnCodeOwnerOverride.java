@@ -57,7 +57,9 @@ class OnCodeOwnerOverride implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals) {
-    if (codeOwnersPluginConfiguration.isDisabled(changeNotes.getChange().getDest())) {
+    if (codeOwnersPluginConfiguration
+        .getProjectConfig(changeNotes.getProjectName())
+        .isDisabled(changeNotes.getChange().getDest().branch())) {
       return Optional.empty();
     }
 
@@ -67,7 +69,8 @@ class OnCodeOwnerOverride implements OnPostReview {
     }
 
     ImmutableList<RequiredApproval> overrideApprovals =
-        codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName()).stream()
+        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName())
+            .getOverrideApproval().stream()
             .sorted(comparing(RequiredApproval::toString))
             .collect(toImmutableList());
 
