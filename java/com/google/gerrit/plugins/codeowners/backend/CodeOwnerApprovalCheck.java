@@ -59,7 +59,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -247,13 +246,17 @@ public class CodeOwnerApprovalCheck {
           "patchSetUploader = %d, implicit approval from uploader is %s",
           patchSetUploader.get(), enableImplicitApprovalFromUploader ? "enabled" : "disabled");
 
+      ImmutableList<PatchSetApproval> currentPatchSetApprovals =
+          getCurrentPatchSetApprovals(changeNotes);
+
       RequiredApproval requiredApproval =
           codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
       logger.atFine().log("requiredApproval = %s", requiredApproval);
 
       ImmutableSet<RequiredApproval> overrideApprovals =
           codeOwnersPluginConfiguration.getOverrideApproval(changeNotes.getProjectName());
-      boolean hasOverride = hasOverride(overrideApprovals, changeNotes, patchSetUploader);
+      boolean hasOverride =
+          hasOverride(currentPatchSetApprovals, overrideApprovals, changeNotes, patchSetUploader);
       logger.atFine().log(
           "hasOverride = %s (overrideApprovals = %s)",
           hasOverride,
@@ -279,7 +282,8 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds =
           getReviewerAccountIds(requiredApproval, changeNotes, patchSetUploader);
       ImmutableSet<Account.Id> approverAccountIds =
-          getApproverAccountIds(requiredApproval, changeNotes, patchSetUploader);
+          getApproverAccountIds(
+              currentPatchSetApprovals, requiredApproval, changeNotes, patchSetUploader);
       logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
       FallbackCodeOwners fallbackCodeOwners =
@@ -877,20 +881,12 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the change notes
    */
   private ImmutableSet<Account.Id> getApproverAccountIds(
-      RequiredApproval requiredApproval, ChangeNotes changeNotes, Account.Id patchSetUploader) {
+      ImmutableList<PatchSetApproval> currentPatchSetApprovals,
+      RequiredApproval requiredApproval,
+      ChangeNotes changeNotes,
+      Account.Id patchSetUploader) {
     ImmutableSet<Account.Id> approverAccountIds =
-        StreamSupport.stream(
-                approvalsUtil
-                    .byPatchSet(
-                        changeNotes,
-                        changeNotes.getCurrentPatchSet().id(),
-                        /** revWalk */
-                        null,
-                        /** repoConfig */
-                        null)
-                    .spliterator(),
-                /** parallel */
-                false)
+        currentPatchSetApprovals.stream()
             .filter(requiredApproval::isApprovedBy)
             .map(PatchSetApproval::accountId)
             .collect(toImmutableSet());
@@ -905,6 +901,17 @@ public class CodeOwnerApprovalCheck {
     }
 
     return approverAccountIds;
+  }
+
+  private ImmutableList<PatchSetApproval> getCurrentPatchSetApprovals(ChangeNotes changeNotes) {
+    return ImmutableList.copyOf(
+        approvalsUtil.byPatchSet(
+            changeNotes,
+            changeNotes.getCurrentPatchSet().id(),
+            /** revWalk */
+            null,
+            /** repoConfig */
+            null));
   }
 
   private ImmutableSet<Account.Id> filterOutAccount(
@@ -923,6 +930,7 @@ public class CodeOwnerApprovalCheck {
    * @return whether the given change has an override approval
    */
   private boolean hasOverride(
+      ImmutableList<PatchSetApproval> currentPatchSetApprovals,
       ImmutableSet<RequiredApproval> overrideApprovals,
       ChangeNotes changeNotes,
       Account.Id patchSetUploader) {
@@ -930,18 +938,7 @@ public class CodeOwnerApprovalCheck {
         overrideApprovals.stream()
             .filter(overrideApproval -> overrideApproval.labelType().isIgnoreSelfApproval())
             .collect(toImmutableSet());
-    return StreamSupport.stream(
-            approvalsUtil
-                .byPatchSet(
-                    changeNotes,
-                    changeNotes.getCurrentPatchSet().id(),
-                    /** revWalk */
-                    null,
-                    /** repoConfig */
-                    null)
-                .spliterator(),
-            /** parallel */
-            false)
+    return currentPatchSetApprovals.stream()
         .filter(
             approval -> {
               // If the approval is from the patch set uploader and if it matches any of the labels
