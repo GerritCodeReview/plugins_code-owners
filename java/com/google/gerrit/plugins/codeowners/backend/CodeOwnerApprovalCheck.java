@@ -282,6 +282,9 @@ public class CodeOwnerApprovalCheck {
           getApproverAccountIds(requiredApproval, changeNotes, patchSetUploader);
       logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
+      FallbackCodeOwners fallbackCodeOwners =
+          codeOwnersPluginConfiguration.getFallbackCodeOwners(branch.project());
+
       return changedFiles
           .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
           .stream()
@@ -295,6 +298,7 @@ public class CodeOwnerApprovalCheck {
                       patchSetUploader,
                       reviewerAccountIds,
                       approverAccountIds,
+                      fallbackCodeOwners,
                       hasOverride,
                       changedFile));
     }
@@ -362,6 +366,7 @@ public class CodeOwnerApprovalCheck {
                       /* reviewerAccountIds= */ ImmutableSet.of(),
                       // Assume an explicit approval of the given account.
                       /* approverAccountIds= */ ImmutableSet.of(accountId),
+                      fallbackCodeOwners,
                       /* hasOverride= */ false,
                       changedFile));
     }
@@ -408,6 +413,7 @@ public class CodeOwnerApprovalCheck {
       @Nullable Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
+      FallbackCodeOwners fallbackCodeOwners,
       boolean hasOverride,
       ChangedFile changedFile) {
     try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatus.start()) {
@@ -427,6 +433,7 @@ public class CodeOwnerApprovalCheck {
                           patchSetUploader,
                           reviewerAccountIds,
                           approverAccountIds,
+                          fallbackCodeOwners,
                           hasOverride,
                           newPath));
 
@@ -448,6 +455,7 @@ public class CodeOwnerApprovalCheck {
                     patchSetUploader,
                     reviewerAccountIds,
                     approverAccountIds,
+                    fallbackCodeOwners,
                     hasOverride,
                     changedFile.oldPath().get()));
       }
@@ -467,6 +475,7 @@ public class CodeOwnerApprovalCheck {
       @Nullable Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
+      FallbackCodeOwners fallbackCodeOwners,
       boolean hasOverride,
       Path absolutePath) {
     logger.atFine().log("computing path status for %s", absolutePath);
@@ -558,6 +567,7 @@ public class CodeOwnerApprovalCheck {
                 patchSetUploader,
                 reviewerAccountIds,
                 approverAccountIds,
+                fallbackCodeOwners,
                 absolutePath));
       }
     }
@@ -700,9 +710,8 @@ public class CodeOwnerApprovalCheck {
       @Nullable Account.Id patchSetUploader,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
+      FallbackCodeOwners fallbackCodeOwners,
       Path absolutePath) {
-    FallbackCodeOwners fallbackCodeOwners =
-        codeOwnersPluginConfiguration.getFallbackCodeOwners(branch.project());
     logger.atFine().log(
         "getting code owner status for fallback code owners (fallback code owners = %s)",
         fallbackCodeOwners);
