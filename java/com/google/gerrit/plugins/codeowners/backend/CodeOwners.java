@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Throwables;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
@@ -37,10 +38,14 @@ import org.eclipse.jgit.lib.ObjectId;
 @Singleton
 public class CodeOwners {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
-  CodeOwners(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+  CodeOwners(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   /**
@@ -54,6 +59,7 @@ public class CodeOwners {
   public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     requireNonNull(revision, "revision");
+    codeOwnerMetrics.countCodeOwnerConfigReads.increment();
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
@@ -68,6 +74,7 @@ public class CodeOwners {
    */
   public Optional<CodeOwnerConfig> getFromCurrentRevision(CodeOwnerConfig.Key codeOwnerConfigKey) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+    codeOwnerMetrics.countCodeOwnerConfigReads.increment();
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, /* revision= */ null);

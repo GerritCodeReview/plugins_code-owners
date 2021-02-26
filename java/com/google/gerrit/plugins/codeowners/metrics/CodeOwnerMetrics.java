@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.metrics;
 
+import com.google.gerrit.metrics.Counter0;
 import com.google.gerrit.metrics.Description;
 import com.google.gerrit.metrics.Description.Units;
 import com.google.gerrit.metrics.MetricMaker;
@@ -24,6 +25,7 @@ import com.google.inject.Singleton;
 /** Metrics of the code-owners plugin. */
 @Singleton
 public class CodeOwnerMetrics {
+  // latency metrics
   public final Timer0 computeChangedFiles;
   public final Timer0 computeFileStatus;
   public final Timer0 computeFileStatuses;
@@ -36,12 +38,16 @@ public class CodeOwnerMetrics {
   public final Timer0 resolvePathCodeOwners;
   public final Timer0 runCodeOwnerSubmitRule;
 
+  // counter metrics
+  public final Counter0 countCodeOwnerConfigReads;
+
   private final MetricMaker metricMaker;
 
   @Inject
   CodeOwnerMetrics(MetricMaker metricMaker) {
     this.metricMaker = metricMaker;
 
+    // latency metrics
     this.computeChangedFiles =
         createLatencyTimer("compute_changed_files", "Latency for computing changed files");
     this.computeFileStatus =
@@ -79,11 +85,19 @@ public class CodeOwnerMetrics {
     this.runCodeOwnerSubmitRule =
         createLatencyTimer(
             "run_code_owner_submit_rule", "Latency for running the code owner submit rule");
+
+    // counter metrics
+    this.countCodeOwnerConfigReads =
+        createCounter("count_code_owner_config_reads", "Total number of code owner config reads");
   }
 
   private Timer0 createLatencyTimer(String name, String description) {
     return metricMaker.newTimer(
         "code_owners/" + name,
         new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
+  }
+
+  private Counter0 createCounter(String name, String description) {
+    return metricMaker.newCounter("code_owners/" + name, new Description(description).setRate());
   }
 }
