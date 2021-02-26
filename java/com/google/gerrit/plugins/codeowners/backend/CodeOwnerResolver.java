@@ -155,7 +155,8 @@ public class CodeOwnerResolver {
     requireNonNull(codeOwnerConfig, "codeOwnerConfig");
     requireNonNull(absolutePath, "absolutePath");
     checkState(absolutePath.isAbsolute(), "path %s must be absolute", absolutePath);
-    return resolvePathCodeOwners(pathCodeOwnersFactory.create(codeOwnerConfig, absolutePath));
+    return resolvePathCodeOwners(
+        pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, absolutePath));
   }
 
   /**

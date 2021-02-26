@@ -89,7 +89,7 @@ public class CodeOwnerApprovalCheck {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ChangedFiles changedFiles;
   private final PureRevertCache pureRevertCache;
-  private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
+  private final Provider<CodeOwnerConfigHierarchy> codeOwnerConfigHierarchyProvider;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final ApprovalsUtil approvalsUtil;
   private final CodeOwnerMetrics codeOwnerMetrics;
@@ -101,7 +101,7 @@ public class CodeOwnerApprovalCheck {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       ChangedFiles changedFiles,
       PureRevertCache pureRevertCache,
-      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
+      Provider<CodeOwnerConfigHierarchy> codeOwnerConfigHierarchyProvider,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ApprovalsUtil approvalsUtil,
       CodeOwnerMetrics codeOwnerMetrics) {
@@ -110,7 +110,7 @@ public class CodeOwnerApprovalCheck {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.changedFiles = changedFiles;
     this.pureRevertCache = pureRevertCache;
-    this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
+    this.codeOwnerConfigHierarchyProvider = codeOwnerConfigHierarchyProvider;
     this.codeOwnerResolver = codeOwnerResolver;
     this.approvalsUtil = approvalsUtil;
     this.codeOwnerMetrics = codeOwnerMetrics;
@@ -285,12 +285,14 @@ public class CodeOwnerApprovalCheck {
       FallbackCodeOwners fallbackCodeOwners =
           codeOwnersPluginConfiguration.getFallbackCodeOwners(branch.project());
 
+      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
       return changedFiles
           .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
           .stream()
           .map(
               changedFile ->
                   getFileStatus(
+                      codeOwnerConfigHierarchy,
                       branch,
                       revision,
                       globalCodeOwners,
@@ -350,10 +352,12 @@ public class CodeOwnerApprovalCheck {
         return getAllPathsAsApproved(changeNotes, patchSet);
       }
 
+      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
       return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
           .map(
               changedFile ->
                   getFileStatus(
+                      codeOwnerConfigHierarchy,
                       branch,
                       revision,
                       /* globalCodeOwners= */ CodeOwnerResolverResult.createEmpty(),
@@ -406,6 +410,7 @@ public class CodeOwnerApprovalCheck {
   }
 
   private FileCodeOwnerStatus getFileStatus(
+      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       BranchNameKey branch,
       ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,
@@ -426,6 +431,7 @@ public class CodeOwnerApprovalCheck {
               .map(
                   newPath ->
                       getPathCodeOwnerStatus(
+                          codeOwnerConfigHierarchy,
                           branch,
                           revision,
                           globalCodeOwners,
@@ -448,6 +454,7 @@ public class CodeOwnerApprovalCheck {
         oldPathStatus =
             Optional.of(
                 getPathCodeOwnerStatus(
+                    codeOwnerConfigHierarchy,
                     branch,
                     revision,
                     globalCodeOwners,
@@ -468,6 +475,7 @@ public class CodeOwnerApprovalCheck {
   }
 
   private PathCodeOwnerStatus getPathCodeOwnerStatus(
+      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       BranchNameKey branch,
       ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,

@@ -28,6 +28,13 @@ usage and performance of the code owners functionality.
 * `run_code_owner_submit_rule`:
   Latency for running the code owner submit rule.
 
+## <a id="counterMetrics"> Counter Metrics
+
+* `count_code_owner_config_reads`:
+  Total number of code owner config reads from backend.
+* `count_code_owner_config_cache_reads`:
+  Total number of code owner config reads from cache.
+
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)

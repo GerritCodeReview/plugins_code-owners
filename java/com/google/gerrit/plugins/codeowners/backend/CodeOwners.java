@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Throwables;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
@@ -35,39 +36,32 @@ import org.eclipse.jgit.lib.ObjectId;
  * that we avoid code repetition in the code owner backends.
  */
 @Singleton
-public class CodeOwners {
+public class CodeOwners implements CodeOwnerConfigLoader {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
-  CodeOwners(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+  CodeOwners(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
-  /**
-   * Retrieves the code owner config for the given key from the given branch revision.
-   *
-   * @param codeOwnerConfigKey the key of the code owner config that should be retrieved
-   * @param revision the branch revision from which the code owner config should be loaded
-   * @return the code owner config for the given key if it exists, otherwise {@link
-   *     Optional#empty()}
-   */
+  @Override
   public Optional<CodeOwnerConfig> get(CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     requireNonNull(revision, "revision");
+    codeOwnerMetrics.countCodeOwnerConfigReads.increment();
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
   }
 
-  /**
-   * Retrieves the code owner config for the given key from the current revision of the branch.
-   *
-   * @param codeOwnerConfigKey the key of the code owner config that should be retrieved
-   * @return the code owner config for the given key if it exists, otherwise {@link
-   *     Optional#empty()}
-   */
+  @Override
   public Optional<CodeOwnerConfig> getFromCurrentRevision(CodeOwnerConfig.Key codeOwnerConfigKey) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+    codeOwnerMetrics.countCodeOwnerConfigReads.increment();
     CodeOwnerBackend codeOwnerBackend =
         codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, /* revision= */ null);
