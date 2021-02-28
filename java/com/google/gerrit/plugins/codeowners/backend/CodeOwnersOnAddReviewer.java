@@ -25,6 +25,7 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.events.ReviewerAddedListener;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ChangeMessagesUtil;
@@ -88,11 +89,10 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
     Change.Id changeId = Change.id(event.getChange()._number);
     Project.NameKey projectName = Project.nameKey(event.getChange().project);
 
-    if (codeOwnersPluginConfiguration
-            .getProjectConfig(projectName)
-            .isDisabled(event.getChange().branch)
-        || codeOwnersPluginConfiguration.getProjectConfig(projectName).getMaxPathsInChangeMessages()
-            <= 0) {
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(projectName);
+    if (codeOwnersConfig.isDisabled(event.getChange().branch)
+        || codeOwnersConfig.getMaxPathsInChangeMessages() <= 0) {
       return;
     }
 

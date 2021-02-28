@@ -38,6 +38,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
@@ -305,9 +306,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevWalk revWalk,
       RevCommit revCommit,
       IdentifiedUser user) {
-    if (codeOwnersPluginConfiguration
-        .getProjectConfig(branchNameKey.project())
-        .isDisabled(branchNameKey.branch())) {
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project());
+    if (codeOwnersConfig.isDisabled(branchNameKey.branch())) {
       return Optional.of(
           ValidationResult.create(
               pluginName,
@@ -315,9 +316,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               new CommitValidationMessage(
                   "code-owners functionality is disabled", ValidationMessage.Type.HINT)));
     }
-    if (codeOwnersPluginConfiguration
-        .getProjectConfig(branchNameKey.project())
-        .areCodeOwnerConfigsReadOnly()) {
+    if (codeOwnersConfig.areCodeOwnerConfigsReadOnly()) {
       return Optional.of(
           ValidationResult.create(
               pluginName,
@@ -328,10 +327,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
 
     try {
-      CodeOwnerBackend codeOwnerBackend =
-          codeOwnersPluginConfiguration
-              .getProjectConfig(branchNameKey.project())
-              .getBackend(branchNameKey.branch());
+      CodeOwnerBackend codeOwnerBackend = codeOwnersConfig.getBackend(branchNameKey.branch());
 
       // For merge commits, always do the comparison against the destination branch
       // (MergeCommitStrategy.ALL_CHANGED_FILES). Doing the comparison against the auto-merge

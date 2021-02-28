@@ -21,6 +21,7 @@ import static java.util.Comparator.comparing;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.entities.PatchSet;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.IdentifiedUser;
@@ -57,9 +58,9 @@ class OnCodeOwnerOverride implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals) {
-    if (codeOwnersPluginConfiguration
-        .getProjectConfig(changeNotes.getProjectName())
-        .isDisabled(changeNotes.getChange().getDest().branch())) {
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
+    if (codeOwnersConfig.isDisabled(changeNotes.getChange().getDest().branch())) {
       return Optional.empty();
     }
 
@@ -69,8 +70,7 @@ class OnCodeOwnerOverride implements OnPostReview {
     }
 
     ImmutableList<RequiredApproval> overrideApprovals =
-        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName())
-            .getOverrideApproval().stream()
+        codeOwnersConfig.getOverrideApproval().stream()
             .sorted(comparing(RequiredApproval::toString))
             .collect(toImmutableList());
 

@@ -34,6 +34,7 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.metrics.Timer0;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
@@ -234,17 +235,14 @@ public class CodeOwnerApprovalCheck {
           "prepare stream to compute file statuses (project = %s, change = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get());
 
-      if (codeOwnersPluginConfiguration
-              .getProjectConfig(changeNotes.getProjectName())
-              .arePureRevertsExempted()
-          && isPureRevert(changeNotes)) {
+      CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+          codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
+
+      if (codeOwnersConfig.arePureRevertsExempted() && isPureRevert(changeNotes)) {
         return getAllPathsAsApproved(changeNotes, changeNotes.getCurrentPatchSet());
       }
 
-      boolean enableImplicitApprovalFromUploader =
-          codeOwnersPluginConfiguration
-              .getProjectConfig(changeNotes.getProjectName())
-              .areImplicitApprovalsEnabled();
+      boolean enableImplicitApprovalFromUploader = codeOwnersConfig.areImplicitApprovalsEnabled();
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
       logger.atFine().log(
           "patchSetUploader = %d, implicit approval from uploader is %s",
@@ -253,16 +251,10 @@ public class CodeOwnerApprovalCheck {
       ImmutableList<PatchSetApproval> currentPatchSetApprovals =
           getCurrentPatchSetApprovals(changeNotes);
 
-      RequiredApproval requiredApproval =
-          codeOwnersPluginConfiguration
-              .getProjectConfig(changeNotes.getProjectName())
-              .getRequiredApproval();
+      RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
       logger.atFine().log("requiredApproval = %s", requiredApproval);
 
-      ImmutableSet<RequiredApproval> overrideApprovals =
-          codeOwnersPluginConfiguration
-              .getProjectConfig(changeNotes.getProjectName())
-              .getOverrideApproval();
+      ImmutableSet<RequiredApproval> overrideApprovals = codeOwnersConfig.getOverrideApproval();
       boolean hasOverride =
           hasOverride(currentPatchSetApprovals, overrideApprovals, changeNotes, patchSetUploader);
       logger.atFine().log(
@@ -294,8 +286,7 @@ public class CodeOwnerApprovalCheck {
               currentPatchSetApprovals, requiredApproval, changeNotes, patchSetUploader);
       logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
-      FallbackCodeOwners fallbackCodeOwners =
-          codeOwnersPluginConfiguration.getProjectConfig(branch.project()).getFallbackCodeOwners();
+      FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
 
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
       return changedFiles
@@ -347,10 +338,10 @@ public class CodeOwnerApprovalCheck {
           changeNotes.getChangeId().get(),
           patchSet.id().get());
 
-      RequiredApproval requiredApproval =
-          codeOwnersPluginConfiguration
-              .getProjectConfig(changeNotes.getProjectName())
-              .getRequiredApproval();
+      CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+          codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
+
+      RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
       logger.atFine().log("requiredApproval = %s", requiredApproval);
 
       BranchNameKey branch = changeNotes.getChange().getDest();
@@ -358,8 +349,7 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
       boolean isProjectOwner = isProjectOwner(changeNotes.getProjectName(), accountId);
-      FallbackCodeOwners fallbackCodeOwners =
-          codeOwnersPluginConfiguration.getProjectConfig(branch.project()).getFallbackCodeOwners();
+      FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
       logger.atFine().log(
           "fallbackCodeOwner = %s, isProjectOwner = %s", fallbackCodeOwners, isProjectOwner);
       if (fallbackCodeOwners.equals(FallbackCodeOwners.PROJECT_OWNERS) && isProjectOwner) {

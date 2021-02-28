@@ -33,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.GeneralInfo;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -78,12 +79,12 @@ public class CodeOwnerProjectConfigJson {
   }
 
   CodeOwnerBranchConfigInfo format(BranchResource branchResource) {
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(branchResource.getNameKey());
+
     CodeOwnerBranchConfigInfo info = new CodeOwnerBranchConfigInfo();
 
-    boolean disabled =
-        codeOwnersPluginConfiguration
-            .getProjectConfig(branchResource.getNameKey())
-            .isDisabled(branchResource.getBranchKey().branch());
+    boolean disabled = codeOwnersConfig.isDisabled(branchResource.getBranchKey().branch());
     info.disabled = disabled ? disabled : null;
 
     if (disabled) {
@@ -93,10 +94,7 @@ public class CodeOwnerProjectConfigJson {
     info.general = formatGeneralInfo(branchResource.getNameKey());
     info.backendId =
         CodeOwnerBackendId.getBackendId(
-            codeOwnersPluginConfiguration
-                .getProjectConfig(branchResource.getNameKey())
-                .getBackend(branchResource.getBranchKey().branch())
-                .getClass());
+            codeOwnersConfig.getBackend(branchResource.getBranchKey().branch()).getClass());
     info.requiredApproval = formatRequiredApprovalInfo(branchResource.getNameKey());
     info.overrideApproval = formatOverrideApprovalInfo(branchResource.getNameKey());
 
@@ -104,22 +102,15 @@ public class CodeOwnerProjectConfigJson {
   }
 
   private GeneralInfo formatGeneralInfo(Project.NameKey projectName) {
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(projectName);
+
     GeneralInfo generalInfo = new GeneralInfo();
-    generalInfo.fileExtension =
-        codeOwnersPluginConfiguration.getProjectConfig(projectName).getFileExtension().orElse(null);
-    generalInfo.mergeCommitStrategy =
-        codeOwnersPluginConfiguration.getProjectConfig(projectName).getMergeCommitStrategy();
-    generalInfo.implicitApprovals =
-        codeOwnersPluginConfiguration.getProjectConfig(projectName).areImplicitApprovalsEnabled()
-            ? true
-            : null;
-    generalInfo.overrideInfoUrl =
-        codeOwnersPluginConfiguration
-            .getProjectConfig(projectName)
-            .getOverrideInfoUrl()
-            .orElse(null);
-    generalInfo.fallbackCodeOwners =
-        codeOwnersPluginConfiguration.getProjectConfig(projectName).getFallbackCodeOwners();
+    generalInfo.fileExtension = codeOwnersConfig.getFileExtension().orElse(null);
+    generalInfo.mergeCommitStrategy = codeOwnersConfig.getMergeCommitStrategy();
+    generalInfo.implicitApprovals = codeOwnersConfig.areImplicitApprovalsEnabled() ? true : null;
+    generalInfo.overrideInfoUrl = codeOwnersConfig.getOverrideInfoUrl().orElse(null);
+    generalInfo.fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
     return generalInfo;
   }
 
