@@ -22,6 +22,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
+import com.google.gerrit.server.cache.PerThreadCache;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -72,7 +73,9 @@ public class CodeOwnersPluginConfiguration {
    */
   public CodeOwnersPluginConfigSnapshot getProjectConfig(Project.NameKey projectName) {
     requireNonNull(projectName, "projectName");
-    return codeOwnersPluginConfigSnapshotFactory.create(projectName);
+    return PerThreadCache.getOrCompute(
+        PerThreadCache.Key.create(CodeOwnersPluginConfigSnapshot.class, projectName),
+        () -> codeOwnersPluginConfigSnapshotFactory.create(projectName));
   }
 
   /**
