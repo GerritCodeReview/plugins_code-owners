@@ -45,6 +45,8 @@ usage and performance of the code owners functionality.
   Total number of code owner config reads from backend.
 * `count_code_owner_config_cache_reads`:
   Total number of code owner config reads from cache.
+* `count_code_owner_submit_rule_runs`:
+  Total number of code owner submit rule runs.
 
 ---
 
