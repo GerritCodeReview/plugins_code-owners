@@ -28,7 +28,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class CodeOwnerMetrics {
   // latency metrics
-  public final Timer0 computeChangedFiles;
+  public final Timer0 computeChangedFilesAgainstAutoMerge;
+  public final Timer0 computeChangedFilesAgainstFirstParent;
   public final Timer0 computeFileStatus;
   public final Timer0 computeFileStatuses;
   public final Timer0 computeOwnedPaths;
@@ -56,8 +57,14 @@ public class CodeOwnerMetrics {
     this.metricMaker = metricMaker;
 
     // latency metrics
-    this.computeChangedFiles =
-        createLatencyTimer("compute_changed_files", "Latency for computing changed files");
+    this.computeChangedFilesAgainstAutoMerge =
+        createLatencyTimer(
+            "compute_changed_files_against_auto_merge",
+            "Latency for computing changed files against auto merge");
+    this.computeChangedFilesAgainstFirstParent =
+        createLatencyTimer(
+            "compute_changed_files_against_first_parent",
+            "Latency for computing changed files against first parent");
     this.computeFileStatus =
         createLatencyTimer(
             "compute_file_status", "Latency for computing the file status of one file");

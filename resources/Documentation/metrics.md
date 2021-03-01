@@ -5,8 +5,10 @@ usage and performance of the code owners functionality.
 
 ## <a id="latencyMetrics"> Latency Metrics
 
-* `compute_changed_files`:
-  Latency for computing changed files.
+* `compute_changed_files_against_auto_merge`:
+  Latency for computing changed files against auto merge.
+* `compute_changed_files_against_first_parent`:
+  Latency for computing changed files against first parent.
 * `compute_file_status`:
   Latency for computing the file status for one file.
 * `compute_file_statuses`:
