@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Throwables;
+import com.google.gerrit.metrics.Timer1;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.inject.Inject;
@@ -57,7 +58,10 @@ public class CodeOwners implements CodeOwnerConfigLoader {
         codeOwnersPluginConfiguration
             .getProjectConfig(codeOwnerConfigKey.project())
             .getBackend(codeOwnerConfigKey.branchNameKey().branch());
-    return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
+    try (Timer1.Context<String> ctx =
+        codeOwnerMetrics.loadCodeOwnerConfig.start(codeOwnerBackend.getClass().getSimpleName())) {
+      return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
+    }
   }
 
   @Override
@@ -68,7 +72,10 @@ public class CodeOwners implements CodeOwnerConfigLoader {
         codeOwnersPluginConfiguration
             .getProjectConfig(codeOwnerConfigKey.project())
             .getBackend(codeOwnerConfigKey.branchNameKey().branch());
-    return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, /* revision= */ null);
+    try (Timer1.Context<String> ctx =
+        codeOwnerMetrics.loadCodeOwnerConfig.start(codeOwnerBackend.getClass().getSimpleName())) {
+      return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, /* revision= */ null);
+    }
   }
 
   /**

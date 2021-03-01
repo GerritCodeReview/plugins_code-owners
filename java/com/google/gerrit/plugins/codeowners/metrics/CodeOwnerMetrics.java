@@ -17,8 +17,10 @@ package com.google.gerrit.plugins.codeowners.metrics;
 import com.google.gerrit.metrics.Counter0;
 import com.google.gerrit.metrics.Description;
 import com.google.gerrit.metrics.Description.Units;
+import com.google.gerrit.metrics.Field;
 import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
+import com.google.gerrit.metrics.Timer1;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -37,6 +39,11 @@ public class CodeOwnerMetrics {
   public final Timer0 resolveCodeOwnerConfigImports;
   public final Timer0 resolvePathCodeOwners;
   public final Timer0 runCodeOwnerSubmitRule;
+
+  // code owner config latency metrics
+  public final Timer1<String> loadCodeOwnerConfig;
+  public final Timer0 readCodeOwnerConfig;
+  public final Timer1<String> parseCodeOwnerConfig;
 
   // counter metrics
   public final Counter0 countCodeOwnerConfigReads;
@@ -87,6 +94,19 @@ public class CodeOwnerMetrics {
         createLatencyTimer(
             "run_code_owner_submit_rule", "Latency for running the code owner submit rule");
 
+    // code owner config latency metrics
+    this.loadCodeOwnerConfig =
+        createTimerWithClassField(
+            "load_code_owner_config",
+            "Latency for loading a code owner config file (read + parse)",
+            "backend");
+    this.parseCodeOwnerConfig =
+        createTimerWithClassField(
+            "parse_code_owner_config", "Latency for parsing a code owner config file", "parser");
+    this.readCodeOwnerConfig =
+        createLatencyTimer(
+            "read_code_owner_config", "Latency for reading a code owner config file");
+
     // counter metrics
     this.countCodeOwnerConfigReads =
         createCounter(
@@ -102,6 +122,19 @@ public class CodeOwnerMetrics {
     return metricMaker.newTimer(
         "code_owners/" + name,
         new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
+  }
+
+  private Timer1<String> createTimerWithClassField(
+      String name, String description, String fieldName) {
+    Field<String> CODE_OWNER_BACKEND_FIELD =
+        Field.ofString(
+                fieldName, (metadataBuilder, fieldValue) -> metadataBuilder.className(fieldValue))
+            .build();
+
+    return metricMaker.newTimer(
+        "code_owners/" + name,
+        new Description(description).setCumulative().setUnit(Description.Units.MILLISECONDS),
+        CODE_OWNER_BACKEND_FIELD);
   }
 
   private Counter0 createCounter(String name, String description) {

@@ -47,10 +47,13 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   @Inject private ProjectOperations projectOperations;
   @Inject private MetaDataUpdate.Server metaDataUpdateServer;
 
+  private CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory;
   private TestCodeOwnerConfigStorage testCodeOwnerConfigStorage;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
+    codeOwnerConfigFileFactory =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigFile.Factory.class);
     testCodeOwnerConfigStorage =
         plugin
             .getSysInjector()
@@ -534,7 +537,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
   private CodeOwnerConfigFile loadCodeOwnerConfig(CodeOwnerConfig.Key codeOwnerConfigKey)
       throws IOException, ConfigInvalidException {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
-      return CodeOwnerConfigFile.loadCurrent(
+      return codeOwnerConfigFileFactory.loadCurrent(
           CODE_OWNER_CONFIG_FILE_NAME, CODE_OWNER_CONFIG_PARSER, repository, codeOwnerConfigKey);
     }
   }
@@ -544,7 +547,7 @@ public class CodeOwnerConfigFileTest extends AbstractCodeOwnersTest {
       throws IOException, ConfigInvalidException {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project());
         RevWalk revWalk = new RevWalk(repository)) {
-      return CodeOwnerConfigFile.load(
+      return codeOwnerConfigFileFactory.load(
           CODE_OWNER_CONFIG_FILE_NAME,
           CODE_OWNER_CONFIG_PARSER,
           revWalk,
