@@ -85,29 +85,27 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void disableAndReenableCodeOwnersFunctionality() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled()).isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.disabled = true;
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.status.disabled).isTrue();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled()).isTrue();
 
     input.disabled = false;
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.status.disabled).isNull();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled()).isFalse();
   }
 
   @Test
   public void setDisabledBranches() throws Exception {
-    BranchNameKey masterBranch = BranchNameKey.create(project, "master");
-    BranchNameKey fooBranch = BranchNameKey.create(project, "foo");
-
-    createBranch(fooBranch);
-    assertThat(codeOwnersPluginConfiguration.isDisabled(masterBranch)).isFalse();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(fooBranch)).isFalse();
+    createBranch(BranchNameKey.create(project, "foo"));
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("master"))
+        .isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("foo")).isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.disabledBranches = ImmutableList.of("refs/heads/master", "refs/heads/foo");
@@ -115,25 +113,25 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.status.disabledBranches)
         .containsExactly("refs/heads/master", "refs/heads/foo");
-    assertThat(codeOwnersPluginConfiguration.isDisabled(masterBranch)).isTrue();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(fooBranch)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("master"))
+        .isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("foo")).isTrue();
 
     input = new CodeOwnerProjectConfigInput();
     input.disabledBranches = ImmutableList.of();
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.status.disabledBranches).isNull();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(masterBranch)).isFalse();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(fooBranch)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("master"))
+        .isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("foo")).isFalse();
   }
 
   @Test
   public void setDisabledBranchesRegEx() throws Exception {
-    BranchNameKey masterBranch = BranchNameKey.create(project, "master");
-    BranchNameKey fooBranch = BranchNameKey.create(project, "foo");
-
-    createBranch(fooBranch);
-    assertThat(codeOwnersPluginConfiguration.isDisabled(masterBranch)).isFalse();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(fooBranch)).isFalse();
+    createBranch(BranchNameKey.create(project, "foo"));
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("master"))
+        .isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("foo")).isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.disabledBranches = ImmutableList.of("refs/heads/*");
@@ -141,15 +139,14 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.status.disabledBranches)
         .containsExactly("refs/heads/master", "refs/heads/foo");
-    assertThat(codeOwnersPluginConfiguration.isDisabled(masterBranch)).isTrue();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(fooBranch)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("master"))
+        .isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("foo")).isTrue();
   }
 
   @Test
   public void setDisabledBranchThatDoesntExist() throws Exception {
-    BranchNameKey fooBranch = BranchNameKey.create(project, "foo");
-
-    assertThat(codeOwnersPluginConfiguration.isDisabled(fooBranch)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("foo")).isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.disabledBranches = ImmutableList.of("refs/heads/foo");
@@ -157,9 +154,9 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     // status.disabledBranches does only contain existing branches
     assertThat(updatedConfig.status.disabledBranches).isNull();
-    assertThat(codeOwnersPluginConfiguration.isDisabled(fooBranch)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("foo")).isTrue();
 
-    createBranch(fooBranch);
+    createBranch(BranchNameKey.create(project, "foo"));
     assertThat(projectCodeOwnersApiFactory.project(project).getConfig().status.disabledBranches)
         .containsExactly("refs/heads/foo");
   }
@@ -183,24 +180,29 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void setFileExtension() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
+        .isEmpty();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.fileExtension = "foo";
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.fileExtension).isEqualTo("foo");
-    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).value().isEqualTo("foo");
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
+        .value()
+        .isEqualTo("foo");
 
     input.fileExtension = "";
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.fileExtension).isNull();
-    assertThat(codeOwnersPluginConfiguration.getFileExtension(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
+        .isEmpty();
   }
 
   @Test
   public void setRequiredApproval() throws Exception {
-    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getProjectConfig(project).getRequiredApproval();
     assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
     assertThat(requiredApproval).hasValueThat().isEqualTo(1);
 
@@ -215,7 +217,8 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.requiredApproval.label).isEqualTo(otherLabel);
     assertThat(updatedConfig.requiredApproval.value).isEqualTo(2);
-    requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    requiredApproval =
+        codeOwnersPluginConfiguration.getProjectConfig(project).getRequiredApproval();
     assertThat(requiredApproval).hasLabelNameThat().isEqualTo(otherLabel);
     assertThat(requiredApproval).hasValueThat().isEqualTo(2);
 
@@ -223,7 +226,8 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.requiredApproval.label).isEqualTo("Code-Review");
     assertThat(updatedConfig.requiredApproval.value).isEqualTo(1);
-    requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    requiredApproval =
+        codeOwnersPluginConfiguration.getProjectConfig(project).getRequiredApproval();
     assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
     assertThat(requiredApproval).hasValueThat().isEqualTo(1);
   }
@@ -249,7 +253,8 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void setOverrideApproval() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval())
+        .isEmpty();
 
     String overrideLabel1 = "Bypass-Owners";
     String overrideLabel2 = "Owners-Override";
@@ -265,12 +270,14 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(updatedConfig.overrideApproval.get(0).value).isEqualTo(1);
     assertThat(updatedConfig.overrideApproval.get(1).label).isEqualTo(overrideLabel2);
     assertThat(updatedConfig.overrideApproval.get(1).value).isEqualTo(1);
-    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).hasSize(2);
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval())
+        .hasSize(2);
 
     input.overrideApprovals = ImmutableList.of();
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.overrideApproval).isNull();
-    assertThat(codeOwnersPluginConfiguration.getOverrideApproval(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval())
+        .isEmpty();
   }
 
   @Test
@@ -294,7 +301,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void setFallbackCodeOwners() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFallbackCodeOwners())
         .isEqualTo(FallbackCodeOwners.NONE);
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
@@ -302,37 +309,39 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.fallbackCodeOwners).isEqualTo(FallbackCodeOwners.ALL_USERS);
-    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFallbackCodeOwners())
         .isEqualTo(FallbackCodeOwners.ALL_USERS);
 
     input.fallbackCodeOwners = FallbackCodeOwners.NONE;
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.fallbackCodeOwners).isEqualTo(FallbackCodeOwners.NONE);
-    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFallbackCodeOwners())
         .isEqualTo(FallbackCodeOwners.NONE);
   }
 
   @Test
   public void setGlobalCodeOwners() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getGlobalCodeOwners(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getGlobalCodeOwners())
+        .isEmpty();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.globalCodeOwners = ImmutableList.of(user.email(), "foo.bar@example.com");
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(
-            codeOwnersPluginConfiguration.getGlobalCodeOwners(project).stream()
+            codeOwnersPluginConfiguration.getProjectConfig(project).getGlobalCodeOwners().stream()
                 .map(CodeOwnerReference::email)
                 .collect(toImmutableSet()))
         .containsExactly(user.email(), "foo.bar@example.com");
 
     input.globalCodeOwners = ImmutableList.of();
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getGlobalCodeOwners(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getGlobalCodeOwners())
+        .isEmpty();
   }
 
   @Test
   public void setMergeCommitStrategy() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy())
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
@@ -341,166 +350,210 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
-    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy())
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
 
     input.mergeCommitStrategy = MergeCommitStrategy.ALL_CHANGED_FILES;
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
-    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy())
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
   }
 
   @Test
   public void setImplicitApprovals() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isFalse();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).areImplicitApprovalsEnabled())
+        .isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.implicitApprovals = true;
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.implicitApprovals).isTrue();
-    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isTrue();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).areImplicitApprovalsEnabled())
+        .isTrue();
 
     input.implicitApprovals = false;
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.implicitApprovals).isNull();
-    assertThat(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).isFalse();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).areImplicitApprovalsEnabled())
+        .isFalse();
   }
 
   @Test
   public void setOverrideInfoUrl() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getOverrideInfoUrl(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
+        .isEmpty();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.overrideInfoUrl = "http://foo.bar";
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.overrideInfoUrl).isEqualTo("http://foo.bar");
-    assertThat(codeOwnersPluginConfiguration.getOverrideInfoUrl(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
         .value()
         .isEqualTo("http://foo.bar");
 
     input.overrideInfoUrl = "";
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.overrideInfoUrl).isNull();
-    assertThat(codeOwnersPluginConfiguration.getOverrideInfoUrl(project)).isEmpty();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
+        .isEmpty();
   }
 
   @Test
   public void setReadOnly() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(project)).isFalse();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).areCodeOwnerConfigsReadOnly())
+        .isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.readOnly = true;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(project)).isTrue();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).areCodeOwnerConfigsReadOnly())
+        .isTrue();
 
     input.readOnly = false;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(project)).isFalse();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).areCodeOwnerConfigsReadOnly())
+        .isFalse();
   }
 
   @Test
   public void setExemptPureReverts() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.arePureRevertsExempted(project)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).arePureRevertsExempted())
+        .isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.exemptPureReverts = true;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.arePureRevertsExempted(project)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).arePureRevertsExempted())
+        .isTrue();
 
     input.exemptPureReverts = false;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.arePureRevertsExempted(project)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).arePureRevertsExempted())
+        .isFalse();
   }
 
   @Test
   public void setEnableValidationOnCommitReceived() throws Exception {
     assertThat(
-            codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
-                project))
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForCommitReceived())
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.enableValidationOnCommitReceived = CodeOwnerConfigValidationPolicy.FALSE;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(
-            codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
-                project))
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForCommitReceived())
         .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
 
     input.enableValidationOnCommitReceived = CodeOwnerConfigValidationPolicy.TRUE;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(
-            codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
-                project))
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForCommitReceived())
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 
   @Test
   public void setEnableValidationOnSubmit() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(project))
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForSubmit())
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.enableValidationOnSubmit = CodeOwnerConfigValidationPolicy.FALSE;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(project))
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForSubmit())
         .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
 
     input.enableValidationOnSubmit = CodeOwnerConfigValidationPolicy.TRUE;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(project))
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForSubmit())
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 
   @Test
   public void setRejectNonResolvableCodeOwners() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.rejectNonResolvableCodeOwners(project)).isTrue();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableCodeOwners())
+        .isTrue();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.rejectNonResolvableCodeOwners = false;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.rejectNonResolvableCodeOwners(project)).isFalse();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableCodeOwners())
+        .isFalse();
 
     input.rejectNonResolvableCodeOwners = true;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.rejectNonResolvableCodeOwners(project)).isTrue();
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableCodeOwners())
+        .isTrue();
   }
 
   @Test
   public void setRejectNonResolvableImports() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.rejectNonResolvableImports(project)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableImports())
+        .isTrue();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.rejectNonResolvableImports = false;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.rejectNonResolvableImports(project)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableImports())
+        .isFalse();
 
     input.rejectNonResolvableImports = true;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.rejectNonResolvableImports(project)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableImports())
+        .isTrue();
   }
 
   @Test
   public void setMaxPathsInChangeMessages() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project))
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).getMaxPathsInChangeMessages())
         .isEqualTo(GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.maxPathsInChangeMessages = 10;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(10);
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).getMaxPathsInChangeMessages())
+        .isEqualTo(10);
 
     input.maxPathsInChangeMessages = 0;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(0);
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).getMaxPathsInChangeMessages())
+        .isEqualTo(0);
 
     input.maxPathsInChangeMessages = GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project))
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).getMaxPathsInChangeMessages())
         .isEqualTo(GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
   }
 
@@ -544,12 +597,12 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     ProjectState projectState = projectCache.get(project).orElseThrow(illegalState(project));
     deleteRef.deleteSingleRef(projectState, RefNames.REFS_CONFIG);
 
-    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isFalse();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled()).isFalse();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.disabled = true;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
 
-    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled()).isTrue();
   }
 }

@@ -20,6 +20,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -69,7 +70,9 @@ class OnCodeOwnerApproval implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals) {
-    if (codeOwnersPluginConfiguration.isDisabled(changeNotes.getChange().getDest())) {
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
+    if (codeOwnersConfig.isDisabled(changeNotes.getChange().getDest().branch())) {
       return Optional.empty();
     }
 
@@ -78,8 +81,7 @@ class OnCodeOwnerApproval implements OnPostReview {
       return Optional.empty();
     }
 
-    RequiredApproval requiredApproval =
-        codeOwnersPluginConfiguration.getRequiredApproval(changeNotes.getProjectName());
+    RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
 
     if (oldApprovals.get(requiredApproval.labelType().getName()) == null) {
       // If oldApprovals doesn't contain the label or if the labels value in it is null, the label
@@ -99,8 +101,9 @@ class OnCodeOwnerApproval implements OnPostReview {
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals,
       RequiredApproval requiredApproval) {
-    int maxPathsInChangeMessage =
-        codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(changeNotes.getProjectName());
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
+    int maxPathsInChangeMessage = codeOwnersConfig.getMaxPathsInChangeMessages();
     if (maxPathsInChangeMessage <= 0) {
       return Optional.empty();
     }
@@ -137,7 +140,7 @@ class OnCodeOwnerApproval implements OnPostReview {
     }
 
     boolean hasImplicitApprovalByUser =
-        codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(changeNotes.getProjectName())
+        codeOwnersConfig.areImplicitApprovalsEnabled()
             && patchSet.uploader().equals(user.getAccountId());
 
     boolean noLongerExplicitlyApproved = false;

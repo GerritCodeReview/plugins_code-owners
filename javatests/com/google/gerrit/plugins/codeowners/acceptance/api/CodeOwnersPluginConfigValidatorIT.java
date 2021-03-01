@@ -27,7 +27,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.config.GerritConfig;
-import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.RebaseInput;
 import com.google.gerrit.extensions.common.ChangeInfo;
@@ -101,7 +100,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.isDisabled(project)).isTrue();
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled()).isTrue();
   }
 
   @Test
@@ -118,7 +117,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).isDisabled("master"))
         .isTrue();
   }
 
@@ -178,7 +177,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getBackend("master"))
         .isInstanceOf(ProtoBackend.class);
   }
 
@@ -196,7 +195,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getBackend("master"))
         .isInstanceOf(ProtoBackend.class);
   }
 
@@ -256,7 +255,8 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    RequiredApproval requiredApproval = codeOwnersPluginConfiguration.getRequiredApproval(project);
+    RequiredApproval requiredApproval =
+        codeOwnersPluginConfiguration.getProjectConfig(project).getRequiredApproval();
     assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
     assertThat(requiredApproval).hasValueThat().isEqualTo(2);
   }
@@ -327,7 +327,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
     ImmutableSet<RequiredApproval> overrideApproval =
-        codeOwnersPluginConfiguration.getOverrideApproval(project);
+        codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval();
     assertThat(overrideApproval).hasSize(1);
     assertThat(overrideApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
     assertThat(overrideApproval).element(0).hasValueThat().isEqualTo(2);
@@ -424,7 +424,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
     ImmutableSet<RequiredApproval> overrideApproval =
-        codeOwnersPluginConfiguration.getOverrideApproval(project);
+        codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval();
     assertThat(overrideApproval).hasSize(1);
     assertThat(overrideApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(overrideApproval).element(0).hasValueThat().isEqualTo(1);
@@ -444,7 +444,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy())
         .isEqualTo(MergeCommitStrategy.ALL_CHANGED_FILES);
   }
 
@@ -483,7 +483,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFallbackCodeOwners())
         .isEqualTo(FallbackCodeOwners.ALL_USERS);
   }
 
@@ -522,7 +522,9 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.getMaxPathsInChangeMessages(project)).isEqualTo(50);
+    assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).getMaxPathsInChangeMessages())
+        .isEqualTo(50);
   }
 
   @Test

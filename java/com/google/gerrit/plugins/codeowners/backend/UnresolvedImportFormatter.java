@@ -61,7 +61,9 @@ public class UnresolvedImportFormatter {
    */
   private CodeOwnerBackend getBackend(CodeOwnerConfig.Key codeOwnerConfigKey) {
     if (projectCache.get(codeOwnerConfigKey.project()).isPresent()) {
-      return codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
+      return codeOwnersPluginConfiguration
+          .getProjectConfig(codeOwnerConfigKey.project())
+          .getBackend(codeOwnerConfigKey.branchNameKey().branch());
     }
     return backendConfig.getDefaultBackend();
   }

@@ -127,7 +127,7 @@ public class ChangedFiles {
         repoConfig,
         revWalk,
         revCommit,
-        codeOwnersPluginConfiguration.getMergeCommitStrategy(project));
+        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
   }
 
   public ImmutableSet<ChangedFile> compute(

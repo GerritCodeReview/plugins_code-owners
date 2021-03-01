@@ -127,7 +127,9 @@ public class PathCodeOwners {
      */
     private PathExpressionMatcher getMatcher(CodeOwnerConfig.Key codeOwnerConfigKey) {
       CodeOwnerBackend codeOwnerBackend =
-          codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
+          codeOwnersPluginConfiguration
+              .getProjectConfig(codeOwnerConfigKey.project())
+              .getBackend(codeOwnerConfigKey.branchNameKey().branch());
       return codeOwnerBackend
           .getPathExpressionMatcher()
           .orElse((pathExpression, relativePath) -> false);

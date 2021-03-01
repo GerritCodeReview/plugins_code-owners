@@ -92,7 +92,10 @@ public class CodeOwnerConfigFileUpdateScanner {
     requireNonNull(commitMessage, "commitMessage");
     requireNonNull(codeOwnerConfigFileUpdater, "codeOwnerConfigFileUpdater");
 
-    CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
+    CodeOwnerBackend codeOwnerBackend =
+        codeOwnersPluginConfiguration
+            .getProjectConfig(branchNameKey.project())
+            .getBackend(branchNameKey.branch());
     logger.atFine().log(
         "updating code owner files in branch %s of project %s",
         branchNameKey.branch(), branchNameKey.project());

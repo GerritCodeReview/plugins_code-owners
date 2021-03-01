@@ -171,7 +171,8 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
     String quotedFileExtension =
         Pattern.quote(
             codeOwnersPluginConfiguration
-                .getFileExtension(project)
+                .getProjectConfig(project)
+                .getFileExtension()
                 .map(ext -> "." + ext)
                 .orElse(""));
     String nameExtension = "(\\w)+";
@@ -188,7 +189,11 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
   private String getFileName(Project.NameKey project) {
     return defaultFileName
-        + codeOwnersPluginConfiguration.getFileExtension(project).map(ext -> "." + ext).orElse("");
+        + codeOwnersPluginConfiguration
+            .getProjectConfig(project)
+            .getFileExtension()
+            .map(ext -> "." + ext)
+            .orElse("");
   }
 
   @Override

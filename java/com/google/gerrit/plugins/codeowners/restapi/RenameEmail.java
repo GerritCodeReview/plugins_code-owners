@@ -99,7 +99,9 @@ public class RenameEmail implements RestModifyView<BranchResource, RenameEmailIn
     validateInput(input);
 
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(branchResource.getBranchKey());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(branchResource.getNameKey())
+            .getBackend(branchResource.getBranchKey().branch());
 
     Account.Id accountOwningOldEmail = resolveEmail(input.oldEmail);
     Account.Id accountOwningNewEmail = resolveEmail(input.newEmail);

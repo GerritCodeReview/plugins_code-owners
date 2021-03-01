@@ -38,6 +38,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
@@ -174,8 +175,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .username(receiveEvent.user.getLoggableName())
                 .build())) {
       CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
-          codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForCommitReceived(
-              receiveEvent.getProjectNameKey());
+          codeOwnersPluginConfiguration
+              .getProjectConfig(receiveEvent.getProjectNameKey())
+              .getCodeOwnerConfigValidationPolicyForCommitReceived();
       logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
       Optional<ValidationResult> validationResult;
       if (!codeOwnerConfigValidationPolicy.runValidation()) {
@@ -243,8 +245,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 .patchSetId(patchSetId.get())
                 .build())) {
       CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
-          codeOwnersPluginConfiguration.getCodeOwnerConfigValidationPolicyForSubmit(
-              branchNameKey.project());
+          codeOwnersPluginConfiguration
+              .getProjectConfig(branchNameKey.project())
+              .getCodeOwnerConfigValidationPolicyForSubmit();
       logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
       Optional<ValidationResult> validationResult;
       if (!codeOwnerConfigValidationPolicy.runValidation()) {
@@ -303,7 +306,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevWalk revWalk,
       RevCommit revCommit,
       IdentifiedUser user) {
-    if (codeOwnersPluginConfiguration.isDisabled(branchNameKey)) {
+    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project());
+    if (codeOwnersConfig.isDisabled(branchNameKey.branch())) {
       return Optional.of(
           ValidationResult.create(
               pluginName,
@@ -311,7 +316,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               new CommitValidationMessage(
                   "code-owners functionality is disabled", ValidationMessage.Type.HINT)));
     }
-    if (codeOwnersPluginConfiguration.areCodeOwnerConfigsReadOnly(branchNameKey.project())) {
+    if (codeOwnersConfig.areCodeOwnerConfigsReadOnly()) {
       return Optional.of(
           ValidationResult.create(
               pluginName,
@@ -322,7 +327,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
 
     try {
-      CodeOwnerBackend codeOwnerBackend = codeOwnersPluginConfiguration.getBackend(branchNameKey);
+      CodeOwnerBackend codeOwnerBackend = codeOwnersConfig.getBackend(branchNameKey.branch());
 
       // For merge commits, always do the comparison against the destination branch
       // (MergeCommitStrategy.ALL_CHANGED_FILES). Doing the comparison against the auto-merge
@@ -922,7 +927,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
 
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(keyOfImportedCodeOwnerConfig.branchNameKey());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(keyOfImportedCodeOwnerConfig.project())
+            .getBackend(keyOfImportedCodeOwnerConfig.branchNameKey().branch());
     if (!codeOwnerBackend.isCodeOwnerConfigFile(
         keyOfImportedCodeOwnerConfig.project(), codeOwnerConfigReference.fileName())) {
       return nonResolvableImport(
@@ -983,11 +990,13 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     return keyOfImportingCodeOwnerConfig.project().equals(keyOfImportedCodeOwnerConfig.project())
         && keyOfImportingCodeOwnerConfig.ref().equals(keyOfImportedCodeOwnerConfig.ref())
         && codeOwnersPluginConfiguration
-            .getBackend(keyOfImportingCodeOwnerConfig.branchNameKey())
+            .getProjectConfig(keyOfImportingCodeOwnerConfig.project())
+            .getBackend(keyOfImportingCodeOwnerConfig.branchNameKey().branch())
             .getFilePath(keyOfImportingCodeOwnerConfig)
             .equals(
                 codeOwnersPluginConfiguration
-                    .getBackend(keyOfImportedCodeOwnerConfig.branchNameKey())
+                    .getProjectConfig(keyOfImportedCodeOwnerConfig.project())
+                    .getBackend(keyOfImportedCodeOwnerConfig.branchNameKey().branch())
                     .getFilePath(keyOfImportedCodeOwnerConfig));
   }
 
@@ -1046,7 +1055,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         importType,
         codeOwnerConfigFilePath,
         message,
-        codeOwnersPluginConfiguration.rejectNonResolvableImports(project)
+        codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableImports()
             ? ValidationMessage.Type.ERROR
             : ValidationMessage.Type.WARNING);
   }
@@ -1069,7 +1078,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     return Optional.of(
         new CommitValidationMessage(
             message,
-            codeOwnersPluginConfiguration.rejectNonResolvableCodeOwners(project)
+            codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableCodeOwners()
                 ? ValidationMessage.Type.ERROR
                 : ValidationMessage.Type.WARNING));
   }

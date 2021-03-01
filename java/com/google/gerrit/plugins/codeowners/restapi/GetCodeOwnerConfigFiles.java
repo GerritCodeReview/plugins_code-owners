@@ -86,11 +86,13 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
   }
 
   @Override
-  public Response<List<String>> apply(BranchResource resource) throws BadRequestException {
+  public Response<List<String>> apply(BranchResource branchResource) throws BadRequestException {
     validateOptions();
 
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(resource.getBranchKey());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(branchResource.getNameKey())
+            .getBackend(branchResource.getBranchKey().branch());
     ImmutableList.Builder<Path> codeOwnerConfigs = ImmutableList.builder();
 
     if (email != null) {
@@ -106,7 +108,7 @@ public class GetCodeOwnerConfigFiles implements RestReadView<BranchResource> {
         // files in refs/meta/config explicitly.
         .includeDefaultCodeOwnerConfig(false)
         .visit(
-            resource.getBranchKey(),
+            branchResource.getBranchKey(),
             codeOwnerConfig -> {
               Path codeOwnerConfigPath = codeOwnerBackend.getFilePath(codeOwnerConfig.key());
               if (email == null || containsEmail(codeOwnerConfig, codeOwnerConfigPath, email)) {

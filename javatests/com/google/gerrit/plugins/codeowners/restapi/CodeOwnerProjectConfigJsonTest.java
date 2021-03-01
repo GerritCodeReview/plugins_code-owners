@@ -34,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
@@ -63,6 +64,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   @Rule public final MockitoRule mockito = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Mock private CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  @Mock private CodeOwnersPluginConfigSnapshot codeOwnersPluginConfigSnapshot;
 
   @Inject private CurrentUser currentUser;
 
@@ -106,14 +108,15 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   public void formatBackendIds() throws Exception {
     createBranch(BranchNameKey.create(project, "stable-2.10"));
 
-    when(codeOwnersPluginConfiguration.getBackend(project)).thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+    when(codeOwnersPluginConfigSnapshot.getBackend()).thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/heads/master"))
         .thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(
-            BranchNameKey.create(project, "refs/meta/config")))
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/meta/config"))
         .thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "stable-2.10")))
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/heads/stable-2.10"))
         .thenReturn(protoBackend);
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
 
     BackendInfo backendInfo = codeOwnerProjectConfigJson.formatBackendInfo(createProjectResource());
     assertThat(backendInfo.id).isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
@@ -129,12 +132,13 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void idsPerBranchNotSetIfThereIsNoBranchSpecificBackendConfiguration() throws Exception {
-    when(codeOwnersPluginConfiguration.getBackend(project)).thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
+    when(codeOwnersPluginConfigSnapshot.getBackend()).thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/heads/master"))
         .thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(
-            BranchNameKey.create(project, "refs/meta/config")))
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/meta/config"))
         .thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
 
     BackendInfo backendInfo = codeOwnerProjectConfigJson.formatBackendInfo(createProjectResource());
     assertThat(backendInfo.id).isEqualTo(CodeOwnerBackendId.FIND_OWNERS.getBackendId());
@@ -146,31 +150,32 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel();
     createBranch(BranchNameKey.create(project, "stable-2.10"));
 
-    when(codeOwnersPluginConfiguration.isDisabled(project)).thenReturn(false);
-    when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(false);
-    when(codeOwnersPluginConfiguration.getBackend(project)).thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-        .thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(
-            BranchNameKey.create(project, "refs/meta/config")))
-        .thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "stable-2.10")))
-        .thenReturn(protoBackend);
-    when(codeOwnersPluginConfiguration.getFileExtension(project)).thenReturn(Optional.of("foo"));
-    when(codeOwnersPluginConfiguration.getOverrideInfoUrl(project))
-        .thenReturn(Optional.of("http://foo.example.com"));
-    when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+    when(codeOwnersPluginConfigSnapshot.getFileExtension()).thenReturn(Optional.of("foo"));
+    when(codeOwnersPluginConfigSnapshot.getMergeCommitStrategy())
         .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
-    when(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+    when(codeOwnersPluginConfigSnapshot.getFallbackCodeOwners())
         .thenReturn(FallbackCodeOwners.ALL_USERS);
-    when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
-    when(codeOwnersPluginConfiguration.getRequiredApproval(project))
+    when(codeOwnersPluginConfigSnapshot.getOverrideInfoUrl())
+        .thenReturn(Optional.of("http://foo.example.com"));
+    when(codeOwnersPluginConfigSnapshot.isDisabled()).thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.isDisabled(any(String.class))).thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.getBackend()).thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/heads/master"))
+        .thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/meta/config"))
+        .thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/heads/stable-2.10"))
+        .thenReturn(protoBackend);
+    when(codeOwnersPluginConfigSnapshot.areImplicitApprovalsEnabled()).thenReturn(true);
+    when(codeOwnersPluginConfigSnapshot.getRequiredApproval())
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
-    when(codeOwnersPluginConfiguration.getOverrideApproval(project))
+    when(codeOwnersPluginConfigSnapshot.getOverrideApproval())
         .thenReturn(
             ImmutableSet.of(
                 RequiredApproval.create(
                     LabelType.withDefaultValues("Owners-Override"), (short) 1)));
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
 
     CodeOwnerProjectConfigInfo codeOwnerProjectConfigInfo =
         codeOwnerProjectConfigJson.format(createProjectResource());
@@ -198,7 +203,9 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void disabledBranchesNotSetIfDisabledOnProjectLevel() throws Exception {
-    when(codeOwnersPluginConfiguration.isDisabled(project)).thenReturn(true);
+    when(codeOwnersPluginConfigSnapshot.isDisabled()).thenReturn(true);
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
     CodeOwnersStatusInfo statusInfo =
         codeOwnerProjectConfigJson.formatStatusInfo(createProjectResource());
     assertThat(statusInfo.disabled).isTrue();
@@ -207,12 +214,11 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void emptyStatus() throws Exception {
-    when(codeOwnersPluginConfiguration.isDisabled(project)).thenReturn(false);
-    when(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
-        .thenReturn(false);
-    when(codeOwnersPluginConfiguration.isDisabled(
-            BranchNameKey.create(project, "refs/meta/config")))
-        .thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.isDisabled()).thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.isDisabled("refs/heads/master")).thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.isDisabled("refs/meta/config")).thenReturn(false);
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
     CodeOwnersStatusInfo statusInfo =
         codeOwnerProjectConfigJson.formatStatusInfo(createProjectResource());
     assertThat(statusInfo.disabled).isNull();
@@ -221,12 +227,11 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void withDisabledBranches() throws Exception {
-    when(codeOwnersPluginConfiguration.isDisabled(project)).thenReturn(false);
-    when(codeOwnersPluginConfiguration.isDisabled(BranchNameKey.create(project, "master")))
-        .thenReturn(true);
-    when(codeOwnersPluginConfiguration.isDisabled(
-            BranchNameKey.create(project, "refs/meta/config")))
-        .thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.isDisabled()).thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.isDisabled("refs/heads/master")).thenReturn(true);
+    when(codeOwnersPluginConfigSnapshot.isDisabled("refs/meta/config")).thenReturn(false);
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
     CodeOwnersStatusInfo statusInfo =
         codeOwnerProjectConfigJson.formatStatusInfo(createProjectResource());
     assertThat(statusInfo.disabled).isNull();
@@ -237,11 +242,13 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   public void withMultipleOverrides() throws Exception {
     createOwnersOverrideLabel();
 
-    when(codeOwnersPluginConfiguration.getOverrideApproval(project))
+    when(codeOwnersPluginConfigSnapshot.getOverrideApproval())
         .thenReturn(
             ImmutableSet.of(
                 RequiredApproval.create(LabelType.withDefaultValues("Owners-Override"), (short) 1),
                 RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2)));
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
 
     ImmutableList<RequiredApprovalInfo> requiredApprovalInfos =
         codeOwnerProjectConfigJson.formatOverrideApprovalInfo(project);
@@ -264,24 +271,26 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(false);
-    when(codeOwnersPluginConfiguration.getBackend(BranchNameKey.create(project, "master")))
-        .thenReturn(findOwnersBackend);
-    when(codeOwnersPluginConfiguration.getFileExtension(project)).thenReturn(Optional.of("foo"));
-    when(codeOwnersPluginConfiguration.getOverrideInfoUrl(project))
-        .thenReturn(Optional.of("http://foo.example.com"));
-    when(codeOwnersPluginConfiguration.getMergeCommitStrategy(project))
+    when(codeOwnersPluginConfigSnapshot.getFileExtension()).thenReturn(Optional.of("foo"));
+    when(codeOwnersPluginConfigSnapshot.getMergeCommitStrategy())
         .thenReturn(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
-    when(codeOwnersPluginConfiguration.getFallbackCodeOwners(project))
+    when(codeOwnersPluginConfigSnapshot.getFallbackCodeOwners())
         .thenReturn(FallbackCodeOwners.ALL_USERS);
-    when(codeOwnersPluginConfiguration.areImplicitApprovalsEnabled(project)).thenReturn(true);
-    when(codeOwnersPluginConfiguration.getRequiredApproval(project))
+    when(codeOwnersPluginConfigSnapshot.getOverrideInfoUrl())
+        .thenReturn(Optional.of("http://foo.example.com"));
+    when(codeOwnersPluginConfigSnapshot.isDisabled(any(String.class))).thenReturn(false);
+    when(codeOwnersPluginConfigSnapshot.getBackend("refs/heads/master"))
+        .thenReturn(findOwnersBackend);
+    when(codeOwnersPluginConfigSnapshot.areImplicitApprovalsEnabled()).thenReturn(true);
+    when(codeOwnersPluginConfigSnapshot.getRequiredApproval())
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
-    when(codeOwnersPluginConfiguration.getOverrideApproval(project))
+    when(codeOwnersPluginConfigSnapshot.getOverrideApproval())
         .thenReturn(
             ImmutableSet.of(
                 RequiredApproval.create(
                     LabelType.withDefaultValues("Owners-Override"), (short) 1)));
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
 
     CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
         codeOwnerProjectConfigJson.format(createBranchResource("refs/heads/master"));
@@ -306,7 +315,9 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
   @Test
   public void formatCodeOwnerBranchConfig_disabled() throws Exception {
-    when(codeOwnersPluginConfiguration.isDisabled(any(BranchNameKey.class))).thenReturn(true);
+    when(codeOwnersPluginConfigSnapshot.isDisabled(any(String.class))).thenReturn(true);
+    when(codeOwnersPluginConfiguration.getProjectConfig(project))
+        .thenReturn(codeOwnersPluginConfigSnapshot);
 
     CodeOwnerBranchConfigInfo codeOwnerBranchConfigInfo =
         codeOwnerProjectConfigJson.format(createBranchResource("refs/heads/master"));

@@ -54,7 +54,9 @@ public class CodeOwners implements CodeOwnerConfigLoader {
     requireNonNull(revision, "revision");
     codeOwnerMetrics.countCodeOwnerConfigReads.increment();
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(codeOwnerConfigKey.project())
+            .getBackend(codeOwnerConfigKey.branchNameKey().branch());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, revision);
   }
 
@@ -63,7 +65,9 @@ public class CodeOwners implements CodeOwnerConfigLoader {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     codeOwnerMetrics.countCodeOwnerConfigReads.increment();
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(codeOwnerConfigKey.project())
+            .getBackend(codeOwnerConfigKey.branchNameKey().branch());
     return codeOwnerBackend.getCodeOwnerConfig(codeOwnerConfigKey, /* revision= */ null);
   }
 
@@ -82,7 +86,9 @@ public class CodeOwners implements CodeOwnerConfigLoader {
   public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
     requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
     CodeOwnerBackend codeOwnerBackend =
-        codeOwnersPluginConfiguration.getBackend(codeOwnerConfigKey.branchNameKey());
+        codeOwnersPluginConfiguration
+            .getProjectConfig(codeOwnerConfigKey.project())
+            .getBackend(codeOwnerConfigKey.branchNameKey().branch());
     return codeOwnerBackend.getFilePath(codeOwnerConfigKey);
   }
 
