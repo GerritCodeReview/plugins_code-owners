@@ -38,6 +38,7 @@ import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl
 import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -60,6 +61,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   private PathCodeOwners.Factory pathCodeOwnersFactory;
   private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
   private Provider<TransientCodeOwnerConfigCache> transientCodeOwnerConfigCacheProvider;
+  private TestPathExpressions testPathExpressions;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
@@ -70,6 +72,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
     transientCodeOwnerConfigCacheProvider =
         plugin.getSysInjector().getInstance(new Key<Provider<TransientCodeOwnerConfigCache>>() {});
+    testPathExpressions = plugin.getSysInjector().getInstance(TestPathExpressions.class);
   }
 
   @Test
@@ -1950,6 +1953,57 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                 Paths.get("bar/baz.md"),
                 pathExpressionMatcher))
         .isTrue();
+  }
+
+  @Test
+  public void perFileRuleThatIgnoresGlobalCodeOwnersCanImportGlobalCodeOwnersFromOtherFile()
+      throws Exception {
+    // create importing config that:
+    // * has a global code owner
+    // * has a per-file import for md files
+    // * ignores global and parent code owners for md files
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .setIgnoreGlobalAndParentCodeOwners()
+                    .addImport(
+                        CodeOwnerConfigReference.create(
+                            CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS"))
+                    .build())
+            .create();
+
+    // create imported config with a global code owner
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global code owner from the imported code owner config (since it is
+    // imported by a matching per-file rule), the global code owner from the importing code owner
+    // config is ignored (since the matching per-file rule ignores parent and global code owners)
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(user.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().hasUnresolvedImports())
+        .isFalse();
   }
 
   private CodeOwnerConfig.Builder createCodeOwnerBuilder() {
