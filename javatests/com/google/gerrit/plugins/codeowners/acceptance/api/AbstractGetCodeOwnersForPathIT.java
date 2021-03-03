@@ -631,7 +631,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   public void getAllUsersAsGlobalCodeOwners() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -640,7 +641,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // Query code owners with a limit.
     requestScopeOperations.setApiUser(user.id());
-    codeOwnersInfo = queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().setResolveAllUsers(true).withLimit(2), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(2);
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -932,7 +935,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addCodeOwnerEmail("*")
         .create();
 
-    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -941,7 +945,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // Query code owners with a limit.
     requestScopeOperations.setApiUser(user.id());
-    codeOwnersInfo = queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().setResolveAllUsers(true).withLimit(2), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(2);
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -975,7 +981,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // user can only see itself
     requestScopeOperations.setApiUser(user.id());
-    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -984,7 +991,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
-    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -993,7 +1001,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // admin can see all users
     requestScopeOperations.setApiUser(admin.id());
-    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -1002,7 +1011,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // Query code owners with a limit, user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
-    codeOwnersInfo = queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().setResolveAllUsers(true).withLimit(1), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(1);
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -1039,7 +1050,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     // user can only see itself, user2 (because user is owner of a group that contains user2) and
     // user3 (because user3 is member of a group that is visible to all users)
     requestScopeOperations.setApiUser(user.id());
-    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -1048,7 +1060,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
-    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -1057,7 +1070,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // admin can see all users
     requestScopeOperations.setApiUser(admin.id());
-    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -1066,7 +1080,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // Query code owners with a limit, user2 can see user3 and itself
     requestScopeOperations.setApiUser(user2.id());
-    codeOwnersInfo = queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().setResolveAllUsers(true).withLimit(1), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(1);
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -1115,7 +1131,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
     // Since accounts.visibility = NONE, no account is visible and hence the list of code owners is
     // empty.
-    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
     assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
 
@@ -1126,7 +1143,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .update();
 
     // If VIEW_ALL_ACCOUNTS is assigned, all accounts are visible now.
-    codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -1182,14 +1200,17 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     // Query code owners with limits, "*" is resolved to random users, but user2 should always be
     // included since this user is set explicitly as code owner
     CodeOwnersInfo codeOwnersInfo =
-        queryCodeOwners(getCodeOwnersApi().query().withLimit(2), "/foo/bar/baz.md");
+        queryCodeOwners(
+            getCodeOwnersApi().query().setResolveAllUsers(true).withLimit(2), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(2);
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .contains(user2.id());
 
-    codeOwnersInfo = queryCodeOwners(getCodeOwnersApi().query().withLimit(1), "/foo/bar/baz.md");
+    codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().setResolveAllUsers(true).withLimit(1), "/foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -1252,7 +1273,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     long seed = (new Random()).nextLong();
 
     CodeOwnersInfo codeOwnersInfo =
-        queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md");
+        queryCodeOwners(
+            getCodeOwnersApi().query().setResolveAllUsers(true).withSeed(seed), "/foo/bar/baz.md");
     // all code owners have the same score, hence their order is random
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -1265,7 +1287,10 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             .map(info -> Account.id(info.account._accountId))
             .collect(toList());
     for (int i = 0; i < 10; i++) {
-      assertThat(queryCodeOwners(getCodeOwnersApi().query().withSeed(seed), "/foo/bar/baz.md"))
+      assertThat(
+              queryCodeOwners(
+                  getCodeOwnersApi().query().setResolveAllUsers(true).withSeed(seed),
+                  "/foo/bar/baz.md"))
           .hasCodeOwnersThat()
           .comparingElementsUsing(hasAccountId())
           .containsExactlyElementsIn(expectedAccountIds)
