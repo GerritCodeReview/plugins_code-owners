@@ -398,6 +398,14 @@ endpoint or by touching the change (e.g. by adding a comment).
         in `@PLUGIN@.config`.\
         By default `100`.
 
+<a id="pluginCodeOwnersMaxCodeOwnerConfigCacheSize">plugin.@PLUGIN@.maxCodeOwnerConfigCacheSize</a>
+:       When computing code owner file statuses for a change (e.g. to compute
+        the results for the code owners submit rule) parsed code owner config
+        files are cached in memory for the time of the request.\
+        This configuration parameter allows to set a limit for the number of
+        code owner config files that are cached per request.\
+        By default `0` (unlimited).
+
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
 <a id="codeOwnersDisabled">codeOwners.disabled</a>

@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.Project;
@@ -87,5 +88,30 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "invalid")
   public void experimentalRestEndpointsNotEnabled_invalidConfig() throws Exception {
     assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
+  }
+
+  @Test
+  public void codeOwnerConfigCacheSizeIsUnlimitedByDefault() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "0")
+  public void codeOwnerConfigCacheSizeIsUnlimited() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "10")
+  public void codeOwnerConfigCacheSizeIsLimited() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize())
+        .value()
+        .isEqualTo(10);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "invalid")
+  public void maxCodeOwnerConfigCacheSize_invalidConfig() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize()).isEmpty();
   }
 }
