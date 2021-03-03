@@ -25,8 +25,10 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.events.ReviewerAddedListener;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.CurrentUser;
@@ -65,6 +67,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
   private final ChangeNotes.Factory changeNotesFactory;
   private final AccountCache accountCache;
   private final ChangeMessagesUtil changeMessageUtil;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
   CodeOwnersOnAddReviewer(
@@ -74,7 +77,8 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       RetryHelper retryHelper,
       ChangeNotes.Factory changeNotesFactory,
       AccountCache accountCache,
-      ChangeMessagesUtil changeMessageUtil) {
+      ChangeMessagesUtil changeMessageUtil,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
     this.userProvider = userProvider;
@@ -82,6 +86,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
     this.changeNotesFactory = changeNotesFactory;
     this.accountCache = accountCache;
     this.changeMessageUtil = changeMessageUtil;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   @Override
@@ -96,7 +101,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       return;
     }
 
-    try {
+    try (Timer0.Context ctx = codeOwnerMetrics.addChangeMessageOnAddReviewer.start()) {
       retryHelper
           .changeUpdate(
               "addCodeOwnersMessageOnAddReviewer",

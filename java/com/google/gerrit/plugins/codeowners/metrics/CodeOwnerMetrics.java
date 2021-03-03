@@ -29,11 +29,13 @@ import com.google.inject.Singleton;
 @Singleton
 public class CodeOwnerMetrics {
   // latency metrics
+  public final Timer0 addChangeMessageOnAddReviewer;
   public final Timer0 computeChangedFilesAgainstAutoMerge;
   public final Timer0 computeChangedFilesAgainstFirstParent;
   public final Timer0 computeFileStatus;
   public final Timer0 computeFileStatuses;
   public final Timer0 computeOwnedPaths;
+  public final Timer0 extendChangeMessageOnPostReview;
   public final Timer0 prepareFileStatusComputation;
   public final Timer0 prepareFileStatusComputationForAccount;
   public final Timer0 resolveCodeOwnerConfig;
@@ -61,6 +63,11 @@ public class CodeOwnerMetrics {
     this.metricMaker = metricMaker;
 
     // latency metrics
+    this.addChangeMessageOnAddReviewer =
+        createLatencyTimer(
+            "add_change_message_on_add_reviewer",
+            "Latency for adding a change message with the owned path when a code owner is added as"
+                + " a reviewer");
     this.computeChangedFilesAgainstAutoMerge =
         createLatencyTimer(
             "compute_changed_files_against_auto_merge",
@@ -80,6 +87,11 @@ public class CodeOwnerMetrics {
         createLatencyTimer(
             "compute_owned_paths",
             "Latency for computing the files in a change that are owned by a user");
+    this.extendChangeMessageOnPostReview =
+        createLatencyTimer(
+            "extend_change_message_on_post_review",
+            "Latency for extending the change message with the owned path when a code owner"
+                + " approval is applied");
     this.prepareFileStatusComputation =
         createLatencyTimer(
             "prepare_file_status_computation", "Latency for preparing the file status computation");

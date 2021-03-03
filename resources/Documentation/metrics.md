@@ -5,6 +5,9 @@ usage and performance of the code owners functionality.
 
 ## <a id="latencyMetrics"> Latency Metrics
 
+* `add_change_message_on_add_reviewer`:
+  Latency for adding a change message with the owned path when a code owner is
+  added as a reviewer.
 * `compute_changed_files_against_auto_merge`:
   Latency for computing changed files against auto merge.
 * `compute_changed_files_against_first_parent`:
@@ -17,6 +20,9 @@ usage and performance of the code owners functionality.
   Latency for computing file statuses.
 * `compute_owned_paths`:
   Latency for computing the files in a change that are owned by a user.
+* `extend_change_message_on_post_review`:
+  Latency for extending the change message with the owned path when a code owner
+  approval is applied.
 * `prepare_file_status_computation`:
   Latency for preparing the file status computation.
 * `prepare_file_status_computation_for_account`:
