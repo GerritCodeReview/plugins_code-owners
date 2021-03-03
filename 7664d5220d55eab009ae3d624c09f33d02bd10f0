@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b5f12cf3_cc9e7b91",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-03-03T08:21:41Z",
+      "side": 1,
+      "message": "We have an equivalent in core already, but doesn\u0027t hurt either way.",
+      "revId": "7664d5220d55eab009ae3d624c09f33d02bd10f0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
