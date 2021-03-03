@@ -17,8 +17,10 @@ package com.google.gerrit.plugins.codeowners.metrics;
 import com.google.gerrit.metrics.Counter0;
 import com.google.gerrit.metrics.Description;
 import com.google.gerrit.metrics.Description.Units;
+import com.google.gerrit.metrics.Field;
 import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
+import com.google.gerrit.metrics.Timer1;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -26,7 +28,8 @@ import com.google.inject.Singleton;
 @Singleton
 public class CodeOwnerMetrics {
   // latency metrics
-  public final Timer0 computeChangedFiles;
+  public final Timer0 computeChangedFilesAgainstAutoMerge;
+  public final Timer0 computeChangedFilesAgainstFirstParent;
   public final Timer0 computeFileStatus;
   public final Timer0 computeFileStatuses;
   public final Timer0 computeOwnedPaths;
@@ -38,9 +41,15 @@ public class CodeOwnerMetrics {
   public final Timer0 resolvePathCodeOwners;
   public final Timer0 runCodeOwnerSubmitRule;
 
+  // code owner config latency metrics
+  public final Timer1<String> loadCodeOwnerConfig;
+  public final Timer0 readCodeOwnerConfig;
+  public final Timer1<String> parseCodeOwnerConfig;
+
   // counter metrics
   public final Counter0 countCodeOwnerConfigReads;
   public final Counter0 countCodeOwnerConfigCacheReads;
+  public final Counter0 countCodeOwnerSubmitRuleRuns;
 
   private final MetricMaker metricMaker;
 
@@ -49,8 +58,14 @@ public class CodeOwnerMetrics {
     this.metricMaker = metricMaker;
 
     // latency metrics
-    this.computeChangedFiles =
-        createLatencyTimer("compute_changed_files", "Latency for computing changed files");
+    this.computeChangedFilesAgainstAutoMerge =
+        createLatencyTimer(
+            "compute_changed_files_against_auto_merge",
+            "Latency for computing changed files against auto merge");
+    this.computeChangedFilesAgainstFirstParent =
+        createLatencyTimer(
+            "compute_changed_files_against_first_parent",
+            "Latency for computing changed files against first parent");
     this.computeFileStatus =
         createLatencyTimer(
             "compute_file_status", "Latency for computing the file status of one file");
@@ -87,6 +102,19 @@ public class CodeOwnerMetrics {
         createLatencyTimer(
             "run_code_owner_submit_rule", "Latency for running the code owner submit rule");
 
+    // code owner config latency metrics
+    this.loadCodeOwnerConfig =
+        createTimerWithClassField(
+            "load_code_owner_config",
+            "Latency for loading a code owner config file (read + parse)",
+            "backend");
+    this.parseCodeOwnerConfig =
+        createTimerWithClassField(
+            "parse_code_owner_config", "Latency for parsing a code owner config file", "parser");
+    this.readCodeOwnerConfig =
+        createLatencyTimer(
+            "read_code_owner_config", "Latency for reading a code owner config file");
+
     // counter metrics
     this.countCodeOwnerConfigReads =
         createCounter(
@@ -96,12 +124,28 @@ public class CodeOwnerMetrics {
         createCounter(
             "count_code_owner_config_cache_reads",
             "Total number of code owner config reads from cache");
+    this.countCodeOwnerSubmitRuleRuns =
+        createCounter(
+            "count_code_owner_submit_rule_runs", "Total number of code owner submit rule runs");
   }
 
   private Timer0 createLatencyTimer(String name, String description) {
     return metricMaker.newTimer(
         "code_owners/" + name,
         new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
+  }
+
+  private Timer1<String> createTimerWithClassField(
+      String name, String description, String fieldName) {
+    Field<String> CODE_OWNER_BACKEND_FIELD =
+        Field.ofString(
+                fieldName, (metadataBuilder, fieldValue) -> metadataBuilder.className(fieldValue))
+            .build();
+
+    return metricMaker.newTimer(
+        "code_owners/" + name,
+        new Description(description).setCumulative().setUnit(Description.Units.MILLISECONDS),
+        CODE_OWNER_BACKEND_FIELD);
   }
 
   private Counter0 createCounter(String name, String description) {

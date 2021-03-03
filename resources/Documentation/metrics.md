@@ -5,8 +5,10 @@ usage and performance of the code owners functionality.
 
 ## <a id="latencyMetrics"> Latency Metrics
 
-* `compute_changed_files`:
-  Latency for computing changed files.
+* `compute_changed_files_against_auto_merge`:
+  Latency for computing changed files against auto merge.
+* `compute_changed_files_against_first_parent`:
+  Latency for computing changed files against first parent.
 * `compute_file_status`:
   Latency for computing the file status for one file.
 * `compute_file_statuses`:
@@ -28,12 +30,23 @@ usage and performance of the code owners functionality.
 * `run_code_owner_submit_rule`:
   Latency for running the code owner submit rule.
 
+### <a id="codeOwnerConfigLatencyMetrics"> Code Owner Config Latency Metrics
+
+* `load_code_owner_config`:
+  Latency for loading a code owner config file (read + parse).
+* `parse_code_owner_config`:
+  Latency for parsing a code owner config file.
+* `read_code_owner_config`:
+  Latency for reading a code owner config file.
+
 ## <a id="counterMetrics"> Counter Metrics
 
 * `count_code_owner_config_reads`:
   Total number of code owner config reads from backend.
 * `count_code_owner_config_cache_reads`:
   Total number of code owner config reads from cache.
+* `count_code_owner_submit_rule_runs`:
+  Total number of code owner submit rule runs.
 
 ---
 

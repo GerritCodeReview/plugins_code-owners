@@ -19,9 +19,13 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import com.google.gerrit.metrics.Timer0;
+import com.google.gerrit.metrics.Timer1;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.git.meta.VersionedMetaData;
+import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
 import org.eclipse.jgit.errors.ConfigInvalidException;
@@ -36,9 +40,9 @@ import org.eclipse.jgit.treewalk.TreeWalk;
  * A representation of a code owner config that is stored as an {@code OWNERS} file in a source
  * branch.
  *
- * <p>For reading code owner configs or creating/updating them, refer to {@link #load(String,
- * CodeOwnerConfigParser, RevWalk, ObjectId, CodeOwnerConfig.Key)} and {@link #loadCurrent(String,
- * CodeOwnerConfigParser, Repository, CodeOwnerConfig.Key)}.
+ * <p>For reading code owner configs or creating/updating them, refer to {@link Factory#load(String,
+ * CodeOwnerConfigParser, RevWalk, ObjectId, CodeOwnerConfig.Key)} and {@link
+ * Factory#loadCurrent(String, CodeOwnerConfigParser, Repository, CodeOwnerConfig.Key)}.
  *
  * <p><strong>Note:</strong> Any modification (code owner config creation or update) only becomes
  * permanent (and hence written to repository) if {@link
@@ -46,83 +50,95 @@ import org.eclipse.jgit.treewalk.TreeWalk;
  */
 @VisibleForTesting
 public class CodeOwnerConfigFile extends VersionedMetaData {
-  /**
-   * Creates a {@link CodeOwnerConfigFile} for a code owner config.
-   *
-   * <p>The code owner config is automatically loaded within this method and can be accessed via
-   * {@link #getLoadedCodeOwnerConfig()}.
-   *
-   * <p>It's safe to call this method for non-existing code owner configs. In that case, {@link
-   * #getLoadedCodeOwnerConfig()} won't return any code owner config. Thus, the existence of a code
-   * owner config can be easily tested.
-   *
-   * <p>The code owner config represented by the returned {@link CodeOwnerConfigFile} can be
-   * created/updated by setting an {@link CodeOwnerConfigUpdate} via {@link
-   * #setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate)} and committing the {@link
-   * CodeOwnerConfigUpdate} via {@link #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)}.
-   *
-   * @param defaultFileName the name of the code owner configuration files that should be used if
-   *     none is specified in the code owner config key
-   * @param codeOwnerConfigParser the parser that should be used to parse code owner config files
-   * @param revWalk the revWalk that should be used to load the revision
-   * @param revision the branch revision from which the code owner config file should be loaded
-   * @param codeOwnerConfigKey the key of the code owner config
-   * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
-   * @throws IOException if the repository can't be accessed for some reason
-   * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
-   *     invalid format
-   */
-  public static CodeOwnerConfigFile load(
-      String defaultFileName,
-      CodeOwnerConfigParser codeOwnerConfigParser,
-      RevWalk revWalk,
-      ObjectId revision,
-      CodeOwnerConfig.Key codeOwnerConfigKey)
-      throws IOException, ConfigInvalidException {
-    requireNonNull(defaultFileName, "defaultFileName");
-    requireNonNull(codeOwnerConfigParser, "codeOwnerConfigParser");
-    requireNonNull(revWalk, "revWalk");
-    requireNonNull(revision, "revision");
-    requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+  public static class Factory {
+    private final CodeOwnerMetrics codeOwnerMetrics;
 
-    CodeOwnerConfigFile codeOwnerConfigFile =
-        new CodeOwnerConfigFile(defaultFileName, codeOwnerConfigParser, codeOwnerConfigKey);
-    codeOwnerConfigFile.load(codeOwnerConfigKey.project(), revWalk, revision);
-    return codeOwnerConfigFile;
+    @Inject
+    Factory(CodeOwnerMetrics codeOwnerMetrics) {
+      this.codeOwnerMetrics = codeOwnerMetrics;
+    }
+
+    /**
+     * Creates a {@link CodeOwnerConfigFile} for a code owner config.
+     *
+     * <p>The code owner config is automatically loaded within this method and can be accessed via
+     * {@link #getLoadedCodeOwnerConfig()}.
+     *
+     * <p>It's safe to call this method for non-existing code owner configs. In that case, {@link
+     * #getLoadedCodeOwnerConfig()} won't return any code owner config. Thus, the existence of a
+     * code owner config can be easily tested.
+     *
+     * <p>The code owner config represented by the returned {@link CodeOwnerConfigFile} can be
+     * created/updated by setting an {@link CodeOwnerConfigUpdate} via {@link
+     * #setCodeOwnerConfigUpdate(CodeOwnerConfigUpdate)} and committing the {@link
+     * CodeOwnerConfigUpdate} via {@link #commit(com.google.gerrit.server.git.meta.MetaDataUpdate)}.
+     *
+     * @param defaultFileName the name of the code owner configuration files that should be used if
+     *     none is specified in the code owner config key
+     * @param codeOwnerConfigParser the parser that should be used to parse code owner config files
+     * @param revWalk the revWalk that should be used to load the revision
+     * @param revision the branch revision from which the code owner config file should be loaded
+     * @param codeOwnerConfigKey the key of the code owner config
+     * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
+     * @throws IOException if the repository can't be accessed for some reason
+     * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
+     *     invalid format
+     */
+    public CodeOwnerConfigFile load(
+        String defaultFileName,
+        CodeOwnerConfigParser codeOwnerConfigParser,
+        RevWalk revWalk,
+        ObjectId revision,
+        CodeOwnerConfig.Key codeOwnerConfigKey)
+        throws IOException, ConfigInvalidException {
+      requireNonNull(defaultFileName, "defaultFileName");
+      requireNonNull(codeOwnerConfigParser, "codeOwnerConfigParser");
+      requireNonNull(revWalk, "revWalk");
+      requireNonNull(revision, "revision");
+      requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+
+      CodeOwnerConfigFile codeOwnerConfigFile =
+          new CodeOwnerConfigFile(
+              codeOwnerMetrics, defaultFileName, codeOwnerConfigParser, codeOwnerConfigKey);
+      codeOwnerConfigFile.load(codeOwnerConfigKey.project(), revWalk, revision);
+      return codeOwnerConfigFile;
+    }
+
+    /**
+     * Creates a {@link CodeOwnerConfigFile} for a code owner config from the current revision in
+     * the branch.
+     *
+     * @param defaultFileName the name of the code owner configuration files that should be used if
+     *     none is specified in the code owner config key
+     * @param codeOwnerConfigParser the parser that should be used to parse code owner config files
+     * @param repository the repository in which the code owner config is stored
+     * @param codeOwnerConfigKey the key of the code owner config
+     * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
+     * @throws IOException if the repository can't be accessed for some reason
+     * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
+     *     invalid format
+     * @see #load(String, CodeOwnerConfigParser, RevWalk, ObjectId, CodeOwnerConfig.Key)
+     */
+    public CodeOwnerConfigFile loadCurrent(
+        String defaultFileName,
+        CodeOwnerConfigParser codeOwnerConfigParser,
+        Repository repository,
+        CodeOwnerConfig.Key codeOwnerConfigKey)
+        throws IOException, ConfigInvalidException {
+      requireNonNull(defaultFileName, "defaultFileName");
+      requireNonNull(codeOwnerConfigParser, "codeOwnerConfigParser");
+      requireNonNull(repository, "repository");
+      requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
+
+      CodeOwnerConfigFile codeOwnerConfigFile =
+          new CodeOwnerConfigFile(
+              codeOwnerMetrics, defaultFileName, codeOwnerConfigParser, codeOwnerConfigKey);
+      codeOwnerConfigFile.load(codeOwnerConfigKey.project(), repository);
+      return codeOwnerConfigFile;
+    }
   }
 
-  /**
-   * Creates a {@link CodeOwnerConfigFile} for a code owner config from the current revision in the
-   * branch.
-   *
-   * @param defaultFileName the name of the code owner configuration files that should be used if
-   *     none is specified in the code owner config key
-   * @param codeOwnerConfigParser the parser that should be used to parse code owner config files
-   * @param repository the repository in which the code owner config is stored
-   * @param codeOwnerConfigKey the key of the code owner config
-   * @return a {@link CodeOwnerConfigFile} for the code owner config with the specified key
-   * @throws IOException if the repository can't be accessed for some reason
-   * @throws ConfigInvalidException if the code owner config exists but can't be read due to an
-   *     invalid format
-   * @see #load(String, CodeOwnerConfigParser, RevWalk, ObjectId, CodeOwnerConfig.Key)
-   */
-  public static CodeOwnerConfigFile loadCurrent(
-      String defaultFileName,
-      CodeOwnerConfigParser codeOwnerConfigParser,
-      Repository repository,
-      CodeOwnerConfig.Key codeOwnerConfigKey)
-      throws IOException, ConfigInvalidException {
-    requireNonNull(defaultFileName, "defaultFileName");
-    requireNonNull(codeOwnerConfigParser, "codeOwnerConfigParser");
-    requireNonNull(repository, "repository");
-    requireNonNull(codeOwnerConfigKey, "codeOwnerConfigKey");
-
-    CodeOwnerConfigFile codeOwnerConfigFile =
-        new CodeOwnerConfigFile(defaultFileName, codeOwnerConfigParser, codeOwnerConfigKey);
-    codeOwnerConfigFile.load(codeOwnerConfigKey.project(), repository);
-    return codeOwnerConfigFile;
-  }
-
+  private final CodeOwnerMetrics codeOwnerMetrics;
   private final String defaultFileName;
   private final CodeOwnerConfigParser codeOwnerConfigParser;
   private final CodeOwnerConfig.Key codeOwnerConfigKey;
@@ -132,9 +148,11 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   private Optional<CodeOwnerConfigUpdate> codeOwnerConfigUpdate = Optional.empty();
 
   private CodeOwnerConfigFile(
+      CodeOwnerMetrics codeOwnerMetrics,
       String defaultFileName,
       CodeOwnerConfigParser codeOwnerConfigParser,
       CodeOwnerConfig.Key codeOwnerConfigKey) {
+    this.codeOwnerMetrics = codeOwnerMetrics;
     this.defaultFileName = defaultFileName;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
     this.codeOwnerConfigKey = codeOwnerConfigKey;
@@ -186,12 +204,21 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   }
 
   @Override
+  protected byte[] readFile(String fileName) throws IOException {
+    try (Timer0.Context ctx = codeOwnerMetrics.readCodeOwnerConfig.start()) {
+      return super.readFile(fileName);
+    }
+  }
+
+  @Override
   protected void onLoad() throws IOException, ConfigInvalidException {
     if (revision != null) {
       Optional<String> codeOwnerConfigFileContent =
           getFileIfItExists(JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get());
       if (codeOwnerConfigFileContent.isPresent()) {
-        try {
+        try (Timer1.Context<String> ctx =
+            codeOwnerMetrics.parseCodeOwnerConfig.start(
+                codeOwnerConfigParser.getClass().getSimpleName())) {
           loadedCodeOwnersConfig =
               Optional.of(
                   codeOwnerConfigParser.parse(

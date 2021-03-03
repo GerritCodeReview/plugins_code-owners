@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFile;
 import com.google.gerrit.plugins.codeowners.backend.FindOwnersGlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -44,6 +45,7 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
   @Inject
   FindOwnersBackend(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory,
       FindOwnersCodeOwnerConfigParser codeOwnerConfigParser,
       GitRepositoryManager repoManager,
       @GerritPersonIdent PersonIdent serverIdent,
@@ -56,6 +58,7 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
         metaDataUpdateInternalFactory,
         retryHelper,
         CODE_OWNER_CONFIG_FILE_NAME,
+        codeOwnerConfigFileFactory,
         codeOwnerConfigParser);
   }
 

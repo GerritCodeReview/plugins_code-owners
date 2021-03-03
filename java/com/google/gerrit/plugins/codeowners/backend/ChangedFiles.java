@@ -146,14 +146,12 @@ public class ChangedFiles {
     logger.atFine().log(
         "computing changed files for revision %s in project %s", revCommit.name(), project);
 
-    try (Timer0.Context ctx = codeOwnerMetrics.computeChangedFiles.start()) {
-      if (revCommit.getParentCount() > 1
-          && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
-        return computeByComparingAgainstAutoMerge(project, revCommit);
-      }
-
-      return computeByComparingAgainstFirstParent(repoConfig, revWalk, revCommit);
+    if (revCommit.getParentCount() > 1
+        && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
+      return computeByComparingAgainstAutoMerge(project, revCommit);
     }
+
+    return computeByComparingAgainstFirstParent(repoConfig, revWalk, revCommit);
   }
 
   /**
@@ -171,16 +169,19 @@ public class ChangedFiles {
     checkState(
         mergeCommit.getParentCount() > 1, "expected %s to be a merge commit", mergeCommit.name());
 
-    // for merge commits the default base is the auto merge commit
-    PatchListKey patchListKey =
-        PatchListKey.againstDefaultBase(mergeCommit, Whitespace.IGNORE_NONE);
+    try (Timer0.Context ctx = codeOwnerMetrics.computeChangedFilesAgainstAutoMerge.start()) {
+      // for merge commits the default base is the auto merge commit
+      PatchListKey patchListKey =
+          PatchListKey.againstDefaultBase(mergeCommit, Whitespace.IGNORE_NONE);
 
-    return patchListCache.get(patchListKey, project).getPatches().stream()
-        .filter(
-            patchListEntry ->
-                patchListEntry.getNewName() == null || !Patch.isMagic(patchListEntry.getNewName()))
-        .map(ChangedFile::create)
-        .collect(toImmutableSet());
+      return patchListCache.get(patchListKey, project).getPatches().stream()
+          .filter(
+              patchListEntry ->
+                  patchListEntry.getNewName() == null
+                      || !Patch.isMagic(patchListEntry.getNewName()))
+          .map(ChangedFile::create)
+          .collect(toImmutableSet());
+    }
   }
 
   /**
@@ -195,25 +196,27 @@ public class ChangedFiles {
    */
   private ImmutableSet<ChangedFile> computeByComparingAgainstFirstParent(
       Config repoConfig, RevWalk revWalk, RevCommit revCommit) throws IOException {
-    RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
-    logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
+    try (Timer0.Context ctx = codeOwnerMetrics.computeChangedFilesAgainstFirstParent.start()) {
+      RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
+      logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
 
-    try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
-      diffFormatter.setReader(revWalk.getObjectReader(), repoConfig);
-      diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-      diffFormatter.setDetectRenames(true);
-      List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
-      ImmutableSet<ChangedFile> changedFiles =
-          diffEntries.stream().map(ChangedFile::create).collect(toImmutableSet());
-      if (changedFiles.size() <= MAX_CHANGED_FILES_TO_LOG) {
-        logger.atFine().log("changed files = %s", changedFiles);
-      } else {
-        logger.atFine().log(
-            "changed files = %s (and %d more)",
-            changedFiles.asList().subList(0, MAX_CHANGED_FILES_TO_LOG),
-            changedFiles.size() - MAX_CHANGED_FILES_TO_LOG);
+      try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
+        diffFormatter.setReader(revWalk.getObjectReader(), repoConfig);
+        diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
+        diffFormatter.setDetectRenames(true);
+        List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
+        ImmutableSet<ChangedFile> changedFiles =
+            diffEntries.stream().map(ChangedFile::create).collect(toImmutableSet());
+        if (changedFiles.size() <= MAX_CHANGED_FILES_TO_LOG) {
+          logger.atFine().log("changed files = %s", changedFiles);
+        } else {
+          logger.atFine().log(
+              "changed files = %s (and %d more)",
+              changedFiles.asList().subList(0, MAX_CHANGED_FILES_TO_LOG),
+              changedFiles.size() - MAX_CHANGED_FILES_TO_LOG);
+        }
+        return changedFiles;
       }
-      return changedFiles;
     }
   }
 }

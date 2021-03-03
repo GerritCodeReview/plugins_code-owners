@@ -52,6 +52,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
   private final MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory;
   private final RetryHelper retryHelper;
   private final String defaultFileName;
+  private final CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory;
   private final CodeOwnerConfigParser codeOwnerConfigParser;
 
   protected AbstractFileBasedCodeOwnerBackend(
@@ -61,6 +62,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
       RetryHelper retryHelper,
       String defaultFileName,
+      CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory,
       CodeOwnerConfigParser codeOwnerConfigParser) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
@@ -68,6 +70,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
     this.metaDataUpdateInternalFactory = metaDataUpdateInternalFactory;
     this.retryHelper = retryHelper;
     this.defaultFileName = defaultFileName;
+    this.codeOwnerConfigFileFactory = codeOwnerConfigFileFactory;
     this.codeOwnerConfigParser = codeOwnerConfigParser;
   }
 
@@ -103,7 +106,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       @Nullable ObjectId revision) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       if (revision == null) {
-        return CodeOwnerConfigFile.loadCurrent(
+        return codeOwnerConfigFileFactory.loadCurrent(
             fileName, codeOwnerConfigParser, repository, codeOwnerConfigKey);
       }
 
@@ -113,7 +116,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
         revWalk = new RevWalk(repository);
       }
       try {
-        return CodeOwnerConfigFile.load(
+        return codeOwnerConfigFileFactory.load(
             fileName, codeOwnerConfigParser, revWalk, revision, codeOwnerConfigKey);
       } finally {
         if (closeRevWalk) {
@@ -222,7 +225,8 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       CodeOwnerConfigUpdate codeOwnerConfigUpdate) {
     try (Repository repository = repoManager.openRepository(codeOwnerConfigKey.project())) {
       CodeOwnerConfigFile codeOwnerConfigFile =
-          CodeOwnerConfigFile.loadCurrent(
+          codeOwnerConfigFileFactory
+              .loadCurrent(
                   getFileName(codeOwnerConfigKey.project()),
                   codeOwnerConfigParser,
                   repository,
