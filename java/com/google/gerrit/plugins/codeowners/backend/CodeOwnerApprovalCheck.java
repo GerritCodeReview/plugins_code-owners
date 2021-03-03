@@ -289,23 +289,30 @@ public class CodeOwnerApprovalCheck {
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
 
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
-      return changedFiles
-          .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
-          .stream()
-          .map(
-              changedFile ->
-                  getFileStatus(
-                      codeOwnerConfigHierarchy,
-                      branch,
-                      revision,
-                      globalCodeOwners,
-                      enableImplicitApprovalFromUploader,
-                      patchSetUploader,
-                      reviewerAccountIds,
-                      approverAccountIds,
-                      fallbackCodeOwners,
-                      hasOverride,
-                      changedFile));
+      try {
+        return changedFiles
+            .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
+            .stream()
+            .map(
+                changedFile ->
+                    getFileStatus(
+                        codeOwnerConfigHierarchy,
+                        branch,
+                        revision,
+                        globalCodeOwners,
+                        enableImplicitApprovalFromUploader,
+                        patchSetUploader,
+                        reviewerAccountIds,
+                        approverAccountIds,
+                        fallbackCodeOwners,
+                        hasOverride,
+                        changedFile));
+      } finally {
+        codeOwnerMetrics.codeOwnerConfigBackendReadsPerChange.record(
+            codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getBackendReadCount());
+        codeOwnerMetrics.codeOwnerConfigCacheReadsPerChange.record(
+            codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getCacheReadCount());
+      }
     }
   }
 

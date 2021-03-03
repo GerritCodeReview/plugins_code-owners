@@ -18,6 +18,7 @@ import com.google.gerrit.metrics.Counter0;
 import com.google.gerrit.metrics.Description;
 import com.google.gerrit.metrics.Description.Units;
 import com.google.gerrit.metrics.Field;
+import com.google.gerrit.metrics.Histogram0;
 import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.metrics.Timer1;
@@ -41,7 +42,9 @@ public class CodeOwnerMetrics {
   public final Timer0 resolvePathCodeOwners;
   public final Timer0 runCodeOwnerSubmitRule;
 
-  // code owner config latency metrics
+  // code owner config metrics
+  public final Histogram0 codeOwnerConfigBackendReadsPerChange;
+  public final Histogram0 codeOwnerConfigCacheReadsPerChange;
   public final Timer1<String> loadCodeOwnerConfig;
   public final Timer0 readCodeOwnerConfig;
   public final Timer1<String> parseCodeOwnerConfig;
@@ -102,7 +105,15 @@ public class CodeOwnerMetrics {
         createLatencyTimer(
             "run_code_owner_submit_rule", "Latency for running the code owner submit rule");
 
-    // code owner config latency metrics
+    // code owner config metrics
+    this.codeOwnerConfigBackendReadsPerChange =
+        createHistogram(
+            "code_owner_config_backend_reads_per_change",
+            "Number of code owner config backend reads per change");
+    this.codeOwnerConfigCacheReadsPerChange =
+        createHistogram(
+            "code_owner_config_cache_reads_per_change",
+            "Number of code owner config cache reads per change");
     this.loadCodeOwnerConfig =
         createTimerWithClassField(
             "load_code_owner_config",
@@ -150,5 +161,10 @@ public class CodeOwnerMetrics {
 
   private Counter0 createCounter(String name, String description) {
     return metricMaker.newCounter("code_owners/" + name, new Description(description).setRate());
+  }
+
+  private Histogram0 createHistogram(String name, String description) {
+    return metricMaker.newHistogram(
+        "code_owners/" + name, new Description(description).setCumulative());
   }
 }

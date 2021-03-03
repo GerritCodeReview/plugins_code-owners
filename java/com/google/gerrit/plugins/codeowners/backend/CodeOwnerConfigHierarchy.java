@@ -234,4 +234,9 @@ public class CodeOwnerConfigHierarchy {
           String.format("failed to read %s", metaCodeOwnerConfigKey), e);
     }
   }
+
+  /** Returns the counters for cache and backend reads of code owner config files. */
+  public TransientCodeOwnerConfigCache.Counters getCodeOwnerConfigCounters() {
+    return transientCodeOwnerConfigCache.getCounters();
+  }
 }

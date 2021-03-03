@@ -30,8 +30,12 @@ usage and performance of the code owners functionality.
 * `run_code_owner_submit_rule`:
   Latency for running the code owner submit rule.
 
-### <a id="codeOwnerConfigLatencyMetrics"> Code Owner Config Latency Metrics
+## <a id="codeOwnerConfigMetrics"> Code Owner Config Metrics
 
+* `code_owner_config_cache_reads_per_change`:
+  Number of code owner config cache reads per change.
+* `code_owner_config_backend_reads_per_change`:
+  Number of code owner config backend reads per change.
 * `load_code_owner_config`:
   Latency for loading a code owner config file (read + parse).
 * `parse_code_owner_config`:
