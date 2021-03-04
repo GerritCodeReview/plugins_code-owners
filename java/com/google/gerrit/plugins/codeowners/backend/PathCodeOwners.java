@@ -246,7 +246,7 @@ public class PathCodeOwners {
       }
 
       // Resolve all global imports.
-      Set<CodeOwnerConfigImport> globalImports = getGlobalImports(0, codeOwnerConfig);
+      ImmutableSet<CodeOwnerConfigImport> globalImports = getGlobalImports(0, codeOwnerConfig);
       OptionalResultWithMessages<List<UnresolvedImport>> unresolvedGlobalImports =
           resolveImports(codeOwnerConfig.key(), globalImports, resolvedCodeOwnerConfigBuilder);
       messages.addAll(unresolvedGlobalImports.messages());
@@ -292,7 +292,7 @@ public class PathCodeOwners {
       }
 
       // Resolve per-file imports.
-      Set<CodeOwnerConfigImport> perFileImports =
+      ImmutableSet<CodeOwnerConfigImport> perFileImports =
           getPerFileImports(
               0, codeOwnerConfig.key(), resolvedCodeOwnerConfigBuilder.codeOwnerSets());
       OptionalResultWithMessages<List<UnresolvedImport>> unresolvedPerFileImports =
@@ -499,7 +499,7 @@ public class PathCodeOwners {
         !message.isEmpty() ? ImmutableList.of(message) : ImmutableList.of());
   }
 
-  private Set<CodeOwnerConfigImport> getGlobalImports(
+  private ImmutableSet<CodeOwnerConfigImport> getGlobalImports(
       int importLevel, CodeOwnerConfig codeOwnerConfig) {
     return codeOwnerConfig.imports().stream()
         .map(
@@ -509,11 +509,11 @@ public class PathCodeOwners {
         .collect(toImmutableSet());
   }
 
-  private Set<CodeOwnerConfigImport> getPerFileImports(
+  private ImmutableSet<CodeOwnerConfigImport> getPerFileImports(
       int importLevel,
       CodeOwnerConfig.Key importingCodeOwnerConfig,
       Set<CodeOwnerSet> codeOwnerSets) {
-    Set<CodeOwnerConfigImport> codeOwnerConfigImports = new HashSet<>();
+    ImmutableSet.Builder<CodeOwnerConfigImport> codeOwnerConfigImports = ImmutableSet.builder();
     for (CodeOwnerSet codeOwnerSet : codeOwnerSets) {
       codeOwnerSet.imports().stream()
           .forEach(
@@ -525,7 +525,7 @@ public class PathCodeOwners {
                           codeOwnerConfigReference,
                           codeOwnerSet)));
     }
-    return codeOwnerConfigImports;
+    return codeOwnerConfigImports.build();
   }
 
   public static CodeOwnerConfig.Key createKeyForImportedCodeOwnerConfig(
