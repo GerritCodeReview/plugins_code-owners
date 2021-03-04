@@ -21,9 +21,11 @@ import static java.util.Comparator.comparing;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.entities.PatchSet;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.restapi.change.OnPostReview;
@@ -45,10 +47,14 @@ import java.util.Optional;
 @Singleton
 class OnCodeOwnerOverride implements OnPostReview {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
-  OnCodeOwnerOverride(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+  OnCodeOwnerOverride(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   @Override
@@ -69,27 +75,32 @@ class OnCodeOwnerOverride implements OnPostReview {
       return Optional.empty();
     }
 
-    ImmutableList<RequiredApproval> overrideApprovals =
+    ImmutableList<RequiredApproval> appliedOverrideApprovals =
         codeOwnersConfig.getOverrideApproval().stream()
             .sorted(comparing(RequiredApproval::toString))
+            // If oldApprovals doesn't contain the label or if the labels value in it is null, the
+            // label was not changed.
+            .filter(
+                overrideApproval ->
+                    oldApprovals.get(overrideApproval.labelType().getName()) != null)
             .collect(toImmutableList());
 
-    List<String> messages = new ArrayList<>();
-    for (RequiredApproval overrideApproval : overrideApprovals) {
-      if (oldApprovals.get(overrideApproval.labelType().getName()) == null) {
-        // If oldApprovals doesn't contain the label or if the labels value in it is null, the label
-        // was not changed.
-        continue;
-      }
-
-      buildMessageForCodeOwnerOverride(user, patchSet, oldApprovals, approvals, overrideApproval)
-          .ifPresent(messages::add);
-    }
-
-    if (messages.isEmpty()) {
+    if (appliedOverrideApprovals.isEmpty()) {
       return Optional.empty();
     }
-    return Optional.of(Joiner.on("\n\n").join(messages));
+
+    try (Timer0.Context ctx = codeOwnerMetrics.extendChangeMessageOnPostReview.start()) {
+      List<String> messages = new ArrayList<>();
+      appliedOverrideApprovals.forEach(
+          overrideApproval ->
+              buildMessageForCodeOwnerOverride(
+                      user, patchSet, oldApprovals, approvals, overrideApproval)
+                  .ifPresent(messages::add));
+      if (messages.isEmpty()) {
+        return Optional.empty();
+      }
+      return Optional.of(Joiner.on("\n\n").join(messages));
+    }
   }
 
   private Optional<String> buildMessageForCodeOwnerOverride(

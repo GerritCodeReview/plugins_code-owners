@@ -20,9 +20,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.notedb.ChangeNotes;
@@ -54,13 +56,16 @@ class OnCodeOwnerApproval implements OnPostReview {
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
   OnCodeOwnerApproval(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
+      CodeOwnerApprovalCheck codeOwnerApprovalCheck,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   @Override
@@ -90,8 +95,10 @@ class OnCodeOwnerApproval implements OnPostReview {
       return Optional.empty();
     }
 
-    return buildMessageForCodeOwnerApproval(
-        user, changeNotes, patchSet, oldApprovals, approvals, requiredApproval);
+    try (Timer0.Context ctx = codeOwnerMetrics.extendChangeMessageOnPostReview.start()) {
+      return buildMessageForCodeOwnerApproval(
+          user, changeNotes, patchSet, oldApprovals, approvals, requiredApproval);
+    }
   }
 
   private Optional<String> buildMessageForCodeOwnerApproval(

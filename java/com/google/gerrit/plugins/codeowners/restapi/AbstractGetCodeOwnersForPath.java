@@ -86,7 +86,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
   private int limit = DEFAULT_LIMIT;
   private Optional<Long> seed = Optional.empty();
-  private boolean resolveAllUsers = true;
+  private boolean resolveAllUsers;
 
   @Option(
       name = "-o",
