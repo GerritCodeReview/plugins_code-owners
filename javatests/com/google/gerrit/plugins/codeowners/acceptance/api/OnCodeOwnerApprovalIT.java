@@ -833,8 +833,9 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + " %s:\n"
                     + "* %s\n"
                     + "* %s\n"
-                    + "(2 more files)\n",
-                admin.fullName(), path4, path3));
+                    + "* %s\n"
+                    + "(more files)\n",
+                admin.fullName(), path4, path3, path1));
   }
 
   @Test
