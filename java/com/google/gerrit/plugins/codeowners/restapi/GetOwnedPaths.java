@@ -66,7 +66,7 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
 
     ImmutableList<Path> ownedPaths =
         codeOwnerApprovalCheck.getOwnedPaths(
-            revisionResource.getNotes(), revisionResource.getPatchSet(), accountId);
+            revisionResource.getNotes(), revisionResource.getPatchSet(), accountId, /* limit= */ 0);
 
     OwnedPathsInfo ownedPathsInfo = new OwnedPathsInfo();
     ownedPathsInfo.ownedPaths = ownedPaths.stream().map(Path::toString).collect(toImmutableList());

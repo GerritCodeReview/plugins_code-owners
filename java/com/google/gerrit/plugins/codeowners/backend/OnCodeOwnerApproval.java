@@ -77,7 +77,9 @@ class OnCodeOwnerApproval implements OnPostReview {
       Map<String, Short> approvals) {
     CodeOwnersPluginConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
-    if (codeOwnersConfig.isDisabled(changeNotes.getChange().getDest().branch())) {
+    int maxPathsInChangeMessage = codeOwnersConfig.getMaxPathsInChangeMessages();
+    if (codeOwnersConfig.isDisabled(changeNotes.getChange().getDest().branch())
+        || maxPathsInChangeMessage <= 0) {
       return Optional.empty();
     }
 
@@ -97,7 +99,13 @@ class OnCodeOwnerApproval implements OnPostReview {
 
     try (Timer0.Context ctx = codeOwnerMetrics.extendChangeMessageOnPostReview.start()) {
       return buildMessageForCodeOwnerApproval(
-          user, changeNotes, patchSet, oldApprovals, approvals, requiredApproval);
+          user,
+          changeNotes,
+          patchSet,
+          oldApprovals,
+          approvals,
+          requiredApproval,
+          maxPathsInChangeMessage);
     }
   }
 
@@ -107,21 +115,16 @@ class OnCodeOwnerApproval implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals,
-      RequiredApproval requiredApproval) {
-    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
-        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
-    int maxPathsInChangeMessage = codeOwnersConfig.getMaxPathsInChangeMessages();
-    if (maxPathsInChangeMessage <= 0) {
-      return Optional.empty();
-    }
-
+      RequiredApproval requiredApproval,
+      int limit) {
     LabelVote newVote = getNewVote(requiredApproval, approvals);
 
     ImmutableList<Path> ownedPaths;
     try {
+      // limit + 1, so that we can show an indicator if there are more than <limit> files.
       ownedPaths =
           codeOwnerApprovalCheck.getOwnedPaths(
-              changeNotes, changeNotes.getCurrentPatchSet(), user.getAccountId());
+              changeNotes, changeNotes.getCurrentPatchSet(), user.getAccountId(), limit + 1);
     } catch (RestApiException e) {
       logger.atFine().withCause(e).log(
           "Couldn't compute owned paths of change %s for account %s",
@@ -147,7 +150,9 @@ class OnCodeOwnerApproval implements OnPostReview {
     }
 
     boolean hasImplicitApprovalByUser =
-        codeOwnersConfig.areImplicitApprovalsEnabled()
+        codeOwnersPluginConfiguration
+                .getProjectConfig(changeNotes.getProjectName())
+                .areImplicitApprovalsEnabled()
             && patchSet.uploader().equals(user.getAccountId());
 
     boolean noLongerExplicitlyApproved = false;
@@ -213,13 +218,11 @@ class OnCodeOwnerApproval implements OnPostReview {
       return Optional.empty();
     }
 
-    if (ownedPaths.size() <= maxPathsInChangeMessage) {
+    if (ownedPaths.size() <= limit) {
       appendPaths(message, ownedPaths.stream());
     } else {
-      // -1 so that we never show "(1 more files)"
-      int limit = maxPathsInChangeMessage - 1;
       appendPaths(message, ownedPaths.stream().limit(limit));
-      message.append(String.format("(%s more files)\n", ownedPaths.size() - limit));
+      message.append("(more files)\n");
     }
 
     if (hasImplicitApprovalByUser && noLongerExplicitlyApproved) {
