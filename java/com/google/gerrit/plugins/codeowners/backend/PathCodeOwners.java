@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
@@ -236,6 +235,7 @@ public class PathCodeOwners {
           codeOwnerConfig.ignoreParentCodeOwners());
       getGlobalCodeOwnerSets(codeOwnerConfig)
           .forEach(resolvedCodeOwnerConfigBuilder::addCodeOwnerSet);
+      boolean globalCodeOwnersIgnored = false;
       for (CodeOwnerSet codeOwnerSet :
           getMatchingPerFileCodeOwnerSets(codeOwnerConfig).collect(toImmutableSet())) {
         messages.add(
@@ -243,13 +243,35 @@ public class PathCodeOwners {
                 "per-file code owner set with path expressions %s matches",
                 codeOwnerSet.pathExpressions()));
         resolvedCodeOwnerConfigBuilder.addCodeOwnerSet(codeOwnerSet);
+        if (codeOwnerSet.ignoreGlobalAndParentCodeOwners()) {
+          globalCodeOwnersIgnored = true;
+        }
       }
 
-      // Resolve all global imports.
+      // Resolve global imports.
+      ImmutableList.Builder<UnresolvedImport> unresolvedImports = ImmutableList.builder();
       ImmutableSet<CodeOwnerConfigImport> globalImports = getGlobalImports(0, codeOwnerConfig);
-      OptionalResultWithMessages<List<UnresolvedImport>> unresolvedGlobalImports =
-          resolveImports(codeOwnerConfig.key(), globalImports, resolvedCodeOwnerConfigBuilder);
+      OptionalResultWithMessages<List<UnresolvedImport>> unresolvedGlobalImports;
+      if (!globalCodeOwnersIgnored) {
+        unresolvedGlobalImports =
+            resolveImports(codeOwnerConfig.key(), globalImports, resolvedCodeOwnerConfigBuilder);
+      } else {
+        // skip global import with mode GLOBAL_CODE_OWNER_SETS_ONLY,
+        // since we already know that global code owners will be ignored, we do not need to resolve
+        // these imports
+        unresolvedGlobalImports =
+            resolveImports(
+                codeOwnerConfig.key(),
+                globalImports.stream()
+                    .filter(
+                        codeOwnerConfigImport ->
+                            codeOwnerConfigImport.referenceToImportedCodeOwnerConfig().importMode()
+                                != CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY)
+                    .collect(toImmutableSet()),
+                resolvedCodeOwnerConfigBuilder);
+      }
       messages.addAll(unresolvedGlobalImports.messages());
+      unresolvedImports.addAll(unresolvedGlobalImports.get());
 
       // Remove all global code owner sets if any per-file code owner set has the
       // ignoreGlobalAndParentCodeOwners flag set to true (as in this case they are ignored and
@@ -298,16 +320,12 @@ public class PathCodeOwners {
       OptionalResultWithMessages<List<UnresolvedImport>> unresolvedPerFileImports =
           resolveImports(codeOwnerConfig.key(), perFileImports, resolvedCodeOwnerConfigBuilder);
       messages.addAll(unresolvedPerFileImports.messages());
+      unresolvedImports.addAll(unresolvedPerFileImports.get());
 
       this.pathCodeOwnersResult =
           OptionalResultWithMessages.create(
               PathCodeOwnersResult.create(
-                  path,
-                  resolvedCodeOwnerConfigBuilder.build(),
-                  Stream.concat(
-                          unresolvedGlobalImports.get().stream(),
-                          unresolvedPerFileImports.get().stream())
-                      .collect(toImmutableList())),
+                  path, resolvedCodeOwnerConfigBuilder.build(), unresolvedImports.build()),
               messages);
       logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
       return this.pathCodeOwnersResult;

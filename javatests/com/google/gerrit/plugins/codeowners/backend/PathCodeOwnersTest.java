@@ -2006,6 +2006,66 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         .isFalse();
   }
 
+  @Test
+  public void
+      perFileRuleThatIsImportedByAGlobalImportIsRespectedIfALocalPerFileRuleIgnoresGlobalCodeOwners()
+          throws Exception {
+    TestAccount user2 = accountCreator.user2();
+    TestAccount user3 =
+        accountCreator.create("user3", "user3@example.com", "User3", /* displayName= */ null);
+
+    // create importing config that has a global import with mode ALL and a per-file rule for md
+    // files that ignores global and parent code owners
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .setIgnoreGlobalAndParentCodeOwners()
+                    .addCodeOwnerEmail(user.email())
+                    .build())
+            .create();
+
+    // create imported config that has a matching per-file rule
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user2.email())
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(user3.email())
+                .build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the code owner from the matching per-file rule in the importing code
+    // owner config and the code owner from the matching per-file rule in the imported code owner
+    // config, the global code owners are ignored since there is a matching per-file rule that
+    // ignores parent and global code owners
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(user.email(), user3.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().hasUnresolvedImports())
+        .isFalse();
+  }
+
   private CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
         CodeOwnerConfig.Key.create(BranchNameKey.create(project, "master"), Paths.get("/")),
