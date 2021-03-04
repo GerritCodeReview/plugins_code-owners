@@ -886,6 +886,7 @@ If a field in this input is not set, the corresponding parameter in the
 | `override_approvals` | optional | The approvals that count as override for the code owners submit check. Must be specified in the format "\<label-name\>+\<label-value\>".
 | `fallback_code_owners` | optional | Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `PROJECT_OWNERS`: Paths for which no code owners are defined are owned by the project owners. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
 | `global_code_owners` | optional | List of emails of users that should be code owners globally across all branches.
+| `exempted_users` | optional | List of emails of users that should be exempted from requiring code owners approvals.
 | `merge_commit_strategy` | optional | Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
 | `implicit_approvals` | optional | Whether an implicit code owner approval from the last uploader is assumed.
 | `override_info_url` | optional | URL for a page that provides project/host-specific information about how to request a code owner override.

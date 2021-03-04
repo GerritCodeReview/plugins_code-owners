@@ -22,6 +22,7 @@ import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
@@ -167,6 +168,163 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     configureFallbackCodeOwners(allProjects, FallbackCodeOwners.ALL_USERS);
     configureFallbackCodeOwners(project, FallbackCodeOwners.NONE);
     assertThat(cfgSnapshot().getFallbackCodeOwners()).isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  public void getExemptedAccountsIfNoneIsConfigured() throws Exception {
+    assertThat(cfgSnapshot().getExemptedAccounts()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.exemptedUser",
+      values = {"exempted-user-1@example.com", "exempted-user-2@example.com"})
+  public void getExemptedAccountsIfNoneIsConfiguredOnProjectLevel() throws Exception {
+    TestAccount exemptedUser1 =
+        accountCreator.create(
+            "exemptedUser1",
+            "exempted-user-1@example.com",
+            "Exempted User 1",
+            /* displayName= */ null);
+    TestAccount exemptedUser2 =
+        accountCreator.create(
+            "exemptedUser2",
+            "exempted-user-2@example.com",
+            "Exempted User 2",
+            /* displayName= */ null);
+    assertThat(cfgSnapshot().getExemptedAccounts())
+        .containsExactly(exemptedUser1.id(), exemptedUser2.id());
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.exemptedUser",
+      values = {"exempted-user-1@example.com", "exempted-user-2@example.com"})
+  public void exemptedAccountsOnProjectLevelOverrideGlobalExemptedAcounts() throws Exception {
+    accountCreator.create(
+        "exemptedUser1", "exempted-user-1@example.com", "Exempted User 1", /* displayName= */ null);
+    accountCreator.create(
+        "exemptedUser2", "exempted-user-2@example.com", "Exempted User 2", /* displayName= */ null);
+    TestAccount exemptedUser3 =
+        accountCreator.create(
+            "exemptedUser3",
+            "exempted-user-3@example.com",
+            "Exempted User 3",
+            /* displayName= */ null);
+    TestAccount exemptedUser4 =
+        accountCreator.create(
+            "exemptedUser4",
+            "exempted-user-4@example.com",
+            "Exempted User 4",
+            /* displayName= */ null);
+    configureExemptedUsers(allProjects, exemptedUser3.email(), exemptedUser4.email());
+    assertThat(cfgSnapshot().getExemptedAccounts())
+        .containsExactly(exemptedUser3.id(), exemptedUser4.id());
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.exemptedUser",
+      values = {"exempted-user-1@example.com", "exempted-user-2@example.com"})
+  public void exemptedAccountsAreInheritedFromParentProject() throws Exception {
+    accountCreator.create(
+        "exemptedUser1", "exempted-user-1@example.com", "Exempted User 1", /* displayName= */ null);
+    accountCreator.create(
+        "exemptedUser2", "exempted-user-2@example.com", "Exempted User 2", /* displayName= */ null);
+    TestAccount exemptedUser3 =
+        accountCreator.create(
+            "exemptedUser3",
+            "exempted-user-3@example.com",
+            "Exempted User 3",
+            /* displayName= */ null);
+    TestAccount exemptedUser4 =
+        accountCreator.create(
+            "exemptedUser4",
+            "exempted-user-4@example.com",
+            "Exempted User 4",
+            /* displayName= */ null);
+    configureExemptedUsers(allProjects, exemptedUser3.email(), exemptedUser4.email());
+    assertThat(cfgSnapshot().getExemptedAccounts())
+        .containsExactly(exemptedUser3.id(), exemptedUser4.id());
+  }
+
+  @Test
+  public void inheritedExemptedAccountsCanBeOverridden() throws Exception {
+    TestAccount exemptedUser1 =
+        accountCreator.create(
+            "exemptedUser1",
+            "exempted-user-1@example.com",
+            "Exempted User 1",
+            /* displayName= */ null);
+    TestAccount exemptedUser2 =
+        accountCreator.create(
+            "exemptedUser2",
+            "exempted-user-2@example.com",
+            "Exempted User 2",
+            /* displayName= */ null);
+    TestAccount exemptedUser3 =
+        accountCreator.create(
+            "exemptedUser3",
+            "exempted-user-3@example.com",
+            "Exempted User 3",
+            /* displayName= */ null);
+    TestAccount exemptedUser4 =
+        accountCreator.create(
+            "exemptedUser4",
+            "exempted-user-4@example.com",
+            "Exempted User 4",
+            /* displayName= */ null);
+    configureExemptedUsers(allProjects, exemptedUser1.email(), exemptedUser2.email());
+    configureExemptedUsers(project, exemptedUser3.email(), exemptedUser4.email());
+    assertThat(cfgSnapshot().getExemptedAccounts())
+        .containsExactly(exemptedUser3.id(), exemptedUser4.id());
+  }
+
+  @Test
+  public void inheritedExemptedAccountsCanBeRemoved() throws Exception {
+    TestAccount exemptedUser1 =
+        accountCreator.create(
+            "exemptedUser1",
+            "exempted-user-1@example.com",
+            "Exempted User 1",
+            /* displayName= */ null);
+    TestAccount exemptedUser2 =
+        accountCreator.create(
+            "exemptedUser2",
+            "exempted-user-2@example.com",
+            "Exempted User 2",
+            /* displayName= */ null);
+    configureExemptedUsers(allProjects, exemptedUser1.email(), exemptedUser2.email());
+    configureExemptedUsers(project, "");
+    assertThat(cfgSnapshot().getExemptedAccounts()).isEmpty();
+  }
+
+  @Test
+  public void nonResolvableExemptedAccountsAreIgnored() throws Exception {
+    TestAccount exemptedUser =
+        accountCreator.create(
+            "exemptedUser", "exempted-user@example.com", "Exempted User", /* displayName= */ null);
+    configureExemptedUsers(project, exemptedUser.email(), "non-resolveable@example.com");
+    assertThat(cfgSnapshot().getExemptedAccounts()).containsExactly(exemptedUser.id());
+  }
+
+  @Test
+  public void exemptedAccountsByIdAreIgnored() throws Exception {
+    TestAccount exemptedUser1 =
+        accountCreator.create(
+            "exemptedUser1",
+            "exempted-user-1@example.com",
+            "Exempted User 1",
+            /* displayName= */ null);
+    TestAccount exemptedUser2 =
+        accountCreator.create(
+            "exemptedUser2",
+            "exempted-user-2@example.com",
+            "Exempted User 2",
+            /* displayName= */ null);
+    configureExemptedUsers(
+        project, exemptedUser1.email(), Integer.toString(exemptedUser2.id().get()));
+    assertThat(cfgSnapshot().getExemptedAccounts()).containsExactly(exemptedUser1.id());
   }
 
   @Test
@@ -778,6 +936,15 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
         /* subsection= */ null,
         GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
         fallbackCodeOwners.name());
+  }
+
+  private void configureExemptedUsers(Project.NameKey project, String... exemptedUsers)
+      throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_EXEMPTED_USER,
+        ImmutableList.copyOf(exemptedUsers));
   }
 
   private void configureMaxPathsInChangeMessages(

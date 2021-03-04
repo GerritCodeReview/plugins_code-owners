@@ -66,6 +66,7 @@ public class GeneralConfig {
   public static final String KEY_MAX_PATHS_IN_CHANGE_MESSAGES = "maxPathsInChangeMessages";
   public static final String KEY_MERGE_COMMIT_STRATEGY = "mergeCommitStrategy";
   public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
+  public static final String KEY_EXEMPTED_USER = "exemptedUser";
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
   public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
   public static final int DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES = 100;
@@ -567,6 +568,32 @@ public class GeneralConfig {
 
     return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_GLOBAL_CODE_OWNER))
         .map(CodeOwnerReference::create)
+        .collect(toImmutableSet());
+  }
+
+  /**
+   * Gets the users which are exempted from requiring code owner approvals.
+   *
+   * <p>If a user is exempted from requiring code owner approvals changes that are uploaded by this
+   * user are automatically code-owner approved.
+   *
+   * @param pluginConfig the plugin config from which the exempted users should be read.
+   * @return the users which are exempted from requiring code owner approvals
+   */
+  ImmutableSet<String> getExemptedUsers(Config pluginConfig) {
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    if (pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER)
+        != null) {
+      return Arrays.stream(
+              pluginConfig.getStringList(
+                  SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER))
+          .filter(value -> !value.trim().isEmpty())
+          .collect(toImmutableSet());
+    }
+
+    return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_EXEMPTED_USER))
+        .filter(value -> !value.trim().isEmpty())
         .collect(toImmutableSet());
   }
 
