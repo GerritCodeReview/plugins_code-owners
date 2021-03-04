@@ -238,7 +238,11 @@ public class CodeOwnerApprovalCheck {
       CodeOwnersPluginConfigSnapshot codeOwnersConfig =
           codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
 
-      if (codeOwnersConfig.arePureRevertsExempted() && isPureRevert(changeNotes)) {
+      boolean arePureRevertsExempted = codeOwnersConfig.arePureRevertsExempted();
+      logger.atFine().log("arePureRevertsExempted = %s", arePureRevertsExempted);
+      if (arePureRevertsExempted && isPureRevert(changeNotes)) {
+        logger.atFine().log(
+            "change is a pure revert and is exempted from requiring code owner approvals");
         return getAllPathsAsApproved(changeNotes, changeNotes.getCurrentPatchSet());
       }
 
