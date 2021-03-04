@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eaa891f6_881d5630",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-04T14:14:07Z",
+      "side": 1,
+      "message": "Do not submit yet, as we first want to rollout the metrics that have been added by change I421c99fb8. With their help we will be able to see how much this change helped to improve the PostReview latency.\n",
+      "revId": "59bdda75b8e75a39f10b91d345802ffb87f11836",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
