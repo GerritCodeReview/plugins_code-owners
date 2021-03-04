@@ -233,8 +233,9 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                 "%s who was added as reviewer owns the following files:\n"
                     + "* %s\n"
                     + "* %s\n"
-                    + "(2 more files)\n",
-                user.fullName(), path4, path3));
+                    + "* %s\n"
+                    + "(more files)\n",
+                user.fullName(), path4, path3, path1));
   }
 
   @Test

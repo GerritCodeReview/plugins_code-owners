@@ -96,8 +96,8 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
 
     CodeOwnersPluginConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(projectName);
-    if (codeOwnersConfig.isDisabled(event.getChange().branch)
-        || codeOwnersConfig.getMaxPathsInChangeMessages() <= 0) {
+    int maxPathsInChangeMessages = codeOwnersConfig.getMaxPathsInChangeMessages();
+    if (codeOwnersConfig.isDisabled(event.getChange().branch) || maxPathsInChangeMessages <= 0) {
       return;
     }
 
@@ -108,7 +108,8 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               updateFactory -> {
                 try (BatchUpdate batchUpdate =
                     updateFactory.create(projectName, userProvider.get(), TimeUtil.nowTs())) {
-                  batchUpdate.addOp(changeId, new Op(event.getReviewers()));
+                  batchUpdate.addOp(
+                      changeId, new Op(event.getReviewers(), maxPathsInChangeMessages));
                   batchUpdate.execute();
                 }
                 return null;
@@ -124,9 +125,11 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
 
   private class Op implements BatchUpdateOp {
     private final List<AccountInfo> reviewers;
+    private final int limit;
 
-    Op(List<AccountInfo> reviewers) {
+    Op(List<AccountInfo> reviewers, int limit) {
       this.reviewers = reviewers;
+      this.limit = limit;
     }
 
     @Override
@@ -158,9 +161,10 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
 
       ImmutableList<Path> ownedPaths;
       try {
+        // limit + 1, so that we can show an indicator if there are more than <limit> files.
         ownedPaths =
             codeOwnerApprovalCheck.getOwnedPaths(
-                changeNotes, changeNotes.getCurrentPatchSet(), reviewerAccountId);
+                changeNotes, changeNotes.getCurrentPatchSet(), reviewerAccountId, limit + 1);
       } catch (RestApiException e) {
         logger.atFine().withCause(e).log(
             "Couldn't compute owned paths of change %s for account %s",
@@ -181,15 +185,11 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               "%s who was added as reviewer owns the following files:\n",
               reviewerAccount.getName()));
 
-      int maxPathsInChangeMessage =
-          codeOwnersPluginConfiguration.getProjectConfig(projectName).getMaxPathsInChangeMessages();
-      if (ownedPaths.size() <= maxPathsInChangeMessage) {
+      if (ownedPaths.size() <= limit) {
         appendPaths(message, ownedPaths.stream());
       } else {
-        // -1 so that we never show "(1 more files)"
-        int limit = maxPathsInChangeMessage - 1;
         appendPaths(message, ownedPaths.stream().limit(limit));
-        message.append(String.format("(%s more files)\n", ownedPaths.size() - limit));
+        message.append("(more files)\n");
       }
 
       return Optional.of(message.toString());

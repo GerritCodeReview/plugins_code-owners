@@ -122,30 +122,39 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the change notes for which the owned files should be returned
    * @param patchSet the patch set for which the owned files should be returned
    * @param accountId account ID of the code owner for which the owned files should be returned
+   * @param limit the max number of owned paths that should be returned (0 = unlimited)
    * @return the paths of the files in the given patch set that are owned by the specified account
    * @throws ResourceConflictException if the destination branch of the change no longer exists
    */
   public ImmutableList<Path> getOwnedPaths(
-      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId)
+      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId, int limit)
       throws ResourceConflictException {
     try (Timer0.Context ctx = codeOwnerMetrics.computeOwnedPaths.start()) {
       logger.atFine().log(
-          "compute owned paths for account %d (project = %s, change = %d, patch set = %d)",
+          "compute owned paths for account %d (project = %s, change = %d, patch set = %d,"
+              + " limit = %d)",
           accountId.get(),
           changeNotes.getProjectName(),
           changeNotes.getChangeId().get(),
-          patchSet.id().get());
-      return getFileStatusesForAccount(changeNotes, patchSet, accountId)
-          .flatMap(
-              fileCodeOwnerStatus ->
-                  Stream.of(
-                          fileCodeOwnerStatus.newPathStatus(), fileCodeOwnerStatus.oldPathStatus())
-                      .filter(Optional::isPresent)
-                      .map(Optional::get))
-          .filter(pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
-          .map(PathCodeOwnerStatus::path)
-          .sorted(comparing(Path::toString))
-          .collect(toImmutableList());
+          patchSet.id().get(),
+          limit);
+      Stream<Path> ownedPaths =
+          getFileStatusesForAccount(changeNotes, patchSet, accountId)
+              .flatMap(
+                  fileCodeOwnerStatus ->
+                      Stream.of(
+                              fileCodeOwnerStatus.newPathStatus(),
+                              fileCodeOwnerStatus.oldPathStatus())
+                          .filter(Optional::isPresent)
+                          .map(Optional::get))
+              .filter(
+                  pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
+              .map(PathCodeOwnerStatus::path)
+              .sorted(comparing(Path::toString));
+      if (limit > 0) {
+        ownedPaths = ownedPaths.limit(limit);
+      }
+      return ownedPaths.collect(toImmutableList());
     } catch (IOException | PatchListNotAvailableException e) {
       throw new CodeOwnersInternalServerErrorException(
           String.format(
