@@ -2001,6 +2001,47 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptedUser", value = "exempted-user@example.com")
+  public void changeUploadedByExemptedUserIsApproved() throws Exception {
+    TestAccount exemptedUser =
+        accountCreator.create(
+            "exemptedUser", "exempted-user@example.com", "Exempted User", /* displayName= */ null);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(exemptedUser, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    // Check that the file is approved since the uploader is exempted from requiring code owner
+    // approvals.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+
+    // Amend the change by another user, so that the other non-exempted user becomes the last
+    // uploader.
+    amendChange(user, changeId);
+
+    // Check that the file is no longer approved since the uploader is not exempted from requiring
+    // code owner approvals.
+    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatuses(getChangeNotes(changeId));
+    fileCodeOwnerStatusSubject = assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
     return changeNotesFactory.create(project, Change.id(gApi.changes().id(changeId).get()._number));
   }

@@ -18,6 +18,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPlug
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPTED_USER;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPT_PURE_REVERTS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
@@ -167,6 +168,11 @@ public class PutCodeOwnerProjectConfig
             /* subsection= */ null,
             KEY_GLOBAL_CODE_OWNER,
             input.globalCodeOwners);
+      }
+
+      if (input.exemptedUsers != null) {
+        codeOwnersConfig.setStringList(
+            SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER, input.exemptedUsers);
       }
 
       if (input.mergeCommitStrategy != null) {

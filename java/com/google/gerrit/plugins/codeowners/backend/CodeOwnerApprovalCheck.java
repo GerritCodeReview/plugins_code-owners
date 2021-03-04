@@ -238,6 +238,16 @@ public class CodeOwnerApprovalCheck {
       CodeOwnersPluginConfigSnapshot codeOwnersConfig =
           codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
 
+      Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
+      ImmutableSet<Account.Id> exemptedAccounts = codeOwnersConfig.getExemptedAccounts();
+      logger.atFine().log("exemptedAccounts = %s", exemptedAccounts);
+      if (exemptedAccounts.contains(patchSetUploader)) {
+        logger.atFine().log(
+            "patch set uploader %d is exempted from requiring code owner approvals",
+            patchSetUploader.get());
+        return getAllPathsAsApproved(changeNotes, changeNotes.getCurrentPatchSet());
+      }
+
       boolean arePureRevertsExempted = codeOwnersConfig.arePureRevertsExempted();
       logger.atFine().log("arePureRevertsExempted = %s", arePureRevertsExempted);
       if (arePureRevertsExempted && isPureRevert(changeNotes)) {
@@ -247,7 +257,6 @@ public class CodeOwnerApprovalCheck {
       }
 
       boolean enableImplicitApprovalFromUploader = codeOwnersConfig.areImplicitApprovalsEnabled();
-      Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
       logger.atFine().log(
           "patchSetUploader = %d, implicit approval from uploader is %s",
           patchSetUploader.get(), enableImplicitApprovalFromUploader ? "enabled" : "disabled");

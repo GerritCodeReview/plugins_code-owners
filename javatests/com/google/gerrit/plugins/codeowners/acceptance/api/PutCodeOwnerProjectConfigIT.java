@@ -23,6 +23,7 @@ import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.UseClockStep;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
@@ -336,6 +337,25 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     input.globalCodeOwners = ImmutableList.of();
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getGlobalCodeOwners())
+        .isEmpty();
+  }
+
+  @Test
+  public void setExemptedUsers() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getExemptedAccounts())
+        .isEmpty();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.exemptedUsers = ImmutableList.of(user.email(), user2.email());
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getExemptedAccounts())
+        .containsExactly(user.id(), user2.id());
+
+    input.exemptedUsers = ImmutableList.of();
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getExemptedAccounts())
         .isEmpty();
   }
 

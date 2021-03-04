@@ -20,6 +20,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPTED_USER;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPT_PURE_REVERTS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
@@ -710,6 +711,51 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER, "bot3@example.com");
     assertThat(generalConfig.getGlobalCodeOwners(cfg))
         .containsExactly(CodeOwnerReference.create("bot3@example.com"));
+  }
+
+  @Test
+  public void cannotGetExemptedUsersForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getExemptedUsers(/* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noExemptedUsers() throws Exception {
+    assertThat(generalConfig.getExemptedUsers(new Config())).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.exemptedUser",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void exemptedUsersAreRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getExemptedUsers(new Config()))
+        .containsExactly("bot1@example.com", "bot2@example.com");
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.exemptedUser",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void exemptedUsersInPluginConfigOverrideExemptedUsersInGerritConfig() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER, "bot3@example.com");
+    assertThat(generalConfig.getExemptedUsers(cfg)).containsExactly("bot3@example.com");
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.exemptedUsers",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void inheritedExemptedUsersCanBeRemovedOnProjectLevel() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER, "");
+    assertThat(generalConfig.getExemptedUsers(cfg)).isEmpty();
   }
 
   @Test
