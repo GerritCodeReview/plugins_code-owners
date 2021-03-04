@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.auto.value.AutoValue;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
@@ -38,14 +39,19 @@ import org.eclipse.jgit.lib.Repository;
 public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
   private final GitRepositoryManager repoManager;
   private final CodeOwners codeOwners;
+  private final Optional<Integer> maxCacheSize;
   private final Counters counters;
   private final HashMap<CacheKey, Optional<CodeOwnerConfig>> cache = new HashMap<>();
 
   @Inject
   TransientCodeOwnerConfigCache(
-      GitRepositoryManager repoManager, CodeOwners codeOwners, CodeOwnerMetrics codeOwnerMetrics) {
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      GitRepositoryManager repoManager,
+      CodeOwners codeOwners,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwners = codeOwners;
+    this.maxCacheSize = codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize();
     this.counters = new Counters(codeOwnerMetrics);
   }
 
@@ -89,7 +95,9 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
         codeOwnerConfig = Optional.empty();
       }
     }
-    cache.put(cacheKey, codeOwnerConfig);
+    if (!maxCacheSize.isPresent() || cache.size() < maxCacheSize.get()) {
+      cache.put(cacheKey, codeOwnerConfig);
+    }
     return codeOwnerConfig;
   }
 

@@ -26,6 +26,7 @@ import com.google.gerrit.server.cache.PerThreadCache;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.util.Optional;
 
 /**
  * The configuration of the code-owners plugin.
@@ -47,6 +48,8 @@ public class CodeOwnersPluginConfiguration {
 
   @VisibleForTesting
   static final String KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS = "enableExperimentalRestEndpoints";
+
+  private static final String KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE = "maxCodeOwnerConfigCacheSize";
 
   private final CodeOwnersPluginConfigSnapshot.Factory codeOwnersPluginConfigSnapshotFactory;
   private final String pluginName;
@@ -115,6 +118,33 @@ public class CodeOwnersPluginConfiguration {
           pluginName,
           KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS);
       return false;
+    }
+  }
+
+  /**
+   * Gets the maximum size for the {@link
+   * com.google.gerrit.plugins.codeowners.backend.TransientCodeOwnerConfigCache}.
+   *
+   * @return the maximum cache size, {@link Optional#empty()} if the cache size is not limited
+   */
+  public Optional<Integer> getMaxCodeOwnerConfigCacheSize() {
+    try {
+      int maxCodeOwnerConfigCacheSize =
+          pluginConfigFactory
+              .getFromGerritConfig(pluginName)
+              .getInt(KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE, /* defaultValue= */ 0);
+      return maxCodeOwnerConfigCacheSize > 0
+          ? Optional.of(maxCodeOwnerConfigCacheSize)
+          : Optional.empty();
+    } catch (IllegalArgumentException e) {
+      logger.atWarning().withCause(e).log(
+          "Value '%s' in gerrit.config (parameter plugin.%s.%s) is invalid.",
+          pluginConfigFactory
+              .getFromGerritConfig(pluginName)
+              .getString(KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE),
+          pluginName,
+          KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
+      return Optional.empty();
     }
   }
 }
