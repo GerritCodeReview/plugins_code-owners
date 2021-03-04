@@ -808,6 +808,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     String path2 = "foo/baz.bar";
     String path3 = "bar/foo.baz";
     String path4 = "bar/baz.foo";
+    String path5 = "baz/foo.bar";
     String changeId =
         createChange(
                 "Test Change",
@@ -819,6 +820,8 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     path3,
                     "file content",
                     path4,
+                    "file content",
+                    path5,
                     "file content"))
             .getChangeId();
 
@@ -833,8 +836,9 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + " %s:\n"
                     + "* %s\n"
                     + "* %s\n"
-                    + "(2 more files)\n",
-                admin.fullName(), path4, path3));
+                    + "* %s\n"
+                    + "(more files)\n",
+                admin.fullName(), path4, path3, path5));
   }
 
   @Test

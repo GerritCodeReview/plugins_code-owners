@@ -210,6 +210,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
     String path2 = "foo/baz.bar";
     String path3 = "bar/foo.baz";
     String path4 = "bar/baz.foo";
+    String path5 = "baz/foo.bar";
     String changeId =
         createChange(
                 "Test Change",
@@ -221,6 +222,8 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                     path3,
                     "file content",
                     path4,
+                    "file content",
+                    path5,
                     "file content"))
             .getChangeId();
 
@@ -233,8 +236,9 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                 "%s who was added as reviewer owns the following files:\n"
                     + "* %s\n"
                     + "* %s\n"
-                    + "(2 more files)\n",
-                user.fullName(), path4, path3));
+                    + "* %s\n"
+                    + "(more files)\n",
+                user.fullName(), path4, path3, path5));
   }
 
   @Test
