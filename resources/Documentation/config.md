@@ -407,7 +407,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         Can be overridden per project by setting
         [codeOwners.maxPathsInChangeMessages](#codeOwnersMaxPathsInChangeMessages)
         in `@PLUGIN@.config`.\
-        By default `100`.
+        By default `50`.
 
 <a id="pluginCodeOwnersMaxCodeOwnerConfigCacheSize">plugin.@PLUGIN@.maxCodeOwnerConfigCacheSize</a>
 :       When computing code owner file statuses for a change (e.g. to compute
@@ -770,8 +770,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.maxPathsInChangeMessages](#pluginCodeOwnersMaxPathsInChangeMessages)
-        in `gerrit.config` is used.\
-        By default `100`.
+        in `gerrit.config` is used.
 
 ---
 

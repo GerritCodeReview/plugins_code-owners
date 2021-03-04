@@ -69,10 +69,11 @@ public class GeneralConfig {
   public static final String KEY_EXEMPTED_USER = "exemptedUser";
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
   public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
-  public static final int DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES = 100;
   public static final String KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS =
       "rejectNonResolvableCodeOwners";
   public static final String KEY_REJECT_NON_RESOLVABLE_IMPORTS = "rejectNonResolvableImports";
+
+  public static final int DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES = 50;
 
   private static final String KEY_ALLOWED_EMAIL_DOMAIN = "allowedEmailDomain";
 
