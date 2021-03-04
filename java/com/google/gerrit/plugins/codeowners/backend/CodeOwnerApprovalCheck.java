@@ -256,7 +256,7 @@ public class CodeOwnerApprovalCheck {
 
       ImmutableSet<RequiredApproval> overrideApprovals = codeOwnersConfig.getOverrideApproval();
       boolean hasOverride =
-          hasOverride(currentPatchSetApprovals, overrideApprovals, changeNotes, patchSetUploader);
+          hasOverride(currentPatchSetApprovals, overrideApprovals, patchSetUploader);
       logger.atFine().log(
           "hasOverride = %s (overrideApprovals = %s)",
           hasOverride,
@@ -282,8 +282,7 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds =
           getReviewerAccountIds(requiredApproval, changeNotes, patchSetUploader);
       ImmutableSet<Account.Id> approverAccountIds =
-          getApproverAccountIds(
-              currentPatchSetApprovals, requiredApproval, changeNotes, patchSetUploader);
+          getApproverAccountIds(currentPatchSetApprovals, requiredApproval, patchSetUploader);
       logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
 
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
@@ -885,12 +884,10 @@ public class CodeOwnerApprovalCheck {
    *
    * @param requiredApproval approval that is required from code owners to approve the files in a
    *     change
-   * @param changeNotes the change notes
    */
   private ImmutableSet<Account.Id> getApproverAccountIds(
       ImmutableList<PatchSetApproval> currentPatchSetApprovals,
       RequiredApproval requiredApproval,
-      ChangeNotes changeNotes,
       Account.Id patchSetUploader) {
     ImmutableSet<Account.Id> approverAccountIds =
         currentPatchSetApprovals.stream()
@@ -932,14 +929,12 @@ public class CodeOwnerApprovalCheck {
    * Checks whether the given change has an override approval.
    *
    * @param overrideApprovals approvals that count as override for the code owners submit check.
-   * @param changeNotes the change notes
    * @param patchSetUploader account ID of the patch set uploader
    * @return whether the given change has an override approval
    */
   private boolean hasOverride(
       ImmutableList<PatchSetApproval> currentPatchSetApprovals,
       ImmutableSet<RequiredApproval> overrideApprovals,
-      ChangeNotes changeNotes,
       Account.Id patchSetUploader) {
     ImmutableSet<RequiredApproval> overrideApprovalsThatIgnoreSelfApprovals =
         overrideApprovals.stream()
