@@ -38,7 +38,7 @@ import org.eclipse.jgit.lib.Repository;
 public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
   private final GitRepositoryManager repoManager;
   private final CodeOwners codeOwners;
-  private final CodeOwnerMetrics codeOwnerMetrics;
+  private final Counters counters;
   private final HashMap<CacheKey, Optional<CodeOwnerConfig>> cache = new HashMap<>();
 
   @Inject
@@ -46,7 +46,7 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
       GitRepositoryManager repoManager, CodeOwners codeOwners, CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwners = codeOwners;
-    this.codeOwnerMetrics = codeOwnerMetrics;
+    this.counters = new Counters(codeOwnerMetrics);
   }
 
   /**
@@ -59,7 +59,7 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
     CacheKey cacheKey = CacheKey.create(codeOwnerConfigKey, revision);
     Optional<CodeOwnerConfig> cachedCodeOwnerConfig = cache.get(cacheKey);
     if (cachedCodeOwnerConfig != null) {
-      codeOwnerMetrics.countCodeOwnerConfigCacheReads.increment();
+      counters.incrementCacheReads();
       return cachedCodeOwnerConfig;
     }
     return loadAndCache(cacheKey);
@@ -76,6 +76,7 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
 
   /** Load a code owner config and puts it into the cache. */
   private Optional<CodeOwnerConfig> loadAndCache(CacheKey cacheKey) {
+    counters.incrementBackendReads();
     Optional<CodeOwnerConfig> codeOwnerConfig;
     if (cacheKey.revision().isPresent()) {
       codeOwnerConfig = codeOwners.get(cacheKey.codeOwnerConfigKey(), cacheKey.revision().get());
@@ -126,6 +127,40 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
         CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
       return new AutoValue_TransientCodeOwnerConfigCache_CacheKey(
           codeOwnerConfigKey, Optional.ofNullable(revision));
+    }
+  }
+
+  public Counters getCounters() {
+    return counters;
+  }
+
+  public static class Counters {
+    private final CodeOwnerMetrics codeOwnerMetrics;
+
+    private int cacheReadCount;
+    private int backendReadCount;
+
+    private Counters(CodeOwnerMetrics codeOwnerMetrics) {
+      this.codeOwnerMetrics = codeOwnerMetrics;
+    }
+
+    private void incrementCacheReads() {
+      codeOwnerMetrics.countCodeOwnerConfigCacheReads.increment();
+      cacheReadCount++;
+    }
+
+    private void incrementBackendReads() {
+      // we do not increase the countCodeOwnerConfigReads metric here, since this is already done in
+      // CodeOwners
+      backendReadCount++;
+    }
+
+    public int getBackendReadCount() {
+      return backendReadCount;
+    }
+
+    public int getCacheReadCount() {
+      return cacheReadCount;
     }
   }
 }
