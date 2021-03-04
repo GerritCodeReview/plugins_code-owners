@@ -65,6 +65,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b57012c_4635e8b0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 240,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-04T08:50:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c02442cd_d46fc046",
+      "range": {
+        "startLine": 240,
+        "startChar": 58,
+        "endLine": 240,
+        "endChar": 82
+      },
+      "revId": "1dd3efc4a52101eb5a3236a95c4801801c5c4cef",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "16748df3_f742ab96",
@@ -102,6 +126,30 @@
       "side": 1,
       "message": "Added a comment with an explanation.\n\nI tried hard to avoid this, but didn\u0027t find a better solution.\n\nBut definitely good to have this documented.",
       "parentUuid": "16748df3_f742ab96",
+      "range": {
+        "startLine": 275,
+        "startChar": 15,
+        "endLine": 276,
+        "endChar": 28
+      },
+      "revId": "1dd3efc4a52101eb5a3236a95c4801801c5c4cef",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a6708fb6_ef718588",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 276,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-04T08:50:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "da3e79c5_60452233",
       "range": {
         "startLine": 275,
         "startChar": 15,

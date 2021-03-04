@@ -22,6 +22,30 @@
       },
       "revId": "0899ed3d809618418a6cf51f5ba7f0727f23cffd",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "23bf9f9d_5dc92246",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 281,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-04T08:50:00Z",
+      "side": 1,
+      "message": "Thanks for suggestion. I was starting to think into this direction too. I\u0027ll follow-up on this and see if this works better, but let\u0027s not block the fix on this :)",
+      "parentUuid": "2e63ea86_c02f2b84",
+      "range": {
+        "startLine": 278,
+        "startChar": 39,
+        "endLine": 281,
+        "endChar": 58
+      },
+      "revId": "0899ed3d809618418a6cf51f5ba7f0727f23cffd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
