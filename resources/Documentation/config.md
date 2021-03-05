@@ -147,7 +147,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         (e.g. because they are bots and cannot react to review requests), they
         can be added to the `Service Users` group (since members of this group
         are not suggested as code owners).\
-        Can be specified multiple time to set multiple global code owners.\
+        Can be specified multiple times to set multiple global code owners.\
         Can be overridden per project by setting
         [codeOwners.globalCodeOwner](#codeOwnersGlobalCodeOwner) in
         `@PLUGIN@.config`.\
@@ -543,7 +543,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         (e.g. because they are bots and cannot react to review requests), they
         can be added to the `Service Users` group (since members of this group
         are not suggested as code owners).\
-        Can be specified multiple time to set multiple global code owners.\
+        Can be specified multiple times to set multiple global code owners.\
         Overrides the global setting
         [plugin.@PLUGIN@.globalCodeOwner](#pluginCodeOwnersGlobalCodeOwner) in
         `gerrit.config` and the `codeOwners.globalCodeOwner` setting from parent
