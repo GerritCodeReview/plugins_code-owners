@@ -16,6 +16,24 @@
       "message": "Could the exempted user just be a global code owner and would that solve the problem as well?",
       "revId": "2f49c8a85599bdd2551b331404b5c94415dc37dd",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "046bbc7e_0f4c0d15",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-05T09:40:54Z",
+      "side": 1,
+      "message": "No, being a global code owner is different.\nA global code owner can approve any change.\nThis means if the bot is a global code owner it would need to self-approve the own changes, but Android wants to disallow self-approvals and then this wouldn\u0027t work.\n\nWhat has been discussed as alternative is to support controlling with permissions who is allowed to self approve a label, e.g. for Code-Review disallow self-approvals for normal users, but allow self-approvals for bots. Implementing this would be much more work which is why we agreed on supporting to exempt users instead (more details in b/181028278).",
+      "parentUuid": "32d7c775_60f744fb",
+      "revId": "2f49c8a85599bdd2551b331404b5c94415dc37dd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
