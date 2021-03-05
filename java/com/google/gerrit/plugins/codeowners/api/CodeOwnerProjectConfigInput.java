@@ -71,6 +71,9 @@ public class CodeOwnerProjectConfigInput {
   /** Emails of users that should be code owners globally across all branches. */
   public List<String> globalCodeOwners;
 
+  /** Emails of users that should be exempted from requiring code owner approvals. */
+  public List<String> exemptedUsers;
+
   /** Strategy that defines for merge commits which files require code owner approvals. */
   public MergeCommitStrategy mergeCommitStrategy;
 

@@ -153,6 +153,17 @@ endpoint or by touching the change (e.g. by adding a comment).
         `@PLUGIN@.config`.\
         By default unset (no global code owners).
 
+<a id="pluginCodeOwnersExemptedUser">plugin.@PLUGIN@.exemptedUser</a>
+:       The email of a user that should be exempted from requiring code owner
+        approvals.\
+        If a user is exempted from requiring code owner approvals changes that
+        are uploaded by this user are automatically code-owner approved.\
+        Can be specified multiple times to exempt multiple users.\
+        Can be overridden per project by setting
+        [codeOwners.exemptedUser](#codeOwnersExemptedUser) in
+        `@PLUGIN@.config`.\
+        By default unset (no exempted users).
+
 <a id="pluginCodeOwnersReadOnly">plugin.@PLUGIN@.readOnly</a>
 :       Whether code owner config files are read-only.\
         Can be overridden per project by setting
@@ -539,6 +550,20 @@ endpoint or by touching the change (e.g. by adding a comment).
         projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.globalCodeOwner](#pluginCodeOwnersGlobalCodeOwner) in
+        `gerrit.config` is used.
+
+<a id="codeOwnersExemptedUser">codeOwners.exemptedUser</a>
+:       The email of a user that should be exempted from requiring code owner
+        approvals.\
+        If a user is exempted from requiring code owner approvals changes that
+        are uploaded by this user are automatically code-owner approved.\
+        Can be specified multiple times to exempt multiple users.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.exemptedUser](#pluginCodeOwnersExemptedUser) in
+        `gerrit.config` and the `codeOwners.exemptedUser` setting from parent
+        projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.exemptedUser](#pluginCodeOwnersExemptedUser) in
         `gerrit.config` is used.
 
 <a id="codeOwnersReadOnly">codeOwners.readOnly</a>
