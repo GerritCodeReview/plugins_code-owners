@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "26549b1c_99cf108a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-03-05T09:20:08Z",
+      "side": 1,
+      "message": "Is this a frequent enough case or cause for latency to warrant the extra complexity?",
+      "revId": "4a62c34209b5ed911aca21b89147f43706995bee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
