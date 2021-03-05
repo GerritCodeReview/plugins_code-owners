@@ -18,15 +18,33 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.truth.ListSubject;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Collection;
 
 /** {@link Subject} for doing assertions on {@link ChangedFile}s. */
 public class ChangedFileSubject extends Subject {
+  /**
+   * Constructs a {@link Correspondence} that maps {@link ChangedFile}s to their paths (new path if
+   * set, otherwise old path).
+   */
+  public static Correspondence<ChangedFile, String> hasPath() {
+    return NullAwareCorrespondence.transforming(
+        changedFile ->
+            JgitPath.of(
+                    changedFile.newPath().isPresent()
+                        ? changedFile.newPath().get()
+                        : changedFile.oldPath().get())
+                .get(),
+        "has path");
+  }
+
   /**
    * Starts fluent chain to do assertions on a {@link ChangedFile}.
    *
