@@ -17,9 +17,12 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject.hasPath;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.junit.Assert.fail;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.PushOneCommit;
@@ -86,7 +89,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
-    ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
@@ -104,7 +108,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
             .getChangeId();
 
-    ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
@@ -118,7 +123,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     String path = "/foo/bar/baz.txt";
     String changeId = createChangeWithFileDeletion(path);
 
-    ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().isEmpty();
@@ -135,7 +141,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
     gApi.changes().id(changeId).current().files();
 
-    ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(newPath));
@@ -152,7 +159,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     assertThat(r.getCommit().getParents()).isEmpty();
     String changeId = r.getChangeId();
 
-    ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(changeId));
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
@@ -231,17 +239,13 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .content("content")
             .create();
 
-    ImmutableSet<ChangedFile> changedFilesSet =
+    ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.compute(getRevisionResource(Integer.toString(mergeChange.get())));
-    ImmutableSet<String> paths =
-        changedFilesSet.stream()
-            .map(changedFile -> JgitPath.of(changedFile.newPath().get()).get())
-            .collect(toImmutableSet());
 
     if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
-      assertThat(paths).containsExactly(file1, file2);
+      assertThat(changedFilesSet).comparingElementsUsing(hasPath()).containsExactly(file1, file2);
     } else if (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
-      assertThat(paths).containsExactly(file1);
+      assertThat(changedFilesSet).comparingElementsUsing(hasPath()).containsExactly(file1);
     } else {
       fail("expected merge commit strategy: " + mergeCommitStrategy);
     }
@@ -308,13 +312,160 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .delete()
             .create();
 
-    ImmutableSet<ChangedFile> changedFilesSet =
+    ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.compute(getRevisionResource(Integer.toString(mergeChange.get())));
     ImmutableSet<String> oldPaths =
         changedFilesSet.stream()
             .map(changedFile -> JgitPath.of(changedFile.oldPath().get()).get())
             .collect(toImmutableSet());
     assertThat(oldPaths).containsExactly(file);
+  }
+
+  @Test
+  public void sortedByPath() throws Exception {
+    String file1 = "foo/bar.baz";
+    String file2 = "foo/baz.bar";
+    String file3 = "bar/foo.baz";
+    String file4 = "bar/baz.foo";
+    String file5 = "baz/foo.bar";
+    String changeId =
+        createChange(
+                "Test Change",
+                ImmutableMap.of(
+                    file1,
+                    "file content",
+                    file2,
+                    "file content",
+                    file3,
+                    "file content",
+                    file4,
+                    "file content",
+                    file5,
+                    "file content"))
+            .getChangeId();
+
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(changeId));
+    assertThat(changedFilesSet)
+        .comparingElementsUsing(hasPath())
+        .containsExactly(file4, file3, file5, file1, file2)
+        .inOrder();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "ALL_CHANGED_FILES")
+  public void sortedByPath_mergeCommitAgainstFirstParent() throws Exception {
+    testSortedByPathForMerge(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void sortedByPath_mergeCommitAgainstAutoMerge() throws Exception {
+    testSortedByPathForMerge(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  }
+
+  private void testSortedByPathForMerge(MergeCommitStrategy mergeCommitStrategy) throws Exception {
+    setAsRootCodeOwners(admin);
+
+    String file1 = "foo/bar.baz";
+    String file2 = "foo/baz.bar";
+    String file3 = "bar/foo.baz";
+    String file4 = "bar/baz.foo";
+    String file5 = "baz/foo.bar";
+
+    // Create a base change.
+    Change.Id baseChange =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .file(file1)
+            .content("base content")
+            .file(file3)
+            .content("base content")
+            .file(file5)
+            .content("base content")
+            .create();
+    approveAndSubmit(baseChange);
+
+    // Create another branch
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create a change in master that touches file1, file3 and file5
+    Change.Id changeInMaster =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .file(file1)
+            .content("master content")
+            .file(file3)
+            .content("master content")
+            .file(file5)
+            .content("master content")
+            .create();
+    approveAndSubmit(changeInMaster);
+
+    // Create a change in the other branch and that touches file1, file3, file5 and creates file2,
+    // file4.
+    Change.Id changeInOtherBranch =
+        changeOperations
+            .newChange()
+            .branch(branchName)
+            .file(file1)
+            .content("other content")
+            .file(file2)
+            .content("content")
+            .file(file3)
+            .content("other content")
+            .file(file4)
+            .content("content")
+            .file(file5)
+            .content("other content")
+            .create();
+    approveAndSubmit(changeInOtherBranch);
+
+    // Create a merge change with a conflict resolution for file1 and file2 with the same content as
+    // in the other branch (no conflict on file2).
+    Change.Id mergeChange =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .mergeOfButBaseOnFirst()
+            .tipOfBranch("master")
+            .and()
+            .tipOfBranch(branchName)
+            .file(file1)
+            .content("merged content")
+            .file(file2)
+            .content("content")
+            .file(file3)
+            .content("merged content")
+            .file(file4)
+            .content("content")
+            .file(file5)
+            .content("merged content")
+            .create();
+
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.compute(getRevisionResource(Integer.toString(mergeChange.get())));
+
+    if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
+      assertThat(changedFilesSet)
+          .comparingElementsUsing(hasPath())
+          .containsExactly(file4, file3, file5, file1, file2)
+          .inOrder();
+    } else if (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
+      assertThat(changedFilesSet)
+          .comparingElementsUsing(hasPath())
+          .containsExactly(file3, file5, file1);
+    } else {
+      fail("expected merge commit strategy: " + mergeCommitStrategy);
+    }
   }
 
   private void approveAndSubmit(Change.Id changeId) throws Exception {
