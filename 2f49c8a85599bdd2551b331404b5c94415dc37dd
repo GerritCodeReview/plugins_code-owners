@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "32d7c775_60f744fb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-03-05T09:25:04Z",
+      "side": 1,
+      "message": "Could the exempted user just be a global code owner and would that solve the problem as well?",
+      "revId": "2f49c8a85599bdd2551b331404b5c94415dc37dd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
