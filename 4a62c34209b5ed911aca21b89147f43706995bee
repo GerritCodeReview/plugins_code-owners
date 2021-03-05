@@ -16,6 +16,24 @@
       "message": "Is this a frequent enough case or cause for latency to warrant the extra complexity?",
       "revId": "4a62c34209b5ed911aca21b89147f43706995bee",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "89050fa6_fb4035f2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-05T09:48:37Z",
+      "side": 1,
+      "message": "We don\u0027t have data on this, but given that latency is an issue for us I would rather do this optimisation. I think the extra complexity is not that bad.",
+      "parentUuid": "26549b1c_99cf108a",
+      "revId": "4a62c34209b5ed911aca21b89147f43706995bee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
