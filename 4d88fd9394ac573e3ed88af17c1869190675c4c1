@@ -26,6 +26,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "34cc42a5_b0fefe1e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-09T15:37:48Z",
+      "side": 1,
+      "message": "Ups, copy\u0026paste mistake.\n\nDone.",
+      "parentUuid": "3f11d5f6_157e870e",
+      "range": {
+        "startLine": 20,
+        "startChar": 39,
+        "endLine": 20,
+        "endChar": 42
+      },
+      "revId": "4d88fd9394ac573e3ed88af17c1869190675c4c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "3e73657c_ddab3bd7",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 1
@@ -72,6 +96,30 @@
       "writtenOn": "2021-03-09T14:53:54Z",
       "side": 1,
       "message": "I would document this differently to allow us to change this in the future. Ideally, we have rename detection turned on here. It\u0027s just that for the moment it\u0027s too expensive and we rather just turn it off.\n\nBut in a perfect world, the diff would just be cached (and hopefully after Youssef\u0027s work is completed we can rewrite this) and we can use rename detection here.\n\nSo I\u0027d document this as:\n\nRenamed files might appear as separate addition and deletion or with type\u003dRENAMED. Copied files might appear as addition or with type\u003dCOPIED.",
+      "range": {
+        "startLine": 941,
+        "startChar": 128,
+        "endLine": 941,
+        "endChar": 156
+      },
+      "revId": "4d88fd9394ac573e3ed88af17c1869190675c4c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e8fab0a_6939966a",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 941,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-09T15:37:48Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. Much better indeed.\n\nDone.",
+      "parentUuid": "c2442c17_d6827e03",
       "range": {
         "startLine": 941,
         "startChar": 128,
