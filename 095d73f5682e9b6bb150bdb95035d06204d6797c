@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5265fa56_5442dfcf",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 206,
+      "author": {
+        "id": 1083042
+      },
+      "writtenOn": "2021-03-09T16:33:00Z",
+      "side": 0,
+      "message": "Add a comment why rename detection should not be disabled. I\u0027d be concerned that a year from now someone sees this and tries to simplify the API by avoiding the ADD+DELETE split :-)",
+      "revId": "095d73f5682e9b6bb150bdb95035d06204d6797c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
