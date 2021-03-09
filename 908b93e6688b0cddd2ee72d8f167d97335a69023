@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "97a7f5b8_2c90b12b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-03-09T15:55:07Z",
+      "side": 1,
+      "message": "+1 so that Dmitrii/Joerg have the chance to look at this as well",
+      "revId": "908b93e6688b0cddd2ee72d8f167d97335a69023",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
