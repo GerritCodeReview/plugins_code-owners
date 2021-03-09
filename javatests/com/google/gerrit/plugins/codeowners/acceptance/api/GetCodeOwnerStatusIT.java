@@ -78,6 +78,88 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void getStatusForRenamedFile() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar")
+        .addCodeOwnerEmail(user.email())
+        .create();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/baz")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    String oldPath = "foo/bar/abc.txt";
+    String newPath = "foo/baz/abc.txt";
+    String changeId = createChangeWithFileRename(oldPath, newPath);
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusInfoSubject
+        .hasOldPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+
+    // Add a reviewer that is a code owner of the old path.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusInfoSubject
+        .hasOldPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.PENDING);
+
+    // Add a reviewer that is a code owner of the new path.
+    gApi.changes().id(changeId).addReviewer(user2.email());
+
+    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.PENDING);
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusInfoSubject
+        .hasOldPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.PENDING);
+  }
+
+  @Test
   public void getCodeOwnerStatusIfCodeOwnersFunctionalityIsDisabled() throws Exception {
     disableCodeOwnersForProject(project);
     String path = "foo/bar.baz";
