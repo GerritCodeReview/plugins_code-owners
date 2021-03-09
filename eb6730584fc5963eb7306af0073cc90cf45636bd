@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7533fa5d_6ba5d195",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-09T17:34:44Z",
+      "side": 1,
+      "message": "copying over the Verified+1 from PS2 (only a comment was added between PS2 and PS3)",
+      "revId": "eb6730584fc5963eb7306af0073cc90cf45636bd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
