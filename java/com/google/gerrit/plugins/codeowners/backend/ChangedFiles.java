@@ -200,10 +200,14 @@ public class ChangedFiles {
       RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
       logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
 
+      // Detecting renames is expensive (since it requires Git to load and compare file contents of
+      // added and deleted files) and can significantly increase the latency for changes that touch
+      // large files. To avoid this latency we do not enable the rename detection on the
+      // DiffFormater. As a result of this renamed files will be returned as 2 ChangedFile's, one
+      // for the deletion of the old path and one for the addition of the new path.
       try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
         diffFormatter.setReader(revWalk.getObjectReader(), repoConfig);
         diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-        diffFormatter.setDetectRenames(true);
         List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
         ImmutableSet<ChangedFile> changedFiles =
             diffEntries.stream().map(ChangedFile::create).collect(toImmutableSet());
