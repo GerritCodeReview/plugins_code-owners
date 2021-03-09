@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject.assertThatCollection;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.junit.Assert.fail;
 
@@ -35,6 +36,7 @@ import com.google.gerrit.extensions.restapi.TopLevelResource;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
+import com.google.gerrit.plugins.codeowners.testing.ChangedFileSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.change.RevisionResource;
@@ -135,13 +137,21 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
     gApi.changes().id(changeId).current().files();
 
+    // A renamed file is reported as addition of new path + deletion of old path. This is because
+    // ChangedFiles uses a DiffFormatter without rename detection (because rename detection requires
+    // loading the file contents which is too expensive).
     ImmutableSet<ChangedFile> changedFilesSet = changedFiles.compute(getRevisionResource(changeId));
-    assertThat(changedFilesSet).hasSize(1);
-    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(newPath));
-    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(oldPath));
-    assertThat(changedFile).isRename();
-    assertThat(changedFile).isNoDeletion();
+    assertThat(changedFilesSet).hasSize(2);
+    ChangedFileSubject changedFile1 = assertThatCollection(changedFilesSet).element(0);
+    changedFile1.hasNewPath().value().isEqualTo(Paths.get(newPath));
+    changedFile1.hasOldPath().isEmpty();
+    changedFile1.isNoRename();
+    changedFile1.isNoDeletion();
+    ChangedFileSubject changedFile2 = assertThatCollection(changedFilesSet).element(1);
+    changedFile2.hasNewPath().isEmpty();
+    changedFile2.hasOldPath().value().isEqualTo(Paths.get(oldPath));
+    changedFile2.isNoRename();
+    changedFile2.isDeletion();
   }
 
   @Test
