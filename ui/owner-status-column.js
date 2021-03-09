@@ -116,6 +116,7 @@ export class OwnerStatusColumnContent extends BaseEl {
   static get properties() {
     return {
       path: String,
+      oldPath: String,
       patchRange: Object,
       hidden: {
         type: Boolean,
@@ -169,7 +170,7 @@ export class OwnerStatusColumnContent extends BaseEl {
 
   static get observers() {
     return [
-      'computeStatusIcon(model.status, path)',
+      'computeStatusIcon(model.status, path, oldPath)',
     ];
   }
 
@@ -178,8 +179,8 @@ export class OwnerStatusColumnContent extends BaseEl {
     this.modelLoader.loadStatus();
   }
 
-  computeStatusIcon(modelStatus, path) {
-    if ([modelStatus, path].includes(undefined)) return;
+  computeStatusIcon(modelStatus, path, oldPath) {
+    if ([modelStatus, path, oldPath].includes(undefined)) return;
     if (MAGIC_FILES.includes(path)) return;
 
     const codeOwnerStatusMap = modelStatus.codeOwnerStatusMap;
@@ -191,10 +192,10 @@ export class OwnerStatusColumnContent extends BaseEl {
 
     const status = statusItem.status;
     let oldPathStatus = null;
-    if (statusItem.oldPath) {
-      const oldStatusItem = codeOwnerStatusMap.get(statusItem.oldPath);
+    if (oldPath !== path) {
+      const oldStatusItem = codeOwnerStatusMap.get(oldPath);
       if (!oldStatusItem) {
-        // should not happen
+        this.status = STATUS_CODE.ERROR;
       } else {
         oldPathStatus = oldStatusItem.status;
       }
