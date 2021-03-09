@@ -615,17 +615,6 @@ The code owner statuses are returned as a
           "path": "docs/todo.txt",
           "status": "PENDING"
         }
-      },
-      {
-        "change_type": "RENAMED",
-        "old_path_status" {
-          "path": "user-introduction.txt",
-          "status": "INSUFFICIENT_REVIEWERS"
-        },
-        "new_path_status" {
-          "path": "docs/user-intro.md",
-          "status": "APPROVED"
-        }
       }
     ]
   }
@@ -949,8 +938,8 @@ file in a change.
 
 | Field Name    |          | Description |
 | ------------- | -------- | ----------- |
-| `change_type` | optional | The type of the file modification. Can be `ADDED`, `MODIFIED`, `DELETED`, `RENAMED` or `COPIED`. Not set if `MODIFIED`.
-| `old_path_status` | optional | The code owner status for the old path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Only set if `change_type` is `DELETED` or `RENAMED`.
+| `change_type` | optional | The type of the file modification. Can be `ADDED`, `MODIFIED` or `DELETED`. Not set if `MODIFIED`. Never `COPIED` or `RENAMED` (for copied files the new path is returned as `ADDED`, for renamed files the old path is returned as `DELETED` and the new path is returned as `ADDED`).
+| `old_path_status` | optional | The code owner status for the old path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Only set if `change_type` is `DELETED`.
 | `new_path_status` | optional | The code owner status for the new path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Not set if `change_type` is `DELETED`.
 
 ### <a id="general-info"> GeneralInfo

@@ -17,10 +17,13 @@ package com.google.gerrit.plugins.codeowners.testing;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
+import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.OptionalSubject;
+import java.util.Collection;
 
 /** {@link Subject} for doing assertions on {@link ChangedFile}s. */
 public class ChangedFileSubject extends Subject {
@@ -32,6 +35,12 @@ public class ChangedFileSubject extends Subject {
    */
   public static ChangedFileSubject assertThat(ChangedFile changedFile) {
     return assertAbout(changedFiles()).that(changedFile);
+  }
+
+  /** Starts fluent chain to do assertions on a collection of {@link ChangedFile}s. */
+  public static ListSubject<ChangedFileSubject, ChangedFile> assertThatCollection(
+      Collection<ChangedFile> changedFiles) {
+    return ListSubject.assertThat(ImmutableList.copyOf(changedFiles), changedFiles());
   }
 
   /** Creates subject factory for mapping {@link ChangedFile}s to {@link ChangedFileSubject}s. */

@@ -203,7 +203,6 @@ public class ChangedFiles {
       try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
         diffFormatter.setReader(revWalk.getObjectReader(), repoConfig);
         diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-        diffFormatter.setDetectRenames(true);
         List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
         ImmutableSet<ChangedFile> changedFiles =
             diffEntries.stream().map(ChangedFile::create).collect(toImmutableSet());
