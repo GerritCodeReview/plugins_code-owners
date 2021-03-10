@@ -133,6 +133,26 @@ export class CodeOwnersPluginStatusNotifier extends
       banner: {
         type: Object,
       },
+      /**
+       * This is a temporary property for interop with find-owner plugin.
+       * It stores information about the change and code-owners status for this
+       * change. The possible values for branchState are:
+       * LOADING - branch config are requesting
+       * FAILED - plugin are in failed state (server returned error, etc...)
+       * ENABLED - code-owners is enabled for the change
+       * DISABLED - code-owners is disable for the change
+       *
+       * ENABLED/DISABLED values are different from the pluginStatus.
+       * For merged and abandoned changes the model.pluginStatus value is
+       * always DISABLED, even if code-owners is enabled for a project.
+       */
+      _stateForFindOwnersPlugin: {
+        type: Object,
+        notify: true,
+        computed:
+            '_getStateForFindOwners(model.pluginStatus, model.branchConfig,' +
+              ' change)',
+      },
     };
   }
 
@@ -159,6 +179,26 @@ export class CodeOwnersPluginStatusNotifier extends
 
   _loadDataAfterStateChanged() {
     this.modelLoader.loadPluginStatus();
+    this.modelLoader.loadBranchConfig();
+  }
+
+  _getStateForFindOwners(pluginStatus, branchConfig, change) {
+    if (pluginStatus === undefined || branchConfig === undefined ||
+        change == undefined) {
+      return {
+        branchState: 'LOADING',
+      };
+    }
+    if (pluginStatus.state === PluginState.Failed) {
+      return {
+        change,
+        branchState: 'FAILED',
+      };
+    }
+    return {
+      change,
+      branchState: branchConfig.disabled ? 'DISABLED' : 'ENABLED',
+    };
   }
 }
 

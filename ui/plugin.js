@@ -21,17 +21,41 @@ import {OwnerRequirementValue} from './owner-requirement.js';
 import {SuggestOwnersTrigger} from './suggest-owners-trigger.js';
 import {CodeOwnersBanner, CodeOwnersPluginStatusNotifier} from './code-owners-banner.js';
 
+// A temporary property for interop with find-owners plugin.
+// It should be set as earlier as possible, so find-owners plugin can check
+// it in Gerrit.install callback.
+window.__gerrit_code_owners_plugin = {
+  state: {
+    // See CodeOwnersPluginStatusNotifier._stateForFindOwnersPlugin for
+    // a list of possible values.
+    branchState: 'LOADING',
+  },
+  stateChanged: new EventTarget(),
+};
+
 Gerrit.install(plugin => {
   const restApi = plugin.restApi();
   const reporting = plugin.reporting();
 
   plugin.registerCustomComponent('banner', CodeOwnersBanner.is);
 
+  const stateForFindOwnerPluginChanged = evt => {
+    window.__gerrit_code_owners_plugin.state = evt.detail.value;
+    window.__gerrit_code_owners_plugin.stateChanged
+        .dispatchEvent(new CustomEvent('state-changed'));
+  };
+
   plugin.registerCustomComponent(
       'change-view-integration', CodeOwnersPluginStatusNotifier.is)
       .onAttached(view => {
         view.restApi = restApi;
         view.reporting = reporting;
+        view.addEventListener('_state-for-find-owners-plugin-changed',
+            stateForFindOwnerPluginChanged);
+      })
+      .onDetached(view => {
+        view.removeEventListener('_state-for-find-owners-plugin-changed',
+            stateForFindOwnerPluginChanged);
       });
 
   // owner status column / rows for file list
