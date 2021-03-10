@@ -605,9 +605,25 @@ endpoint or by touching the change (e.g. by adding a comment).
         [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
         in `gerrit.config` and the `codeOwners.enableValidationOnCommitReceived`
         setting from parent projects.\
+        Can be overriden on branch-level by setting
+        [validation.\<branch\>.enableValidationOnCommitReceived](#validationBranchEnableValidationOnCommitReceived).\
         If not set, the global setting
         [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived)
         in `gerrit.config` is used.
+
+<a id="validationBranchEnableValidationOnCommitReceived">validation.\<branch\>.enableValidationOnCommitReceived</a>
+:       Branch-level policy for validating code owner config files when a commit
+        is received.\
+        Applies to all branches that are matched by `<branch>`, which can be
+        an exact ref name (e.g. `refs/heads/master`), a ref pattern (e.g.
+        `refs/heads/*`) or a regular expression (e.g. `^refs/heads/stable-.*`).\
+        If a branches matches multiple validation subsections it is undefined
+        which of the subsections takes precedence.\
+        Overrides the project-level configuration for validating code owner
+        config files when a commit is received that is configured by
+        [codeOwners.enableValidationOnCommitReceived](#codeOwnersEnableValidationOnCommitReceived).\
+        For further details see the description of
+        [codeOwners.enableValidationOnCommitReceived](#codeOwnersEnableValidationOnCommitReceived).
 
 <a id="codeOwnersEnableValidationOnSubmit">codeOwners.enableValidationOnSubmit</a>
 :       Policy for validating code owner config files when a change is
@@ -622,9 +638,25 @@ endpoint or by touching the change (e.g. by adding a comment).
         [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
         in `gerrit.config` and the `codeOwners.enableValidationOnSubmit` setting
         from parent projects.\
+        Can be overriden on branch-level by setting
+        [validation.\<branch\>.enableValidationOnSubmit](#validationBranchEnableValidationOnSubmit).\
         If not set, the global setting
         [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
         in `gerrit.config` is used.
+
+<a id="validationBranchEnableValidationOnSubmit">validation.\<branch\>.enableValidationOnSubmit</a>
+:       Branch-level policy for validating code owner config files when a change
+        is submitted.\
+        Applies to all branches that are matched by `<branch>`, which can be
+        an exact ref name (e.g. `refs/heads/master`), a ref pattern (e.g.
+        `refs/heads/*`) or a regular expression (e.g. `^refs/heads/stable-.*`).\
+        If a branches matches multiple validation subsections it is undefined
+        which of the subsections takes precedence.\
+        Overrides the project-level configuration for validating code owner
+        config files when a change is submitted that is configured by
+        [codeOwners.enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit).\
+        For further details see the description of
+        [codeOwners.enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit).
 
 <a id="codeOwnersRejectNonResolvableCodeOwners">codeOwners.rejectNonResolvableCodeOwners</a>
 :       Whether modifications of code owner config files that newly add
