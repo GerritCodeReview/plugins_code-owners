@@ -19,5 +19,6 @@ java_library(
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/restapi",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )

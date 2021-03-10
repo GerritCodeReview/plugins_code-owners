@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -149,8 +148,7 @@ public class CodeOwnerApprovalCheck {
                           .map(Optional::get))
               .filter(
                   pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
-              .map(PathCodeOwnerStatus::path)
-              .sorted(comparing(Path::toString));
+              .map(PathCodeOwnerStatus::path);
       if (limit > 0) {
         ownedPaths = ownedPaths.limit(limit);
       }
