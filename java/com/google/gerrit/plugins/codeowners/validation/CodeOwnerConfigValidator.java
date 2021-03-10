@@ -177,7 +177,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
           codeOwnersPluginConfiguration
               .getProjectConfig(receiveEvent.getProjectNameKey())
-              .getCodeOwnerConfigValidationPolicyForCommitReceived();
+              .getCodeOwnerConfigValidationPolicyForCommitReceived(receiveEvent.refName);
       logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
       Optional<ValidationResult> validationResult;
       if (!codeOwnerConfigValidationPolicy.runValidation()) {
@@ -247,7 +247,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
           codeOwnersPluginConfiguration
               .getProjectConfig(branchNameKey.project())
-              .getCodeOwnerConfigValidationPolicyForSubmit();
+              .getCodeOwnerConfigValidationPolicyForSubmit(branchNameKey.branch());
       logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
       Optional<ValidationResult> validationResult;
       if (!codeOwnerConfigValidationPolicy.runValidation()) {

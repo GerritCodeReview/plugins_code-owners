@@ -31,12 +31,14 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_READ_ONLY;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.SECTION_VALIDATION;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
@@ -417,6 +419,165 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotGetEnableValidationOnCommitReceivedForBranchForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                    /* branchNameKey= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
+  }
+
+  @Test
+  public void cannotGetEnableValidationOnCommitReceivedForBranchForNullPluginConfig()
+      throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                    BranchNameKey.create(project, "master"), /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noBranchSpecificEnableValidationOnCommitReceivedConfiguration() throws Exception {
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), new Config()))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnCommitReceivedConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/foo", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnCommitReceivedConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/foo/*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnCommitReceivedConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION,
+        "^refs/heads/.*foo.*",
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+        "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnCommitReceivedConfiguration_invalidRegEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "^refs/heads/[", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnCommitReceivedConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnCommitReceivedConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnCommitReceivedConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION,
+        "^refs/heads/.*bar.*",
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+        "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "foobarbaz"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void branchSpecificEnableValidationOnCommitReceivedConfigurationIsIgnoredIfValueIsInvalid()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION,
+        "refs/heads/master",
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+        "INVALID");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void multipleMatchingBranchSpecificEnableValidationOnCommitReceivedConfiguration()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    cfg.setString(
+        SECTION_VALIDATION, "^refs/heads/.*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+
+    // it is non-deterministic which of the branch-specific configurations takes precedence, but
+    // since they all configure the same value it's not important for this assertion
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
   public void cannotGetEnableValidationOnSubmitForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(
@@ -482,6 +643,147 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(project, new Config()))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+  }
+
+  @Test
+  public void cannotGetEnableValidationOnSubmitForBranchForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                    /* branchNameKey= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
+  }
+
+  @Test
+  public void cannotGetEnableValidationOnSubmitForBranchForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                    BranchNameKey.create(project, "master"), /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noBranchSpecificEnableValidationOnSubmitConfiguration() throws Exception {
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), new Config()))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnSubmitConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_VALIDATION, "refs/heads/foo", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnSubmitConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_VALIDATION, "refs/heads/foo/*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnSubmitConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "^refs/heads/.*foo.*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnSubmitConfiguration_invalidRegEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_VALIDATION, "^refs/heads/[", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnSubmitConfiguration_exact() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnSubmitConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnSubmitConfiguration_regEx() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "^refs/heads/.*bar.*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "foobarbaz"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void branchSpecificEnableValidationOnSubmitConfigurationIsIgnoredIfValueIsInvalid()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_SUBMIT, "INVALID");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void multipleMatchingBranchSpecificEnableValidationOnSubmitConfiguration()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    cfg.setString(SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+    cfg.setString(SECTION_VALIDATION, "^refs/heads/.*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
+
+    // it is non-deterministic which of the branch-specific configurations takes precedence, but
+    // since they all configure the same value it's not important for this assertion
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
   }
 
   @Test
