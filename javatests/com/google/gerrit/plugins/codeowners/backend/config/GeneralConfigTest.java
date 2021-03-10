@@ -714,6 +714,16 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void inheritedGlobalOwnersCanBeRemovedOnProjectLevel() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER, "");
+    assertThat(generalConfig.getGlobalCodeOwners(cfg)).isEmpty();
+  }
+
+  @Test
   public void cannotGetExemptedUsersForNullPluginConfig() throws Exception {
     NullPointerException npe =
         assertThrows(

@@ -436,8 +436,12 @@ public class GeneralConfig {
       } catch (IllegalArgumentException e) {
         logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
-                + " of project %s. Falling back to global config.",
-            codeOwnerConfigValidationPolicyString, pluginName, project.get());
+                + " of project %s (parameter %s.%s). Falling back to global config.",
+            codeOwnerConfigValidationPolicyString,
+            pluginName,
+            project.get(),
+            SECTION_CODE_OWNERS,
+            key);
       }
     }
 
@@ -563,11 +567,13 @@ public class GeneralConfig {
       return Arrays.stream(
               pluginConfig.getStringList(
                   SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER))
+          .filter(value -> !value.trim().isEmpty())
           .map(CodeOwnerReference::create)
           .collect(toImmutableSet());
     }
 
     return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_GLOBAL_CODE_OWNER))
+        .filter(value -> !value.trim().isEmpty())
         .map(CodeOwnerReference::create)
         .collect(toImmutableSet());
   }
