@@ -467,7 +467,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
-                .getCodeOwnerConfigValidationPolicyForCommitReceived())
+                .getCodeOwnerConfigValidationPolicyForCommitReceived("master"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
@@ -476,7 +476,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
-                .getCodeOwnerConfigValidationPolicyForCommitReceived())
+                .getCodeOwnerConfigValidationPolicyForCommitReceived("master"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
 
     input.enableValidationOnCommitReceived = CodeOwnerConfigValidationPolicy.TRUE;
@@ -484,7 +484,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
-                .getCodeOwnerConfigValidationPolicyForCommitReceived())
+                .getCodeOwnerConfigValidationPolicyForCommitReceived("master"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 
@@ -493,7 +493,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
-                .getCodeOwnerConfigValidationPolicyForSubmit())
+                .getCodeOwnerConfigValidationPolicyForSubmit("master"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
@@ -502,7 +502,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
-                .getCodeOwnerConfigValidationPolicyForSubmit())
+                .getCodeOwnerConfigValidationPolicyForSubmit("master"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
 
     input.enableValidationOnSubmit = CodeOwnerConfigValidationPolicy.TRUE;
@@ -510,7 +510,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
-                .getCodeOwnerConfigValidationPolicyForSubmit())
+                .getCodeOwnerConfigValidationPolicyForSubmit("master"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 

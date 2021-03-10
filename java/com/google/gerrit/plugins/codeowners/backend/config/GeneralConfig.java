@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
@@ -33,12 +34,14 @@ import com.google.gerrit.server.config.PluginConfig;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.project.RefPatternMatcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.PatternSyntaxException;
 import org.eclipse.jgit.lib.Config;
 
 /**
@@ -55,6 +58,8 @@ import org.eclipse.jgit.lib.Config;
 @Singleton
 public class GeneralConfig {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  public static final String SECTION_VALIDATION = "validation";
 
   public static final String KEY_FILE_EXTENSION = "fileExtension";
   public static final String KEY_READ_ONLY = "readOnly";
@@ -388,14 +393,16 @@ public class GeneralConfig {
   }
 
   /**
-   * Gets the enable validation on commit received configuration from the given plugin config with
-   * fallback to {@code gerrit.config} and default to {@code true}.
+   * Gets the enable validation on commit received configuration from the given plugin config for
+   * the specified project with fallback to {@code gerrit.config} and default to {@code true}.
    *
    * <p>The enable validation on commit received controls whether code owner config files should be
    * validated when a commit is received.
    *
+   * @param project the project for which the enable validation on commit received configuration
+   *     should be read
    * @param pluginConfig the plugin config from which the enable validation on commit received
-   *     configuration should be read.
+   *     configuration should be read
    * @return whether code owner config files should be validated when a commit is received
    */
   CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived(
@@ -405,20 +412,85 @@ public class GeneralConfig {
   }
 
   /**
-   * Gets the enable validation on submit configuration from the given plugin config with fallback
-   * to {@code gerrit.config} and default to {@code true}.
+   * Gets the enable validation on commit received configuration from the given plugin config for
+   * the specified branch.
+   *
+   * <p>If multiple branch-specific configurations match the specified branch, it is undefined which
+   * of the matching branch configurations takes precedence.
+   *
+   * <p>The enable validation on commit received controls whether code owner config files should be
+   * validated when a commit is received.
+   *
+   * @param branchNameKey the branch and project for which the enable validation on commit received
+   *     configuration should be read
+   * @param pluginConfig the plugin config from which the enable validation on commit received
+   *     configuration should be read
+   * @return the enable validation on commit received configuration that is configured for the
+   *     branch, {@link Optional#empty()} if no branch specific configuration exists
+   */
+  Optional<CodeOwnerConfigValidationPolicy>
+      getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+          BranchNameKey branchNameKey, Config pluginConfig) {
+    return getCodeOwnerConfigValidationPolicyForBranch(
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, branchNameKey, pluginConfig);
+  }
+
+  /**
+   * Gets the enable validation on submit configuration from the given plugin config for the
+   * specified project with fallback to {@code gerrit.config} and default to {@code true}.
    *
    * <p>The enable validation on submit controls whether code owner config files should be validated
    * when a change is submitted.
    *
+   * @param project the project for which the enable validation on submit configuration should be
+   *     read
    * @param pluginConfig the plugin config from which the enable validation on submit configuration
-   *     should be read.
+   *     should be read
    * @return whether code owner config files should be validated when a change is submitted
    */
   CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForSubmit(
       Project.NameKey project, Config pluginConfig) {
     return getCodeOwnerConfigValidationPolicy(
         KEY_ENABLE_VALIDATION_ON_SUBMIT, project, pluginConfig);
+  }
+
+  /**
+   * Gets the enable validation on submit configuration from the given plugin config for the
+   * specified branch.
+   *
+   * <p>If multiple branch-specific configurations match the specified branch, it is undefined which
+   * of the matching branch configurations takes precedence.
+   *
+   * <p>The enable validation on submit controls whether code owner config files should be validated
+   * when a change is submitted.
+   *
+   * @param branchNameKey the branch and project for which the enable validation on submit
+   *     configuration should be read
+   * @param pluginConfig the plugin config from which the enable validation on submit configuration
+   *     should be read
+   * @return the enable validation on submit configuration that is configured for the branch, {@link
+   *     Optional#empty()} if no branch specific configuration exists
+   */
+  Optional<CodeOwnerConfigValidationPolicy> getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+      BranchNameKey branchNameKey, Config pluginConfig) {
+    return getCodeOwnerConfigValidationPolicyForBranch(
+        KEY_ENABLE_VALIDATION_ON_SUBMIT, branchNameKey, pluginConfig);
+  }
+
+  private Optional<CodeOwnerConfigValidationPolicy> getCodeOwnerConfigValidationPolicyForBranch(
+      String key, BranchNameKey branchNameKey, Config pluginConfig) {
+    requireNonNull(key, "key");
+    requireNonNull(branchNameKey, "branchNameKey");
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    Optional<String> validationSectionForBranch =
+        getValidationSectionForBranch(branchNameKey, pluginConfig);
+    if (!validationSectionForBranch.isPresent()) {
+      return Optional.empty();
+    }
+
+    return getCodeOwnerConfigValidationPolicyForBranch(
+        validationSectionForBranch.get(), key, branchNameKey.project(), pluginConfig);
   }
 
   private CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicy(
@@ -457,6 +529,76 @@ public class GeneralConfig {
           CodeOwnerConfigValidationPolicy.TRUE);
       return CodeOwnerConfigValidationPolicy.TRUE;
     }
+  }
+
+  private Optional<String> getValidationSectionForBranch(
+      BranchNameKey branchNameKey, Config pluginConfig) {
+    ImmutableSet<String> matchingValidationSubsections =
+        pluginConfig.getSubsections(SECTION_VALIDATION).stream()
+            .filter(
+                refPattern -> {
+                  try {
+                    return RefPatternMatcher.getMatcher(refPattern)
+                        .match(branchNameKey.branch(), /* user= */ null);
+                  } catch (PatternSyntaxException e) {
+                    logger.atWarning().withCause(e).log(
+                        "invalid ref pattern %s for subsection %s.%s in %s.config of project %s",
+                        refPattern,
+                        SECTION_VALIDATION,
+                        refPattern,
+                        pluginName,
+                        branchNameKey.project());
+                    return false;
+                  }
+                })
+            .collect(toImmutableSet());
+
+    if (matchingValidationSubsections.isEmpty()) {
+      return Optional.empty();
+    }
+
+    String matchingValidationSubsection = matchingValidationSubsections.asList().get(0);
+    if (matchingValidationSubsections.size() > 1) {
+      logger.atWarning().log(
+          "branch %s matches multiple %s subsections in %.config of project %s: %s,"
+              + " subsection %s takes precedence",
+          branchNameKey.branch(),
+          SECTION_VALIDATION,
+          pluginName,
+          branchNameKey.project(),
+          matchingValidationSubsections,
+          matchingValidationSubsection);
+    }
+    return Optional.of(matchingValidationSubsection);
+  }
+
+  private Optional<CodeOwnerConfigValidationPolicy> getCodeOwnerConfigValidationPolicyForBranch(
+      String subsection, String key, Project.NameKey project, Config pluginConfig) {
+    requireNonNull(subsection, "subsection");
+    requireNonNull(key, "key");
+    requireNonNull(project, "project");
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    String codeOwnerConfigValidationPolicyString =
+        pluginConfig.getString(SECTION_VALIDATION, subsection, key);
+    if (codeOwnerConfigValidationPolicyString != null) {
+      try {
+        return Optional.of(
+            pluginConfig.getEnum(
+                SECTION_VALIDATION, subsection, key, CodeOwnerConfigValidationPolicy.TRUE));
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().withCause(e).log(
+            "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
+                + " of project %s (parameter %s.%s.%s). Falling back to project-level setting.",
+            codeOwnerConfigValidationPolicyString,
+            pluginName,
+            project.get(),
+            SECTION_VALIDATION,
+            subsection,
+            key);
+      }
+    }
+    return Optional.empty();
   }
 
   /**

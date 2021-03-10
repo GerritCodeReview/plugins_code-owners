@@ -131,14 +131,44 @@ public class CodeOwnersPluginConfigSnapshot {
     return generalConfig.getRejectNonResolvableImports(projectName, pluginConfig);
   }
 
-  /** Whether code owner configs should be validated when a commit is received. */
-  public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived() {
+  /**
+   * Whether code owner configs should be validated when a commit is received.
+   *
+   * @param branchName the branch for which it should be checked whether code owner configs should
+   *     be validated on commit received
+   */
+  public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived(
+      String branchName) {
+    requireNonNull(branchName, "branchName");
+
+    Optional<CodeOwnerConfigValidationPolicy> branchSpecificPolicy =
+        generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
+            BranchNameKey.create(projectName, branchName), pluginConfig);
+    if (branchSpecificPolicy.isPresent()) {
+      return branchSpecificPolicy.get();
+    }
+
     return generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
         projectName, pluginConfig);
   }
 
-  /** Whether code owner configs should be validated when a change is submitted. */
-  public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForSubmit() {
+  /**
+   * Whether code owner configs should be validated when a change is submitted.
+   *
+   * @param branchName the branch for which it should be checked whether code owner configs should
+   *     be validated on submit
+   */
+  public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForSubmit(
+      String branchName) {
+    requireNonNull(branchName, "branchName");
+
+    Optional<CodeOwnerConfigValidationPolicy> branchSpecificPolicy =
+        generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
+            BranchNameKey.create(projectName, branchName), pluginConfig);
+    if (branchSpecificPolicy.isPresent()) {
+      return branchSpecificPolicy.get();
+    }
+
     return generalConfig.getCodeOwnerConfigValidationPolicyForSubmit(projectName, pluginConfig);
   }
 

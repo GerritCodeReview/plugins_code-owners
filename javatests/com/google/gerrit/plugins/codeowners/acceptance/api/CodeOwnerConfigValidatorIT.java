@@ -53,10 +53,12 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -1966,6 +1968,43 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
       gApi.changes().id(r.getChangeId()).current().submit();
       assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
     }
+  }
+
+  @Test
+  public void disableValidationForBranch() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
+    // Disable the validation for the master branch.
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig -> {
+          codeOwnersConfig.setString(
+              GeneralConfig.SECTION_VALIDATION,
+              "refs/heads/master",
+              GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+              CodeOwnerConfigValidationPolicy.FALSE.name());
+          codeOwnersConfig.setString(
+              GeneralConfig.SECTION_VALIDATION,
+              "refs/heads/master",
+              GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT,
+              CodeOwnerConfigValidationPolicy.FALSE.name());
+        });
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(createCodeOwnerConfigKey("/"))
+                .getJGitFilePath(),
+            "INVALID");
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        "code owners config validation is disabled");
+
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
   private CodeOwnerConfig createCodeOwnerConfigWithImport(

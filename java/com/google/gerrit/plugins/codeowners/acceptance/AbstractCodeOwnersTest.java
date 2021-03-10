@@ -168,7 +168,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
                 CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS, subsection, key, values));
   }
 
-  private void updateCodeOwnersConfig(Project.NameKey project, Consumer<Config> configUpdater)
+  protected void updateCodeOwnersConfig(Project.NameKey project, Consumer<Config> configUpdater)
       throws Exception {
     Config codeOwnersConfig = new Config();
     configUpdater.accept(codeOwnersConfig);
