@@ -436,8 +436,12 @@ public class GeneralConfig {
       } catch (IllegalArgumentException e) {
         logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
-                + " of project %s. Falling back to global config.",
-            codeOwnerConfigValidationPolicyString, pluginName, project.get());
+                + " of project %s (parameter %s.%s). Falling back to global config.",
+            codeOwnerConfigValidationPolicyString,
+            pluginName,
+            project.get(),
+            SECTION_CODE_OWNERS,
+            key);
       }
     }
 
