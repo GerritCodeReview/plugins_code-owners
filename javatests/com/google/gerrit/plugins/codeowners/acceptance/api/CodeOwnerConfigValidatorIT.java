@@ -2007,6 +2007,98 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
+  @Test
+  public void disableRejectionOfNonResolvableCodeOwnersForBranch() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
+    // Disable the rejection of non-resolvable code owners for the master branch.
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig ->
+            codeOwnersConfig.setBoolean(
+                GeneralConfig.SECTION_VALIDATION,
+                "refs/heads/master",
+                GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+                false));
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+    String unknownEmail = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .build()));
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "code owner email '%s' in '%s' cannot be resolved for %s",
+            unknownEmail,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  public void disableRejectionOfNonResolvableImportsForBranch() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    setAsDefaultCodeOwners(admin);
+
+    // Disable the rejection of non-resolvable imports for the master branch.
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig ->
+            codeOwnersConfig.setBoolean(
+                GeneralConfig.SECTION_VALIDATION,
+                "refs/heads/master",
+                GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+                false));
+
+    // create a code owner config that imports a code owner config from a non-existing project
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    Project.NameKey nonExistingProject = Project.nameKey("non-existing");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonExistingProject, "master", "/"))
+                    .getFilePath())
+            .setProject(nonExistingProject)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig,
+            CodeOwnerConfigImportType.GLOBAL,
+            codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid %s import in '%s': project '%s' not found",
+            CodeOwnerConfigImportType.GLOBAL.getType(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
+            nonExistingProject.get()));
+
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
   private CodeOwnerConfig createCodeOwnerConfigWithImport(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       CodeOwnerConfigImportType importType,

@@ -1101,6 +1101,143 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
         .isEqualTo(CodeOwnerConfigValidationPolicy.DRY_RUN);
   }
 
+  @Test
+  public void cannotGetRejectNonResolvableCodeOwnersForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> cfgSnapshot().rejectNonResolvableCodeOwners(/* branchName= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("branchName");
+  }
+
+  @Test
+  public void getRejectNonResolvableCodeOwners_notConfigured() throws Exception {
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("non-existing")).isTrue();
+  }
+
+  @Test
+  public void getRejectNonResolvableCodeOwners_configuredOnProjectLevel() throws Exception {
+    configureRejectNonResolvableCodeOwners(project, false);
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("master")).isFalse();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("non-existing")).isFalse();
+  }
+
+  @Test
+  public void getRejectNonResolvableCodeOwners_configuredOnBranchLevel() throws Exception {
+    configureRejectNonResolvableCodeOwnersForBranch(project, "refs/heads/master", false);
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("master")).isFalse();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("refs/heads/master")).isFalse();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("foo")).isTrue();
+  }
+
+  @Test
+  public void getRejectNonResolvableCodeOwners_branchLevelConfigTakesPrecedence() throws Exception {
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig -> {
+          codeOwnersConfig.setBoolean(
+              CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+              /* subsection= */ null,
+              GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+              /* value= */ false);
+          codeOwnersConfig.setBoolean(
+              GeneralConfig.SECTION_VALIDATION,
+              "refs/heads/master",
+              GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+              /* value= */ true);
+        });
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("refs/heads/master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("foo")).isFalse();
+  }
+
+  @Test
+  public void getRejectNonResolvableCodeOwners_inheritedBranchLevelConfigTakesPrecedence()
+      throws Exception {
+    configureRejectNonResolvableCodeOwnersForBranch(allProjects, "refs/heads/master", true);
+    configureRejectNonResolvableCodeOwners(project, false);
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("refs/heads/master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("foo")).isFalse();
+  }
+
+  @Test
+  public void getRejectNonResolvableCodeOwners_inheritedBranchLevelCanBeOverridden()
+      throws Exception {
+    configureRejectNonResolvableCodeOwnersForBranch(allProjects, "refs/heads/master", true);
+    configureRejectNonResolvableCodeOwnersForBranch(project, "refs/heads/master", false);
+    assertThat(cfgSnapshot().rejectNonResolvableCodeOwners("master")).isFalse();
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableImportsForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> cfgSnapshot().rejectNonResolvableImports(/* branchName= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("branchName");
+  }
+
+  @Test
+  public void getRejectNonResolvableImports_notConfigured() throws Exception {
+    assertThat(cfgSnapshot().rejectNonResolvableImports("master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("non-existing")).isTrue();
+  }
+
+  @Test
+  public void getRejectNonResolvableImports_configuredOnProjectLevel() throws Exception {
+    configureRejectNonResolvableImports(project, false);
+    assertThat(cfgSnapshot().rejectNonResolvableImports("master")).isFalse();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("non-existing")).isFalse();
+  }
+
+  @Test
+  public void getRejectNonResolvableImports_configuredOnBranchLevel() throws Exception {
+    configureRejectNonResolvableImportsForBranch(project, "refs/heads/master", false);
+    assertThat(cfgSnapshot().rejectNonResolvableImports("master")).isFalse();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("refs/heads/master")).isFalse();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("foo")).isTrue();
+  }
+
+  @Test
+  public void getRejectNonResolvableImports_branchLevelConfigTakesPrecedence() throws Exception {
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig -> {
+          codeOwnersConfig.setBoolean(
+              CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+              /* subsection= */ null,
+              GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+              /* value= */ false);
+          codeOwnersConfig.setBoolean(
+              GeneralConfig.SECTION_VALIDATION,
+              "refs/heads/master",
+              GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+              /* value= */ true);
+        });
+    assertThat(cfgSnapshot().rejectNonResolvableImports("master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("refs/heads/master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("foo")).isFalse();
+  }
+
+  @Test
+  public void getRejectNonResolvableImports_inheritedBranchLevelConfigTakesPrecedence()
+      throws Exception {
+    configureRejectNonResolvableImportsForBranch(allProjects, "refs/heads/master", true);
+    configureRejectNonResolvableImports(project, false);
+    assertThat(cfgSnapshot().rejectNonResolvableImports("master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("refs/heads/master")).isTrue();
+    assertThat(cfgSnapshot().rejectNonResolvableImports("foo")).isFalse();
+  }
+
+  @Test
+  public void getRejectNonResolvableImports_inheritedBranchLevelCanBeOverridden() throws Exception {
+    configureRejectNonResolvableImportsForBranch(allProjects, "refs/heads/master", true);
+    configureRejectNonResolvableImportsForBranch(project, "refs/heads/master", false);
+    assertThat(cfgSnapshot().rejectNonResolvableImports("master")).isFalse();
+  }
+
   private CodeOwnersPluginConfigSnapshot cfgSnapshot() {
     return codeOwnersPluginConfigSnapshotFactory.create(project);
   }
@@ -1236,6 +1373,48 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
                 branchSubsection,
                 GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT,
                 codeOwnerConfigValidationPolicy.name()));
+  }
+
+  private void configureRejectNonResolvableCodeOwners(Project.NameKey project, boolean value)
+      throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        Boolean.toString(value));
+  }
+
+  private void configureRejectNonResolvableCodeOwnersForBranch(
+      Project.NameKey project, String branchSubsection, boolean value) throws Exception {
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig ->
+            codeOwnersConfig.setString(
+                GeneralConfig.SECTION_VALIDATION,
+                branchSubsection,
+                GeneralConfig.KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+                Boolean.toString(value)));
+  }
+
+  private void configureRejectNonResolvableImports(Project.NameKey project, boolean value)
+      throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        Boolean.toString(value));
+  }
+
+  private void configureRejectNonResolvableImportsForBranch(
+      Project.NameKey project, String branchSubsection, boolean value) throws Exception {
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig ->
+            codeOwnersConfig.setString(
+                GeneralConfig.SECTION_VALIDATION,
+                branchSubsection,
+                GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+                Boolean.toString(value)));
   }
 
   private AutoCloseable registerTestBackend() {
