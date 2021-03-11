@@ -281,6 +281,185 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotGetRejectNonResolvableCodeOwnersForBranchForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                    /* branchNameKey= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableCodeOwnersForBranchForNullConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                    BranchNameKey.create(project, "master"), /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noBranchSpecificRejectNonResolvableCodeOwnersConfiguration() throws Exception {
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), new Config()))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/foo",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/foo/*",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "^refs/heads/.*foo.*",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration_invalidRegEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "^refs/heads/[",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void matchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/master",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(false);
+  }
+
+  @Test
+  public void matchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/*",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(false);
+  }
+
+  @Test
+  public void matchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "^refs/heads/.*bar.*",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "foobarbaz"), cfg))
+        .value()
+        .isEqualTo(false);
+  }
+
+  @Test
+  public void branchSpecificRejectNonResolvableCodeOwnersConfigurationIsIgnoredIfValueIsInvalid()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, "INVALID");
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void multipleMatchingBranchSpecificRejectNonResolvableCodeOwnersConfiguration()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/master",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/*",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "^refs/heads/.*",
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
+        /* value= */ false);
+
+    // it is non-deterministic which of the branch-specific configurations takes precedence, but
+    // since they all configure the same value it's not important for this assertion
+    assertThat(
+            generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(false);
+  }
+
+  @Test
   public void cannotGetRejectNonResolvableImportsForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(
@@ -336,6 +515,176 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void invalidRejectNonResolvableImportsConfigurationInGerritConfigIsIgnored()
       throws Exception {
     assertThat(generalConfig.getRejectNonResolvableImports(project, new Config())).isTrue();
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableImportsForBranchForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getRejectNonResolvableImportsForBranch(
+                    /* branchNameKey= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
+  }
+
+  @Test
+  public void cannotGetRejectNonResolvableImportsForBranchForNullConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getRejectNonResolvableImportsForBranch(
+                    BranchNameKey.create(project, "master"), /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noBranchSpecificRejectNonResolvableImportsConfiguration() throws Exception {
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), new Config()))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableImportsConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/foo",
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableImportsConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/foo/*",
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableImportsConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "^refs/heads/.*foo.*",
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificRejectNonResolvableImportsConfiguration_invalidRegEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION, "^refs/heads/[", KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void matchingBranchSpecificRejectNonResolvableImportsConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/master",
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(false);
+  }
+
+  @Test
+  public void matchingBranchSpecificRejectNonResolvableImportsConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION, "refs/heads/*", KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(false);
+  }
+
+  @Test
+  public void matchingBranchSpecificRejectNonResolvableImportsConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "^refs/heads/.*bar.*",
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        /* value= */ false);
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "foobarbaz"), cfg))
+        .value()
+        .isEqualTo(false);
+  }
+
+  @Test
+  public void branchSpecificRejectNonResolvableImportsConfigurationIsIgnoredIfValueIsInvalid()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_REJECT_NON_RESOLVABLE_IMPORTS, "INVALID");
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void multipleMatchingBranchSpecificRejectNonResolvableImportsConfiguration()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "refs/heads/master",
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        /* value= */ false);
+    cfg.setBoolean(
+        SECTION_VALIDATION, "refs/heads/*", KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* value= */ false);
+    cfg.setBoolean(
+        SECTION_VALIDATION,
+        "^refs/heads/.*",
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS,
+        /* value= */ false);
+
+    // it is non-deterministic which of the branch-specific configurations takes precedence, but
+    // since they all configure the same value it's not important for this assertion
+    assertThat(
+            generalConfig.getRejectNonResolvableImportsForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(false);
   }
 
   @Test
