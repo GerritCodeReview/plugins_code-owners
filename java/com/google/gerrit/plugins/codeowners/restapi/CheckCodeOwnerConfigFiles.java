@@ -177,11 +177,7 @@ public class CheckCodeOwnerConfigFiles
               problemsByPath.putAll(
                   codeOwnerBackend.getFilePath(codeOwnerConfig.key()).toString(),
                   checkCodeOwnerConfig(
-                      branchNameKey.project(),
-                      revWalk,
-                      codeOwnerBackend,
-                      codeOwnerConfig,
-                      verbosity));
+                      branchNameKey, revWalk, codeOwnerBackend, codeOwnerConfig, verbosity));
               return true;
             },
             (codeOwnerConfigFilePath, configInvalidException) -> {
@@ -196,14 +192,14 @@ public class CheckCodeOwnerConfigFiles
   }
 
   private ImmutableList<ConsistencyProblemInfo> checkCodeOwnerConfig(
-      Project.NameKey project,
+      BranchNameKey branchNameKey,
       RevWalk revWalk,
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig codeOwnerConfig,
       @Nullable ConsistencyProblemInfo.Status verbosity) {
     return codeOwnerConfigValidator
         .validateCodeOwnerConfig(
-            project,
+            branchNameKey,
             revWalk,
             currentUser.get().asIdentifiedUser(),
             codeOwnerBackend,

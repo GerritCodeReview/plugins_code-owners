@@ -234,15 +234,15 @@ public class GeneralConfig {
   }
 
   /**
-   * Gets the reject-non-resolvable-code-owners configuration from the given plugin config with
-   * fallback to {@code gerrit.config}.
+   * Gets the reject-non-resolvable-code-owners configuration from the given plugin config for the
+   * specified project with fallback to {@code gerrit.config}.
    *
    * <p>The reject-non-resolvable-code-owners configuration controls whether code owner config files
    * with newly added non-resolvable code owners should be rejected on commit received and on
    * submit.
    *
-   * @param project the project for which the freject-non-resolvable-code-owners configuration
-   *     should be read
+   * @param project the project for which the reject-non-resolvable-code-owners configuration should
+   *     be read
    * @param pluginConfig the plugin config from which the reject-non-resolvable-code-owners
    *     configuration should be read.
    * @return whether code owner config files with newly added non-resolvable code owners should be
@@ -254,13 +254,37 @@ public class GeneralConfig {
   }
 
   /**
-   * Gets the reject-non-resolvable-imports configuration from the given plugin config with fallback
-   * to {@code gerrit.config}.
+   * Gets the reject-non-resolvable-code-owners configuration from the given plugin config for the
+   * specified branch with fallback to {@code gerrit.config}.
+   *
+   * <p>If multiple branch-specific configurations match the specified branch, it is undefined which
+   * of the matching branch configurations takes precedence.
+   *
+   * <p>The reject-non-resolvable-code-owners configuration controls whether code owner config files
+   * with newly added non-resolvable code owners should be rejected on commit received and on
+   * submit.
+   *
+   * @param branchNameKey the branch and project for which the reject-non-resolvable-code-owners
+   *     configuration should be read
+   * @param pluginConfig the plugin config from which the reject-non-resolvable-code-owners
+   *     configuration should be read.
+   * @return whether code owner config files with newly added non-resolvable code owners should be
+   *     rejected on commit received and on submit
+   */
+  Optional<Boolean> getRejectNonResolvableCodeOwnersForBranch(
+      BranchNameKey branchNameKey, Config pluginConfig) {
+    return getCodeOwnerConfigValidationFlagForBranch(
+        KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, branchNameKey, pluginConfig);
+  }
+
+  /**
+   * Gets the reject-non-resolvable-imports configuration from the given plugin config for the
+   * specified project with fallback to {@code gerrit.config}.
    *
    * <p>The reject-non-resolvable-imports configuration controls whether code owner config files
    * with newly added non-resolvable imports should be rejected on commit received and on submit.
    *
-   * @param project the project for which the freject-non-resolvable-imports configuration should be
+   * @param project the project for which the reject-non-resolvable-imports configuration should be
    *     read
    * @param pluginConfig the plugin config from which the reject-non-resolvable-imports
    *     configuration should be read.
@@ -270,6 +294,26 @@ public class GeneralConfig {
   boolean getRejectNonResolvableImports(Project.NameKey project, Config pluginConfig) {
     return getBooleanConfig(
         project, pluginConfig, KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* defaultValue= */ true);
+  }
+
+  /**
+   * Gets the reject-non-resolvable-imports configuration from the given plugin config for the
+   * specified branch with fallback to {@code gerrit.config}.
+   *
+   * <p>The reject-non-resolvable-imports configuration controls whether code owner config files
+   * with newly added non-resolvable imports should be rejected on commit received and on submit.
+   *
+   * @param branchNameKey the branch and project for which the reject-non-resolvable-imports
+   *     configuration should be read
+   * @param pluginConfig the plugin config from which the reject-non-resolvable-imports
+   *     configuration should be read.
+   * @return whether code owner config files with newly added non-resolvable imports should be
+   *     rejected on commit received and on submit
+   */
+  Optional<Boolean> getRejectNonResolvableImportsForBranch(
+      BranchNameKey branchNameKey, Config pluginConfig) {
+    return getCodeOwnerConfigValidationFlagForBranch(
+        KEY_REJECT_NON_RESOLVABLE_IMPORTS, branchNameKey, pluginConfig);
   }
 
   private boolean getBooleanConfig(
@@ -493,6 +537,22 @@ public class GeneralConfig {
         validationSectionForBranch.get(), key, branchNameKey.project(), pluginConfig);
   }
 
+  private Optional<Boolean> getCodeOwnerConfigValidationFlagForBranch(
+      String key, BranchNameKey branchNameKey, Config pluginConfig) {
+    requireNonNull(key, "key");
+    requireNonNull(branchNameKey, "branchNameKey");
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    Optional<String> validationSectionForBranch =
+        getValidationSectionForBranch(branchNameKey, pluginConfig);
+    if (!validationSectionForBranch.isPresent()) {
+      return Optional.empty();
+    }
+
+    return getCodeOwnerConfigValidationFlagForBranch(
+        validationSectionForBranch.get(), key, branchNameKey.project(), pluginConfig);
+  }
+
   private CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicy(
       String key, Project.NameKey project, Config pluginConfig) {
     requireNonNull(key, "key");
@@ -596,6 +656,33 @@ public class GeneralConfig {
             SECTION_VALIDATION,
             subsection,
             key);
+      }
+    }
+    return Optional.empty();
+  }
+
+  private Optional<Boolean> getCodeOwnerConfigValidationFlagForBranch(
+      String subsection, String key, Project.NameKey project, Config pluginConfig) {
+    requireNonNull(subsection, "subsection");
+    requireNonNull(key, "key");
+    requireNonNull(project, "project");
+    requireNonNull(pluginConfig, "pluginConfig");
+
+    String codeOwnerConfigValidationFlagString =
+        pluginConfig.getString(SECTION_VALIDATION, subsection, key);
+    if (codeOwnerConfigValidationFlagString != null) {
+      try {
+        return Optional.of(pluginConfig.getBoolean(SECTION_VALIDATION, subsection, key, true));
+      } catch (IllegalArgumentException e) {
+        logger.atWarning().withCause(e).log(
+            "Ignoring invalid value %s for %s.%s.%s in '%s.config' of project %s."
+                + " Falling back to project-level setting.",
+            codeOwnerConfigValidationFlagString,
+            SECTION_VALIDATION,
+            subsection,
+            key,
+            pluginName,
+            project.get());
       }
     }
     return Optional.empty();
