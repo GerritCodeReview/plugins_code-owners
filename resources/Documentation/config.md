@@ -673,9 +673,26 @@ endpoint or by touching the change (e.g. by adding a comment).
         [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](#pluginCodeOwnersRejectNonResolvableCodeOwners)
         in `gerrit.config` and the `codeOwners.rejectNonResolvableCodeOwners`
         setting from parent projects.\
+        Can be overriden on branch-level by setting
+        [validation.\<branch\>.rejectNonResolvableCodeOwners](#validationBranchRejectNonResolvableCodeOwners).\
         If not set, the global setting
         [plugin.@PLUGIN@.rejectNonResolvableCodeOwners](#pluginCodeOwnersRejectNonResolvableCodeOwners)
         in `gerrit.config` is used.
+
+<a id="validationBranchRejectNonResolvableCodeOwners">validation.\<branch\>.rejectNonResolvableCodeOwners</a>
+:       Branch-level configuration to control whether modifications of code
+        owner config files that newly add non-resolvable code owners should be
+        rejected on commit received and submit.\
+        Applies to all branches that are matched by `<branch>`, which can be
+        an exact ref name (e.g. `refs/heads/master`), a ref pattern (e.g.
+        `refs/heads/*`) or a regular expression (e.g. `^refs/heads/stable-.*`).\
+        If a branches matches multiple validation subsections it is undefined
+        which of the subsections takes precedence.\
+        Overrides the project-level configuration for rejecting non-resolvable
+        code owners that is configured by
+        [codeOwners.rejectNonResolvableCodeOwners](#codeOwnersRejectNonResolvableCodeOwners).\
+        For further details see the description of
+        [codeOwners.rejectNonResolvableCodeOwners](#codeOwnersRejectNonResolvableCodeOwners).
 
 <a id="codeOwnersRejectNonResolvableImports">codeOwners.rejectNonResolvableImports</a>
 :       Whether modifications of code owner config files that newly add
@@ -691,9 +708,26 @@ endpoint or by touching the change (e.g. by adding a comment).
         [plugin.@PLUGIN@.rejectNonResolvableImports](#pluginCodeOwnersRejectNonResolvableImports)
         in `gerrit.config` and the `codeOwners.rejectNonResolvableImports`
         setting from parent projects.\
+        Can be overriden on branch-level by setting
+        [validation.\<branch\>.rejectNonResolvableImports](#validationBranchRejectNonResolvableImports).\
         If not set, the global setting
         [plugin.@PLUGIN@.rejectNonResolvableImports](#pluginCodeOwnersRejectNonResolvableImports)
         in `gerrit.config` is used.
+
+<a id="validationBranchRejectNonResolvableImports">validation.\<branch\>.rejectNonResolvableImports</a>
+:       Branch-level configuration to control whether modifications of code
+        owner config files that newly add non-resolvable imports should be
+        rejected on commit received and submit.\
+        Applies to all branches that are matched by `<branch>`, which can be
+        an exact ref name (e.g. `refs/heads/master`), a ref pattern (e.g.
+        `refs/heads/*`) or a regular expression (e.g. `^refs/heads/stable-.*`).\
+        If a branches matches multiple validation subsections it is undefined
+        which of the subsections takes precedence.\
+        Overrides the project-level configuration for rejecting non-resolvable
+        imports that is configured by
+        [codeOwners.rejectNonResolvableImports](#codeOwnersRejectNonResolvableImports).\
+        For further details see the description of
+        [codeOwners.rejectNonResolvableImports](#codeOwnersRejectNonResolvableImports).
 
 <a id="codeOwnersRequiredApproval">codeOwners.requiredApproval</a>
 :       Approval that is required from code owners to approve the files in a

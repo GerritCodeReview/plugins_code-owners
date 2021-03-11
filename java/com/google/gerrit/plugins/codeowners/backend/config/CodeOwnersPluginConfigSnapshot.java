@@ -118,16 +118,40 @@ public class CodeOwnersPluginConfigSnapshot {
   /**
    * Checks whether newly added non-resolvable code owners should be rejected on commit received and
    * submit.
+   *
+   * @param branchName the branch for which it should be checked whether non-resolvable code owners
+   *     should be rejected
    */
-  public boolean rejectNonResolvableCodeOwners() {
+  public boolean rejectNonResolvableCodeOwners(String branchName) {
+    requireNonNull(branchName, "branchName");
+
+    Optional<Boolean> branchSpecificFlag =
+        generalConfig.getRejectNonResolvableCodeOwnersForBranch(
+            BranchNameKey.create(projectName, branchName), pluginConfig);
+    if (branchSpecificFlag.isPresent()) {
+      return branchSpecificFlag.get();
+    }
+
     return generalConfig.getRejectNonResolvableCodeOwners(projectName, pluginConfig);
   }
 
   /**
    * Checks whether newly added non-resolvable imports should be rejected on commit received and
    * submit.
+   *
+   * @param branchName the branch for which it should be checked whether non-resolvable imports
+   *     should be rejected
    */
-  public boolean rejectNonResolvableImports() {
+  public boolean rejectNonResolvableImports(String branchName) {
+    requireNonNull(branchName, "branchName");
+
+    Optional<Boolean> branchSpecificFlag =
+        generalConfig.getRejectNonResolvableImportsForBranch(
+            BranchNameKey.create(projectName, branchName), pluginConfig);
+    if (branchSpecificFlag.isPresent()) {
+      return branchSpecificFlag.get();
+    }
+
     return generalConfig.getRejectNonResolvableImports(projectName, pluginConfig);
   }
 

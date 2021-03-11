@@ -517,37 +517,52 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   @Test
   public void setRejectNonResolvableCodeOwners() throws Exception {
     assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableCodeOwners())
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .rejectNonResolvableCodeOwners("master"))
         .isTrue();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.rejectNonResolvableCodeOwners = false;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableCodeOwners())
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .rejectNonResolvableCodeOwners("master"))
         .isFalse();
 
     input.rejectNonResolvableCodeOwners = true;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableCodeOwners())
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .rejectNonResolvableCodeOwners("master"))
         .isTrue();
   }
 
   @Test
   public void setRejectNonResolvableImports() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableImports())
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .rejectNonResolvableImports("master"))
         .isTrue();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
     input.rejectNonResolvableImports = false;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableImports())
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .rejectNonResolvableImports("master"))
         .isFalse();
 
     input.rejectNonResolvableImports = true;
     projectCodeOwnersApiFactory.project(project).updateConfig(input);
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).rejectNonResolvableImports())
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .rejectNonResolvableImports("master"))
         .isTrue();
   }
 
