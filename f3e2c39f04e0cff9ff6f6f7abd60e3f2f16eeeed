@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "79580332_c75fc44f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 420,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-11T22:15:51Z",
+      "side": 1,
+      "message": "Yes, if this happens we log a warning below in line 562-564 that tells us which section took precedence.",
+      "parentUuid": "6a3e2a5c_9d98824f",
+      "range": {
+        "startLine": 418,
+        "startChar": 0,
+        "endLine": 420,
+        "endChar": 0
+      },
+      "revId": "f3e2c39f04e0cff9ff6f6f7abd60e3f2f16eeeed",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b3011eaf_b2202a2b",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-03-11T21:54:38Z",
       "side": 1,
       "message": "branch or branchSubsection (also in other methods)",
+      "range": {
+        "startLine": 1203,
+        "startChar": 6,
+        "endLine": 1203,
+        "endChar": 23
+      },
+      "revId": "f3e2c39f04e0cff9ff6f6f7abd60e3f2f16eeeed",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5cbe394b_2f9410a1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfigSnapshotTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1203,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-11T22:15:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b3011eaf_b2202a2b",
       "range": {
         "startLine": 1203,
         "startChar": 6,
