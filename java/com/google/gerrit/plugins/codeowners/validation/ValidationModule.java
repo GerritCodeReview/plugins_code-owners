@@ -14,7 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.validation;
 
+import com.google.gerrit.extensions.annotations.Exports;
+import com.google.gerrit.extensions.config.CapabilityDefinition;
 import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.server.git.receive.PluginPushOption;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.MergeValidationListener;
 import com.google.inject.AbstractModule;
@@ -25,5 +28,11 @@ public class ValidationModule extends AbstractModule {
   protected void configure() {
     DynamicSet.bind(binder(), CommitValidationListener.class).to(CodeOwnerConfigValidator.class);
     DynamicSet.bind(binder(), MergeValidationListener.class).to(CodeOwnerConfigValidator.class);
+
+    bind(CapabilityDefinition.class)
+        .annotatedWith(Exports.named(SkipCodeOwnerConfigValidationCapability.ID))
+        .to(SkipCodeOwnerConfigValidationCapability.class);
+    DynamicSet.bind(binder(), PluginPushOption.class)
+        .to(SkipCodeOwnerConfigValidationPushOption.class);
   }
 }

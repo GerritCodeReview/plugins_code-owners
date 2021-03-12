@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -62,6 +63,8 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwn
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
+import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationCapability;
+import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationPushOption;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -427,6 +430,135 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         r,
         "skipping validation of code owner config files",
         "code-owners functionality is disabled");
+  }
+
+  @Test
+  public void userCannotSkipCodeOwnerConfigValidationWithoutCapability() throws Exception {
+    testCannotSkipCodeOwnerConfigValidationWithoutCapability(user);
+  }
+
+  @Test
+  public void adminCannotSkipCodeOwnerConfigValidationWithoutCapability() throws Exception {
+    testCannotSkipCodeOwnerConfigValidationWithoutCapability(admin);
+  }
+
+  private void testCannotSkipCodeOwnerConfigValidationWithoutCapability(TestAccount testAccount)
+      throws Exception {
+    PushOneCommit push =
+        pushFactory.create(
+            testAccount.newIdent(),
+            testRepo,
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(createCodeOwnerConfigKey("/"))
+                .getJGitFilePath(),
+            "INVALID");
+    push.setPushOptions(
+        ImmutableList.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME)));
+    PushOneCommit.Result r = push.to("refs/for/master");
+    assertErrorWithMessages(
+        r,
+        "skipping code owner config validation not allowed",
+        String.format(
+            "%s for plugin code-owners not permitted", SkipCodeOwnerConfigValidationCapability.ID));
+  }
+
+  @Test
+  public void canUploadNonParseableConfigWithSkipOption() throws Exception {
+    // with --code-owners~skip-code-owners-validation
+    PushOneCommit.Result r =
+        uploadNonParseableConfigWithPushOption(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        String.format(
+            "the validation is skipped due to the --code-owners~%s push option",
+            SkipCodeOwnerConfigValidationPushOption.NAME));
+
+    // with --code-owners~skip-code-owners-validation=true
+    r =
+        uploadNonParseableConfigWithPushOption(
+            String.format("code-owners~%s=true", SkipCodeOwnerConfigValidationPushOption.NAME));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        String.format(
+            "the validation is skipped due to the --code-owners~%s push option",
+            SkipCodeOwnerConfigValidationPushOption.NAME));
+
+    // with --code-owners~skip-code-owners-validation=TRUE
+    r =
+        uploadNonParseableConfigWithPushOption(
+            String.format("code-owners~%s=TRUE", SkipCodeOwnerConfigValidationPushOption.NAME));
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        String.format(
+            "the validation is skipped due to the --code-owners~%s push option",
+            SkipCodeOwnerConfigValidationPushOption.NAME));
+  }
+
+  @Test
+  public void cannotUploadNonParseableConfigIfSkipOptionIsFalse() throws Exception {
+    // with --code-owners~skip-code-owners-validation=false
+    PushOneCommit.Result r =
+        uploadNonParseableConfigWithPushOption(
+            String.format("code-owners~%s=false", SkipCodeOwnerConfigValidationPushOption.NAME));
+    String abbreviatedCommit = abbreviateName(r.getCommit());
+    r.assertErrorStatus(
+        String.format(
+            "commit %s: [code-owners] %s", abbreviatedCommit, "invalid code owner config files"));
+  }
+
+  @Test
+  public void cannotUploadNonParseableConfigWithInvalidSkipOption() throws Exception {
+    PushOneCommit.Result r =
+        uploadNonParseableConfigWithPushOption(
+            String.format("code-owners~%s=INVALID", SkipCodeOwnerConfigValidationPushOption.NAME));
+    assertErrorWithMessages(
+        r,
+        "invalid push option",
+        String.format(
+            "Invalid value for --code-owners~%s push option: INVALID",
+            SkipCodeOwnerConfigValidationPushOption.NAME));
+  }
+
+  @Test
+  public void cannotUploadNonParseableConfigIfSkipOptionIsSetMultipleTimes() throws Exception {
+    PushOneCommit.Result r =
+        uploadNonParseableConfigWithPushOption(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME),
+            String.format("code-owners~%s=false", SkipCodeOwnerConfigValidationPushOption.NAME));
+    assertErrorWithMessages(
+        r,
+        "invalid push option",
+        String.format(
+            "--code-owners~%s push option can be specified only once, received multiple values: [, false]",
+            SkipCodeOwnerConfigValidationPushOption.NAME));
+  }
+
+  private PushOneCommit.Result uploadNonParseableConfigWithPushOption(String... pushOptions)
+      throws Exception {
+    projectOperations
+        .allProjectsForUpdate()
+        .add(
+            allowCapability("code-owners-" + SkipCodeOwnerConfigValidationCapability.ID)
+                .group(REGISTERED_USERS))
+        .update();
+
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(createCodeOwnerConfigKey("/"))
+                .getJGitFilePath(),
+            "INVALID");
+    push.setPushOptions(ImmutableList.copyOf(pushOptions));
+    return push.to("refs/for/master");
   }
 
   @Test
