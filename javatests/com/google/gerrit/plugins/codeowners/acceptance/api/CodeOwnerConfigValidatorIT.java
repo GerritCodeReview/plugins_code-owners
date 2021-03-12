@@ -425,8 +425,68 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "forced")
+  public void
+      cannotUploadNonParseableConfigIfCodeOwnersFunctionalityIsDisabledButValidationIsEnforced()
+          throws Exception {
+    disableCodeOwnersForProject(project);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            "INVALID");
+    assertFatalWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            project,
+            getParsingErrorMessage(
+                ImmutableMap.of(
+                    FindOwnersBackend.class,
+                    "invalid line: INVALID",
+                    ProtoBackend.class,
+                    "1:8: expected \"{\""))));
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "dry_run")
   public void canUploadNonParseableConfigIfValidationIsDoneAsDryRun() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            "INVALID");
+    assertOkWithFatals(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            project,
+            getParsingErrorMessage(
+                ImmutableMap.of(
+                    FindOwnersBackend.class,
+                    "invalid line: INVALID",
+                    ProtoBackend.class,
+                    "1:8: expected \"{\""))));
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableValidationOnCommitReceived",
+      value = "forced_dry_run")
+  public void
+      canUploadNonParseableConfigIfCodeOwnersFunctionalityIsDisabledButDryRunValidationIsEnforced()
+          throws Exception {
+    disableCodeOwnersForProject(project);
+
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
     PushOneCommit.Result r =
@@ -1713,6 +1773,13 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     testCanSubmitNonParseableConfig();
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "forced_dry_run")
+  public void canSubmitNonParseableConfigIfValidationIsDoneAsForcedDryRun() throws Exception {
+    disableCodeOwnersForProject(project);
+    testCanSubmitNonParseableConfig();
+  }
+
   private void testCanSubmitNonParseableConfig() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -1736,6 +1803,48 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     approve(r.getChangeId());
     gApi.changes().id(r.getChangeId()).current().submit();
     assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "forced")
+  public void
+      cannotSubmitConfigWithIssuesIfCodeOwnersFunctionalityIsDisabledButValidationIsEnforced()
+          throws Exception {
+    disableCodeOwnersForProject(project);
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    // upload a change with a code owner config that has issues (non-resolvable code owners)
+    String unknownEmail = "non-existing-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .build()));
+    r.assertOkStatus();
+
+    // approve the change
+    approve(r.getChangeId());
+
+    // try to submit the change
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %d: [code-owners] invalid code owner config files:\n"
+                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
+                r.getChange().getId().get(),
+                unknownEmail,
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+                identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
   @Test

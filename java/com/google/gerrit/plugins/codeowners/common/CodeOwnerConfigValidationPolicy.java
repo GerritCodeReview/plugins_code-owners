@@ -19,6 +19,8 @@ public enum CodeOwnerConfigValidationPolicy {
   /**
    * The code owner config file validation is enabled and invalid code owner config files are
    * rejected.
+   *
+   * <p>If the code owners functionality is disabled, no validation is performed.
    */
   TRUE,
 
@@ -30,14 +32,39 @@ public enum CodeOwnerConfigValidationPolicy {
 
   /**
    * Code owner config files are validated, but invalid code owner config files are not rejected.
+   *
+   * <p>If the code owners functionality is disabled, no dry-run validation is performed.
    */
-  DRY_RUN;
+  DRY_RUN,
+
+  /**
+   * Code owner config files are validated even if the code owners functionality is disabled.
+   *
+   * <p>This option is useful when the code owner config validation should be enabled as preparation
+   * to enabling the code owners functionality.
+   */
+  FORCED,
+
+  /**
+   * Code owner config files are validated even if the code owners functionality is disabled, but
+   * invalid code owner config files are not rejected.
+   *
+   * <p>This option is useful when the code owner config validation should be enabled as preparation
+   * to enabling the code owners functionality.
+   */
+  FORCED_DRY_RUN;
 
   public boolean isDryRun() {
-    return this == CodeOwnerConfigValidationPolicy.DRY_RUN;
+    return this == CodeOwnerConfigValidationPolicy.DRY_RUN
+        || this == CodeOwnerConfigValidationPolicy.FORCED_DRY_RUN;
   }
 
   public boolean runValidation() {
     return this != CodeOwnerConfigValidationPolicy.FALSE;
+  }
+
+  public boolean isForced() {
+    return this == CodeOwnerConfigValidationPolicy.FORCED
+        || this == CodeOwnerConfigValidationPolicy.FORCED_DRY_RUN;
   }
 }

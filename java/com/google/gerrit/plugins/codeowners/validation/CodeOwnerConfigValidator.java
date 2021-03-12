@@ -196,7 +196,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   receiveEvent.repoConfig,
                   receiveEvent.revWalk,
                   receiveEvent.commit,
-                  receiveEvent.user);
+                  receiveEvent.user,
+                  codeOwnerConfigValidationPolicy.isForced());
         } catch (RuntimeException e) {
           if (!codeOwnerConfigValidationPolicy.isDryRun()) {
             throw e;
@@ -266,7 +267,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
           validationResult =
               validateCodeOwnerConfig(
-                  branchNameKey, repository.getConfig(), revWalk, commit, patchSetUploader);
+                  branchNameKey,
+                  repository.getConfig(),
+                  revWalk,
+                  commit,
+                  patchSetUploader,
+                  codeOwnerConfigValidationPolicy.isForced());
         } catch (RuntimeException e) {
           if (!codeOwnerConfigValidationPolicy.isDryRun()) {
             throw e;
@@ -297,6 +303,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param revCommit the commit for which newly added and modified code owner configs should be
    *     validated
    * @param user user for which the code owner visibility checks should be performed
+   * @param force whether the validation should be done even if the code owners functionality is
+   *     disabled for the branch
    * @return the validation result, {@link Optional#empty()} if no validation is performed because
    *     the given commit doesn't contain newly added or modified code owner configs
    */
@@ -305,10 +313,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       Config repoConfig,
       RevWalk revWalk,
       RevCommit revCommit,
-      IdentifiedUser user) {
+      IdentifiedUser user,
+      boolean force) {
     CodeOwnersPluginConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project());
-    if (codeOwnersConfig.isDisabled(branchNameKey.branch())) {
+    logger.atFine().log("force = %s", force);
+    if (!force && codeOwnersConfig.isDisabled(branchNameKey.branch())) {
       return Optional.of(
           ValidationResult.create(
               pluginName,

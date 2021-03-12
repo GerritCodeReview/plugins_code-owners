@@ -185,12 +185,38 @@ endpoint or by touching the change (e.g. by adding a comment).
 
 <a id="pluginCodeOwnersEnableValidationOnCommitReceived">plugin.@PLUGIN@.enableValidationOnCommitReceived</a>
 :       Policy for validating code owner config files when a commit is received.
-        Allowed values are `true` (the code owner config file validation is
-        enabled and the upload of invalid code owner config files is rejected),
-        `false` (the code owner config file validation is disabled, invalid code
-        owner config files are not rejected) and `dry_run` (code owner config
-        files are validated, but invalid code owner config files are not
-        rejected).\
+        \
+        Can be `TRUE`, `FALSE`, `DRY_RUN`, `FORCED` or `FORCED_DRY_RUN`.\
+        \
+        `TRUE`:\
+        The code owner config file validation is enabled and the upload of
+        invalid code owner config files is rejected.\
+        If the code owners functionality is disabled, no validation is
+        performed.\
+        \
+        `FALSE`:\
+        The code owner config file validation is disabled, invalid code owner
+        config files are not rejected.\
+        \
+        `DRY_RUN`:\
+        Code owner config files are validated, but invalid code owner config
+        files are not rejected.\
+        If the code owners functionality is disabled, no dry-run validation is
+        performed.\
+        \
+        `FORCED`:\
+        Code owner config files are validated even if the code owners
+        functionality is disabled.\
+        This option is useful when the code owner config validation should be
+        enabled as preparation to enabling the code owners functionality.\
+        \
+        `FORCED_DRY_RUN`:\
+        Code owner config files are validated even if the code owners
+        functionality is disabled, but invalid code owner config files are not
+        rejected.\
+        This option is useful when the code owner config validation should be
+        enabled as preparation to enabling the code owners functionality.\
+        \
         Should only be disabled if there is bot that validates the code owner
         config files in open changes as part of a pre-submit validation.\
         Can be overridden per project by setting
@@ -200,12 +226,39 @@ endpoint or by touching the change (e.g. by adding a comment).
 
 <a id="pluginCodeOwnersEnableValidationOnSubmit">plugin.@PLUGIN@.enableValidationOnSubmit</a>
 :       Policy for validating code owner config files when a change is
-        submitted. Allowed values are `true` (the code owner config file
-        validation is enabled and the submission of invalid code owner config
-        files is rejected), `false` (the code owner config file validation is
-        disabled, invalid code owner config files are not rejected) and
-        `dry_run` (code owner config files are validated, but invalid code owner
-        config files are not rejected).\
+        submitted.
+        \
+        Can be `TRUE`, `FALSE`, `DRY_RUN`, `FORCED` or `FORCED_DRY_RUN`.\
+        \
+        `TRUE`:\
+        The code owner config file validation is enabled and the submission of
+        invalid code owner config files is rejected.\
+        If the code owners functionality is disabled, no validation is
+        performed.\
+        \
+        `FALSE`:\
+        The code owner config file validation is disabled, invalid code owner
+        config files are not rejected.\
+        \
+        `DRY_RUN`:\
+        Code owner config files are validated, but invalid code owner config
+        files are not rejected.\
+        If the code owners functionality is disabled, no dry-run validation is
+        performed.\
+        \
+        `FORCED`:\
+        Code owner config files are validated even if the code owners
+        functionality is disabled.\
+        This option is useful when the code owner config validation should be
+        enabled as preparation to enabling the code owners functionality.\
+        \
+        `FORCED_DRY_RUN`:\
+        Code owner config files are validated even if the code owners
+        functionality is disabled, but invalid code owner config files are not
+        rejected.\
+        This option is useful when the code owner config validation should be
+        enabled as preparation to enabling the code owners functionality.\
+        \
         Disabling the submit validation is not recommended.\
         Can be overridden per project by setting
         [codeOwners.enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit)
@@ -592,13 +645,11 @@ endpoint or by touching the change (e.g. by adding a comment).
         in `gerrit.config` is used.
 
 <a id="codeOwnersEnableValidationOnCommitReceived">codeOwners.enableValidationOnCommitReceived</a>
-:       Policy for validating code owner config files when a commit is received.
-        Allowed values are `true` (the code owner config file validation is
-        enabled and the upload of invalid code owner config files is rejected),
-        `false` (the code owner config file validation is disabled, invalid code
-        owner config files are not rejected) and `dry_run` (code owner config
-        files are validated, but invalid code owner config files are not
-        rejected).\
+:       Policy for validating code owner config files when a commit is
+        received.\
+        Can be `TRUE`, `FALSE`, `DRY_RUN`, `FORCED` or `FORCED_DRY_RUN`. For a
+        description of the values see
+        [plugin.@PLUGIN@.enableValidationOnCommitReceived](#pluginCodeOwnersEnableValidationOnCommitReceived).\
         Should only be disabled if there is bot that validates the code owner
         config files in open changes as part of a pre-submit validation.\
         Overrides the global setting
@@ -627,12 +678,10 @@ endpoint or by touching the change (e.g. by adding a comment).
 
 <a id="codeOwnersEnableValidationOnSubmit">codeOwners.enableValidationOnSubmit</a>
 :       Policy for validating code owner config files when a change is
-        submitted. Allowed values are `true` (the code owner config file
-        validation is enabled and the submit of invalid code owner config files
-        is rejected), `false` (the code owner config file validation is
-        disabled, invalid code owner config files are not rejected) and
-        `dry_run` (code owner config files are validated, but invalid code owner
-        config files are not rejected).\
+        submitted.\
+        Can be `TRUE`, `FALSE`, `DRY_RUN`, `FORCED` or `FORCED_DRY_RUN`. For a
+        description of the values see
+        [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit).\
         Disabling the submit validation is not recommended.\
         Overrides the global setting
         [plugin.@PLUGIN@.enableValidationOnSubmit](#pluginCodeOwnersEnableValidationOnSubmit)
