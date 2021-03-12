@@ -269,7 +269,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 :       Whether modifications of code owner config files that newly add
         non-resolvable code owners should be rejected on commit received and
         submit.\
-        if `true` newly added non-resolveable code owners are reported as errors
+        If `true` newly added non-resolveable code owners are reported as errors
         and the commit is rejected.\
         If `false` newly added non-resolvable code owners are only reported as
         warnings and the commit is not rejected.\
@@ -284,7 +284,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 <a id="pluginCodeOwnersRejectNonResolvableImports">plugin.@PLUGIN@.rejectNonResolvableImports</a>
 :       Whether modifications of code owner config files that newly add
         non-resolvable imports should be rejected on commit received an submit.\
-        if `true` newly added non-resolveable imports are reported as errors and
+        If `true` newly added non-resolveable imports are reported as errors and
         the commit is rejected.\
         If `false` newly added non-resolvable imports are only reported as
         warnings and the commit is not rejected.\
@@ -711,7 +711,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 :       Whether modifications of code owner config files that newly add
         non-resolvable code owners should be rejected on commit received and
         submit.\
-        if `true` newly added non-resolveable code owners are reported as errors
+        If `true` newly added non-resolveable code owners are reported as errors
         and the commit is rejected.\
         If `false` newly added non-resolvable code owners are only reported as
         warnings and the commit is not rejected.\
@@ -746,7 +746,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 <a id="codeOwnersRejectNonResolvableImports">codeOwners.rejectNonResolvableImports</a>
 :       Whether modifications of code owner config files that newly add
         non-resolvable imports should be rejected on commit received an submit.\
-        if `true` newly added non-resolveable imports are reported as errors and
+        If `true` newly added non-resolveable imports are reported as errors and
         the commit is rejected.\
         If `false` newly added non-resolvable imports are only reported as
         warnings and the commit is not rejected.\
