@@ -22,6 +22,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
@@ -29,6 +30,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -137,6 +139,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   private final ChangeNotes.Factory changeNotesFactory;
   private final PatchSetUtil patchSetUtil;
   private final IdentifiedUser.GenericFactory userFactory;
+  private final SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption;
 
   @Inject
   CodeOwnerConfigValidator(
@@ -149,7 +152,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       ProjectCache projectCache,
       ChangeNotes.Factory changeNotesFactory,
       PatchSetUtil patchSetUtil,
-      IdentifiedUser.GenericFactory userFactory) {
+      IdentifiedUser.GenericFactory userFactory,
+      SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption) {
     this.pluginName = pluginName;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
@@ -160,6 +164,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     this.changeNotesFactory = changeNotesFactory;
     this.patchSetUtil = patchSetUtil;
     this.userFactory = userFactory;
+    this.skipCodeOwnerConfigValidationPushOption = skipCodeOwnerConfigValidationPushOption;
   }
 
   @Override
@@ -197,7 +202,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   receiveEvent.revWalk,
                   receiveEvent.commit,
                   receiveEvent.user,
-                  codeOwnerConfigValidationPolicy.isForced());
+                  codeOwnerConfigValidationPolicy.isForced(),
+                  receiveEvent.pushOptions);
         } catch (RuntimeException e) {
           if (!codeOwnerConfigValidationPolicy.isDryRun()) {
             throw e;
@@ -272,7 +278,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   revWalk,
                   commit,
                   patchSetUploader,
-                  codeOwnerConfigValidationPolicy.isForced());
+                  codeOwnerConfigValidationPolicy.isForced(),
+                  /* pushOptions= */ ImmutableListMultimap.of());
         } catch (RuntimeException e) {
           if (!codeOwnerConfigValidationPolicy.isDryRun()) {
             throw e;
@@ -314,7 +321,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevWalk revWalk,
       RevCommit revCommit,
       IdentifiedUser user,
-      boolean force) {
+      boolean force,
+      ImmutableListMultimap<String, String> pushOptions) {
     CodeOwnersPluginConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project());
     logger.atFine().log("force = %s", force);
@@ -326,6 +334,36 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               new CommitValidationMessage(
                   "code-owners functionality is disabled", ValidationMessage.Type.HINT)));
     }
+
+    try {
+      if (skipCodeOwnerConfigValidationPushOption.skipValidation(pushOptions)) {
+        logger.atFine().log("skip validation requested");
+        return Optional.of(
+            ValidationResult.create(
+                pluginName,
+                "skipping validation of code owner config files",
+                new CommitValidationMessage(
+                    String.format(
+                        "the validation is skipped due to the --%s~%s push option",
+                        pluginName, SkipCodeOwnerConfigValidationPushOption.NAME),
+                    ValidationMessage.Type.HINT)));
+      }
+    } catch (AuthException e) {
+      logger.atFine().withCause(e).log("Not allowed to skip code owner config validation");
+      return Optional.of(
+          ValidationResult.create(
+              pluginName,
+              "skipping code owner config validation not allowed",
+              new CommitValidationMessage(e.getMessage(), ValidationMessage.Type.ERROR)));
+    } catch (SkipCodeOwnerConfigValidationPushOption.InvalidValueException e) {
+      logger.atFine().log(e.getMessage());
+      return Optional.of(
+          ValidationResult.create(
+              pluginName,
+              "invalid push option",
+              new CommitValidationMessage(e.getMessage(), ValidationMessage.Type.ERROR)));
+    }
+
     if (codeOwnersConfig.areCodeOwnerConfigsReadOnly()) {
       return Optional.of(
           ValidationResult.create(
