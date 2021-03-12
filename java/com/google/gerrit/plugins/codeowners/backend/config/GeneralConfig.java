@@ -560,7 +560,7 @@ public class GeneralConfig {
     String matchingValidationSubsection = matchingValidationSubsections.asList().get(0);
     if (matchingValidationSubsections.size() > 1) {
       logger.atWarning().log(
-          "branch %s matches multiple %s subsections in %.config of project %s: %s,"
+          "branch %s matches multiple %s subsections in %s.config of project %s: %s,"
               + " subsection %s takes precedence",
           branchNameKey.branch(),
           SECTION_VALIDATION,
