@@ -18,8 +18,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.TestAccount;
@@ -129,7 +129,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
         codeOwnerConfigFileUpdateScanner.update(
             BranchNameKey.create(project, "master"), "Update code owner configs", updater);
     assertThat(commit).isEmpty();
-    verifyZeroInteractions(updater);
+    verifyNoInteractions(updater);
   }
 
   @Test
@@ -155,7 +155,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
         codeOwnerConfigFileUpdateScanner.update(
             BranchNameKey.create(project, "master"), "Update code owner configs", updater);
     assertThat(commit).isEmpty();
-    verifyZeroInteractions(updater);
+    verifyNoInteractions(updater);
   }
 
   @Test

@@ -20,8 +20,8 @@ import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
@@ -169,7 +169,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
   @Test
   public void visitorNotInvokedIfNoCodeOwnerConfigExists() throws Exception {
     visit("master", "/foo/bar/baz.md");
-    verifyZeroInteractions(visitor);
+    verifyNoInteractions(visitor);
   }
 
   @Test
@@ -185,7 +185,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .create();
 
     visit(branch, "/foo/bar/baz.md");
-    verifyZeroInteractions(visitor);
+    verifyNoInteractions(visitor);
   }
 
   @Test
@@ -562,7 +562,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(rootCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
-    verifyZeroInteractions(parentCodeOwnersIgnoredCallback);
+    verifyNoInteractions(parentCodeOwnersIgnoredCallback);
   }
 
   @Test
@@ -583,23 +583,24 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void visitorNotInvokedForCodeOwnerConfigInRefsMetaConfigIfItDoesntApply()
-      throws Exception {
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch(RefNames.REFS_CONFIG)
-        .folderPath("/")
-        .addCodeOwnerSet(
-            CodeOwnerSet.builder()
-                .addPathExpression(testPathExpressions.matchAllFilesInSubfolder("other"))
-                .addCodeOwnerEmail(admin.email())
-                .build())
-        .create();
+  public void visitorInvokedForCodeOwnerConfigInRefsMetaConfigIfItDoesntApply() throws Exception {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchAllFilesInSubfolder("other"))
+                    .addCodeOwnerEmail(admin.email())
+                    .build())
+            .create();
 
     when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
     visit("master", "/foo/bar/baz.md");
-    verifyZeroInteractions(visitor);
+    verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
   }
 
   @Test
@@ -754,7 +755,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     // This test is making sure that trying to load 4. doesn't fail if refs/meta/config doesn't
     // exist.
     visit("master", "/foo/bar/baz.md");
-    verifyZeroInteractions(visitor);
+    verifyNoInteractions(visitor);
   }
 
   private void visit(String branchName, String path)

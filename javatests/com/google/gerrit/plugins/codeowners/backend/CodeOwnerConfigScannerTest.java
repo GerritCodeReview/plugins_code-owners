@@ -18,8 +18,8 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -122,8 +122,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
   @Test
   public void visitorNotInvokedIfNoCodeOwnerConfigFilesExists() throws Exception {
     visit();
-    verifyZeroInteractions(visitor);
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(visitor);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -146,8 +146,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     }
 
     visit();
-    verifyZeroInteractions(visitor);
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(visitor);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -155,7 +155,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
     createNonParseableCodeOwnerConfig("/OWNERS");
 
     visit();
-    verifyZeroInteractions(visitor);
+    verifyNoInteractions(visitor);
 
     // Verify that we received the expected callbacks for the invalid code onwer config.
     Mockito.verify(invalidCodeOwnerConfigCallback)
@@ -280,7 +280,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -303,7 +303,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -322,8 +322,8 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         false);
 
     // Verify that we did not receive any callback.
-    verifyZeroInteractions(visitor);
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(visitor);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -387,7 +387,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooBarCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -436,7 +436,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -486,7 +486,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(fooCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   @Test
@@ -516,7 +516,7 @@ public class CodeOwnerConfigScannerTest extends AbstractCodeOwnersTest {
         .visit(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
 
-    verifyZeroInteractions(invalidCodeOwnerConfigCallback);
+    verifyNoInteractions(invalidCodeOwnerConfigCallback);
   }
 
   private void visit() {
