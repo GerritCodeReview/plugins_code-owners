@@ -61,7 +61,6 @@ import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
 import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
-import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
@@ -405,7 +404,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   "code-owners plugin configuration is invalid,"
                       + " cannot validate code owner config files",
                   ValidationMessage.Type.WARNING)));
-    } catch (IOException | PatchListNotAvailableException e) {
+    } catch (IOException e) {
       String errorMessage =
           String.format(
               "failed to validate code owner config files in revision %s"
