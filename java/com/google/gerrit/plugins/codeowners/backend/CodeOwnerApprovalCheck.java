@@ -546,7 +546,7 @@ public class CodeOwnerApprovalCheck {
 
       AtomicBoolean hasRevelantCodeOwnerDefinitions = new AtomicBoolean(false);
       AtomicBoolean parentCodeOwnersAreIgnored = new AtomicBoolean(false);
-      codeOwnerConfigHierarchy.visit(
+      codeOwnerConfigHierarchy.visitForFile(
           branch,
           revision,
           absolutePath,

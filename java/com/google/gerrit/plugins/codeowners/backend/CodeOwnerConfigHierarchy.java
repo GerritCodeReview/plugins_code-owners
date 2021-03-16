@@ -132,6 +132,56 @@ public class CodeOwnerConfigHierarchy {
       Path absolutePath,
       PathCodeOwnersVisitor pathCodeOwnersVisitor,
       Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
+    visit(
+        branchNameKey,
+        revision,
+        absolutePath,
+        absolutePath,
+        pathCodeOwnersVisitor,
+        parentCodeOwnersIgnoredCallback);
+  }
+
+  /**
+   * Visits the path code owners in the given branch that apply for the given file path by following
+   * the path hierarchy from the given path up to the root folder.
+   *
+   * <p>Same as {@link #visit(BranchNameKey, ObjectId, Path, PathCodeOwnersVisitor, Consumer)} with
+   * the only difference that the provided path must be a file path (no folder path). Knowing that
+   * that the path is a file path allows us to skip checking if there is a code owner config file in
+   * this path (if it's a file it cannot contain a code owner config file). This is a performance
+   * optimization that matters if code owner config files need to be looked up for 1000s of files
+   * (e.g. for large changes).
+   *
+   * @param branchNameKey project and branch from which the code owner configs should be visited
+   * @param revision the branch revision from which the code owner configs should be loaded
+   * @param absoluteFilePath the path for which the code owner configs should be visited; the path
+   *     must be absolute; must be the path of a file; the path may or may not exist
+   * @param pathCodeOwnersVisitor visitor that should be invoked for the applying path code owners
+   * @param parentCodeOwnersIgnoredCallback callback that is invoked for the first visited code
+   *     owner config that ignores parent code owners
+   */
+  public void visitForFile(
+      BranchNameKey branchNameKey,
+      ObjectId revision,
+      Path absoluteFilePath,
+      PathCodeOwnersVisitor pathCodeOwnersVisitor,
+      Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
+    visit(
+        branchNameKey,
+        revision,
+        absoluteFilePath,
+        absoluteFilePath.getParent(),
+        pathCodeOwnersVisitor,
+        parentCodeOwnersIgnoredCallback);
+  }
+
+  private void visit(
+      BranchNameKey branchNameKey,
+      ObjectId revision,
+      Path absolutePath,
+      Path startFolder,
+      PathCodeOwnersVisitor pathCodeOwnersVisitor,
+      Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
     requireNonNull(branchNameKey, "branch");
     requireNonNull(revision, "revision");
     requireNonNull(absolutePath, "absolutePath");
@@ -143,9 +193,9 @@ public class CodeOwnerConfigHierarchy {
         "visiting code owner configs for '%s' in branch '%s' in project '%s' (revision = '%s')",
         absolutePath, branchNameKey.shortName(), branchNameKey.project(), revision.name());
 
-    // Next path in which we look for a code owner configuration. We start at the given path and
+    // Next path in which we look for a code owner configuration. We start at the given folder and
     // then go up the parent hierarchy.
-    Path ownerConfigFolder = absolutePath;
+    Path ownerConfigFolder = startFolder;
 
     // Iterate over the parent code owner configurations.
     while (ownerConfigFolder != null) {
