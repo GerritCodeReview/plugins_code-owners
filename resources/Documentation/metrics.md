@@ -18,6 +18,8 @@ usage and performance of the code owners functionality.
   Latency for computing file statuses.
 * `compute_owned_paths`:
   Latency for computing the files in a change that are owned by a user.
+* `compute_patch_set_approvals`:
+  Latency for computing the approvals of the current patch set.
 * `extend_change_message_on_post_review`:
   Latency for extending the change message with the owned path when a code owner
   approval is applied.

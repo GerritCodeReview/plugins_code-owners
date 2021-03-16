@@ -928,14 +928,16 @@ public class CodeOwnerApprovalCheck {
   }
 
   private ImmutableList<PatchSetApproval> getCurrentPatchSetApprovals(ChangeNotes changeNotes) {
-    return ImmutableList.copyOf(
-        approvalsUtil.byPatchSet(
-            changeNotes,
-            changeNotes.getCurrentPatchSet().id(),
-            /** revWalk */
-            null,
-            /** repoConfig */
-            null));
+    try (Timer0.Context ctx = codeOwnerMetrics.computePatchSetApprovals.start()) {
+      return ImmutableList.copyOf(
+          approvalsUtil.byPatchSet(
+              changeNotes,
+              changeNotes.getCurrentPatchSet().id(),
+              /** revWalk */
+              null,
+              /** repoConfig */
+              null));
+    }
   }
 
   private ImmutableSet<Account.Id> filterOutAccount(

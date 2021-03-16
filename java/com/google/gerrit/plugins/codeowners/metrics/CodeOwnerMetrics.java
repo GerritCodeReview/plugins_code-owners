@@ -34,6 +34,7 @@ public class CodeOwnerMetrics {
   public final Timer0 computeFileStatus;
   public final Timer0 computeFileStatuses;
   public final Timer0 computeOwnedPaths;
+  public final Timer0 computePatchSetApprovals;
   public final Timer0 extendChangeMessageOnPostReview;
   public final Timer0 getAutoMerge;
   public final Timer0 prepareFileStatusComputation;
@@ -81,6 +82,10 @@ public class CodeOwnerMetrics {
         createLatencyTimer(
             "compute_owned_paths",
             "Latency for computing the files in a change that are owned by a user");
+    this.computePatchSetApprovals =
+        createLatencyTimer(
+            "compute_patch_set_approvals",
+            "Latency for computing the approvals of the current patch set");
     this.extendChangeMessageOnPostReview =
         createLatencyTimer(
             "extend_change_message_on_post_review",
