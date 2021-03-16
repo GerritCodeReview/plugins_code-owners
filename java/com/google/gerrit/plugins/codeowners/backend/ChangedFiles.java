@@ -14,26 +14,27 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
-import com.google.gerrit.entities.Patch;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.extensions.client.DiffPreferencesInfo.Whitespace;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.change.RevisionResource;
+import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.git.GitRepositoryManager;
-import com.google.gerrit.server.patch.PatchListCache;
-import com.google.gerrit.server.patch.PatchListKey;
+import com.google.gerrit.server.git.InMemoryInserter;
+import com.google.gerrit.server.git.MergeUtil;
+import com.google.gerrit.server.patch.AutoMerger;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
@@ -42,7 +43,10 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.merge.ThreeWayMergeStrategy;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
@@ -63,19 +67,24 @@ public class ChangedFiles {
 
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private final PatchListCache patchListCache;
+  private final Provider<AutoMerger> autoMergerProvider;
   private final CodeOwnerMetrics codeOwnerMetrics;
+  private final ThreeWayMergeStrategy mergeStrategy;
+  private final boolean saveAutoMergeCommits;
 
   @Inject
   public ChangedFiles(
+      @GerritServerConfig Config cfg,
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      PatchListCache patchListCache,
+      Provider<AutoMerger> autoMergerProvider,
       CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
-    this.patchListCache = patchListCache;
+    this.autoMergerProvider = autoMergerProvider;
     this.codeOwnerMetrics = codeOwnerMetrics;
+    this.mergeStrategy = MergeUtil.getMergeStrategy(cfg);
+    this.saveAutoMergeCommits = AutoMerger.cacheAutomerge(cfg);
   }
 
   /**
@@ -121,7 +130,7 @@ public class ChangedFiles {
 
   public ImmutableList<ChangedFile> compute(
       Project.NameKey project, Config repoConfig, RevWalk revWalk, RevCommit revCommit)
-      throws IOException, PatchListNotAvailableException {
+      throws IOException {
     return compute(
         project,
         repoConfig,
@@ -136,7 +145,7 @@ public class ChangedFiles {
       RevWalk revWalk,
       RevCommit revCommit,
       MergeCommitStrategy mergeCommitStrategy)
-      throws IOException, PatchListNotAvailableException {
+      throws IOException {
     requireNonNull(project, "project");
     requireNonNull(repoConfig, "repoConfig");
     requireNonNull(revWalk, "revWalk");
@@ -148,58 +157,47 @@ public class ChangedFiles {
 
     if (revCommit.getParentCount() > 1
         && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
-      return computeByComparingAgainstAutoMerge(project, revCommit);
+      RevCommit autoMergeCommit = getAutoMergeCommit(project, revCommit);
+      return compute(repoConfig, revWalk, revCommit, autoMergeCommit);
     }
 
-    return computeByComparingAgainstFirstParent(repoConfig, revWalk, revCommit);
+    RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
+    return compute(repoConfig, revWalk, revCommit, baseCommit);
   }
 
-  /**
-   * Computes the changed files by comparing the given merge commit against the auto merge.
-   *
-   * <p>Since computing the auto merge is expensive, we do not compute it and diff against it on our
-   * own, but rather ask the patch list cache for it.
-   *
-   * @param project the project that contains the merge commit
-   * @param mergeCommit the merge commit for which the changed files should be computed
-   * @return the changed files for the given merge commit
-   */
-  private ImmutableList<ChangedFile> computeByComparingAgainstAutoMerge(
-      Project.NameKey project, RevCommit mergeCommit) throws PatchListNotAvailableException {
-    checkState(
-        mergeCommit.getParentCount() > 1, "expected %s to be a merge commit", mergeCommit.name());
-
-    try (Timer0.Context ctx = codeOwnerMetrics.computeChangedFilesAgainstAutoMerge.start()) {
-      // for merge commits the default base is the auto merge commit
-      PatchListKey patchListKey =
-          PatchListKey.againstDefaultBase(mergeCommit, Whitespace.IGNORE_NONE);
-
-      return patchListCache.get(patchListKey, project).getPatches().stream()
-          .filter(
-              patchListEntry ->
-                  patchListEntry.getNewName() == null
-                      || !Patch.isMagic(patchListEntry.getNewName()))
-          .map(ChangedFile::create)
-          .collect(toImmutableList());
+  private RevCommit getAutoMergeCommit(Project.NameKey project, RevCommit mergeCommit)
+      throws IOException {
+    try (Timer0.Context ctx = codeOwnerMetrics.getAutoMerge.start();
+        Repository repository = repoManager.openRepository(project);
+        ObjectInserter inserter =
+            saveAutoMergeCommits
+                ? repository.newObjectInserter()
+                : new InMemoryInserter(repository);
+        ObjectReader reader = inserter.newReader();
+        RevWalk revWalk = new RevWalk(reader)) {
+      return autoMergerProvider
+          .get()
+          .merge(repository, revWalk, inserter, mergeCommit, mergeStrategy);
     }
   }
 
   /**
-   * Computes the changed files by comparing the given commit against its first parent.
+   * Computes the changed files by comparing the given commit against the given base commit.
    *
    * <p>The computation also works if the commit doesn't have any parent.
    *
    * @param repoConfig the repository configuration
    * @param revWalk the rev walk
-   * @param revCommit the commit for which the changed files should be computed
+   * @param commit the commit for which the changed files should be computed
+   * @param baseCommit the base commit against which the given commit should be compared, {@code
+   *     null} if the commit doesn't have any parent commit
    * @return the changed files for the given commit, sorted alphabetically by path
    */
-  private ImmutableList<ChangedFile> computeByComparingAgainstFirstParent(
-      Config repoConfig, RevWalk revWalk, RevCommit revCommit) throws IOException {
-    try (Timer0.Context ctx = codeOwnerMetrics.computeChangedFilesAgainstFirstParent.start()) {
-      RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
-      logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
-
+  private ImmutableList<ChangedFile> compute(
+      Config repoConfig, RevWalk revWalk, RevCommit commit, @Nullable RevCommit baseCommit)
+      throws IOException {
+    logger.atFine().log("baseCommit = %s", baseCommit != null ? baseCommit.name() : "n/a");
+    try (Timer0.Context ctx = codeOwnerMetrics.computeChangedFiles.start()) {
       // Detecting renames is expensive (since it requires Git to load and compare file contents of
       // added and deleted files) and can significantly increase the latency for changes that touch
       // large files. To avoid this latency we do not enable the rename detection on the
@@ -208,7 +206,7 @@ public class ChangedFiles {
       try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
         diffFormatter.setReader(revWalk.getObjectReader(), repoConfig);
         diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
-        List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, revCommit);
+        List<DiffEntry> diffEntries = diffFormatter.scan(baseCommit, commit);
         ImmutableList<ChangedFile> changedFiles =
             diffEntries.stream().map(ChangedFile::create).collect(toImmutableList());
         if (changedFiles.size() <= MAX_CHANGED_FILES_TO_LOG) {

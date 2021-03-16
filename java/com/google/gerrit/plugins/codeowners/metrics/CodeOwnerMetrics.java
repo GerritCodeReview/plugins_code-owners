@@ -30,12 +30,12 @@ import com.google.inject.Singleton;
 public class CodeOwnerMetrics {
   // latency metrics
   public final Timer0 addChangeMessageOnAddReviewer;
-  public final Timer0 computeChangedFilesAgainstAutoMerge;
-  public final Timer0 computeChangedFilesAgainstFirstParent;
+  public final Timer0 computeChangedFiles;
   public final Timer0 computeFileStatus;
   public final Timer0 computeFileStatuses;
   public final Timer0 computeOwnedPaths;
   public final Timer0 extendChangeMessageOnPostReview;
+  public final Timer0 getAutoMerge;
   public final Timer0 prepareFileStatusComputation;
   public final Timer0 prepareFileStatusComputationForAccount;
   public final Timer0 resolveCodeOwnerConfig;
@@ -68,14 +68,8 @@ public class CodeOwnerMetrics {
             "add_change_message_on_add_reviewer",
             "Latency for adding a change message with the owned path when a code owner is added as"
                 + " a reviewer");
-    this.computeChangedFilesAgainstAutoMerge =
-        createLatencyTimer(
-            "compute_changed_files_against_auto_merge",
-            "Latency for computing changed files against auto merge");
-    this.computeChangedFilesAgainstFirstParent =
-        createLatencyTimer(
-            "compute_changed_files_against_first_parent",
-            "Latency for computing changed files against first parent");
+    this.computeChangedFiles =
+        createLatencyTimer("compute_changed_files", "Latency for computing changed files");
     this.computeFileStatus =
         createLatencyTimer(
             "compute_file_status", "Latency for computing the file status of one file");
@@ -92,6 +86,9 @@ public class CodeOwnerMetrics {
             "extend_change_message_on_post_review",
             "Latency for extending the change message with the owned path when a code owner"
                 + " approval is applied");
+    this.getAutoMerge =
+        createLatencyTimer(
+            "get_auto_merge", "Latency for getting the auto merge commit of a merge commit");
     this.prepareFileStatusComputation =
         createLatencyTimer(
             "prepare_file_status_computation", "Latency for preparing the file status computation");

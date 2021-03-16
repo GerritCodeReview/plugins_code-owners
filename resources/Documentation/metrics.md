@@ -8,10 +8,8 @@ usage and performance of the code owners functionality.
 * `add_change_message_on_add_reviewer`:
   Latency for adding a change message with the owned path when a code owner is
   added as a reviewer.
-* `compute_changed_files_against_auto_merge`:
-  Latency for computing changed files against auto merge.
-* `compute_changed_files_against_first_parent`:
-  Latency for computing changed files against first parent.
+* `compute_changed_files`:
+  Latency for computing changed files.
 * `compute_file_status`:
   Latency for computing the file status for one file.
 * `compute_file_statuses`:
@@ -23,6 +21,8 @@ usage and performance of the code owners functionality.
 * `extend_change_message_on_post_review`:
   Latency for extending the change message with the owned path when a code owner
   approval is applied.
+* `get_auto_merge`:
+  Latency for getting the auto merge commit of a merge commit.
 * `prepare_file_status_computation`:
   Latency for preparing the file status computation.
 * `prepare_file_status_computation_for_account`:
