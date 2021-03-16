@@ -61,7 +61,6 @@ import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
 import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
-import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
@@ -341,11 +340,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
       // For merge commits, always do the comparison against the destination branch
       // (MergeCommitStrategy.ALL_CHANGED_FILES). Doing the comparison against the auto-merge
-      // (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION) is not possible because the auto-merge
-      // is loaded via the PatchListCache to which we cannot pass the rev walk which should be used
-      // to load the newly created merge commit and hence trying to load it from PatchListCache
-      // would fail with a missing object exception. This is why we use
-      // MergeCommitStrategy.ALL_CHANGED_FILES here even if
+      // (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION) is not possible because loading the
+      // auto-merge cannot reuse the rev walk that can see newly created merge commits and hence
+      // trying to get the auto merge would fail with a missing object exception. This is why we
+      // use MergeCommitStrategy.ALL_CHANGED_FILES here even if
       // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
       ImmutableList<ChangedFile> modifiedCodeOwnerConfigFiles =
           changedFiles
@@ -405,7 +403,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   "code-owners plugin configuration is invalid,"
                       + " cannot validate code owner config files",
                   ValidationMessage.Type.WARNING)));
-    } catch (IOException | PatchListNotAvailableException e) {
+    } catch (IOException e) {
       String errorMessage =
           String.format(
               "failed to validate code owner config files in revision %s"
