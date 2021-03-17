@@ -121,6 +121,24 @@
       "parentUuid": "22e34227_7ba2c3d9",
       "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c2a6f2dc_8620c641",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-03-17T12:04:21Z",
+      "side": 1,
+      "message": "Thanks a lot for the details!\n\none comment:\n\u003e we must use the provided RevWalk instance to lookup this commit, as any newly created RevWalk instance would not see the newly created commit yet and hence fail with MissingObjectException\n\nWhere do we reuse a RevWalk instance? I see l.125 of PS#2 is creating a new RevWalk instance.\nUpdate: You probably meant CodeOwnerConfigValidator reusing ChangedFiles. But the previous implementation of ChangedFiles used PatchListCache. Did it sometimes result in MissingObjectException?",
+      "parentUuid": "84e5c557_9da73d74",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
