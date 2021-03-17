@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5cda452d_72b83cd5",
+        "filename": "resources/Documentation/metrics.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-03-17T10:47:04Z",
+      "side": 0,
+      "message": "nit: You removed this metric in code. Should also be removed here.",
+      "range": {
+        "startLine": 13,
+        "startChar": 3,
+        "endLine": 13,
+        "endChar": 45
+      },
+      "revId": "b03becb79d5cc211ef1f70280dca69b62795abf8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
