@@ -139,6 +139,24 @@
       "parentUuid": "84e5c557_9da73d74",
       "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "87729bc4_53486258",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-17T12:51:36Z",
+      "side": 1,
+      "message": "\u003e Where do we reuse a RevWalk instance?\n\nMainly for the DiffFormatter in l. 207 [1].\n\nIt would be great if we could also reuse it for the AutoMerge creation, but that\u0027s not easily possible yet (we could pass in the RevWalk into AutoMerger, but it also needs a Repository instance which we don\u0027t have and I\u0027m not sure what happens if we pass in Repository + RevWalk, but the RevWalk was not created from that Repository instance).\n\n\u003e Update: You probably meant CodeOwnerConfigValidator reusing ChangedFiles.\n\nYes, using the given RevWalk instance is only relevant for calls that are done from CodeOwnerConfigValidator.\n\n\u003e But the previous implementation of ChangedFiles used PatchListCache. \n\nYes, but this code was not used when the call was done from CodeOwnerConfigValidator, see [2]. Otherwise we would see MissingObjectExceptions. \n\nThe same is true for the new code that creates the AutoMerge. It\u0027s also not used when the call comes from CodeOwnerConfigValidator and this is why it\u0027s okay to create a new RevWalk instance here. This is a mess and I would prefer if we could reuse the RevWalk instance here too, but as said above I don\u0027t have access to a matching Repository instance here (and Gerrit core also cannot provide it easily) :(\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/300212/2/java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java#207\n\n[2] https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java#342",
+      "parentUuid": "c2a6f2dc_8620c641",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
