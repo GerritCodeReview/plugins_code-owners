@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc1ebdd5_66b63e4f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-03-17T10:47:04Z",
+      "side": 1,
+      "message": "nit: \"Avoid using PatchListCache for computing changed files for auto-merge commits\"\n\nAgainst first parent are already not using PatchListCache",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "8c6f0ea8_2ccccc26",
@@ -14,6 +31,23 @@
       "writtenOn": "2021-03-17T09:50:26Z",
       "side": 1,
       "message": "Youssef, this is a domain where you have good context. Can you take a look?",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2946e361_b6522560",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-03-17T10:47:04Z",
+      "side": 1,
+      "message": "LGTM for the code added in this change. Left few comments.\n\nGeneral comment: the code added here is duplicating the logic we have in PatchListCache. In the new diff cache, rename detection is part of the diff cache key [1] (right now the score is static, but it\u0027s easy to expose more methods in the interface to request a specific rename score or disable).\n\nAlso code owners (at least in this change) only cares about old path, new path, change type. I could also add another field in new diff cache key to prune, e.g. computing rebase edits. These should make the computations much faster. Benefits would be:\n1) Not duplicating code.\n2) Benefiting from the results being cached, instead of recomputing diff entries with every request.\n\n[1] https://gerrit.googlesource.com/gerrit/+/36271eb7a4e4cf238480158f9b08383b5e038959/java/com/google/gerrit/server/patch/DiffOperationsImpl.java#245",
       "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
