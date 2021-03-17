@@ -20,6 +20,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "e73d80f7_295e977f",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-17T11:24:12Z",
+      "side": 1,
+      "message": "Thanks for the suggestion. I agree this is better.\n\nDone.",
+      "parentUuid": "cc1ebdd5_66b63e4f",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "8c6f0ea8_2ccccc26",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 1
@@ -48,6 +66,41 @@
       "writtenOn": "2021-03-17T10:47:04Z",
       "side": 1,
       "message": "LGTM for the code added in this change. Left few comments.\n\nGeneral comment: the code added here is duplicating the logic we have in PatchListCache. In the new diff cache, rename detection is part of the diff cache key [1] (right now the score is static, but it\u0027s easy to expose more methods in the interface to request a specific rename score or disable).\n\nAlso code owners (at least in this change) only cares about old path, new path, change type. I could also add another field in new diff cache key to prune, e.g. computing rebase edits. These should make the computations much faster. Benefits would be:\n1) Not duplicating code.\n2) Benefiting from the results being cached, instead of recomputing diff entries with every request.\n\n[1] https://gerrit.googlesource.com/gerrit/+/36271eb7a4e4cf238480158f9b08383b5e038959/java/com/google/gerrit/server/patch/DiffOperationsImpl.java#245",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6cd8476a_d5c76368",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-17T11:24:12Z",
+      "side": 1,
+      "message": "Youssef, thanks for your useful comments!!",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "22e34227_7ba2c3d9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-17T11:24:12Z",
+      "side": 1,
+      "message": "\u003e General comment: the code added here is duplicating the logic we have\n\u003e in PatchListCache.\n\nYes, I\u0027m aware of this and would like to get rid of it one day.\nThe problem is that for loading OWNERS files from newly created commits during the commit validation (e.g. a commit created via the CreateChange REST endpoint) we must use the provided RevWalk instance to lookup this commit, as any newly created RevWalk instance would not see the newly created commit yet and hence fail with MissingObjectException. So as long as we cannot provide this RevWalk instance to the cache loader, we need to have this duplicated code here.\n\n\u003e In the new diff cache, rename detection is part of\n\u003e the diff cache key [1]\n\nAh, that\u0027s cool!\n\n\u003e (right now the score is static, but it\u0027s easy to expose more methods in the \n\u003e interface to request a specific rename score or disable).\n\nThis sounds like a useful addition to me.\n\n\u003e Also code owners (at least in this change) only cares about old path,\n\u003e new path, change type.\n\nThat\u0027s correct.\n\n\u003e I could also add another field in new diff cache key to prune,\n\u003e e.g. computing rebase edits. These should make the computations much faster.\n\nSounds useful to me too.\n\n\u003e Benefits would be:\n\u003e 1) Not duplicating code.\n\nSee above, for this we still need to solve the problem with passing in the RevWalk instance. But I would love to drop this code. Actually it was always meant to be temporary until the new cache is there :)\n\n\u003e 2) Benefiting from the results being cached, instead of recomputing diff\n\u003e entries with every request.\n\n+1, having caching would be great (but of course the code-owners plugin didn\u0027t want to implement it on its own)\n\nSo to summarise, any changes that we can make to the new diff cache so that we could be use it here, would be more than welcome. But for now I think we can\u0027t use it yet.",
+      "parentUuid": "2946e361_b6522560",
       "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
