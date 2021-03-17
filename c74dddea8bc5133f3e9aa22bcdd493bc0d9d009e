@@ -103,6 +103,24 @@
       "parentUuid": "2946e361_b6522560",
       "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "84e5c557_9da73d74",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-17T11:31:08Z",
+      "side": 1,
+      "message": "\u003e Also code owners (at least in this change) only cares about old path,\n\u003e new path, change type.\n\u003e\n\u003e That\u0027s correct.\n\nIn particular, we don\u0027t need any file diffs here. The code-owners plugin only wants to know which files have been touched in the change.",
+      "parentUuid": "22e34227_7ba2c3d9",
+      "revId": "c74dddea8bc5133f3e9aa22bcdd493bc0d9d009e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
