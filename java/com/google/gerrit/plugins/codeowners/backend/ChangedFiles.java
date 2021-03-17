@@ -70,7 +70,6 @@ public class ChangedFiles {
   private final Provider<AutoMerger> autoMergerProvider;
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final ThreeWayMergeStrategy mergeStrategy;
-  private final boolean saveAutoMergeCommits;
 
   @Inject
   public ChangedFiles(
@@ -84,7 +83,6 @@ public class ChangedFiles {
     this.autoMergerProvider = autoMergerProvider;
     this.codeOwnerMetrics = codeOwnerMetrics;
     this.mergeStrategy = MergeUtil.getMergeStrategy(cfg);
-    this.saveAutoMergeCommits = AutoMerger.cacheAutomerge(cfg);
   }
 
   /**
@@ -169,10 +167,7 @@ public class ChangedFiles {
       throws IOException {
     try (Timer0.Context ctx = codeOwnerMetrics.getAutoMerge.start();
         Repository repository = repoManager.openRepository(project);
-        ObjectInserter inserter =
-            saveAutoMergeCommits
-                ? repository.newObjectInserter()
-                : new InMemoryInserter(repository);
+        ObjectInserter inserter = new InMemoryInserter(repository);
         ObjectReader reader = inserter.newReader();
         RevWalk revWalk = new RevWalk(reader)) {
       return autoMergerProvider
