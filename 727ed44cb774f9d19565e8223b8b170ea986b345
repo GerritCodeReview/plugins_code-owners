@@ -3,6 +3,23 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "639c0d3c_1ee41815",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-03-17T12:09:47Z",
+      "side": 1,
+      "message": "nit [optional]: shorten a bit to fit in one line.\n\n\"Avoid computing changed files for automerge commits using PatchListCache\"",
+      "revId": "727ed44cb774f9d19565e8223b8b170ea986b345",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "acbde385_0449c163",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 2
