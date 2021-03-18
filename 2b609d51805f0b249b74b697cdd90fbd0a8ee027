@@ -16,6 +16,24 @@
       "message": "Let\u0027s fabricate the AutoMerge commits synchronously on the git push path instead which will prevent the situation where we later on are missing AutoMerge commits.\n\nJust disabling the writes might lead to issues later on because AutoMerge commits are basically a cache and we are turning that off when we turn off writes.",
       "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "993176f7_5709187d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-18T08:05:19Z",
+      "side": 1,
+      "message": "\u003e Let\u0027s fabricate the AutoMerge commits synchronously on the git push path instead \u003e which will prevent the situation where we later on are missing AutoMerge commits.\nThat should work too. But if it\u0027s done then this change should be fine too. Then it always finds the the auto-merge commit and never needs to save auto-merge commit, hence it doesn\u0027t matter what we would do here in case an auto-merge would need to be created and saved.\n\n\u003e Just disabling the writes might lead to issues later on because AutoMerge\n\u003e commits are basically a cache and we are turning that off when we turn off\n\u003e writes.\n\nI can\u0027t see any issue here? Do you have an example?\nIf the auto-merge was previously created, we read it. If it didn\u0027t exist we compute as before, but just don\u0027t write it back to Git. The code-owners plugin is only interested in which files have been touched, which doesn\u0027t require persisting the auto-merge commit. And if the algorithm changes it likely only affects the conflict markers in the files, but not which files are conflicting. And even if it does it\u0027s still no issue for the code-owners plugin.",
+      "parentUuid": "c2fc80e3_72748e14",
+      "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
