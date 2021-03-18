@@ -34,6 +34,24 @@
       "parentUuid": "c2fc80e3_72748e14",
       "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c3c4e846_f07feb2a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-03-18T09:32:47Z",
+      "side": 1,
+      "message": "As discussed in chat it would be nice if we had the promise that we always compute the merge upon push because it spares doing expensive in memory merges. Iebb1a5a is doing that. We can merge this change regardless.",
+      "parentUuid": "993176f7_5709187d",
+      "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
