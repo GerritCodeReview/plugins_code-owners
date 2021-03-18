@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c2fc80e3_72748e14",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-03-18T07:57:27Z",
+      "side": 1,
+      "message": "Let\u0027s fabricate the AutoMerge commits synchronously on the git push path instead which will prevent the situation where we later on are missing AutoMerge commits.\n\nJust disabling the writes might lead to issues later on because AutoMerge commits are basically a cache and we are turning that off when we turn off writes.",
+      "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
