@@ -52,6 +52,24 @@
       "parentUuid": "993176f7_5709187d",
       "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9c409545_9f8f87d6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-03-18T09:40:23Z",
+      "side": 1,
+      "message": "Thanks, Iebb1a5a looks great!\n\nI think this change also still makes sense as we don\u0027t plan to backfill auto-merge commits for old merge changes.",
+      "parentUuid": "c3c4e846_f07feb2a",
+      "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
