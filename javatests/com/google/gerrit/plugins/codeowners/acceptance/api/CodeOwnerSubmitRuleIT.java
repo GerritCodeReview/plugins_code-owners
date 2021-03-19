@@ -20,6 +20,8 @@ import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfo
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
@@ -296,5 +298,44 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("destination branch \"refs/heads/%s\" not found.", branchName));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.exemptedUser", value = "exempted-user@example.com")
+  public void changeIsSubmittableIfUserIsExcempted() throws Exception {
+    TestAccount exemptedUser =
+        accountCreator.create(
+            "exemptedUser", "exempted-user@example.com", "Exempted User", /* displayName= */ null);
+
+    PushOneCommit.Result r = createChange(exemptedUser, "Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+
+    // Apply Code-Review+2 by a non-code-owner to satisfy the MaxWithBlock function of the
+    // Code-Review label.
+    approve(changeId);
+
+    ChangeInfo changeInfo =
+        gApi.changes()
+            .id(changeId)
+            .get(
+                ListChangesOption.SUBMITTABLE,
+                ListChangesOption.ALL_REVISIONS,
+                ListChangesOption.CURRENT_ACTIONS);
+    assertThat(changeInfo.submittable).isTrue();
+
+    // Check that the submit button is enabled.
+    assertThat(changeInfo.revisions.get(r.getCommit().getName()).actions.get("submit").enabled)
+        .isTrue();
+
+    // Check the submit requirement.
+    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+        assertThatCollection(changeInfo.requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
+
+    // Submit the change.
+    gApi.changes().id(changeId).current().submit();
+    assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 }

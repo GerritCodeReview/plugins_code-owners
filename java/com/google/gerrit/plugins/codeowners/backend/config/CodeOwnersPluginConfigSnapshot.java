@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -34,10 +35,7 @@ import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
-import com.google.gerrit.server.account.AccountResolver;
-import com.google.gerrit.server.account.AccountResolver.UnresolvableAccountException;
-import com.google.gerrit.server.account.AccountState;
-import com.google.gerrit.server.account.externalids.ExternalId;
+import com.google.gerrit.server.account.Emails;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.project.ProjectCache;
@@ -48,7 +46,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Config;
 
 /** Snapshot of the code-owners plugin configuration for one project. */
@@ -62,7 +59,7 @@ public class CodeOwnersPluginConfigSnapshot {
   private final String pluginName;
   private final PluginConfigFactory pluginConfigFactory;
   private final ProjectCache projectCache;
-  private final AccountResolver accountResolver;
+  private final Emails emails;
   private final BackendConfig backendConfig;
   private final GeneralConfig generalConfig;
   private final OverrideApprovalConfig overrideApprovalConfig;
@@ -78,7 +75,7 @@ public class CodeOwnersPluginConfigSnapshot {
       @PluginName String pluginName,
       PluginConfigFactory pluginConfigFactory,
       ProjectCache projectCache,
-      AccountResolver accountResolver,
+      Emails emails,
       BackendConfig backendConfig,
       GeneralConfig generalConfig,
       OverrideApprovalConfig overrideApprovalConfig,
@@ -88,7 +85,7 @@ public class CodeOwnersPluginConfigSnapshot {
     this.pluginName = pluginName;
     this.pluginConfigFactory = pluginConfigFactory;
     this.projectCache = projectCache;
-    this.accountResolver = accountResolver;
+    this.emails = emails;
     this.backendConfig = backendConfig;
     this.generalConfig = generalConfig;
     this.overrideApprovalConfig = overrideApprovalConfig;
@@ -225,36 +222,27 @@ public class CodeOwnersPluginConfigSnapshot {
   }
 
   private ImmutableSet<Account.Id> lookupExemptedAccounts() {
-    ImmutableSet.Builder<Account.Id> exemptedAccounts = ImmutableSet.builder();
-    for (String exemptedUser : generalConfig.getExemptedUsers(pluginConfig)) {
-      try {
-        AccountState accountState = accountResolver.resolve(exemptedUser).asUnique();
+    ImmutableSet<String> exemptedUsers = generalConfig.getExemptedUsers(pluginConfig);
 
-        // We only support specifying exempted users by email, if another account identifier (full
-        // name, account ID, etc.) was used in the config we want to ignore it. Hence after looking
-        // up the account we check that the identifier from the config was indeed an email of the
-        // account.
-        if (!ExternalId.getEmails(accountState.externalIds())
-            .anyMatch(email -> email.equals(exemptedUser))) {
-          logger.atWarning().log(
-              "Ignoring exempted user %s for project %s: not an email", exemptedUser, projectName);
-          continue;
-        }
+    try {
+      ImmutableSetMultimap<String, Account.Id> exemptedAccounts =
+          emails.getAccountsFor(exemptedUsers.toArray(new String[0]));
 
-        exemptedAccounts.add(accountState.account().id());
-      } catch (UnresolvableAccountException e) {
-        logger.atWarning().log(
-            "Ignoring exempted user %s for project %s: %s",
-            exemptedUser, projectName, e.getMessage());
-      } catch (IOException | ConfigInvalidException e) {
-        throw new CodeOwnersInternalServerErrorException(
-            String.format(
-                "Failed to resolve exempted user %s on project %s", exemptedUser, projectName),
-            e);
-      }
+      exemptedUsers.stream()
+          .filter(exemptedUser -> !exemptedAccounts.containsKey(exemptedUser))
+          .forEach(
+              exemptedUser ->
+                  logger.atWarning().log(
+                      "Ignoring exempted user %s for project %s: not found",
+                      exemptedUser, projectName));
+
+      return ImmutableSet.copyOf(exemptedAccounts.values());
+    } catch (IOException e) {
+      throw new CodeOwnersInternalServerErrorException(
+          String.format(
+              "Failed to resolve exempted users %s on project %s", exemptedUsers, projectName),
+          e);
     }
-
-    return exemptedAccounts.build();
   }
 
   /** Gets the override info URL that is configured. */
