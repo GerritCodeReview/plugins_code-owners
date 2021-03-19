@@ -109,7 +109,7 @@ class CodeOwnerApi {
   listOwnersForPath(changeId, path) {
     return this.restApi.get(
         `/changes/${changeId}/revisions/current/code_owners` +
-        `/${encodeURIComponent(path)}?limit=5&o=DETAILS&resolve-all-users=true`
+        `/${encodeURIComponent(path)}?limit=5&o=DETAILS`
     );
   }
 
@@ -319,11 +319,7 @@ export class OwnersFetcher {
     try {
       const owners = await this.codeOwnerApi.listOwnersForPath(changeId,
           filePath);
-      // In the upcoming backend changes, the api will return an object instead
-      // of array. While this transition is in progress, the frontend supports
-      // both API - the old one and the new one.
-      this._fetchedOwners.get(filePath).owners = new Set(
-          owners instanceof Array ? owners : owners.code_owners);
+      this._fetchedOwners.get(filePath).owners = owners;
     } catch (e) {
       this._fetchedOwners.get(filePath).error = e;
     }
@@ -566,14 +562,11 @@ export class CodeOwnerService {
       if (!file.info.owners) {
         continue;
       }
-      const owners = [...file.info.owners];
-      const ownersKey = owners
-          .map(owner => owner.account._account_id)
-          .sort()
-          .join(',');
+
+      const ownersKey = this._getOwnersGroupKey(file.info.owners);
       ownersFilesMap.set(
           ownersKey,
-          ownersFilesMap.get(ownersKey) || {files: [], owners}
+          ownersFilesMap.get(ownersKey) || {files: [], owners: file.info.owners}
       );
       ownersFilesMap.get(ownersKey).files.push(fileInfo);
     }
@@ -598,6 +591,17 @@ export class CodeOwnerService {
     }
 
     return groupedItems;
+  }
+
+  _getOwnersGroupKey(owners) {
+    if (owners.owned_by_all_users) {
+      return '__owned_by_all_users__';
+    }
+    const code_owners = owners.code_owners;
+    return code_owners
+        .map(owner => owner.account._account_id)
+        .sort()
+        .join(',');
   }
 
   getGroupName(files) {
