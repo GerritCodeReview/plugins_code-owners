@@ -174,37 +174,47 @@ public class CodeOwnerApprovalCheck {
     logger.atFine().log(
         "checking if change %d in project %s is submittable",
         changeNotes.getChangeId().get(), changeNotes.getProjectName());
-    boolean isSubmittable =
-        !getFileStatuses(changeNotes)
-            .anyMatch(
-                fileStatus ->
-                    (fileStatus.newPathStatus().isPresent()
-                            && fileStatus.newPathStatus().get().status()
-                                != CodeOwnerStatus.APPROVED)
-                        || (fileStatus.oldPathStatus().isPresent()
-                            && fileStatus.oldPathStatus().get().status()
-                                != CodeOwnerStatus.APPROVED));
-    logger.atFine().log(
-        "change %d in project %s %s submittable",
-        changeNotes.getChangeId().get(),
-        changeNotes.getProjectName(),
-        isSubmittable ? "is" : "is not");
-    return isSubmittable;
+    CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
+    try {
+      boolean isSubmittable =
+          !getFileStatuses(codeOwnerConfigHierarchy, changeNotes)
+              .anyMatch(
+                  fileStatus ->
+                      (fileStatus.newPathStatus().isPresent()
+                              && fileStatus.newPathStatus().get().status()
+                                  != CodeOwnerStatus.APPROVED)
+                          || (fileStatus.oldPathStatus().isPresent()
+                              && fileStatus.oldPathStatus().get().status()
+                                  != CodeOwnerStatus.APPROVED));
+      logger.atFine().log(
+          "change %d in project %s %s submittable",
+          changeNotes.getChangeId().get(),
+          changeNotes.getProjectName(),
+          isSubmittable ? "is" : "is not");
+      return isSubmittable;
+    } finally {
+      codeOwnerMetrics.codeOwnerConfigBackendReadsPerChange.record(
+          codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getBackendReadCount());
+      codeOwnerMetrics.codeOwnerConfigCacheReadsPerChange.record(
+          codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getCacheReadCount());
+    }
   }
 
   /**
    * Gets the code owner statuses for all files/paths that were changed in the current revision of
    * the given change as a set.
    *
-   * @see #getFileStatuses(ChangeNotes)
+   * @see #getFileStatuses(CodeOwnerConfigHierarchy, ChangeNotes)
    */
   public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(ChangeNotes changeNotes)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
+    requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
       logger.atFine().log(
           "compute file statuses (project = %s, change = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get());
-      return getFileStatuses(changeNotes).collect(toImmutableSet());
+      return getFileStatuses(codeOwnerConfigHierarchyProvider.get(), changeNotes)
+          .collect(toImmutableSet());
     }
   }
 
@@ -231,10 +241,13 @@ public class CodeOwnerApprovalCheck {
    *       approvals that were present on an old revision) would only confuse users
    * </ul>
    *
+   * @param codeOwnerConfigHierarchy {@link CodeOwnerConfigHierarchy} instance that should be used
+   *     to iterate over code owner config hierarchies
    * @param changeNotes the notes of the change for which the current code owner statuses should be
    *     returned
    */
-  public Stream<FileCodeOwnerStatus> getFileStatuses(ChangeNotes changeNotes)
+  private Stream<FileCodeOwnerStatus> getFileStatuses(
+      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy, ChangeNotes changeNotes)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.prepareFileStatusComputation.start()) {
@@ -307,31 +320,23 @@ public class CodeOwnerApprovalCheck {
 
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
 
-      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
-      try {
-        return changedFiles
-            .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
-            .stream()
-            .map(
-                changedFile ->
-                    getFileStatus(
-                        codeOwnerConfigHierarchy,
-                        branch,
-                        revision,
-                        globalCodeOwners,
-                        enableImplicitApprovalFromUploader,
-                        patchSetUploader,
-                        reviewerAccountIds,
-                        approverAccountIds,
-                        fallbackCodeOwners,
-                        hasOverride,
-                        changedFile));
-      } finally {
-        codeOwnerMetrics.codeOwnerConfigBackendReadsPerChange.record(
-            codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getBackendReadCount());
-        codeOwnerMetrics.codeOwnerConfigCacheReadsPerChange.record(
-            codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getCacheReadCount());
-      }
+      return changedFiles
+          .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
+          .stream()
+          .map(
+              changedFile ->
+                  getFileStatus(
+                      codeOwnerConfigHierarchy,
+                      branch,
+                      revision,
+                      globalCodeOwners,
+                      enableImplicitApprovalFromUploader,
+                      patchSetUploader,
+                      reviewerAccountIds,
+                      approverAccountIds,
+                      fallbackCodeOwners,
+                      hasOverride,
+                      changedFile));
     }
   }
 
