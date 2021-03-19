@@ -165,11 +165,19 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           flex: 1;
         }
         .fetch-error-content,
+        .owned-by-all-users-content,
         .no-owners-content {
           line-height: 26px;
           flex: 1;
           padding-left: var(--spacing-m);
         }
+        
+        .owned-by-all-users-content iron-icon {
+          width: 16px;
+          height: 16px;
+          padding-top: 5px;
+        }
+        
         .fetch-error-content {
           color: var(--error-text-color);
         }
@@ -179,6 +187,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
         .no-owners-content a iron-icon {
           width: 16px;
           height: 16px;
+          padding-top: 5px;
         }
         gr-account-label {
           display: inline-block;
@@ -267,7 +276,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
               </div>
             </template>
             <template is="dom-if" if="[[!suggestion.error]]">
-              <template is="dom-if" if="[[!suggestion.owners.length]]">
+              <template is="dom-if" if="[[!_areOwnersFound(suggestion.owners)]]">
                 <div class="no-owners-content">
                   <span>Not found</span>
                   <a on-click="_reportDocClick" href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md#no-code-owners-found" target="_blank">
@@ -275,22 +284,30 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
                   </a>
                 </div>
               </template>
-              <ul class="suggested-owners">
-                <template
-                  is="dom-repeat"
-                  items="[[suggestion.owners]]"
-                  as="owner"
-                  index-as="ownerIndex"
-                >
-                  <gr-account-label
-                    data-suggestion-index$="[[suggestionIndex]]"
-                    data-owner-index$="[[ownerIndex]]"
-                    account="[[owner.account]]"
-                    selected$="[[isSelected(owner)]]"
-                    on-click="toggleAccount">
-                  </gr-account-label>
-                </template>
-              </ul>
+              <template is="dom-if" if="[[suggestion.owners.owned_by_all_users]]">
+                <div class="owned-by-all-users-content">
+                  <iron-icon icon="gr-icons:info" ></iron-icon>
+                  <span>[[_getOwnedByAllUsersContent(isLoading, suggestedOwners)]]</span>
+                </div>
+              </template>
+              <template is="dom-if" if="[[!suggestion.owners.owned_by_all_users]]">
+                <ul class="suggested-owners">
+                  <template
+                    is="dom-repeat"
+                    items="[[suggestion.owners.code_owners]]"
+                    as="owner"
+                    index-as="ownerIndex"
+                  >
+                    <gr-account-label
+                      data-suggestion-index$="[[suggestionIndex]]"
+                      data-owner-index$="[[ownerIndex]]"
+                      account="[[owner.account]]"
+                      selected$="[[isSelected(owner)]]"
+                      on-click="toggleAccount">
+                    </gr-account-label>
+                  </template>
+                </ul>
+              </template>
             </template>
           </li>
         </template>
@@ -394,7 +411,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     const reportDetails = suggestions.reduce((details, cur) => {
       details.totalGroups++;
       details.stats.push([cur.files.length,
-        cur.owners ? cur.owners.length : 0]);
+        cur.owners?.code_owners ? cur.owners.code_owners.length : 0]);
       return details;
     }, {totalGroups: 0, stats: []});
     this.reporting.reportLifeCycle(
@@ -407,9 +424,16 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
 
   _updateSuggestions(suggestions) {
     // update group names and files, no modification on owners or error
-    this.suggestedOwners = suggestions.map(suggestion => {
+    const suggestedOwners = suggestions.map(suggestion => {
       return this.formatSuggestionInfo(suggestion);
     });
+    // move owned_by_all_users to the bottom:
+    const index = suggestedOwners
+        .findIndex((suggestion) => suggestion.owners.owned_by_all_users);
+    if(index >= 0) {
+      suggestedOwners.push(suggestedOwners.splice(index, 1)[0]);
+    }
+    this.suggestedOwners = suggestedOwners;
   }
 
   _onReviewerChanged(reviewers) {
@@ -421,7 +445,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     const res = {};
     res.groupName = suggestion.groupName;
     res.files = suggestion.files.slice();
-    res.owners = (suggestion.owners || []).map(owner => {
+    const codeOwners = (suggestion.owners.code_owners || []).map(owner => {
       const updatedOwner = {...owner};
       const reviewers = this.change.reviewers.REVIEWER;
       if (
@@ -432,6 +456,12 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
       }
       return updatedOwner;
     });
+    res.owners = {
+      owned_by_all_users: !!suggestion.owners.owned_by_all_users,
+      code_owners: codeOwners,
+    }
+
+
     res.error = suggestion.error;
     return res;
   }
@@ -467,7 +497,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
   toggleAccount(e) {
     const grAccountLabel = e.currentTarget;
     const owner = this.suggestedOwners[grAccountLabel.dataset.suggestionIndex]
-        .owners[grAccountLabel.dataset.ownerIndex];
+        .owners.code_owners[grAccountLabel.dataset.ownerIndex];
     if (this.isSelected(owner)) {
       this.removeAccount(owner);
     } else {
@@ -480,13 +510,13 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     // update all occurences
     this.suggestedOwners.forEach((suggestion, sId) => {
       let hasSelected = false;
-      suggestion.owners.forEach((owner, oId) => {
+      suggestion.owners.code_owners.forEach((owner, oId) => {
         if (
           accounts.some(account => account._account_id
               === owner.account._account_id)
         ) {
           this.set(
-              ['suggestedOwners', sId, 'owners', oId],
+              ['suggestedOwners', sId, 'owners', 'code_owners', oId],
               {...owner,
                 selected: true,
               }
@@ -494,11 +524,14 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           hasSelected = true;
         } else {
           this.set(
-              ['suggestedOwners', sId, 'owners', oId],
+              ['suggestedOwners', sId, 'owners', 'code_owners', oId],
               {...owner, selected: false}
           );
         }
       });
+      if (accounts.length > 0 && suggestion.owners.owned_by_all_users) {
+        hasSelected = true;
+      }
       this.set(['suggestedOwners', sId, 'hasSelected'], hasSelected);
     });
   }
@@ -510,6 +543,21 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
   _reportDocClick() {
     this.reporting.reportInteraction('code-owners-doc-click',
         {section: 'no owners found'});
+  }
+
+  _areOwnersFound(owners) {
+    return owners.code_owners.length > 0 || !!owners.owned_by_all_users;
+  }
+
+  _getOwnedByAllUsersContent(isLoading, suggestedOwners) {
+    if (isLoading) {
+      return 'Any user can approve';
+    }
+    // If all users own all the files in the change suggestedOwners.length === 1
+    // (suggestedOwners - collection of owners groupbed by owners)
+    return suggestedOwners && suggestedOwners.length === 1 ?
+      'Any user can approve. Please select a user manually' :
+      'Any user from the other files can approve';
   }
 }
 
