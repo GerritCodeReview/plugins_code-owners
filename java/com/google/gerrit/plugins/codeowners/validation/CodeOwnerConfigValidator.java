@@ -833,32 +833,38 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevWalk revWalk,
       Path codeOwnerConfigFilePath,
       CodeOwnerConfig codeOwnerConfig) {
-    return Streams.concat(
-            codeOwnerConfig.imports().stream()
-                .map(
-                    codeOwnerConfigReference ->
-                        validateCodeOwnerConfigReference(
-                            branchNameKey,
-                            revWalk,
-                            codeOwnerConfigFilePath,
-                            codeOwnerConfig.key(),
-                            codeOwnerConfig.revision(),
-                            CodeOwnerConfigImportType.GLOBAL,
-                            codeOwnerConfigReference)),
-            codeOwnerConfig.codeOwnerSets().stream()
-                .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
-                .map(
-                    codeOwnerConfigReference ->
-                        validateCodeOwnerConfigReference(
-                            branchNameKey,
-                            revWalk,
-                            codeOwnerConfigFilePath,
-                            codeOwnerConfig.key(),
-                            codeOwnerConfig.revision(),
-                            CodeOwnerConfigImportType.PER_FILE,
-                            codeOwnerConfigReference)))
-        .filter(Optional::isPresent)
-        .map(Optional::get);
+    try {
+      RevCommit codeOwnerConfigRevision = revWalk.parseCommit(codeOwnerConfig.revision());
+      return Streams.concat(
+              codeOwnerConfig.imports().stream()
+                  .map(
+                      codeOwnerConfigReference ->
+                          validateCodeOwnerConfigReference(
+                              branchNameKey,
+                              revWalk,
+                              codeOwnerConfigFilePath,
+                              codeOwnerConfig.key(),
+                              codeOwnerConfigRevision,
+                              CodeOwnerConfigImportType.GLOBAL,
+                              codeOwnerConfigReference)),
+              codeOwnerConfig.codeOwnerSets().stream()
+                  .flatMap(codeOwnerSet -> codeOwnerSet.imports().stream())
+                  .map(
+                      codeOwnerConfigReference ->
+                          validateCodeOwnerConfigReference(
+                              branchNameKey,
+                              revWalk,
+                              codeOwnerConfigFilePath,
+                              codeOwnerConfig.key(),
+                              codeOwnerConfigRevision,
+                              CodeOwnerConfigImportType.PER_FILE,
+                              codeOwnerConfigReference)))
+          .filter(Optional::isPresent)
+          .map(Optional::get);
+    } catch (IOException e) {
+      throw new CodeOwnersInternalServerErrorException(
+          String.format("Failed to validate imports for %s in ", codeOwnerConfig.key()), e);
+    }
   }
 
   /**
@@ -881,7 +887,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevWalk revWalk,
       Path codeOwnerConfigFilePath,
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
-      ObjectId codeOwnerConfigRevision,
+      RevCommit codeOwnerConfigRevision,
       CodeOwnerConfigImportType importType,
       CodeOwnerConfigReference codeOwnerConfigReference) {
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
@@ -902,16 +908,20 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // that uploaders cannot probe for the existence of projects (e.g. deduce from the error
       // message whether a project exists)
       return nonResolvableImport(
+          codeOwnerConfigRevision,
           branchNameKey,
           importType,
+          codeOwnerConfigReference,
           codeOwnerConfigFilePath,
           String.format("project '%s' not found", keyOfImportedCodeOwnerConfig.project().get()));
     }
 
     if (!projectState.get().statePermitsRead()) {
       return nonResolvableImport(
+          codeOwnerConfigRevision,
           branchNameKey,
           importType,
+          codeOwnerConfigReference,
           codeOwnerConfigFilePath,
           String.format(
               "project '%s' has state '%s' that doesn't permit read",
@@ -927,8 +937,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // that uploaders cannot probe for the existence of branches (e.g. deduce from the error
       // message whether a branch exists)
       return nonResolvableImport(
+          codeOwnerConfigRevision,
           branchNameKey,
           importType,
+          codeOwnerConfigReference,
           codeOwnerConfigFilePath,
           String.format(
               "branch '%s' not found in project '%s'",
@@ -943,8 +955,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     if (!codeOwnerBackend.isCodeOwnerConfigFile(
         keyOfImportedCodeOwnerConfig.project(), codeOwnerConfigReference.fileName())) {
       return nonResolvableImport(
+          codeOwnerConfigRevision,
           branchNameKey,
           importType,
+          codeOwnerConfigReference,
           codeOwnerConfigFilePath,
           String.format(
               "'%s' is not a code owner config file", codeOwnerConfigReference.filePath()));
@@ -961,8 +975,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               : codeOwnerBackend.getCodeOwnerConfig(keyOfImportedCodeOwnerConfig, revision.get());
       if (!importedCodeOwnerConfig.isPresent()) {
         return nonResolvableImport(
+            codeOwnerConfigRevision,
             branchNameKey,
             importType,
+            codeOwnerConfigReference,
             codeOwnerConfigFilePath,
             String.format(
                 "'%s' does not exist (project = %s, branch = %s, revision = %s)",
@@ -975,8 +991,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       if (getInvalidConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
         // The imported code owner config is non-parseable.
         return nonResolvableImport(
+            codeOwnerConfigRevision,
             branchNameKey,
             importType,
+            codeOwnerConfigReference,
             codeOwnerConfigFilePath,
             String.format(
                 "'%s' is not parseable (project = %s, branch = %s)",
@@ -1057,19 +1075,54 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   }
 
   private Optional<CommitValidationMessage> nonResolvableImport(
+      RevCommit codeOwnerConfigRevision,
       BranchNameKey branchNameKey,
       CodeOwnerConfigImportType importType,
+      CodeOwnerConfigReference codeOwnerConfigReference,
       Path codeOwnerConfigFilePath,
       String message) {
-    return nonResolvableImport(
-        importType,
-        codeOwnerConfigFilePath,
-        message,
-        codeOwnersPluginConfiguration
-                .getProjectConfig(branchNameKey.project())
-                .rejectNonResolvableImports(branchNameKey.branch())
-            ? ValidationMessage.Type.ERROR
-            : ValidationMessage.Type.WARNING);
+    ValidationMessage.Type validationMessageType;
+    if (codeOwnerConfigRevision.getParentCount() > 1
+        && !codeOwnerConfigReference.branch().isPresent()
+        && codeOwnerConfigReference.project().isPresent()
+        && !codeOwnerConfigReference.project().get().equals(branchNameKey.project())) {
+      // For merge commits, imports from other projects, that implicitly assume the same branch as
+      // the importing code owner config, should not be rejected if they cannot be resolved. Hence
+      // issues with them are always reported as warnings (rather than errors which would cause a
+      // rejection).
+      //
+      // We do not reject such non-resolvable imports because that can require landing merge
+      // commits in a certain order or even make the landing of merge commits impossible.
+      //
+      // Example 1:
+      // 1. project A adds foo/OWNERS
+      // 2. project B imports A:foo/OWNERS
+      // => If these changes should be merged into another branch (e.g. a release branch) the
+      // validation of the code owner config files only succeeds if the merges are done in the
+      // correct order (1. do merge for project A, 2. do merge for project B). If the merges are
+      // done in the opposite order (1. do merge for project B, 2. do merge for project A) the code
+      // owner config file validation for the merge in project B would fail since A:foo/OWNERS
+      // doesn't exist in the target branch yet.
+      //
+      // Example 2:
+      // 1. project A adds foo/OWNERS
+      // 2. project B imports A:foo/OWNERS
+      // 3. project B adds bar/OWNERS
+      // 4. project A imports B:bar/OWNERS
+      // => If the merge for project A is done first the code owner config file validation would
+      // fail because B:bar/OWNERS doesn't exist yet. If the merge for project B is done first the
+      // code owner config file validation would fail because A:foo/OWNERS doesn't exist yet.
+      validationMessageType = ValidationMessage.Type.WARNING;
+    } else {
+      validationMessageType =
+          codeOwnersPluginConfiguration
+                  .getProjectConfig(branchNameKey.project())
+                  .rejectNonResolvableImports(branchNameKey.branch())
+              ? ValidationMessage.Type.ERROR
+              : ValidationMessage.Type.WARNING;
+    }
+
+    return nonResolvableImport(importType, codeOwnerConfigFilePath, message, validationMessageType);
   }
 
   private Optional<CommitValidationMessage> nonResolvableImport(

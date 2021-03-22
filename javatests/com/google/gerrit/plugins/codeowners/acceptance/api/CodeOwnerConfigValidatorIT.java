@@ -20,6 +20,7 @@ import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.b
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.PushOneCommit;
@@ -32,6 +33,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.Project.NameKey;
+import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
@@ -43,6 +45,7 @@ import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
@@ -67,6 +70,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
@@ -1630,6 +1634,208 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                 .getFilePath(),
             project.get(),
             r.getCommit().name()));
+  }
+
+  @Test
+  public void
+      forMergeCommitsNonResolvableGlobalImportsFromOtherProjectsAreReportedAsWarningsIfImportsDontSpecifyBranch()
+          throws Exception {
+    testForMergeCommitsThatNonResolvableImportsFromOtherProjectsAreReportedAsWarningsIfImportsDontSpecifyBranch(
+        CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void
+      forMergeCommitsNonResolvablePerFileImportsFromOtherProjectsAreReportedAsWarningsIfImportsDontSpecifyBranch()
+          throws Exception {
+    testForMergeCommitsThatNonResolvableImportsFromOtherProjectsAreReportedAsWarningsIfImportsDontSpecifyBranch(
+        CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void
+      testForMergeCommitsThatNonResolvableImportsFromOtherProjectsAreReportedAsWarningsIfImportsDontSpecifyBranch(
+          CodeOwnerConfigImportType importType) throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // Create a second project from which we will import a code owner config.
+    Project.NameKey otherProject = projectOperations.newProject().create();
+
+    // Create a target branch for into which we will merge later.
+    String targetBranchName = "target";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = targetBranchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+    branchInput.revision = projectOperations.project(otherProject).getHead("master").name();
+    gApi.projects().name(otherProject.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create the code owner config file in the second project that we will import.
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(otherProject)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    // Create a code owner config that imports the code owner config from the other project, without
+    // specifying the branch for the import (if the branch is not specified the code owner config is
+    // imported from the same branch that contains the importing code owner config).
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getFilePath())
+            .setProject(otherProject)
+            .build();
+    TestCodeOwnerConfigCreation.Builder codeOwnerConfigBuilder =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/");
+    switch (importType) {
+      case GLOBAL:
+        codeOwnerConfigBuilder.addImport(codeOwnerConfigReference);
+        break;
+      case PER_FILE:
+        codeOwnerConfigBuilder.addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("foo")
+                .addImport(codeOwnerConfigReference)
+                .build());
+        break;
+      default:
+        throw new IllegalStateException("unknown import type: " + importType);
+    }
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = codeOwnerConfigBuilder.create();
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+
+    // Create the merge commit.
+    RevCommit parent1 = projectOperations.project(project).getHead(targetBranchName);
+    RevCommit parent2 = projectOperations.project(project).getHead("master");
+    PushOneCommit m =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "merge",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get()));
+    m.setParents(ImmutableList.of(parent1, parent2));
+    PushOneCommit.Result r = m.to("refs/for/" + targetBranchName);
+    assertOkWithWarnings(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid %s import in '%s': '%s' does not exist (project = %s, branch = %s,"
+                + " revision = %s)",
+            importType.getType(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath(),
+            otherProject.get(),
+            targetBranchName,
+            parent1.name()));
+  }
+
+  @Test
+  public void
+      forMergeCommitsNonResolvableGlobalImportsFromOtherProjectsAreReportedAsErrorsIfImportsSpecifyBranch()
+          throws Exception {
+    testForMergeCommitsThatNonResolvableImportsFromOtherProjectsAreReportedAsErrorsIfImportsSpecifyBranch(
+        CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void
+      forMergeCommitsNonResolvablePerFileImportsFromOtherProjectsAreReportedAsErrorsIfImportsSpecifyBranch()
+          throws Exception {
+    testForMergeCommitsThatNonResolvableImportsFromOtherProjectsAreReportedAsErrorsIfImportsSpecifyBranch(
+        CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void
+      testForMergeCommitsThatNonResolvableImportsFromOtherProjectsAreReportedAsErrorsIfImportsSpecifyBranch(
+          CodeOwnerConfigImportType importType) throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // Create a second project from which we will import a non-existing code owner config.
+    Project.NameKey otherProject = projectOperations.newProject().create();
+
+    // Create a target branch for into which we will merge later.
+    String targetBranchName = "target";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = targetBranchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create a code owner config that imports a non-existing code owner config from the other
+    // project, with specifying the branch for the import. When this code owner config is merged
+    // into another branch later we expect that it is rejected by the validation.
+    CodeOwnerConfig.Key keyOfNonExistingCodeOwnerConfig =
+        CodeOwnerConfig.Key.create(project, "master", "/foo/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfNonExistingCodeOwnerConfig)
+                    .getFilePath())
+            .setProject(otherProject)
+            .setBranch("master")
+            .build();
+    TestCodeOwnerConfigCreation.Builder codeOwnerConfigBuilder =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/");
+    switch (importType) {
+      case GLOBAL:
+        codeOwnerConfigBuilder.addImport(codeOwnerConfigReference);
+        break;
+      case PER_FILE:
+        codeOwnerConfigBuilder.addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("foo")
+                .addImport(codeOwnerConfigReference)
+                .build());
+        break;
+      default:
+        throw new IllegalStateException("unknown import type: " + importType);
+    }
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = codeOwnerConfigBuilder.create();
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+
+    // Create the merge commit.
+    RevCommit parent1 = projectOperations.project(project).getHead(targetBranchName);
+    RevCommit parent2 = projectOperations.project(project).getHead("master");
+    PushOneCommit m =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "merge",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get()));
+    m.setParents(ImmutableList.of(parent1, parent2));
+    PushOneCommit.Result r = m.to("refs/for/" + targetBranchName);
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid %s import in '%s': '%s' does not exist (project = %s, branch = master,"
+                + " revision = %s)",
+            importType.getType(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfNonExistingCodeOwnerConfig)
+                .getFilePath(),
+            otherProject.get(),
+            parent1.name()));
   }
 
   @Test
