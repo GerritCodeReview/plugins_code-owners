@@ -43,7 +43,6 @@ import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.lib.ObjectInserter;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.merge.ThreeWayMergeStrategy;
@@ -167,12 +166,12 @@ public class ChangedFiles {
       throws IOException {
     try (Timer0.Context ctx = codeOwnerMetrics.getAutoMerge.start();
         Repository repository = repoManager.openRepository(project);
-        ObjectInserter inserter = new InMemoryInserter(repository);
+        InMemoryInserter inserter = new InMemoryInserter(repository);
         ObjectReader reader = inserter.newReader();
         RevWalk revWalk = new RevWalk(reader)) {
       return autoMergerProvider
           .get()
-          .merge(repository, revWalk, inserter, mergeCommit, mergeStrategy);
+          .lookupFromGitOrMergeInMemory(repository, revWalk, inserter, mergeCommit, mergeStrategy);
     }
   }
 
