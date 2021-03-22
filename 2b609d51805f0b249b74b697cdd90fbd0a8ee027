@@ -70,6 +70,24 @@
       "parentUuid": "c3c4e846_f07feb2a",
       "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4d615be2_b61d0623",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-03-22T08:27:48Z",
+      "side": 1,
+      "message": "Yes. In fact, this change is required, because the AutoMerger interface changed from taking an \u0027ObjectInserter\u0027 to taking an \"InMemoryObjectInserter\" :-)",
+      "parentUuid": "9c409545_9f8f87d6",
+      "revId": "2b609d51805f0b249b74b697cdd90fbd0a8ee027",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
