@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import {SuggestionsType, BestSuggestionsLimit} from './code-owners-model.js';
+
 /**
  * All statuses returned for owner status.
  *
@@ -106,10 +108,10 @@ class CodeOwnerApi {
    * @param {string} changeId
    * @param {string} path
    */
-  listOwnersForPath(changeId, path) {
+  listOwnersForPath(changeId, path, limit) {
     return this.restApi.get(
         `/changes/${changeId}/revisions/current/code_owners` +
-        `/${encodeURIComponent(path)}?limit=5&o=DETAILS`
+        `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`
     );
   }
 
@@ -224,11 +226,6 @@ export class CodeOwnersCacheApi {
         () => this.codeOwnerApi.getBranchConfig(this.change.project,
             this.change.branch));
   }
-
-  listOwnersForPath(path) {
-    return this._fetchOnce(`listOwnersForPath:${path}`,
-        () => this.codeOwnerApi.listOwnersForPath(this.change.id, path));
-  }
 }
 
 export class OwnersFetcher {
@@ -239,6 +236,7 @@ export class OwnersFetcher {
     this._totalFetchCount = 0;
     this.change = change;
     this.options = options;
+    this._paused = false;
     this.codeOwnerApi = new CodeOwnerApi(restApi);
   }
 
@@ -318,7 +316,7 @@ export class OwnersFetcher {
   async _fetchOwnersForPath(changeId, filePath) {
     try {
       const owners = await this.codeOwnerApi.listOwnersForPath(changeId,
-          filePath);
+          filePath, this.options.ownersLimit);
       this._fetchedOwners.get(filePath).owners = owners;
     } catch (e) {
       this._fetchedOwners.get(filePath).error = e;
@@ -345,7 +343,16 @@ export class CodeOwnerService {
     const fetcherOptions = {
       maxConcurrentRequests: options.maxConcurrentRequests || 10,
     };
-    this.ownersFetcher = new OwnersFetcher(restApi, change, fetcherOptions);
+    this.ownersFetchers = {
+      [SuggestionsType.BEST_SUGGESTIONS]: new OwnersFetcher(restApi, change, {
+        ...fetcherOptions,
+        ownersLimit: BestSuggestionsLimit,
+      }),
+      [SuggestionsType.ALL_SUGGESTIONS]: new OwnersFetcher(restApi, change, {
+        ...fetcherOptions,
+        ownersLimit: AllSuggestionsLimit,
+      }),
+    };
   }
 
   /**
@@ -476,36 +483,38 @@ export class CodeOwnerService {
    *  }>
    * }}
    */
-  async getSuggestedOwners() {
+  async getSuggestedOwners(suggestionsType) {
     const {codeOwnerStatusMap} = await this.getStatus();
+    const ownersFetcher = this.ownersFetchers[suggestionsType];
 
     // In case its aborted due to outdated patches
     // should kick start the fetching again
     // Note: we currently are not reusing the instance when switching changes,
     // so if its `abort` due to different changes, the whole instance will be
     // outdated and not used.
-    if (this.ownersFetcher.getStatus() === FetchStatus.NOT_STARTED
-      || this.ownersFetcher.getStatus() === FetchStatus.ABORT) {
-      await this.ownersFetcher.fetchSuggestedOwners(codeOwnerStatusMap);
+    if (ownersFetcher.getStatus() === FetchStatus.NOT_STARTED
+      || ownersFetcher.getStatus() === FetchStatus.ABORT) {
+      await ownersFetcher.fetchSuggestedOwners(codeOwnerStatusMap);
     }
 
     return {
-      finished: this.ownersFetcher.getStatus() === FetchStatus.FINISHED,
-      status: this.ownersFetcher.getStatus(),
-      progress: this.ownersFetcher.getProgressString(),
-      suggestions: this._groupFilesByOwners(codeOwnerStatusMap,
-          this.ownersFetcher.getFiles()),
+      finished: ownersFetcher.getStatus() === FetchStatus.FINISHED,
+      status: ownersFetcher.getStatus(),
+      progress: ownersFetcher.getProgressString(),
+      files: this._getFilesWithStatuses(codeOwnerStatusMap,
+          ownersFetcher.getFiles()),
     };
   }
 
-  async getSuggestedOwnersProgress() {
+  async getSuggestedOwnersProgress(suggestionsType) {
     const {codeOwnerStatusMap} = await this.getStatus();
+    const ownersFetcher = this.ownersFetchers[suggestionsType];
     return {
-      finished: this.ownersFetcher.getStatus() === FetchStatus.FINISHED,
-      status: this.ownersFetcher.getStatus(),
-      progress: this.ownersFetcher.getProgressString(),
-      suggestions: this._groupFilesByOwners(codeOwnerStatusMap,
-          this.ownersFetcher.getFiles()),
+      finished: ownersFetcher.getStatus() === FetchStatus.FINISHED,
+      status: ownersFetcher.getStatus(),
+      progress: ownersFetcher.getProgressString(),
+      files: this._getFilesWithStatuses(codeOwnerStatusMap,
+          ownersFetcher.getFiles()),
     };
   }
 
@@ -542,74 +551,14 @@ export class CodeOwnerService {
     return;
   }
 
-  _groupFilesByOwners(codeOwnerStatusMap, files) {
-    // Note: for renamed or moved files, they will have two entries in the map
-    // we will treat them as two entries when group as well
-    const ownersFilesMap = new Map();
-    const failedToFetchFiles = new Set();
-    for (const file of files) {
-      const fileInfo = {
+  _getFilesWithStatuses(codeOwnerStatusMap, files) {
+    return files.map(file => {
+      return {
         path: file.path,
+        info: file.info,
         status: this._computeFileStatus(codeOwnerStatusMap, file.path),
       };
-      // for files failed to fetch, add them to the special group
-      if (file.info.error) {
-        failedToFetchFiles.add(fileInfo);
-        continue;
-      }
-
-      // do not include files still in fetching
-      if (!file.info.owners) {
-        continue;
-      }
-
-      const ownersKey = this._getOwnersGroupKey(file.info.owners);
-      ownersFilesMap.set(
-          ownersKey,
-          ownersFilesMap.get(ownersKey) || {files: [], owners: file.info.owners}
-      );
-      ownersFilesMap.get(ownersKey).files.push(fileInfo);
-    }
-    const groupedItems = [];
-    for (const ownersKey of ownersFilesMap.keys()) {
-      const groupName = this.getGroupName(ownersFilesMap.get(ownersKey).files);
-      groupedItems.push({
-        groupName,
-        files: ownersFilesMap.get(ownersKey).files,
-        owners: ownersFilesMap.get(ownersKey).owners,
-      });
-    }
-
-    if (failedToFetchFiles.size > 0) {
-      const failedFiles = [...failedToFetchFiles];
-      groupedItems.push({
-        groupName: this.getGroupName(failedFiles),
-        files: failedFiles,
-        error: new Error(
-            'Failed to fetch code owner info. Try to refresh the page.'),
-      });
-    }
-
-    return groupedItems;
-  }
-
-  _getOwnersGroupKey(owners) {
-    if (owners.owned_by_all_users) {
-      return '__owned_by_all_users__';
-    }
-    const code_owners = owners.code_owners;
-    return code_owners
-        .map(owner => owner.account._account_id)
-        .sort()
-        .join(',');
-  }
-
-  getGroupName(files) {
-    const fileName = files[0].path.split('/').pop();
-    return {
-      name: fileName,
-      prefix: files.length > 1 ? `+ ${files.length - 1} more` : '',
-    };
+    });
   }
 
   isOnLatestPatchset(patchsetId) {
@@ -618,7 +567,9 @@ export class CodeOwnerService {
   }
 
   abort() {
-    this.ownersFetcher.abort();
+    for (const fetcher of Object.values(this.ownersFetchers)) {
+      fetcher.abort();
+    }
     const codeOwnerApi = new CodeOwnerApi(this.restApi);
     this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
   }
