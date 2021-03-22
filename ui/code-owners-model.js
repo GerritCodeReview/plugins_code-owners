@@ -28,6 +28,14 @@ export const PluginState = {
   Failed: 'Failed',
 };
 
+export const SuggestionsType = {
+  BEST_SUGGESTIONS: 'BEST_SUGGESTIONS',
+  ALL_SUGGESTIONS: 'ALL_SUGGESTIONS',
+};
+
+export const BestSuggestionsLimit = 5;
+export const AllSuggestionsLimit = 1000;
+
 /**
  * Maintain the state of code-owners.
  * Raises 'model-property-changed' event when a property is changed.
@@ -54,11 +62,21 @@ export class CodeOwnersModel extends EventTarget {
     this.userRole = undefined;
     this.isCodeOwnerEnabled = undefined;
     this.areAllFilesApproved = undefined;
-    this.suggestions = undefined;
-    this.suggestionsState = SuggestionsState.NotLoaded;
-    this.suggestionsLoadProgress = undefined;
+    this.suggestionsByTypes = {};
+    for (const suggestionType of Object.values(SuggestionsType)) {
+      this.suggestionsByTypes[suggestionType] = {
+        files: undefined,
+        state: SuggestionsState.NotLoaded,
+        loadProgress: undefined,
+      };
+    }
+    this.selectedSuggestionsType = SuggestionsType.BEST_SUGGESTIONS;
     this.showSuggestions = false;
     this.pluginStatus = undefined;
+  }
+
+  get selectedSuggestions() {
+    return this.suggestionsByTypes[this.selectedSuggestionsType];
   }
 
   setBranchConfig(config) {
@@ -91,22 +109,32 @@ export class CodeOwnersModel extends EventTarget {
     this._firePropertyChanged('areAllFilesApproved');
   }
 
-  setSuggestions(suggestions) {
-    if (this.suggestions === suggestions) return;
-    this.suggestions = suggestions;
-    this._firePropertyChanged('suggestions');
+  setSuggestionsFiles(suggestionsType, files) {
+    const suggestions = this.suggestionsByTypes[suggestionsType];
+    if (suggestions.files === files) return;
+    suggestions.files = files;
+    this._fireSuggestionsChanged(suggestionsType, 'files');
   }
 
-  setSuggestionsState(state) {
-    if (this.suggestionsState === state) return;
-    this.suggestionsState = state;
-    this._firePropertyChanged('suggestionsState');
+  setSuggestionsState(suggestionsType, state) {
+    const suggestions = this.suggestionsByTypes[suggestionsType];
+    if (suggestions.state === state) return;
+    suggestions.state = state;
+    this._fireSuggestionsChanged(suggestionsType, 'state');
   }
 
-  setSuggestionsLoadProgress(progress) {
-    if (this.suggestionsLoadProgress === progress) return;
-    this.suggestionsLoadProgress = progress;
-    this._firePropertyChanged('suggestionsLoadProgress');
+  setSuggestionsLoadProgress(suggestionsType, progress) {
+    const suggestions = this.suggestionsByTypes[suggestionsType];
+    if (suggestions.loadProgress === progress) return;
+    suggestions.loadProgress = progress;
+    this._fireSuggestionsChanged(suggestionsType, 'loadProgress');
+  }
+
+  setSelectedSuggestionType(suggestionsType) {
+    if (this.selectedSuggestionsType === suggestionsType) return;
+    this.selectedSuggestionsType = suggestionsType;
+    this._firePropertyChanged('selectedSuggestionsType');
+    this._firePropertyChanged('selectedSuggestions');
   }
 
   setShowSuggestions(show) {
@@ -146,6 +174,14 @@ export class CodeOwnersModel extends EventTarget {
         propertyName,
       },
     }));
+  }
+
+  _fireSuggestionsChanged(suggestionsType, propertyName) {
+    this._firePropertyChanged(
+        `suggestionsByTypes.${suggestionsType}.${propertyName}`);
+    if (suggestionsType === this.selectedSuggestionsType) {
+      this._firePropertyChanged(`selectedSuggestions.${propertyName}`);
+    }
   }
 
   static getModel(change) {
