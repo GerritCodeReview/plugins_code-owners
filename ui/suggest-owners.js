@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
-import {SuggestionsState} from './code-owners-model.js';
+import {SuggestionsState, SuggestionsType} from './code-owners-model.js';
+import {getDisplayOwnersGroups} from './suggest-owners-util.js';
 
 const SUGGESTION_POLLING_INTERVAL = 1000;
 
@@ -115,15 +116,23 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           max-height: 300px;
           overflow-y: auto;
         }
-        .suggestion-row {
+        .flex-break {
+          height: 0;
+          flex-basis: 100%;
+        }
+        .suggestion-row, .show-all-owners-row {
           display: flex;
           flex-direction: row;
           align-items: flex-start;
+        }
+        .suggestion-row {
+          flex-wrap: wrap;
           border-bottom: 1px solid var(--border-color);
           padding: var(--spacing-s) 0;
         }
-        .suggestion-row:last-of-type {
-          border-bottom: none;
+        .show-all-owners-row {
+          padding: var(--spacing-m) var(--spacing-xl) var(--spacing-s);
+          justify-content: flex-end;    
         }
         .suggestion-row-indicator {
           margin-right: var(--spacing-m);
@@ -162,6 +171,9 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           color: var(--deemphasized-text-color);
         }
         .suggested-owners {
+          --account-gap: var(--spacing-s);
+          --negative-account-gap: calc(-1*var(--account-gap));
+          margin: var(--negative-account-gap) 0 0 var(--negative-account-gap);
           flex: 1;
         }
         .fetch-error-content,
@@ -200,6 +212,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
            are always fit in a single row */
           --account-max-length: 60px;
           border: 1px solid var(--border-color);
+          margin: var(--account-gap) 0 0 var(--account-gap)
         }
         gr-account-label:focus {
           outline: none;
@@ -291,26 +304,39 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
                 </div>
               </template>
               <template is="dom-if" if="[[!suggestion.owners.owned_by_all_users]]">
+                <template is="dom-if" if="[[_showAllOwners]]">
+                  <div class="flex-break"></div>
+                </template>
                 <ul class="suggested-owners">
                   <template
                     is="dom-repeat"
                     items="[[suggestion.owners.code_owners]]"
                     as="owner"
                     index-as="ownerIndex"
-                  >
-                    <gr-account-label
+                  ><!--
+                    --><gr-account-label
                       data-suggestion-index$="[[suggestionIndex]]"
                       data-owner-index$="[[ownerIndex]]"
                       account="[[owner.account]]"
                       selected$="[[isSelected(owner)]]"
                       on-click="toggleAccount">
-                    </gr-account-label>
-                  </template>
+                    </gr-account-label><!--
+                --></template>
                 </ul>
               </template>
             </template>
           </li>
         </template>
+        <li class="show-all-owners-row">
+          <label>
+            <input
+              id="showAllOwnersCheckbox"
+              type="checkbox"
+              checked="{{_showAllOwners::change}}"
+            />
+            Show all owners
+          </label>
+        </li>
       </ul>
     `;
   }
@@ -333,7 +359,21 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
       reviewers: {
         type: Array,
       },
+      _reviewersIdSet: {
+        type: Object,
+        computed: '_getReviewersIdSet(reviewers)',
+      },
       pendingReviewers: Array,
+      _showAllOwners: {
+        type: Boolean,
+        value: false,
+        observer: '_showAllOwnersChanged',
+      },
+      _allOwnersByPathMap: {
+        type: Object,
+        computed:
+            `_getOwnersByPathMap(model.suggestionsByTypes.${SuggestionsType.ALL_SUGGESTIONS}.files)`,
+      },
     };
   }
 
@@ -341,15 +381,31 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     return [
       '_onReviewerChanged(reviewers)',
       '_onShowSuggestionsChanged(model.showSuggestions)',
-      '_onSuggestionsStateChanged(model.suggestionsState)',
-      '_onSuggestionsChanged(model.suggestions, model.suggestionsState)',
-      '_onSuggestionsLoadProgressChanged(model.suggestionsLoadProgress)',
+      '_onShowSuggestionsTypeChanged(model.showSuggestions,' +
+        'model.selectedSuggestionsType)',
+      '_onSuggestionsStateChanged(model.selectedSuggestions.state)',
+      '_onSuggestionsFilesChanged(model.selectedSuggestions.files, ' +
+        '_allOwnersByPathMap, _reviewersIdSet, model.selectedSuggestionsType,' +
+        'model.selectedSuggestions.state)',
+      '_onSuggestionsLoadProgressChanged(' +
+        'model.selectedSuggestions.loadProgress)',
     ];
   }
 
+  constructor() {
+    super();
+    // To prevent multiple reporting when switching back and forth showAllOwners
+    this.reportedEvents = {};
+    for (const suggestionType of Object.values(SuggestionsType)) {
+      this.reportedEvents[suggestionType] = {
+        fetchingStart: false,
+        fetchingFinished: false,
+      };
+    }
+  }
+
   _onShowSuggestionsChanged(showSuggestions) {
-    if (!showSuggestions ||
-        this.model.suggestionsLoadProgress === SuggestionsState.NotLoaded) {
+    if (!showSuggestions) {
       return;
     }
     // this is more of a hack to let review input lose focus
@@ -361,8 +417,24 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     // legacy element mixin which not used in this plugin.
     Polymer.Async.timeOut.run(() => this.click(), 100);
 
-    this.modelLoader.loadSuggestions();
-    this.reporting.reportLifeCycle('owners-suggestions-fetching-start');
+  }
+
+  _onShowSuggestionsTypeChanged(showSuggestion, selectedSuggestionsType) {
+    if (!showSuggestion) {
+      return;
+    }
+    this.modelLoader.loadSuggestions(selectedSuggestionsType);
+    // The progress is updated at the next _progressUpdateTimer tick.
+    // Without excplicit call to updateLoadSuggestionsProgress it looks like
+    // a slow reaction to checkbox.
+    this.modelLoader.updateLoadSelectedSuggestionsProgress();
+
+    if (!this.reportedEvents[selectedSuggestionsType].fetchingStart) {
+      this.reportedEvents[selectedSuggestionsType].fetchingStart = true;
+      this.reporting.reportLifeCycle('owners-suggestions-fetching-start', {
+        type: selectedSuggestionsType,
+      });
+    }
   }
 
   disconnectedCallback() {
@@ -373,7 +445,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
   _startUpdateProgressTimer() {
     if (this._progressUpdateTimer) return;
     this._progressUpdateTimer = setInterval(() => {
-      this.modelLoader.updateLoadSuggestionsProgress();
+      this.modelLoader.updateLoadSelectedSuggestionsProgress();
     }, SUGGESTION_POLLING_INTERVAL);
   }
 
@@ -403,20 +475,43 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     this.modelLoader.loadAreAllFilesApproved();
   }
 
-  _onSuggestionsChanged(suggestions, suggestionsState) {
+  _getReviewersIdSet(reviewers) {
+    return new Set((reviewers || []).map(account => account._account_id));
+  }
+
+  _onSuggestionsFilesChanged(files, allOwnersByPathMap, reviewersIdSet,
+      selectedSuggestionsType, suggestionsState) {
+    if (files === undefined || allOwnersByPathMap === undefined ||
+        reviewersIdSet === undefined || selectedSuggestionsType === undefined ||
+        suggestionsState === undefined) return;
+
+    const groups = getDisplayOwnersGroups(
+        files, allOwnersByPathMap, reviewersIdSet,
+        selectedSuggestionsType !== SuggestionsType.ALL_SUGGESTIONS);
     // The updateLoadSuggestionsProgress method also updates suggestions
-    this._updateSuggestions(suggestions || []);
+    this._updateSuggestions(groups);
     this._updateAllChips(this._currentReviewers);
-    if (!suggestions || suggestionsState !== SuggestionsState.Loaded) return;
-    const reportDetails = suggestions.reduce((details, cur) => {
-      details.totalGroups++;
-      details.stats.push([cur.files.length,
-        cur.owners && cur.owners.code_owners ?
-          cur.owners.code_owners.length : 0]);
-      return details;
-    }, {totalGroups: 0, stats: []});
-    this.reporting.reportLifeCycle(
-        'owners-suggestions-fetching-finished', reportDetails);
+
+    if (suggestionsState !== SuggestionsState.Loaded) return;
+    if (!this.reportedEvents[selectedSuggestionsType].fetchingFinished) {
+      this.reportedEvents[selectedSuggestionsType].fetchingFinished = true;
+      const reportDetails = groups.reduce((details, cur) => {
+        details.totalGroups++;
+        details.stats.push([cur.files.length,
+          cur.owners && cur.owners.code_owners ?
+            cur.owners.code_owners.length : 0]);
+        return details;
+      }, {totalGroups: 0, stats: [], type: selectedSuggestionsType});
+      this.reporting.reportLifeCycle(
+          'owners-suggestions-fetching-finished', reportDetails);
+    }
+  }
+
+  _getOwnersByPathMap(files) {
+    return new Map((files || [])
+        .filter(file => !file.info.error && file.info.owners)
+        .map(file => [file.path, file.info.owners])
+    );
   }
 
   _onSuggestionsLoadProgressChanged(progress) {
@@ -430,8 +525,8 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     });
     // move owned_by_all_users to the bottom:
     const index = suggestedOwners
-        .findIndex((suggestion) => suggestion.owners.owned_by_all_users);
-    if(index >= 0) {
+        .findIndex(suggestion => suggestion.owners.owned_by_all_users);
+    if (index >= 0) {
       suggestedOwners.push(suggestedOwners.splice(index, 1)[0]);
     }
     this.suggestedOwners = suggestedOwners;
@@ -460,8 +555,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     res.owners = {
       owned_by_all_users: !!suggestion.owners.owned_by_all_users,
       code_owners: codeOwners,
-    }
-
+    };
 
     res.error = suggestion.error;
     return res;
@@ -512,10 +606,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     this.suggestedOwners.forEach((suggestion, sId) => {
       let hasSelected = false;
       suggestion.owners.code_owners.forEach((owner, oId) => {
-        if (
-          accounts.some(account => account._account_id
-              === owner.account._account_id)
-        ) {
+        if (accounts.some(account => account._account_id === owner.account._account_id)) {
           this.set(
               ['suggestedOwners', sId, 'owners', 'code_owners', oId],
               {...owner,
@@ -559,6 +650,13 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     return suggestedOwners && suggestedOwners.length === 1 ?
       'Any user can approve. Please select a user manually' :
       'Any user from the other files can approve';
+  }
+
+  _showAllOwnersChanged(showAll) {
+    // The first call to this method happens before model is set.
+    if (!this.model) return;
+    this.model.setSelectedSuggestionType(showAll ?
+      SuggestionsType.ALL_SUGGESTIONS : SuggestionsType.BEST_SUGGESTIONS);
   }
 }
 
