@@ -85,32 +85,47 @@ export class ModelLoader {
   }
 
   async loadSuggestions() {
+    const suggestionsType = this.ownersModel.selectedSuggestionsType;
     // If a loading has been started already, do nothing
-    if (this.ownersModel.suggestionsState
-        !== SuggestionsState.NotLoaded) return;
+    if (this.ownersModel.suggestionsByTypes[suggestionsType].state !==
+        SuggestionsState.NotLoaded) return;
 
-    this.ownersModel.setSuggestionsState(SuggestionsState.Loading);
+    this.ownersModel.setSuggestionsState(suggestionsType,
+        SuggestionsState.Loading);
     let suggestedOwners;
     try {
-      suggestedOwners = await this.ownersService.getSuggestedOwners();
+      suggestedOwners =
+          await this.ownersService.getSuggestedOwners(suggestionsType);
     } catch (e) {
-      this.ownersModel.setSuggestionsState(SuggestionsState.LoadFailed);
-      this.ownersModel.setPluginFailed(e.message);
+      this.ownersModel.setSuggestionsState(suggestionsType,
+          SuggestionsState.LoadFailed);
+      // The selectedSuggestionsType can be changed while getSuggestedOwners
+      // is executed. The plugin should fail only if the selectedSuggestionsType
+      // is the same.
+      if (this.ownersModel.selectedSuggestionsType === suggestionsType) {
+        this.ownersModel.setPluginFailed(e.message);
+      }
       return;
     }
-    this.ownersModel.setSuggestions(suggestedOwners.suggestions);
-    this.ownersModel.setSuggestionsState(SuggestionsState.Loaded);
+    this.ownersModel.setSuggestionsFiles(suggestionsType,
+        suggestedOwners.files);
+    this.ownersModel.setSuggestionsState(suggestionsType,
+        SuggestionsState.Loaded);
   }
 
   async updateLoadSuggestionsProgress() {
+    const suggestionsType = this.ownersModel.selectedSuggestionsType;
     let suggestedOwners;
     try {
-      suggestedOwners = await this.ownersService.getSuggestedOwnersProgress();
+      suggestedOwners =
+          await this.ownersService.getSuggestedOwnersProgress(suggestionsType);
     } catch {
       // Ignore any error, keep progress unchanged.
       return;
     }
-    this.ownersModel.setSuggestionsLoadProgress(suggestedOwners.progress);
-    this.ownersModel.setSuggestions(suggestedOwners.suggestions);
+    this.ownersModel.setSuggestionsLoadProgress(suggestionsType,
+        suggestedOwners.progress);
+    this.ownersModel.setSuggestionsFiles(suggestionsType,
+        suggestedOwners.files);
   }
 }
