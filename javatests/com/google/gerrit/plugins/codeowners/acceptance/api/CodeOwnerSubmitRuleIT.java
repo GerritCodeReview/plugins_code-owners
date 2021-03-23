@@ -20,11 +20,15 @@ import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfo
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
+import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ListChangesOption;
@@ -34,10 +38,16 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject;
+import com.google.inject.Inject;
+import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.RefUpdate;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}. */
 public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
+  @Inject private ProjectOperations projectOperations;
 
   @Test
   public void changeIsSubmittableIfCodeOwnersFuctionalityIsDisabled() throws Exception {
@@ -337,5 +347,94 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
     assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void changeIsSubmittableIfAutoMergeIsNotPresent() throws Exception {
+    setAsDefaultCodeOwners(admin);
+
+    // Create another branch
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    ObjectId initial = projectOperations.project(project).getHead("master");
+
+    PushOneCommit.Result p1 =
+        pushFactory
+            .create(
+                admin.newIdent(),
+                testRepo,
+                "parent 1",
+                ImmutableMap.of("foo", "foo-1.2", "bar", "bar-1.2"))
+            .to("refs/for/master");
+    RevCommit parent1 = p1.getCommit();
+    approve(p1.getChangeId());
+    gApi.changes().id(p1.getChangeId()).current().submit();
+
+    testRepo.reset(initial);
+    PushOneCommit.Result p2 =
+        pushFactory
+            .create(
+                admin.newIdent(),
+                testRepo,
+                "parent 2",
+                ImmutableMap.of("foo", "foo-2.2", "bar", "bar-2.2"))
+            .to("refs/for/foo");
+    RevCommit parent2 = p2.getCommit();
+    approve(p2.getChangeId());
+    gApi.changes().id(p2.getChangeId()).current().submit();
+
+    PushOneCommit m =
+        pushFactory.create(
+            admin.newIdent(), testRepo, "merge", ImmutableMap.of("foo", "foo-1", "bar", "bar-2"));
+    m.setParents(ImmutableList.of(parent1, parent2));
+    PushOneCommit.Result r = m.to("refs/for/master");
+    r.assertOkStatus();
+    String changeId = r.getChangeId();
+
+    // Apply Code-Review+2 by a non-code-owner to satisfy the MaxWithBlock function of the
+    // Code-Review label.
+    approve(changeId);
+
+    deleteAutoMergeBranch(r.getCommit());
+
+    ChangeInfo changeInfo =
+        gApi.changes()
+            .id(changeId)
+            .get(
+                ListChangesOption.SUBMITTABLE,
+                ListChangesOption.ALL_REVISIONS,
+                ListChangesOption.CURRENT_ACTIONS);
+    assertThat(changeInfo.submittable).isTrue();
+
+    // Check that the submit button is enabled.
+    assertThat(changeInfo.revisions.get(r.getCommit().getName()).actions.get("submit").enabled)
+        .isTrue();
+
+    // Check the submit requirement.
+    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+        assertThatCollection(changeInfo.requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
+
+    // Submit the change.
+    gApi.changes().id(changeId).current().submit();
+    assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  private void deleteAutoMergeBranch(ObjectId mergeCommit) throws Exception {
+    try (Repository repo = repoManager.openRepository(project)) {
+      RefUpdate ru = repo.updateRef(RefNames.refsCacheAutomerge(mergeCommit.name()));
+      ru.setForceUpdate(true);
+      assertThat(ru.delete()).isEqualTo(RefUpdate.Result.FORCED);
+      assertThat(repo.exactRef(RefNames.refsCacheAutomerge(mergeCommit.name()))).isNull();
+    }
   }
 }
