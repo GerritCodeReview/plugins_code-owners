@@ -94,7 +94,8 @@ For [code owner config files](user-guide.html#codeOwnerConfigFiles) the
 following checks are performed:
 
 * the code owner config files are parseable
-* the code owner emails are resolveable:\
+* the code owner emails are resolveable (unless this check is
+  [disabled](config.html#codeOwnersRejectNonResolvableCodeOwners)):\
   a code owners email is not resolveable if:
     * the account that owns it is inactive
     * the account that owns it is not visible to the uploader (according to
@@ -106,7 +107,8 @@ following checks are performed:
     * it has an email domain that is disallowed (see
       [allowedEmailDomain](config.html#pluginCodeOwnersAllowedEmailDomain))
       configuration
-* the imports are resolveable:\
+* the imports are resolveable (unless this check is
+  [disabled](config.html#codeOwnersRejectNonResolvableImports)):\
   an import is not resolveable if:
     * the imported file is not a code owner config file
     * the imported file is not parseable
