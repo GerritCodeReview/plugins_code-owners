@@ -263,7 +263,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         Can be overridden per project by setting
         [codeOwners.enableValidationOnSubmit](#codeOwnersEnableValidationOnSubmit)
         in `@PLUGIN@.config`.\
-        By default `true`.
+        By default `false`.
 
 <a id="pluginCodeOwnersRejectNonResolvableCodeOwners">plugin.@PLUGIN@.rejectNonResolvableCodeOwners</a>
 :       Whether modifications of code owner config files that newly add

@@ -82,11 +82,14 @@ means the update is allowed if:
 * the file was non-parseable and with the update it is still non-parseable
 
 For [code owner config files](user-guide.html#codeOwnerConfigFiles) the
-validation is also performed on submit (in addition to the validation that is
-performed on upload of the change). This is because relevant configuration can
-change between the time a change is uploaded and the time a change is submitted.
-On submit we repeat the exact same validation that was done on upload. This
-means, all visibility checks will be done from the perspective of the uploader.
+validation may also be performed on submit (in addition to the validation that
+is performed on upload of the change, see
+[enableValidationOnSubmit](config.html#codeOwnersEnableValidationOnSubmit)
+config setting). Repeating the validation on submit can make sense because
+relevant configuration can change between the time a change is uploaded and the
+time a change is submitted. If enabled, on submit we repeat the exact same
+validation that was done on upload. This means, all visibility checks will be
+done from the perspective of the uploader.
 
 ### <a id="codeOwnerConfigFileChecks">Validation checks for code owner config files
 

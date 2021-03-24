@@ -452,7 +452,10 @@ public class GeneralConfig {
   CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived(
       Project.NameKey project, Config pluginConfig) {
     return getCodeOwnerConfigValidationPolicy(
-        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, project, pluginConfig);
+        KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
+        project,
+        pluginConfig,
+        CodeOwnerConfigValidationPolicy.TRUE);
   }
 
   /**
@@ -495,7 +498,10 @@ public class GeneralConfig {
   CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForSubmit(
       Project.NameKey project, Config pluginConfig) {
     return getCodeOwnerConfigValidationPolicy(
-        KEY_ENABLE_VALIDATION_ON_SUBMIT, project, pluginConfig);
+        KEY_ENABLE_VALIDATION_ON_SUBMIT,
+        project,
+        pluginConfig,
+        CodeOwnerConfigValidationPolicy.FALSE);
   }
 
   /**
@@ -554,7 +560,10 @@ public class GeneralConfig {
   }
 
   private CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicy(
-      String key, Project.NameKey project, Config pluginConfig) {
+      String key,
+      Project.NameKey project,
+      Config pluginConfig,
+      CodeOwnerConfigValidationPolicy defaultValue) {
     requireNonNull(key, "key");
     requireNonNull(project, "project");
     requireNonNull(pluginConfig, "pluginConfig");
@@ -563,8 +572,7 @@ public class GeneralConfig {
         pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, key);
     if (codeOwnerConfigValidationPolicyString != null) {
       try {
-        return pluginConfig.getEnum(
-            SECTION_CODE_OWNERS, /* subsection= */ null, key, CodeOwnerConfigValidationPolicy.TRUE);
+        return pluginConfig.getEnum(SECTION_CODE_OWNERS, /* subsection= */ null, key, defaultValue);
       } catch (IllegalArgumentException e) {
         logger.atWarning().withCause(e).log(
             "Ignoring invalid value %s for the code owner config validation policy in '%s.config'"
@@ -578,16 +586,13 @@ public class GeneralConfig {
     }
 
     try {
-      return pluginConfigFromGerritConfig.getEnum(key, CodeOwnerConfigValidationPolicy.TRUE);
+      return pluginConfigFromGerritConfig.getEnum(key, defaultValue);
     } catch (IllegalArgumentException e) {
       logger.atWarning().withCause(e).log(
           "Ignoring invalid value %s for the code owner config validation policy in gerrit.config"
               + " (parameter plugin.%s.%s). Falling back to default value %s.",
-          pluginConfigFromGerritConfig.getString(key),
-          pluginName,
-          key,
-          CodeOwnerConfigValidationPolicy.TRUE);
-      return CodeOwnerConfigValidationPolicy.TRUE;
+          pluginConfigFromGerritConfig.getString(key), pluginName, key, defaultValue);
+      return defaultValue;
     }
   }
 

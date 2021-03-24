@@ -168,6 +168,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void canSubmitConfigWithoutIssues() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -534,6 +535,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void onReceiveCommitValidationDisabled() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -964,6 +966,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void cannotSubmitConfigWithNewIssues() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -1073,6 +1076,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void cannotSubmitConfigWithCodeOwnersThatAreNotVisibleToThePatchSetUploader()
       throws Exception {
     setAsDefaultCodeOwners(admin);
@@ -1127,6 +1131,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void canSubmitConfigWithCodeOwnersThatAreNotVisibleToTheSubmitterButVisibleToTheUploader()
       throws Exception {
     setAsDefaultCodeOwners(admin);
@@ -2097,6 +2102,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void canUploadAndSubmitConfigWithUnresolvableCodeOwners() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -2129,6 +2135,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.rejectNonResolvableImports", value = "false")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void canUploadAndSubmitConfigWithUnresolvableImports() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -2254,6 +2261,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void submitFailsOnInternalError() throws Exception {
     try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
       disableCodeOwnersForProject(project);
@@ -2286,6 +2294,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void disableValidationForBranch() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -2323,6 +2332,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void disableRejectionOfNonResolvableCodeOwnersForBranch() throws Exception {
     setAsDefaultCodeOwners(admin);
 
@@ -2361,6 +2371,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void disableRejectionOfNonResolvableImportsForBranch() throws Exception {
     skipTestIfImportsNotSupportedByCodeOwnersBackend();
 

@@ -1022,32 +1022,32 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   @Test
   public void getCodeOwnerConfigValidationPolicyForSubmitd_notConfigured() throws Exception {
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("non-existing"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
   }
 
   @Test
   public void getCodeOwnerConfigValidationPolicyForSubmit_configuredOnProjectLevel()
       throws Exception {
-    configureEnableValidationOnSubmit(project, CodeOwnerConfigValidationPolicy.FALSE);
+    configureEnableValidationOnSubmit(project, CodeOwnerConfigValidationPolicy.TRUE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("non-existing"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
   }
 
   @Test
   public void getCodeOwnerConfigValidationPolicyForSubmit_configuredOnBranchLevel()
       throws Exception {
     configureEnableValidationOnSubmitForBranch(
-        project, "refs/heads/master", CodeOwnerConfigValidationPolicy.FALSE);
+        project, "refs/heads/master", CodeOwnerConfigValidationPolicy.TRUE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
-    assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("refs/heads/master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
-    assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("foo"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+    assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("refs/heads/master"))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+    assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("foo"))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
   }
 
   @Test
@@ -1065,12 +1065,12 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
               GeneralConfig.SECTION_VALIDATION,
               "refs/heads/master",
               GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT,
-              CodeOwnerConfigValidationPolicy.FALSE);
+              CodeOwnerConfigValidationPolicy.TRUE);
         });
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("refs/heads/master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("foo"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.DRY_RUN);
   }
@@ -1080,12 +1080,12 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
       getCodeOwnerConfigValidationPolicyForSubmit_inheritedBranchLevelConfigTakesPrecedence()
           throws Exception {
     configureEnableValidationOnSubmitForBranch(
-        allProjects, "refs/heads/master", CodeOwnerConfigValidationPolicy.FALSE);
+        allProjects, "refs/heads/master", CodeOwnerConfigValidationPolicy.TRUE);
     configureEnableValidationOnSubmit(project, CodeOwnerConfigValidationPolicy.DRY_RUN);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("refs/heads/master"))
-        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("foo"))
         .isEqualTo(CodeOwnerConfigValidationPolicy.DRY_RUN);
   }
@@ -1094,7 +1094,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   public void getCodeOwnerConfigValidationPolicyForSubmit_inheritedBranchLevelCanBeOverridden()
       throws Exception {
     configureEnableValidationOnSubmitForBranch(
-        allProjects, "refs/heads/master", CodeOwnerConfigValidationPolicy.FALSE);
+        allProjects, "refs/heads/master", CodeOwnerConfigValidationPolicy.TRUE);
     configureEnableValidationOnSubmitForBranch(
         project, "refs/heads/master", CodeOwnerConfigValidationPolicy.DRY_RUN);
     assertThat(cfgSnapshot().getCodeOwnerConfigValidationPolicyForSubmit("master"))
