@@ -1738,7 +1738,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath(),
             otherProject.get(),
             targetBranchName,
-            parent1.name()));
+            projectOperations.project(otherProject).getHead(targetBranchName).getName()));
   }
 
   @Test
@@ -1835,7 +1835,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                 .codeOwnerConfig(keyOfNonExistingCodeOwnerConfig)
                 .getFilePath(),
             otherProject.get(),
-            parent1.name()));
+            projectOperations.project(otherProject).getHead("master").getName()));
   }
 
   @Test
