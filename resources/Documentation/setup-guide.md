@@ -316,7 +316,9 @@ Examples (not an exhaustive list):
 
 * [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner)
 * Configure a policy for [fallback code
-  owners](config.html#pluginCodeOwnersFallbackCodeOwners)
+  owners](config.html#pluginCodeOwnersFallbackCodeOwners) (who should own files
+  for which no code owners have been defined, e.g. project owners, all users or
+  no one)
 * Whether [an implicit code owner approval from the last uploader is
   assumed](config.html#codeOwnersEnableImplicitApprovals)
 * [Merge commit strategy](config.html#codeOwnersMergeCommitStrategy) that
@@ -340,13 +342,12 @@ is no longer needed and you should stop using it before you start using the
 By enabling the code owners functionality, a code owner approval from code
 owners will be required for submitting changes.
 
-While a branch doesn't contain any code owner config files yet, the project
-owners (users with the
-[Owner](../../../Documentation/access-control.html#category_owner) access right
-on `refs/*`) are considered as code owners. This allows you to add an initial
-code owner config file, with approval from the project owners, that defines the
-inital code owners. Once the first code owner config file has been submitted,
-project owners are no longer considered as code owners.
+If code owners are not defined yet, changes can only be submitted
+
+* with a code owner override (if override labels have been configured, see
+  [above](#configureCodeOwnerOverrides))
+* with an approval from a fallback code owner (if fallback code owners have been
+  configured, see [above](#optionalConfiguration)).
 
 Right after the code owners functionality got enabled for a project/branch, it
 is recommended to add an initial code owner configuration at the root level that
@@ -356,12 +357,19 @@ defines the code owners for the project/branch explicitly.
 after enabling the code owners functionality so that the code owner
 configuration is [validated](validation.html) on upload, which prevents
 submitting an invalid code owner config that may block the submission of all
-changes (e.g. if it is not parseable).
+changes (e.g. if it is not parseable). Submitting the initial code owner
+configuration requires an override or an approval from a fallback code owner
+(see above).
 
 **NOTE** If the repository contains pre-existing code owner config files, it is
 recommended to validate them via the [Check code owners files REST
 endpoint](rest-api.html#check-code-owner-config-files) and fix the reported
 issues.
+
+**NOTE:** If neither code owner overrides nor fallback code owners are
+configured an initial code owner configuration must be added before enabling the
+code owners functionality as otherwise changes can become unsubmittable (they
+require code-owner approvals, but noone can provide nor override them).
 
 ### <a id="disableFindOwnersPlugin">11. Disable/uninstall the find-owners plugin
 
