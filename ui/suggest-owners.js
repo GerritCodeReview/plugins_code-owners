@@ -404,6 +404,14 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     }
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._stopUpdateProgressTimer();
+    if (this.modelLoader) {
+      this.modelLoader.pauseActiveSuggestedOwnersLoading();
+    }
+  }
+
   _onShowSuggestionsChanged(showSuggestions) {
     if (!showSuggestions) {
       return;
@@ -416,11 +424,11 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     // Can not use `this.async` as it's only available in
     // legacy element mixin which not used in this plugin.
     Polymer.Async.timeOut.run(() => this.click(), 100);
-
   }
 
   _onShowSuggestionsTypeChanged(showSuggestion, selectedSuggestionsType) {
     if (!showSuggestion) {
+      this.modelLoader.pauseActiveSuggestedOwnersLoading();
       return;
     }
     this.modelLoader.loadSuggestions(selectedSuggestionsType);
@@ -435,11 +443,6 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
         type: selectedSuggestionsType,
       });
     }
-  }
-
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    this._stopUpdateProgressTimer();
   }
 
   _startUpdateProgressTimer() {
@@ -541,21 +544,28 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     const res = {};
     res.groupName = suggestion.groupName;
     res.files = suggestion.files.slice();
-    const codeOwners = (suggestion.owners.code_owners || []).map(owner => {
-      const updatedOwner = {...owner};
-      const reviewers = this.change.reviewers.REVIEWER;
-      if (
-        reviewers &&
-        reviewers.find(reviewer => reviewer._account_id === owner._account_id)
-      ) {
-        updatedOwner.selected = true;
-      }
-      return updatedOwner;
-    });
-    res.owners = {
-      owned_by_all_users: !!suggestion.owners.owned_by_all_users,
-      code_owners: codeOwners,
-    };
+    if (suggestion.owners) {
+      const codeOwners = (suggestion.owners.code_owners || []).map(owner => {
+        const updatedOwner = {...owner};
+        const reviewers = this.change.reviewers.REVIEWER;
+        if (reviewers &&
+            reviewers.find(
+                reviewer => reviewer._account_id === owner._account_id)
+        ) {
+          updatedOwner.selected = true;
+        }
+        return updatedOwner;
+      });
+      res.owners = {
+        owned_by_all_users: !!suggestion.owners.owned_by_all_users,
+        code_owners: codeOwners,
+      };
+    } else {
+      res.owners = {
+        owned_by_all_users: false,
+        code_owners: [],
+      };
+    }
 
     res.error = suggestion.error;
     return res;

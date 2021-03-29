@@ -39,6 +39,7 @@ export class ModelLoader {
     try {
       newValue = await propertyLoader();
     } catch (e) {
+      console.error(e);
       this.ownersModel.setPluginFailed(e.message);
       return;
     }
@@ -85,6 +86,14 @@ export class ModelLoader {
   }
 
   async loadSuggestions(suggestionsType) {
+    this.pauseActiveSuggestedOwnersLoading();
+    this.activeLoadSuggestionType = suggestionsType;
+    if (this.ownersModel.suggestionsByTypes[suggestionsType].state ===
+        SuggestionsState.Loading) {
+      this.ownersService.resumeSuggestedOwnersLoading(suggestionsType);
+      return;
+    }
+
     // If a loading has been started already, do nothing
     if (this.ownersModel.suggestionsByTypes[suggestionsType].state !==
         SuggestionsState.NotLoaded) return;
@@ -96,6 +105,7 @@ export class ModelLoader {
       suggestedOwners =
           await this.ownersService.getSuggestedOwners(suggestionsType);
     } catch (e) {
+      console.error(e);
       this.ownersModel.setSuggestionsState(suggestionsType,
           SuggestionsState.LoadFailed);
       // The selectedSuggestionsType can be changed while getSuggestedOwners
@@ -110,6 +120,12 @@ export class ModelLoader {
         suggestedOwners.files);
     this.ownersModel.setSuggestionsState(suggestionsType,
         SuggestionsState.Loaded);
+  }
+
+  pauseActiveSuggestedOwnersLoading() {
+    if (!this.activeLoadSuggestionType) return;
+    this.ownersService.pauseSuggestedOwnersLoading(
+        this.activeLoadSuggestionType);
   }
 
   async updateLoadSelectedSuggestionsProgress() {

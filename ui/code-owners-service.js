@@ -16,27 +16,8 @@
  */
 
 import {SuggestionsType, BestSuggestionsLimit, AllSuggestionsLimit} from './code-owners-model.js';
-
-/**
- * All statuses returned for owner status.
- *
- * @enum
- */
-export const OwnerStatus = {
-  INSUFFICIENT_REVIEWERS: 'INSUFFICIENT_REVIEWERS',
-  PENDING: 'PENDING',
-  APPROVED: 'APPROVED',
-};
-
-/**
- * @enum
- */
-const FetchStatus = {
-  NOT_STARTED: 0,
-  FETCHING: 1,
-  FINISHED: 2,
-  ABORT: 3,
-};
+import {OwnersProvider, OwnerStatus, FetchStatus} from './code-owners-fetcher.js';
+import {CodeOwnersApi, CodeOwnersCacheApi} from './code-owners-api.js';
 
 /**
  * Specifies status for a change. The same as ChangeStatus enum in gerrit
@@ -62,273 +43,6 @@ const UserRole = {
   OTHER: 'OTHER',
 };
 
-// TODO: Try to remove it. The ResponseError and getErrorMessage duplicates
-// code from the gr-plugin-rest-api.ts. This code is required because
-// we want custom error processing in some functions. For details see
-// the original gr-plugin-rest-api.ts file/
-
-class ResponseError extends Error {
-  constructor(response) {
-    super();
-    this.response = response;
-  }
-}
-
-async function getErrorMessage(response) {
-  const text = await response.text();
-  return text ?
-    `${response.status}: ${text}` :
-    `${response.status}`;
-}
-
-/**
- * Responsible for communicating with the rest-api
- *
- * @see resources/Documentation/rest-api.md
- */
-class CodeOwnerApi {
-  constructor(restApi) {
-    this.restApi = restApi;
-  }
-
-  /**
-   * Returns a promise fetching the owner statuses for all files within the change.
-   *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#change-endpoints
-   * @param {string} changeId
-   */
-  listOwnerStatus(changeId) {
-    return this.restApi.get(`/changes/${changeId}/code_owners.status`);
-  }
-
-  /**
-   * Returns a promise fetching the owners for a given path.
-   *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
-   * @param {string} changeId
-   * @param {string} path
-   */
-  listOwnersForPath(changeId, path, limit) {
-    return this.restApi.get(
-        `/changes/${changeId}/revisions/current/code_owners` +
-        `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`
-    );
-  }
-
-  /**
-   * Returns a promise fetching the owners config for a given path.
-   *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#branch-endpoints
-   * @param {string} project
-   * @param {string} branch
-   * @param {string} path
-   */
-  getConfigForPath(project, branch, path) {
-    return this.restApi.get(
-        `/projects/${encodeURIComponent(project)}/` +
-        `branches/${encodeURIComponent(branch)}/` +
-        `code_owners.config/${encodeURIComponent(path)}`
-    );
-  }
-
-  /**
-   * Returns a promise fetching the owners config for a given branch.
-   *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#branch-endpoints
-   * @param {string} project
-   * @param {string} branch
-   */
-  async getBranchConfig(project, branch) {
-    const errFn = (response, error) => {
-      if (error) throw error;
-      if (response) throw new ResponseError(response);
-      throw new Error('Generic REST API error');
-    }
-    try {
-      const config = await this.restApi.send(
-          'GET',
-          `/projects/${encodeURIComponent(project)}/` +
-          `branches/${encodeURIComponent(branch)}/` +
-          `code_owners.branch_config`,
-          undefined,
-          errFn
-      );
-      if (config.override_approval && !(config.override_approval
-          instanceof Array)) {
-        // In the upcoming backend changes, the override_approval will be changed
-        // to array with (possible) multiple items.
-        // While this transition is in progress, the frontend supports both API -
-        // the old one and the new one.
-        return {...config, override_approval: [config.override_approval]};
-      }
-      return config;
-    } catch(err) {
-      if (err instanceof ResponseError) {
-        if (err.response.status === 404) {
-          // The 404 error means that the branch doesn't exist and
-          // the plugin should be disabled.
-          return {disabled: true};
-        }
-        return getErrorMessage(err.response).then(msg => {
-          throw new Error(msg);
-        });
-      }
-      throw err;
-    }
-  }
-}
-
-/**
- * Wrapper around codeOwnerApi, sends each requests only once and then cache
- * the response. A new CodeOwnersCacheApi instance is created every time when a
- * new change object is assigned.
- * Gerrit never updates existing change object, but instead always assigns a new
- * change object. Particularly, a new change object is assigned when a change
- * is updated and user clicks reload toasts to see the updated change.
- * As a result, the lifetime of a cache is the same as a lifetime of an assigned
- * change object.
- * Periodical cache invalidation can lead to inconsistency in UI, i.e.
- * user can see the old reviewers list (reflects a state when a change was
- * loaded) and code-owners status for the current reviewer list. To avoid
- * this inconsistency, the cache doesn't invalidate.
- */
-export class CodeOwnersCacheApi {
-  constructor(codeOwnerApi, change) {
-    this.codeOwnerApi = codeOwnerApi;
-    this.change = change;
-    this.promises = {};
-  }
-
-  _fetchOnce(cacheKey, asyncFn) {
-    if (!this.promises[cacheKey]) {
-      this.promises[cacheKey] = asyncFn();
-    }
-    return this.promises[cacheKey];
-  }
-
-  getAccount() {
-    return this._fetchOnce('getAccount', () => this._getAccount());
-  }
-
-  async _getAccount() {
-    const loggedIn = await this.codeOwnerApi.restApi.getLoggedIn();
-    if (!loggedIn) return undefined;
-    return await this.codeOwnerApi.restApi.getAccount();
-  }
-
-  listOwnerStatus() {
-    return this._fetchOnce('listOwnerStatus',
-        () => this.codeOwnerApi.listOwnerStatus(this.change._number));
-  }
-
-  getBranchConfig() {
-    return this._fetchOnce('getBranchConfig',
-        () => this.codeOwnerApi.getBranchConfig(this.change.project,
-            this.change.branch));
-  }
-}
-
-export class OwnersFetcher {
-  constructor(restApi, change, options) {
-    // fetched files and fetching status
-    this._fetchedOwners = new Map();
-    this._fetchStatus = FetchStatus.NOT_STARTED;
-    this._totalFetchCount = 0;
-    this.change = change;
-    this.options = options;
-    this.codeOwnerApi = new CodeOwnerApi(restApi);
-  }
-
-  getStatus() {
-    return this._fetchStatus;
-  }
-
-  getProgressString() {
-    return this._totalFetchCount === 0 ?
-      `Loading suggested owners ...` :
-      `${this._fetchedOwners.size} out of ${this._totalFetchCount} files have returned suggested owners.`;
-  }
-
-  getFiles() {
-    const result = [];
-    for (const [path, info] of this._fetchedOwners.entries()) {
-      result.push({path, info});
-    }
-    return result;
-  }
-
-  async fetchSuggestedOwners(codeOwnerStatusMap) {
-    // reset existing temporary storage
-    this._fetchedOwners = new Map();
-    this._fetchStatus = FetchStatus.FETCHING;
-    this._totalFetchCount = 0;
-
-    // only fetch those not approved yet
-    const filesGroupByStatus = [...codeOwnerStatusMap.keys()].reduce(
-        (list, file) => {
-          const status = codeOwnerStatusMap
-              .get(file).status;
-          if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
-            list.missing.push(file);
-          } else if (status === OwnerStatus.PENDING) {
-            list.pending.push(file);
-          }
-          return list;
-        }
-        , {pending: [], missing: []});
-    // always fetch INSUFFICIENT_REVIEWERS first and then pending
-    const filesToFetch = filesGroupByStatus.missing
-        .concat(filesGroupByStatus.pending);
-    this._totalFetchCount = filesToFetch.length;
-    await this._batchFetchCodeOwners(filesToFetch);
-    this._fetchStatus = FetchStatus.FINISHED;
-  }
-
-  /**
-   * Recursively fetches code owners for all files until finished.
-   *
-   * @param {!Array<string>} files
-   */
-  async _batchFetchCodeOwners(files) {
-    if (this._fetchStatus === FetchStatus.ABORT) {
-      return this._fetchedOwners;
-    }
-
-    const batchRequests = [];
-    const maxConcurrentRequests = this.options.maxConcurrentRequests;
-    for (let i = 0; i < maxConcurrentRequests; i++) {
-      const filePath = files[i];
-      if (filePath) {
-        this._fetchedOwners.set(filePath, {});
-        batchRequests.push(this._fetchOwnersForPath(this.change.id, filePath));
-      }
-    }
-    const resPromise = Promise.all(batchRequests);
-    await resPromise;
-    if (files.length > maxConcurrentRequests) {
-      return await this._batchFetchCodeOwners(
-          files.slice(maxConcurrentRequests));
-    }
-    return this._fetchedOwners;
-  }
-
-  async _fetchOwnersForPath(changeId, filePath) {
-    try {
-      const owners = await this.codeOwnerApi.listOwnersForPath(changeId,
-          filePath, this.options.ownersLimit);
-      this._fetchedOwners.get(filePath).owners = owners;
-    } catch (e) {
-      this._fetchedOwners.get(filePath).error = e;
-    }
-  }
-
-  abort() {
-    this._fetchStatus = FetchStatus.ABORT;
-    this._fetchedOwners = new Map();
-    this._totalFetchCount = 0;
-  }
-}
-
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -336,19 +50,19 @@ export class CodeOwnerService {
   constructor(restApi, change, options = {}) {
     this.restApi = restApi;
     this.change = change;
-    const codeOwnerApi = new CodeOwnerApi(restApi);
-    this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
+    const codeOwnersApi = new CodeOwnersApi(restApi);
+    this.codeOwnersCacheApi = new CodeOwnersCacheApi(codeOwnersApi, change);
 
-    const fetcherOptions = {
+    const providerOptions = {
       maxConcurrentRequests: options.maxConcurrentRequests || 10,
     };
-    this.ownersFetchers = {
-      [SuggestionsType.BEST_SUGGESTIONS]: new OwnersFetcher(restApi, change, {
-        ...fetcherOptions,
+    this.ownersProviders = {
+      [SuggestionsType.BEST_SUGGESTIONS]: new OwnersProvider(restApi, change, {
+        ...providerOptions,
         ownersLimit: BestSuggestionsLimit,
       }),
-      [SuggestionsType.ALL_SUGGESTIONS]: new OwnersFetcher(restApi, change, {
-        ...fetcherOptions,
+      [SuggestionsType.ALL_SUGGESTIONS]: new OwnersProvider(restApi, change, {
+        ...providerOptions,
         ownersLimit: AllSuggestionsLimit,
       }),
     };
@@ -360,7 +74,7 @@ export class CodeOwnerService {
   async prefetch() {
     try {
       await Promise.all([
-        this.codeOwnerCacheApi.getAccount(),
+        this.codeOwnersCacheApi.getAccount(),
         this.getStatus(),
       ]);
     } catch {
@@ -377,7 +91,7 @@ export class CodeOwnerService {
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
   async getLoggedInUserInitialRole() {
-    const account = await this.codeOwnerCacheApi.getAccount();
+    const account = await this.codeOwnersCacheApi.getAccount();
     if (!account) {
       return UserRole.ANONYMOUS;
     }
@@ -424,9 +138,9 @@ export class CodeOwnerService {
     const status = await this._getStatus();
     if (status.enabled && !this.isOnLatestPatchset(status.patchsetNumber)) {
       // status is outdated, abort and re-init
-      this.abort();
+      this.reset();
       this.prefetch();
-      return await this.codeOwnerCacheApi.getStatus();
+      return await this.codeOwnersCacheApi.getStatus();
     }
     return status;
   }
@@ -442,7 +156,7 @@ export class CodeOwnerService {
       };
     }
 
-    const onwerStatus = await this.codeOwnerCacheApi.listOwnerStatus();
+    const onwerStatus = await this.codeOwnersCacheApi.listOwnerStatus();
 
     return {
       enabled: true,
@@ -484,38 +198,39 @@ export class CodeOwnerService {
    */
   async getSuggestedOwners(suggestionsType) {
     const {codeOwnerStatusMap} = await this.getStatus();
-    const ownersFetcher = this.ownersFetchers[suggestionsType];
+    const ownersProvider = this.ownersProviders[suggestionsType];
 
-    // In case its aborted due to outdated patches
-    // should kick start the fetching again
-    // Note: we currently are not reusing the instance when switching changes,
-    // so if its `abort` due to different changes, the whole instance will be
-    // outdated and not used.
-    if (ownersFetcher.getStatus() === FetchStatus.NOT_STARTED
-      || ownersFetcher.getStatus() === FetchStatus.ABORT) {
-      await ownersFetcher.fetchSuggestedOwners(codeOwnerStatusMap);
-    }
+    await ownersProvider.fetchSuggestedOwners(codeOwnerStatusMap);
 
     return {
-      finished: ownersFetcher.getStatus() === FetchStatus.FINISHED,
-      status: ownersFetcher.getStatus(),
-      progress: ownersFetcher.getProgressString(),
+      finished: ownersProvider.getStatus() === FetchStatus.FINISHED,
+      status: ownersProvider.getStatus(),
+      progress: ownersProvider.getProgressString(),
       files: this._getFilesWithStatuses(codeOwnerStatusMap,
-          ownersFetcher.getFiles()),
+          ownersProvider.getFiles()),
     };
   }
 
   async getSuggestedOwnersProgress(suggestionsType) {
     const {codeOwnerStatusMap} = await this.getStatus();
-    const ownersFetcher = this.ownersFetchers[suggestionsType];
+    const ownersProvider = this.ownersProviders[suggestionsType];
     return {
-      finished: ownersFetcher.getStatus() === FetchStatus.FINISHED,
-      status: ownersFetcher.getStatus(),
-      progress: ownersFetcher.getProgressString(),
+      finished: ownersProvider.getStatus() === FetchStatus.FINISHED,
+      status: ownersProvider.getStatus(),
+      progress: ownersProvider.getProgressString(),
       files: this._getFilesWithStatuses(codeOwnerStatusMap,
-          ownersFetcher.getFiles()),
+          ownersProvider.getFiles()),
     };
   }
+
+  pauseSuggestedOwnersLoading(suggestionsType) {
+    this.ownersProviders[suggestionsType].pause();
+  }
+
+  resumeSuggestedOwnersLoading(suggestionsType) {
+    this.ownersProviders[suggestionsType].resume();
+  }
+
 
   _formatStatuses(statuses) {
     // convert the array of statuses to map between file path -> status
@@ -565,16 +280,16 @@ export class CodeOwnerService {
     return `${latestRevision._number}` === `${patchsetId}`;
   }
 
-  abort() {
-    for (const fetcher of Object.values(this.ownersFetchers)) {
-      fetcher.abort();
+  reset() {
+    for (const provider of Object.values(this.ownersProviders)) {
+      provider.reset();
     }
-    const codeOwnerApi = new CodeOwnerApi(this.restApi);
-    this.codeOwnerCacheApi = new CodeOwnersCacheApi(codeOwnerApi, change);
+    const codeOwnersApi = new CodeOwnersApi(this.restApi);
+    this.codeOwnersCacheApi = new CodeOwnersCacheApi(codeOwnersApi, change);
   }
 
   async getBranchConfig() {
-    return this.codeOwnerCacheApi.getBranchConfig();
+    return this.codeOwnersCacheApi.getBranchConfig();
   }
 
   async isCodeOwnerEnabled() {
@@ -582,7 +297,7 @@ export class CodeOwnerService {
         this.change.status === ChangeStatus.MERGED) {
       return false;
     }
-    const config = await this.codeOwnerCacheApi.getBranchConfig();
+    const config = await this.codeOwnersCacheApi.getBranchConfig();
     return config && !config.disabled;
   }
 

@@ -37,6 +37,7 @@ export const CodeOwnersModelMixin = Polymer.dedupingMixin(base => {
        */
       this.modelLoader = undefined;
     }
+
     static get properties() {
       return {
         /* The following 3 properties (change, reporting, restApi) have to be

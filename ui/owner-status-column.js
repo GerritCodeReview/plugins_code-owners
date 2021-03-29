@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {OwnerStatus} from './code-owners-service.js';
+import {OwnerStatus} from './code-owners-fetcher.js';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 
 const MAGIC_FILES = ['/COMMIT_MSG', '/MERGE_LIST', '/PATCHSET_LEVEL'];
