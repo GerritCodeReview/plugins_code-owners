@@ -74,11 +74,9 @@ export class OwnerRequirementValue extends
                     title="Documentation for overriding code owners"></iron-icon>
                 </a>
               </template>
-              <template is="dom-if" if="[[!_allApproved]]">
-                <gr-button link on-click="_openReplyDialog">
-                Suggest owners
+              <gr-button link on-click="_openReplyDialog">
+                [[_getSuggestOwnersText(_statusCount)]]
               </gr-button>
-              </template>
             </template>
             <template is="dom-if" if="[[model.branchConfig.no_code_owners_defined]]">                
               <span>No code-owners file</span>
@@ -105,10 +103,6 @@ export class OwnerRequirementValue extends
         type: Boolean,
         computed: '_computeIsLoading(model.branchConfig, model.status, '
             + 'model.userRole, model.pluginStatus)',
-      },
-      _allApproved: {
-        type: Boolean,
-        computed: '_computeAllApproved(_statusCount)',
       },
       _isOverriden: {
         type: Boolean,
@@ -171,8 +165,7 @@ export class OwnerRequirementValue extends
       return false;
     }
 
-
-    for(const requiredApprovalInfo of branchConfig['override_approval']) {
+    for (const requiredApprovalInfo of branchConfig['override_approval']) {
       const overridenLabel = requiredApprovalInfo.label;
       const overridenValue = Number(requiredApprovalInfo.value);
       if (isNaN(overridenValue)) continue;
@@ -189,9 +182,9 @@ export class OwnerRequirementValue extends
     return false;
   }
 
-  _computeAllApproved(statusCount) {
-    return statusCount && statusCount.missing === 0
-            && statusCount.pending === 0;
+  _getSuggestOwnersText(statusCount) {
+    return statusCount && statusCount.missing === 0 ?
+      'Add owners' : 'Suggest owners';
   }
 
   _getStatusCount(rawStatuses) {

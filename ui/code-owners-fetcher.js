@@ -170,20 +170,21 @@ export class OwnersProvider {
 
   _getFilesToFetch(codeOwnerStatusMap) {
     // only fetch those not approved yet
-    const filesGroupByStatus = [...codeOwnerStatusMap.keys()].reduce(
-        (list, file) => {
-          const status = codeOwnerStatusMap
-              .get(file).status;
-          if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
-            list.missing.push(file);
-          } else if (status === OwnerStatus.PENDING) {
-            list.pending.push(file);
-          }
+    const filesGroupByStatus = [...codeOwnerStatusMap.entries()].reduce(
+        (list, [file, fileInfo]) => {
+          if (list[fileInfo.status]) list[fileInfo.status].push(file);
           return list;
         }
-        , {pending: [], missing: []});
-    // always fetch INSUFFICIENT_REVIEWERS first and then pending
-    return filesGroupByStatus.missing.concat(filesGroupByStatus.pending);
+        , {
+          [OwnerStatus.PENDING]: [],
+          [OwnerStatus.INSUFFICIENT_REVIEWERS]: [],
+          [OwnerStatus.APPROVED]: [],
+        }
+    );
+    // always fetch INSUFFICIENT_REVIEWERS first, then pending and then approved
+    return filesGroupByStatus[OwnerStatus.INSUFFICIENT_REVIEWERS]
+        .concat(filesGroupByStatus[OwnerStatus.PENDING])
+        .concat(filesGroupByStatus[OwnerStatus.APPROVED]);
   }
 
   pause() {

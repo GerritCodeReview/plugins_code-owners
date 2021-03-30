@@ -352,8 +352,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
         type: Boolean,
         value: true,
         reflectToAttribute: true,
-        computed: '_isHidden(model.areAllFilesApproved, ' +
-            'model.showSuggestions)',
+        computed: '_isHidden(model.showSuggestions)',
       },
       suggestedOwners: Array,
       isLoading: {
@@ -470,10 +469,8 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     this.isLoading = state === SuggestionsState.Loading;
   }
 
-  _isHidden(allFilesApproved, showSuggestions) {
-    if (!showSuggestions) return true;
-    // if all approved, no need to show the container
-    return allFilesApproved === undefined || !!allFilesApproved;
+  _isHidden(showSuggestions) {
+    return !showSuggestions;
   }
 
   loadPropertiesAfterModelChanged() {
