@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {OwnerStatus} from './code-owners-service.js';
+import {OwnerStatus} from './code-owners-fetcher.js';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 import {showPluginFailedMessage} from './code-owners-banner.js';
 import {PluginState} from './code-owners-model.js';

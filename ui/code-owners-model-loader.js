@@ -39,6 +39,7 @@ export class ModelLoader {
     try {
       newValue = await propertyLoader();
     } catch (e) {
+      console.error(e);
       this.ownersModel.setPluginFailed(e.message);
       return;
     }
@@ -84,33 +85,62 @@ export class ModelLoader {
     );
   }
 
-  async loadSuggestions() {
-    // If a loading has been started already, do nothing
-    if (this.ownersModel.suggestionsState
-        !== SuggestionsState.NotLoaded) return;
-
-    this.ownersModel.setSuggestionsState(SuggestionsState.Loading);
-    let suggestedOwners;
-    try {
-      suggestedOwners = await this.ownersService.getSuggestedOwners();
-    } catch (e) {
-      this.ownersModel.setSuggestionsState(SuggestionsState.LoadFailed);
-      this.ownersModel.setPluginFailed(e.message);
+  async loadSuggestions(suggestionsType) {
+    this.pauseActiveSuggestedOwnersLoading();
+    this.activeLoadSuggestionType = suggestionsType;
+    if (this.ownersModel.suggestionsByTypes[suggestionsType].state ===
+        SuggestionsState.Loading) {
+      this.ownersService.resumeSuggestedOwnersLoading(suggestionsType);
       return;
     }
-    this.ownersModel.setSuggestions(suggestedOwners.suggestions);
-    this.ownersModel.setSuggestionsState(SuggestionsState.Loaded);
-  }
 
-  async updateLoadSuggestionsProgress() {
+    // If a loading has been started already, do nothing
+    if (this.ownersModel.suggestionsByTypes[suggestionsType].state !==
+        SuggestionsState.NotLoaded) return;
+
+    this.ownersModel.setSuggestionsState(suggestionsType,
+        SuggestionsState.Loading);
     let suggestedOwners;
     try {
-      suggestedOwners = await this.ownersService.getSuggestedOwnersProgress();
+      suggestedOwners =
+          await this.ownersService.getSuggestedOwners(suggestionsType);
+    } catch (e) {
+      console.error(e);
+      this.ownersModel.setSuggestionsState(suggestionsType,
+          SuggestionsState.LoadFailed);
+      // The selectedSuggestionsType can be changed while getSuggestedOwners
+      // is executed. The plugin should fail only if the selectedSuggestionsType
+      // is the same.
+      if (this.ownersModel.selectedSuggestionsType === suggestionsType) {
+        this.ownersModel.setPluginFailed(e.message);
+      }
+      return;
+    }
+    this.ownersModel.setSuggestionsFiles(suggestionsType,
+        suggestedOwners.files);
+    this.ownersModel.setSuggestionsState(suggestionsType,
+        SuggestionsState.Loaded);
+  }
+
+  pauseActiveSuggestedOwnersLoading() {
+    if (!this.activeLoadSuggestionType) return;
+    this.ownersService.pauseSuggestedOwnersLoading(
+        this.activeLoadSuggestionType);
+  }
+
+  async updateLoadSelectedSuggestionsProgress() {
+    const suggestionsType = this.ownersModel.selectedSuggestionsType;
+    let suggestedOwners;
+    try {
+      suggestedOwners =
+          await this.ownersService.getSuggestedOwnersProgress(suggestionsType);
     } catch {
       // Ignore any error, keep progress unchanged.
       return;
     }
-    this.ownersModel.setSuggestionsLoadProgress(suggestedOwners.progress);
-    this.ownersModel.setSuggestions(suggestedOwners.suggestions);
+    this.ownersModel.setSuggestionsLoadProgress(suggestionsType,
+        suggestedOwners.progress);
+    this.ownersModel.setSuggestionsFiles(suggestionsType,
+        suggestedOwners.files);
   }
 }
