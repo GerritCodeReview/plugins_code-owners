@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c36d96dc_bc1af7f1",
+        "filename": "ui/code-owners-api.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-30T08:34:21Z",
+      "side": 1,
+      "message": "I assume that this is just copied code from code-owners-service. I just quickly read it.",
+      "revId": "adff1be840680af6a8fe2dd80c103775550af5f9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "30701416_4f5beb34",
+        "filename": "ui/code-owners-fetcher.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-30T08:34:21Z",
+      "side": 1,
+      "message": "I assume that this is just copied code from code-owners-service. I just quickly read it.",
+      "revId": "adff1be840680af6a8fe2dd80c103775550af5f9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
