@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b090b081_434c7565",
+        "filename": "ui/code-owners-fetcher.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 174,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-30T14:58:58Z",
+      "side": 1,
+      "message": "NIT: name `acc` as accumulator would be more suited.",
+      "range": {
+        "startLine": 174,
+        "startChar": 9,
+        "endLine": 174,
+        "endChar": 13
+      },
+      "revId": "51c7340fd4f719eb7daa701431dcca15e138219f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "90ed2c83_1da5ccba",
+        "filename": "ui/owner-requirement.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-30T14:58:58Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 68,
+        "startChar": 86,
+        "endLine": 68,
+        "endChar": 100
+      },
+      "revId": "51c7340fd4f719eb7daa701431dcca15e138219f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "66a2ded4_a9fbf0bd",
+        "filename": "ui/owner-requirement.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-30T14:58:58Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 81,
+        "startChar": 85,
+        "endLine": 81,
+        "endChar": 101
+      },
+      "revId": "51c7340fd4f719eb7daa701431dcca15e138219f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
