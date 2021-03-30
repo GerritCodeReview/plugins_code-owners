@@ -632,7 +632,10 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           );
         }
       });
-      if (accounts.length > 0 && suggestion.owners.owned_by_all_users) {
+      const nonServiceUser = account =>
+        !account.tags || account.tags.indexOf('SERVICE_USER') < 0;
+      if (suggestion.owners.owned_by_all_users &&
+          accounts.some(nonServiceUser)) {
         hasSelected = true;
       }
       this.set(['suggestedOwners', sId, 'hasSelected'], hasSelected);
