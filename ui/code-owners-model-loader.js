@@ -16,6 +16,7 @@
  */
 
 import {SuggestionsState} from './code-owners-model.js';
+import {ServerConfigurationError} from './code-owners-api.js';
 
 /**
  * ModelLoader provides a method for loading data into the model.
@@ -39,6 +40,10 @@ export class ModelLoader {
     try {
       newValue = await propertyLoader();
     } catch (e) {
+      if (e instanceof ServerConfigurationError) {
+        this.ownersModel.setServerConfigurationError(e.message);
+        return;
+      }
       console.error(e);
       this.ownersModel.setPluginFailed(e.message);
       return;

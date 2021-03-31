@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
-import {PluginState} from './code-owners-model.js';
+import {PluginState, isPluginErrorState} from './code-owners-model.js';
 
 // There are 2 elements in this file:
 // CodeOwnersBanner - visual elements. This element is shown at the top
@@ -79,7 +79,7 @@ export class CodeOwnersBanner extends Polymer.Element {
           margin-left: var(--spacing-l);
         }
       </style>
-      <span class="text">Error: Code-owners plugin has failed</span>
+      <span class="text">[[_getErrorText(pluginStatus)]]</span>
       <gr-button link on-click="_showFailDetails">
         Details
       </gr-button>
@@ -112,7 +112,14 @@ export class CodeOwnersBanner extends Polymer.Element {
   }
 
   _computeHidden(pluginStatus) {
-    return !pluginStatus || pluginStatus.state !== PluginState.Failed;
+    return !pluginStatus || !isPluginErrorState(pluginStatus.state);
+  }
+
+  _getErrorText(pluginStatus) {
+    return !pluginStatus || pluginStatus.state === PluginState.Failed ?
+      'Error: Code-owners plugin has failed' :
+      'The code-owners plugin has configuration issue. ' +
+      'Please contact the project owner or the host admin.';
   }
 
   _showFailDetails() {
@@ -189,7 +196,7 @@ export class CodeOwnersPluginStatusNotifier extends
         branchState: 'LOADING',
       };
     }
-    if (pluginStatus.state === PluginState.Failed) {
+    if (isPluginErrorState(pluginStatus.state)) {
       return {
         change,
         branchState: 'FAILED',
