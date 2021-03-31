@@ -79,7 +79,7 @@ export class CodeOwnersBanner extends Polymer.Element {
           margin-left: var(--spacing-l);
         }
       </style>
-      <span class="text">Error: Code-owners plugin has failed</span>
+      <span class="text">[[_getErrorText(pluginStatus)]]</span>
       <gr-button link on-click="_showFailDetails">
         Details
       </gr-button>
@@ -112,7 +112,16 @@ export class CodeOwnersBanner extends Polymer.Element {
   }
 
   _computeHidden(pluginStatus) {
-    return !pluginStatus || pluginStatus.state !== PluginState.Failed;
+    return !pluginStatus ||
+        pluginStatus.state !== PluginState.Failed &&
+        pluginStatus.state !== PluginState.ServerConfigurationError;
+  }
+
+  _getErrorText(pluginStatus) {
+    return !pluginStatus || pluginStatus.state === PluginState.Failed ?
+      'Error: Code-owners plugin has failed' :
+      'The code-owners plugin has configuration issue. ' +
+      'Please contact the project owner or the host admin.';
   }
 
   _showFailDetails() {
@@ -189,7 +198,9 @@ export class CodeOwnersPluginStatusNotifier extends
         branchState: 'LOADING',
       };
     }
-    if (pluginStatus.state === PluginState.Failed) {
+    if (pluginStatus.state === PluginState.Failed ||
+        pluginStatus.state === PluginState.ServerConfigurationError
+    ) {
       return {
         change,
         branchState: 'FAILED',

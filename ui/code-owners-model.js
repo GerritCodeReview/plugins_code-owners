@@ -25,6 +25,7 @@ export const SuggestionsState = {
 export const PluginState = {
   Enabled: 'Enabled',
   Disabled: 'Disabled',
+  ServerConfigurationError: 'ServerConfigurationError',
   Failed: 'Failed',
 };
 
@@ -148,6 +149,11 @@ export class CodeOwnersModel extends EventTarget {
       PluginState.Enabled : PluginState.Disabled});
   }
 
+  setServerConfigurationError(failedMessage) {
+    this._setPluginStatus({state: PluginState.ServerConfigurationError,
+      failedMessage});
+  }
+
   setPluginFailed(failedMessage) {
     this._setPluginStatus({state: PluginState.Failed, failedMessage});
   }
@@ -163,7 +169,8 @@ export class CodeOwnersModel extends EventTarget {
       return status1 === status2;
     }
     if (status1.state !== status2.state) return false;
-    return status1.state === PluginState.Failed ?
+    return (status1.state === PluginState.Failed ||
+        status1.state === PluginState.ServerConfigurationError)?
       status1.failedMessage === status2.failedMessage :
       true;
   }
