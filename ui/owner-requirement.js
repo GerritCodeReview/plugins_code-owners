@@ -137,7 +137,8 @@ export class OwnerRequirementValue extends
   }
 
   _pluginFailed(pluginStatus) {
-    return pluginStatus && pluginStatus.state === PluginState.Failed;
+    return pluginStatus && (pluginStatus.state === PluginState.Failed ||
+      pluginStatus.state === PluginState.ServerConfigurationError);
   }
 
   _onStatusChanged(status, userRole) {
