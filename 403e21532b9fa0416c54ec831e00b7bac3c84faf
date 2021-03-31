@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ab660949_912328a1",
+        "filename": "ui/code-owners-model.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 173,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-31T14:30:44Z",
+      "side": 1,
+      "message": "Maybe consider utility function. I saw these condition 3x in this change.",
+      "range": {
+        "startLine": 172,
+        "startChar": 12,
+        "endLine": 173,
+        "endChar": 62
+      },
+      "revId": "403e21532b9fa0416c54ec831e00b7bac3c84faf",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
