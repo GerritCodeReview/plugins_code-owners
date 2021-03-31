@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "52bbf8a8_aecb3291",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-31T18:20:46Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 139,
+        "startChar": 36,
+        "endLine": 139,
+        "endChar": 40
+      },
+      "revId": "9926b51150c69df23893e07aaff1ee7ace823656",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "62f64f0d_f5d088c6",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-31T18:20:46Z",
+      "side": 1,
+      "message": "NIT: I think, you can actually do calc((26px - 18px)/2)",
+      "range": {
+        "startLine": 155,
+        "startChar": 24,
+        "endLine": 155,
+        "endChar": 32
+      },
+      "revId": "9926b51150c69df23893e07aaff1ee7ace823656",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f971f4b4_30485f24",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 2
+      },
+      "lineNbr": 155,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-03-31T18:20:46Z",
+      "side": 1,
+      "message": "whitespace",
+      "range": {
+        "startLine": 155,
+        "startChar": 68,
+        "endLine": 155,
+        "endChar": 69
+      },
+      "revId": "9926b51150c69df23893e07aaff1ee7ace823656",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
