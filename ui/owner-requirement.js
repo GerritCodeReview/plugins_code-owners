@@ -18,7 +18,7 @@
 import {OwnerStatus} from './code-owners-fetcher.js';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 import {showPluginFailedMessage} from './code-owners-banner.js';
-import {PluginState} from './code-owners-model.js';
+import {isPluginErrorState} from './code-owners-model.js';
 
 /**
  * Owner requirement control for `submit-requirement-item-code-owners` endpoint.
@@ -137,7 +137,7 @@ export class OwnerRequirementValue extends
   }
 
   _pluginFailed(pluginStatus) {
-    return pluginStatus && pluginStatus.state === PluginState.Failed;
+    return pluginStatus && isPluginErrorState(pluginStatus.state);
   }
 
   _onStatusChanged(status, userRole) {

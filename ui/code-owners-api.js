@@ -15,16 +15,20 @@
  * limitations under the License.
  */
 
-
 // TODO: Try to remove it. The ResponseError and getErrorMessage duplicates
 // code from the gr-plugin-rest-api.ts. This code is required because
 // we want custom error processing in some functions. For details see
 // the original gr-plugin-rest-api.ts file/
-
 class ResponseError extends Error {
   constructor(response) {
     super();
     this.response = response;
+  }
+}
+
+export class ServerConfigurationError extends Error {
+  constructor(msg) {
+    super(msg);
   }
 }
 
@@ -46,13 +50,39 @@ export class CodeOwnersApi {
   }
 
   /**
+   * Send a get request and provides custom response-code handling
+   */
+  async _get(url) {
+    const errFn = (response, error) => {
+      if (error) throw error;
+      if (response) throw new ResponseError(response);
+      throw new Error('Generic REST API error');
+    };
+    try {
+      return await this.restApi.send(
+          'GET',
+          url,
+          undefined,
+          errFn
+      );
+    } catch (err) {
+      if (err instanceof ResponseError && err.response.status === 409) {
+        return getErrorMessage(err.response).then(msg => {
+          throw new ServerConfigurationError(msg);
+        });
+      }
+      throw err;
+    }
+  }
+
+  /**
    * Returns a promise fetching the owner statuses for all files within the change.
    *
    * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#change-endpoints
    * @param {string} changeId
    */
   listOwnerStatus(changeId) {
-    return this.restApi.get(`/changes/${changeId}/code_owners.status`);
+    return this._get(`/changes/${changeId}/code_owners.status`);
   }
 
   /**
@@ -63,7 +93,7 @@ export class CodeOwnersApi {
    * @param {string} path
    */
   listOwnersForPath(changeId, path, limit) {
-    return this.restApi.get(
+    return this._get(
         `/changes/${changeId}/revisions/current/code_owners` +
         `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`
     );
@@ -78,7 +108,7 @@ export class CodeOwnersApi {
    * @param {string} path
    */
   getConfigForPath(project, branch, path) {
-    return this.restApi.get(
+    return this._get(
         `/projects/${encodeURIComponent(project)}/` +
         `branches/${encodeURIComponent(branch)}/` +
         `code_owners.config/${encodeURIComponent(path)}`
@@ -93,19 +123,11 @@ export class CodeOwnersApi {
    * @param {string} branch
    */
   async getBranchConfig(project, branch) {
-    const errFn = (response, error) => {
-      if (error) throw error;
-      if (response) throw new ResponseError(response);
-      throw new Error('Generic REST API error');
-    }
     try {
-      const config = await this.restApi.send(
-          'GET',
+      const config = await this._get(
           `/projects/${encodeURIComponent(project)}/` +
           `branches/${encodeURIComponent(branch)}/` +
-          `code_owners.branch_config`,
-          undefined,
-          errFn
+          `code_owners.branch_config`
       );
       if (config.override_approval && !(config.override_approval
           instanceof Array)) {
@@ -116,7 +138,7 @@ export class CodeOwnersApi {
         return {...config, override_approval: [config.override_approval]};
       }
       return config;
-    } catch(err) {
+    } catch (err) {
       if (err instanceof ResponseError) {
         if (err.response.status === 404) {
           // The 404 error means that the branch doesn't exist and
