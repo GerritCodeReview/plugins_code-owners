@@ -103,7 +103,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           border: 1px solid var(--view-background-color);
           border-radius: var(--border-radius);
           box-shadow: var(--elevation-level-1);
-          padding: var(--spacing-s);
+          padding: 0 var(--spacing-m);
           margin: var(--spacing-m) 0;
         }
         p.loading {
@@ -139,7 +139,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           justify-content: flex-end;    
         }
         .suggestion-row-indicator {
-          margin-right: var(--spacing-m);
+          margin-right: var(--spacing-s);
           visibility: hidden;
           line-height: 26px;
         }
@@ -150,14 +150,16 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           color: var(--link-color);
           vertical-align: top;
           position: relative;
-          top: 3px; /* (26-20)/2 - 26px line-height and 20px icon */ 
+          --iron-icon-height: 18px;
+          --iron-icon-width: 18px;
+          top: 4px; /* (26-18)/2 - 26px line-height and 18px icon */ 
         }
         .suggestion-group-name {
-          width: 200px;
+          width: 262px;
           line-height: 26px;
           text-overflow: ellipsis;
           overflow: hidden;
-          padding-right: var(--spacing-l);
+          padding-right: var(--spacing-s);
           white-space: nowrap;
         }
         .group-name-content {
@@ -175,7 +177,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           color: var(--deemphasized-text-color);
         }
         .suggested-owners {
-          --account-gap: var(--spacing-s);
+          --account-gap: var(--spacing-xs);
           --negative-account-gap: calc(-1*var(--account-gap));
           margin: var(--negative-account-gap) 0 0 var(--negative-account-gap);
           flex: 1;
