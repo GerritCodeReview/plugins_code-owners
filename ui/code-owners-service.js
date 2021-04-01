@@ -284,7 +284,8 @@ export class CodeOwnerService {
       provider.reset();
     }
     const codeOwnersApi = new CodeOwnersApi(this.restApi);
-    this.codeOwnersCacheApi = new CodeOwnersCacheApi(codeOwnersApi, change);
+    this.codeOwnersCacheApi =
+        new CodeOwnersCacheApi(codeOwnersApi, this.change);
   }
 
   async getBranchConfig() {
