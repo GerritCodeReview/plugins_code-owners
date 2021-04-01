@@ -254,7 +254,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void setOverrideApproval() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApprovals())
         .isEmpty();
 
     String overrideLabel1 = "Bypass-Owners";
@@ -271,13 +271,13 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     assertThat(updatedConfig.overrideApproval.get(0).value).isEqualTo(1);
     assertThat(updatedConfig.overrideApproval.get(1).label).isEqualTo(overrideLabel2);
     assertThat(updatedConfig.overrideApproval.get(1).value).isEqualTo(1);
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApprovals())
         .hasSize(2);
 
     input.overrideApprovals = ImmutableList.of();
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.overrideApproval).isNull();
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApprovals())
         .isEmpty();
   }
 
