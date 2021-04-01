@@ -15,7 +15,6 @@
  * limitations under the License.
  */
 
-
 // TODO: Try to remove it. The ResponseError and getErrorMessage duplicates
 // code from the gr-plugin-rest-api.ts. This code is required because
 // we want custom error processing in some functions. For details see
@@ -97,7 +96,7 @@ export class CodeOwnersApi {
       if (error) throw error;
       if (response) throw new ResponseError(response);
       throw new Error('Generic REST API error');
-    }
+    };
     try {
       const config = await this.restApi.send(
           'GET',
@@ -107,8 +106,8 @@ export class CodeOwnersApi {
           undefined,
           errFn
       );
-      if (config.override_approval && !(config.override_approval
-          instanceof Array)) {
+      if (config.override_approval &&
+          !(config.override_approval instanceof Array)) {
         // In the upcoming backend changes, the override_approval will be changed
         // to array with (possible) multiple items.
         // While this transition is in progress, the frontend supports both API -
@@ -116,7 +115,7 @@ export class CodeOwnersApi {
         return {...config, override_approval: [config.override_approval]};
       }
       return config;
-    } catch(err) {
+    } catch (err) {
       if (err instanceof ResponseError) {
         if (err.response.status === 404) {
           // The 404 error means that the branch doesn't exist and

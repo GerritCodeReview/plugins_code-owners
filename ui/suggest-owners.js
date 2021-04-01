@@ -136,7 +136,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
         }
         .show-all-owners-row {
           padding: var(--spacing-m) var(--spacing-xl) var(--spacing-s);
-          justify-content: flex-end;    
+          justify-content: flex-end;
         }
         .suggestion-row-indicator {
           margin-right: var(--spacing-s);
@@ -152,7 +152,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           position: relative;
           --iron-icon-height: 18px;
           --iron-icon-width: 18px;
-          top: 4px; /* (26-18)/2 - 26px line-height and 18px icon */ 
+          top: 4px; /* (26-18)/2 - 26px line-height and 18px icon */
         }
         .suggestion-group-name {
           width: 262px;
@@ -619,7 +619,8 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     this.suggestedOwners.forEach((suggestion, sId) => {
       let hasSelected = false;
       suggestion.owners.code_owners.forEach((owner, oId) => {
-        if (accounts.some(account => account._account_id === owner.account._account_id)) {
+        if (accounts.some(
+            account => account._account_id === owner.account._account_id)) {
           this.set(
               ['suggestedOwners', sId, 'owners', 'code_owners', oId],
               {...owner,
