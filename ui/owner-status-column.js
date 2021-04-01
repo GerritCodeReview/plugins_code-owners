@@ -51,8 +51,8 @@ class BaseEl extends CodeOwnersModelMixin(Polymer.Element) {
   computeHidden(change, patchRange) {
     if ([change, patchRange].includes(undefined)) return true;
     // if code-owners is not a submit requirement, don't show status column
-    if (change.requirements
-        && !change.requirements.find(r => r.type === 'code-owners')) {
+    if (change.requirements &&
+        !change.requirements.find(r => r.type === 'code-owners')) {
       return true;
     }
 
@@ -205,9 +205,9 @@ export class OwnerStatusColumnContent extends BaseEl {
     if (!oldPathStatus) {
       this.status = newPathStatus;
     } else {
-      this.status = newPathStatus === STATUS_CODE.APPROVED
-        ? this._computeStatus(oldPathStatus, /* oldPath= */ true)
-        : newPathStatus;
+      this.status = newPathStatus === STATUS_CODE.APPROVED ?
+        this._computeStatus(oldPathStatus, /* oldPath= */ true) :
+        newPathStatus;
     }
   }
 
