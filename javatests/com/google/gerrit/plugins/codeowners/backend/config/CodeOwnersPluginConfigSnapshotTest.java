@@ -802,7 +802,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
-  public void getConfiguredDefaultRequireApproval() throws Exception {
+  public void getConfiguredRequiredApproval() throws Exception {
     RequiredApproval requiredApproval = cfgSnapshot().getRequiredApproval();
     assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
     assertThat(requiredApproval).hasValueThat().isEqualTo(2);
@@ -882,7 +882,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+1")
-  public void requiredApprovalConfiguredOnProjectLevelOverridesDefaultRequiredApproval()
+  public void requiredApprovalConfiguredOnProjectLevelOverridesGloballyConfiguredRequiredApproval()
       throws Exception {
     configureRequiredApproval(project, "Code-Review+2");
     RequiredApproval requiredApproval = cfgSnapshot().getRequiredApproval();
@@ -899,8 +899,9 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = FindOwnersBackend.ID)
-  public void inheritedRequiredApprovalOverridesDefaultRequiredApproval() throws Exception {
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+1")
+  public void inheritedRequiredApprovalOverridesGloballyConfiguredRequiredApproval()
+      throws Exception {
     configureRequiredApproval(allProjects, "Code-Review+2");
     RequiredApproval requiredApproval = cfgSnapshot().getRequiredApproval();
     assertThat(requiredApproval).hasLabelNameThat().isEqualTo("Code-Review");
