@@ -326,11 +326,11 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    ImmutableSet<RequiredApproval> overrideApproval =
-        codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval();
-    assertThat(overrideApproval).hasSize(1);
-    assertThat(overrideApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(overrideApproval).element(0).hasValueThat().isEqualTo(2);
+    ImmutableSet<RequiredApproval> overrideApprovals =
+        codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApprovals();
+    assertThat(overrideApprovals).hasSize(1);
+    assertThat(overrideApprovals).element(0).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(overrideApprovals).element(0).hasValueThat().isEqualTo(2);
   }
 
   @Test
@@ -423,11 +423,11 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    ImmutableSet<RequiredApproval> overrideApproval =
-        codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApproval();
-    assertThat(overrideApproval).hasSize(1);
-    assertThat(overrideApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(overrideApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> overrideApprovals =
+        codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApprovals();
+    assertThat(overrideApprovals).hasSize(1);
+    assertThat(overrideApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(overrideApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test

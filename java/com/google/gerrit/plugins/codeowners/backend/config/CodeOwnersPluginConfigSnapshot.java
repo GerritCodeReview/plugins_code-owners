@@ -439,7 +439,7 @@ public class CodeOwnersPluginConfigSnapshot {
    * @return the override approvals that should be used, an empty set if no override approval is
    *     configured, in this case the override functionality is disabled
    */
-  public ImmutableSet<RequiredApproval> getOverrideApproval() {
+  public ImmutableSet<RequiredApproval> getOverrideApprovals() {
     try {
       return filterOutDuplicateRequiredApprovals(
           getConfiguredRequiredApproval(overrideApprovalConfig));

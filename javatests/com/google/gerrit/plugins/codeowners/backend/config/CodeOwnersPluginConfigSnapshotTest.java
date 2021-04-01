@@ -982,47 +982,47 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getOverrideApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void getConfiguredOverrideApproval() throws Exception {
     createOwnersOverrideLabel();
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Foo-Bar+1")
   public void getOverrideApprovalIfNonExistingLabelIsConfiguredAsOverrideApproval()
       throws Exception {
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Code-Review+3")
   public void getOverrideApprovalIfNonExistingLabelValueIsConfiguredAsOverrideApproval()
       throws Exception {
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "INVALID")
   public void getOverrideApprovalIfInvalidOverrideApprovalIsConfigured() throws Exception {
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
   public void getOverrideApprovalConfiguredOnProjectLevel() throws Exception {
     createOwnersOverrideLabel();
     configureOverrideApproval(project, "Owners-Override+1");
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -1036,7 +1036,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
         OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL,
         ImmutableList.of("Owners-Override+1", "Other-Override+1"));
 
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApproval();
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(
             requiredApprovals.stream()
                 .map(requiredApproval -> requiredApproval.toString())
@@ -1052,10 +1052,10 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel("Other-Override");
 
     configureOverrideApproval(project, "Other-Override+1");
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Other-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -1063,10 +1063,10 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel();
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -1077,10 +1077,10 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel("Other-Override");
 
     configureOverrideApproval(allProjects, "Other-Override+1");
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Other-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -1090,10 +1090,10 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
     configureOverrideApproval(project, "Other-Override+1");
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Other-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -1106,17 +1106,17 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
     configureOverrideApproval(project, "Owners-Override+2");
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(2);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(2);
   }
 
   @Test
   public void getOverrideApprovalIfNonExistingLabelIsConfiguredAsOverrideApprovalOnProjectLevel()
       throws Exception {
     configureOverrideApproval(project, "Foo-Bar+1");
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
@@ -1125,14 +1125,14 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
           throws Exception {
     createOwnersOverrideLabel();
     configureOverrideApproval(project, "Owners-Override+2");
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
   public void getOverrideApprovalIfInvalidOverrideApprovalIsConfiguredOnProjectLevel()
       throws Exception {
     configureOverrideApproval(project, "INVALID");
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
@@ -1140,7 +1140,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel();
     Project.NameKey otherProject = projectOperations.newProject().create();
     configureOverrideApproval(otherProject, "Owners-Override+1");
-    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+    assertThat(cfgSnapshot().getOverrideApprovals()).isEmpty();
   }
 
   @Test
@@ -1152,10 +1152,10 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
         ImmutableList.of("Code-Review+2", "Code-Review+1", "Code-Review+2"));
 
     // If multiple values are set for a key, the last value wins.
-    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
-    assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    assertThat(requiredApprovals).hasSize(1);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Code-Review");
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test

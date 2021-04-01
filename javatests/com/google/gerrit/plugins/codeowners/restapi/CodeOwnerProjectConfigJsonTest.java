@@ -169,7 +169,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     when(codeOwnersPluginConfigSnapshot.areImplicitApprovalsEnabled()).thenReturn(true);
     when(codeOwnersPluginConfigSnapshot.getRequiredApproval())
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
-    when(codeOwnersPluginConfigSnapshot.getOverrideApproval())
+    when(codeOwnersPluginConfigSnapshot.getOverrideApprovals())
         .thenReturn(
             ImmutableSet.of(
                 RequiredApproval.create(
@@ -242,7 +242,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   public void withMultipleOverrides() throws Exception {
     createOwnersOverrideLabel();
 
-    when(codeOwnersPluginConfigSnapshot.getOverrideApproval())
+    when(codeOwnersPluginConfigSnapshot.getOverrideApprovals())
         .thenReturn(
             ImmutableSet.of(
                 RequiredApproval.create(LabelType.withDefaultValues("Owners-Override"), (short) 1),
@@ -284,7 +284,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     when(codeOwnersPluginConfigSnapshot.areImplicitApprovalsEnabled()).thenReturn(true);
     when(codeOwnersPluginConfigSnapshot.getRequiredApproval())
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
-    when(codeOwnersPluginConfigSnapshot.getOverrideApproval())
+    when(codeOwnersPluginConfigSnapshot.getOverrideApprovals())
         .thenReturn(
             ImmutableSet.of(
                 RequiredApproval.create(
