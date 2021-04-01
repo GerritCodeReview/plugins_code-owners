@@ -1411,7 +1411,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(
-      name = "plugin.code-owners.exemptedUsers",
+      name = "plugin.code-owners.exemptedUser",
       values = {"bot1@example.com", "bot2@example.com"})
   public void inheritedExemptedUsersCanBeRemovedOnProjectLevel() throws Exception {
     Config cfg = new Config();
