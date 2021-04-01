@@ -129,8 +129,8 @@ export class CodeOwnersApi {
           `branches/${encodeURIComponent(branch)}/` +
           `code_owners.branch_config`
       );
-      if (config.override_approval && !(config.override_approval
-          instanceof Array)) {
+      if (config.override_approval &&
+          !(config.override_approval instanceof Array)) {
         // In the upcoming backend changes, the override_approval will be changed
         // to array with (possible) multiple items.
         // While this transition is in progress, the frontend supports both API -
