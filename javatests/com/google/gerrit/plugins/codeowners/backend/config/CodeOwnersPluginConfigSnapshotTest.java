@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.hasEmail;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
@@ -172,6 +173,152 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getGlobalCodeOwnersIfNoneIsConfigured() throws Exception {
+    assertThat(cfgSnapshot().getGlobalCodeOwners()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"global-code-owner-1@example.com", "global-code-owner-2@example.com"})
+  public void getGlobalCodeOwnerssIfNoneIsConfiguredOnProjectLevel() throws Exception {
+    TestAccount globalCodeOwner1 =
+        accountCreator.create(
+            "globalCodeOwner1",
+            "global-code-owner-1@example.com",
+            "Global Code Owner 1",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner2 =
+        accountCreator.create(
+            "globalCodeOwner2",
+            "global-code-owner-2@example.com",
+            "Global Code Owner 2",
+            /* displayName= */ null);
+    assertThat(cfgSnapshot().getGlobalCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(globalCodeOwner1.email(), globalCodeOwner2.email());
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"global-code-owner-1@example.com", "global-code-owner-2@example.com"})
+  public void globalCodeOwnersOnProjectLevelOverrideGloballyConfiguredGlobalCodeOwners()
+      throws Exception {
+    accountCreator.create(
+        "globalCodeOwner1",
+        "global-code-owner-1@example.com",
+        "Global Code Owner 1",
+        /* displayName= */ null);
+    accountCreator.create(
+        "globalCodeOwner2",
+        "global-code-owner-2@example.com",
+        "Global Code Owner 2",
+        /* displayName= */ null);
+    TestAccount globalCodeOwner3 =
+        accountCreator.create(
+            "globalCodeOwner3",
+            "global-code-owner-3@example.com",
+            "Global Code Owner 3",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner4 =
+        accountCreator.create(
+            "globalCodeOwner4",
+            "global-code-owner-4@example.com",
+            "Global Code Owner 4",
+            /* displayName= */ null);
+    configureGlobalCodeOwners(allProjects, globalCodeOwner3.email(), globalCodeOwner4.email());
+    assertThat(cfgSnapshot().getGlobalCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(globalCodeOwner3.email(), globalCodeOwner4.email());
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"global-code-owner-1@example.com", "global-code-owner-2@example.com"})
+  public void globalCodeOwnersAreInheritedFromParentProject() throws Exception {
+    accountCreator.create(
+        "globalCodeOwner1",
+        "global-code-owner-1@example.com",
+        "Global Code Owner 1",
+        /* displayName= */ null);
+    accountCreator.create(
+        "globalCodeOwner2",
+        "global-code-owner-2@example.com",
+        "Global Code Owner 2",
+        /* displayName= */ null);
+    TestAccount globalCodeOwner3 =
+        accountCreator.create(
+            "globalCodeOwner3",
+            "global-code-owner-3@example.com",
+            "Global Code Owner 3",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner4 =
+        accountCreator.create(
+            "globalCodeOwner4",
+            "global-code-owner-4@example.com",
+            "Global Code Owner 4",
+            /* displayName= */ null);
+    configureGlobalCodeOwners(allProjects, globalCodeOwner3.email(), globalCodeOwner4.email());
+    assertThat(cfgSnapshot().getGlobalCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(globalCodeOwner3.email(), globalCodeOwner4.email());
+  }
+
+  @Test
+  public void inheritedGlobalCodeOwnersCanBeOverridden() throws Exception {
+    TestAccount globalCodeOwner1 =
+        accountCreator.create(
+            "globalCodeOwner1",
+            "global-code-owner-1@example.com",
+            "Global Code Owner 1",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner2 =
+        accountCreator.create(
+            "globalCodeOwner2",
+            "global-code-owner-2@example.com",
+            "Global Code Owner 2",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner3 =
+        accountCreator.create(
+            "globalCodeOwner3",
+            "global-code-owner-3@example.com",
+            "Global Code Owner 3",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner4 =
+        accountCreator.create(
+            "globalCodeOwner4",
+            "global-code-owner-4@example.com",
+            "Global Code Owner 4",
+            /* displayName= */ null);
+    configureGlobalCodeOwners(allProjects, globalCodeOwner1.email(), globalCodeOwner2.email());
+    configureGlobalCodeOwners(project, globalCodeOwner3.email(), globalCodeOwner4.email());
+    assertThat(cfgSnapshot().getGlobalCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(globalCodeOwner3.email(), globalCodeOwner4.email());
+  }
+
+  @Test
+  public void inheritedGlobalCodeOwnersCanBeRemoved() throws Exception {
+    TestAccount globalCodeOwner1 =
+        accountCreator.create(
+            "globalCodeOwner1",
+            "global-code-owner-1@example.com",
+            "Global Code Owner 1",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner2 =
+        accountCreator.create(
+            "globalCodeOwner2",
+            "global-code-owner-2@example.com",
+            "Global Code Owner 2",
+            /* displayName= */ null);
+    configureGlobalCodeOwners(allProjects, globalCodeOwner1.email(), globalCodeOwner2.email());
+    configureGlobalCodeOwners(project, "");
+    assertThat(cfgSnapshot().getGlobalCodeOwners()).isEmpty();
+  }
+
+  @Test
   public void getExemptedAccountsIfNoneIsConfigured() throws Exception {
     assertThat(cfgSnapshot().getExemptedAccounts()).isEmpty();
   }
@@ -201,7 +348,8 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   @GerritConfig(
       name = "plugin.code-owners.exemptedUser",
       values = {"exempted-user-1@example.com", "exempted-user-2@example.com"})
-  public void exemptedAccountsOnProjectLevelOverrideGlobalExemptedAcounts() throws Exception {
+  public void exemptedAccountsOnProjectLevelOverrideGloballyConfiguredExemptedAcounts()
+      throws Exception {
     accountCreator.create(
         "exemptedUser1", "exempted-user-1@example.com", "Exempted User 1", /* displayName= */ null);
     accountCreator.create(
@@ -1264,6 +1412,15 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
         /* subsection= */ null,
         GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
         fallbackCodeOwners.name());
+  }
+
+  private void configureGlobalCodeOwners(Project.NameKey project, String... globalCodeOwners)
+      throws Exception {
+    setCodeOwnersConfig(
+        project,
+        /* subsection= */ null,
+        GeneralConfig.KEY_GLOBAL_CODE_OWNER,
+        ImmutableList.copyOf(globalCodeOwners));
   }
 
   private void configureExemptedUsers(Project.NameKey project, String... exemptedUsers)
