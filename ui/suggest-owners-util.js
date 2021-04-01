@@ -30,7 +30,6 @@ import {BestSuggestionsLimit} from './code-owners-model.js';
 
 export function getDisplayOwnersGroups(files, allOwnersByPathMap,
     reviewersIdSet, allowAllOwnersSubstition) {
-
   const getDisplayOwnersFunc =
       !allowAllOwnersSubstition || allOwnersByPathMap.size === 0 ||
       reviewersIdSet.size === 0 ?

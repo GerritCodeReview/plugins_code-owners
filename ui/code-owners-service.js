@@ -174,8 +174,8 @@ export class CodeOwnerService {
       const oldPathStatus = status.old_path_status;
       const newPathStatus = status.new_path_status;
       // For deleted files, no new_path_status exists
-      return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED)
-        || (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
+      return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED) ||
+        (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
     });
   }
 
@@ -230,7 +230,6 @@ export class CodeOwnerService {
   resumeSuggestedOwnersLoading(suggestionsType) {
     this.ownersProviders[suggestionsType].resume();
   }
-
 
   _formatStatuses(statuses) {
     // convert the array of statuses to map between file path -> status
