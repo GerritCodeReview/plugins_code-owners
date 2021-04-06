@@ -631,7 +631,15 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   @Test
   public void inheritedDisabledBranchCanBeOverridden() throws Exception {
     configureDisabledBranch(allProjects, "refs/heads/master");
-    enableCodeOwnersForAllBranches(project);
+    configureDisabledBranch(project, "refs/heads/test");
+    assertThat(cfgSnapshot().isDisabled("master")).isFalse();
+    assertThat(cfgSnapshot().isDisabled("test")).isTrue();
+  }
+
+  @Test
+  public void inheritedDisabledBranchCanBeRemoved() throws Exception {
+    configureDisabledBranch(allProjects, "refs/heads/master");
+    configureDisabledBranch(project, "");
     assertThat(cfgSnapshot().isDisabled("master")).isFalse();
   }
 
@@ -1559,10 +1567,6 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
       throws Exception {
     setCodeOwnersConfig(
         project, /* subsection= */ null, StatusConfig.KEY_DISABLED_BRANCH, disabledBranch);
-  }
-
-  private void enableCodeOwnersForAllBranches(Project.NameKey project) throws Exception {
-    setCodeOwnersConfig(project, /* subsection= */ null, StatusConfig.KEY_DISABLED_BRANCH, "");
   }
 
   private void configureBackend(Project.NameKey project, String backendName) throws Exception {
