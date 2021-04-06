@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f83d5f16_1b63156c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfigSnapshotTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 642,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-06T19:22:05Z",
+      "side": 1,
+      "message": "Can you make it clear what this does when the branch is empty?\n\nLooks like it\u0027s just \"for all branches\" but I kind of liked it better before since it used to be self-explanatory with \"enableCodeOwnersForAllBranches\".",
+      "range": {
+        "startLine": 642,
+        "startChar": 36,
+        "endLine": 642,
+        "endChar": 39
+      },
+      "revId": "f0e57e9ad358c852ac0396be9fb02d5f631ca29d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
