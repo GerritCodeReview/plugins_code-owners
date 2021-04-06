@@ -62,47 +62,33 @@ abstract class AbstractRequiredApprovalConfig {
     requireNonNull(pluginConfig, "pluginConfig");
 
     ImmutableList.Builder<RequiredApproval> requiredApprovalList = ImmutableList.builder();
-    String[] requiredApprovals =
-        pluginConfig.getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey());
-    if (requiredApprovals.length > 0) {
-      for (String requiredApproval : requiredApprovals) {
-        try {
-          requiredApprovalList.add(RequiredApproval.parse(projectState, requiredApproval));
-        } catch (IllegalStateException | IllegalArgumentException e) {
-          throw new InvalidPluginConfigurationException(
-              pluginName,
-              String.format(
-                  "Required approval '%s' that is configured in %s.config"
-                      + " (parameter %s.%s) is invalid: %s",
-                  requiredApproval,
-                  pluginName,
-                  SECTION_CODE_OWNERS,
-                  getConfigKey(),
-                  e.getMessage()));
-        }
+    for (String requiredApproval :
+        pluginConfigFactory.getFromGerritConfig(pluginName).getStringList(getConfigKey())) {
+      try {
+        requiredApprovalList.add(RequiredApproval.parse(projectState, requiredApproval));
+      } catch (IllegalStateException | IllegalArgumentException e) {
+        throw new InvalidPluginConfigurationException(
+            pluginName,
+            String.format(
+                "Required approval '%s' that is configured in gerrit.config"
+                    + " (parameter plugin.%s.%s) is invalid: %s",
+                requiredApproval, pluginName, getConfigKey(), e.getMessage()));
       }
-      return requiredApprovalList.build();
     }
-
-    requiredApprovals =
-        pluginConfigFactory.getFromGerritConfig(pluginName).getStringList(getConfigKey());
-    if (requiredApprovals.length > 0) {
-      for (String requiredApproval : requiredApprovals) {
-        try {
-          requiredApprovalList.add(RequiredApproval.parse(projectState, requiredApproval));
-        } catch (IllegalStateException | IllegalArgumentException e) {
-          throw new InvalidPluginConfigurationException(
-              pluginName,
-              String.format(
-                  "Required approval '%s' that is configured in gerrit.config"
-                      + " (parameter plugin.%s.%s) is invalid: %s",
-                  requiredApproval, pluginName, getConfigKey(), e.getMessage()));
-        }
+    for (String requiredApproval :
+        pluginConfig.getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, getConfigKey())) {
+      try {
+        requiredApprovalList.add(RequiredApproval.parse(projectState, requiredApproval));
+      } catch (IllegalStateException | IllegalArgumentException e) {
+        throw new InvalidPluginConfigurationException(
+            pluginName,
+            String.format(
+                "Required approval '%s' that is configured in %s.config"
+                    + " (parameter %s.%s) is invalid: %s",
+                requiredApproval, pluginName, SECTION_CODE_OWNERS, getConfigKey(), e.getMessage()));
       }
-      return requiredApprovalList.build();
     }
-
-    return ImmutableList.of();
+    return requiredApprovalList.build();
   }
 
   /**

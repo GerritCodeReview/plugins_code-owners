@@ -1355,23 +1355,29 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(
       name = "plugin.code-owners.globalCodeOwner",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void globalCodeOnwersInPluginConfigOverrideGlobalCodeOwnersInGerritConfig()
+  public void globalCodeOwnersInPluginConfigExtendGlobalCodeOwnersInGerritConfig()
       throws Exception {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER, "bot3@example.com");
     assertThat(generalConfig.getGlobalCodeOwners(cfg))
-        .containsExactly(CodeOwnerReference.create("bot3@example.com"));
+        .containsExactly(
+            CodeOwnerReference.create("bot1@example.com"),
+            CodeOwnerReference.create("bot2@example.com"),
+            CodeOwnerReference.create("bot3@example.com"));
   }
 
   @Test
   @GerritConfig(
       name = "plugin.code-owners.globalCodeOwner",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void inheritedGlobalOwnersCanBeRemovedOnProjectLevel() throws Exception {
+  public void inheritedGlobalOwnersCannotBeRemovedOnProjectLevel() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER, "");
-    assertThat(generalConfig.getGlobalCodeOwners(cfg)).isEmpty();
+    assertThat(generalConfig.getGlobalCodeOwners(cfg))
+        .containsExactly(
+            CodeOwnerReference.create("bot1@example.com"),
+            CodeOwnerReference.create("bot2@example.com"));
   }
 
   @Test
@@ -1402,21 +1408,23 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(
       name = "plugin.code-owners.exemptedUser",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void exemptedUsersInPluginConfigOverrideExemptedUsersInGerritConfig() throws Exception {
+  public void exemptedUsersInPluginConfigExtendExemptedUsersInGerritConfig() throws Exception {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER, "bot3@example.com");
-    assertThat(generalConfig.getExemptedUsers(cfg)).containsExactly("bot3@example.com");
+    assertThat(generalConfig.getExemptedUsers(cfg))
+        .containsExactly("bot1@example.com", "bot2@example.com", "bot3@example.com");
   }
 
   @Test
   @GerritConfig(
       name = "plugin.code-owners.exemptedUser",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void inheritedExemptedUsersCanBeRemovedOnProjectLevel() throws Exception {
+  public void inheritedExemptedUsersCannotBeRemovedOnProjectLevel() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER, "");
-    assertThat(generalConfig.getExemptedUsers(cfg)).isEmpty();
+    assertThat(generalConfig.getExemptedUsers(cfg))
+        .containsExactly("bot1@example.com", "bot2@example.com");
   }
 
   @Test

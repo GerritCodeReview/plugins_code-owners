@@ -27,7 +27,6 @@ import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
@@ -36,8 +35,6 @@ import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.account.Emails;
-import com.google.gerrit.server.config.PluginConfigFactory;
-import com.google.gerrit.server.project.NoSuchProjectException;
 import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
@@ -56,8 +53,6 @@ public class CodeOwnersPluginConfigSnapshot {
     CodeOwnersPluginConfigSnapshot create(Project.NameKey projectName);
   }
 
-  private final String pluginName;
-  private final PluginConfigFactory pluginConfigFactory;
   private final ProjectCache projectCache;
   private final Emails emails;
   private final BackendConfig backendConfig;
@@ -72,8 +67,7 @@ public class CodeOwnersPluginConfigSnapshot {
 
   @Inject
   CodeOwnersPluginConfigSnapshot(
-      @PluginName String pluginName,
-      PluginConfigFactory pluginConfigFactory,
+      CodeOwnersPluginConfig.Factory codeOwnersPluginConfigFactory,
       ProjectCache projectCache,
       Emails emails,
       BackendConfig backendConfig,
@@ -82,8 +76,6 @@ public class CodeOwnersPluginConfigSnapshot {
       RequiredApprovalConfig requiredApprovalConfig,
       StatusConfig statusConfig,
       @Assisted Project.NameKey projectName) {
-    this.pluginName = pluginName;
-    this.pluginConfigFactory = pluginConfigFactory;
     this.projectCache = projectCache;
     this.emails = emails;
     this.backendConfig = backendConfig;
@@ -92,7 +84,7 @@ public class CodeOwnersPluginConfigSnapshot {
     this.requiredApprovalConfig = requiredApprovalConfig;
     this.statusConfig = statusConfig;
     this.projectName = projectName;
-    this.pluginConfig = loadPluginConfig();
+    this.pluginConfig = codeOwnersPluginConfigFactory.create(projectName).get();
   }
 
   /** Gets the file extension of code owner config files, if any configured. */
@@ -492,22 +484,5 @@ public class CodeOwnersPluginConfigSnapshot {
     ProjectState projectState =
         projectCache.get(projectName).orElseThrow(illegalState(projectName));
     return requiredApprovalConfig.get(projectState, pluginConfig);
-  }
-
-  /**
-   * Reads and returns the config from the {@code code-owners.config} file in {@code
-   * refs/meta/config} branch.
-   *
-   * @return the code owners configurations
-   */
-  private Config loadPluginConfig() {
-    try {
-      return pluginConfigFactory.getProjectPluginConfigWithInheritance(projectName, pluginName);
-    } catch (NoSuchProjectException e) {
-      throw new IllegalStateException(
-          String.format(
-              "cannot get %s plugin config for non-existing project %s", pluginName, projectName),
-          e);
-    }
   }
 }
