@@ -180,31 +180,30 @@ public class StatusConfig {
     requireNonNull(pluginConfig, "pluginConfig");
     requireNonNull(branch, "branch");
 
-    String disabledBranches =
-        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH);
-    if (disabledBranches != null) {
-      // a value for KEY_DISABLED_BRANCH is set on project-level
-      return isDisabledForBranch(
-          pluginConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH),
-          branch.branch(),
-          "Disabled branch '%s' that is configured for project "
-              + branch.project()
-              + " in "
-              + pluginName
-              + ".config (parameter "
-              + SECTION_CODE_OWNERS
-              + "."
-              + KEY_DISABLED_BRANCH
-              + ") is invalid.");
+    // check if the branch is disabled in gerrit.config
+    boolean isDisabled =
+        isDisabledForBranch(
+            pluginConfigFromGerritConfig.getStringList(KEY_DISABLED_BRANCH),
+            branch.branch(),
+            "Disabled branch '%s' that is configured for in gerrit.config (parameter plugin."
+                + pluginName
+                + "."
+                + KEY_DISABLED_BRANCH
+                + ") is invalid.");
+    if (isDisabled) {
+      return true;
     }
 
-    // there is no project-level configuration for KEY_DISABLED_BRANCH, check if it's set in
-    // gerrit.config
+    // check if the branch is disabled on project level
     return isDisabledForBranch(
-        pluginConfigFromGerritConfig.getStringList(KEY_DISABLED_BRANCH),
+        pluginConfig.getStringList(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH),
         branch.branch(),
-        "Disabled branch '%s' that is configured for in gerrit.config (parameter plugin."
+        "Disabled branch '%s' that is configured for project "
+            + branch.project()
+            + " in "
             + pluginName
+            + ".config (parameter "
+            + SECTION_CODE_OWNERS
             + "."
             + KEY_DISABLED_BRANCH
             + ") is invalid.");
