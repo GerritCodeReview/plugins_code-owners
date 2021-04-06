@@ -204,18 +204,20 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   @GerritConfig(
       name = "plugin.code-owners.globalCodeOwner",
       values = {"global-code-owner-1@example.com", "global-code-owner-2@example.com"})
-  public void globalCodeOwnersOnProjectLevelOverrideGloballyConfiguredGlobalCodeOwners()
+  public void globalCodeOwnersOnProjectLevelExtendsGloballyConfiguredGlobalCodeOwners()
       throws Exception {
-    accountCreator.create(
-        "globalCodeOwner1",
-        "global-code-owner-1@example.com",
-        "Global Code Owner 1",
-        /* displayName= */ null);
-    accountCreator.create(
-        "globalCodeOwner2",
-        "global-code-owner-2@example.com",
-        "Global Code Owner 2",
-        /* displayName= */ null);
+    TestAccount globalCodeOwner1 =
+        accountCreator.create(
+            "globalCodeOwner1",
+            "global-code-owner-1@example.com",
+            "Global Code Owner 1",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner2 =
+        accountCreator.create(
+            "globalCodeOwner2",
+            "global-code-owner-2@example.com",
+            "Global Code Owner 2",
+            /* displayName= */ null);
     TestAccount globalCodeOwner3 =
         accountCreator.create(
             "globalCodeOwner3",
@@ -231,7 +233,11 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     configureGlobalCodeOwners(allProjects, globalCodeOwner3.email(), globalCodeOwner4.email());
     assertThat(cfgSnapshot().getGlobalCodeOwners())
         .comparingElementsUsing(hasEmail())
-        .containsExactly(globalCodeOwner3.email(), globalCodeOwner4.email());
+        .containsExactly(
+            globalCodeOwner1.email(),
+            globalCodeOwner2.email(),
+            globalCodeOwner3.email(),
+            globalCodeOwner4.email());
   }
 
   @Test
@@ -239,16 +245,18 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
       name = "plugin.code-owners.globalCodeOwner",
       values = {"global-code-owner-1@example.com", "global-code-owner-2@example.com"})
   public void globalCodeOwnersAreInheritedFromParentProject() throws Exception {
-    accountCreator.create(
-        "globalCodeOwner1",
-        "global-code-owner-1@example.com",
-        "Global Code Owner 1",
-        /* displayName= */ null);
-    accountCreator.create(
-        "globalCodeOwner2",
-        "global-code-owner-2@example.com",
-        "Global Code Owner 2",
-        /* displayName= */ null);
+    TestAccount globalCodeOwner1 =
+        accountCreator.create(
+            "globalCodeOwner1",
+            "global-code-owner-1@example.com",
+            "Global Code Owner 1",
+            /* displayName= */ null);
+    TestAccount globalCodeOwner2 =
+        accountCreator.create(
+            "globalCodeOwner2",
+            "global-code-owner-2@example.com",
+            "Global Code Owner 2",
+            /* displayName= */ null);
     TestAccount globalCodeOwner3 =
         accountCreator.create(
             "globalCodeOwner3",
@@ -264,11 +272,15 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     configureGlobalCodeOwners(allProjects, globalCodeOwner3.email(), globalCodeOwner4.email());
     assertThat(cfgSnapshot().getGlobalCodeOwners())
         .comparingElementsUsing(hasEmail())
-        .containsExactly(globalCodeOwner3.email(), globalCodeOwner4.email());
+        .containsExactly(
+            globalCodeOwner1.email(),
+            globalCodeOwner2.email(),
+            globalCodeOwner3.email(),
+            globalCodeOwner4.email());
   }
 
   @Test
-  public void inheritedGlobalCodeOwnersCanBeOverridden() throws Exception {
+  public void inheritedGlobalCodeOwnersCanBeExtended() throws Exception {
     TestAccount globalCodeOwner1 =
         accountCreator.create(
             "globalCodeOwner1",
@@ -297,11 +309,15 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     configureGlobalCodeOwners(project, globalCodeOwner3.email(), globalCodeOwner4.email());
     assertThat(cfgSnapshot().getGlobalCodeOwners())
         .comparingElementsUsing(hasEmail())
-        .containsExactly(globalCodeOwner3.email(), globalCodeOwner4.email());
+        .containsExactly(
+            globalCodeOwner1.email(),
+            globalCodeOwner2.email(),
+            globalCodeOwner3.email(),
+            globalCodeOwner4.email());
   }
 
   @Test
-  public void inheritedGlobalCodeOwnersCanBeRemoved() throws Exception {
+  public void inheritedGlobalCodeOwnersCannotBeRemoved() throws Exception {
     TestAccount globalCodeOwner1 =
         accountCreator.create(
             "globalCodeOwner1",
@@ -316,7 +332,9 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
             /* displayName= */ null);
     configureGlobalCodeOwners(allProjects, globalCodeOwner1.email(), globalCodeOwner2.email());
     configureGlobalCodeOwners(project, "");
-    assertThat(cfgSnapshot().getGlobalCodeOwners()).isEmpty();
+    assertThat(cfgSnapshot().getGlobalCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(globalCodeOwner1.email(), globalCodeOwner2.email());
   }
 
   @Test
@@ -349,12 +367,20 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   @GerritConfig(
       name = "plugin.code-owners.exemptedUser",
       values = {"exempted-user-1@example.com", "exempted-user-2@example.com"})
-  public void exemptedAccountsOnProjectLevelOverrideGloballyConfiguredExemptedAcounts()
+  public void exemptedAccountsOnProjectLevelExtendsGloballyConfiguredExemptedAcounts()
       throws Exception {
-    accountCreator.create(
-        "exemptedUser1", "exempted-user-1@example.com", "Exempted User 1", /* displayName= */ null);
-    accountCreator.create(
-        "exemptedUser2", "exempted-user-2@example.com", "Exempted User 2", /* displayName= */ null);
+    TestAccount exemptedUser1 =
+        accountCreator.create(
+            "exemptedUser1",
+            "exempted-user-1@example.com",
+            "Exempted User 1",
+            /* displayName= */ null);
+    TestAccount exemptedUser2 =
+        accountCreator.create(
+            "exemptedUser2",
+            "exempted-user-2@example.com",
+            "Exempted User 2",
+            /* displayName= */ null);
     TestAccount exemptedUser3 =
         accountCreator.create(
             "exemptedUser3",
@@ -369,7 +395,8 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
             /* displayName= */ null);
     configureExemptedUsers(allProjects, exemptedUser3.email(), exemptedUser4.email());
     assertThat(cfgSnapshot().getExemptedAccounts())
-        .containsExactly(exemptedUser3.id(), exemptedUser4.id());
+        .containsExactly(
+            exemptedUser1.id(), exemptedUser2.id(), exemptedUser3.id(), exemptedUser4.id());
   }
 
   @Test
@@ -377,10 +404,18 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
       name = "plugin.code-owners.exemptedUser",
       values = {"exempted-user-1@example.com", "exempted-user-2@example.com"})
   public void exemptedAccountsAreInheritedFromParentProject() throws Exception {
-    accountCreator.create(
-        "exemptedUser1", "exempted-user-1@example.com", "Exempted User 1", /* displayName= */ null);
-    accountCreator.create(
-        "exemptedUser2", "exempted-user-2@example.com", "Exempted User 2", /* displayName= */ null);
+    TestAccount exemptedUser1 =
+        accountCreator.create(
+            "exemptedUser1",
+            "exempted-user-1@example.com",
+            "Exempted User 1",
+            /* displayName= */ null);
+    TestAccount exemptedUser2 =
+        accountCreator.create(
+            "exemptedUser2",
+            "exempted-user-2@example.com",
+            "Exempted User 2",
+            /* displayName= */ null);
     TestAccount exemptedUser3 =
         accountCreator.create(
             "exemptedUser3",
@@ -395,11 +430,12 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
             /* displayName= */ null);
     configureExemptedUsers(allProjects, exemptedUser3.email(), exemptedUser4.email());
     assertThat(cfgSnapshot().getExemptedAccounts())
-        .containsExactly(exemptedUser3.id(), exemptedUser4.id());
+        .containsExactly(
+            exemptedUser1.id(), exemptedUser2.id(), exemptedUser3.id(), exemptedUser4.id());
   }
 
   @Test
-  public void inheritedExemptedAccountsCanBeOverridden() throws Exception {
+  public void inheritedExemptedAccountsCanBeExtended() throws Exception {
     TestAccount exemptedUser1 =
         accountCreator.create(
             "exemptedUser1",
@@ -427,11 +463,12 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     configureExemptedUsers(allProjects, exemptedUser1.email(), exemptedUser2.email());
     configureExemptedUsers(project, exemptedUser3.email(), exemptedUser4.email());
     assertThat(cfgSnapshot().getExemptedAccounts())
-        .containsExactly(exemptedUser3.id(), exemptedUser4.id());
+        .containsExactly(
+            exemptedUser1.id(), exemptedUser2.id(), exemptedUser3.id(), exemptedUser4.id());
   }
 
   @Test
-  public void inheritedExemptedAccountsCanBeRemoved() throws Exception {
+  public void inheritedExemptedAccountsCannotBeRemoved() throws Exception {
     TestAccount exemptedUser1 =
         accountCreator.create(
             "exemptedUser1",
@@ -446,7 +483,8 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
             /* displayName= */ null);
     configureExemptedUsers(allProjects, exemptedUser1.email(), exemptedUser2.email());
     configureExemptedUsers(project, "");
-    assertThat(cfgSnapshot().getExemptedAccounts()).isEmpty();
+    assertThat(cfgSnapshot().getExemptedAccounts())
+        .containsExactly(exemptedUser1.id(), exemptedUser2.id());
   }
 
   @Test
@@ -629,21 +667,23 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void inheritedDisabledBranchCanBeOverridden() throws Exception {
+  public void inheritedDisabledBranchCanBeExtended() throws Exception {
     configureDisabledBranch(allProjects, "refs/heads/master");
     configureDisabledBranch(project, "refs/heads/test");
-    assertThat(cfgSnapshot().isDisabled("master")).isFalse();
+    assertThat(cfgSnapshot().isDisabled("master")).isTrue();
     assertThat(cfgSnapshot().isDisabled("test")).isTrue();
   }
 
   @Test
-  public void inheritedDisabledBranchCanBeRemoved() throws Exception {
+  public void inheritedDisabledBranchCannotBeRemoved() throws Exception {
     configureDisabledBranch(allProjects, "refs/heads/master");
 
-    // override the inherited config with an empty value to enable code owners for all branches
+    // trying to override the inherited config with an empty value to enable code owners for all
+    // branches doesn't work because the empty string is added to the inherited value list so that
+    // disabledBranch is ["refs/heads/master", ""] now
     configureDisabledBranch(project, "");
 
-    assertThat(cfgSnapshot().isDisabled("master")).isFalse();
+    assertThat(cfgSnapshot().isDisabled("master")).isTrue();
   }
 
   @Test
@@ -1057,16 +1097,18 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
-  public void overrideApprovalConfiguredOnProjectLevelOverridesGloballyConfiguredOverrideApproval()
+  public void overrideApprovalConfiguredOnProjectLevelExtendsGloballyConfiguredOverrideApproval()
       throws Exception {
     createOwnersOverrideLabel();
     createOwnersOverrideLabel("Other-Override");
 
     configureOverrideApproval(project, "Other-Override+1");
     ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
-    assertThat(requiredApprovals).hasSize(1);
-    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).hasSize(2);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
+    assertThat(requiredApprovals).element(1).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(1).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -1082,45 +1124,52 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
-  public void inheritedOverrideApprovalOverridesGloballyConfiguredOverrideApproval()
+  public void inheritedOverrideApprovalExtendsGloballyConfiguredOverrideApproval()
       throws Exception {
     createOwnersOverrideLabel();
     createOwnersOverrideLabel("Other-Override");
 
     configureOverrideApproval(allProjects, "Other-Override+1");
     ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
-    assertThat(requiredApprovals).hasSize(1);
-    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).hasSize(2);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
+    assertThat(requiredApprovals).element(1).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(1).hasValueThat().isEqualTo(1);
   }
 
   @Test
-  public void projectLevelOverrideApprovalOverridesInheritedOverrideApproval() throws Exception {
+  public void projectLevelOverrideApprovalExtendsInheritedOverrideApproval() throws Exception {
     createOwnersOverrideLabel();
     createOwnersOverrideLabel("Other-Override");
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
     configureOverrideApproval(project, "Other-Override+1");
     ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
-    assertThat(requiredApprovals).hasSize(1);
-    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).hasSize(2);
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
+    assertThat(requiredApprovals).element(1).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(1).hasValueThat().isEqualTo(1);
   }
 
   @Test
-  public void
-      projectLevelOverrideApprovalOverridesInheritedOverrideApprovalWithDifferentLabelValue()
-          throws Exception {
+  public void projectLevelOverrideApprovalExtendsInheritedOverrideApprovalWithDifferentLabelValue()
+      throws Exception {
     LabelDefinitionInput input = new LabelDefinitionInput();
     input.values = ImmutableMap.of("+2", "Super-Override", "+1", "Override", " 0", "No Override");
     gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
     configureOverrideApproval(project, "Owners-Override+2");
+
+    // if the same label is configured multiple times as override approval, only the definition with
+    // the lowest value is returned (since all higher values are implicitly considered as overrides
+    // as well)
     ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
-    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(2);
+    assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
