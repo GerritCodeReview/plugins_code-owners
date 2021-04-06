@@ -235,12 +235,12 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/heads/master")
   public void
-      disabledBranchConfigurationInPluginConfigOverridesDisabledBranchConfigurationInGerritConfig()
+      disabledBranchConfigurationInPluginConfigExtendsDisabledBranchConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "refs/heads/test");
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
-        .isFalse();
+        .isTrue();
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "test")))
         .isTrue();
   }
@@ -248,12 +248,12 @@ public class StatusConfigTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.disabledBranch", value = "refs/heads/master")
   public void
-      disabledBranchConfigurationInPluginConfigCanRemoveDisabledBranchConfigurationInGerritConfig()
+      disabledBranchConfigurationInPluginConfigCannotRemoveDisabledBranchConfigurationInGerritConfig()
           throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_DISABLED_BRANCH, "");
     assertThat(statusConfig.isDisabledForBranch(cfg, BranchNameKey.create(project, "master")))
-        .isFalse();
+        .isTrue();
   }
 
   @Test

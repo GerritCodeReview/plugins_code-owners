@@ -21,6 +21,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
@@ -40,8 +41,10 @@ import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Stream;
 import org.eclipse.jgit.lib.Config;
 
 /**
@@ -796,19 +799,7 @@ public class GeneralConfig {
    */
   ImmutableSet<CodeOwnerReference> getGlobalCodeOwners(Config pluginConfig) {
     requireNonNull(pluginConfig, "pluginConfig");
-
-    if (pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER)
-        != null) {
-      return Arrays.stream(
-              pluginConfig.getStringList(
-                  SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER))
-          .filter(value -> !value.trim().isEmpty())
-          .map(CodeOwnerReference::create)
-          .collect(toImmutableSet());
-    }
-
-    return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_GLOBAL_CODE_OWNER))
-        .filter(value -> !value.trim().isEmpty())
+    return getMultiValue(pluginConfig, KEY_GLOBAL_CODE_OWNER)
         .map(CodeOwnerReference::create)
         .collect(toImmutableSet());
   }
@@ -824,19 +815,7 @@ public class GeneralConfig {
    */
   ImmutableSet<String> getExemptedUsers(Config pluginConfig) {
     requireNonNull(pluginConfig, "pluginConfig");
-
-    if (pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER)
-        != null) {
-      return Arrays.stream(
-              pluginConfig.getStringList(
-                  SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER))
-          .filter(value -> !value.trim().isEmpty())
-          .collect(toImmutableSet());
-    }
-
-    return Arrays.stream(pluginConfigFromGerritConfig.getStringList(KEY_EXEMPTED_USER))
-        .filter(value -> !value.trim().isEmpty())
-        .collect(toImmutableSet());
+    return getMultiValue(pluginConfig, KEY_EXEMPTED_USER).collect(toImmutableSet());
   }
 
   /**
@@ -859,5 +838,26 @@ public class GeneralConfig {
     }
 
     return Optional.ofNullable(pluginConfigFromGerritConfig.getString(KEY_OVERRIDE_INFO_URL));
+  }
+
+  /**
+   * Gets the values for a parameter that can be set multiple times with taking inherited values
+   * from {@code gerrit.config} into account.
+   *
+   * <p>The inherited values from {@code gerrit.config} are included into the returned list at the
+   * first position. This matches the behavior in {@link Config#getStringList(String, String,
+   * String)} that includes inherited values from the base config into the result list at the first
+   * position too.
+   *
+   * <p>The returned stream contains duplicates if the exact same value is set for different
+   * projects in the line of parent projects.
+   */
+  private Stream<String> getMultiValue(Config pluginConfig, String key) {
+    return Streams.concat(
+            Arrays.stream(pluginConfigFromGerritConfig.getStringList(key)),
+            Arrays.stream(
+                pluginConfig.getStringList(SECTION_CODE_OWNERS, /* subsection= */ null, key)))
+        .filter(Objects::nonNull)
+        .filter(value -> !value.trim().isEmpty());
   }
 }
