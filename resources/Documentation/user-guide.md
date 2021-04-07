@@ -230,7 +230,13 @@ submission.
 
 **NOTE:** Besides the code owners submit rule there may be further submit rules
 that block the change submission for other reasons that are not related to code
-owners.
+owners. E.g. configured [label
+functions](../../../Documentation/config-labels.html#label_function) are
+completely orthogonal to code owner approvals. If, for example, `Code-Review+1`
+votes are required as code owner approval, but the `Code-Review` label has the
+function `MaxWithBlock` the change submission is still blocked if a max approval
+(aka `Code-Review+2`) is missing or if a veto vote (aka `Code-Review-2`) is
+present.
 
 **NOTE:** Gerrit submit rules are executed on submit and when change details are
 loaded, e.g. when loading the change screen (to know whether the submit button
