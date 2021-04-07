@@ -232,6 +232,20 @@ submission.
 that block the change submission for other reasons that are not related to code
 owners.
 
+**NOTE:** Gerrit submit rules are executed on submit and when change details are
+loaded, e.g. when loading the change screen (to know whether the submit button
+should be enabled). In addition submit rules are executed on every change update
+because the result of running submit rules is stored as submit records in the
+change index. This makes the submit records available when querying changes
+(without needing to run the submit rules for every change in the result which
+would be too expensive). For code owners the submit records that are stored in
+the index can become stale for 2 reasons: 1. [code owner config
+files](#codeOwnerConfigFiles) are changed after the change has been indexed
+(e.g. new code owners are added), 2. [if the code owners plugin configuration
+was changed in a way that affected the result of the code owners submit
+rule](config.html#staleIndexOnConfigChanges). Callers of change queries should
+be aware of this.
+
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)
