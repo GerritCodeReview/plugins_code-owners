@@ -145,7 +145,9 @@ the code-owners plugin both places are equally good. However which place is
 preferred can depend on the system setup, e.g. changes to `gerrit.config` may be
 harder to do and require a multi-day rollout, whereas changes of the
 `All-Projects` configuration can be done through the [REST
-API](rest-api.html#update-code-owner-project-config) and are always instant.
+API](rest-api.html#update-code-owner-project-config) and are always instant
+(this can also be a disadvantage as it means that also bad config changes are
+effective immediately).
 
 **NOTE:** Any configuration that is done in `All-Projects` overrides the
 corresponding configuration that is inherited from `gerrit.config`.
