@@ -22,6 +22,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -985,21 +986,43 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Code-Review+2")
-  public void getConfiguredDefaultOverrideApproval() throws Exception {
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void getConfiguredOverrideApproval() throws Exception {
+    createOwnersOverrideLabel();
     ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
     assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(2);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Foo-Bar+1")
+  public void getOverrideApprovalIfNonExistingLabelIsConfiguredAsOverrideApproval()
+      throws Exception {
+    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Code-Review+3")
+  public void getOverrideApprovalIfNonExistingLabelValueIsConfiguredAsOverrideApproval()
+      throws Exception {
+    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "INVALID")
+  public void getOverrideApprovalIfInvalidOverrideApprovalIsConfigured() throws Exception {
+    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
   }
 
   @Test
   public void getOverrideApprovalConfiguredOnProjectLevel() throws Exception {
-    configureOverrideApproval(project, "Code-Review+2");
+    createOwnersOverrideLabel();
+    configureOverrideApproval(project, "Owners-Override+1");
     ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
     assertThat(requiredApproval).hasSize(1);
-    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Code-Review");
-    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(2);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
   }
 
   @Test
@@ -1022,8 +1045,86 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "INVALID")
-  public void getOverrideApprovalIfInvalidOverrideApprovalIsConfigured() throws Exception {
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void overrideApprovalConfiguredOnProjectLevelOverridesGloballyConfiguredOverrideApproval()
+      throws Exception {
+    createOwnersOverrideLabel();
+    createOwnersOverrideLabel("Other-Override");
+
+    configureOverrideApproval(project, "Other-Override+1");
+    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+  }
+
+  @Test
+  public void overrideApprovalIsInheritedFromParentProject() throws Exception {
+    createOwnersOverrideLabel();
+
+    configureOverrideApproval(allProjects, "Owners-Override+1");
+    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void inheritedOverrideApprovalOverridesGloballyConfiguredOverrideApproval()
+      throws Exception {
+    createOwnersOverrideLabel();
+    createOwnersOverrideLabel("Other-Override");
+
+    configureOverrideApproval(allProjects, "Other-Override+1");
+    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+  }
+
+  @Test
+  public void projectLevelOverrideApprovalOverridesInheritedOverrideApproval() throws Exception {
+    createOwnersOverrideLabel();
+    createOwnersOverrideLabel("Other-Override");
+
+    configureOverrideApproval(allProjects, "Owners-Override+1");
+    configureOverrideApproval(project, "Other-Override+1");
+    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(1);
+  }
+
+  @Test
+  public void
+      projectLevelOverrideApprovalOverridesInheritedOverrideApprovalWithDifferentLabelValue()
+          throws Exception {
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+2", "Super-Override", "+1", "Override", " 0", "No Override");
+    gApi.projects().name(project.get()).label("Owners-Override").create(input).get();
+
+    configureOverrideApproval(allProjects, "Owners-Override+1");
+    configureOverrideApproval(project, "Owners-Override+2");
+    ImmutableSet<RequiredApproval> requiredApproval = cfgSnapshot().getOverrideApproval();
+    assertThat(requiredApproval).hasSize(1);
+    assertThat(requiredApproval).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApproval).element(0).hasValueThat().isEqualTo(2);
+  }
+
+  @Test
+  public void getOverrideApprovalIfNonExistingLabelIsConfiguredAsOverrideApprovalOnProjectLevel()
+      throws Exception {
+    configureOverrideApproval(project, "Foo-Bar+1");
+    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+  }
+
+  @Test
+  public void
+      getOverrideApprovalIfNonExistingLabelValueIsConfiguredAsOverrideApprovalOnProjectLevel()
+          throws Exception {
+    createOwnersOverrideLabel();
+    configureOverrideApproval(project, "Owners-Override+2");
     assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
   }
 
@@ -1031,6 +1132,14 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   public void getOverrideApprovalIfInvalidOverrideApprovalIsConfiguredOnProjectLevel()
       throws Exception {
     configureOverrideApproval(project, "INVALID");
+    assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
+  }
+
+  @Test
+  public void projectLevelOverrideApprovalForOtherProjectHasNoEffect() throws Exception {
+    createOwnersOverrideLabel();
+    Project.NameKey otherProject = projectOperations.newProject().create();
+    configureOverrideApproval(otherProject, "Owners-Override+1");
     assertThat(cfgSnapshot().getOverrideApproval()).isEmpty();
   }
 
