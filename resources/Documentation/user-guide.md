@@ -219,6 +219,19 @@ all branches require code owner approvals and the code owners of all branches
 are trusted, as it prevents that code owners need to approve the same changes
 multiple times, but for different branches.
 
+## <a id="codeOwnersSubmitRule">Code Owners Submit Rule
+
+The logic that checks whether a change has sufficient [code owner
+approvals](#codeOwnerApproval) to be submitted is implemented in the code owners
+submit rule. If the code owners submit rule finds that code owner approvals are
+missing the submission of the change is blocked. In this case it's possible to
+use a [code owner override](#codeOwnerOverride) to unblock the change
+submission.
+
+**NOTE:** Besides the code owners submit rule there may be further submit rules
+that block the change submission for other reasons that are not related to code
+owners.
+
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)
