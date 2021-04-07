@@ -162,7 +162,7 @@ public class CodeOwnerProjectConfigJson {
   @Nullable
   ImmutableList<RequiredApprovalInfo> formatOverrideApprovalInfo(Project.NameKey projectName) {
     ImmutableList<RequiredApprovalInfo> overrideApprovalInfos =
-        codeOwnersPluginConfiguration.getProjectConfig(projectName).getOverrideApproval().stream()
+        codeOwnersPluginConfiguration.getProjectConfig(projectName).getOverrideApprovals().stream()
             .sorted(comparing(requiredApproval -> requiredApproval.toString()))
             .map(CodeOwnerProjectConfigJson::formatRequiredApproval)
             .collect(toImmutableList());

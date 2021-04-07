@@ -287,7 +287,7 @@ public class CodeOwnerApprovalCheck {
       RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
       logger.atFine().log("requiredApproval = %s", requiredApproval);
 
-      ImmutableSet<RequiredApproval> overrideApprovals = codeOwnersConfig.getOverrideApproval();
+      ImmutableSet<RequiredApproval> overrideApprovals = codeOwnersConfig.getOverrideApprovals();
       boolean hasOverride =
           hasOverride(currentPatchSetApprovals, overrideApprovals, patchSetUploader);
       logger.atFine().log(

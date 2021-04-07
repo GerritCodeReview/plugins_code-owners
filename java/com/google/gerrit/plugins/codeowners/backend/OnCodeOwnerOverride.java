@@ -76,7 +76,7 @@ class OnCodeOwnerOverride implements OnPostReview {
     }
 
     ImmutableList<RequiredApproval> appliedOverrideApprovals =
-        codeOwnersConfig.getOverrideApproval().stream()
+        codeOwnersConfig.getOverrideApprovals().stream()
             .sorted(comparing(RequiredApproval::toString))
             // If oldApprovals doesn't contain the label or if the labels value in it is null, the
             // label was not changed.
