@@ -11,6 +11,11 @@ The @PLUGIN@ plugin can be configured on host and on project-level:
 This page describes all available configuration parameters. For configuration
 recommendations please consult the [config guide](config-guide.html).
 
+**NOTE**: This is the configuration that controls the behavior of the @PLUGIN@
+plugin. Code owners (except global code owners) are not defined here, but in
+[code owner config files](user-guide.html#codeOwnerConfigFiles) (e.g. `OWNERS`
+files) that are stored in the source tree of the repository.
+
 ## <a id="inheritance">Inheritance</a>
 
 Projects inherit the configuration of their parent projects, following the chain
