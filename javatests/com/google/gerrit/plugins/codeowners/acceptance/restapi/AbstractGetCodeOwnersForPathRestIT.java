@@ -85,7 +85,7 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
     String secondaryEmail = "admin@foo.bar";
     accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
-    // Make the request with the admin user that has the 'Modify Account' global capability.
+    // Make the request with the admin user that has the 'View Secondary Emails' global capability.
     RestResponse r =
         adminRestSession.get(
             getUrl(
@@ -121,7 +121,7 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
     String secondaryEmail = "admin@foo.bar";
     accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
-    // Make the request with the admin user that has the 'Modify Account' global capability.
+    // Make the request with the admin user that has the 'View Secondary Emails' global capability.
     RestResponse r =
         adminRestSession.get(
             getUrl(

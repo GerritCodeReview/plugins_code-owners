@@ -116,7 +116,7 @@ For code owners this means:
 * code owners which are referenced by secondary email cannot be resolved for
   most users, this is because secondary emails of users are only visible to
   users that have the
-  [Modify Account](../../../Documentation/access-control.html#capability_modifyAccount)
+  [View Secondary Emails](../../../Documentation/access-control.html#capability_viewSecondaryEmails)
   global capability assigned in Gerrit, which is normally only granted to
   administrators
 

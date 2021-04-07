@@ -285,7 +285,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     String secondaryEmail = "admin@foo.bar";
     accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
-    // Make the request with the admin user that has the 'Modify Account' global capability.
+    // Make the request with the admin user that has the 'View Secondary Emails' global capability.
     CodeOwnersInfo codeOwnersInfo =
         queryCodeOwners(
             getCodeOwnersApi().query().withOptions(ListAccountsOption.ALL_EMAILS),
@@ -317,7 +317,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     String secondaryEmail = "admin@foo.bar";
     accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
-    // Make the request with a user that doesn't have the 'Modify Account' global capability.
+    // Make the request with a user that doesn't have the 'View Secondary Emails' global capability.
     requestScopeOperations.setApiUser(user.id());
 
     AuthException exception =
@@ -327,7 +327,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
                 queryCodeOwners(
                     getCodeOwnersApi().query().withOptions(ListAccountsOption.ALL_EMAILS),
                     "/foo/bar/baz.md"));
-    assertThat(exception).hasMessageThat().isEqualTo("modify account not permitted");
+    assertThat(exception).hasMessageThat().isEqualTo("view secondary emails not permitted");
   }
 
   @Test
@@ -344,7 +344,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
     String secondaryEmail = "admin@foo.bar";
     accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
-    // Make the request with the admin user that has the 'Modify Account' global capability.
+    // Make the request with the admin user that has the 'View Secondary Emails' global capability.
     CodeOwnersInfo codeOwnersInfo =
         queryCodeOwners(
             getCodeOwnersApi()
@@ -487,7 +487,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .addCodeOwnerEmail(secondaryEmail)
         .create();
 
-    // admin has the "Modify Account" global capability and hence can see secondary emails
+    // admin has the "View Secondary Emails" global capability and hence can see secondary emails
     assertThat(queryCodeOwners("/foo/bar/baz.md"))
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
@@ -500,7 +500,8 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
 
-    // user2 doesn't have the 'Modify Account' global capability and hence cannot see the secondary
+    // user2 doesn't have the 'View Secondary Emails' global capability and hence cannot see the
+    // secondary
     // email
     TestAccount user2 = accountCreator.user2();
     requestScopeOperations.setApiUser(user2.id());

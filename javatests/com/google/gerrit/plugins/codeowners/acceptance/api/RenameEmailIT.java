@@ -288,7 +288,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
     projectOperations
         .project(allProjects)
         .forUpdate()
-        .add(allowCapability(GlobalCapability.MODIFY_ACCOUNT).group(REGISTERED_USERS))
+        .add(allowCapability(GlobalCapability.VIEW_SECONDARY_EMAILS).group(REGISTERED_USERS))
         .update();
 
     String secondaryEmail = "admin-foo@example.com";

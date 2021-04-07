@@ -293,8 +293,8 @@ public class CodeOwnerResolver {
    *
    * <ul>
    *   <li>every user can see the own secondary emails
-   *   <li>users with the {@code Modify Account} global capability can see the secondary emails of
-   *       all accounts
+   *   <li>users with the {@code View Secondary Emails} global capability can see the secondary
+   *       emails of all accounts
    * </ul>
    *
    * <p>This method does not resolve {@link CodeOwnerReference}s that assign the code ownership to
@@ -451,8 +451,8 @@ public class CodeOwnerResolver {
    *
    * <ul>
    *   <li>it is owned by the {@link #user} or the calling user (if {@link #user} is unset)
-   *   <li>if the {@link #user} or the calling user (if {@link #user} is unset) has the {@code
-   *       Modify Account} global capability
+   *   <li>if the {@link #user} or the calling user (if {@link #user} is unset) has the {@code View
+   *       Secondary Emails} global capability
    * </ul>
    *
    * @param accountState the account for which it should be checked whether it's visible to the user
@@ -499,7 +499,7 @@ public class CodeOwnerResolver {
       // emails
       try {
         if (user != null) {
-          if (!permissionBackend.user(user).test(GlobalPermission.MODIFY_ACCOUNT)) {
+          if (!permissionBackend.user(user).test(GlobalPermission.VIEW_SECONDARY_EMAILS)) {
             return OptionalResultWithMessages.create(
                 false,
                 String.format(
@@ -513,7 +513,7 @@ public class CodeOwnerResolver {
                   "resolved code owner email %s: account %s is referenced by secondary email"
                       + " and user %s can see secondary emails",
                   email, accountState.account().id(), user.getLoggableName()));
-        } else if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
+        } else if (!permissionBackend.currentUser().test(GlobalPermission.VIEW_SECONDARY_EMAILS)) {
           return OptionalResultWithMessages.create(
               false,
               String.format(
@@ -531,7 +531,7 @@ public class CodeOwnerResolver {
       } catch (PermissionBackendException e) {
         throw new CodeOwnersInternalServerErrorException(
             String.format(
-                "failed to test the %s global capability", GlobalPermission.MODIFY_ACCOUNT),
+                "failed to test the %s global capability", GlobalPermission.VIEW_SECONDARY_EMAILS),
             e);
       }
     }

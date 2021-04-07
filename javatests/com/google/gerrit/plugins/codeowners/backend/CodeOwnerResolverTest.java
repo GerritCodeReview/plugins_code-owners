@@ -230,8 +230,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     String secondaryEmail = "user@foo.bar";
     accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
-    // admin has the "Modify Account" global capability and hence can see the secondary email of the
-    // user account.
+    // admin has the "View Secondary Emails" global capability and hence can see the secondary
+    // email of the user account.
     OptionalResultWithMessages<CodeOwner> result =
         codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(user.id());
@@ -242,8 +242,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                 "resolved code owner email %s: account %s is referenced by secondary email and the calling user %s can see secondary emails",
                 secondaryEmail, user.id(), admin.username()));
 
-    // admin has the "Modify Account" global capability and hence can see the secondary email of the
-    // user account if another user is the calling user
+    // admin has the "View Secondary Emails" global capability and hence can see the secondary
+    // email of the user account if another user is the calling user
     requestScopeOperations.setApiUser(user2.id());
     result =
         codeOwnerResolver
@@ -291,8 +291,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     String secondaryEmail = "admin@foo.bar";
     accountOperations.account(admin.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
 
-    // user doesn't have the "Modify Account" global capability and hence cannot see the secondary
-    // email of the admin account.
+    // user doesn't have the "View Secondary Emails" global capability and hence cannot see the
+    // secondary email of the admin account.
     requestScopeOperations.setApiUser(user.id());
     OptionalResultWithMessages<CodeOwner> result =
         codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
@@ -304,8 +304,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                 "cannot resolve code owner email %s: account %s is referenced by secondary email but the calling user %s cannot see secondary emails",
                 secondaryEmail, admin.id(), user.username()));
 
-    // user doesn't have the "Modify Account" global capability and hence cannot see the secondary
-    // email of the admin account if another user is the calling user
+    // user doesn't have the "View Secondary Emails" global capability and hence cannot see the
+    // secondary email of the admin account if another user is the calling user
     requestScopeOperations.setApiUser(admin.id());
     result =
         codeOwnerResolver
