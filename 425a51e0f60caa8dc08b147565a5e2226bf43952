@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "98fa6815_60fbeb42",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-07T07:06:06Z",
+      "side": 1,
+      "message": "comment to trigger a reindex so that the submit button gets enabled",
+      "revId": "425a51e0f60caa8dc08b147565a5e2226bf43952",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
