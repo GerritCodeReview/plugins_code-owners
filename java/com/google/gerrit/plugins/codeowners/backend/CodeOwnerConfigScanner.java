@@ -14,7 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidConfigCause;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidCodeOwnerConfigCause;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
@@ -26,7 +26,6 @@ import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevWalk;
 
@@ -144,16 +143,16 @@ public class CodeOwnerConfigScanner {
         try {
           codeOwnerConfig = treeWalk.getCodeOwnerConfig();
         } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
-          Optional<ConfigInvalidException> configInvalidException =
-              getInvalidConfigCause(codeOwnersInternalServerErrorException);
-          if (!configInvalidException.isPresent()) {
+          Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
+              getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException);
+          if (!invalidCodeOwnerConfigException.isPresent()) {
             // Propagate any failure that is not related to the contents of the code owner config.
             throw codeOwnersInternalServerErrorException;
           }
 
           // The code owner config is invalid and cannot be parsed.
           invalidCodeOwnerConfigCallback.onInvalidCodeOwnerConfig(
-              treeWalk.getFilePath(), configInvalidException.get());
+              treeWalk.getFilePath(), invalidCodeOwnerConfigException.get());
           continue;
         }
 

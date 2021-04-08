@@ -21,7 +21,6 @@ import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigur
 import com.google.gerrit.server.ExceptionHook;
 import java.nio.file.InvalidPathException;
 import java.util.Optional;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 
 /**
  * Class to define the HTTP response status code and message for exceptions that can occur for all
@@ -52,10 +51,10 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
       return ImmutableList.of(invalidPluginConfigurationException.get().getMessage());
     }
 
-    Optional<ConfigInvalidException> configInvalidException =
-        CodeOwners.getInvalidConfigCause(throwable);
-    if (configInvalidException.isPresent()) {
-      return ImmutableList.of(configInvalidException.get().getMessage());
+    Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
+        CodeOwners.getInvalidCodeOwnerConfigCause(throwable);
+    if (invalidCodeOwnerConfigException.isPresent()) {
+      return ImmutableList.of(invalidCodeOwnerConfigException.get().getMessage());
     }
 
     Optional<InvalidPathException> invalidPathException = getInvalidPathException(throwable);
@@ -115,6 +114,6 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
   }
 
   private static boolean isInvalidCodeOwnerConfigException(Throwable throwable) {
-    return CodeOwners.getInvalidConfigCause(throwable).isPresent();
+    return CodeOwners.getInvalidCodeOwnerConfigCause(throwable).isPresent();
   }
 }

@@ -24,7 +24,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
 import java.util.Optional;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
 
 /**
@@ -101,13 +100,14 @@ public class CodeOwners implements CodeOwnerConfigLoader {
 
   /**
    * Checks whether the given exception was caused by a non-parseable code owner config ({@link
-   * ConfigInvalidException}). If yes, the {@link ConfigInvalidException} is returned. If no, {@link
-   * Optional#empty()} is returned.
+   * InvalidCodeOwnerConfigException}). If yes, the {@link InvalidCodeOwnerConfigException} is
+   * returned. If no, {@link Optional#empty()} is returned.
    */
-  public static Optional<ConfigInvalidException> getInvalidConfigCause(Throwable e) {
+  public static Optional<InvalidCodeOwnerConfigException> getInvalidCodeOwnerConfigCause(
+      Throwable e) {
     return Throwables.getCausalChain(e).stream()
-        .filter(t -> t instanceof ConfigInvalidException)
-        .map(t -> (ConfigInvalidException) t)
+        .filter(t -> t instanceof InvalidCodeOwnerConfigException)
+        .map(t -> (InvalidCodeOwnerConfigException) t)
         .findFirst();
   }
 }

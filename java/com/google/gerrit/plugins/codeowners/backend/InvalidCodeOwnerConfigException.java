@@ -1,4 +1,4 @@
-// Copyright (C) 2020 The Android Open Source Project
+// Copyright (C) 2021 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,17 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
-import java.nio.file.Path;
+import org.eclipse.jgit.errors.ConfigInvalidException;
 
-/** Callback interface to let callers handle invalid code owner config files. */
-public interface InvalidCodeOwnerConfigCallback {
-  /**
-   * Invoked when an invalid code owner config file is found.
-   *
-   * @param codeOwnerConfigFilePath the path of the invalid code owner config file
-   * @param invalidCodeOwnerConfigException the parsing exception
-   */
-  void onInvalidCodeOwnerConfig(
-      Path codeOwnerConfigFilePath,
-      InvalidCodeOwnerConfigException invalidCodeOwnerConfigException);
+/** Exception that is thrown if there is an invalid code owner config file. */
+public class InvalidCodeOwnerConfigException extends ConfigInvalidException {
+  private static final long serialVersionUID = 1L;
+
+  public InvalidCodeOwnerConfigException(String message) {
+    super(message);
+  }
+
+  public InvalidCodeOwnerConfigException(String message, Throwable cause) {
+    super(message, cause);
+  }
 }
