@@ -89,6 +89,14 @@ public class CodeOwnerCheckInfoSubject extends Subject {
     check("isGlobalCodeOwner").that(codeOwnerCheckInfo().isGlobalCodeOwner).isFalse();
   }
 
+  public void isOwnedByAllUsers() {
+    check("isOwnedByAllUsers").that(codeOwnerCheckInfo().isOwnedByAllUsers).isTrue();
+  }
+
+  public void isNotOwnedByAllUsers() {
+    check("isOwnedByAllUsers").that(codeOwnerCheckInfo().isOwnedByAllUsers).isFalse();
+  }
+
   public void hasDebugLogsThatContainAllOf(String... expectedMessages) {
     for (String expectedMessage : expectedMessages) {
       check("debugLogs").that(codeOwnerCheckInfo().debugLogs).contains(expectedMessage);
