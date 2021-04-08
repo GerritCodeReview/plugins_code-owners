@@ -156,7 +156,7 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
   }
 
   private InvalidCodeOwnerConfigException newInvalidCodeOwnerConfigException() {
-    return new InvalidCodeOwnerConfigException("message", project);
+    return new InvalidCodeOwnerConfigException("message", project, "refs/heads/master", "/OWNERS");
   }
 
   private InvalidPathException newInvalidPathException() {
