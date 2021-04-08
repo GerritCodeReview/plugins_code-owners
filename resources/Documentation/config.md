@@ -1,21 +1,24 @@
 # Configuration
 
-The global configuration of the @PLUGIN@ plugin is stored in the `gerrit.config`
-file in the `plugin.@PLUGIN@` subsection.
+The @PLUGIN@ plugin can be configured on host and on project-level:
+
+* host-level:\
+  in the `gerrit.config` file in the `plugin.@PLUGIN@` subsection
+* project-level:\
+  in `@PLUGIN@.config` files that are stored in the `refs/meta/config` branches
+  of the projects
 
 This page describes all available configuration parameters. For configuration
 recommendations please consult the [config guide](config-guide.html).
 
-## <a id="projectLevelConfigFile">
-In addition some configuration can be done on the project level in
-`@PLUGIN@.config` files that are stored in the `refs/meta/config` branches of
-the projects.
+## <a id="inheritance">Inheritance</a>
 
-Parameters that are not set for a project are inherited from the parent project
-or the global configuration in `gerrit.config`.
+Projects inherit the configuration of their parent projects, following the chain
+of parent projects until the `All-Projects` root project is reached which
+inherits the configuration from `gerrit.config`.
 
-A config setting on project level overrides the corresponsing setting that is
-inherited from parent projects and the global configuration in `gerrit.config`.
+Setting a configuration parameter for a project overrides any inherited value
+for this configuration parameter.
 
 **NOTE:** Some configuration parameters have a list of values and can be
 specified multiple times (e.g. `disabledBranch`). If such a value is set on
