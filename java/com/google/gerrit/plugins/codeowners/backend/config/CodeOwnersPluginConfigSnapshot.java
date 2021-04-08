@@ -242,6 +242,11 @@ public class CodeOwnersPluginConfigSnapshot {
     return generalConfig.getOverrideInfoUrl(pluginConfig);
   }
 
+  /** Gets the invalid code owner config info URL that is configured. */
+  public Optional<String> getInvalidCodeOwnerConfigInfoUrl() {
+    return generalConfig.getInvalidCodeOwnerConfigInfoUrl(pluginConfig);
+  }
+
   /**
    * Whether the code owners functionality is disabled for the given branch.
    *

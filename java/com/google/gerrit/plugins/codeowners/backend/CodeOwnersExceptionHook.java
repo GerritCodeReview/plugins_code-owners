@@ -17,8 +17,10 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook;
+import com.google.inject.Inject;
 import java.nio.file.InvalidPathException;
 import java.util.Optional;
 
@@ -36,6 +38,13 @@ import java.util.Optional;
  * </ul>
  */
 public class CodeOwnersExceptionHook implements ExceptionHook {
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+
+  @Inject
+  CodeOwnersExceptionHook(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+  }
+
   @Override
   public boolean skipRetryWithTrace(String actionType, String actionName, Throwable throwable) {
     return isInvalidPluginConfigurationException(throwable)
@@ -54,7 +63,15 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
     Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
         CodeOwners.getInvalidCodeOwnerConfigCause(throwable);
     if (invalidCodeOwnerConfigException.isPresent()) {
-      return ImmutableList.of(invalidCodeOwnerConfigException.get().getMessage());
+      ImmutableList.Builder<String> messages = ImmutableList.builder();
+      messages.add(invalidCodeOwnerConfigException.get().getMessage());
+      codeOwnersPluginConfiguration
+          .getProjectConfig(invalidCodeOwnerConfigException.get().getProjectName())
+          .getInvalidCodeOwnerConfigInfoUrl()
+          .ifPresent(
+              invalidCodeOwnerConfigInfoUrl ->
+                  messages.add(String.format("For help check %s", invalidCodeOwnerConfigInfoUrl)));
+      return messages.build();
     }
 
     Optional<InvalidPathException> invalidPathException = getInvalidPathException(throwable);

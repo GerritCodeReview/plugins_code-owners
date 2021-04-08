@@ -110,6 +110,8 @@ public class CodeOwnerProjectConfigJson {
     generalInfo.mergeCommitStrategy = codeOwnersConfig.getMergeCommitStrategy();
     generalInfo.implicitApprovals = codeOwnersConfig.areImplicitApprovalsEnabled() ? true : null;
     generalInfo.overrideInfoUrl = codeOwnersConfig.getOverrideInfoUrl().orElse(null);
+    generalInfo.invalidCodeOwnerConfigInfoUrl =
+        codeOwnersConfig.getInvalidCodeOwnerConfigInfoUrl().orElse(null);
     generalInfo.fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
     return generalInfo;
   }

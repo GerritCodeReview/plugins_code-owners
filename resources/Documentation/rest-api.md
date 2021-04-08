@@ -880,6 +880,7 @@ If a field in this input is not set, the corresponding parameter in the
 | `merge_commit_strategy` | optional | Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
 | `implicit_approvals` | optional | Whether an implicit code owner approval from the last uploader is assumed.
 | `override_info_url` | optional | URL for a page that provides project/host-specific information about how to request a code owner override.
+| `invalid_code_owner_config_info_url` | optional | URL for a page that provides project/host-specific information about how to to deal with invalid code owner config files.
 | `read_only` | optional | Whether code owner config files are read-only.
 | `exempt_pure_reverts` | optional | Whether pure revert changes are exempted from needing code owner approvals for submit.
 | `enable_validation_on_commit_received` | optional | Policy for validating code owner config files when a commit is received. Allowed values are `true` (the code owner config file validation is enabled and the upload of invalid code owner config files is rejected), `false` (the code owner config file validation is disabled, invalid code owner config files are not rejected) and `dry_run` (code owner config files are validated, but invalid code owner config files are not rejected).
@@ -952,6 +953,7 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | `merge_commit_strategy` || Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
 | `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.html#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
 | `override_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to request a code owner override.
+| `invalid_code_owner_config_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to to deal with invalid code owner config files.
 |`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `PROJECT_OWNERS`: Paths for which no code owners are defined are owned by the project owners. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
 
 ### <a id="owned-paths-info"> OwnedPathsInfo

@@ -14,17 +14,31 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.gerrit.entities.Project;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 
 /** Exception that is thrown if there is an invalid code owner config file. */
 public class InvalidCodeOwnerConfigException extends ConfigInvalidException {
   private static final long serialVersionUID = 1L;
 
-  public InvalidCodeOwnerConfigException(String message) {
+  private final Project.NameKey projectName;
+
+  public InvalidCodeOwnerConfigException(String message, Project.NameKey projectName) {
     super(message);
+
+    this.projectName = requireNonNull(projectName, "projectName");
   }
 
-  public InvalidCodeOwnerConfigException(String message, Throwable cause) {
+  public InvalidCodeOwnerConfigException(
+      String message, Project.NameKey projectName, Throwable cause) {
     super(message, cause);
+
+    this.projectName = requireNonNull(projectName, "projectName");
+  }
+
+  public Project.NameKey getProjectName() {
+    return projectName;
   }
 }
