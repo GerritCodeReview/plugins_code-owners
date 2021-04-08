@@ -19,6 +19,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.ExceptionHook;
 import com.google.inject.Inject;
 import java.nio.file.InvalidPathException;
@@ -39,10 +40,14 @@ import java.util.Optional;
  */
 public class CodeOwnersExceptionHook implements ExceptionHook {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
-  CodeOwnersExceptionHook(CodeOwnersPluginConfiguration codeOwnersPluginConfiguration) {
+  CodeOwnersExceptionHook(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerMetrics codeOwnerMetric) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.codeOwnerMetrics = codeOwnerMetric;
   }
 
   @Override
@@ -63,6 +68,11 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
     Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
         CodeOwners.getInvalidCodeOwnerConfigCause(throwable);
     if (invalidCodeOwnerConfigException.isPresent()) {
+      codeOwnerMetrics.countInvalidCodeOwnerConfigFiles.increment(
+          invalidCodeOwnerConfigException.get().getProjectName().get(),
+          invalidCodeOwnerConfigException.get().getRef(),
+          invalidCodeOwnerConfigException.get().getCodeOwnerConfigFilePath());
+
       ImmutableList.Builder<String> messages = ImmutableList.builder();
       messages.add(invalidCodeOwnerConfigException.get().getMessage());
       codeOwnersPluginConfiguration

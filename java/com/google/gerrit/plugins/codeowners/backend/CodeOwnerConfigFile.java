@@ -213,8 +213,9 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
   @Override
   protected void onLoad() throws IOException, ConfigInvalidException {
     if (revision != null) {
-      Optional<String> codeOwnerConfigFileContent =
-          getFileIfItExists(JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get());
+      String codeOwnerConfigFilePath =
+          JgitPath.of(codeOwnerConfigKey.filePath(defaultFileName)).get();
+      Optional<String> codeOwnerConfigFileContent = getFileIfItExists(codeOwnerConfigFilePath);
       if (codeOwnerConfigFileContent.isPresent()) {
         try (Timer1.Context<String> ctx =
             codeOwnerMetrics.parseCodeOwnerConfig.start(
@@ -225,7 +226,11 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
                       revision, codeOwnerConfigKey, codeOwnerConfigFileContent.get()));
         } catch (CodeOwnerConfigParseException e) {
           throw new InvalidCodeOwnerConfigException(
-              e.getFullMessage(defaultFileName), projectName, e);
+              e.getFullMessage(defaultFileName),
+              projectName,
+              getRefName(),
+              codeOwnerConfigFilePath,
+              e);
         }
       }
     }
