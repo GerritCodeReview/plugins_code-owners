@@ -831,10 +831,10 @@ public class GeneralConfig {
   Optional<String> getOverrideInfoUrl(Config pluginConfig) {
     requireNonNull(pluginConfig, "pluginConfig");
 
-    String fileExtension =
+    String overrideInfoUrl =
         pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_OVERRIDE_INFO_URL);
-    if (fileExtension != null) {
-      return Optional.of(fileExtension);
+    if (overrideInfoUrl != null) {
+      return Optional.of(overrideInfoUrl);
     }
 
     return Optional.ofNullable(pluginConfigFromGerritConfig.getString(KEY_OVERRIDE_INFO_URL));
