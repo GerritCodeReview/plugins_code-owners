@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 
@@ -24,21 +25,37 @@ public class InvalidCodeOwnerConfigException extends ConfigInvalidException {
   private static final long serialVersionUID = 1L;
 
   private final Project.NameKey projectName;
+  private final String ref;
+  private final String codeOwnerConfigFilePath;
 
-  public InvalidCodeOwnerConfigException(String message, Project.NameKey projectName) {
-    super(message);
-
-    this.projectName = requireNonNull(projectName, "projectName");
+  public InvalidCodeOwnerConfigException(
+      String message, Project.NameKey projectName, String ref, String codeOwnerConfigFilePath) {
+    this(message, projectName, ref, codeOwnerConfigFilePath, /* cause= */ null);
   }
 
   public InvalidCodeOwnerConfigException(
-      String message, Project.NameKey projectName, Throwable cause) {
+      String message,
+      Project.NameKey projectName,
+      String ref,
+      String codeOwnerConfigFilePath,
+      @Nullable Throwable cause) {
     super(message, cause);
 
     this.projectName = requireNonNull(projectName, "projectName");
+    this.ref = requireNonNull(ref, "ref");
+    this.codeOwnerConfigFilePath =
+        requireNonNull(codeOwnerConfigFilePath, "codeOwnerConfigFilePath");
   }
 
   public Project.NameKey getProjectName() {
     return projectName;
+  }
+
+  public String getRef() {
+    return ref;
+  }
+
+  public String getCodeOwnerConfigFilePath() {
+    return codeOwnerConfigFilePath;
   }
 }
