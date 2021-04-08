@@ -180,15 +180,7 @@ public class GeneralConfig {
    *     project, {@link Optional#empty()} if no file extension should be used
    */
   Optional<String> getFileExtension(Config pluginConfig) {
-    requireNonNull(pluginConfig, "pluginConfig");
-
-    String fileExtension =
-        pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION);
-    if (fileExtension != null) {
-      return Optional.of(fileExtension);
-    }
-
-    return Optional.ofNullable(pluginConfigFromGerritConfig.getString(KEY_FILE_EXTENSION));
+    return getStringValue(pluginConfig, KEY_FILE_EXTENSION);
   }
 
   /**
@@ -829,15 +821,18 @@ public class GeneralConfig {
    *     such URL is configured
    */
   Optional<String> getOverrideInfoUrl(Config pluginConfig) {
+    return getStringValue(pluginConfig, KEY_OVERRIDE_INFO_URL);
+  }
+
+  private Optional<String> getStringValue(Config pluginConfig, String key) {
     requireNonNull(pluginConfig, "pluginConfig");
 
-    String overrideInfoUrl =
-        pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_OVERRIDE_INFO_URL);
-    if (overrideInfoUrl != null) {
-      return Optional.of(overrideInfoUrl);
+    String value = pluginConfig.getString(SECTION_CODE_OWNERS, /* subsection= */ null, key);
+    if (value != null) {
+      return Optional.of(value);
     }
 
-    return Optional.ofNullable(pluginConfigFromGerritConfig.getString(KEY_OVERRIDE_INFO_URL));
+    return Optional.ofNullable(pluginConfigFromGerritConfig.getString(key));
   }
 
   /**
