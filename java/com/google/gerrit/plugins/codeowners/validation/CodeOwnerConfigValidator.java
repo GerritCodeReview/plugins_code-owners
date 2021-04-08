@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.validation;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
-import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidConfigCause;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidCodeOwnerConfigCause;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
@@ -37,6 +37,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
+import com.google.gerrit.plugins.codeowners.backend.InvalidCodeOwnerConfigException;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -467,9 +468,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                               codeOwnerConfigKey, revCommit.name())));
     } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
       // Loading the code owner config has failed.
-      Optional<ConfigInvalidException> configInvalidException =
-          getInvalidConfigCause(codeOwnersInternalServerErrorException);
-      if (!configInvalidException.isPresent()) {
+      Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
+          getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException);
+      if (!invalidCodeOwnerConfigException.isPresent()) {
         // Propagate any failure that is not related to the contents of the code owner config.
         throw codeOwnersInternalServerErrorException;
       }
@@ -481,7 +482,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // it.
       return Stream.of(
           new CommitValidationMessage(
-              configInvalidException.get().getMessage(),
+              invalidCodeOwnerConfigException.get().getMessage(),
               getValidationMessageTypeForParsingError(
                   codeOwnerBackend, branchNameKey, changedFile, revWalk, revCommit)));
     }
@@ -496,7 +497,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       baseCodeOwnerConfig =
           getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revWalk, revCommit);
     } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
-      if (getInvalidConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
+      if (getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
         // The base code owner config is non-parseable. Since the update makes the code owner
         // config parseable, it is a good update even if the code owner config still contains
         // issues. Hence in this case we downgrade all validation errors in the new version to
@@ -630,7 +631,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         return ValidationMessage.Type.FATAL;
       } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
         // Loading the base code owner config has failed.
-        if (getInvalidConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
+        if (getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
           // The code owner config was already non-parseable before, hence we do not need to
           // block the upload if the code owner config is still non-parseable.
           // Using warning as type means that uploads are not blocked.
@@ -988,7 +989,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                 revision.get().name()));
       }
     } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
-      if (getInvalidConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
+      if (getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
         // The imported code owner config is non-parseable.
         return nonResolvableImport(
             codeOwnerConfigRevision,

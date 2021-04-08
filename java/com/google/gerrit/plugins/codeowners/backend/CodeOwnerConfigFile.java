@@ -224,7 +224,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
                   codeOwnerConfigParser.parse(
                       revision, codeOwnerConfigKey, codeOwnerConfigFileContent.get()));
         } catch (CodeOwnerConfigParseException e) {
-          throw new ConfigInvalidException(e.getFullMessage(defaultFileName), e);
+          throw new InvalidCodeOwnerConfigException(e.getFullMessage(defaultFileName), e);
         }
       }
     }
