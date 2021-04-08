@@ -16,7 +16,6 @@
  */
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 import {
-  BestSuggestionsLimit,
   SuggestionsState,
   SuggestionsType,
 } from './code-owners-model.js';
@@ -310,7 +309,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
                 </div>
               </template>
               <template is="dom-if" if="[[!suggestion.owners.owned_by_all_users]]">
-                <template is="dom-if" if="[[_breakBeforeOwners(suggestion.owners.code_owners, _showAllOwners)]]">
+                <template is="dom-if" if="[[_showAllOwners]]">
                   <div class="flex-break"></div>
                 </template>
                 <ul class="suggested-owners">
@@ -674,11 +673,6 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
     if (!this.model) return;
     this.model.setSelectedSuggestionType(showAll ?
       SuggestionsType.ALL_SUGGESTIONS : SuggestionsType.BEST_SUGGESTIONS);
-  }
-
-  _breakBeforeOwners(codeOwners, showAllOwners) {
-    if (!codeOwners || !showAllOwners) return false;
-    return codeOwners.length > BestSuggestionsLimit;
   }
 }
 
