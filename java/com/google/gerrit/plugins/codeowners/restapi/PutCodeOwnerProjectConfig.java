@@ -23,6 +23,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
@@ -197,6 +198,14 @@ public class PutCodeOwnerProjectConfig
             /* subsection= */ null,
             KEY_OVERRIDE_INFO_URL,
             input.overrideInfoUrl);
+      }
+
+      if (input.invalidCodeOwnerConfigInfoUrl != null) {
+        codeOwnersConfig.setString(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL,
+            input.invalidCodeOwnerConfigInfoUrl);
       }
 
       if (input.readOnly != null) {
