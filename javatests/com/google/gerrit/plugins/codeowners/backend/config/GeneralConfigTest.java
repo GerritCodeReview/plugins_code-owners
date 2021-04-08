@@ -25,6 +25,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
@@ -1497,6 +1498,48 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         KEY_OVERRIDE_INFO_URL,
         "http://bar.example.com");
     assertThat(generalConfig.getOverrideInfoUrl(cfg)).value().isEqualTo("http://bar.example.com");
+  }
+
+  @Test
+  public void cannotGetInvalidCodeOwnerConfigInfoUrlForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getInvalidCodeOwnerConfigInfoUrl(/* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noInvalidCodeOwnerConfigInfoUrlConfigured() throws Exception {
+    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config())).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl",
+      value = "http://foo.example.com")
+  public void invalidCodeOwnerConfigInfoIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config()))
+        .value()
+        .isEqualTo("http://foo.example.com");
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl",
+      value = "http://foo.example.com")
+  public void invalidCodeOwnerConfigInfoUrlInPluginConfigOverridesOverrideInfoUrlInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL,
+        "http://bar.example.com");
+    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(cfg))
+        .value()
+        .isEqualTo("http://bar.example.com");
   }
 
   @Test

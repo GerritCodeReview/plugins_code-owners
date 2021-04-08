@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook.Status;
@@ -92,6 +93,21 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl", value = "http://foo.bar")
+  public void getUserMessages_withInvalidCodeOwnerConfigInfoUrl() throws Exception {
+    InvalidCodeOwnerConfigException invalidCodeOwnerConfigException =
+        newInvalidCodeOwnerConfigException();
+    assertThat(getUserMessages(invalidCodeOwnerConfigException))
+        .containsExactly(
+            invalidCodeOwnerConfigException.getMessage(), "For help check http://foo.bar")
+        .inOrder();
+    assertThat(getUserMessages(newExceptionWithCause(invalidCodeOwnerConfigException)))
+        .containsExactly(
+            invalidCodeOwnerConfigException.getMessage(), "For help check http://foo.bar")
+        .inOrder();
+  }
+
+  @Test
   public void getStatus() throws Exception {
     Status conflictStatus = Status.create(409, "Conflict");
     assertThat(getStatus(newInvalidPluginConfigurationException()))
@@ -140,7 +156,7 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
   }
 
   private InvalidCodeOwnerConfigException newInvalidCodeOwnerConfigException() {
-    return new InvalidCodeOwnerConfigException("message");
+    return new InvalidCodeOwnerConfigException("message", project);
   }
 
   private InvalidPathException newInvalidPathException() {

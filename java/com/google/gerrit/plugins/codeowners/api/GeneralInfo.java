@@ -47,6 +47,12 @@ public class GeneralInfo {
    */
   public String overrideInfoUrl;
 
+  /**
+   * Optional URL for a page that provides project/host-specific information about how to deal with
+   * invalid code owner config files.
+   */
+  public String invalidCodeOwnerConfigInfoUrl;
+
   /** Policy that controls who should own paths that have no code owners defined. */
   public FallbackCodeOwners fallbackCodeOwners;
 }

@@ -77,6 +77,8 @@ public class GeneralConfig {
   public static final String KEY_EXEMPTED_USER = "exemptedUser";
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
   public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
+  public static final String KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL =
+      "invalidCodeOwnerConfigInfoUrl";
   public static final String KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS =
       "rejectNonResolvableCodeOwners";
   public static final String KEY_REJECT_NON_RESOLVABLE_IMPORTS = "rejectNonResolvableImports";
@@ -822,6 +824,21 @@ public class GeneralConfig {
    */
   Optional<String> getOverrideInfoUrl(Config pluginConfig) {
     return getStringValue(pluginConfig, KEY_OVERRIDE_INFO_URL);
+  }
+
+  /**
+   * Gets an URL that leads to an information page about invalid code owner config files.
+   *
+   * <p>The URL is retrieved from the given plugin config, with fallback to the {@code
+   * gerrit.config}.
+   *
+   * @param pluginConfig the plugin config from which the invalid code owner config info URL should
+   *     be read.
+   * @return URL that leads to an information page about invalid code owner config files, {@link
+   *     Optional#empty()} if no such URL is configured
+   */
+  Optional<String> getInvalidCodeOwnerConfigInfoUrl(Config pluginConfig) {
+    return getStringValue(pluginConfig, KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL);
   }
 
   private Optional<String> getStringValue(Config pluginConfig, String key) {

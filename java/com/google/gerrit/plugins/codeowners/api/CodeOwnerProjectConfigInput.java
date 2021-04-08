@@ -86,6 +86,12 @@ public class CodeOwnerProjectConfigInput {
    */
   public String overrideInfoUrl;
 
+  /**
+   * URL for a page that provides project/host-specific information about how to deal with invalid
+   * code owner config files.
+   */
+  public String invalidCodeOwnerConfigInfoUrl;
+
   /** Whether code owner config files are read-only. */
   public Boolean readOnly;
 

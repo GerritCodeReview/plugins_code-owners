@@ -170,6 +170,16 @@ endpoint or by touching the change (e.g. by adding a comment).
         `@PLUGIN@.config`.\
         By default unset (no override info URL).
 
+<a id="pluginCodeOwnersInvalidCodeOwnerConfigInfoUrl">plugin.@PLUGIN@.invalidCodeOwnerConfigInfoUrl</a>
+:       A URL for a page that provides host-specific information about how to
+        deal with invalid code owner config files.\
+        This URL is included into error messages that indicate invalid code
+        owner config files.\
+        Can be overridden per project by setting
+        [codeOwners.invalidCodeOwnerConfigInfoUrl](#codeOwnersInvalidCodeOwnerConfigInfoUrl)
+        in `@PLUGIN@.config`.\
+        By default unset (no invalid code owner config info URL).
+
 <a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplicitApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
@@ -631,6 +641,19 @@ endpoint or by touching the change (e.g. by adding a comment).
         If not set, the global setting
         [plugin.@PLUGIN@.overrideInfoUrl](#pluginCodeOwnersOverrideInfoUrl) in
         `gerrit.config` is used.
+
+<a id="codeOwnersInvalidCodeOwnerConfigInfoUrl">codeOwners.invalidCodeOwnerConfigInfoUrl</a>
+:       A URL for a page that provides project-specific information about how
+        to deal with invalid code owner config files.\
+        This URL is included into error messages that indicate invalid code
+        owner config files.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.invalidCodeOwnerConfigInfoUrl](#pluginCodeOwnersInvalidCodeOwnerConfigInfoUrl)
+        in `gerrit.config` and the `codeOwners.invalidCodeOwnerConfigInfoUrl`
+        setting from parent projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.invalidCodeOwnerConfigInfoUrl](#pluginCodeOwnersInvalidCodeOwnerConfigInfoUrl)
+        in `gerrit.config` is used.
 
 <a id="codeOwnersEnableImplicitApprovals">codeOwners.enableImplicitApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
