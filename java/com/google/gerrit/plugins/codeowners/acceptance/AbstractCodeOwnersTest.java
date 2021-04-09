@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
 import com.google.common.collect.ImmutableList;
@@ -228,6 +229,26 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
     enableCodeOwnersForProject(project);
+  }
+
+  /**
+   * Returns the parsing error message for the non-parseable code owner config that was created by
+   * {@link #createNonParseableCodeOwnerConfig(String)}.
+   */
+  protected String getParsingErrorMessageForNonParseableCodeOwnerConfig() {
+    return getParsingErrorMessage(
+        ImmutableMap.of(
+            FindOwnersBackend.class,
+            "invalid line: INVALID",
+            ProtoBackend.class,
+            "1:8: Expected \"{\"."));
+  }
+
+  protected String getParsingErrorMessage(
+      ImmutableMap<Class<? extends CodeOwnerBackend>, String> messagesByBackend) {
+    CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
+    assertThat(messagesByBackend).containsKey(codeOwnerBackend.getClass());
+    return messagesByBackend.get(codeOwnerBackend.getClass());
   }
 
   /**

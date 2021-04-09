@@ -2465,13 +2465,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             backendConfig.getDefaultBackend().getClass().getName()));
   }
 
-  private String getParsingErrorMessage(
-      ImmutableMap<Class<? extends CodeOwnerBackend>, String> messagesByBackend) {
-    CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
-    assertThat(messagesByBackend).containsKey(codeOwnerBackend.getClass());
-    return messagesByBackend.get(codeOwnerBackend.getClass());
-  }
-
   private String abbreviateName(AnyObjectId id) throws Exception {
     return ObjectIds.abbreviateName(id, testRepo.getRevWalk().getObjectReader());
   }
