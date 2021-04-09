@@ -78,7 +78,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
       }
 
       try (Timer0.Context ctx = codeOwnerMetrics.runCodeOwnerSubmitRule.start()) {
-        codeOwnerMetrics.countCodeOwnerConfigReads.increment();
+        codeOwnerMetrics.countCodeOwnerSubmitRuleRuns.increment();
         logger.atFine().log(
             "run code owner submit rule (project = %s, change = %d)",
             changeData.project().get(), changeData.getId().get());
