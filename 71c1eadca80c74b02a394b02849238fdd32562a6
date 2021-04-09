@@ -1,0 +1,136 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c8fb7ed4_3dfb3e7c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-09T10:25:29Z",
+      "side": 1,
+      "message": "nit: use @throws",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 78
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "84cba4e9_086e21b6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-09T10:25:29Z",
+      "side": 1,
+      "message": "nit: unfinished comment",
+      "range": {
+        "startLine": 148,
+        "startChar": 46,
+        "endLine": 148,
+        "endChar": 49
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9edc7475_67779562",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-09T10:25:29Z",
+      "side": 1,
+      "message": "nit/optional: comments for these parameters",
+      "range": {
+        "startLine": 152,
+        "startChar": 21,
+        "endLine": 152,
+        "endChar": 25
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6303a2cf_6b3d6e78",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 852,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-09T10:25:29Z",
+      "side": 1,
+      "message": "my concern about duplicates applies here as well (see below suggestion for another test for CodeOwnersPluginConfig).\n\nI think here you\u0027ll be returning duplicates as well (so you have duplicates from Gerrit.config and you have duplicates from inherited projects).",
+      "range": {
+        "startLine": 852,
+        "startChar": 25,
+        "endLine": 852,
+        "endChar": 38
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c88bbcbf_33326b17",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/StatusConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-09T10:25:29Z",
+      "side": 1,
+      "message": "I wonder if it\u0027s easy now with the new refactor to unite this logic into one class (so that you don\u0027t have to call both GerritConfig one and pluginConfig one separately).",
+      "range": {
+        "startLine": 186,
+        "startChar": 12,
+        "endLine": 186,
+        "endChar": 40
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7c3103af_8d2e26f8",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfigTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-09T10:25:29Z",
+      "side": 1,
+      "message": "another test: set the same value in both the parent and the project to see that it\u0027s fine to specify it twice. It looks to me that you will return it with duplicates.",
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
