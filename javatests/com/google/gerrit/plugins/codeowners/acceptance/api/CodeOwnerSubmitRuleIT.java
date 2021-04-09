@@ -350,6 +350,47 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void changeIsNotSubmittableIfOwnersFileIsNonParsable() throws Exception {
+    // Add a non-parsable code owner config.
+    String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
+    createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
+
+    PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+
+    // Apply Code-Review+2 to satisfy the MaxWithBlock function of the Code-Review label.
+    approve(changeId);
+
+    ChangeInfo changeInfo =
+        gApi.changes()
+            .id(changeId)
+            .get(
+                ListChangesOption.SUBMITTABLE,
+                ListChangesOption.ALL_REVISIONS,
+                ListChangesOption.CURRENT_ACTIONS);
+    assertThat(changeInfo.submittable).isFalse();
+
+    // Check that the submit button is not visible.
+    assertThat(changeInfo.revisions.get(r.getCommit().getName()).actions.get("submit")).isNull();
+
+    // Check the submit requirement.
+    assertThatCollection(changeInfo.requirements).isEmpty();
+
+    // Try to submit the change.
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class, () -> gApi.changes().id(changeId).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %s: submit rule error: Failed to evaluate code owner statuses for"
+                    + " patch set 1 of change %s.",
+                changeInfo._number, changeInfo._number));
+  }
+
+  @Test
   @GerritConfig(
       name = "plugin.code-owners.mergeCommitStrategy",
       value = "FILES_WITH_CONFLICT_RESOLUTION")
