@@ -109,8 +109,22 @@ class CodeOwnerSubmitRule implements SubmitRule {
       }
       Optional<InvalidPathException> invalidPathException =
           CodeOwnersExceptionHook.getInvalidPathException(t);
+      Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
+          CodeOwners.getInvalidCodeOwnerConfigCause(t);
       if (invalidPathException.isPresent()) {
         errorMessage += String.format(" (cause: %s)", invalidPathException.get().getMessage());
+      } else if (invalidCodeOwnerConfigException.isPresent()) {
+        errorMessage +=
+            String.format(" (cause: %s)", invalidCodeOwnerConfigException.get().getMessage());
+
+        Optional<String> invalidCodeOwnerConfigInfoUrl =
+            codeOwnersPluginConfiguration
+                .getProjectConfig(invalidCodeOwnerConfigException.get().getProjectName())
+                .getInvalidCodeOwnerConfigInfoUrl();
+        if (invalidCodeOwnerConfigInfoUrl.isPresent()) {
+          errorMessage +=
+              String.format(".\nFor help check %s", invalidCodeOwnerConfigInfoUrl.get());
+        }
       }
       errorMessage += ".";
       logger.atSevere().withCause(t).log(errorMessage);
