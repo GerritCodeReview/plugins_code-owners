@@ -175,8 +175,7 @@ public class CodeOwnerMetrics {
 
   private Timer0 createLatencyTimer(String name, String description) {
     return metricMaker.newTimer(
-        "code_owners/" + name,
-        new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
+        name, new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
   }
 
   private Timer1<String> createTimerWithClassField(
@@ -187,23 +186,22 @@ public class CodeOwnerMetrics {
             .build();
 
     return metricMaker.newTimer(
-        "code_owners/" + name,
+        name,
         new Description(description).setCumulative().setUnit(Description.Units.MILLISECONDS),
         CODE_OWNER_BACKEND_FIELD);
   }
 
   private Counter0 createCounter(String name, String description) {
-    return metricMaker.newCounter("code_owners/" + name, new Description(description).setRate());
+    return metricMaker.newCounter(name, new Description(description).setRate());
   }
 
   private <F1, F2, F3> Counter3<F1, F2, F3> createCounter3(
       String name, String description, Field<F1> field1, Field<F2> field2, Field<F3> field3) {
     return metricMaker.newCounter(
-        "code_owners/" + name, new Description(description).setRate(), field1, field2, field3);
+        name, new Description(description).setRate(), field1, field2, field3);
   }
 
   private Histogram0 createHistogram(String name, String description) {
-    return metricMaker.newHistogram(
-        "code_owners/" + name, new Description(description).setCumulative());
+    return metricMaker.newHistogram(name, new Description(description).setCumulative());
   }
 }
