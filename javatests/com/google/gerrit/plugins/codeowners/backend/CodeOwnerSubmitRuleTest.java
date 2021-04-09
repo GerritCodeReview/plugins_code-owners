@@ -138,10 +138,28 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void ruleErrorWhenChangeDataIsNull() throws Exception {
+  public void ruleError_changeDataIsNull() throws Exception {
     SubmitRecordSubject submitRecordSubject =
         assertThatOptional(codeOwnerSubmitRule.evaluate(/* changeData= */ null)).value();
     submitRecordSubject.hasStatusThat().isRuleError();
     submitRecordSubject.hasErrorMessageThat().isEqualTo("Failed to evaluate code owner statuses.");
+  }
+
+  @Test
+  public void ruleError_nonParsableCodeOwnerConfig() throws Exception {
+    String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
+    createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
+
+    ChangeData changeData = createChange().getChange();
+
+    SubmitRecordSubject submitRecordSubject =
+        assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
+    submitRecordSubject.hasStatusThat().isRuleError();
+    submitRecordSubject
+        .hasErrorMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to evaluate code owner statuses for patch set %d of change %d.",
+                changeData.change().currentPatchSetId().get(), changeData.change().getId().get()));
   }
 }
