@@ -24,7 +24,6 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
@@ -524,12 +523,5 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
         String.format(
             "unknown code owner backend: %s",
             backendConfig.getDefaultBackend().getClass().getName()));
-  }
-
-  private String getParsingErrorMessage(
-      ImmutableMap<Class<? extends CodeOwnerBackend>, String> messagesByBackend) {
-    CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
-    assertThat(messagesByBackend).containsKey(codeOwnerBackend.getClass());
-    return messagesByBackend.get(codeOwnerBackend.getClass());
   }
 }
