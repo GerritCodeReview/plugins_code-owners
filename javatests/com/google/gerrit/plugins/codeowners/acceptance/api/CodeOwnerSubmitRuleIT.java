@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.TestMetricMaker;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
@@ -50,6 +51,7 @@ import org.junit.Test;
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}. */
 public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   @Inject private ProjectOperations projectOperations;
+  @Inject private TestMetricMaker testMetricMaker;
 
   @Test
   public void changeIsSubmittableIfCodeOwnersFuctionalityIsDisabled() throws Exception {
@@ -494,6 +496,37 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
     assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  public void submitRuleIsInvokedOnlyOnceWhenGettingChangeDetails() throws Exception {
+    PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+
+    testMetricMaker.reset();
+    gApi.changes()
+        .id(changeId)
+        .get(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS);
+
+    // Submit rules are computed freshly, but only once.
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))
+        .isEqualTo(1);
+  }
+
+  @Test
+  public void submitRuleIsNotInvokedWhenQueryingChange() throws Exception {
+    PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+
+    testMetricMaker.reset();
+    gApi.changes()
+        .query(changeId)
+        .withOptions(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS)
+        .get();
+
+    // Submit rule evaluation results from the change index are reused
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))
+        .isEqualTo(0);
   }
 
   private void deleteAutoMergeBranch(ObjectId mergeCommit) throws Exception {
