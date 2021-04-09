@@ -668,16 +668,6 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
     return projectCodeOwnersApiFactory.project(projectName).checkCodeOwnerConfigFiles().check();
   }
 
-  private String getCodeOwnerConfigFileName() {
-    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
-    if (backend instanceof FindOwnersBackend) {
-      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    } else if (backend instanceof ProtoBackend) {
-      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    }
-    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
-  }
-
   private String getParsingErrorMessage(
       ImmutableMap<Class<? extends CodeOwnerBackend>, String> messagesByBackend) {
     CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();

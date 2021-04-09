@@ -36,8 +36,12 @@ import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation.Builder;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -67,11 +71,13 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   @Inject private ProjectOperations projectOperations;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
+  private BackendConfig backendConfig;
 
   @Before
   public void testSetup() throws Exception {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
+    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
   }
 
   protected String createChangeWithFileDeletion(Path filePath) throws Exception {
@@ -302,5 +308,15 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
       throws Exception {
     PushOneCommit push = pushFactory.create(admin.newIdent(), testRepo, subject, files);
     return push.to("refs/for/master");
+  }
+
+  protected String getCodeOwnerConfigFileName() {
+    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
+    if (backend instanceof FindOwnersBackend) {
+      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
+    } else if (backend instanceof ProtoBackend) {
+      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
+    }
+    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
   }
 }
