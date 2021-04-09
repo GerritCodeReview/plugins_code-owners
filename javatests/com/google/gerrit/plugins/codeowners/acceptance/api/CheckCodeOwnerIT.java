@@ -39,15 +39,11 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
-import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ServerInitiated;
@@ -75,12 +71,10 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
 
-  private BackendConfig backendConfig;
   private TestPathExpressions testPathExpressions;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
     testPathExpressions = plugin.getSysInjector().getInstance(TestPathExpressions.class);
   }
 
@@ -1337,16 +1331,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .folderPath(ROOT_PATH)
         .addCodeOwnerEmail(email)
         .create();
-  }
-
-  private String getCodeOwnerConfigFileName() {
-    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
-    if (backend instanceof FindOwnersBackend) {
-      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    } else if (backend instanceof ProtoBackend) {
-      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    }
-    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
   }
 
   private void addEmail(Account.Id accountId, String email) throws Exception {
