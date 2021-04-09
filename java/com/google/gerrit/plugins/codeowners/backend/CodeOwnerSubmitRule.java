@@ -114,6 +114,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
       if (invalidPathException.isPresent()) {
         errorMessage += String.format(" (cause: %s)", invalidPathException.get().getMessage());
       } else if (invalidCodeOwnerConfigException.isPresent()) {
+        codeOwnerMetrics.countInvalidCodeOwnerConfigFiles.increment(
+            invalidCodeOwnerConfigException.get().getProjectName().get(),
+            invalidCodeOwnerConfigException.get().getRef(),
+            invalidCodeOwnerConfigException.get().getCodeOwnerConfigFilePath());
+
         errorMessage +=
             String.format(" (cause: %s)", invalidCodeOwnerConfigException.get().getMessage());
 
