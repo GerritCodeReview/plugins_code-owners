@@ -2476,16 +2476,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     return ObjectIds.abbreviateName(id, testRepo.getRevWalk().getObjectReader());
   }
 
-  private String getCodeOwnerConfigFileName() {
-    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
-    if (backend instanceof FindOwnersBackend) {
-      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    } else if (backend instanceof ProtoBackend) {
-      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    }
-    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
-  }
-
   private static void assertOkWithoutMessages(PushOneCommit.Result pushResult) {
     pushResult.assertOkStatus();
     pushResult.assertNotMessage("fatal");

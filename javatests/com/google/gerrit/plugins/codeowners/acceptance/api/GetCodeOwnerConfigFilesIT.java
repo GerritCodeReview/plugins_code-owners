@@ -21,14 +21,9 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
-import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -36,13 +31,6 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerConfigFiles} REST endpoint.
  */
 public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
-  private BackendConfig backendConfig;
-
-  @Before
-  public void setUpCodeOwnersPlugin() throws Exception {
-    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
-  }
-
   @Test
   public void noCodeOwnerConfigFiles() throws Exception {
     assertThat(
@@ -433,15 +421,5 @@ public class GetCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey3).getFilePath())
         .inOrder();
-  }
-
-  private String getCodeOwnerConfigFileName() {
-    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
-    if (backend instanceof FindOwnersBackend) {
-      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    } else if (backend instanceof ProtoBackend) {
-      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    }
-    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
   }
 }
