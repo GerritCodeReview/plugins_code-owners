@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject.fileCodeOwnerStatusInfos;
 import static com.google.gerrit.truth.ListSubject.elements;
 
+import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IntegerSubject;
 import com.google.common.truth.Subject;
@@ -57,9 +58,13 @@ public class CodeOwnerStatusInfoSubject extends Subject {
   /** Returns a {@link ListSubject} for the file code owner statuses. */
   public ListSubject<FileCodeOwnerStatusInfoSubject, FileCodeOwnerStatusInfo>
       hasFileCodeOwnerStatusesThat() {
-    return check("fileCodeOwnerStatuses")
+    return check("fileCodeOwnerStatuses()")
         .about(elements())
         .thatCustom(codeOwnerStatusInfo().fileCodeOwnerStatuses, fileCodeOwnerStatusInfos());
+  }
+
+  public BooleanSubject hasMoreThat() {
+    return check("more()").that(codeOwnerStatusInfo().more);
   }
 
   private CodeOwnerStatusInfo codeOwnerStatusInfo() {
