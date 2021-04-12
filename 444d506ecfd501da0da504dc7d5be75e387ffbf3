@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4630ca89_dcb6b3c9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/metrics/CodeOwnerMetrics.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 161,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:07:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1da65a4e_a4ca01ed",
+      "range": {
+        "startLine": 161,
+        "startChar": 13,
+        "endLine": 161,
+        "endChar": 56
+      },
+      "revId": "444d506ecfd501da0da504dc7d5be75e387ffbf3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b4627112_6cf27531",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-04-09T13:26:39Z",
       "side": 1,
       "message": "omit? (and below)",
+      "range": {
+        "startLine": 65,
+        "startChar": 6,
+        "endLine": 65,
+        "endChar": 11
+      },
+      "revId": "444d506ecfd501da0da504dc7d5be75e387ffbf3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1f21624c_b808d453",
+        "filename": "resources/Documentation/metrics.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:07:18Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b4627112_6cf27531",
       "range": {
         "startLine": 65,
         "startChar": 6,
