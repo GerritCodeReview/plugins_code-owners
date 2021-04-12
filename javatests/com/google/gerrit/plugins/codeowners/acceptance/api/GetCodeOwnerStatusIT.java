@@ -28,6 +28,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import org.junit.Test;
@@ -326,6 +327,24 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void getStatusLimitedByDefault() throws Exception {
+    setAsRootCodeOwners(user);
+
+    ImmutableMap.Builder<String, String> files = ImmutableMap.builder();
+    for (int i = 1; i <= GetCodeOwnerStatus.DEFAULT_LIMIT + 1; i++) {
+      files.put(String.format("foo-%d.txt", i), "file content");
+    }
+
+    String changeId = createChange("test change", files.build()).getChangeId();
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .hasSize(GetCodeOwnerStatus.DEFAULT_LIMIT);
+  }
+
+  @Test
   public void startCannotBeNegative() throws Exception {
     String changeId = createChange().getChangeId();
     BadRequestException exception =
@@ -352,16 +371,22 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                     .getCodeOwnerStatus()
                     .withLimit(-1)
                     .get());
-    assertThat(exception).hasMessageThat().isEqualTo("limit cannot be negative");
+    assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
   }
 
   @Test
-  public void getStatusWithoutLimit() throws Exception {
+  public void cannotGetStatusWithoutLimit() throws Exception {
     String changeId = createChange().getChangeId();
-    CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(0).get();
-    assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().isNotEmpty();
-    assertThat(codeOwnerStatus).hasMoreThat().isNull();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                changeCodeOwnersApiFactory
+                    .change(changeId)
+                    .getCodeOwnerStatus()
+                    .withLimit(0)
+                    .get());
+    assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
   }
 
   @Test
