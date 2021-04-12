@@ -20,6 +20,7 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.h
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
+import static java.util.Comparator.comparing;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -1279,11 +1280,13 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel("Other-Override");
 
     configureOverrideApproval(project, "Other-Override+1");
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableList<RequiredApproval> requiredApprovals =
+        ImmutableList.sortedCopyOf(
+            comparing(RequiredApproval::toString), cfgSnapshot().getOverrideApprovals());
     assertThat(requiredApprovals).hasSize(2);
-    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
-    assertThat(requiredApprovals).element(1).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(1).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(1).hasValueThat().isEqualTo(1);
   }
 
@@ -1349,11 +1352,13 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
     configureOverrideApproval(project, "Other-Override+1");
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableList<RequiredApproval> requiredApprovals =
+        ImmutableList.sortedCopyOf(
+            comparing(RequiredApproval::toString), cfgSnapshot().getOverrideApprovals());
     assertThat(requiredApprovals).hasSize(2);
-    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
+    assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Other-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
-    assertThat(requiredApprovals).element(1).hasLabelNameThat().isEqualTo("Other-Override");
+    assertThat(requiredApprovals).element(1).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(1).hasValueThat().isEqualTo(1);
   }
 
