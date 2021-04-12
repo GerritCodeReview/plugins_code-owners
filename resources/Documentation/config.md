@@ -166,7 +166,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         The frontend displays a link to this page on the change screen so that
         users can discover the override instructions easily.\
         Can be overridden per project by setting
-        [codeOwners.overrideInfoUrl](#codeOwnersFileExtension) in
+        [codeOwners.overrideInfoUrl](#codeOwnersOverrideInfoUrl) in
         `@PLUGIN@.config`.\
         By default unset (no override info URL).
 
