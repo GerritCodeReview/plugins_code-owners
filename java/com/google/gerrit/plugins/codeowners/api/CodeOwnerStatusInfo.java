@@ -34,4 +34,11 @@ public class CodeOwnerStatusInfo {
 
   /** List of the code owner statuses for the files in the change. */
   public List<FileCodeOwnerStatusInfo> fileCodeOwnerStatuses;
+
+  /**
+   * Whether the request would deliver more results if not limited.
+   *
+   * <p>Not set if {@code false}.
+   */
+  public Boolean more;
 }
