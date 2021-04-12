@@ -14,7 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
+
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.RestReadView;
@@ -26,8 +30,8 @@ import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 import java.io.IOException;
+import org.kohsuke.args4j.Option;
 
 /**
  * REST endpoint that gets the code owner statuses for the files in a change.
@@ -49,9 +53,31 @@ import java.io.IOException;
  *       so that this approval can never happen)
  * </ul>
  */
-@Singleton
 public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
+  @VisibleForTesting public static final int DEFAULT_LIMIT = 200;
+
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
+
+  private int start;
+  private int limit = DEFAULT_LIMIT;
+
+  @Option(
+      name = "--limit",
+      aliases = {"-n"},
+      metaVar = "CNT",
+      usage = "maximum number of owned path to return (default = " + DEFAULT_LIMIT + ")")
+  public void setLimit(int limit) {
+    this.limit = limit;
+  }
+
+  @Option(
+      name = "--start",
+      aliases = {"-S"},
+      metaVar = "CNT",
+      usage = "number of owned paths to skip")
+  public void setStart(int start) {
+    this.start = start;
+  }
 
   @Inject
   public GetCodeOwnerStatus(CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
@@ -62,10 +88,24 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
   public Response<CodeOwnerStatusInfo> apply(ChangeResource changeResource)
       throws RestApiException, IOException, PermissionBackendException,
           PatchListNotAvailableException, DiffNotAvailableException {
+    validateStartAndLimit();
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(changeResource.getNotes());
-    return Response.ok(
+        codeOwnerApprovalCheck.getFileStatusesAsSet(changeResource.getNotes(), start, limit + 1);
+    CodeOwnerStatusInfo codeOwnerStatusInfo =
         CodeOwnerStatusInfoJson.format(
-            changeResource.getNotes().getCurrentPatchSet().id(), fileCodeOwnerStatuses));
+            changeResource.getNotes().getCurrentPatchSet().id(),
+            fileCodeOwnerStatuses.stream().limit(limit).collect(toImmutableSet()));
+    codeOwnerStatusInfo.more = fileCodeOwnerStatuses.size() > limit ? true : null;
+    return Response.ok(codeOwnerStatusInfo);
+  }
+
+  private void validateStartAndLimit() throws BadRequestException {
+    if (start < 0) {
+      throw new BadRequestException("start cannot be negative");
+    }
+    if (limit <= 0) {
+      throw new BadRequestException("limit must be positive");
+    }
   }
 }

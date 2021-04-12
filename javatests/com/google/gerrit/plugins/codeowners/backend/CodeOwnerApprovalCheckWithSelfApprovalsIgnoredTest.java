@@ -83,8 +83,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             .getChangeId();
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -99,7 +98,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     recommend(changeId);
 
     // Verify that the file is not approved (since self approvals are ignored).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -125,8 +124,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     amendChange(admin, changeId);
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -142,7 +140,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
     // Verify that the file is approved now (since the change owner is not the uploader of the
     // current patch set).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -172,8 +170,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     amendChange(codeOwner, changeId);
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -188,7 +185,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
     // Verify that the file is not pending (the code owner is the uploader of the current patch set
     // and self approvals are ignored).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -203,7 +200,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
     // Verify that the file is not approved (since the code owner is the uploader of the current
     // patch set and self approvals are ignored).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -227,8 +224,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             .getChangeId();
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -260,8 +256,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     amendChange(codeOwner, changeId);
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -286,8 +281,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             .getChangeId();
 
     // Verify that the file is approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -319,8 +313,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     amendChange(codeOwner, changeId);
 
     // Verify that the file is approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -343,8 +336,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             .getChangeId();
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -360,7 +352,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
     // Verify that the file is not approved (since self approvals on the override label are
     // ignored).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -385,8 +377,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     amendChange(admin, changeId);
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -402,7 +393,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
     // Verify that the file is approved now (since the change owner is not the uploader of the
     // current patch set and hence the override counts).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -427,8 +418,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     amendChange(admin, changeId);
 
     // Verify that the file is not approved.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -442,7 +432,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
 
     // Verify that the file is not approved (since the override from the uploader is ignored).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -450,6 +440,12 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)
+      throws Exception {
+    return codeOwnerApprovalCheck.getFileStatusesAsSet(
+        getChangeNotes(changeId), /* start= */ 0, /* limit= */ 0);
   }
 
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
