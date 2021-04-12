@@ -20,6 +20,7 @@ import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Revision-level Java API of the code-owners plugin.
@@ -95,7 +96,39 @@ public interface RevisionCodeOwners {
 
   /** Request to check code owner config files. */
   abstract class OwnedPathsRequest {
+    private Integer start;
+    private Integer limit;
     private String user;
+
+    /**
+     * Sets a limit on the number of owned paths that should be returned.
+     *
+     * @param start number of owned paths to skip
+     */
+    public OwnedPathsRequest withStart(int start) {
+      this.start = start;
+      return this;
+    }
+
+    /** Returns the number of owned paths to skip. */
+    public Optional<Integer> getStart() {
+      return Optional.ofNullable(start);
+    }
+
+    /**
+     * Sets a limit on the number of owned paths that should be returned.
+     *
+     * @param limit the limit
+     */
+    public OwnedPathsRequest withLimit(int limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    /** Returns the limit. */
+    public Optional<Integer> getLimit() {
+      return Optional.ofNullable(limit);
+    }
 
     /** Sets the user for which the owned paths should be retrieved. */
     public OwnedPathsRequest forUser(String user) {

@@ -26,6 +26,7 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.UnprocessableEntityException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.OwnedPathsInfo;
+import com.google.gerrit.plugins.codeowners.restapi.GetOwnedPaths;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import org.junit.Test;
@@ -33,6 +34,10 @@ import org.junit.Test;
 /**
  * Acceptance test for the {@link com.google.gerrit.plugins.codeowners.restapi.GetOwnedPaths} REST
  * endpoint.
+ *
+ * <p>Further tests for the {@link com.google.gerrit.plugins.codeowners.restapi.GetOwnedPaths} REST
+ * endpoint that require using the REST API are implemented in {@link
+ * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetOwnedPathRestIT}.
  */
 public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
@@ -126,6 +131,7 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .forUser(user.email())
             .get();
     assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
   @Test
@@ -178,5 +184,261 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .forUser(user.email())
             .get();
     assertThat(ownedPathsInfo).hasOwnedPathsThat().isEmpty();
+  }
+
+  @Test
+  public void getOwnedPathsWithStart() throws Exception {
+    setAsRootCodeOwners(user);
+
+    String path1 = "/bar/baz.md";
+    String path2 = "/bar/foo.md";
+    String path3 = "/foo/bar/baz.md";
+    String path4 = "/foo/baz/bar.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content",
+                    JgitPath.of(path4).get(),
+                    "file content"))
+            .getChangeId();
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withStart(0)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo)
+        .hasOwnedPathsThat()
+        .containsExactly(path1, path2, path3, path4)
+        .inOrder();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withStart(1)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path2, path3, path4).inOrder();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withStart(2)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path3, path4).inOrder();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withStart(3)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path4);
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withStart(4)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().isEmpty();
+  }
+
+  @Test
+  public void getOwnedPathsWithLimit() throws Exception {
+    setAsRootCodeOwners(user);
+
+    String path1 = "/bar/baz.md";
+    String path2 = "/bar/foo.md";
+    String path3 = "/foo/bar/baz.md";
+    String path4 = "/foo/baz/bar.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content",
+                    JgitPath.of(path4).get(),
+                    "file content"))
+            .getChangeId();
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withLimit(1)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1);
+    assertThat(ownedPathsInfo).hasMoreThat().isTrue();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withLimit(2)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isTrue();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withLimit(3)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2, path3).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isTrue();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withLimit(4)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo)
+        .hasOwnedPathsThat()
+        .containsExactly(path1, path2, path3, path4)
+        .inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isNull();
+  }
+
+  @Test
+  public void getOwnedPathsWithStartAndLimit() throws Exception {
+    setAsRootCodeOwners(user);
+
+    String path1 = "/bar/baz.md";
+    String path2 = "/bar/foo.md";
+    String path3 = "/foo/bar/baz.md";
+    String path4 = "/foo/baz/bar.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content",
+                    JgitPath.of(path4).get(),
+                    "file content"))
+            .getChangeId();
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .withStart(1)
+            .withLimit(2)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path2, path3).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isTrue();
+  }
+
+  @Test
+  public void getOwnedPathsLimitedByDefault() throws Exception {
+    setAsRootCodeOwners(user);
+
+    ImmutableMap.Builder<String, String> files = ImmutableMap.builder();
+    for (int i = 1; i <= GetOwnedPaths.DEFAULT_LIMIT + 1; i++) {
+      files.put(String.format("foo-%d.txt", i), "file content");
+    }
+
+    String changeId = createChange("test change", files.build()).getChangeId();
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().hasSize(GetOwnedPaths.DEFAULT_LIMIT);
+  }
+
+  @Test
+  public void startCannotBeNegative() throws Exception {
+    String changeId = createChange().getChangeId();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                changeCodeOwnersApiFactory
+                    .change(changeId)
+                    .current()
+                    .getOwnedPaths()
+                    .withStart(-1)
+                    .forUser(user.email())
+                    .get());
+    assertThat(exception).hasMessageThat().isEqualTo("start cannot be negative");
+  }
+
+  @Test
+  public void limitCannotBeNegative() throws Exception {
+    String changeId = createChange().getChangeId();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                changeCodeOwnersApiFactory
+                    .change(changeId)
+                    .current()
+                    .getOwnedPaths()
+                    .withLimit(-1)
+                    .forUser(user.email())
+                    .get());
+    assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
+  }
+
+  @Test
+  public void cannotGetOwnedPathWithoutLimit() throws Exception {
+    String changeId = createChange().getChangeId();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                changeCodeOwnersApiFactory
+                    .change(changeId)
+                    .current()
+                    .getOwnedPaths()
+                    .withLimit(0)
+                    .forUser(user.email())
+                    .get());
+    assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
   }
 }

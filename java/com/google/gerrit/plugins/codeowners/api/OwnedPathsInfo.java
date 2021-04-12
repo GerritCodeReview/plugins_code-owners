@@ -31,4 +31,11 @@ public class OwnedPathsInfo {
    * <p>The paths are sorted alphabetically.
    */
   public List<String> ownedPaths;
+
+  /**
+   * Whether the request would deliver more results if not limited.
+   *
+   * <p>Not set if {@code false}.
+   */
+  public Boolean more;
 }

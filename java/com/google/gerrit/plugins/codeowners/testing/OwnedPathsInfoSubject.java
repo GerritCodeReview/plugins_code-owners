@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
 
+import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
@@ -46,6 +47,10 @@ public class OwnedPathsInfoSubject extends Subject {
 
   public IterableSubject hasOwnedPathsThat() {
     return check("ownedPaths()").that(ownedPathsInfo().ownedPaths);
+  }
+
+  public BooleanSubject hasMoreThat() {
+    return check("more()").that(ownedPathsInfo().more);
   }
 
   private OwnedPathsInfo ownedPathsInfo() {
