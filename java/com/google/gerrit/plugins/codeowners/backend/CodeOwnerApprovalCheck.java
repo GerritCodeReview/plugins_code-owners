@@ -211,18 +211,28 @@ public class CodeOwnerApprovalCheck {
    * Gets the code owner statuses for all files/paths that were changed in the current revision of
    * the given change as a set.
    *
+   * @param start number of file statuses to skip
+   * @param limit the max number of file statuses that should be returned (0 = unlimited)
    * @see #getFileStatuses(CodeOwnerConfigHierarchy, ChangeNotes)
    */
-  public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(ChangeNotes changeNotes)
+  public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(
+      ChangeNotes changeNotes, int start, int limit)
       throws ResourceConflictException, IOException, PatchListNotAvailableException,
           DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
       logger.atFine().log(
-          "compute file statuses (project = %s, change = %d)",
-          changeNotes.getProjectName(), changeNotes.getChangeId().get());
-      return getFileStatuses(codeOwnerConfigHierarchyProvider.get(), changeNotes)
-          .collect(toImmutableSet());
+          "compute file statuses (project = %s, change = %d, start = %d, limit = %d)",
+          changeNotes.getProjectName(), changeNotes.getChangeId().get(), start, limit);
+      Stream<FileCodeOwnerStatus> fileStatuses =
+          getFileStatuses(codeOwnerConfigHierarchyProvider.get(), changeNotes);
+      if (start > 0) {
+        fileStatuses = fileStatuses.skip(start);
+      }
+      if (limit > 0) {
+        fileStatuses = fileStatuses.limit(limit);
+      }
+      return fileStatuses.collect(toImmutableSet());
     }
   }
 
