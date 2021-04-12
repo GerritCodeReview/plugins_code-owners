@@ -56,7 +56,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     recommend(changeId);
 
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasPatchSetNumberThat()
         .isEqualTo(r.getChange().currentPatchSet().id().get());
@@ -79,7 +79,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
@@ -90,7 +90,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     // Add a reviewer that is a code owner of the old path.
     gApi.changes().id(changeId).addReviewer(user.email());
 
-    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
@@ -101,7 +101,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     // Add a reviewer that is a code owner of the new path.
     gApi.changes().id(changeId).addReviewer(user2.email());
 
-    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+    codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
@@ -116,7 +116,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     String path = "foo/bar.baz";
     String changeId = createChange("Change Adding A File", path, "file content").getChangeId();
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())

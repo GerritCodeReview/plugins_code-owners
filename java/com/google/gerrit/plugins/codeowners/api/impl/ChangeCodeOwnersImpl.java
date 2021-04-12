@@ -52,12 +52,17 @@ public class ChangeCodeOwnersImpl implements ChangeCodeOwners {
   }
 
   @Override
-  public CodeOwnerStatusInfo getCodeOwnerStatus() throws RestApiException {
-    try {
-      return getCodeOwnerStatus.apply(changeResource).value();
-    } catch (Exception e) {
-      throw asRestApiException("Cannot get code owner status", e);
-    }
+  public CodeOwnerStatusRequest getCodeOwnerStatus() throws RestApiException {
+    return new CodeOwnerStatusRequest() {
+      @Override
+      public CodeOwnerStatusInfo get() throws RestApiException {
+        try {
+          return getCodeOwnerStatus.apply(changeResource).value();
+        } catch (Exception e) {
+          throw asRestApiException("Cannot get code owner status", e);
+        }
+      }
+    };
   }
 
   @Override

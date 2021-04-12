@@ -23,8 +23,8 @@ import com.google.gerrit.extensions.restapi.RestApiException;
  * <p>To create an instance for a change use {@code ChangeCodeOwnersFactory}.
  */
 public interface ChangeCodeOwners {
-  /** Returns the code owner status for the files in the change. */
-  CodeOwnerStatusInfo getCodeOwnerStatus() throws RestApiException;
+  /** Creates a request to retrieve the code owner status for the files in the change. */
+  CodeOwnerStatusRequest getCodeOwnerStatus() throws RestApiException;
 
   /** Returns the revision-level code owners API for the current revision. */
   default RevisionCodeOwners current() throws RestApiException {
@@ -35,12 +35,26 @@ public interface ChangeCodeOwners {
   RevisionCodeOwners revision(String id) throws RestApiException;
 
   /**
+   * Request to compute code owner status.
+   *
+   * <p>Allows to set parameters on the request before executing it by calling {@link #get()}.
+   */
+  abstract class CodeOwnerStatusRequest {
+    /**
+     * Executes this request and retrieves the code owner status.
+     *
+     * @return the code owner status
+     */
+    public abstract CodeOwnerStatusInfo get() throws RestApiException;
+  }
+
+  /**
    * A default implementation which allows source compatibility when adding new methods to the
    * interface.
    */
   class NotImplemented implements ChangeCodeOwners {
     @Override
-    public CodeOwnerStatusInfo getCodeOwnerStatus() {
+    public CodeOwnerStatusRequest getCodeOwnerStatus() {
       throw new NotImplementedException();
     }
 
