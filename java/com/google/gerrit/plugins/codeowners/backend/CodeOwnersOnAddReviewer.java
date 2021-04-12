@@ -164,7 +164,11 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
         // limit + 1, so that we can show an indicator if there are more than <limit> files.
         ownedPaths =
             codeOwnerApprovalCheck.getOwnedPaths(
-                changeNotes, changeNotes.getCurrentPatchSet(), reviewerAccountId, limit + 1);
+                changeNotes,
+                changeNotes.getCurrentPatchSet(),
+                reviewerAccountId,
+                /* start= */ 0,
+                limit + 1);
       } catch (RestApiException e) {
         logger.atFine().withCause(e).log(
             "Couldn't compute owned paths of change %s for account %s",

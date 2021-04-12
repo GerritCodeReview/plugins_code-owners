@@ -657,9 +657,11 @@ request parameter below).
 
 The following request parameters can be specified:
 
-| Field Name  |           | Description |
-| ----------- | --------- | ----------- |
-| `user`      | mandatory | user for which the owned paths should be returned
+| Field Name   |           | Description |
+| ------------ | --------- | ----------- |
+| `start`\|`S` | optional  | Number of owned paths to skip. Allows to page over the owned files. By default 0.
+| `limit`\|`n` | optional  | Limit defining how many owned files should be returned at most. By default 50.
+| `user`       | mandatory | user for which the owned paths should be returned
 
 #### Request
 
@@ -960,9 +962,10 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 The `OwnedPathsInfo` entity contains paths that are owned by a user.
 
 
-| Field Name    | Description |
-| ------------- | ----------- |
-| `owned_paths` | The owned paths as absolute paths, sorted alphabetically.
+| Field Name    |          | Description |
+| ------------- | -------- | ----------- |
+| `owned_paths` |          |The owned paths as absolute paths, sorted alphabetically.
+| `more`        | optional | Whether the request would deliver more results if not limited. Not set if `false`.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path
