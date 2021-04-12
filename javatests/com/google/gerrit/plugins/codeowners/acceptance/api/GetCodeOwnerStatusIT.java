@@ -14,16 +14,22 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject.isFileCodeOwnerStatus;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import org.junit.Test;
 
@@ -65,6 +71,323 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+  }
+
+  @Test
+  public void getStatusWithStart() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+    String path4 = "/bar/baz.md";
+
+    PushOneCommit.Result r =
+        createChange(
+            "Change Adding A File",
+            ImmutableMap.of(
+                JgitPath.of(path1).get(),
+                "file content",
+                JgitPath.of(path2).get(),
+                "file content",
+                JgitPath.of(path3).get(),
+                "file content",
+                JgitPath.of(path4).get(),
+                "file content"));
+    String changeId = r.getChangeId();
+
+    // Add a reviewer that is a code owner.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId);
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(0).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+        .inOrder();
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(1).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+        .inOrder();
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(2).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+        .inOrder();
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(3).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING));
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(4).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().isEmpty();
+  }
+
+  @Test
+  public void getStatusWithLimit() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+    String path4 = "/bar/baz.md";
+
+    PushOneCommit.Result r =
+        createChange(
+            "Change Adding A File",
+            ImmutableMap.of(
+                JgitPath.of(path1).get(),
+                "file content",
+                JgitPath.of(path2).get(),
+                "file content",
+                JgitPath.of(path3).get(),
+                "file content",
+                JgitPath.of(path4).get(),
+                "file content"));
+    String changeId = r.getChangeId();
+
+    // Add a reviewer that is a code owner.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId);
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(1).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(2).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS))
+        .inOrder();
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(3).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING))
+        .inOrder();
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(4).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+        .inOrder();
+
+    codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(4).get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().isEmpty();
+  }
+
+  @Test
+  public void getStatusWithStartAndLimit() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+    String path4 = "/bar/baz.md";
+
+    PushOneCommit.Result r =
+        createChange(
+            "Change Adding A File",
+            ImmutableMap.of(
+                JgitPath.of(path1).get(),
+                "file content",
+                JgitPath.of(path2).get(),
+                "file content",
+                JgitPath.of(path3).get(),
+                "file content",
+                JgitPath.of(path4).get(),
+                "file content"));
+    String changeId = r.getChangeId();
+
+    // Add a reviewer that is a code owner.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Add a Code-Review+1 (= code owner approval) from a user that is not a code owner.
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId);
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .getCodeOwnerStatus()
+            .withStart(1)
+            .withLimit(2)
+            .get();
+    assertThat(codeOwnerStatus)
+        .hasPatchSetNumberThat()
+        .isEqualTo(r.getChange().currentPatchSet().id().get());
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING))
+        .inOrder();
+  }
+
+  @Test
+  public void getStatusLimitedByDefault() throws Exception {
+    setAsRootCodeOwners(user);
+
+    ImmutableMap.Builder<String, String> files = ImmutableMap.builder();
+    for (int i = 1; i <= GetCodeOwnerStatus.DEFAULT_LIMIT + 1; i++) {
+      files.put(String.format("foo-%d.txt", i), "file content");
+    }
+
+    String changeId = createChange("test change", files.build()).getChangeId();
+
+    CodeOwnerStatusInfo codeOwnerStatus =
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .hasSize(GetCodeOwnerStatus.DEFAULT_LIMIT);
+  }
+
+  @Test
+  public void startCannotBeNegative() throws Exception {
+    String changeId = createChange().getChangeId();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                changeCodeOwnersApiFactory
+                    .change(changeId)
+                    .getCodeOwnerStatus()
+                    .withStart(-1)
+                    .get());
+    assertThat(exception).hasMessageThat().isEqualTo("start cannot be negative");
+  }
+
+  @Test
+  public void limitCannotBeNegative() throws Exception {
+    String changeId = createChange().getChangeId();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                changeCodeOwnersApiFactory
+                    .change(changeId)
+                    .getCodeOwnerStatus()
+                    .withLimit(-1)
+                    .get());
+    assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
+  }
+
+  @Test
+  public void cannotGetStatusWithoutLimit() throws Exception {
+    String changeId = createChange().getChangeId();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () ->
+                changeCodeOwnersApiFactory
+                    .change(changeId)
+                    .getCodeOwnerStatus()
+                    .withLimit(0)
+                    .get());
+    assertThat(exception).hasMessageThat().isEqualTo("limit must be positive");
   }
 
   @Test

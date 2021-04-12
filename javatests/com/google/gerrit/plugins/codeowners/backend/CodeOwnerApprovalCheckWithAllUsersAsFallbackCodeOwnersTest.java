@@ -76,8 +76,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -92,7 +91,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -107,7 +106,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -130,8 +129,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -157,8 +155,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -173,7 +170,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -188,7 +185,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -215,8 +212,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -235,8 +231,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved yet (the change owner is a code owner, but
     // implicit approvals are disabled).
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -250,7 +245,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     gApi.changes().id(changeId).addReviewer(user.email());
 
     // Verify that the status is pending now .
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -264,7 +259,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     recommend(changeId);
 
     // Verify that the status is approved now
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -283,8 +278,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is approved (the change owner is a code owner and implicit approvals are
     // enabled).
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -310,8 +304,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -326,7 +319,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -341,7 +334,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -367,8 +360,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -395,8 +387,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -411,7 +402,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -426,7 +417,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -453,8 +444,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -486,8 +476,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -502,7 +491,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -517,7 +506,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved (fallback code owner doesn't apply since a code owner is
     // defined).
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
     fileCodeOwnerStatusSubject
@@ -550,8 +539,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -560,6 +548,12 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)
+      throws Exception {
+    return codeOwnerApprovalCheck.getFileStatusesAsSet(
+        getChangeNotes(changeId), /* start= */ 0, /* limit= */ 0);
   }
 
   private ChangeNotes getChangeNotes(String changeId) throws Exception {

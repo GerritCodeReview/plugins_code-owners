@@ -79,7 +79,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerApprovalCheck.getFileStatusesAsSet(/* changeNotes= */ null));
+            () ->
+                codeOwnerApprovalCheck.getFileStatusesAsSet(
+                    /* changeNotes= */ null, /* start= */ 0, /* limit= */ 0));
     assertThat(npe).hasMessageThat().isEqualTo("changeNotes");
   }
 
@@ -98,8 +100,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -122,8 +123,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.modification(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -143,8 +143,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -165,8 +164,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -193,8 +191,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
   }
@@ -218,8 +215,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.modification(path, CodeOwnerStatus.PENDING));
   }
@@ -240,8 +236,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.PENDING));
   }
@@ -263,8 +258,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -288,8 +282,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user2.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -308,8 +301,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -328,8 +320,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.modification(path, CodeOwnerStatus.APPROVED));
   }
@@ -345,8 +336,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.APPROVED));
   }
@@ -364,8 +354,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -388,8 +377,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(user.id());
     recommend(changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -421,8 +409,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     amendChange(user, changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
@@ -457,8 +444,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
     amendChange(user, changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.modification(
@@ -489,8 +475,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     String changeId = createChangeWithFileDeletion(path);
     amendChange(user, changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.deletion(
@@ -524,8 +509,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     String changeId = createChangeWithFileRename(oldPath, newPath);
     amendChange(user, changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -561,8 +545,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     String changeId = createChangeWithFileRename(oldPath, newPath);
     amendChange(user, changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.rename(
@@ -584,8 +567,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     amendChange(user, changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -605,8 +587,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     amendChange(user, changeId);
     amendChange(user2, changeId);
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -631,8 +612,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Verify that the file is not approved yet (the change owner is a code owner, but
     // implicit approvals are disabled).
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -642,7 +622,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -674,8 +654,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
@@ -703,8 +682,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Verify that the status of the file is INSUFFICIENT_REVIEWERS (since there is no implicit
     // approval by default).
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -713,7 +691,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).addReviewer(user.email());
 
     // Check that the status of the file is PENDING now.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
   }
@@ -732,8 +710,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -749,7 +726,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -777,8 +754,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         createChange(bot, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
@@ -802,8 +778,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the status of the file is INSUFFICIENT_REVIEWERS.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -813,7 +788,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the status of the file is PENDING now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
 
@@ -828,7 +803,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -844,8 +819,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Verify that the file is not approved yet (the change owner is a global code owner, but
     // implicit approvals are disabled).
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -855,7 +829,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -882,8 +856,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
@@ -903,8 +876,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Verify that the status of the file is INSUFFICIENT_REVIEWERS (since there is no implicit
     // approval by default).
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -913,7 +885,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).addReviewer(user.email());
 
     // Check that the status of the file is PENDING now.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
   }
@@ -940,8 +912,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // Add code owner from a lower level as reviewer.
     gApi.changes().id(changeId).addReviewer(user2.email());
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     // The expected status is APPROVED since 'user' which is configured as code owner on the root
     // level approved the change.
     assertThatCollection(fileCodeOwnerStatuses)
@@ -970,8 +941,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Without Owners-Override approval the expected status is INSUFFICIENT_REVIEWERS.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
@@ -981,7 +951,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
 
     // With Owners-Override approval the expected status is APPROVED.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
@@ -1013,8 +983,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
@@ -1024,7 +993,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
 
     // With override approval the expected status is APPROVED.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
@@ -1034,7 +1003,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
 
     // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
@@ -1044,7 +1013,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Another-Override", 1));
 
     // With override approval the expected status is APPROVED.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
@@ -1177,9 +1146,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.projects().name(project.get()).deleteBranches(input);
 
     ResourceConflictException exception =
-        assertThrows(
-            ResourceConflictException.class,
-            () -> codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId)));
+        assertThrows(ResourceConflictException.class, () -> getFileCodeOwnerStatuses(changeId));
     assertThat(exception).hasMessageThat().isEqualTo("destination branch not found");
   }
 
@@ -1197,8 +1164,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1214,7 +1180,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
 
@@ -1234,7 +1200,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .isEqualTo(user.email());
 
     // Check that the file is still approved.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -1256,8 +1222,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1267,7 +1232,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
 
@@ -1286,7 +1251,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .isEqualTo(admin.email());
 
     // Check that the file is still approved.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -1305,8 +1270,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1322,7 +1286,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -1357,8 +1321,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1369,7 +1332,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -1387,8 +1350,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1404,7 +1366,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -1429,8 +1391,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
 
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -1456,8 +1417,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
             .getChangeId();
 
     // Verify that the status of the file is INSUFFICIENT_REVIEWERS.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1467,7 +1427,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the status of the file is PENDING now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
 
@@ -1482,7 +1442,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
@@ -1502,7 +1462,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is not approved.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeIdOfRevert));
+        getFileCodeOwnerStatuses(changeIdOfRevert);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1524,7 +1484,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved since it's a pure revert.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeIdOfRevert));
+        getFileCodeOwnerStatuses(changeIdOfRevert);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.APPROVED));
   }
@@ -1560,7 +1520,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is not approved.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(revertChange.changeId));
+        getFileCodeOwnerStatuses(revertChange.changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.modification(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
@@ -1580,8 +1540,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is approved since the uploader is exempted from requiring code owner
     // approvals.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
 
@@ -1591,10 +1550,16 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is no longer approved since the uploader is not exempted from requiring
     // code owner approvals.
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+  }
+
+  private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)
+      throws Exception {
+    return codeOwnerApprovalCheck.getFileStatusesAsSet(
+        getChangeNotes(changeId), /* start= */ 0, /* limit= */ 0);
   }
 
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
