@@ -100,6 +100,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
               changeData.currentPatchSet().id().get(), changeData.change().getId().get()));
       return Optional.of(notReady());
     } catch (Throwable t) {
+      String cause = t.getClass().getSimpleName();
       String errorMessage = "Failed to evaluate code owner statuses";
       if (changeData != null) {
         errorMessage +=
@@ -112,6 +113,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
       Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
           CodeOwners.getInvalidCodeOwnerConfigCause(t);
       if (invalidPathException.isPresent()) {
+        cause = "invalid_path";
         errorMessage += String.format(" (cause: %s)", invalidPathException.get().getMessage());
       } else if (invalidCodeOwnerConfigException.isPresent()) {
         codeOwnerMetrics.countInvalidCodeOwnerConfigFiles.increment(
@@ -119,6 +121,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
             invalidCodeOwnerConfigException.get().getRef(),
             invalidCodeOwnerConfigException.get().getCodeOwnerConfigFilePath());
 
+        cause = "invalid_code_owner_config_file";
         errorMessage +=
             String.format(" (cause: %s)", invalidCodeOwnerConfigException.get().getMessage());
 
@@ -133,6 +136,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
       }
       errorMessage += ".";
       logger.atSevere().withCause(t).log(errorMessage);
+      codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
       return Optional.of(ruleError(errorMessage));
     }
   }

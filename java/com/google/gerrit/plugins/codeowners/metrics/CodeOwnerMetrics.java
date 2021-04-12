@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.metrics;
 
 import com.google.gerrit.metrics.Counter0;
+import com.google.gerrit.metrics.Counter1;
 import com.google.gerrit.metrics.Counter3;
 import com.google.gerrit.metrics.Description;
 import com.google.gerrit.metrics.Description.Units;
@@ -57,6 +58,7 @@ public class CodeOwnerMetrics {
   // counter metrics
   public final Counter0 countCodeOwnerConfigReads;
   public final Counter0 countCodeOwnerConfigCacheReads;
+  public final Counter1<String> countCodeOwnerSubmitRuleErrors;
   public final Counter0 countCodeOwnerSubmitRuleRuns;
   public final Counter3<String, String, String> countInvalidCodeOwnerConfigFiles;
 
@@ -152,6 +154,13 @@ public class CodeOwnerMetrics {
         createCounter(
             "count_code_owner_config_cache_reads",
             "Total number of code owner config reads from cache");
+    this.countCodeOwnerSubmitRuleErrors =
+        createCounter1(
+            "count_code_owner_submit_rule_errors",
+            "Total number of code owner submit rule errors",
+            Field.ofString("cause", Metadata.Builder::cause)
+                .description("The cause of the submit rule error.")
+                .build());
     this.countCodeOwnerSubmitRuleRuns =
         createCounter(
             "count_code_owner_submit_rule_runs", "Total number of code owner submit rule runs");
@@ -193,6 +202,10 @@ public class CodeOwnerMetrics {
 
   private Counter0 createCounter(String name, String description) {
     return metricMaker.newCounter(name, new Description(description).setRate());
+  }
+
+  private <F1> Counter1<F1> createCounter1(String name, String description, Field<F1> field1) {
+    return metricMaker.newCounter(name, new Description(description).setRate(), field1);
   }
 
   private <F1, F2, F3> Counter3<F1, F2, F3> createCounter3(
