@@ -608,7 +608,7 @@ The following request parameters can be specified:
 | Field Name   |           | Description |
 | ------------ | --------- | ----------- |
 | `start`\|`S` | optional  | Number of file code owner statuses to skip. Allows to page over the file code owner statuses. By default 0.
-| `limit`\|`n` | optional  | Limit defining how many file code owner statuses should be returned at most. By default 0 (= unlimited).
+| `limit`\|`n` | optional  | Limit defining how many file code owner statuses should be returned at most. By default 200.
 
 The code owner statuses are returned as a
 [CodeOwnerStatusInfo](#code-owner-status-info) entity.
