@@ -16,6 +16,24 @@
       "message": "I think it should be easy to inject the metric into the test and ensure it increases where it should increase, WDYT?",
       "revId": "a4db2c3f786ecdc6a28e829ab8c0c5c688837372",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6dfd3940_45e789de",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T08:54:29Z",
+      "side": 1,
+      "message": "Unfortunately this is not possible yet. But I\u0027ve already looked into enabling this in https://gerrit-review.googlesource.com/c/gerrit/+/302845. If this gets accepted, we can start adding tests for metrics.",
+      "parentUuid": "19ad6d7d_e02fa64c",
+      "revId": "a4db2c3f786ecdc6a28e829ab8c0c5c688837372",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
