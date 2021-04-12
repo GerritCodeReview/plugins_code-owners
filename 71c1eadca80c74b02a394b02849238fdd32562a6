@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "fdafe377_426399d6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 106,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:06:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c8fb7ed4_3dfb3e7c",
+      "range": {
+        "startLine": 106,
+        "startChar": 0,
+        "endLine": 106,
+        "endChar": 78
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "84cba4e9_086e21b6",
@@ -47,6 +71,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5a48ff04_9c2e7993",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:06:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "84cba4e9_086e21b6",
+      "range": {
+        "startLine": 148,
+        "startChar": 46,
+        "endLine": 148,
+        "endChar": 49
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9edc7475_67779562",
@@ -60,6 +108,30 @@
       "writtenOn": "2021-04-09T10:25:29Z",
       "side": 1,
       "message": "nit/optional: comments for these parameters",
+      "range": {
+        "startLine": 152,
+        "startChar": 21,
+        "endLine": 152,
+        "endChar": 25
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4d5241a0_0ad0fcf1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:06:21Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9edc7475_67779562",
       "range": {
         "startLine": 152,
         "startChar": 21,
@@ -95,6 +167,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "75816935_4f099460",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/GeneralConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 852,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:06:21Z",
+      "side": 1,
+      "message": "Thanks for raising this. I actually didn\u0027t think about duplicates.\n\nIt\u0027s correct that this method returns duplicates if\na. a project sets the exact same value as gerrit.config\nb. a project sets the exact same value as any of its parent projects\n\nb. is the behaviour of JGit and we cannot change it easily (especially since the order of the elements in the list matters when reading single values). Hence I think it\u0027s best to keep the behaviour of a. here, since it\u0027s consistent with b.\n\nI included this information into the JavaDoc here and in other classes where it\u0027s relevant and I also added a bunch of tests to verify that duplicates values are correctly handled. Basically it\u0027s not really an issue since we mostly expose sets rather than lists so that duplicates are filtered out there.",
+      "parentUuid": "6303a2cf_6b3d6e78",
+      "range": {
+        "startLine": 852,
+        "startChar": 25,
+        "endLine": 852,
+        "endChar": 38
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "c88bbcbf_33326b17",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/StatusConfig.java",
         "patchSetId": 3
@@ -106,6 +202,30 @@
       "writtenOn": "2021-04-09T10:25:29Z",
       "side": 1,
       "message": "I wonder if it\u0027s easy now with the new refactor to unite this logic into one class (so that you don\u0027t have to call both GerritConfig one and pluginConfig one separately).",
+      "range": {
+        "startLine": 186,
+        "startChar": 12,
+        "endLine": 186,
+        "endChar": 40
+      },
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b580d30f_390357ec",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/StatusConfig.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:06:21Z",
+      "side": 1,
+      "message": "Yeah, I\u0027m thinking about this, but at this moment it\u0027s not at the top of my todo list. So I might pick this up only later.",
+      "parentUuid": "c88bbcbf_33326b17",
       "range": {
         "startLine": 186,
         "startChar": 12,
@@ -129,6 +249,24 @@
       "writtenOn": "2021-04-09T10:25:29Z",
       "side": 1,
       "message": "another test: set the same value in both the parent and the project to see that it\u0027s fine to specify it twice. It looks to me that you will return it with duplicates.",
+      "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "407e8157_57e09555",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfigTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 267,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-12T09:06:21Z",
+      "side": 1,
+      "message": "Good point. Added a test for this.\n\nIt\u0027s right that duplicates are returned, but since this is JGit\u0027s behaviour I wouldn\u0027t like it change it, but I took care now that callers of this logic are handling duplicates correctly.",
+      "parentUuid": "7c3103af_8d2e26f8",
       "revId": "71c1eadca80c74b02a394b02849238fdd32562a6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
