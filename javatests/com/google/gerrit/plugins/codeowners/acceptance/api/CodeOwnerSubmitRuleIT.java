@@ -103,7 +103,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
     // Verify that the code owner status for the changed file is INSUFFICIENT_REVIEWERS.
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .onlyElement()
@@ -156,7 +156,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
     // Verify that the code owner status for the changed file is PENDING.
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .onlyElement()
@@ -206,7 +206,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
     // Verify that the code owner status for the changed file is APPROVED.
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .onlyElement()
@@ -247,7 +247,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
     // Verify that the code owner status for the changed file is APPROVED.
     CodeOwnerStatusInfo codeOwnerStatus =
-        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus();
+        changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .onlyElement()
