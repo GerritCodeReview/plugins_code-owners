@@ -4,6 +4,7 @@
 * [How to check if the code owners functionality is enabled for a project or branch](#checkIfEnabled)
 * [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
 * [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
+* [How to define default code owners](#defineDefaultCodeOwners)
 * [How to setup code owner overrides](#setupOverrides)
 * [What's the best place to keep the global plugin
   configuration](#globalPluginConfiguration)
@@ -99,6 +100,23 @@ only after issues with the code owner config files have been excluded.
 
 Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
 owner config files in the first place.
+
+## <a id="defineDefaultCodeOwners">How to define default code owners
+
+[Default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration)
+that apply to all branches can be defined in an `OWNERS` file in the root
+directory of the `refs/meta/config` branch.
+
+To add an `OWNERS` file in the `refs/meta/config` branch do (requires to be a
+project owner):
+
+* clone the repository
+* fetch and checkout the `refs/meta/config` branch (e.g. `git fetch origin
+  refs/meta/config && git checkout FETCH_HEAD`)
+* create or edit the `OWNERS` file
+* commit the changes
+* push the newly created commit back to the `refs/meta/config` branch (e.g. `git
+  push origin HEAD:refs/meta/config`)
 
 ## <a id="setupOverrides">How to setup code owner overrides
 
