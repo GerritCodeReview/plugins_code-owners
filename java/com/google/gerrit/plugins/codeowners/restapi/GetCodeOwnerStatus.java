@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
@@ -53,18 +54,19 @@ import org.kohsuke.args4j.Option;
  * </ul>
  */
 public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
-  private static final int UNLIMITED = 0;
+  @VisibleForTesting public static final int DEFAULT_LIMIT = 200;
 
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
 
   private int start;
-  private int limit;
+  private int limit = DEFAULT_LIMIT;
 
   @Option(
       name = "--limit",
       aliases = {"-n"},
       metaVar = "CNT",
-      usage = "maximum number of file code owner statuses to return (by default 0 aka unlimited)")
+      usage =
+          "maximum number of file code owner statuses to return (default = " + DEFAULT_LIMIT + ")")
   public void setLimit(int limit) {
     this.limit = limit;
   }
@@ -90,16 +92,12 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
     validateStartAndLimit();
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(
-            changeResource.getNotes(), start, limit == UNLIMITED ? UNLIMITED : limit + 1);
+        codeOwnerApprovalCheck.getFileStatusesAsSet(changeResource.getNotes(), start, limit + 1);
     CodeOwnerStatusInfo codeOwnerStatusInfo =
         CodeOwnerStatusInfoJson.format(
             changeResource.getNotes().getCurrentPatchSet().id(),
-            limit == UNLIMITED
-                ? fileCodeOwnerStatuses
-                : fileCodeOwnerStatuses.stream().limit(limit).collect(toImmutableSet()));
-    codeOwnerStatusInfo.more =
-        limit != UNLIMITED && fileCodeOwnerStatuses.size() > limit ? true : null;
+            fileCodeOwnerStatuses.stream().limit(limit).collect(toImmutableSet()));
+    codeOwnerStatusInfo.more = fileCodeOwnerStatuses.size() > limit ? true : null;
     return Response.ok(codeOwnerStatusInfo);
   }
 
@@ -107,8 +105,8 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
     if (start < 0) {
       throw new BadRequestException("start cannot be negative");
     }
-    if (limit < 0) {
-      throw new BadRequestException("limit cannot be negative");
+    if (limit <= 0) {
+      throw new BadRequestException("limit must be positive");
     }
   }
 }
