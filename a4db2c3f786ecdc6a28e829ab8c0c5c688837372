@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "19ad6d7d_e02fa64c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-12T07:55:38Z",
+      "side": 1,
+      "message": "I think it should be easy to inject the metric into the test and ensure it increases where it should increase, WDYT?",
+      "revId": "a4db2c3f786ecdc6a28e829ab8c0c5c688837372",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
