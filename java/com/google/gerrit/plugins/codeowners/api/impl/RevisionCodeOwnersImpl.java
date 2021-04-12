@@ -75,6 +75,8 @@ public class RevisionCodeOwnersImpl implements RevisionCodeOwners {
       public OwnedPathsInfo get() throws RestApiException {
         try {
           GetOwnedPaths getOwnedPaths = getOwnedPathsProvider.get();
+          getStart().ifPresent(getOwnedPaths::setStart);
+          getLimit().ifPresent(getOwnedPaths::setLimit);
           getOwnedPaths.setUser(getUser());
           return getOwnedPaths.apply(revisionResource).value();
         } catch (Exception e) {

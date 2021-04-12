@@ -657,9 +657,11 @@ request parameter below).
 
 The following request parameters can be specified:
 
-| Field Name  |           | Description |
-| ----------- | --------- | ----------- |
-| `user`      | mandatory | user for which the owned paths should be returned
+| Field Name   |           | Description |
+| ------------ | --------- | ----------- |
+| `start`\|`S` | optional  | Number of owned paths to skip. Allows to page over the owned files. By default 0.
+| `limit`\|`n` | optional  | Limit defining how many owned files should be returned at most. By default 50.
+| `user`       | mandatory | user for which the owned paths should be returned
 
 #### Request
 

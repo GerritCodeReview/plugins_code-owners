@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.entities.Account;
@@ -41,10 +42,32 @@ import org.kohsuke.args4j.Option;
  * /changes/<change-id>/revisions/<revision-id>/owned_paths} requests.
  */
 public class GetOwnedPaths implements RestReadView<RevisionResource> {
+  @VisibleForTesting public static final int DEFAULT_LIMIT = 50;
+
   private final AccountResolver accountResolver;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
 
+  private int start;
+  private int limit = DEFAULT_LIMIT;
   private String user;
+
+  @Option(
+      name = "--limit",
+      aliases = {"-n"},
+      metaVar = "CNT",
+      usage = "maximum number of owned path to return (default = " + DEFAULT_LIMIT + ")")
+  public void setLimit(int limit) {
+    this.limit = limit;
+  }
+
+  @Option(
+      name = "--start",
+      aliases = {"-S"},
+      metaVar = "CNT",
+      usage = "number of owned paths to skip")
+  public void setStart(int start) {
+    this.start = start;
+  }
 
   @Option(name = "--user", usage = "user for which the owned paths should be returned")
   public void setUser(String user) {
@@ -62,11 +85,13 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
   public Response<OwnedPathsInfo> apply(RevisionResource revisionResource)
       throws BadRequestException, ResourceConflictException, UnresolvableAccountException,
           ConfigInvalidException, IOException {
+    validateStartAndLimit();
+
     Account.Id accountId = resolveAccount();
 
     ImmutableList<Path> ownedPaths =
         codeOwnerApprovalCheck.getOwnedPaths(
-            revisionResource.getNotes(), revisionResource.getPatchSet(), accountId, /* limit= */ 0);
+            revisionResource.getNotes(), revisionResource.getPatchSet(), accountId, start, limit);
 
     OwnedPathsInfo ownedPathsInfo = new OwnedPathsInfo();
     ownedPathsInfo.ownedPaths = ownedPaths.stream().map(Path::toString).collect(toImmutableList());
@@ -81,5 +106,14 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
     }
 
     return accountResolver.resolve(user).asUnique().account().id();
+  }
+
+  private void validateStartAndLimit() throws BadRequestException {
+    if (start < 0) {
+      throw new BadRequestException("start cannot be negative");
+    }
+    if (limit <= 0) {
+      throw new BadRequestException("limit must be positive");
+    }
   }
 }
