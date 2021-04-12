@@ -19,12 +19,15 @@ import static com.google.gerrit.plugins.codeowners.testing.SubmitRecordSubject.a
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRecordSubject;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementSubject;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.inject.Inject;
 import org.junit.Before;
@@ -138,10 +141,49 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void ruleErrorWhenChangeDataIsNull() throws Exception {
+  public void ruleError_changeDataIsNull() throws Exception {
     SubmitRecordSubject submitRecordSubject =
         assertThatOptional(codeOwnerSubmitRule.evaluate(/* changeData= */ null)).value();
     submitRecordSubject.hasStatusThat().isRuleError();
     submitRecordSubject.hasErrorMessageThat().isEqualTo("Failed to evaluate code owner statuses.");
+  }
+
+  @Test
+  public void ruleError_nonParsableCodeOwnerConfig() throws Exception {
+    testRuleErrorForNonParsableCodeOwnerConfigl(/* invalidCodeOwnerConfigInfoUrl= */ null);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl", value = "http://foo.bar")
+  public void ruleError_nonParsableCodeOwnerConfig_withInvalidCodeOwnerConfigInfoUrl()
+      throws Exception {
+    testRuleErrorForNonParsableCodeOwnerConfigl("http://foo.bar");
+  }
+
+  public void testRuleErrorForNonParsableCodeOwnerConfigl(
+      @Nullable String invalidCodeOwnerConfigInfoUrl) throws Exception {
+    String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
+    createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
+
+    ChangeData changeData = createChange().getChange();
+
+    SubmitRecordSubject submitRecordSubject =
+        assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
+    submitRecordSubject.hasStatusThat().isRuleError();
+    submitRecordSubject
+        .hasErrorMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to evaluate code owner statuses for patch set %d of change %d"
+                    + " (cause: invalid code owner config file '%s' (project = %s, branch = master):\n"
+                    + "  %s).%s",
+                changeData.change().currentPatchSetId().get(),
+                changeData.change().getId().get(),
+                JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath(),
+                project,
+                getParsingErrorMessageForNonParseableCodeOwnerConfig(),
+                invalidCodeOwnerConfigInfoUrl != null
+                    ? String.format("\nFor help check %s.", invalidCodeOwnerConfigInfoUrl)
+                    : ""));
   }
 }

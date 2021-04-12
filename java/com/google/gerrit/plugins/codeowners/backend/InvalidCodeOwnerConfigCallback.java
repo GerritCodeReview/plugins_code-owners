@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import java.nio.file.Path;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 
 /** Callback interface to let callers handle invalid code owner config files. */
 public interface InvalidCodeOwnerConfigCallback {
@@ -23,8 +22,9 @@ public interface InvalidCodeOwnerConfigCallback {
    * Invoked when an invalid code owner config file is found.
    *
    * @param codeOwnerConfigFilePath the path of the invalid code owner config file
-   * @param configInvalidException the parsing exception
+   * @param invalidCodeOwnerConfigException the parsing exception
    */
   void onInvalidCodeOwnerConfig(
-      Path codeOwnerConfigFilePath, ConfigInvalidException configInvalidException);
+      Path codeOwnerConfigFilePath,
+      InvalidCodeOwnerConfigException invalidCodeOwnerConfigException);
 }

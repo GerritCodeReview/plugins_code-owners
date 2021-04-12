@@ -28,6 +28,7 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -35,17 +36,14 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
-import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ServerInitiated;
@@ -55,6 +53,7 @@ import com.google.gerrit.server.account.externalids.ExternalIdNotes;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import java.util.Arrays;
 import org.eclipse.jgit.lib.Repository;
 import org.junit.Before;
 import org.junit.Test;
@@ -72,12 +71,10 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
 
-  private BackendConfig backendConfig;
   private TestPathExpressions testPathExpressions;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
     testPathExpressions = plugin.getSysInjector().getInstance(TestPathExpressions.class);
   }
 
@@ -138,6 +135,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -168,6 +166,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .inOrder();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -211,6 +210,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .inOrder();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -235,7 +235,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .addSecondaryEmail(secondaryEmail)
         .update();
 
-    setAsRootCodeOwner(secondaryEmail);
+    setAsRootCodeOwners(secondaryEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, secondaryEmail);
     assertThat(checkCodeOwnerInfo).isCodeOwner();
@@ -245,12 +245,64 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
                 "found email %s as code owner in %s",
                 secondaryEmail, getCodeOwnerConfigFilePath(ROOT_PATH)),
             String.format("resolved to account %s", codeOwner.id()));
+  }
+
+  @Test
+  public void checkCodeOwner_ownedByAllUsers() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+
+    setAsRootCodeOwners(CodeOwnerResolver.ALL_USERS_WILDCARD);
+
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigFilePathsThat()
+        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
+    assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "found email %s as code owner in %s",
+                CodeOwnerResolver.ALL_USERS_WILDCARD, getCodeOwnerConfigFilePath(ROOT_PATH)));
+  }
+
+  @Test
+  public void checkCodeOwner_ownedByEmailAndOwnedByAllUsers() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+
+    setAsRootCodeOwners(codeOwner.email(), CodeOwnerResolver.ALL_USERS_WILDCARD);
+
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo)
+        .hasCodeOwnerConfigFilePathsThat()
+        .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
+    assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "found email %s as code owner in %s",
+                codeOwner.email(), getCodeOwnerConfigFilePath(ROOT_PATH)),
+            String.format(
+                "found email %s as code owner in %s",
+                CodeOwnerResolver.ALL_USERS_WILDCARD, getCodeOwnerConfigFilePath(ROOT_PATH)));
   }
 
   @Test
@@ -261,6 +313,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(String.format("resolved to account %s", user.id()));
   }
@@ -269,7 +322,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   public void checkNonExistingEmail() throws Exception {
     String nonExistingEmail = "non-exiting@example.com";
 
-    setAsRootCodeOwner(nonExistingEmail);
+    setAsRootCodeOwners(nonExistingEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, nonExistingEmail);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
@@ -279,6 +332,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -293,7 +347,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   public void checkAmbiguousExistingEmail() throws Exception {
     String ambiguousEmail = "ambiguous@example.com";
 
-    setAsRootCodeOwner(ambiguousEmail);
+    setAsRootCodeOwners(ambiguousEmail);
 
     // Add the email to 2 accounts to make it ambiguous.
     addEmail(user.id(), ambiguousEmail);
@@ -307,6 +361,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -328,7 +383,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
       extIdNotes.commit(md);
     }
 
-    setAsRootCodeOwner(orphanedEmail);
+    setAsRootCodeOwners(orphanedEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, orphanedEmail);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
@@ -338,6 +393,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -368,6 +424,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -398,6 +455,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -431,6 +489,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -452,11 +511,12 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
   }
 
   @Test
   public void checkAllUsersWildcard_ownedByAllUsers() throws Exception {
-    setAsRootCodeOwner(CodeOwnerResolver.ALL_USERS_WILDCARD);
+    setAsRootCodeOwners(CodeOwnerResolver.ALL_USERS_WILDCARD);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo =
         checkCodeOwner(ROOT_PATH, CodeOwnerResolver.ALL_USERS_WILDCARD);
@@ -467,6 +527,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -491,11 +552,38 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
                 "found email %s as code owner in default code owner config",
                 defaultCodeOwner.email()),
+            String.format("resolved to account %s", defaultCodeOwner.id()));
+  }
+
+  @Test
+  public void checkDefaultCodeOwner_ownedByAllUsers() throws Exception {
+    TestAccount defaultCodeOwner =
+        accountCreator.create(
+            "defaultCodeOwner",
+            "defaultCodeOwner@example.com",
+            "Default Code Owner",
+            /* displayName= */ null);
+    setAsDefaultCodeOwner(CodeOwnerResolver.ALL_USERS_WILDCARD);
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, defaultCodeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
+    assertThat(checkCodeOwnerInfo).isDefaultCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "found email %s as code owner in default code owner config",
+                CodeOwnerResolver.ALL_USERS_WILDCARD),
             String.format("resolved to account %s", defaultCodeOwner.id()));
   }
 
@@ -516,9 +604,37 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format("found email %s as global code owner", globalCodeOwner.email()),
+            String.format("resolved to account %s", globalCodeOwner.id()));
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      value = CodeOwnerResolver.ALL_USERS_WILDCARD)
+  public void checkGlobalCodeOwner_ownedByAllUsers() throws Exception {
+    TestAccount globalCodeOwner =
+        accountCreator.create(
+            "globalCodeOwner",
+            "globalCodeOwner@example.com",
+            "Global Code Owner",
+            /* displayName= */ null);
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, globalCodeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
+    assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
+    assertThat(checkCodeOwnerInfo).isGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isOwnedByAllUsers();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "found email %s as global code owner", CodeOwnerResolver.ALL_USERS_WILDCARD),
             String.format("resolved to account %s", globalCodeOwner.id()));
   }
 
@@ -538,6 +654,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -576,6 +693,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -598,7 +716,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .addSecondaryEmail(secondaryEmail)
         .update();
 
-    setAsRootCodeOwner(secondaryEmail);
+    setAsRootCodeOwners(secondaryEmail);
 
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(ROOT_PATH, secondaryEmail, user.email());
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
@@ -608,6 +726,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .containsExactly(getCodeOwnerConfigFilePath(ROOT_PATH));
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
+    assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1193,24 +1312,25 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     return folderPath + getCodeOwnerConfigFileName();
   }
 
-  private void setAsRootCodeOwner(String email) {
+  private void setAsRootCodeOwners(String... emails) {
+    TestCodeOwnerConfigCreation.Builder builder =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath(ROOT_PATH);
+    Arrays.stream(emails).forEach(builder::addCodeOwnerEmail);
+    builder.create();
+  }
+
+  private void setAsDefaultCodeOwner(String email) {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
-        .branch("master")
+        .branch(RefNames.REFS_CONFIG)
         .folderPath(ROOT_PATH)
         .addCodeOwnerEmail(email)
         .create();
-  }
-
-  private String getCodeOwnerConfigFileName() {
-    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
-    if (backend instanceof FindOwnersBackend) {
-      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    } else if (backend instanceof ProtoBackend) {
-      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    }
-    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
   }
 
   private void addEmail(Account.Id accountId, String email) throws Exception {

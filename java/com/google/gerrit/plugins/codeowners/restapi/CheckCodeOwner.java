@@ -133,6 +133,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     List<String> messages = new ArrayList<>();
     List<Path> codeOwnerConfigFilePaths = new ArrayList<>();
     AtomicBoolean isCodeOwnershipAssignedToEmail = new AtomicBoolean(false);
+    AtomicBoolean isCodeOwnershipAssignedToAllUsers = new AtomicBoolean(false);
     AtomicBoolean isDefaultCodeOwner = new AtomicBoolean(false);
     AtomicBoolean hasRevelantCodeOwnerDefinitions = new AtomicBoolean(false);
     AtomicBoolean parentCodeOwnersAreIgnored = new AtomicBoolean(false);
@@ -159,7 +160,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               pathCodeOwnersResult.get().getPathCodeOwners().stream()
                   .filter(cor -> cor.email().equals(email))
                   .findAny();
-          if (codeOwnerReference.isPresent()) {
+          if (codeOwnerReference.isPresent()
+              && !CodeOwnerResolver.ALL_USERS_WILDCARD.equals(email)) {
             isCodeOwnershipAssignedToEmail.set(true);
 
             if (RefNames.isConfigRef(codeOwnerConfig.key().ref())) {
@@ -174,7 +176,31 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                       "found email %s as code owner in %s", email, codeOwnerConfigFilePath));
               codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
             }
-          } else if (codeOwnerResolverProvider
+          }
+
+          if (pathCodeOwnersResult.get().getPathCodeOwners().stream()
+              .anyMatch(cor -> cor.email().equals(CodeOwnerResolver.ALL_USERS_WILDCARD))) {
+            isCodeOwnershipAssignedToAllUsers.set(true);
+
+            if (RefNames.isConfigRef(codeOwnerConfig.key().ref())) {
+              messages.add(
+                  String.format(
+                      "found email %s as code owner in default code owner config",
+                      CodeOwnerResolver.ALL_USERS_WILDCARD));
+              isDefaultCodeOwner.set(true);
+            } else {
+              Path codeOwnerConfigFilePath = codeOwners.getFilePath(codeOwnerConfig.key());
+              messages.add(
+                  String.format(
+                      "found email %s as code owner in %s",
+                      CodeOwnerResolver.ALL_USERS_WILDCARD, codeOwnerConfigFilePath));
+              if (!codeOwnerConfigFilePaths.contains(codeOwnerConfigFilePath)) {
+                codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
+              }
+            }
+          }
+
+          if (codeOwnerResolverProvider
               .get()
               .resolvePathCodeOwners(codeOwnerConfig, absolutePath)
               .hasRevelantCodeOwnerDefinitions()) {
@@ -189,10 +215,20 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
           return !pathCodeOwnersResult.get().ignoreParentCodeOwners();
         });
 
-    boolean isGlobalCodeOwner = isGlobalCodeOwner(branchResource.getNameKey());
-    if (isGlobalCodeOwner) {
+    boolean isGlobalCodeOwner = false;
+
+    if (isGlobalCodeOwner(branchResource.getNameKey(), email)) {
+      isGlobalCodeOwner = true;
       messages.add(String.format("found email %s as global code owner", email));
       isCodeOwnershipAssignedToEmail.set(true);
+    }
+
+    if (isGlobalCodeOwner(branchResource.getNameKey(), CodeOwnerResolver.ALL_USERS_WILDCARD)) {
+      isGlobalCodeOwner = true;
+      messages.add(
+          String.format(
+              "found email %s as global code owner", CodeOwnerResolver.ALL_USERS_WILDCARD));
+      isCodeOwnershipAssignedToAllUsers.set(true);
     }
 
     OptionalResultWithMessages<Boolean> isResolvableResult = isResolvable();
@@ -201,19 +237,24 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
 
     boolean isFallbackCodeOwner =
         !isCodeOwnershipAssignedToEmail.get()
+            && !isCodeOwnershipAssignedToAllUsers.get()
             && !hasRevelantCodeOwnerDefinitions.get()
             && !parentCodeOwnersAreIgnored.get()
             && isFallbackCodeOwner(branchResource.getNameKey());
 
     CodeOwnerCheckInfo codeOwnerCheckInfo = new CodeOwnerCheckInfo();
     codeOwnerCheckInfo.isCodeOwner =
-        (isCodeOwnershipAssignedToEmail.get() || isFallbackCodeOwner) && isResolvable;
+        (isCodeOwnershipAssignedToEmail.get()
+                || isCodeOwnershipAssignedToAllUsers.get()
+                || isFallbackCodeOwner)
+            && isResolvable;
     codeOwnerCheckInfo.isResolvable = isResolvable;
     codeOwnerCheckInfo.codeOwnerConfigFilePaths =
         codeOwnerConfigFilePaths.stream().map(Path::toString).collect(toList());
     codeOwnerCheckInfo.isFallbackCodeOwner = isFallbackCodeOwner && isResolvable;
     codeOwnerCheckInfo.isDefaultCodeOwner = isDefaultCodeOwner.get();
     codeOwnerCheckInfo.isGlobalCodeOwner = isGlobalCodeOwner;
+    codeOwnerCheckInfo.isOwnedByAllUsers = isCodeOwnershipAssignedToAllUsers.get();
     codeOwnerCheckInfo.debugLogs = messages;
     return Response.ok(codeOwnerCheckInfo);
   }
@@ -238,7 +279,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     }
   }
 
-  private boolean isGlobalCodeOwner(Project.NameKey projectName) {
+  private boolean isGlobalCodeOwner(Project.NameKey projectName, String email) {
     return codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners()
         .stream()
         .filter(cor -> cor.email().equals(email))

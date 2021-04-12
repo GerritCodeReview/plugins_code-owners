@@ -78,7 +78,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
       }
 
       try (Timer0.Context ctx = codeOwnerMetrics.runCodeOwnerSubmitRule.start()) {
-        codeOwnerMetrics.countCodeOwnerConfigReads.increment();
+        codeOwnerMetrics.countCodeOwnerSubmitRuleRuns.increment();
         logger.atFine().log(
             "run code owner submit rule (project = %s, change = %d)",
             changeData.project().get(), changeData.getId().get());
@@ -100,6 +100,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
               changeData.currentPatchSet().id().get(), changeData.change().getId().get()));
       return Optional.of(notReady());
     } catch (Throwable t) {
+      String cause = t.getClass().getSimpleName();
       String errorMessage = "Failed to evaluate code owner statuses";
       if (changeData != null) {
         errorMessage +=
@@ -109,11 +110,33 @@ class CodeOwnerSubmitRule implements SubmitRule {
       }
       Optional<InvalidPathException> invalidPathException =
           CodeOwnersExceptionHook.getInvalidPathException(t);
+      Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
+          CodeOwners.getInvalidCodeOwnerConfigCause(t);
       if (invalidPathException.isPresent()) {
+        cause = "invalid_path";
         errorMessage += String.format(" (cause: %s)", invalidPathException.get().getMessage());
+      } else if (invalidCodeOwnerConfigException.isPresent()) {
+        codeOwnerMetrics.countInvalidCodeOwnerConfigFiles.increment(
+            invalidCodeOwnerConfigException.get().getProjectName().get(),
+            invalidCodeOwnerConfigException.get().getRef(),
+            invalidCodeOwnerConfigException.get().getCodeOwnerConfigFilePath());
+
+        cause = "invalid_code_owner_config_file";
+        errorMessage +=
+            String.format(" (cause: %s)", invalidCodeOwnerConfigException.get().getMessage());
+
+        Optional<String> invalidCodeOwnerConfigInfoUrl =
+            codeOwnersPluginConfiguration
+                .getProjectConfig(invalidCodeOwnerConfigException.get().getProjectName())
+                .getInvalidCodeOwnerConfigInfoUrl();
+        if (invalidCodeOwnerConfigInfoUrl.isPresent()) {
+          errorMessage +=
+              String.format(".\nFor help check %s", invalidCodeOwnerConfigInfoUrl.get());
+        }
       }
       errorMessage += ".";
       logger.atSevere().withCause(t).log(errorMessage);
+      codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
       return Optional.of(ruleError(errorMessage));
     }
   }

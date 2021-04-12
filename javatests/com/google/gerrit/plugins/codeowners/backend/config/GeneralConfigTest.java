@@ -25,6 +25,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FALLBACK_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_FILE_EXTENSION;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_GLOBAL_CODE_OWNER;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MAX_PATHS_IN_CHANGE_MESSAGES;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_MERGE_COMMIT_STRATEGY;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_OVERRIDE_INFO_URL;
@@ -1355,23 +1356,49 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(
       name = "plugin.code-owners.globalCodeOwner",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void globalCodeOnwersInPluginConfigOverrideGlobalCodeOwnersInGerritConfig()
+  public void globalCodeOwnersInPluginConfigExtendGlobalCodeOwnersInGerritConfig()
       throws Exception {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER, "bot3@example.com");
     assertThat(generalConfig.getGlobalCodeOwners(cfg))
-        .containsExactly(CodeOwnerReference.create("bot3@example.com"));
+        .containsExactly(
+            CodeOwnerReference.create("bot1@example.com"),
+            CodeOwnerReference.create("bot2@example.com"),
+            CodeOwnerReference.create("bot3@example.com"));
   }
 
   @Test
   @GerritConfig(
       name = "plugin.code-owners.globalCodeOwner",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void inheritedGlobalOwnersCanBeRemovedOnProjectLevel() throws Exception {
+  public void
+      globalCodeOwnersInPluginConfigExtendGlobalCodeOwnersInGerritConfig_duplicatesFilteredOut()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setStringList(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_GLOBAL_CODE_OWNER,
+        ImmutableList.of("bot1@example.com", "bot3@example.com"));
+    assertThat(generalConfig.getGlobalCodeOwners(cfg))
+        .containsExactly(
+            CodeOwnerReference.create("bot1@example.com"),
+            CodeOwnerReference.create("bot2@example.com"),
+            CodeOwnerReference.create("bot3@example.com"));
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void inheritedGlobalOwnersCannotBeRemovedOnProjectLevel() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_GLOBAL_CODE_OWNER, "");
-    assertThat(generalConfig.getGlobalCodeOwners(cfg)).isEmpty();
+    assertThat(generalConfig.getGlobalCodeOwners(cfg))
+        .containsExactly(
+            CodeOwnerReference.create("bot1@example.com"),
+            CodeOwnerReference.create("bot2@example.com"));
   }
 
   @Test
@@ -1402,21 +1429,39 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   @GerritConfig(
       name = "plugin.code-owners.exemptedUser",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void exemptedUsersInPluginConfigOverrideExemptedUsersInGerritConfig() throws Exception {
+  public void exemptedUsersInPluginConfigExtendExemptedUsersInGerritConfig() throws Exception {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER, "bot3@example.com");
-    assertThat(generalConfig.getExemptedUsers(cfg)).containsExactly("bot3@example.com");
+    assertThat(generalConfig.getExemptedUsers(cfg))
+        .containsExactly("bot1@example.com", "bot2@example.com", "bot3@example.com");
   }
 
   @Test
   @GerritConfig(
       name = "plugin.code-owners.exemptedUser",
       values = {"bot1@example.com", "bot2@example.com"})
-  public void inheritedExemptedUsersCanBeRemovedOnProjectLevel() throws Exception {
+  public void exemptedUsersInPluginConfigExtendExemptedUsersInGerritConfig_duplicatesFilteredOut()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setStringList(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_EXEMPTED_USER,
+        ImmutableList.of("bot1@example.com", "bot3@example.com"));
+    assertThat(generalConfig.getExemptedUsers(cfg))
+        .containsExactly("bot1@example.com", "bot2@example.com", "bot3@example.com");
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.exemptedUser",
+      values = {"bot1@example.com", "bot2@example.com"})
+  public void inheritedExemptedUsersCannotBeRemovedOnProjectLevel() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_EXEMPTED_USER, "");
-    assertThat(generalConfig.getExemptedUsers(cfg)).isEmpty();
+    assertThat(generalConfig.getExemptedUsers(cfg))
+        .containsExactly("bot1@example.com", "bot2@example.com");
   }
 
   @Test
@@ -1453,6 +1498,48 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         KEY_OVERRIDE_INFO_URL,
         "http://bar.example.com");
     assertThat(generalConfig.getOverrideInfoUrl(cfg)).value().isEqualTo("http://bar.example.com");
+  }
+
+  @Test
+  public void cannotGetInvalidCodeOwnerConfigInfoUrlForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.getInvalidCodeOwnerConfigInfoUrl(/* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noInvalidCodeOwnerConfigInfoUrlConfigured() throws Exception {
+    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config())).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl",
+      value = "http://foo.example.com")
+  public void invalidCodeOwnerConfigInfoIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+      throws Exception {
+    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config()))
+        .value()
+        .isEqualTo("http://foo.example.com");
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl",
+      value = "http://foo.example.com")
+  public void invalidCodeOwnerConfigInfoUrlInPluginConfigOverridesOverrideInfoUrlInGerritConfig()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL,
+        "http://bar.example.com");
+    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(cfg))
+        .value()
+        .isEqualTo("http://bar.example.com");
   }
 
   @Test

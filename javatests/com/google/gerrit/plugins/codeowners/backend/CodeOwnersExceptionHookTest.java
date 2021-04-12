@@ -18,12 +18,12 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook.Status;
 import java.nio.file.InvalidPathException;
 import java.util.Optional;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,8 +42,9 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
     assertThat(skipRetryWithTrace(newExceptionWithCause(newInvalidPluginConfigurationException())))
         .isTrue();
 
-    assertThat(skipRetryWithTrace(newConfigInvalidException())).isTrue();
-    assertThat(skipRetryWithTrace(newExceptionWithCause(newConfigInvalidException()))).isTrue();
+    assertThat(skipRetryWithTrace(newInvalidCodeOwnerConfigException())).isTrue();
+    assertThat(skipRetryWithTrace(newExceptionWithCause(newInvalidCodeOwnerConfigException())))
+        .isTrue();
 
     assertThat(skipRetryWithTrace(newInvalidPathException())).isTrue();
     assertThat(skipRetryWithTrace(newExceptionWithCause(newInvalidPathException()))).isTrue();
@@ -67,11 +68,12 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
     assertThat(getUserMessages(newExceptionWithCause(invalidPluginConfigurationException)))
         .containsExactly(invalidPluginConfigurationException.getMessage());
 
-    ConfigInvalidException configInvalidException = newConfigInvalidException();
-    assertThat(getUserMessages(configInvalidException))
-        .containsExactly(configInvalidException.getMessage());
-    assertThat(getUserMessages(newExceptionWithCause(configInvalidException)))
-        .containsExactly(configInvalidException.getMessage());
+    InvalidCodeOwnerConfigException invalidCodeOwnerConfigException =
+        newInvalidCodeOwnerConfigException();
+    assertThat(getUserMessages(invalidCodeOwnerConfigException))
+        .containsExactly(invalidCodeOwnerConfigException.getMessage());
+    assertThat(getUserMessages(newExceptionWithCause(invalidCodeOwnerConfigException)))
+        .containsExactly(invalidCodeOwnerConfigException.getMessage());
 
     InvalidPathException invalidPathException = newInvalidPathException();
     assertThat(getUserMessages(invalidPathException))
@@ -91,6 +93,21 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl", value = "http://foo.bar")
+  public void getUserMessages_withInvalidCodeOwnerConfigInfoUrl() throws Exception {
+    InvalidCodeOwnerConfigException invalidCodeOwnerConfigException =
+        newInvalidCodeOwnerConfigException();
+    assertThat(getUserMessages(invalidCodeOwnerConfigException))
+        .containsExactly(
+            invalidCodeOwnerConfigException.getMessage(), "For help check http://foo.bar")
+        .inOrder();
+    assertThat(getUserMessages(newExceptionWithCause(invalidCodeOwnerConfigException)))
+        .containsExactly(
+            invalidCodeOwnerConfigException.getMessage(), "For help check http://foo.bar")
+        .inOrder();
+  }
+
+  @Test
   public void getStatus() throws Exception {
     Status conflictStatus = Status.create(409, "Conflict");
     assertThat(getStatus(newInvalidPluginConfigurationException()))
@@ -100,8 +117,8 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
         .value()
         .isEqualTo(conflictStatus);
 
-    assertThat(getStatus(newConfigInvalidException())).value().isEqualTo(conflictStatus);
-    assertThat(getStatus(newExceptionWithCause(newConfigInvalidException())))
+    assertThat(getStatus(newInvalidCodeOwnerConfigException())).value().isEqualTo(conflictStatus);
+    assertThat(getStatus(newExceptionWithCause(newInvalidCodeOwnerConfigException())))
         .value()
         .isEqualTo(conflictStatus);
 
@@ -138,8 +155,8 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
     return new InvalidPluginConfigurationException("code-owners", "message");
   }
 
-  private ConfigInvalidException newConfigInvalidException() {
-    return new ConfigInvalidException("message");
+  private InvalidCodeOwnerConfigException newInvalidCodeOwnerConfigException() {
+    return new InvalidCodeOwnerConfigException("message", project, "refs/heads/master", "/OWNERS");
   }
 
   private InvalidPathException newInvalidPathException() {

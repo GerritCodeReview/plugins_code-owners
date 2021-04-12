@@ -11,20 +11,82 @@ The @PLUGIN@ plugin can be configured on host and on project-level:
 This page describes all available configuration parameters. For configuration
 recommendations please consult the [config guide](config-guide.html).
 
+**NOTE**: This is the configuration that controls the behavior of the @PLUGIN@
+plugin. Code owners (except global code owners) are not defined here, but in
+[code owner config files](user-guide.html#codeOwnerConfigFiles) (e.g. `OWNERS`
+files) that are stored in the source tree of the repository.
+
 ## <a id="inheritance">Inheritance</a>
 
 Projects inherit the configuration of their parent projects, following the chain
 of parent projects until the `All-Projects` root project is reached which
 inherits the configuration from `gerrit.config`.
 
-Setting a configuration parameter for a project overrides any inherited value
-for this configuration parameter.
+Setting a single-value configuration parameter (single string, boolean, enum,
+int, long) for a project overrides any inherited value for this configuration
+parameter.
 
-**NOTE:** Some configuration parameters have a list of values and can be
-specified multiple times (e.g. `disabledBranch`). If such a value is set on
-project level it means that the complete inherited list is overridden. It's
-*not* possible to just add a value to the inherited list, but if this is wanted
-the complete list with the additional value has to be set on project level.
+Example for single-value configuration parameters:
+
+parent `code-owners.config`:
+```
+  [codeOwners]
+    readOnly = true
+    overrideInfoUrl = https://owners-overrides.example.com
+    exemptPureReverts = true
+```
+\
+project `code-owners.config`:
+```
+  [codeOwners]
+    readOnly = false
+    overrideInfoUrl = https://foo.example.com/owners-overrides
+    fileExtension = fork
+```
+\
+effective configuration:
+```
+  [code-owners]
+    readOnly = false
+    overrideInfoUrl = https://foo.example.com/owners-overrides
+    fileExtension = fork
+    exemptPureReverts = true
+```
+\
+In contrast to this, if a value for a multi-value / list configuration parameter
+is set, the value is added to the inherited value list (the inherited value list
+is extended, not overridden). Overriding/unsetting an inherited value list is
+not possible.
+
+Example for multi-value / list configuration parameters:
+
+parent `code-owners.config`:
+```
+  [codeOwners]
+    globalCodeOwner = bot-foo@example.com
+    globalCodeOwner = bot-bar@example.com
+    exemptedUser = bot-abc@example.com
+    exemptedUser = bot-xyz@example.com
+    disabledBranch = refs/meta/config
+```
+\
+project `code-owners.config`:
+```
+  [codeOwners]
+    globalCodeOwner = bot-baz@example.com
+    disabledBranch =
+```
+\
+effective configuration:
+```
+  [code-owners]
+    globalCodeOwner = bot-foo@example.com
+    globalCodeOwner = bot-bar@example.com
+    globalCodeOwner = bot-baz@example.com
+    exemptedUser = bot-abc@example.com
+    exemptedUser = bot-xyz@example.com
+    disabledBranch = refs/meta/config
+```
 
 ## <a id="staleIndexOnConfigChanges">
 **NOTE:** Some configuration changes can lead to changes becoming stale in the
@@ -65,7 +127,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         approvals.\
         This allows branches to opt-out of the code owners functionality.\
         Can be set multiple times.\
-        Can be overridden per project by setting
+        The configured value list can be extended on project-level by setting
         [codeOwners.disabledBranch](#codeOwnersDisabledBranch) in
         `@PLUGIN@.config`.\
         By default unset.
@@ -104,9 +166,19 @@ endpoint or by touching the change (e.g. by adding a comment).
         The frontend displays a link to this page on the change screen so that
         users can discover the override instructions easily.\
         Can be overridden per project by setting
-        [codeOwners.overrideInfoUrl](#codeOwnersFileExtension) in
+        [codeOwners.overrideInfoUrl](#codeOwnersOverrideInfoUrl) in
         `@PLUGIN@.config`.\
         By default unset (no override info URL).
+
+<a id="pluginCodeOwnersInvalidCodeOwnerConfigInfoUrl">plugin.@PLUGIN@.invalidCodeOwnerConfigInfoUrl</a>
+:       A URL for a page that provides host-specific information about how to
+        deal with invalid code owner config files.\
+        This URL is included into error messages that indicate invalid code
+        owner config files.\
+        Can be overridden per project by setting
+        [codeOwners.invalidCodeOwnerConfigInfoUrl](#codeOwnersInvalidCodeOwnerConfigInfoUrl)
+        in `@PLUGIN@.config`.\
+        By default unset (no invalid code owner config info URL).
 
 <a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplicitApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
@@ -151,7 +223,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         can be added to the `Service Users` group (since members of this group
         are not suggested as code owners).\
         Can be specified multiple times to set multiple global code owners.\
-        Can be overridden per project by setting
+        The configured value list can be extended on project-level by setting
         [codeOwners.globalCodeOwner](#codeOwnersGlobalCodeOwner) in
         `@PLUGIN@.config`.\
         By default unset (no global code owners).
@@ -162,7 +234,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         If a user is exempted from requiring code owner approvals changes that
         are uploaded by this user are automatically code-owner approved.\
         Can be specified multiple times to exempt multiple users.\
-        Can be overridden per project by setting
+        The configured value list can be extended on project-level by setting
         [codeOwners.exemptedUser](#codeOwnersExemptedUser) in
         `@PLUGIN@.config`.\
         By default unset (no exempted users).
@@ -350,7 +422,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
         from the uploader, any override vote from the uploader on that label is
         ignored for the code owners check.\
-        Can be overridden per project by setting
+        The configured value list can be extended on project-level by setting
         [codeOwners.overrideApproval](#codeOwnersOverrideApproval) in
         `@PLUGIN@.config`.\
         By default unset which means that the override functionality is
@@ -496,7 +568,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         approvals.\
         This allows branches to opt-out of the code owners functionality.\
         Can be set multiple times.\
-        Overrides the global setting
+        Extends the global setting
         [plugin.@PLUGIN@.disabledBranch](#pluginCodeOwnersDisabledBranch) in
         `gerrit.config` and the `codeOwners.disabledBranch` setting from parent
         projects.\
@@ -570,6 +642,19 @@ endpoint or by touching the change (e.g. by adding a comment).
         [plugin.@PLUGIN@.overrideInfoUrl](#pluginCodeOwnersOverrideInfoUrl) in
         `gerrit.config` is used.
 
+<a id="codeOwnersInvalidCodeOwnerConfigInfoUrl">codeOwners.invalidCodeOwnerConfigInfoUrl</a>
+:       A URL for a page that provides project-specific information about how
+        to deal with invalid code owner config files.\
+        This URL is included into error messages that indicate invalid code
+        owner config files.\
+        Overrides the global setting
+        [plugin.@PLUGIN@.invalidCodeOwnerConfigInfoUrl](#pluginCodeOwnersInvalidCodeOwnerConfigInfoUrl)
+        in `gerrit.config` and the `codeOwners.invalidCodeOwnerConfigInfoUrl`
+        setting from parent projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.invalidCodeOwnerConfigInfoUrl](#pluginCodeOwnersInvalidCodeOwnerConfigInfoUrl)
+        in `gerrit.config` is used.
+
 <a id="codeOwnersEnableImplicitApprovals">codeOwners.enableImplicitApprovals</a>
 :       Whether an implicit code owner approval from the last uploader is
         assumed.\
@@ -600,7 +685,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         can be added to the `Service Users` group (since members of this group
         are not suggested as code owners).\
         Can be specified multiple times to set multiple global code owners.\
-        Overrides the global setting
+        Extends the global setting
         [plugin.@PLUGIN@.globalCodeOwner](#pluginCodeOwnersGlobalCodeOwner) in
         `gerrit.config` and the `codeOwners.globalCodeOwner` setting from parent
         projects.\
@@ -614,7 +699,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         If a user is exempted from requiring code owner approvals changes that
         are uploaded by this user are automatically code-owner approved.\
         Can be specified multiple times to exempt multiple users.\
-        Overrides the global setting
+        Extends the global setting
         [plugin.@PLUGIN@.exemptedUser](#pluginCodeOwnersExemptedUser) in
         `gerrit.config` and the `codeOwners.exemptedUser` setting from parent
         projects.\
@@ -827,7 +912,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
         from the uploader, any override vote from the uploader on that label is
         ignored for the code owners check.\
-        Overrides the global setting
+        Extends the global setting
         [plugin.@PLUGIN@.overrideApproval](#pluginCodeOwnersOverrideApproval) in
         `gerrit.config` and the `codeOwners.overrideApproval` setting from
         parent projects.\

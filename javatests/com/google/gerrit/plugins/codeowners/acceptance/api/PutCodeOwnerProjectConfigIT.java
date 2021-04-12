@@ -426,6 +426,36 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void setInvalidCodeOwnerConfigInfoUrl() throws Exception {
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getInvalidCodeOwnerConfigInfoUrl())
+        .isEmpty();
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.invalidCodeOwnerConfigInfoUrl = "http://foo.bar";
+    CodeOwnerProjectConfigInfo updatedConfig =
+        projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.invalidCodeOwnerConfigInfoUrl).isEqualTo("http://foo.bar");
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getInvalidCodeOwnerConfigInfoUrl())
+        .value()
+        .isEqualTo("http://foo.bar");
+
+    input.invalidCodeOwnerConfigInfoUrl = "";
+    updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(updatedConfig.general.invalidCodeOwnerConfigInfoUrl).isNull();
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getInvalidCodeOwnerConfigInfoUrl())
+        .isEmpty();
+  }
+
+  @Test
   public void setReadOnly() throws Exception {
     assertThat(
             codeOwnersPluginConfiguration.getProjectConfig(project).areCodeOwnerConfigsReadOnly())

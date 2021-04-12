@@ -15,6 +15,8 @@
 package com.google.gerrit.plugins.codeowners.metrics;
 
 import com.google.gerrit.metrics.Counter0;
+import com.google.gerrit.metrics.Counter1;
+import com.google.gerrit.metrics.Counter3;
 import com.google.gerrit.metrics.Description;
 import com.google.gerrit.metrics.Description.Units;
 import com.google.gerrit.metrics.Field;
@@ -22,6 +24,7 @@ import com.google.gerrit.metrics.Histogram0;
 import com.google.gerrit.metrics.MetricMaker;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.metrics.Timer1;
+import com.google.gerrit.server.logging.Metadata;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -55,7 +58,9 @@ public class CodeOwnerMetrics {
   // counter metrics
   public final Counter0 countCodeOwnerConfigReads;
   public final Counter0 countCodeOwnerConfigCacheReads;
+  public final Counter1<String> countCodeOwnerSubmitRuleErrors;
   public final Counter0 countCodeOwnerSubmitRuleRuns;
+  public final Counter3<String, String, String> countInvalidCodeOwnerConfigFiles;
 
   private final MetricMaker metricMaker;
 
@@ -149,15 +154,37 @@ public class CodeOwnerMetrics {
         createCounter(
             "count_code_owner_config_cache_reads",
             "Total number of code owner config reads from cache");
+    this.countCodeOwnerSubmitRuleErrors =
+        createCounter1(
+            "count_code_owner_submit_rule_errors",
+            "Total number of code owner submit rule errors",
+            Field.ofString("cause", Metadata.Builder::cause)
+                .description("The cause of the submit rule error.")
+                .build());
     this.countCodeOwnerSubmitRuleRuns =
         createCounter(
             "count_code_owner_submit_rule_runs", "Total number of code owner submit rule runs");
+    this.countInvalidCodeOwnerConfigFiles =
+        createCounter3(
+            "count_invalid_code_owner_config_files",
+            "Total number of failed requests caused by an invalid / non-parsable code owner config"
+                + " file",
+            Field.ofString("project", Metadata.Builder::projectName)
+                .description(
+                    "The name of the project that contains the invalid code owner config file.")
+                .build(),
+            Field.ofString("branch", Metadata.Builder::branchName)
+                .description(
+                    "The name of the branch that contains the invalid code owner config file.")
+                .build(),
+            Field.ofString("path", Metadata.Builder::filePath)
+                .description("The path of the invalid code owner config file.")
+                .build());
   }
 
   private Timer0 createLatencyTimer(String name, String description) {
     return metricMaker.newTimer(
-        "code_owners/" + name,
-        new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
+        name, new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
   }
 
   private Timer1<String> createTimerWithClassField(
@@ -168,17 +195,26 @@ public class CodeOwnerMetrics {
             .build();
 
     return metricMaker.newTimer(
-        "code_owners/" + name,
+        name,
         new Description(description).setCumulative().setUnit(Description.Units.MILLISECONDS),
         CODE_OWNER_BACKEND_FIELD);
   }
 
   private Counter0 createCounter(String name, String description) {
-    return metricMaker.newCounter("code_owners/" + name, new Description(description).setRate());
+    return metricMaker.newCounter(name, new Description(description).setRate());
+  }
+
+  private <F1> Counter1<F1> createCounter1(String name, String description, Field<F1> field1) {
+    return metricMaker.newCounter(name, new Description(description).setRate(), field1);
+  }
+
+  private <F1, F2, F3> Counter3<F1, F2, F3> createCounter3(
+      String name, String description, Field<F1> field1, Field<F2> field2, Field<F3> field3) {
+    return metricMaker.newCounter(
+        name, new Description(description).setRate(), field1, field2, field3);
   }
 
   private Histogram0 createHistogram(String name, String description) {
-    return metricMaker.newHistogram(
-        "code_owners/" + name, new Description(description).setCumulative());
+    return metricMaker.newHistogram(name, new Description(description).setCumulative());
   }
 }

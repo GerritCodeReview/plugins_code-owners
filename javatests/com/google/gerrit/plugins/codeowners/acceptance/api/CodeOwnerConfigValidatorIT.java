@@ -2465,25 +2465,8 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             backendConfig.getDefaultBackend().getClass().getName()));
   }
 
-  private String getParsingErrorMessage(
-      ImmutableMap<Class<? extends CodeOwnerBackend>, String> messagesByBackend) {
-    CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
-    assertThat(messagesByBackend).containsKey(codeOwnerBackend.getClass());
-    return messagesByBackend.get(codeOwnerBackend.getClass());
-  }
-
   private String abbreviateName(AnyObjectId id) throws Exception {
     return ObjectIds.abbreviateName(id, testRepo.getRevWalk().getObjectReader());
-  }
-
-  private String getCodeOwnerConfigFileName() {
-    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
-    if (backend instanceof FindOwnersBackend) {
-      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    } else if (backend instanceof ProtoBackend) {
-      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    }
-    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
   }
 
   private static void assertOkWithoutMessages(PushOneCommit.Result pushResult) {

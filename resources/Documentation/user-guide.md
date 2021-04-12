@@ -219,6 +219,39 @@ all branches require code owner approvals and the code owners of all branches
 are trusted, as it prevents that code owners need to approve the same changes
 multiple times, but for different branches.
 
+## <a id="codeOwnersSubmitRule">Code Owners Submit Rule
+
+The logic that checks whether a change has sufficient [code owner
+approvals](#codeOwnerApproval) to be submitted is implemented in the code owners
+submit rule. If the code owners submit rule finds that code owner approvals are
+missing the submission of the change is blocked. In this case it's possible to
+use a [code owner override](#codeOwnerOverride) to unblock the change
+submission.
+
+**NOTE:** Besides the code owners submit rule there may be further submit rules
+that block the change submission for other reasons that are not related to code
+owners. E.g. configured [label
+functions](../../../Documentation/config-labels.html#label_function) are
+completely orthogonal to code owner approvals. If, for example, `Code-Review+1`
+votes are required as code owner approval, but the `Code-Review` label has the
+function `MaxWithBlock` the change submission is still blocked if a max approval
+(aka `Code-Review+2`) is missing or if a veto vote (aka `Code-Review-2`) is
+present.
+
+**NOTE:** Gerrit submit rules are executed on submit and when change details are
+loaded, e.g. when loading the change screen (to know whether the submit button
+should be enabled). In addition, submit rules are executed on every change
+update because the result of running submit rules is stored as submit records in
+the change index. This makes the submit records available when querying changes
+(without needing to run the submit rules for every change in the result which
+would be too expensive). For code owners the submit records that are stored in
+the index can become stale for 2 reasons: 1. [code owner config
+files](#codeOwnerConfigFiles) are changed after the change has been indexed
+(e.g. new code owners are added), 2. [if the code owners plugin configuration
+was changed in a way that affected the result of the code owners submit
+rule](config.html#staleIndexOnConfigChanges). Callers of change queries should
+be aware of this.
+
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)

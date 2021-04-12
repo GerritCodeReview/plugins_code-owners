@@ -157,6 +157,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(FallbackCodeOwners.ALL_USERS);
     when(codeOwnersPluginConfigSnapshot.getOverrideInfoUrl())
         .thenReturn(Optional.of("http://foo.example.com"));
+    when(codeOwnersPluginConfigSnapshot.getInvalidCodeOwnerConfigInfoUrl())
+        .thenReturn(Optional.of("http://bar.example.com"));
     when(codeOwnersPluginConfigSnapshot.isDisabled()).thenReturn(false);
     when(codeOwnersPluginConfigSnapshot.isDisabled(any(String.class))).thenReturn(false);
     when(codeOwnersPluginConfigSnapshot.getBackend()).thenReturn(findOwnersBackend);
@@ -184,6 +186,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerProjectConfigInfo.general.fileExtension).isEqualTo("foo");
     assertThat(codeOwnerProjectConfigInfo.general.overrideInfoUrl)
         .isEqualTo("http://foo.example.com");
+    assertThat(codeOwnerProjectConfigInfo.general.invalidCodeOwnerConfigInfoUrl)
+        .isEqualTo("http://bar.example.com");
     assertThat(codeOwnerProjectConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
     assertThat(codeOwnerProjectConfigInfo.general.fallbackCodeOwners)
@@ -278,6 +282,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(FallbackCodeOwners.ALL_USERS);
     when(codeOwnersPluginConfigSnapshot.getOverrideInfoUrl())
         .thenReturn(Optional.of("http://foo.example.com"));
+    when(codeOwnersPluginConfigSnapshot.getInvalidCodeOwnerConfigInfoUrl())
+        .thenReturn(Optional.of("http://bar.example.com"));
     when(codeOwnersPluginConfigSnapshot.isDisabled(any(String.class))).thenReturn(false);
     when(codeOwnersPluginConfigSnapshot.getBackend("refs/heads/master"))
         .thenReturn(findOwnersBackend);
@@ -298,6 +304,8 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
     assertThat(codeOwnerBranchConfigInfo.general.fileExtension).isEqualTo("foo");
     assertThat(codeOwnerBranchConfigInfo.general.overrideInfoUrl)
         .isEqualTo("http://foo.example.com");
+    assertThat(codeOwnerBranchConfigInfo.general.invalidCodeOwnerConfigInfoUrl)
+        .isEqualTo("http://bar.example.com");
     assertThat(codeOwnerBranchConfigInfo.general.mergeCommitStrategy)
         .isEqualTo(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
     assertThat(codeOwnerBranchConfigInfo.general.fallbackCodeOwners)

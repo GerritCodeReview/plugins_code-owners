@@ -4,6 +4,7 @@
 * [How to check if the code owners functionality is enabled for a project or branch](#checkIfEnabled)
 * [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
 * [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
+* [How to define default code owners](#defineDefaultCodeOwners)
 * [How to setup code owner overrides](#setupOverrides)
 * [What's the best place to keep the global plugin
   configuration](#globalPluginConfiguration)
@@ -100,6 +101,23 @@ only after issues with the code owner config files have been excluded.
 Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
 owner config files in the first place.
 
+## <a id="defineDefaultCodeOwners">How to define default code owners
+
+[Default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration)
+that apply to all branches can be defined in an `OWNERS` file in the root
+directory of the `refs/meta/config` branch.
+
+To add an `OWNERS` file in the `refs/meta/config` branch do (requires to be a
+project owner):
+
+* clone the repository
+* fetch and checkout the `refs/meta/config` branch (e.g. `git fetch origin
+  refs/meta/config && git checkout FETCH_HEAD`)
+* create or edit the `OWNERS` file
+* commit the changes
+* push the newly created commit back to the `refs/meta/config` branch (e.g. `git
+  push origin HEAD:refs/meta/config`)
+
 ## <a id="setupOverrides">How to setup code owner overrides
 
 To setup code owner overrides do:
@@ -145,7 +163,9 @@ the code-owners plugin both places are equally good. However which place is
 preferred can depend on the system setup, e.g. changes to `gerrit.config` may be
 harder to do and require a multi-day rollout, whereas changes of the
 `All-Projects` configuration can be done through the [REST
-API](rest-api.html#update-code-owner-project-config) and are always instant.
+API](rest-api.html#update-code-owner-project-config) and are always instant
+(this can also be a disadvantage as it means that also bad config changes are
+effective immediately).
 
 **NOTE:** Any configuration that is done in `All-Projects` overrides the
 corresponding configuration that is inherited from `gerrit.config`.

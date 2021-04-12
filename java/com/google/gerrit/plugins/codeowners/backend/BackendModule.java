@@ -19,6 +19,7 @@ import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.extensions.events.ReviewerAddedListener;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.server.ExceptionHook;
 import com.google.gerrit.server.IdentifiedUser;
@@ -34,6 +35,7 @@ public class BackendModule extends FactoryModule {
     factory(CodeOwnersUpdate.Factory.class);
     factory(CodeOwnerConfigScanner.Factory.class);
     factory(CodeOwnersPluginConfigSnapshot.Factory.class);
+    factory(CodeOwnersPluginConfig.Factory.class);
 
     DynamicMap.mapOf(binder(), CodeOwnerBackend.class);
 

@@ -17,11 +17,13 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.ExceptionHook;
+import com.google.inject.Inject;
 import java.nio.file.InvalidPathException;
 import java.util.Optional;
-import org.eclipse.jgit.errors.ConfigInvalidException;
 
 /**
  * Class to define the HTTP response status code and message for exceptions that can occur for all
@@ -37,6 +39,17 @@ import org.eclipse.jgit.errors.ConfigInvalidException;
  * </ul>
  */
 public class CodeOwnersExceptionHook implements ExceptionHook {
+  private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final CodeOwnerMetrics codeOwnerMetrics;
+
+  @Inject
+  CodeOwnersExceptionHook(
+      CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      CodeOwnerMetrics codeOwnerMetric) {
+    this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.codeOwnerMetrics = codeOwnerMetric;
+  }
+
   @Override
   public boolean skipRetryWithTrace(String actionType, String actionName, Throwable throwable) {
     return isInvalidPluginConfigurationException(throwable)
@@ -52,10 +65,23 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
       return ImmutableList.of(invalidPluginConfigurationException.get().getMessage());
     }
 
-    Optional<ConfigInvalidException> configInvalidException =
-        CodeOwners.getInvalidConfigCause(throwable);
-    if (configInvalidException.isPresent()) {
-      return ImmutableList.of(configInvalidException.get().getMessage());
+    Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
+        CodeOwners.getInvalidCodeOwnerConfigCause(throwable);
+    if (invalidCodeOwnerConfigException.isPresent()) {
+      codeOwnerMetrics.countInvalidCodeOwnerConfigFiles.increment(
+          invalidCodeOwnerConfigException.get().getProjectName().get(),
+          invalidCodeOwnerConfigException.get().getRef(),
+          invalidCodeOwnerConfigException.get().getCodeOwnerConfigFilePath());
+
+      ImmutableList.Builder<String> messages = ImmutableList.builder();
+      messages.add(invalidCodeOwnerConfigException.get().getMessage());
+      codeOwnersPluginConfiguration
+          .getProjectConfig(invalidCodeOwnerConfigException.get().getProjectName())
+          .getInvalidCodeOwnerConfigInfoUrl()
+          .ifPresent(
+              invalidCodeOwnerConfigInfoUrl ->
+                  messages.add(String.format("For help check %s", invalidCodeOwnerConfigInfoUrl)));
+      return messages.build();
     }
 
     Optional<InvalidPathException> invalidPathException = getInvalidPathException(throwable);
@@ -115,6 +141,6 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
   }
 
   private static boolean isInvalidCodeOwnerConfigException(Throwable throwable) {
-    return CodeOwners.getInvalidConfigCause(throwable).isPresent();
+    return CodeOwners.getInvalidCodeOwnerConfigCause(throwable).isPresent();
   }
 }

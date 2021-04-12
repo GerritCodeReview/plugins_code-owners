@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
 import com.google.common.collect.ImmutableList;
@@ -36,8 +37,12 @@ import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation.Builder;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
+import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -67,11 +72,13 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   @Inject private ProjectOperations projectOperations;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
+  private BackendConfig backendConfig;
 
   @Before
   public void testSetup() throws Exception {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
+    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
   }
 
   protected String createChangeWithFileDeletion(Path filePath) throws Exception {
@@ -225,6 +232,26 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   }
 
   /**
+   * Returns the parsing error message for the non-parseable code owner config that was created by
+   * {@link #createNonParseableCodeOwnerConfig(String)}.
+   */
+  protected String getParsingErrorMessageForNonParseableCodeOwnerConfig() {
+    return getParsingErrorMessage(
+        ImmutableMap.of(
+            FindOwnersBackend.class,
+            "invalid line: INVALID",
+            ProtoBackend.class,
+            "1:8: Expected \"{\"."));
+  }
+
+  protected String getParsingErrorMessage(
+      ImmutableMap<Class<? extends CodeOwnerBackend>, String> messagesByBackend) {
+    CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
+    assertThat(messagesByBackend).containsKey(codeOwnerBackend.getClass());
+    return messagesByBackend.get(codeOwnerBackend.getClass());
+  }
+
+  /**
    * Creates a default code owner config with the given test accounts as code owners.
    *
    * @param testAccounts the accounts of the users that should be code owners
@@ -302,5 +329,15 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
       throws Exception {
     PushOneCommit push = pushFactory.create(admin.newIdent(), testRepo, subject, files);
     return push.to("refs/for/master");
+  }
+
+  protected String getCodeOwnerConfigFileName() {
+    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
+    if (backend instanceof FindOwnersBackend) {
+      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
+    } else if (backend instanceof ProtoBackend) {
+      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
+    }
+    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
   }
 }

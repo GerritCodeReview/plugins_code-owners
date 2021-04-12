@@ -25,6 +25,7 @@ import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
@@ -38,6 +39,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -347,6 +349,67 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Submit the change.
     gApi.changes().id(changeId).current().submit();
     assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  public void changeIsNotSubmittableIfOwnersFileIsNonParsable() throws Exception {
+    testChangeIsNotSubmittableIfOwnersFileIsNonParsable(/* invalidCodeOwnerConfigInfoUrl= */ null);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl", value = "http://foo.bar")
+  public void changeIsNotSubmittableIfOwnersFileIsNonParsable_withInvalidCodeOwnerConfigInfoUrl()
+      throws Exception {
+    testChangeIsNotSubmittableIfOwnersFileIsNonParsable("http://foo.bar");
+  }
+
+  private void testChangeIsNotSubmittableIfOwnersFileIsNonParsable(
+      @Nullable String invalidCodeOwnerConfigInfoUrl) throws Exception {
+    // Add a non-parsable code owner config.
+    String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
+    createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
+
+    PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+
+    // Apply Code-Review+2 to satisfy the MaxWithBlock function of the Code-Review label.
+    approve(changeId);
+
+    ChangeInfo changeInfo =
+        gApi.changes()
+            .id(changeId)
+            .get(
+                ListChangesOption.SUBMITTABLE,
+                ListChangesOption.ALL_REVISIONS,
+                ListChangesOption.CURRENT_ACTIONS);
+    assertThat(changeInfo.submittable).isFalse();
+
+    // Check that the submit button is not visible.
+    assertThat(changeInfo.revisions.get(r.getCommit().getName()).actions.get("submit")).isNull();
+
+    // Check the submit requirement.
+    assertThatCollection(changeInfo.requirements).isEmpty();
+
+    // Try to submit the change.
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class, () -> gApi.changes().id(changeId).current().submit());
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to submit 1 change due to the following problems:\n"
+                    + "Change %s: submit rule error: Failed to evaluate code owner statuses for"
+                    + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
+                    + " (project = %s, branch = master):\n  %s).%s",
+                changeInfo._number,
+                changeInfo._number,
+                JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath(),
+                project,
+                getParsingErrorMessageForNonParseableCodeOwnerConfig(),
+                invalidCodeOwnerConfigInfoUrl != null
+                    ? String.format("\nFor help check %s.", invalidCodeOwnerConfigInfoUrl)
+                    : ""));
   }
 
   @Test

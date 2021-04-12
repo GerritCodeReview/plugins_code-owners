@@ -83,6 +83,9 @@ public class CodeOwnerCheckInfo {
    */
   public boolean isGlobalCodeOwner;
 
+  /** Whether the the specified path in the branch is owned by all users (aka {@code *}). */
+  public boolean isOwnedByAllUsers;
+
   /** Debug logs that may help to understand why the user is or isn't a code owner. */
   public List<String> debugLogs;
 }

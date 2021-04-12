@@ -35,18 +35,13 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.extensions.restapi.UnprocessableEntityException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
-import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
-import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.inject.Inject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -61,13 +56,6 @@ import org.junit.Test;
 public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
-
-  private BackendConfig backendConfig;
-
-  @Before
-  public void setUpCodeOwnersPlugin() throws Exception {
-    backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
-  }
 
   @Test
   public void requiresAuthenticatedUser() throws Exception {
@@ -172,12 +160,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                                     + " branch = master):\n  %s",
                                 codeOwnerConfigPath,
                                 project,
-                                getParsingErrorMessage(
-                                    ImmutableMap.of(
-                                        FindOwnersBackend.class,
-                                        "invalid line: INVALID",
-                                        ProtoBackend.class,
-                                        "1:8: Expected \"{\".")))))),
+                                getParsingErrorMessageForNonParseableCodeOwnerConfig())))),
             "refs/meta/config", ImmutableMap.of());
   }
 
@@ -618,12 +601,7 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
                     "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
                     pathOfNonParseableCodeOwnerConfig,
                     project,
-                    getParsingErrorMessage(
-                        ImmutableMap.of(
-                            FindOwnersBackend.class,
-                            "invalid line: INVALID",
-                            ProtoBackend.class,
-                            "1:8: Expected \"{\"."))))));
+                    getParsingErrorMessageForNonParseableCodeOwnerConfig()))));
     if (verbosity == null
         || (ConsistencyProblemInfo.Status.ERROR.equals(verbosity)
             && (expectedStatus.equals(ConsistencyProblemInfo.Status.FATAL)
@@ -666,22 +644,5 @@ public class CheckCodeOwnerConfigFilesIT extends AbstractCodeOwnersIT {
   private Map<String, Map<String, List<ConsistencyProblemInfo>>> checkCodeOwnerConfigFilesIn(
       Project.NameKey projectName) throws RestApiException {
     return projectCodeOwnersApiFactory.project(projectName).checkCodeOwnerConfigFiles().check();
-  }
-
-  private String getCodeOwnerConfigFileName() {
-    CodeOwnerBackend backend = backendConfig.getDefaultBackend();
-    if (backend instanceof FindOwnersBackend) {
-      return FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    } else if (backend instanceof ProtoBackend) {
-      return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
-    }
-    throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
-  }
-
-  private String getParsingErrorMessage(
-      ImmutableMap<Class<? extends CodeOwnerBackend>, String> messagesByBackend) {
-    CodeOwnerBackend codeOwnerBackend = backendConfig.getDefaultBackend();
-    assertThat(messagesByBackend).containsKey(codeOwnerBackend.getClass());
-    return messagesByBackend.get(codeOwnerBackend.getClass());
   }
 }
