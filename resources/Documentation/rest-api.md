@@ -603,6 +603,13 @@ Gets the code owner statuses for the files in a change.
 The code owner statuses are always listed for the files in the current revision
 of the change (latest patch set).
 
+The following request parameters can be specified:
+
+| Field Name   |           | Description |
+| ------------ | --------- | ----------- |
+| `start`\|`S` | optional  | Number of file code owner statuses to skip. Allows to page over the file code owner statuses. By default 0.
+| `limit`\|`n` | optional  | Limit defining how many file code owner statuses should be returned at most. By default 0 (= unlimited).
+
 The code owner statuses are returned as a
 [CodeOwnerStatusInfo](#code-owner-status-info) entity.
 
@@ -938,10 +945,11 @@ The `CodeOwnerSetInfo` entity defines a set of code owners.
 The `CodeOwnerStatusInfo` entity describes the code owner statuses for the files
 in a change.
 
-| Field Name         | Description |
-| ------------------ | ----------- |
-| `patch_set_number` | The number of the patch set for which the code owner statuses are returned.
-| `file_code_owner_statuses` | List of the code owner statuses for the files in the change as [FileCodeOwnerStatusInfo](#file-code-owner-status-info) entities, sorted by new path, then old path.
+| Field Name         |          | Description |
+| ------------------ | -------- | ----------- |
+| `patch_set_number` |          | The number of the patch set for which the code owner statuses are returned.
+| `file_code_owner_statuses` |  | List of the code owner statuses for the files in the change as [FileCodeOwnerStatusInfo](#file-code-owner-status-info) entities, sorted by new path, then old path.
+| `more`             | optional | Whether the request would deliver more results if not limited. Not set if `false`.
 
 ### <a id="code-owners-status-info"> CodeOwnersStatusInfo
 The `CodeOwnersStatusInfo` contains information about whether the code owners

@@ -26,6 +26,7 @@ import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.restapi.change.Revisions;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.assistedinject.Assisted;
 
 /** Implementation of the {@link ChangeCodeOwners} API. */
@@ -37,17 +38,17 @@ public class ChangeCodeOwnersImpl implements ChangeCodeOwners {
   private final Revisions revisions;
   private final RevisionCodeOwnersImpl.Factory revisionCodeOwnersApi;
   private final ChangeResource changeResource;
-  private final GetCodeOwnerStatus getCodeOwnerStatus;
+  private final Provider<GetCodeOwnerStatus> getCodeOwnerStatusProvider;
 
   @Inject
   public ChangeCodeOwnersImpl(
       Revisions revisions,
       RevisionCodeOwnersImpl.Factory revisionCodeOwnersApi,
-      GetCodeOwnerStatus getCodeOwnerStatus,
+      Provider<GetCodeOwnerStatus> getCodeOwnerStatusProvider,
       @Assisted ChangeResource changeResource) {
     this.revisions = revisions;
     this.revisionCodeOwnersApi = revisionCodeOwnersApi;
-    this.getCodeOwnerStatus = getCodeOwnerStatus;
+    this.getCodeOwnerStatusProvider = getCodeOwnerStatusProvider;
     this.changeResource = changeResource;
   }
 
@@ -57,6 +58,9 @@ public class ChangeCodeOwnersImpl implements ChangeCodeOwners {
       @Override
       public CodeOwnerStatusInfo get() throws RestApiException {
         try {
+          GetCodeOwnerStatus getCodeOwnerStatus = getCodeOwnerStatusProvider.get();
+          getStart().ifPresent(getCodeOwnerStatus::setStart);
+          getLimit().ifPresent(getCodeOwnerStatus::setLimit);
           return getCodeOwnerStatus.apply(changeResource).value();
         } catch (Exception e) {
           throw asRestApiException("Cannot get code owner status", e);
