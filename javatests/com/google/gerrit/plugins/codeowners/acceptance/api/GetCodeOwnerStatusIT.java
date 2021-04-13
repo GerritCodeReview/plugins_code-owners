@@ -42,13 +42,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
   public void getStatus() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/")
-        .addCodeOwnerEmail(user.email())
-        .create();
+    setAsCodeOwners("/foo/", user);
 
     String path = "foo/bar.baz";
     PushOneCommit.Result r = createChange("Change Adding A File", path, "file content");
@@ -81,20 +75,8 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
   public void getStatusForRenamedFile() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/bar")
-        .addCodeOwnerEmail(user.email())
-        .create();
-    codeOwnerConfigOperations
-        .newCodeOwnerConfig()
-        .project(project)
-        .branch("master")
-        .folderPath("/foo/baz")
-        .addCodeOwnerEmail(user2.email())
-        .create();
+    setAsCodeOwners("/foo/bar/", user);
+    setAsCodeOwners("/foo/baz/", user2);
 
     String oldPath = "foo/bar/abc.txt";
     String newPath = "foo/baz/abc.txt";
