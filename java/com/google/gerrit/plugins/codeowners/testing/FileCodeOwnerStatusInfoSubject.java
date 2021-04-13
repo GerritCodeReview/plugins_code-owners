@@ -17,17 +17,72 @@ package com.google.gerrit.plugins.codeowners.testing;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.plugins.codeowners.testing.PathCodeOwnerStatusInfoSubject.pathCodeOwnerStatusInfos;
 import static com.google.gerrit.truth.OptionalSubject.optionals;
+import static java.util.Objects.requireNonNull;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.common.truth.ComparableSubject;
+import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.extensions.common.ChangeType;
 import com.google.gerrit.plugins.codeowners.api.FileCodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.api.PathCodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.common.ChangedFile;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Optional;
+import org.eclipse.jgit.diff.DiffEntry;
 
 /** {@link Subject} for doing assertions on {@link FileCodeOwnerStatusInfo}s. */
 public class FileCodeOwnerStatusInfoSubject extends Subject {
+  private static final ImmutableMap<ChangeType, DiffEntry.ChangeType> CHANGE_TYPE =
+      Maps.immutableEnumMap(
+          new ImmutableMap.Builder<ChangeType, DiffEntry.ChangeType>()
+              .put(ChangeType.ADDED, DiffEntry.ChangeType.ADD)
+              .put(ChangeType.MODIFIED, DiffEntry.ChangeType.MODIFY)
+              .put(ChangeType.DELETED, DiffEntry.ChangeType.DELETE)
+              .put(ChangeType.RENAMED, DiffEntry.ChangeType.RENAME)
+              .put(ChangeType.COPIED, DiffEntry.ChangeType.COPY)
+              .build());
+
+  /**
+   * {@link Correspondence} that maps {@link FileCodeOwnerStatusInfo}s to {@link
+   * FileCodeOwnerStatus}s.
+   */
+  public static final Correspondence<FileCodeOwnerStatusInfo, FileCodeOwnerStatus>
+      isFileCodeOwnerStatus() {
+    return NullAwareCorrespondence.transforming(
+        FileCodeOwnerStatusInfoSubject::toFileCodeOwnerStatus, "is file code owner status");
+  }
+
+  private static FileCodeOwnerStatus toFileCodeOwnerStatus(
+      FileCodeOwnerStatusInfo fileCodeOwnerStatusInfo) {
+    requireNonNull(fileCodeOwnerStatusInfo, "fileCodeOwnerStatusInfo");
+
+    ChangedFile changedFile =
+        ChangedFile.create(
+            Optional.ofNullable(fileCodeOwnerStatusInfo.newPathStatus)
+                .map(pathCodeOwnerStatusInfo -> pathCodeOwnerStatusInfo.path),
+            Optional.ofNullable(fileCodeOwnerStatusInfo.oldPathStatus)
+                .map(pathCodeOwnerStatusInfo -> pathCodeOwnerStatusInfo.path),
+            CHANGE_TYPE.get(fileCodeOwnerStatusInfo.changeType));
+    return FileCodeOwnerStatus.create(
+        changedFile,
+        Optional.ofNullable(fileCodeOwnerStatusInfo.newPathStatus)
+            .map(FileCodeOwnerStatusInfoSubject::toPathCodeOwnerStatus),
+        Optional.ofNullable(fileCodeOwnerStatusInfo.oldPathStatus)
+            .map(FileCodeOwnerStatusInfoSubject::toPathCodeOwnerStatus));
+  }
+
+  private static PathCodeOwnerStatus toPathCodeOwnerStatus(
+      PathCodeOwnerStatusInfo pathCodeOwnerStatusInfo) {
+    requireNonNull(pathCodeOwnerStatusInfo, "pathCodeOwnerStatusInfo");
+    return PathCodeOwnerStatus.create(pathCodeOwnerStatusInfo.path, pathCodeOwnerStatusInfo.status);
+  }
+
   /**
    * Starts fluent chain to do assertions on a {@link FileCodeOwnerStatusInfo}.
    *

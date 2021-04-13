@@ -14,8 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.auto.value.AutoValue;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.nio.file.Path;
 
 /** Code owner status for a particular path that has been modified in a change. */
@@ -40,5 +43,19 @@ public abstract class PathCodeOwnerStatus {
    */
   public static PathCodeOwnerStatus create(Path path, CodeOwnerStatus codeOwnerStatus) {
     return new AutoValue_PathCodeOwnerStatus(path, codeOwnerStatus);
+  }
+
+  /**
+   * Creates a {@link PathCodeOwnerStatus} instance.
+   *
+   * @param path the path to which the code owner status belongs
+   * @param codeOwnerStatus the code owner status
+   * @return the created {@link PathCodeOwnerStatus} instance
+   */
+  public static PathCodeOwnerStatus create(String path, CodeOwnerStatus codeOwnerStatus) {
+    requireNonNull(path, "path");
+    requireNonNull(codeOwnerStatus, "codeOwnerStatus");
+
+    return create(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus);
   }
 }
