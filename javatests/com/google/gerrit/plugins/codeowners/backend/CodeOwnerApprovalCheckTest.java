@@ -169,8 +169,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -264,8 +267,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -289,8 +292,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.PENDING));
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS, newPath, CodeOwnerStatus.PENDING));
   }
 
   @Test
@@ -365,8 +368,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.APPROVED),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.APPROVED,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -386,8 +392,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.APPROVED));
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.APPROVED));
   }
 
   @Test
@@ -519,12 +528,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.deletion(
+            FileCodeOwnerStatus.rename(
                 oldPath,
                 implicitApprovalsEnabled
                     ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -555,8 +565,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                 newPath,
                 implicitApprovalsEnabled
                     ? CodeOwnerStatus.APPROVED
