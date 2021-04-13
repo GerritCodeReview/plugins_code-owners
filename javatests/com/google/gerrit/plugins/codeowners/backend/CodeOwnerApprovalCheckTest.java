@@ -24,6 +24,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
@@ -31,8 +32,11 @@ import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.entities.PatchSet;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
+import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -1963,11 +1967,16 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).current().submit();
 
     // Revert the change
-    String changeIdOfRevert = gApi.changes().id(changeId).revert().get().changeId;
+    ChangeInfo revertChange = gApi.changes().id(changeId).revert().get();
 
     // Amend change to make it a non-pure revert change.
+    GitUtil.fetch(
+        testRepo,
+        RefNames.patchSetRef(PatchSet.id(Change.id(revertChange._number), 1)) + ":revert");
+    testRepo.reset("revert");
+
     amendChange(
-        changeIdOfRevert,
+        revertChange.changeId,
         "refs/for/master",
         admin,
         testRepo,
@@ -1977,7 +1986,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is not approved.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeIdOfRevert));
+        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(revertChange.changeId));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatCollection(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
