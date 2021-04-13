@@ -44,6 +44,7 @@ import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.PureRevertCache;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -158,7 +159,7 @@ public class CodeOwnerApprovalCheck {
         ownedPaths = ownedPaths.limit(limit);
       }
       return ownedPaths.collect(toImmutableList());
-    } catch (IOException | PatchListNotAvailableException e) {
+    } catch (IOException | PatchListNotAvailableException | DiffNotAvailableException e) {
       throw new CodeOwnersInternalServerErrorException(
           String.format(
               "failed to compute owned paths of patch set %s for account %d",
@@ -174,7 +175,8 @@ public class CodeOwnerApprovalCheck {
    * @return whether the given change has sufficient code owner approvals to be submittable
    */
   public boolean isSubmittable(ChangeNotes changeNotes)
-      throws ResourceConflictException, IOException, PatchListNotAvailableException {
+      throws ResourceConflictException, IOException, PatchListNotAvailableException,
+          DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     logger.atFine().log(
         "checking if change %d in project %s is submittable",
@@ -212,7 +214,8 @@ public class CodeOwnerApprovalCheck {
    * @see #getFileStatuses(CodeOwnerConfigHierarchy, ChangeNotes)
    */
   public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(ChangeNotes changeNotes)
-      throws ResourceConflictException, IOException, PatchListNotAvailableException {
+      throws ResourceConflictException, IOException, PatchListNotAvailableException,
+          DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
       logger.atFine().log(
@@ -253,7 +256,8 @@ public class CodeOwnerApprovalCheck {
    */
   private Stream<FileCodeOwnerStatus> getFileStatuses(
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy, ChangeNotes changeNotes)
-      throws ResourceConflictException, IOException, PatchListNotAvailableException {
+      throws ResourceConflictException, IOException, PatchListNotAvailableException,
+          DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.prepareFileStatusComputation.start()) {
       logger.atFine().log(
@@ -326,7 +330,7 @@ public class CodeOwnerApprovalCheck {
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
 
       return changedFiles
-          .compute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
+          .getOrCompute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
           .stream()
           .map(
               changedFile ->
@@ -360,7 +364,8 @@ public class CodeOwnerApprovalCheck {
   @VisibleForTesting
   public Stream<FileCodeOwnerStatus> getFileStatusesForAccount(
       ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId)
-      throws ResourceConflictException, IOException, PatchListNotAvailableException {
+      throws ResourceConflictException, IOException, PatchListNotAvailableException,
+          DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     requireNonNull(patchSet, "patchSet");
     requireNonNull(accountId, "accountId");
@@ -392,7 +397,7 @@ public class CodeOwnerApprovalCheck {
       }
 
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
-      return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
+      return changedFiles.getOrCompute(changeNotes.getProjectName(), patchSet.commitId()).stream()
           .map(
               changedFile ->
                   getFileStatus(
@@ -429,8 +434,8 @@ public class CodeOwnerApprovalCheck {
 
   private Stream<FileCodeOwnerStatus> getAllPathsAsApproved(
       ChangeNotes changeNotes, PatchSet patchSet)
-      throws IOException, PatchListNotAvailableException {
-    return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
+      throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
+    return changedFiles.getOrCompute(changeNotes.getProjectName(), patchSet.commitId()).stream()
         .map(
             changedFile ->
                 FileCodeOwnerStatus.create(

@@ -15,11 +15,13 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.Patch;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -28,16 +30,22 @@ import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.config.GerritServerConfig;
+import com.google.gerrit.server.experiments.ExperimentFeatures;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.InMemoryInserter;
 import com.google.gerrit.server.git.MergeUtil;
 import com.google.gerrit.server.patch.AutoMerger;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
+import com.google.gerrit.server.patch.DiffOperations;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
+import com.google.gerrit.server.patch.filediff.FileDiffOutput;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Stream;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffFormatter;
 import org.eclipse.jgit.diff.RawTextComparator;
@@ -51,12 +59,21 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.eclipse.jgit.util.io.DisabledOutputStream;
 
 /**
- * Class to compute the files that have been changed in a revision.
+ * Class to get/compute the files that have been changed in a revision.
  *
- * <p>The file diff is newly computed on each access and not retrieved from any cache. This is
- * better than using {@link com.google.gerrit.server.patch.PatchListCache} which does a lot of
- * unneeded computations and hence is slower. The Gerrit diff caches are currently being redesigned.
- * Once the envisioned {@code ModifiedFilesCache} is available we should consider using it.
+ * <p>The {@link #getFromDiffCache(Project.NameKey, ObjectId)} method is retrieving the file diff
+ * from the diff cache and has rename detection enabled.
+ *
+ * <p>In contrast to this, for the {@code compute} methods the file diff is newly computed on each
+ * access and rename detection is disabled (as it's too expensive to do it on each access).
+ *
+ * <p>If possible, using {@link #getFromDiffCache(Project.NameKey, ObjectId)} is preferred, however
+ * {@link #getFromDiffCache(Project.NameKey, ObjectId)} cannot be used for newly created commits
+ * that are only available from a specific {@link RevWalk} instance since the {@link RevWalk}
+ * instance cannot be passed in.
+ *
+ * <p>The {@link com.google.gerrit.server.patch.PatchListCache} is deprecated, and hence it not
+ * being used here.
  */
 @Singleton
 public class ChangedFiles {
@@ -66,28 +83,59 @@ public class ChangedFiles {
 
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final DiffOperations diffOperations;
   private final Provider<AutoMerger> autoMergerProvider;
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final ThreeWayMergeStrategy mergeStrategy;
+  private final ExperimentFeatures experimentFeatures;
 
   @Inject
   public ChangedFiles(
       @GerritServerConfig Config cfg,
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      DiffOperations diffOperations,
       Provider<AutoMerger> autoMergerProvider,
-      CodeOwnerMetrics codeOwnerMetrics) {
+      CodeOwnerMetrics codeOwnerMetrics,
+      ExperimentFeatures experimentFeatures) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.diffOperations = diffOperations;
     this.autoMergerProvider = autoMergerProvider;
     this.codeOwnerMetrics = codeOwnerMetrics;
+    this.experimentFeatures = experimentFeatures;
     this.mergeStrategy = MergeUtil.getMergeStrategy(cfg);
+  }
+
+  /**
+   * Returns the changed files for the given revision.
+   *
+   * <p>By default the changed files are computed on access (see {@link #compute(Project.NameKey,
+   * ObjectId)}).
+   *
+   * <p>Only if enabled via the {@link CodeOwnersExperimentFeaturesConstants#USE_NEW_DIFF_CACHE}
+   * experiment feature flag the changed files are retrieved from the new diff cache (see {@link
+   * #getFromDiffCache(Project.NameKey, ObjectId)}).
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be computed
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   */
+  public ImmutableList<ChangedFile> getOrCompute(Project.NameKey project, ObjectId revision)
+      throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
+    if (experimentFeatures.isFeatureEnabled(
+        CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)) {
+      return getFromDiffCache(project, revision);
+    }
+    return compute(project, revision);
   }
 
   /**
    * Computes the files that have been changed in the given revision.
    *
    * <p>The diff is computed against the parent commit.
+   *
+   * <p>Rename detection is disabled.
    *
    * @param revisionResource the revision resource for which the changed files should be computed
    * @return the files that have been changed in the given revision, sorted alphabetically by path
@@ -105,6 +153,8 @@ public class ChangedFiles {
    * Computes the files that have been changed in the given revision.
    *
    * <p>The diff is computed against the parent commit.
+   *
+   * <p>Rename detection is disabled.
    *
    * @param project the project
    * @param revision the revision for which the changed files should be computed
@@ -180,6 +230,8 @@ public class ChangedFiles {
    *
    * <p>The computation also works if the commit doesn't have any parent.
    *
+   * <p>Rename detection is disabled.
+   *
    * @param repoConfig the repository configuration
    * @param revWalk the rev walk
    * @param commit the commit for which the changed files should be computed
@@ -214,5 +266,60 @@ public class ChangedFiles {
         return changedFiles;
       }
     }
+  }
+
+  /**
+   * Gets the changed files from the diff cache.
+   *
+   * <p>The computation also works if the commit doesn't have any parent, but in this case the
+   * changed files are newly computed on each access and not retrieved from the diff cache (this is
+   * because the diff cache doesn't support getting changed files for commits that don't have any
+   * parent).
+   *
+   * <p>Rename detection is enabled.
+   */
+  public ImmutableList<ChangedFile> getFromDiffCache(Project.NameKey project, ObjectId revision)
+      throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+
+    if (isInitialCommit(project, revision)) {
+      // DiffOperations doesn't support getting the list of modified files for the initial commit.
+      return compute(project, revision);
+    }
+
+    MergeCommitStrategy mergeCommitStrategy =
+        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy();
+
+    try (Timer0.Context ctx = codeOwnerMetrics.getChangedFiles.start()) {
+      Map<String, FileDiffOutput> fileDiffOutputs;
+      if (mergeCommitStrategy.equals(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION)) {
+        fileDiffOutputs =
+            diffOperations.listModifiedFilesAgainstParent(project, revision, /* parentNum=*/ null);
+      } else {
+        fileDiffOutputs = diffOperations.listModifiedFilesAgainstParent(project, revision, 1);
+      }
+
+      return toChangedFiles(filterOutMagicFilesAndSort(fileDiffOutputs)).collect(toImmutableList());
+    }
+  }
+
+  private boolean isInitialCommit(Project.NameKey project, ObjectId objectId) throws IOException {
+    try (Repository repo = repoManager.openRepository(project);
+        RevWalk revWalk = new RevWalk(repo)) {
+      return revWalk.parseCommit(objectId).getParentCount() < 1;
+    }
+  }
+
+  private Stream<Map.Entry<String, FileDiffOutput>> filterOutMagicFilesAndSort(
+      Map<String, FileDiffOutput> fileDiffOutputs) {
+    return fileDiffOutputs.entrySet().stream()
+        .filter(e -> !Patch.isMagic(e.getKey()))
+        .sorted(comparing(Map.Entry::getKey));
+  }
+
+  private Stream<ChangedFile> toChangedFiles(
+      Stream<Map.Entry<String, FileDiffOutput>> fileDiffOutputs) {
+    return fileDiffOutputs.map(Map.Entry::getValue).map(ChangedFile::create);
   }
 }
