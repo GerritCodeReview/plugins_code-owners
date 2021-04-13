@@ -24,7 +24,9 @@ import com.google.gerrit.entities.Patch;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.server.patch.PatchListEntry;
+import com.google.gerrit.server.patch.filediff.FileDiffOutput;
 import java.nio.file.Paths;
+import java.util.Optional;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
 import org.junit.Rule;
@@ -40,6 +42,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
 
   @Mock private DiffEntry diffEntry;
   @Mock private PatchListEntry patchListEntry;
+  @Mock private FileDiffOutput fileDiffOutput;
 
   @Test
   public void getNewPath_diffEntry() throws Exception {
@@ -58,6 +61,15 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getNewPath_fileDiffOutput() throws Exception {
+    String newPath = "foo/bar/baz.txt";
+    setupFileDiffOutput(newPath, /* oldPath= */ null, Patch.ChangeType.ADDED);
+    assertThat(ChangedFile.create(fileDiffOutput).newPath())
+        .value()
+        .isEqualTo(Paths.get("/" + newPath));
+  }
+
+  @Test
   public void getNewPathWhenNewPathIsNotSet_diffEntry() throws Exception {
     setupDiffEntry(/* newPath= */ null, /* oldPath= */ null, ChangeType.ADD);
     assertThat(ChangedFile.create(diffEntry).newPath()).isEmpty();
@@ -67,6 +79,12 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   public void getNewPathWhenNewPathIsNotSet_patchListEntry() throws Exception {
     setupPatchListEntry(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.ADDED);
     assertThat(ChangedFile.create(patchListEntry).newPath()).isEmpty();
+  }
+
+  @Test
+  public void getNewPathWhenNewPathIsNotSet_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.ADDED);
+    assertThat(ChangedFile.create(fileDiffOutput).newPath()).isEmpty();
   }
 
   @Test
@@ -90,6 +108,16 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void hasNewPath_fileDiffOutput() throws Exception {
+    String newPath = "foo/bar/baz.txt";
+    setupFileDiffOutput(newPath, /* oldPath= */ null, Patch.ChangeType.ADDED);
+
+    ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
+    assertThat(changedFile.hasNewPath(Paths.get("/" + newPath))).isTrue();
+    assertThat(changedFile.hasNewPath(Paths.get("/otherPath"))).isFalse();
+  }
+
+  @Test
   public void cannotCheckHasNewPathWithNull_diffEntry() throws Exception {
     setupDiffEntry(/* newPath= */ null, /* oldPath= */ null, ChangeType.ADD);
 
@@ -108,6 +136,17 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () -> ChangedFile.create(patchListEntry).hasNewPath(/* absolutePath= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
+  }
+
+  @Test
+  public void cannotCheckHasNewPathWithNull_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.ADDED);
+
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> ChangedFile.create(fileDiffOutput).hasNewPath(/* absolutePath= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 
@@ -138,6 +177,19 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotCheckHasNewPathWithRelativePath_fileDiffOutput() throws Exception {
+    String relativePath = "foo/bar/baz.txt";
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.ADDED);
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> ChangedFile.create(fileDiffOutput).hasNewPath(Paths.get(relativePath)));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("path %s must be absolute", relativePath));
+  }
+
+  @Test
   public void getOldPath_diffEntry() throws Exception {
     String oldPath = "foo/bar/baz.txt";
     setupDiffEntry(/* newPath= */ null, oldPath, ChangeType.DELETE);
@@ -154,6 +206,15 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getOldPath_fileDiffOutput() throws Exception {
+    String oldPath = "foo/bar/baz.txt";
+    setupFileDiffOutput(/* newPath= */ null, oldPath, Patch.ChangeType.DELETED);
+    assertThat(ChangedFile.create(fileDiffOutput).oldPath())
+        .value()
+        .isEqualTo(Paths.get("/" + oldPath));
+  }
+
+  @Test
   public void getOldPathWhenOldPathIsNotSet_diffEntry() throws Exception {
     setupDiffEntry(/* newPath= */ null, /* oldPath= */ null, ChangeType.DELETE);
     when(diffEntry.getOldPath()).thenReturn(DiffEntry.DEV_NULL);
@@ -164,6 +225,12 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   public void getOldPathWhenOldPathIsNotSet_patchListEntry() throws Exception {
     setupPatchListEntry(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.DELETED);
     assertThat(ChangedFile.create(patchListEntry).oldPath()).isEmpty();
+  }
+
+  @Test
+  public void getOldPathWhenOldPathIsNotSet_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.DELETED);
+    assertThat(ChangedFile.create(fileDiffOutput).oldPath()).isEmpty();
   }
 
   @Test
@@ -187,6 +254,16 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void hasOldPath_fileDiffOutput() throws Exception {
+    String oldPath = "foo/bar/baz.txt";
+    setupFileDiffOutput(/* newPath= */ null, oldPath, Patch.ChangeType.DELETED);
+
+    ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
+    assertThat(changedFile.hasOldPath(Paths.get("/" + oldPath))).isTrue();
+    assertThat(changedFile.hasOldPath(Paths.get("/otherPath"))).isFalse();
+  }
+
+  @Test
   public void cannotCheckHasOldPathWithNull_diffEntry() throws Exception {
     setupDiffEntry(/* newPath= */ null, /* oldPath= */ null, ChangeType.DELETE);
     NullPointerException npe =
@@ -203,6 +280,16 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () -> ChangedFile.create(patchListEntry).hasOldPath(/* absolutePath= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
+  }
+
+  @Test
+  public void cannotCheckHasOldPathWithNull_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.DELETED);
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> ChangedFile.create(fileDiffOutput).hasOldPath(/* absolutePath= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
   }
 
@@ -233,6 +320,19 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotCheckHasOldPathWithRelativePath_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.DELETED);
+    String relativePath = "foo/bar/baz.txt";
+    IllegalStateException exception =
+        assertThrows(
+            IllegalStateException.class,
+            () -> ChangedFile.create(fileDiffOutput).hasOldPath(Paths.get(relativePath)));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("path %s must be absolute", relativePath));
+  }
+
+  @Test
   public void isRename_diffEntry() throws Exception {
     setupDiffEntry(/* newPath= */ null, /* oldPath= */ null, ChangeType.RENAME);
     ChangedFile changedFile = ChangedFile.create(diffEntry);
@@ -244,6 +344,14 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   public void isRename_patchListEntry() throws Exception {
     setupPatchListEntry(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.RENAMED);
     ChangedFile changedFile = ChangedFile.create(patchListEntry);
+    assertThat(changedFile.isRename()).isTrue();
+    assertThat(changedFile.isDeletion()).isFalse();
+  }
+
+  @Test
+  public void isRename_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.RENAMED);
+    ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
     assertThat(changedFile.isRename()).isTrue();
     assertThat(changedFile.isDeletion()).isFalse();
   }
@@ -265,6 +373,14 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void isDeletion_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.DELETED);
+    ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
+    assertThat(changedFile.isRename()).isFalse();
+    assertThat(changedFile.isDeletion()).isTrue();
+  }
+
+  @Test
   public void isAddition_diffEntry() throws Exception {
     setupDiffEntry(/* newPath= */ null, /* oldPath= */ null, ChangeType.ADD);
     ChangedFile changedFile = ChangedFile.create(diffEntry);
@@ -276,6 +392,14 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   public void isAddition_patchListEntry() throws Exception {
     setupPatchListEntry(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.ADDED);
     ChangedFile changedFile = ChangedFile.create(patchListEntry);
+    assertThat(changedFile.isRename()).isFalse();
+    assertThat(changedFile.isDeletion()).isFalse();
+  }
+
+  @Test
+  public void isAddition_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.ADDED);
+    ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
     assertThat(changedFile.isRename()).isFalse();
     assertThat(changedFile.isDeletion()).isFalse();
   }
@@ -297,6 +421,14 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void isModify_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.MODIFIED);
+    ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
+    assertThat(changedFile.isRename()).isFalse();
+    assertThat(changedFile.isDeletion()).isFalse();
+  }
+
+  @Test
   public void isCopy_diffEntry() throws Exception {
     setupDiffEntry(/* newPath= */ null, /* oldPath= */ null, ChangeType.COPY);
     ChangedFile changedFile = ChangedFile.create(diffEntry);
@@ -308,6 +440,14 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
   public void isCopy_patchListEntry() throws Exception {
     setupPatchListEntry(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.COPIED);
     ChangedFile changedFile = ChangedFile.create(patchListEntry);
+    assertThat(changedFile.isRename()).isFalse();
+    assertThat(changedFile.isDeletion()).isFalse();
+  }
+
+  @Test
+  public void isCopy_fileDiffOutput() throws Exception {
+    setupFileDiffOutput(/* newPath= */ null, /* oldPath= */ null, Patch.ChangeType.COPIED);
+    ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
     assertThat(changedFile.isRename()).isFalse();
     assertThat(changedFile.isDeletion()).isFalse();
   }
@@ -330,5 +470,12 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
       when(patchListEntry.getOldName()).thenReturn(oldPath);
       when(patchListEntry.getChangeType()).thenReturn(changeType);
     }
+  }
+
+  private void setupFileDiffOutput(
+      @Nullable String newPath, @Nullable String oldPath, Patch.ChangeType changeType) {
+    when(fileDiffOutput.newPath()).thenReturn(Optional.ofNullable(newPath));
+    when(fileDiffOutput.oldPath()).thenReturn(Optional.ofNullable(oldPath));
+    when(fileDiffOutput.changeType()).thenReturn(changeType);
   }
 }
