@@ -66,7 +66,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotComputeForNullRevisionResource() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> changedFiles.compute(null));
+        assertThrows(
+            NullPointerException.class, () -> changedFiles.compute(/* revisionResource= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("revisionResource");
   }
 
@@ -74,14 +75,16 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   public void cannotComputeForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(
-            NullPointerException.class, () -> changedFiles.compute(null, ObjectId.zeroId()));
+            NullPointerException.class,
+            () -> changedFiles.compute(/* project= */ null, ObjectId.zeroId()));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
   @Test
   public void cannotComputeForNullRevision() throws Exception {
     NullPointerException npe =
-        assertThrows(NullPointerException.class, () -> changedFiles.compute(project, null));
+        assertThrows(
+            NullPointerException.class, () -> changedFiles.compute(project, /* revision= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
