@@ -47,6 +47,7 @@ import com.google.gerrit.server.restapi.change.ChangesCollection;
 import com.google.inject.Inject;
 import java.nio.file.Paths;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -332,7 +333,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void sortedByPath() throws Exception {
+  public void computeReturnsChangedFilesSortedByPath() throws Exception {
     String file1 = "foo/bar.baz";
     String file2 = "foo/baz.bar";
     String file3 = "bar/foo.baz";
@@ -364,19 +365,23 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "ALL_CHANGED_FILES")
-  public void sortedByPath_mergeCommitAgainstFirstParent() throws Exception {
-    testSortedByPathForMerge(MergeCommitStrategy.ALL_CHANGED_FILES);
+  public void computeReturnsChangedFilesSortedByPath_mergeCommitAgainstFirstParent()
+      throws Exception {
+    testComputeReturnsChangedFilesSortedByPathForMerge(MergeCommitStrategy.ALL_CHANGED_FILES);
   }
 
   @Test
   @GerritConfig(
       name = "plugin.code-owners.mergeCommitStrategy",
       value = "FILES_WITH_CONFLICT_RESOLUTION")
-  public void sortedByPath_mergeCommitAgainstAutoMerge() throws Exception {
-    testSortedByPathForMerge(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  public void computeReturnsChangedFilesSortedByPath_mergeCommitAgainstAutoMerge()
+      throws Exception {
+    testComputeReturnsChangedFilesSortedByPathForMerge(
+        MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
   }
 
-  private void testSortedByPathForMerge(MergeCommitStrategy mergeCommitStrategy) throws Exception {
+  private void testComputeReturnsChangedFilesSortedByPathForMerge(
+      MergeCommitStrategy mergeCommitStrategy) throws Exception {
     setAsRootCodeOwners(admin);
 
     String file1 = "foo/bar.baz";
@@ -463,6 +468,419 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
 
     ImmutableList<ChangedFile> changedFilesSet =
         changedFiles.compute(getRevisionResource(Integer.toString(mergeChange.get())));
+
+    if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
+      assertThat(changedFilesSet)
+          .comparingElementsUsing(hasPath())
+          .containsExactly(file4, file3, file5, file1, file2)
+          .inOrder();
+    } else if (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
+      assertThat(changedFilesSet)
+          .comparingElementsUsing(hasPath())
+          .containsExactly(file3, file5, file1);
+    } else {
+      fail("expected merge commit strategy: " + mergeCommitStrategy);
+    }
+  }
+
+  @Test
+  public void cannotGetFromDiffCacheForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> changedFiles.getFromDiffCache(/* project= */ null, ObjectId.zeroId()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetFromDiffCacheForNullRevision() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> changedFiles.getFromDiffCache(project, /* revision= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("revision");
+  }
+
+  @Test
+  public void getFromDiffCacheForChangeThatAddedAFile() throws Exception {
+    String path = "/foo/bar/baz.txt";
+    RevCommit commit =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
+
+    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    assertThat(changedFilesSet).hasSize(1);
+    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().isEmpty();
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
+  }
+
+  @Test
+  public void getFromDiffCacheForChangeThatModifiedAFile() throws Exception {
+    String path = "/foo/bar/baz.txt";
+    createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
+
+    RevCommit commit =
+        createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
+            .getCommit();
+
+    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    assertThat(changedFilesSet).hasSize(1);
+    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
+  }
+
+  @Test
+  public void getFromDiffCacheForChangeThatDeletedAFile() throws Exception {
+    String path = "/foo/bar/baz.txt";
+    String changeId = createChangeWithFileDeletion(path);
+
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCache(
+            project, getRevisionResource(changeId).getPatchSet().commitId());
+    assertThat(changedFilesSet).hasSize(1);
+    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
+    assertThat(changedFile).hasNewPath().isEmpty();
+    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isDeletion();
+  }
+
+  @Test
+  public void getFromDiffCacheForChangeThatRenamedAFile() throws Exception {
+    String oldPath = "/foo/bar/old.txt";
+    String newPath = "/foo/bar/new.txt";
+    String changeId = createChangeWithFileRename(oldPath, newPath);
+
+    gApi.changes().id(changeId).current().files();
+
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCache(
+            project, getRevisionResource(changeId).getPatchSet().commitId());
+    ChangedFileSubject changedFile = assertThatCollection(changedFilesSet).onlyElement();
+    changedFile.hasNewPath().value().isEqualTo(Paths.get(newPath));
+    changedFile.hasOldPath().value().isEqualTo(Paths.get(oldPath));
+    changedFile.isRename();
+    changedFile.isNoDeletion();
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  public void getFromDiffCacheForInitialChangeThatAddedAFile() throws Exception {
+    String path = "/foo/bar/baz.txt";
+    RevCommit commit =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
+    assertThat(commit.getParents()).isEmpty();
+
+    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    assertThat(changedFilesSet).hasSize(1);
+    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().isEmpty();
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "ALL_CHANGED_FILES")
+  public void getFromFileDiffCacheForMergeChange_allChangedFiles() throws Exception {
+    testGetFromFileDiffCacheForMergeChange(MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void getFromFileDiffCacheForMergeChange_filesWithConflictResolution() throws Exception {
+    testGetFromFileDiffCacheForMergeChange(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  }
+
+  private void testGetFromFileDiffCacheForMergeChange(MergeCommitStrategy mergeCommitStrategy)
+      throws Exception {
+    setAsRootCodeOwners(admin);
+
+    String file1 = "foo/a.txt";
+    String file2 = "bar/b.txt";
+
+    // Create a base change.
+    Change.Id baseChange =
+        changeOperations.newChange().branch("master").file(file1).content("base content").create();
+    approveAndSubmit(baseChange);
+
+    // Create another branch
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create a change in master that touches file1.
+    Change.Id changeInMaster =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .file(file1)
+            .content("master content")
+            .create();
+    approveAndSubmit(changeInMaster);
+
+    // Create a change in the other branch and that touches file1 and creates file2.
+    Change.Id changeInOtherBranch =
+        changeOperations
+            .newChange()
+            .branch(branchName)
+            .file(file1)
+            .content("other content")
+            .file(file2)
+            .content("content")
+            .create();
+    approveAndSubmit(changeInOtherBranch);
+
+    // Create a merge change with a conflict resolution for file1 and file2 with the same content as
+    // in the other branch (no conflict on file2).
+    Change.Id mergeChange =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .mergeOfButBaseOnFirst()
+            .tipOfBranch("master")
+            .and()
+            .tipOfBranch(branchName)
+            .file(file1)
+            .content("merged content")
+            .file(file2)
+            .content("content")
+            .create();
+
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCache(
+            project,
+            getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId());
+
+    if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
+      assertThat(changedFilesSet).comparingElementsUsing(hasPath()).containsExactly(file1, file2);
+    } else if (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
+      assertThat(changedFilesSet).comparingElementsUsing(hasPath()).containsExactly(file1);
+    } else {
+      fail("expected merge commit strategy: " + mergeCommitStrategy);
+    }
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "ALL_CHANGED_FILES")
+  public void
+      getFromFileDiffCacheForMergeChangeThatContainsADeletedFileAsConflictResolution_allChangedFiles()
+          throws Exception {
+    testGetFromFileDiffCacheForMergeChangeThatContainsADeletedFileAsConflictResolution();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void
+      getFromFileDiffCacheForMergeChangeThatContainsADeletedFileAsConflictResolution_filesWithConflictResolution()
+          throws Exception {
+    testGetFromFileDiffCacheForMergeChangeThatContainsADeletedFileAsConflictResolution();
+  }
+
+  private void testGetFromFileDiffCacheForMergeChangeThatContainsADeletedFileAsConflictResolution()
+      throws Exception {
+    setAsRootCodeOwners(admin);
+
+    String file = "foo/a.txt";
+
+    // Create a base change.
+    Change.Id baseChange =
+        changeOperations.newChange().branch("master").file(file).content("base content").create();
+    approveAndSubmit(baseChange);
+
+    // Create another branch
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create a change in master that touches file1.
+    Change.Id changeInMaster =
+        changeOperations.newChange().branch("master").file(file).content("master content").create();
+    approveAndSubmit(changeInMaster);
+
+    // Create a change in the other branch and that deleted file1.
+    PushOneCommit push =
+        pushFactory.create(admin.newIdent(), testRepo, "Change Deleting A File", file, "");
+    Result r = push.rm("refs/for/master");
+    r.assertOkStatus();
+    approveAndSubmit(r.getChange().getId());
+
+    // Create a merge change with resolving the conflict on file between the edit in master and the
+    // deletion in the other branch by deleting the file.
+    Change.Id mergeChange =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .mergeOf()
+            .tipOfBranch("master")
+            .and()
+            .tipOfBranch(branchName)
+            .file(file)
+            .delete()
+            .create();
+
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCache(
+            project,
+            getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId());
+    ImmutableSet<String> oldPaths =
+        changedFilesSet.stream()
+            .map(changedFile -> JgitPath.of(changedFile.oldPath().get()).get())
+            .collect(toImmutableSet());
+    assertThat(oldPaths).containsExactly(file);
+  }
+
+  @Test
+  public void getFromDiffCacheReturnsChangedFilesSortedByPath() throws Exception {
+    String file1 = "foo/bar.baz";
+    String file2 = "foo/baz.bar";
+    String file3 = "bar/foo.baz";
+    String file4 = "bar/baz.foo";
+    String file5 = "baz/foo.bar";
+    RevCommit commit =
+        createChange(
+                "Test Change",
+                ImmutableMap.of(
+                    file1,
+                    "file content",
+                    file2,
+                    "file content",
+                    file3,
+                    "file content",
+                    file4,
+                    "file content",
+                    file5,
+                    "file content"))
+            .getCommit();
+
+    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    assertThat(changedFilesSet)
+        .comparingElementsUsing(hasPath())
+        .containsExactly(file4, file3, file5, file1, file2)
+        .inOrder();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.mergeCommitStrategy", value = "ALL_CHANGED_FILES")
+  public void getFromDiffCacheReturnsChangedFilesSortedByPath_mergeCommitAgainstFirstParent()
+      throws Exception {
+    testGetFromDiffCacheReturnsChangedFilesSortedByPathForMerge(
+        MergeCommitStrategy.ALL_CHANGED_FILES);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.mergeCommitStrategy",
+      value = "FILES_WITH_CONFLICT_RESOLUTION")
+  public void getFromDiffCacheReturnsChangedFilesSortedByPath_mergeCommitAgainstAutoMerge()
+      throws Exception {
+    testGetFromDiffCacheReturnsChangedFilesSortedByPathForMerge(
+        MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION);
+  }
+
+  private void testGetFromDiffCacheReturnsChangedFilesSortedByPathForMerge(
+      MergeCommitStrategy mergeCommitStrategy) throws Exception {
+    setAsRootCodeOwners(admin);
+
+    String file1 = "foo/bar.baz";
+    String file2 = "foo/baz.bar";
+    String file3 = "bar/foo.baz";
+    String file4 = "bar/baz.foo";
+    String file5 = "baz/foo.bar";
+
+    // Create a base change.
+    Change.Id baseChange =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .file(file1)
+            .content("base content")
+            .file(file3)
+            .content("base content")
+            .file(file5)
+            .content("base content")
+            .create();
+    approveAndSubmit(baseChange);
+
+    // Create another branch
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    // Create a change in master that touches file1, file3 and file5
+    Change.Id changeInMaster =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .file(file1)
+            .content("master content")
+            .file(file3)
+            .content("master content")
+            .file(file5)
+            .content("master content")
+            .create();
+    approveAndSubmit(changeInMaster);
+
+    // Create a change in the other branch and that touches file1, file3, file5 and creates file2,
+    // file4.
+    Change.Id changeInOtherBranch =
+        changeOperations
+            .newChange()
+            .branch(branchName)
+            .file(file1)
+            .content("other content")
+            .file(file2)
+            .content("content")
+            .file(file3)
+            .content("other content")
+            .file(file4)
+            .content("content")
+            .file(file5)
+            .content("other content")
+            .create();
+    approveAndSubmit(changeInOtherBranch);
+
+    // Create a merge change with a conflict resolution for file1 and file2 with the same content as
+    // in the other branch (no conflict on file2).
+    Change.Id mergeChange =
+        changeOperations
+            .newChange()
+            .branch("master")
+            .mergeOfButBaseOnFirst()
+            .tipOfBranch("master")
+            .and()
+            .tipOfBranch(branchName)
+            .file(file1)
+            .content("merged content")
+            .file(file2)
+            .content("content")
+            .file(file3)
+            .content("merged content")
+            .file(file4)
+            .content("content")
+            .file(file5)
+            .content("merged content")
+            .create();
+
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCache(
+            project,
+            getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId());
 
     if (MergeCommitStrategy.ALL_CHANGED_FILES.equals(mergeCommitStrategy)) {
       assertThat(changedFilesSet)
