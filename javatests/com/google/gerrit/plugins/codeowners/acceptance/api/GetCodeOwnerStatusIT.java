@@ -102,21 +102,17 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
     CodeOwnerStatusInfo codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().hasSize(2);
-    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject1 =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().element(0);
-    fileCodeOwnerStatusInfoSubject1.hasChangeTypeThat().isEqualTo(ChangeType.DELETED);
-    fileCodeOwnerStatusInfoSubject1.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
-    fileCodeOwnerStatusInfoSubject1
+    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusInfoSubject
         .hasOldPathStatusThat()
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject2 =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().element(1);
-    fileCodeOwnerStatusInfoSubject2.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
-    fileCodeOwnerStatusInfoSubject2.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
-    fileCodeOwnerStatusInfoSubject2
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusInfoSubject
         .hasNewPathStatusThat()
         .value()
         .hasStatusThat()
@@ -126,21 +122,17 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     gApi.changes().id(changeId).addReviewer(user.email());
 
     codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().hasSize(2);
-    fileCodeOwnerStatusInfoSubject1 =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().element(0);
-    fileCodeOwnerStatusInfoSubject1.hasChangeTypeThat().isEqualTo(ChangeType.DELETED);
-    fileCodeOwnerStatusInfoSubject1.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
-    fileCodeOwnerStatusInfoSubject1
+    fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusInfoSubject
         .hasOldPathStatusThat()
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusInfoSubject2 =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().element(1);
-    fileCodeOwnerStatusInfoSubject2.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
-    fileCodeOwnerStatusInfoSubject2.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
-    fileCodeOwnerStatusInfoSubject2
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusInfoSubject
         .hasNewPathStatusThat()
         .value()
         .hasStatusThat()
@@ -150,21 +142,17 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     gApi.changes().id(changeId).addReviewer(user2.email());
 
     codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().hasSize(2);
-    fileCodeOwnerStatusInfoSubject1 =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().element(0);
-    fileCodeOwnerStatusInfoSubject1.hasChangeTypeThat().isEqualTo(ChangeType.DELETED);
-    fileCodeOwnerStatusInfoSubject1.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
-    fileCodeOwnerStatusInfoSubject1
+    fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
+    fileCodeOwnerStatusInfoSubject
         .hasOldPathStatusThat()
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusInfoSubject2 =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().element(1);
-    fileCodeOwnerStatusInfoSubject2.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
-    fileCodeOwnerStatusInfoSubject2.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
-    fileCodeOwnerStatusInfoSubject2
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
+    fileCodeOwnerStatusInfoSubject
         .hasNewPathStatusThat()
         .value()
         .hasStatusThat()
