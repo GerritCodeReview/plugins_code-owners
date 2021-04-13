@@ -27,6 +27,7 @@ import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.rules.SubmitRule;
@@ -142,7 +143,8 @@ class CodeOwnerSubmitRule implements SubmitRule {
   }
 
   private SubmitRecord getSubmitRecord(ChangeNotes changeNotes)
-      throws ResourceConflictException, IOException, PatchListNotAvailableException {
+      throws ResourceConflictException, IOException, PatchListNotAvailableException,
+          DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     return codeOwnerApprovalCheck.isSubmittable(changeNotes) ? ok() : notReady();
   }
