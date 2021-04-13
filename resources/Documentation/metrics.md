@@ -25,6 +25,8 @@ usage and performance of the code owners functionality.
   approval is applied.
 * `get_auto_merge`:
   Latency for getting the auto merge commit of a merge commit.
+* `get_changed_files`:
+  Latency for getting changed files from diff cache.
 * `prepare_file_status_computation`:
   Latency for preparing the file status computation.
 * `prepare_file_status_computation_for_account`:

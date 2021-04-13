@@ -88,12 +88,6 @@ public abstract class FileCodeOwnerStatus {
         Optional.empty());
   }
 
-  public static FileCodeOwnerStatus deletion(String path, CodeOwnerStatus codeOwnerStatus) {
-    requireNonNull(path, "path");
-
-    return deletion(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus);
-  }
-
   public static FileCodeOwnerStatus deletion(Path path, CodeOwnerStatus codeOwnerStatus) {
     requireNonNull(path, "path");
     requireNonNull(codeOwnerStatus, "codeOwnerStatus");

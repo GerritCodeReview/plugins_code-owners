@@ -84,8 +84,11 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a reviewer that is a code owner of the old path.
     gApi.changes().id(changeId).addReviewer(user.email());
@@ -95,8 +98,8 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a reviewer that is a code owner of the new path.
     gApi.changes().id(changeId).addReviewer(user2.email());
@@ -106,8 +109,8 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(
-            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
-            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.PENDING));
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.PENDING));
   }
 
   @Test
