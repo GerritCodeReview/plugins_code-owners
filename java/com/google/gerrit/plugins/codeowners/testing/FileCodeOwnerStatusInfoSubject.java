@@ -19,15 +19,28 @@ import static com.google.gerrit.plugins.codeowners.testing.PathCodeOwnerStatusIn
 import static com.google.gerrit.truth.OptionalSubject.optionals;
 
 import com.google.common.truth.ComparableSubject;
+import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
 import com.google.gerrit.extensions.common.ChangeType;
 import com.google.gerrit.plugins.codeowners.api.FileCodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
+import com.google.gerrit.truth.NullAwareCorrespondence;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Optional;
 
 /** {@link Subject} for doing assertions on {@link FileCodeOwnerStatusInfo}s. */
 public class FileCodeOwnerStatusInfoSubject extends Subject {
+  /**
+   * {@link Correspondence} that maps {@link FileCodeOwnerStatusInfo}s to {@link
+   * FileCodeOwnerStatus}s.
+   */
+  public static final Correspondence<FileCodeOwnerStatusInfo, FileCodeOwnerStatus>
+      isFileCodeOwnerStatus() {
+    return NullAwareCorrespondence.transforming(
+        FileCodeOwnerStatus::from, "is file code owner status");
+  }
+
   /**
    * Starts fluent chain to do assertions on a {@link FileCodeOwnerStatusInfo}.
    *
