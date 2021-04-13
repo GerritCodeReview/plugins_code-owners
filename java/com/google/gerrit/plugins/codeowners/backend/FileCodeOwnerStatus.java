@@ -14,8 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.auto.value.AutoValue;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
+import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import java.nio.file.Path;
 import java.util.Optional;
 
 /** Code owner status for a particular file that was changed in a change. */
@@ -55,5 +60,72 @@ public abstract class FileCodeOwnerStatus {
       Optional<PathCodeOwnerStatus> oldPathCodeOwnerStatus) {
     return new AutoValue_FileCodeOwnerStatus(
         changedFile, newPathCodeOwnerStatus, oldPathCodeOwnerStatus);
+  }
+
+  public static FileCodeOwnerStatus addition(String path, CodeOwnerStatus codeOwnerStatus) {
+    requireNonNull(path, "path");
+
+    return addition(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus);
+  }
+
+  public static FileCodeOwnerStatus addition(Path path, CodeOwnerStatus codeOwnerStatus) {
+    requireNonNull(path, "path");
+    requireNonNull(codeOwnerStatus, "codeOwnerStatus");
+
+    return create(
+        ChangedFile.addition(path),
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus)),
+        Optional.empty());
+  }
+
+  public static FileCodeOwnerStatus modification(Path path, CodeOwnerStatus codeOwnerStatus) {
+    requireNonNull(path, "path");
+    requireNonNull(codeOwnerStatus, "codeOwnerStatus");
+
+    return create(
+        ChangedFile.modification(path),
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus)),
+        Optional.empty());
+  }
+
+  public static FileCodeOwnerStatus deletion(Path path, CodeOwnerStatus codeOwnerStatus) {
+    requireNonNull(path, "path");
+    requireNonNull(codeOwnerStatus, "codeOwnerStatus");
+
+    return create(
+        ChangedFile.deletion(path),
+        Optional.empty(),
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus)));
+  }
+
+  public static FileCodeOwnerStatus rename(
+      String oldPath,
+      CodeOwnerStatus oldPathCodeOwnerStatus,
+      String newPath,
+      CodeOwnerStatus newPathCodeOwnerStatus) {
+    requireNonNull(oldPath, "oldPath");
+    requireNonNull(newPath, "newPath");
+
+    return rename(
+        JgitPath.of(oldPath).getAsAbsolutePath(),
+        oldPathCodeOwnerStatus,
+        JgitPath.of(newPath).getAsAbsolutePath(),
+        newPathCodeOwnerStatus);
+  }
+
+  public static FileCodeOwnerStatus rename(
+      Path oldPath,
+      CodeOwnerStatus oldPathCodeOwnerStatus,
+      Path newPath,
+      CodeOwnerStatus newPathCodeOwnerStatus) {
+    requireNonNull(oldPath, "oldPath");
+    requireNonNull(oldPathCodeOwnerStatus, "oldPathCodeOwnerStatus");
+    requireNonNull(newPath, "newPath");
+    requireNonNull(newPathCodeOwnerStatus, "newPathCodeOwnerStatus");
+
+    return create(
+        ChangedFile.rename(newPath, oldPath),
+        Optional.of(PathCodeOwnerStatus.create(newPath, newPathCodeOwnerStatus)),
+        Optional.of(PathCodeOwnerStatus.create(oldPath, oldPathCodeOwnerStatus)));
   }
 }

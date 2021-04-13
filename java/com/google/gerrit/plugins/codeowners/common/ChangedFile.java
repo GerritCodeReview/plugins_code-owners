@@ -182,4 +182,38 @@ public abstract class ChangedFile {
     requireNonNull(path, "path");
     return path.map(p -> JgitPath.of(p).getAsAbsolutePath());
   }
+
+  public static ChangedFile create(
+      Optional<String> newPath, Optional<String> oldPath, ChangeType changeType) {
+    requireNonNull(changeType, "changeType");
+
+    return new AutoValue_ChangedFile(
+        newPath.map(JgitPath::of).map(JgitPath::getAsAbsolutePath),
+        oldPath.map(JgitPath::of).map(JgitPath::getAsAbsolutePath),
+        changeType);
+  }
+
+  public static ChangedFile addition(Path newPath) {
+    requireNonNull(newPath, "newPath");
+
+    return new AutoValue_ChangedFile(Optional.of(newPath), Optional.empty(), ChangeType.ADD);
+  }
+
+  public static ChangedFile modification(Path path) {
+    requireNonNull(path, "path");
+
+    return new AutoValue_ChangedFile(Optional.of(path), Optional.of(path), ChangeType.MODIFY);
+  }
+
+  public static ChangedFile deletion(Path path) {
+    requireNonNull(path, "path");
+
+    return new AutoValue_ChangedFile(Optional.empty(), Optional.of(path), ChangeType.DELETE);
+  }
+
+  public static ChangedFile rename(Path newPath, Path oldPath) {
+    requireNonNull(newPath, "newPath");
+
+    return new AutoValue_ChangedFile(Optional.of(newPath), Optional.of(oldPath), ChangeType.RENAME);
+  }
 }

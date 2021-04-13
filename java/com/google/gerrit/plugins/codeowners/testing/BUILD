@@ -13,6 +13,7 @@ java_library(
         "//java/com/google/gerrit/extensions:api",
         "//java/com/google/gerrit/truth",
         "//lib:guava",
+        "//lib:jgit",
         "//lib/truth",
         "//lib/truth:truth-java8-extension",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api",

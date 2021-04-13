@@ -15,15 +15,15 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject.isFileCodeOwnerStatus;
 
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
-import com.google.gerrit.extensions.common.ChangeType;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
-import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject;
 import com.google.inject.Inject;
 import org.junit.Test;
 
@@ -60,15 +60,11 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerStatus)
         .hasPatchSetNumberThat()
         .isEqualTo(r.getChange().currentPatchSet().id().get());
-    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
-    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
-    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusInfoSubject
-        .hasNewPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
+
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
   }
 
   @Test
@@ -84,61 +80,37 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
     CodeOwnerStatusInfo codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
-    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
-    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
-    fileCodeOwnerStatusInfoSubject
-        .hasOldPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
-    fileCodeOwnerStatusInfoSubject
-        .hasNewPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a reviewer that is a code owner of the old path.
     gApi.changes().id(changeId).addReviewer(user.email());
 
     codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    fileCodeOwnerStatusInfoSubject =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
-    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
-    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
-    fileCodeOwnerStatusInfoSubject
-        .hasOldPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
-    fileCodeOwnerStatusInfoSubject
-        .hasNewPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a reviewer that is a code owner of the new path.
     gApi.changes().id(changeId).addReviewer(user2.email());
 
     codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    fileCodeOwnerStatusInfoSubject =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
-    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.RENAMED);
-    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().value().hasPathThat().isEqualTo(oldPath);
-    fileCodeOwnerStatusInfoSubject
-        .hasOldPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(newPath);
-    fileCodeOwnerStatusInfoSubject
-        .hasNewPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.PENDING));
   }
 
   @Test
@@ -148,14 +120,10 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     String changeId = createChange("Change Adding A File", path, "file content").getChangeId();
     CodeOwnerStatusInfo codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
-        assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().onlyElement();
-    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
-    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusInfoSubject
-        .hasNewPathStatusThat()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 }
