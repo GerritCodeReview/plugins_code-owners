@@ -91,8 +91,10 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void codeOwnerConfigCacheSizeIsUnlimitedByDefault() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize()).isEmpty();
+  public void codeOwnerConfigCacheSizeIsLimitedByDefault() throws Exception {
+    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize())
+        .value()
+        .isEqualTo(CodeOwnersPluginConfiguration.DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
   }
 
   @Test
