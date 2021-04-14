@@ -1217,7 +1217,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void getConfiguredOverrideApproval() throws Exception {
     createOwnersOverrideLabel();
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
@@ -1247,7 +1247,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
   public void getOverrideApprovalConfiguredOnProjectLevel() throws Exception {
     createOwnersOverrideLabel();
     configureOverrideApproval(project, "Owners-Override+1");
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
@@ -1296,7 +1296,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel();
 
     configureOverrideApproval(project, "Owners-Override+1");
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
@@ -1307,7 +1307,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel();
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
@@ -1337,7 +1337,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     createOwnersOverrideLabel();
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
@@ -1366,7 +1366,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
 
     configureOverrideApproval(allProjects, "Owners-Override+1");
     configureOverrideApproval(project, "Owners-Override+1");
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
@@ -1385,7 +1385,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     // if the same label is configured multiple times as override approval, only the definition with
     // the lowest value is returned (since all higher values are implicitly considered as overrides
     // as well)
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);
@@ -1431,7 +1431,7 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
         ImmutableList.of("Code-Review+2", "Code-Review+1", "Code-Review+2"));
 
     // If multiple values are set for a key, the last value wins.
-    ImmutableSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
+    ImmutableSortedSet<RequiredApproval> requiredApprovals = cfgSnapshot().getOverrideApprovals();
     assertThat(requiredApprovals).hasSize(1);
     assertThat(requiredApprovals).element(0).hasLabelNameThat().isEqualTo("Code-Review");
     assertThat(requiredApprovals).element(0).hasValueThat().isEqualTo(1);

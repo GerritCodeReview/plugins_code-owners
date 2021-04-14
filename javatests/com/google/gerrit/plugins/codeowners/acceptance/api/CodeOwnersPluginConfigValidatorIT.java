@@ -23,7 +23,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -326,7 +326,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    ImmutableSet<RequiredApproval> overrideApprovals =
+    ImmutableSortedSet<RequiredApproval> overrideApprovals =
         codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApprovals();
     assertThat(overrideApprovals).hasSize(1);
     assertThat(overrideApprovals).element(0).hasLabelNameThat().isEqualTo("Code-Review");
@@ -423,7 +423,7 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    ImmutableSet<RequiredApproval> overrideApprovals =
+    ImmutableSortedSet<RequiredApproval> overrideApprovals =
         codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideApprovals();
     assertThat(overrideApprovals).hasSize(1);
     assertThat(overrideApprovals).element(0).hasLabelNameThat().isEqualTo("Owners-Override");
