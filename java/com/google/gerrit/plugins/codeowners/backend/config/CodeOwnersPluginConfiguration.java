@@ -49,6 +49,8 @@ public class CodeOwnersPluginConfiguration {
   @VisibleForTesting
   static final String KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS = "enableExperimentalRestEndpoints";
 
+  @VisibleForTesting static final int DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE = 25000;
+
   private static final String KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE = "maxCodeOwnerConfigCacheSize";
 
   private final CodeOwnersPluginConfigSnapshot.Factory codeOwnersPluginConfigSnapshotFactory;
@@ -132,7 +134,8 @@ public class CodeOwnersPluginConfiguration {
       int maxCodeOwnerConfigCacheSize =
           pluginConfigFactory
               .getFromGerritConfig(pluginName)
-              .getInt(KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE, /* defaultValue= */ 0);
+              .getInt(
+                  KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE, DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
       return maxCodeOwnerConfigCacheSize > 0
           ? Optional.of(maxCodeOwnerConfigCacheSize)
           : Optional.empty();
