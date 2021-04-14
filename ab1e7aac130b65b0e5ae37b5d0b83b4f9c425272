@@ -96,6 +96,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "6fc9d292_2f408494",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-14T08:58:42Z",
+      "side": 1,
+      "message": "No, the mismatches are in the list of modified files.\n\nI actually dark launched the file diffs (e.g. DiffOperations#getModifiedFile/AgainstParent) with the GetDiff endpoint, and the diffs were matching. I\u0027m getting mismatches for DiffOperations#listModifiedFiles.\n\nI do the comparison with:\n\n\u003e if (!oldMap.equals(newMap)) {\n\u003e  // mismatch\n\u003e }\n\nI\u0027m still looking into the nature of these mismatches; the outputs were perfectly matching for me when I tried with curl from the cmd line, and the mismatch is a bit subtle.",
+      "parentUuid": "3775dcba_158f645f",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 3
+      },
+      "revId": "ab1e7aac130b65b0e5ae37b5d0b83b4f9c425272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "27baec06_acfc1ecd",
