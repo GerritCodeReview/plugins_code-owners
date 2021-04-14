@@ -89,6 +89,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private int limit = DEFAULT_LIMIT;
   private Optional<Long> seed = Optional.empty();
   private boolean resolveAllUsers;
+  private boolean highestScoreOnly;
 
   @Option(
       name = "-o",
@@ -128,6 +129,13 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               + " users")
   public void setResolveAllUsers(boolean resolveAllUsers) {
     this.resolveAllUsers = resolveAllUsers;
+  }
+
+  @Option(
+      name = "--highest-score-only",
+      usage = "whether only code owners with the highest score should be returned")
+  public void setHighestScoreOnly(boolean highestScoreOnly) {
+    this.highestScoreOnly = highestScoreOnly;
   }
 
   protected AbstractGetCodeOwnersForPath(
@@ -236,9 +244,22 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     ImmutableMap<CodeOwner, Double> scoredCodeOwners =
         codeOwnerScorings.getScorings(immutableCodeOwners);
 
+    ImmutableList<CodeOwner> sortedAndLimitedCodeOwners = sortAndLimit(rsrc, scoredCodeOwners);
+
+    if (highestScoreOnly) {
+      Optional<Double> highestScore =
+          scoredCodeOwners.values().stream().max(Comparator.naturalOrder());
+      if (highestScore.isPresent()) {
+        sortedAndLimitedCodeOwners =
+            sortedAndLimitedCodeOwners.stream()
+                .filter(codeOwner -> scoredCodeOwners.get(codeOwner).equals(highestScore.get()))
+                .collect(toImmutableList());
+      }
+    }
+
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners =
-        codeOwnerJsonFactory.create(getFillOptions()).format(sortAndLimit(rsrc, scoredCodeOwners));
+        codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     return Response.ok(codeOwnersInfo);
   }
