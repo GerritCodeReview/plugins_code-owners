@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -24,6 +25,7 @@ import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -37,6 +39,8 @@ import org.eclipse.jgit.lib.Repository;
  * <p><strong>Note</strong>: This class is not thread-safe.
  */
 public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final GitRepositoryManager repoManager;
   private final CodeOwners codeOwners;
   private final Optional<Integer> maxCacheSize;
@@ -97,6 +101,10 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
     }
     if (!maxCacheSize.isPresent() || cache.size() < maxCacheSize.get()) {
       cache.put(cacheKey, codeOwnerConfig);
+    } else if (maxCacheSize.isPresent()) {
+      logger.atWarning().atMostEvery(1, TimeUnit.DAYS).log(
+          "exceeded limit of %s (project = %s)",
+          getClass().getSimpleName(), cacheKey.codeOwnerConfigKey().project());
     }
     return codeOwnerConfig;
   }
