@@ -120,6 +120,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "d5b8601a_ddb2e24e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-14T09:03:14Z",
+      "side": 1,
+      "message": "Ah ok, got it. Thanks for clarifying. In this case we should definitely wait with submitting this change until this is fixed.",
+      "parentUuid": "6fc9d292_2f408494",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 3
+      },
+      "revId": "ab1e7aac130b65b0e5ae37b5d0b83b4f9c425272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "27baec06_acfc1ecd",
@@ -133,6 +157,23 @@
       "writtenOn": "2021-04-13T12:03:05Z",
       "side": 1,
       "message": "Youssef, is the diff cache ready to be used yet?",
+      "revId": "ab1e7aac130b65b0e5ae37b5d0b83b4f9c425272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5c3132b2_a49ac34f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-14T09:03:14Z",
+      "side": 1,
+      "message": "The new diff cache is not yet ready to be used (see inline comments for the commit message).",
       "revId": "ab1e7aac130b65b0e5ae37b5d0b83b4f9c425272",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
