@@ -1364,51 +1364,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void projectOwnersAreNoCodeOwnersIfDefaultCodeOwnerConfigExists() throws Exception {
-    TestAccount user2 = accountCreator.user2();
-
-    setAsDefaultCodeOwners(user);
-
-    // Create a change as a user that is neither a code owner nor a project owner.
-    Path path = Paths.get("/foo/bar.baz");
-    String changeId =
-        createChange(user2, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
-
-    // Verify that the file is not approved yet.
-    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-
-    // Let the project owner approve the change.
-    requestScopeOperations.setApiUser(admin.id());
-    approve(changeId);
-
-    // Verify that the file is not approved yet
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-
-    // Let the code owner approve the change.
-    projectOperations
-        .project(project)
-        .forUpdate()
-        .add(allowLabel("Code-Review").ref("refs/heads/*").group(REGISTERED_USERS).range(-2, +2))
-        .update();
-    requestScopeOperations.setApiUser(user.id());
-    approve(changeId);
-
-    // Check that the file is approved now.
-    requestScopeOperations.setApiUser(admin.id());
-    fileCodeOwnerStatuses = codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
-  }
-
-  @Test
   public void approvedByDefaultCodeOwner() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
