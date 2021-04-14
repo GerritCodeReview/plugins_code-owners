@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.common.base.MoreObjects;
 import com.google.gerrit.extensions.common.ChangeType;
 
 /** JSON entity that describes the code owner status for a file that was touched in a change. */
@@ -38,4 +39,13 @@ public class FileCodeOwnerStatusInfo {
    * <p>Not set if the file was deleted.
    */
   public PathCodeOwnerStatusInfo newPathStatus;
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("changeType", changeType.name())
+        .add("oldPathStatus", oldPathStatus)
+        .add("newPathStatus", newPathStatus)
+        .toString();
+  }
 }

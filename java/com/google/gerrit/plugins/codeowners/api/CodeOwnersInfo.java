@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.common.base.MoreObjects;
 import java.util.List;
 
 /**
@@ -33,4 +34,12 @@ public class CodeOwnersInfo {
    * <p>Not set if {@code false}.
    */
   public Boolean ownedByAllUsers;
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("codeOwners", codeOwners)
+        .add("ownedByAllUsers", ownedByAllUsers)
+        .toString();
+  }
 }

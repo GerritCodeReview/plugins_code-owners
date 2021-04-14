@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.common.base.MoreObjects;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 
 /** JSON entity that describes the code owner status for a path that was touched in a change. */
@@ -27,4 +28,12 @@ public class PathCodeOwnerStatusInfo {
 
   /** The code owner status for the path. */
   public CodeOwnerStatus status;
+
+  @Override
+  public String toString() {
+    return MoreObjects.toStringHelper(this)
+        .add("path", path)
+        .add("status", status.name())
+        .toString();
+  }
 }
