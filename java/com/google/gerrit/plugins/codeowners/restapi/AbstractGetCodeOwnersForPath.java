@@ -89,6 +89,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private int limit = DEFAULT_LIMIT;
   private Optional<Long> seed = Optional.empty();
   private boolean resolveAllUsers;
+  private boolean highestScoreOnly;
 
   @Option(
       name = "-o",
@@ -128,6 +129,13 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               + " users")
   public void setResolveAllUsers(boolean resolveAllUsers) {
     this.resolveAllUsers = resolveAllUsers;
+  }
+
+  @Option(
+      name = "--highest-scored-only",
+      usage = "whether only code owner with the highest score should be returned")
+  public void setHighestScoreOnly(boolean highestScoreOnly) {
+    this.highestScoreOnly = highestScoreOnly;
   }
 
   protected AbstractGetCodeOwnersForPath(
