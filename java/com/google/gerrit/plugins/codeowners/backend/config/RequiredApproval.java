@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ComparisonChain;
 import com.google.common.primitives.Ints;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.PatchSetApproval;
@@ -39,7 +40,7 @@ import java.util.Optional;
  * </ul>
  */
 @AutoValue
-public abstract class RequiredApproval {
+public abstract class RequiredApproval implements Comparable<RequiredApproval> {
   /** The label on which an approval is required. */
   public abstract LabelType labelType();
 
@@ -56,6 +57,11 @@ public abstract class RequiredApproval {
     requireNonNull(patchSetApproval, "patchSetApproval");
     return labelType().getLabelId().equals(patchSetApproval.key().labelId())
         && patchSetApproval.value() >= value();
+  }
+
+  @Override
+  public final int compareTo(RequiredApproval other) {
+    return ComparisonChain.start().compare(toString(), other.toString()).result();
   }
 
   @Override

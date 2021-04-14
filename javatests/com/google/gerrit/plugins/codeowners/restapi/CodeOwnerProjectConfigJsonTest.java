@@ -22,7 +22,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
@@ -173,7 +173,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
     when(codeOwnersPluginConfigSnapshot.getOverrideApprovals())
         .thenReturn(
-            ImmutableSet.of(
+            ImmutableSortedSet.of(
                 RequiredApproval.create(
                     LabelType.withDefaultValues("Owners-Override"), (short) 1)));
     when(codeOwnersPluginConfiguration.getProjectConfig(project))
@@ -248,7 +248,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
 
     when(codeOwnersPluginConfigSnapshot.getOverrideApprovals())
         .thenReturn(
-            ImmutableSet.of(
+            ImmutableSortedSet.of(
                 RequiredApproval.create(LabelType.withDefaultValues("Owners-Override"), (short) 1),
                 RequiredApproval.create(LabelType.withDefaultValues("Code-Review"), (short) 2)));
     when(codeOwnersPluginConfiguration.getProjectConfig(project))
@@ -292,7 +292,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
         .thenReturn(RequiredApproval.create(getDefaultCodeReviewLabel(), (short) 2));
     when(codeOwnersPluginConfigSnapshot.getOverrideApprovals())
         .thenReturn(
-            ImmutableSet.of(
+            ImmutableSortedSet.of(
                 RequiredApproval.create(
                     LabelType.withDefaultValues("Owners-Override"), (short) 1)));
     when(codeOwnersPluginConfiguration.getProjectConfig(project))

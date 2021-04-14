@@ -20,6 +20,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSetMultimap;
+import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -40,6 +41,7 @@ import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -433,13 +435,17 @@ public class CodeOwnersPluginConfigSnapshot {
    *
    * <p>The first override approval configuration that exists counts and the evaluation is stopped.
    *
+   * <p>The returned override approvals are sorted alphabetically by their string representation
+   * (e.g. {@code Owners-Override+1}).
+   *
    * @return the override approvals that should be used, an empty set if no override approval is
    *     configured, in this case the override functionality is disabled
    */
-  public ImmutableSet<RequiredApproval> getOverrideApprovals() {
+  public ImmutableSortedSet<RequiredApproval> getOverrideApprovals() {
     try {
-      return filterOutDuplicateRequiredApprovals(
-          getConfiguredRequiredApproval(overrideApprovalConfig));
+      return ImmutableSortedSet.copyOf(
+          filterOutDuplicateRequiredApprovals(
+              getConfiguredRequiredApproval(overrideApprovalConfig)));
     } catch (InvalidPluginConfigurationException e) {
       logger.atWarning().withCause(e).log(
           "Ignoring invalid override approval configuration for project %s."
@@ -447,7 +453,7 @@ public class CodeOwnersPluginConfigSnapshot {
           projectName.get());
     }
 
-    return ImmutableSet.of();
+    return ImmutableSortedSet.of();
   }
 
   /**
@@ -462,7 +468,7 @@ public class CodeOwnersPluginConfigSnapshot {
    *       "Code-Review" approvals >= 1)
    * </ul>
    */
-  private ImmutableSet<RequiredApproval> filterOutDuplicateRequiredApprovals(
+  private Collection<RequiredApproval> filterOutDuplicateRequiredApprovals(
       ImmutableList<RequiredApproval> requiredApprovals) {
     Map<String, RequiredApproval> requiredApprovalsByLabel = new HashMap<>();
     for (RequiredApproval requiredApproval : requiredApprovals) {
@@ -474,7 +480,7 @@ public class CodeOwnersPluginConfigSnapshot {
       }
       requiredApprovalsByLabel.put(labelName, requiredApproval);
     }
-    return ImmutableSet.copyOf(requiredApprovalsByLabel.values());
+    return requiredApprovalsByLabel.values();
   }
 
   /**
