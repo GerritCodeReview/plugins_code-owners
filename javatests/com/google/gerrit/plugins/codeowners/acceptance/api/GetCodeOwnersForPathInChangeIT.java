@@ -36,6 +36,7 @@ import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import java.util.List;
@@ -388,5 +389,44 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user2.id(), user.id(), admin.id())
         .inOrder();
+  }
+
+  @Test
+  public void codeOwnersSortedByDistance_fileOwnedByAllUsers() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    // None of the code owners is a reviewer, hence the sorting is done only by distance.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id(), user.id(), admin.id())
+        .inOrder();
+    assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
 }

@@ -179,6 +179,15 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
           codeOwners.addAll(filterCodeOwners(rsrc, pathCodeOwners.codeOwners()));
 
+          int distance =
+              codeOwnerConfig.key().branchNameKey().branch().equals(RefNames.REFS_CONFIG)
+                  ? defaultOwnersDistance
+                  : rootDistance - codeOwnerConfig.key().folderPath().getNameCount();
+          pathCodeOwners
+              .codeOwners()
+              .forEach(
+                  localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
+
           if (pathCodeOwners.ownedByAllUsers()) {
             ownedByAllUsers.set(true);
             fillUpWithRandomUsers(rsrc, codeOwners, limit);
@@ -190,18 +199,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
                       + " (wanted number of suggestions = %d, got = %d",
                   limit, codeOwners.size());
             }
-
-            return true;
           }
-
-          int distance =
-              codeOwnerConfig.key().branchNameKey().branch().equals(RefNames.REFS_CONFIG)
-                  ? defaultOwnersDistance
-                  : rootDistance - codeOwnerConfig.key().folderPath().getNameCount();
-          pathCodeOwners
-              .codeOwners()
-              .forEach(
-                  localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
           return true;
         });
