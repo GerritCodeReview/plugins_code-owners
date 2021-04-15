@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
@@ -53,6 +54,7 @@ import com.google.inject.Provider;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -231,12 +233,12 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     ImmutableSet<CodeOwner> immutableCodeOwners = ImmutableSet.copyOf(codeOwners);
     CodeOwnerScorings codeOwnerScorings =
         createScorings(rsrc, immutableCodeOwners, distanceScoring.build());
+    ImmutableMap<CodeOwner, Double> scoredCodeOwners =
+        codeOwnerScorings.getScorings(immutableCodeOwners);
 
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners =
-        codeOwnerJsonFactory
-            .create(getFillOptions())
-            .format(sortAndLimit(rsrc, codeOwnerScorings, immutableCodeOwners));
+        codeOwnerJsonFactory.create(getFillOptions()).format(sortAndLimit(rsrc, scoredCodeOwners));
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     return Response.ok(codeOwnersInfo);
   }
@@ -378,26 +380,26 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   }
 
   private ImmutableList<CodeOwner> sortAndLimit(
-      R rsrc, CodeOwnerScorings scorings, ImmutableSet<CodeOwner> codeOwners) {
-    return sortCodeOwners(rsrc, seed, scorings, codeOwners).limit(limit).collect(toImmutableList());
+      R rsrc, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
+    return sortCodeOwners(rsrc, seed, scoredCodeOwners).limit(limit).collect(toImmutableList());
   }
 
   /**
    * Sorts the code owners.
    *
-   * <p>Code owners with higher distance score are returned first.
+   * <p>Code owners with higher score are returned first.
    *
-   * <p>The order of code owners with the same distance score is random.
+   * <p>The order of code owners with the same score is random.
    *
    * @param rsrc resource on which this REST endpoint is invoked
    * @param seed seed that should be used to randomize the order
-   * @param scorings the scorings for the code owners
-   * @param codeOwners the code owners that should be sorted
+   * @param scoredCodeOwners the code owners with their scores
    * @return the sorted code owners
    */
   private Stream<CodeOwner> sortCodeOwners(
-      R rsrc, Optional<Long> seed, CodeOwnerScorings scorings, ImmutableSet<CodeOwner> codeOwners) {
-    return randomizeOrder(seed, codeOwners).sorted(scorings.comparingByScorings());
+      R rsrc, Optional<Long> seed, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
+    return randomizeOrder(seed, scoredCodeOwners.keySet())
+        .sorted(Comparator.comparingDouble(scoredCodeOwners::get).reversed());
   }
 
   /**
