@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REVIEWER_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.util.ArrayList;
 import org.junit.Test;
@@ -25,7 +26,7 @@ import org.junit.Test;
 /** Tests for {@link CodeOwnerScorings}. */
 public class CodeOwnerScoringsTest extends AbstractCodeOwnersTest {
   @Test
-  public void sortCodeOwnersByLowerValueIsBetterScore() throws Exception {
+  public void getScorings_lowerValueIsBetterScore() throws Exception {
     CodeOwner codeOwner1 = CodeOwner.create(admin.id());
     CodeOwner codeOwner2 = CodeOwner.create(user.id());
     CodeOwner codeOwner3 = CodeOwner.create(accountCreator.user2().id());
@@ -43,12 +44,20 @@ public class CodeOwnerScoringsTest extends AbstractCodeOwnersTest {
             .putValueForCodeOwner(codeOwner2, 100)
             .putValueForCodeOwner(codeOwner3, 0)
             .build();
-    codeOwners.sort(CodeOwnerScorings.create(distanceScoring).comparingByScorings());
-    assertThat(codeOwners).containsExactly(codeOwner3, codeOwner1, codeOwner2).inOrder();
+
+    CodeOwnerScorings codeOwnerScorings = CodeOwnerScorings.create(distanceScoring);
+    assertThat(codeOwnerScorings.getScorings(ImmutableSet.of(codeOwner1, codeOwner2, codeOwner3)))
+        .containsExactly(
+            codeOwner1,
+            CodeOwnerScore.DISTANCE.weight() * 0.5,
+            codeOwner2,
+            0.0,
+            codeOwner3,
+            CodeOwnerScore.DISTANCE.weight() * 1.0);
   }
 
   @Test
-  public void sortCodeOwnersByGreaterValueIsBetterScore() throws Exception {
+  public void getScorings_greaterValueIsBetterScore() throws Exception {
     CodeOwner codeOwner1 = CodeOwner.create(admin.id());
     CodeOwner codeOwner2 = CodeOwner.create(user.id());
 
@@ -63,12 +72,18 @@ public class CodeOwnerScoringsTest extends AbstractCodeOwnersTest {
             .putValueForCodeOwner(codeOwner1, 0)
             .putValueForCodeOwner(codeOwner2, 1)
             .build();
-    codeOwners.sort(CodeOwnerScorings.create(isReviewerScoring).comparingByScorings());
-    assertThat(codeOwners).containsExactly(codeOwner2, codeOwner1).inOrder();
+
+    CodeOwnerScorings codeOwnerScorings = CodeOwnerScorings.create(isReviewerScoring);
+    assertThat(codeOwnerScorings.getScorings(ImmutableSet.of(codeOwner1, codeOwner2)))
+        .containsExactly(
+            codeOwner1,
+            CodeOwnerScore.IS_REVIEWER.weight() * CodeOwnerScore.NO_REVIEWER_SCORING_VALUE,
+            codeOwner2,
+            CodeOwnerScore.IS_REVIEWER.weight() * CodeOwnerScore.IS_REVIEWER_SCORING_VALUE);
   }
 
   @Test
-  public void sortCodeOwnersByMultipleScore() throws Exception {
+  public void getScorings_multipleScore() throws Exception {
     CodeOwner codeOwner1 = CodeOwner.create(admin.id());
     CodeOwner codeOwner2 = CodeOwner.create(user.id());
     CodeOwner codeOwner3 = CodeOwner.create(accountCreator.user2().id());
@@ -95,9 +110,6 @@ public class CodeOwnerScoringsTest extends AbstractCodeOwnersTest {
             .putValueForCodeOwner(codeOwner3, NO_REVIEWER_SCORING_VALUE)
             .build();
 
-    codeOwners.sort(
-        CodeOwnerScorings.create(distanceScoring, isReviewerScoring).comparingByScorings());
-
     // Expected scorings:
     // codeOwner1: DISTANCE(weight=1)=0.5, IS_REVIEWER(weight=2)=0.0
     //             -> total scoring: 0.5 * 1 + 0.0 * 2 = 0.5
@@ -105,12 +117,23 @@ public class CodeOwnerScoringsTest extends AbstractCodeOwnersTest {
     //            -> total scoring: 0.25 * 1 + 1.0 * 2 = 2.25
     // codeOwner3: DISTANCE(weight=1)=1.0, IS_REVIEWER(weight=2)=0.0
     //            -> total scoring: 1.0 * 1 + 0.0 * 2 = 1.0
-    // => expected order (highest total score first): codeOwner2, codeOwner3, codeOwner1
-    assertThat(codeOwners).containsExactly(codeOwner2, codeOwner3, codeOwner1).inOrder();
+    CodeOwnerScorings codeOwnerScorings =
+        CodeOwnerScorings.create(distanceScoring, isReviewerScoring);
+    assertThat(codeOwnerScorings.getScorings(ImmutableSet.of(codeOwner1, codeOwner2, codeOwner3)))
+        .containsExactly(
+            codeOwner1,
+            CodeOwnerScore.DISTANCE.weight() * 0.5
+                + CodeOwnerScore.IS_REVIEWER.weight() * CodeOwnerScore.NO_REVIEWER_SCORING_VALUE,
+            codeOwner2,
+            CodeOwnerScore.DISTANCE.weight() * 0.25
+                + CodeOwnerScore.IS_REVIEWER.weight() * CodeOwnerScore.IS_REVIEWER_SCORING_VALUE,
+            codeOwner3,
+            CodeOwnerScore.DISTANCE.weight() * 1.0
+                + CodeOwnerScore.IS_REVIEWER.weight() * CodeOwnerScore.NO_REVIEWER_SCORING_VALUE);
   }
 
   @Test
-  public void sortCodeOwnersByScoringsIfAnyCodeOwnerHasNoScoring() throws Exception {
+  public void getScoringsIfAnyCodeOwnerHasNoScoring() throws Exception {
     CodeOwner codeOwner1 = CodeOwner.create(admin.id());
     CodeOwner codeOwner2 = CodeOwner.create(user.id());
 
@@ -122,7 +145,9 @@ public class CodeOwnerScoringsTest extends AbstractCodeOwnersTest {
         CodeOwnerScoring.builder(CodeOwnerScore.DISTANCE, 100)
             .putValueForCodeOwner(codeOwner2, 50)
             .build();
-    codeOwners.sort(CodeOwnerScorings.create(distanceScoring).comparingByScorings());
-    assertThat(codeOwners).containsExactly(codeOwner2, codeOwner1).inOrder();
+
+    CodeOwnerScorings codeOwnerScorings = CodeOwnerScorings.create(distanceScoring);
+    assertThat(codeOwnerScorings.getScorings(ImmutableSet.of(codeOwner1, codeOwner2)))
+        .containsExactly(codeOwner1, 0.0, codeOwner2, 0.5);
   }
 }
