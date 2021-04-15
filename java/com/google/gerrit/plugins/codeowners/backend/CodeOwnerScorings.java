@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableSet;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,13 +37,6 @@ public abstract class CodeOwnerScorings {
 
   public static CodeOwnerScorings create(Set<CodeOwnerScoring> codeOwnerScorings) {
     return new AutoValue_CodeOwnerScorings(ImmutableSet.copyOf(codeOwnerScorings));
-  }
-
-  public static CodeOwnerScorings appendScoring(
-      CodeOwnerScorings codeOwnerScorings, CodeOwnerScoring codeOwnerScoringToBeAdded) {
-    Set<CodeOwnerScoring> codeOwnerScoringSet = new HashSet<>(codeOwnerScorings.scorings());
-    codeOwnerScoringSet.add(codeOwnerScoringToBeAdded);
-    return create(codeOwnerScoringSet);
   }
 
   /**

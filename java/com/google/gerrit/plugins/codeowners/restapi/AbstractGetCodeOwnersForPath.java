@@ -228,17 +228,25 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       }
     }
 
+    ImmutableSet<CodeOwner> immutableCodeOwners = ImmutableSet.copyOf(codeOwners);
+    CodeOwnerScorings codeOwnerScorings =
+        createScorings(rsrc, immutableCodeOwners, distanceScoring.build());
+
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory
             .create(getFillOptions())
-            .format(
-                sortAndLimit(
-                    rsrc,
-                    CodeOwnerScorings.create(distanceScoring.build()),
-                    ImmutableSet.copyOf(codeOwners)));
+            .format(sortAndLimit(rsrc, codeOwnerScorings, immutableCodeOwners));
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     return Response.ok(codeOwnersInfo);
+  }
+
+  private CodeOwnerScorings createScorings(
+      R rsrc, ImmutableSet<CodeOwner> codeOwners, CodeOwnerScoring distanceScoring) {
+    ImmutableSet.Builder<CodeOwnerScoring> codeOwnerScorings = ImmutableSet.builder();
+    codeOwnerScorings.add(distanceScoring);
+    codeOwnerScorings.addAll(getCodeOwnerScorings(rsrc, codeOwners));
+    return CodeOwnerScorings.create(codeOwnerScorings.build());
   }
 
   private CodeOwnerResolverResult getGlobalCodeOwners(Project.NameKey projectName) {
@@ -249,6 +257,19 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
                 codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners());
     logger.atFine().log("including global code owners = %s", globalCodeOwners);
     return globalCodeOwners;
+  }
+
+  /**
+   * Get further code owner scorings.
+   *
+   * <p>To be overridden by subclasses to include further scorings.
+   *
+   * @param rsrc resource on which the request is being performed
+   * @param codeOwners the code owners
+   */
+  protected ImmutableSet<CodeOwnerScoring> getCodeOwnerScorings(
+      R rsrc, ImmutableSet<CodeOwner> codeOwners) {
+    return ImmutableSet.of();
   }
 
   /**
@@ -374,7 +395,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    * @param codeOwners the code owners that should be sorted
    * @return the sorted code owners
    */
-  protected Stream<CodeOwner> sortCodeOwners(
+  private Stream<CodeOwner> sortCodeOwners(
       R rsrc, Optional<Long> seed, CodeOwnerScorings scorings, ImmutableSet<CodeOwner> codeOwners) {
     return randomizeOrder(seed, codeOwners).sorted(scorings.comparingByScorings());
   }

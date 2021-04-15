@@ -29,7 +29,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.Accounts;
@@ -97,11 +96,8 @@ public class GetCodeOwnersForPathInChange
    * only applies if code owners are suggested on changes.
    */
   @Override
-  protected Stream<CodeOwner> sortCodeOwners(
-      CodeOwnersInChangeCollection.PathResource rsrc,
-      Optional<Long> seed,
-      CodeOwnerScorings scorings,
-      ImmutableSet<CodeOwner> codeOwners) {
+  protected ImmutableSet<CodeOwnerScoring> getCodeOwnerScorings(
+      CodeOwnersInChangeCollection.PathResource rsrc, ImmutableSet<CodeOwner> codeOwners) {
     // Add scorings for IS_REVIEWER score.
     ImmutableSet<Account.Id> reviewers =
         rsrc.getRevisionResource()
@@ -116,9 +112,8 @@ public class GetCodeOwnersForPathInChange
                 reviewers.contains(codeOwner.accountId())
                     ? IS_REVIEWER_SCORING_VALUE
                     : NO_REVIEWER_SCORING_VALUE));
-    scorings = CodeOwnerScorings.appendScoring(scorings, isReviewerScoring.build());
 
-    return super.sortCodeOwners(rsrc, seed, scorings, codeOwners);
+    return ImmutableSet.of(isReviewerScoring.build());
   }
 
   @Override
