@@ -114,12 +114,18 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
 
   @Test
   public void getCodeOwnersForAbsolutePath() throws Exception {
-    testGetCodeOwners(true);
+    testGetCodeOwners(/* useAbsolutePath= */ true);
   }
 
   @Test
   public void getCodeOwnersForNonAbsolutePath() throws Exception {
-    testGetCodeOwners(false);
+    testGetCodeOwners(/* useAbsolutePath= */ false);
+  }
+
+  @Test
+  public void getCodeOwnersForAnonymousUser() throws Exception {
+    requestScopeOperations.setApiUserAnonymous();
+    testGetCodeOwners(/* useAbsolutePath= */ true);
   }
 
   private void testGetCodeOwners(boolean useAbsolutePath) throws Exception {
