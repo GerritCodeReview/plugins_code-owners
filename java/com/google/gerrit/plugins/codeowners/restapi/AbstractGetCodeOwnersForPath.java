@@ -190,7 +190,10 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
           if (pathCodeOwners.ownedByAllUsers()) {
             ownedByAllUsers.set(true);
-            fillUpWithRandomUsers(rsrc, codeOwners, limit);
+            ImmutableSet<CodeOwner> addedCodeOwners =
+                fillUpWithRandomUsers(rsrc, codeOwners, limit);
+            addedCodeOwners.forEach(
+                localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
             if (codeOwners.size() < limit) {
               logger.atFine().log(
@@ -214,7 +217,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
       if (globalCodeOwners.ownedByAllUsers()) {
         ownedByAllUsers.set(true);
-        fillUpWithRandomUsers(rsrc, codeOwners, limit);
+        ImmutableSet<CodeOwner> addedCodeOwners = fillUpWithRandomUsers(rsrc, codeOwners, limit);
+        addedCodeOwners.forEach(
+            codeOwner -> distanceScoring.putValueForCodeOwner(codeOwner, globalOwnersDistance));
       }
     }
 
@@ -391,16 +396,19 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    * all user.
    *
    * <p>No-op if code ownership for all users should not be resolved.
+   *
+   * @return the added code owners
    */
-  private void fillUpWithRandomUsers(R rsrc, Set<CodeOwner> codeOwners, int limit) {
+  private ImmutableSet<CodeOwner> fillUpWithRandomUsers(
+      R rsrc, Set<CodeOwner> codeOwners, int limit) {
     if (!resolveAllUsers || codeOwners.size() >= limit) {
       // code ownership for all users should not be resolved or the limit has already been reached
       // so that we don't need to add further suggestions
-      return;
+      return ImmutableSet.of();
     }
 
     logger.atFine().log("filling up with random users");
-    codeOwners.addAll(
+    ImmutableSet<CodeOwner> codeOwnersToAdd =
         filterCodeOwners(
                 rsrc,
                 // ask for 2 times the number of users that we need so that we still have enough
@@ -412,7 +420,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
             .stream()
             .filter(codeOwner -> !codeOwners.contains(codeOwner))
             .limit(limit - codeOwners.size())
-            .collect(toImmutableSet()));
+            .collect(toImmutableSet());
+    codeOwners.addAll(codeOwnersToAdd);
+    return codeOwnersToAdd;
   }
 
   /**
