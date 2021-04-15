@@ -204,6 +204,11 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
             }
           }
 
+          // We always need to iterate over all relevant OWNERS files (even if the limit has already
+          // been reached).
+          // This is needed to collect distance scores for code owners that are mentioned in the
+          // more distant OWNERS files. Those become relevant if further scores are applied later
+          // (e.g. the score for current reviewers of the change).
           return true;
         });
 
