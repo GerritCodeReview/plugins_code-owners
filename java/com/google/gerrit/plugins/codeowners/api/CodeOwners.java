@@ -48,6 +48,7 @@ public interface CodeOwners {
     private String revision;
     private Long seed;
     private Boolean resolveAllUsers;
+    private Boolean highestScoreOnly;
 
     /**
      * Lists the code owners for the given path.
@@ -116,6 +117,17 @@ public interface CodeOwners {
     }
 
     /**
+     * Sets whether only the code owners with the highest score should be returned.
+     *
+     * @param highestScoreOnly whether only the code owners with the highest score should be
+     *     returned
+     */
+    public QueryRequest withHighestScoreOnly(boolean highestScoreOnly) {
+      this.highestScoreOnly = highestScoreOnly;
+      return this;
+    }
+
+    /**
      * Sets the branch revision from which the code owner configs should be read.
      *
      * <p>Not supported for querying code owners for a path in a change.
@@ -147,6 +159,11 @@ public interface CodeOwners {
      */
     public Optional<Boolean> getResolveAllUsers() {
       return Optional.ofNullable(resolveAllUsers);
+    }
+
+    /** Whether only the code owners with the highest score should be returned. */
+    public Optional<Boolean> getHighestScoreOnly() {
+      return Optional.ofNullable(highestScoreOnly);
     }
 
     /** Returns the branch revision from which the code owner configs should be read. */

@@ -244,9 +244,22 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     ImmutableMap<CodeOwner, Double> scoredCodeOwners =
         codeOwnerScorings.getScorings(immutableCodeOwners);
 
+    ImmutableList<CodeOwner> sortedCodeOwners = sortAndLimit(rsrc, scoredCodeOwners);
+
+    if (highestScoreOnly) {
+      Optional<Double> highestScore =
+          scoredCodeOwners.values().stream().max(Comparator.naturalOrder());
+      if (highestScore.isPresent()) {
+        sortedCodeOwners =
+            sortedCodeOwners.stream()
+                .filter(codeOwner -> scoredCodeOwners.get(codeOwner).equals(highestScore.get()))
+                .collect(toImmutableList());
+      }
+    }
+
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners =
-        codeOwnerJsonFactory.create(getFillOptions()).format(sortAndLimit(rsrc, scoredCodeOwners));
+        codeOwnerJsonFactory.create(getFillOptions()).format(sortedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     return Response.ok(codeOwnersInfo);
   }

@@ -59,6 +59,7 @@ public class CodeOwnersInBranchImpl implements CodeOwners {
           getLimit().ifPresent(getCodeOwners::setLimit);
           getSeed().ifPresent(getCodeOwners::setSeed);
           getResolveAllUsers().ifPresent(getCodeOwners::setResolveAllUsers);
+          getHighestScoreOnly().ifPresent(getCodeOwners::setHighestScoreOnly);
           getRevision().ifPresent(getCodeOwners::setRevision);
           CodeOwnersInBranchCollection.PathResource pathInBranchResource =
               codeOwnersInBranchCollection.parse(

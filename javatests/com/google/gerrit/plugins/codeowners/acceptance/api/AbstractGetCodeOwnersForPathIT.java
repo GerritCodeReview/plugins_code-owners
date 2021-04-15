@@ -1385,4 +1385,77 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .inOrder();
     assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
   }
+
+  @Test
+  public void getCodeOwnersWithHighestScoreOnly() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().withHighestScoreOnly(/* highestScoreOnly= */ false),
+            "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(3);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them we get get first and second
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .element(0)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .element(1)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .element(2)
+        .hasAccountIdThat()
+        .isEqualTo(admin.id());
+
+    codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().withHighestScoreOnly(/* highestScoreOnly= */ true),
+            "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(2);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them we get get first and second
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .element(0)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id());
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .element(1)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id());
+  }
+
+  @Test
+  public void getCodeOwnersWithHighestScoreOnly_noCodeOwners() throws Exception {
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi().query().withHighestScoreOnly(/* highestScoreOnly= */ true),
+            "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+  }
 }
