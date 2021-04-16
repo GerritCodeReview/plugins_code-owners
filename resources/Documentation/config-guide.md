@@ -33,16 +33,17 @@ approval](config.html#pluginCodeOwnersOverrideApproval).
 ### <a id="implicitApprovals">Implicit code owner approvals
 
 It's possible to [enable implicit approvals](config.html#pluginCodeOwnersEnableImplicitApprovals)
-of code owners on their own changes. If enabled and the uploader of a patch set
-is a code owner, an approval of the uploader is assumed for all owned files.
-This means if a code owner uploads a change / patch set that only touches files
-that they own, no approval from other code owners is required for submitting the
-change.
+of code owners on their own changes. If enabled, changes of code owners are
+automatically code owner approved, but only if the last patch set was uploaded
+by the change owner (change owner == last patch set uploader). This implict code
+owner approval covers all files that are owned by the change owner. This means
+if a code owner uploads a change that only touches files that they own, no
+approval from other code owners is required for submitting the change.
 
 If implicit approvals are enabled, paths can be exempted from requiring code
 owner approvals by assigning the code ownership to [all
 users](backend-find-owners.html#allUsers), as then any modification to the path
-is always implicitly approved by the uploader.
+is always implicitly approved by the change owner.
 
 **NOTE:** If implicit approvals are disabled, users can still self-approve their
 own changes by voting on the required label.
@@ -179,17 +180,14 @@ bypass code owner approvals, and hence using them is not recommended.
 ### <a id="securityImplicitApprovals">Implicit approvals
 
 If [implicit approvals](#implicitApprovals) are enabled, it is important that
-code owners are aware of their implicit approval when they upload new patch sets
+code owners are aware of their implicit approval when they upload new changes
 for other users.
 
-Examples:
+Example:
 
 * If a contributor pushes a change to a wrong branch and a code owner helps them
   to get it rebased onto the correct branch, the rebased change has implicit
-  approvals from the code owner, since the code owner is the uploader.
-* If a code owner edits the commit message of change owned by a non-code-owner,
-  the change gets implicitly approved since editing the commit message creates a
-  new patch set and the code owner is the uploader that patch set.
+  approvals from the code owner, since the code owner is the change owner.
 
 To avoid situations like this it is recommended to not enable implicit
 approvals.
