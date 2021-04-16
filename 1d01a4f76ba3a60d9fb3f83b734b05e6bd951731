@@ -163,6 +163,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb147fc7_80a3e969",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 554,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-16T09:30:32Z",
+      "side": 1,
+      "message": "Done in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/303520",
+      "parentUuid": "98cb285f_ddaba50e",
+      "range": {
+        "startLine": 554,
+        "startChar": 6,
+        "endLine": 554,
+        "endChar": 43
+      },
+      "revId": "1d01a4f76ba3a60d9fb3f83b734b05e6bd951731",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f9547cf9_250c209c",
