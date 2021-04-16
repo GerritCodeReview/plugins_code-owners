@@ -64,14 +64,20 @@ grants the code owner approval. Negative votes from other code owners do not
 block the submission (unless it's a veto vote which is configured independently
 of the `@PLUGIN@` plugin).
 
-It's possible to configure that for changes/patch-sets that are uploaded by a
-code owner an implicit code owner approval from the uploader is assumed. In this
-case, if a code owner only touches files that they own, no approval from other
-code owners is required. If this is configured, it is important that code owners
-are aware of their implicit approval when they upload new patch sets for other
-users (e.g. if a contributor pushes a change to a wrong branch and a code owner
-helps them to get it rebased onto the correct branch, the rebased change has
-implicit approvals from the code owner, since the code owner is the uploader).
+It's possible to [configure implicit
+approvals](config.html#codeOwnersEnableImplicitApprovals) for changes/patch-sets
+that are owned and uploaded by a code owner. In this case, if a code owner only
+touches files that they own, no approval from other code owners is required. If
+this is configured, it is important that code owners are aware of their implicit
+approval when they upload new changes for other users (e.g. if a contributor
+pushes a change to a wrong branch and a code owner helps them to get it rebased
+onto the correct branch, i.e. the code owner performs a cherry-pick, the rebased
+change has implicit approvals from the code owner, since the code owner is the
+change owner and uploader).
+
+**NOTE:** Implicit approvals are applied on changes that are owned by a code
+owner, but only if the current patch set was uploader by the change owner
+(change owner == last patch set uploader).
 
 For files that are [renamed/moved](#renames) Gerrit requires a code owner
 approval for the old and the new path of the files.

@@ -212,7 +212,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void notImplicitlyApprovedByUploaderWhoIsChangeOwner() throws Exception {
+  public void notImplicitlyApproved() throws Exception {
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
@@ -269,7 +269,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "forced")
-  public void implicitlyApprovedByUploaderWhoIsChangeOwner() throws Exception {
+  public void implicitlyApproved() throws Exception {
     TestAccount codeOwner =
         accountCreator.create(
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
@@ -294,7 +294,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "forced")
-  public void implicitlyApprovedByUploader() throws Exception {
+  public void notImplicitlyApprovedByUploader_forcedImplicitApprovals() throws Exception {
     TestAccount changeOwner =
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
@@ -321,7 +321,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
         .hasNewPathStatus()
         .value()
         .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
   }
 
   @Test
