@@ -100,6 +100,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
               changeData.currentPatchSet().id().get(), changeData.change().getId().get()));
       return Optional.of(notReady());
     } catch (Throwable t) {
+      // Whether the exception should be treated as RULE_ERROR.
+      // RULE_ERROR must only be returned if the exception is caused by user misconfiguration (e.g.
+      // an invalid OWNERS file), but not for internal server errors.
+      boolean isRuleError = false;
+
       String cause = t.getClass().getSimpleName();
       String errorMessage = "Failed to evaluate code owner statuses";
       if (changeData != null) {
@@ -113,9 +118,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
       Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
           CodeOwners.getInvalidCodeOwnerConfigCause(t);
       if (invalidPathException.isPresent()) {
+        isRuleError = true;
         cause = "invalid_path";
         errorMessage += String.format(" (cause: %s)", invalidPathException.get().getMessage());
       } else if (invalidCodeOwnerConfigException.isPresent()) {
+        isRuleError = true;
         codeOwnerMetrics.countInvalidCodeOwnerConfigFiles.increment(
             invalidCodeOwnerConfigException.get().getProjectName().get(),
             invalidCodeOwnerConfigException.get().getRef(),
@@ -137,7 +144,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
       errorMessage += ".";
       logger.atSevere().withCause(t).log(errorMessage);
       codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
-      return Optional.of(ruleError(errorMessage));
+
+      if (isRuleError) {
+        return Optional.of(ruleError(errorMessage));
+      }
+      throw new CodeOwnersInternalServerErrorException(errorMessage, t);
     }
   }
 

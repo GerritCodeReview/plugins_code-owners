@@ -14,8 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.SubmitRecordSubject.assertThatOptional;
+import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -120,7 +122,7 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void ruleError() throws Exception {
+  public void internalServerError() throws Exception {
     ChangeData changeData = createChange().getChange();
 
     // Create a ChangeData without change notes to trigger an error.
@@ -129,11 +131,12 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     when(changeDataWithoutChangeNotes.change()).thenReturn(changeData.change());
     when(changeDataWithoutChangeNotes.currentPatchSet()).thenReturn(changeData.currentPatchSet());
 
-    SubmitRecordSubject submitRecordSubject =
-        assertThatOptional(codeOwnerSubmitRule.evaluate(changeDataWithoutChangeNotes)).value();
-    submitRecordSubject.hasStatusThat().isRuleError();
-    submitRecordSubject
-        .hasErrorMessageThat()
+    CodeOwnersInternalServerErrorException exception =
+        assertThrows(
+            CodeOwnersInternalServerErrorException.class,
+            () -> codeOwnerSubmitRule.evaluate(changeDataWithoutChangeNotes));
+    assertThat(exception)
+        .hasMessageThat()
         .isEqualTo(
             String.format(
                 "Failed to evaluate code owner statuses for patch set %d of change %d.",
@@ -141,11 +144,12 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void ruleError_changeDataIsNull() throws Exception {
-    SubmitRecordSubject submitRecordSubject =
-        assertThatOptional(codeOwnerSubmitRule.evaluate(/* changeData= */ null)).value();
-    submitRecordSubject.hasStatusThat().isRuleError();
-    submitRecordSubject.hasErrorMessageThat().isEqualTo("Failed to evaluate code owner statuses.");
+  public void internalServerError_changeDataIsNull() throws Exception {
+    CodeOwnersInternalServerErrorException exception =
+        assertThrows(
+            CodeOwnersInternalServerErrorException.class,
+            () -> codeOwnerSubmitRule.evaluate(/* changeData= */ null));
+    assertThat(exception).hasMessageThat().isEqualTo("Failed to evaluate code owner statuses.");
   }
 
   @Test
