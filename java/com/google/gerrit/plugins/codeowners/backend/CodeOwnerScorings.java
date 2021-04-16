@@ -14,11 +14,13 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -40,21 +42,14 @@ public abstract class CodeOwnerScorings {
     return new AutoValue_CodeOwnerScorings(ImmutableSet.copyOf(codeOwnerScorings));
   }
 
-  public static CodeOwnerScorings appendScoring(
-      CodeOwnerScorings codeOwnerScorings, CodeOwnerScoring codeOwnerScoringToBeAdded) {
-    Set<CodeOwnerScoring> codeOwnerScoringSet = new HashSet<>(codeOwnerScorings.scorings());
-    codeOwnerScoringSet.add(codeOwnerScoringToBeAdded);
-    return create(codeOwnerScoringSet);
-  }
-
   /**
-   * Returns a comparator to sort code owners by the collected scorings.
+   * Returns the total scorings for the given code owners.
    *
-   * <p>Code owners with higher scoring come first. The order of code owners with the same scoring
-   * is undefined.
+   * @param codeOwners the code owners for which the scorings should be returned
    */
-  public Comparator<CodeOwner> comparingByScorings() {
-    return Comparator.comparingDouble(this::sumWeightedScorings).reversed();
+  public ImmutableMap<CodeOwner, Double> getScorings(ImmutableSet<CodeOwner> codeOwners) {
+    return codeOwners.stream()
+        .collect(toImmutableMap(Function.identity(), this::sumWeightedScorings));
   }
 
   /** Returns the sum of all weighted scorings that available for the given code owner. */

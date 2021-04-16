@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
@@ -53,6 +54,7 @@ import com.google.inject.Provider;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -87,6 +89,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private int limit = DEFAULT_LIMIT;
   private Optional<Long> seed = Optional.empty();
   private boolean resolveAllUsers;
+  private boolean highestScoreOnly;
 
   @Option(
       name = "-o",
@@ -126,6 +129,13 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               + " users")
   public void setResolveAllUsers(boolean resolveAllUsers) {
     this.resolveAllUsers = resolveAllUsers;
+  }
+
+  @Option(
+      name = "--highest-score-only",
+      usage = "whether only code owners with the highest score should be returned")
+  public void setHighestScoreOnly(boolean highestScoreOnly) {
+    this.highestScoreOnly = highestScoreOnly;
   }
 
   protected AbstractGetCodeOwnersForPath(
@@ -179,21 +189,6 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
           codeOwners.addAll(filterCodeOwners(rsrc, pathCodeOwners.codeOwners()));
 
-          if (pathCodeOwners.ownedByAllUsers()) {
-            ownedByAllUsers.set(true);
-            fillUpWithRandomUsers(rsrc, codeOwners, limit);
-
-            if (codeOwners.size() < limit) {
-              logger.atFine().log(
-                  "tried to fill up the suggestion list with random users,"
-                      + " but didn't find enough visible accounts"
-                      + " (wanted number of suggestions = %d, got = %d",
-                  limit, codeOwners.size());
-            }
-
-            return true;
-          }
-
           int distance =
               codeOwnerConfig.key().branchNameKey().branch().equals(RefNames.REFS_CONFIG)
                   ? defaultOwnersDistance
@@ -203,6 +198,27 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
               .forEach(
                   localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
 
+          if (pathCodeOwners.ownedByAllUsers()) {
+            ownedByAllUsers.set(true);
+            ImmutableSet<CodeOwner> addedCodeOwners =
+                fillUpWithRandomUsers(rsrc, codeOwners, limit);
+            addedCodeOwners.forEach(
+                localCodeOwner -> distanceScoring.putValueForCodeOwner(localCodeOwner, distance));
+
+            if (codeOwners.size() < limit) {
+              logger.atFine().log(
+                  "tried to fill up the suggestion list with random users,"
+                      + " but didn't find enough visible accounts"
+                      + " (wanted number of suggestions = %d, got = %d",
+                  limit, codeOwners.size());
+            }
+          }
+
+          // We always need to iterate over all relevant OWNERS files (even if the limit has already
+          // been reached).
+          // This is needed to collect distance scores for code owners that are mentioned in the
+          // more distant OWNERS files. Those become relevant if further scores are applied later
+          // (e.g. the score for current reviewers of the change).
           return true;
         });
 
@@ -216,21 +232,44 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
       if (globalCodeOwners.ownedByAllUsers()) {
         ownedByAllUsers.set(true);
-        fillUpWithRandomUsers(rsrc, codeOwners, limit);
+        ImmutableSet<CodeOwner> addedCodeOwners = fillUpWithRandomUsers(rsrc, codeOwners, limit);
+        addedCodeOwners.forEach(
+            codeOwner -> distanceScoring.putValueForCodeOwner(codeOwner, globalOwnersDistance));
+      }
+    }
+
+    ImmutableSet<CodeOwner> immutableCodeOwners = ImmutableSet.copyOf(codeOwners);
+    CodeOwnerScorings codeOwnerScorings =
+        createScorings(rsrc, immutableCodeOwners, distanceScoring.build());
+    ImmutableMap<CodeOwner, Double> scoredCodeOwners =
+        codeOwnerScorings.getScorings(immutableCodeOwners);
+
+    ImmutableList<CodeOwner> sortedAndLimitedCodeOwners = sortAndLimit(rsrc, scoredCodeOwners);
+
+    if (highestScoreOnly) {
+      Optional<Double> highestScore =
+          scoredCodeOwners.values().stream().max(Comparator.naturalOrder());
+      if (highestScore.isPresent()) {
+        sortedAndLimitedCodeOwners =
+            sortedAndLimitedCodeOwners.stream()
+                .filter(codeOwner -> scoredCodeOwners.get(codeOwner).equals(highestScore.get()))
+                .collect(toImmutableList());
       }
     }
 
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners =
-        codeOwnerJsonFactory
-            .create(getFillOptions())
-            .format(
-                sortAndLimit(
-                    rsrc,
-                    CodeOwnerScorings.create(distanceScoring.build()),
-                    ImmutableSet.copyOf(codeOwners)));
+        codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     return Response.ok(codeOwnersInfo);
+  }
+
+  private CodeOwnerScorings createScorings(
+      R rsrc, ImmutableSet<CodeOwner> codeOwners, CodeOwnerScoring distanceScoring) {
+    ImmutableSet.Builder<CodeOwnerScoring> codeOwnerScorings = ImmutableSet.builder();
+    codeOwnerScorings.add(distanceScoring);
+    codeOwnerScorings.addAll(getCodeOwnerScorings(rsrc, codeOwners));
+    return CodeOwnerScorings.create(codeOwnerScorings.build());
   }
 
   private CodeOwnerResolverResult getGlobalCodeOwners(Project.NameKey projectName) {
@@ -241,6 +280,19 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
                 codeOwnersPluginConfiguration.getProjectConfig(projectName).getGlobalCodeOwners());
     logger.atFine().log("including global code owners = %s", globalCodeOwners);
     return globalCodeOwners;
+  }
+
+  /**
+   * Get further code owner scorings.
+   *
+   * <p>To be overridden by subclasses to include further scorings.
+   *
+   * @param rsrc resource on which the request is being performed
+   * @param codeOwners the code owners
+   */
+  protected ImmutableSet<CodeOwnerScoring> getCodeOwnerScorings(
+      R rsrc, ImmutableSet<CodeOwner> codeOwners) {
+    return ImmutableSet.of();
   }
 
   /**
@@ -349,26 +401,26 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   }
 
   private ImmutableList<CodeOwner> sortAndLimit(
-      R rsrc, CodeOwnerScorings scorings, ImmutableSet<CodeOwner> codeOwners) {
-    return sortCodeOwners(rsrc, seed, scorings, codeOwners).limit(limit).collect(toImmutableList());
+      R rsrc, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
+    return sortCodeOwners(rsrc, seed, scoredCodeOwners).limit(limit).collect(toImmutableList());
   }
 
   /**
    * Sorts the code owners.
    *
-   * <p>Code owners with higher distance score are returned first.
+   * <p>Code owners with higher score are returned first.
    *
-   * <p>The order of code owners with the same distance score is random.
+   * <p>The order of code owners with the same score is random.
    *
    * @param rsrc resource on which this REST endpoint is invoked
    * @param seed seed that should be used to randomize the order
-   * @param scorings the scorings for the code owners
-   * @param codeOwners the code owners that should be sorted
+   * @param scoredCodeOwners the code owners with their scores
    * @return the sorted code owners
    */
-  protected Stream<CodeOwner> sortCodeOwners(
-      R rsrc, Optional<Long> seed, CodeOwnerScorings scorings, ImmutableSet<CodeOwner> codeOwners) {
-    return randomizeOrder(seed, codeOwners).sorted(scorings.comparingByScorings());
+  private Stream<CodeOwner> sortCodeOwners(
+      R rsrc, Optional<Long> seed, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
+    return randomizeOrder(seed, scoredCodeOwners.keySet())
+        .sorted(Comparator.comparingDouble(scoredCodeOwners::get).reversed());
   }
 
   /**
@@ -393,16 +445,19 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    * all user.
    *
    * <p>No-op if code ownership for all users should not be resolved.
+   *
+   * @return the added code owners
    */
-  private void fillUpWithRandomUsers(R rsrc, Set<CodeOwner> codeOwners, int limit) {
+  private ImmutableSet<CodeOwner> fillUpWithRandomUsers(
+      R rsrc, Set<CodeOwner> codeOwners, int limit) {
     if (!resolveAllUsers || codeOwners.size() >= limit) {
       // code ownership for all users should not be resolved or the limit has already been reached
       // so that we don't need to add further suggestions
-      return;
+      return ImmutableSet.of();
     }
 
     logger.atFine().log("filling up with random users");
-    codeOwners.addAll(
+    ImmutableSet<CodeOwner> codeOwnersToAdd =
         filterCodeOwners(
                 rsrc,
                 // ask for 2 times the number of users that we need so that we still have enough
@@ -414,7 +469,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
             .stream()
             .filter(codeOwner -> !codeOwners.contains(codeOwner))
             .limit(limit - codeOwners.size())
-            .collect(toImmutableSet()));
+            .collect(toImmutableSet());
+    codeOwners.addAll(codeOwnersToAdd);
+    return codeOwnersToAdd;
   }
 
   /**

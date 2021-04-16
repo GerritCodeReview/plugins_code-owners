@@ -121,21 +121,23 @@ public class CodeOwnerApprovalCheck {
    * @param changeNotes the change notes for which the owned files should be returned
    * @param patchSet the patch set for which the owned files should be returned
    * @param accountId account ID of the code owner for which the owned files should be returned
+   * @param start number of owned paths to skip
    * @param limit the max number of owned paths that should be returned (0 = unlimited)
    * @return the paths of the files in the given patch set that are owned by the specified account
    * @throws ResourceConflictException if the destination branch of the change no longer exists
    */
   public ImmutableList<Path> getOwnedPaths(
-      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId, int limit)
+      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId, int start, int limit)
       throws ResourceConflictException {
     try (Timer0.Context ctx = codeOwnerMetrics.computeOwnedPaths.start()) {
       logger.atFine().log(
           "compute owned paths for account %d (project = %s, change = %d, patch set = %d,"
-              + " limit = %d)",
+              + " start = %d, limit = %d)",
           accountId.get(),
           changeNotes.getProjectName(),
           changeNotes.getChangeId().get(),
           patchSet.id().get(),
+          start,
           limit);
       Stream<Path> ownedPaths =
           getFileStatusesForAccount(changeNotes, patchSet, accountId)
@@ -149,6 +151,9 @@ public class CodeOwnerApprovalCheck {
               .filter(
                   pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
               .map(PathCodeOwnerStatus::path);
+      if (start > 0) {
+        ownedPaths = ownedPaths.skip(start);
+      }
       if (limit > 0) {
         ownedPaths = ownedPaths.limit(limit);
       }
