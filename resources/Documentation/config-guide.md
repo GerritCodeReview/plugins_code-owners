@@ -179,10 +179,18 @@ bypass code owner approvals, and hence using them is not recommended.
 
 If [implicit approvals](#implicitApprovals) are enabled, it is important that
 code owners are aware of their implicit approval when they upload new patch sets
-for other users. E.g. if a contributor pushes a change to a wrong branch and a
-code owner helps them to get it rebased onto the correct branch, the rebased
-change has implicit approvals from the code owner, since the code owner is the
-uploader. To avoid situations like this it is recommended to not enable implicit
+for other users.
+
+Examples:
+
+* If a contributor pushes a change to a wrong branch and a code owner helps them
+  to get it rebased onto the correct branch, the rebased change has implicit
+  approvals from the code owner, since the code owner is the uploader.
+* If a code owner edits the commit message of change owned by a non-code-owner,
+  the change gets implicitly approved since editing the commit message creates a
+  new patch set and the code owner is the uploader that patch set.
+
+To avoid situations like this it is recommended to not enable implicit
 approvals.
 
 ### <a id="securityMergeCommits">Required code owner approvals on merge commits
