@@ -740,8 +740,11 @@ public class GeneralConfig {
   }
 
   /**
-   * Gets whether an implicit code owner approval from the last uploader is assumed from the given
-   * plugin config with fallback to {@code gerrit.config}.
+   * Gets whether an implicit code owner approvals are enabled from the given plugin config with
+   * fallback to {@code gerrit.config}.
+   *
+   * <p>If enabled, an implict code owner approval from the change owner is assumed if the last
+   * patch set was uploaded by the change owner.
    *
    * @param project the name of the project for which the configuration should be read
    * @param pluginConfig the plugin config from which the configuration should be read.

@@ -263,6 +263,7 @@ public class CodeOwnerApprovalCheck {
       CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
           codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
 
+      Account.Id changeOwner = changeNotes.getChange().getOwner();
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
       ImmutableSet<Account.Id> exemptedAccounts = codeOwnersConfig.getExemptedAccounts();
       logger.atFine().log("exemptedAccounts = %s", exemptedAccounts);
@@ -281,10 +282,15 @@ public class CodeOwnerApprovalCheck {
         return getAllPathsAsApproved(changeNotes, changeNotes.getCurrentPatchSet());
       }
 
-      boolean enableImplicitApprovalFromUploader = codeOwnersConfig.areImplicitApprovalsEnabled();
+      boolean implicitApprovalConfig = codeOwnersConfig.areImplicitApprovalsEnabled();
+      boolean enableImplicitApproval =
+          implicitApprovalConfig && changeOwner.equals(patchSetUploader);
       logger.atFine().log(
-          "patchSetUploader = %d, implicit approval from uploader is %s",
-          patchSetUploader.get(), enableImplicitApprovalFromUploader ? "enabled" : "disabled");
+          "changeOwner = %d, patchSetUploader = %d, implict approval config = %s\n=> implicit approval is %s",
+          changeOwner.get(),
+          patchSetUploader.get(),
+          implicitApprovalConfig,
+          enableImplicitApproval ? "enabled" : "disabled");
 
       ImmutableList<PatchSetApproval> currentPatchSetApprovals =
           getCurrentPatchSetApprovals(changeNotes);
@@ -335,7 +341,7 @@ public class CodeOwnerApprovalCheck {
                       branch,
                       revision,
                       globalCodeOwners,
-                      enableImplicitApprovalFromUploader ? patchSetUploader : null,
+                      enableImplicitApproval ? changeOwner : null,
                       reviewerAccountIds,
                       approverAccountIds,
                       fallbackCodeOwners,

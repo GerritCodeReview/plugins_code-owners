@@ -336,8 +336,9 @@ documentation](config.html).
 Examples (not an exhaustive list):
 
 * [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner)
-* Whether [an implicit code owner approval from the last uploader is
-  assumed](config.html#codeOwnersEnableImplicitApprovals)
+* Whether [an implicit code owner approval from the change owner is
+  assumed](config.html#codeOwnersEnableImplicitApprovals) (only for patch sets
+  that are uploaded by the change owner)
 * [Merge commit strategy](config.html#codeOwnersMergeCommitStrategy) that
   decides which files of merge commits require code owner approvals
 * [File extension](config.html#codeOwnersFileExtension) that should be used for
