@@ -22,6 +22,30 @@
       },
       "revId": "3f0196a04711dbbfe28a8a017ac3cb01e650126c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "46827186_6be12c19",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 601,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-16T14:16:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1800af22_17fda76b",
+      "range": {
+        "startLine": 601,
+        "startChar": 30,
+        "endLine": 601,
+        "endChar": 32
+      },
+      "revId": "3f0196a04711dbbfe28a8a017ac3cb01e650126c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
