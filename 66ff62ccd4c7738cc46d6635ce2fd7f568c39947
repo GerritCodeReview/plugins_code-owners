@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "c77c318a_16c52436",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 369,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-16T13:54:29Z",
+      "side": 1,
+      "message": "\u003e // skip path4 since that\u0027s the first one alphabetically and return 3 and 1? \nExactly.\n\nRenaming these variables is a good idea. Will do this is a new patch set.",
+      "parentUuid": "edb78f82_b6c5de66",
+      "range": {
+        "startLine": 369,
+        "startChar": 0,
+        "endLine": 369,
+        "endChar": 91
+      },
+      "revId": "66ff62ccd4c7738cc46d6635ce2fd7f568c39947",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "4cae65ec_e6960242",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 3
@@ -37,6 +61,30 @@
       "writtenOn": "2021-04-16T13:40:42Z",
       "side": 1,
       "message": "why \\ is needed here?",
+      "range": {
+        "startLine": 662,
+        "startChar": 9,
+        "endLine": 662,
+        "endChar": 10
+      },
+      "revId": "66ff62ccd4c7738cc46d6635ce2fd7f568c39947",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5becd693_ac23b6b6",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 3
+      },
+      "lineNbr": 662,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-16T13:54:29Z",
+      "side": 1,
+      "message": "It escapes the following \u0027|\u0027 which is otherwise interpreted as the start of a new table cell.",
+      "parentUuid": "4cae65ec_e6960242",
       "range": {
         "startLine": 662,
         "startChar": 9,
