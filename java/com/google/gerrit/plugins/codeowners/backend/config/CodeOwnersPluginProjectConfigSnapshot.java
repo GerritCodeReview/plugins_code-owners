@@ -450,7 +450,12 @@ public class CodeOwnersPluginProjectConfigSnapshot {
     return backendConfig.getDefaultBackend();
   }
 
-  /** Checks whether an implicit code owner approval from the last uploader is assumed. */
+  /**
+   * Checks whether implicit code owner approvals are enabled.
+   *
+   * <p>If enabled, an implict code owner approval from the change owner is assumed if the last
+   * patch set was uploaded by the change owner.
+   */
   public boolean areImplicitApprovalsEnabled() {
     if (implicitApprovalsEnabled == null) {
       implicitApprovalsEnabled = readImplicitApprovalsEnabled();
