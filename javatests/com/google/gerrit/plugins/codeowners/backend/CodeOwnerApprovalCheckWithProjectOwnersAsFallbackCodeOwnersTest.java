@@ -116,27 +116,44 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", values = "bot@example.com")
   public void globalCodeOwner_noImplicitApproval() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(/* implicitApprovalsEnabled= */ false);
+    testImplicitlyApprovedByGlobalCodeOwner(
+        /* implicitApprovalsEnabled= */ false, /* uploaderMatchesChangeOwner= */ true);
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", values = "bot@example.com")
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void globalCodeOwner_withImplicitApproval() throws Exception {
-    testImplicitlyApprovedByGlobalCodeOwner(/* implicitApprovalsEnabled= */ true);
+  public void globalCodeOwner_noImplicitApproval_uploaderDoesntMatchChangeOwner() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwner(
+        /* implicitApprovalsEnabled= */ true, /* uploaderMatchesChangeOwner= */ false);
   }
 
-  private void testImplicitlyApprovedByGlobalCodeOwner(boolean implicitApprovalsEnabled)
-      throws Exception {
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", values = "bot@example.com")
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void globalCodeOwner_withImplicitApproval() throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwner(
+        /* implicitApprovalsEnabled= */ true, /* uploaderMatchesChangeOwner= */ true);
+  }
+
+  private void testImplicitlyApprovedByGlobalCodeOwner(
+      boolean implicitApprovalsEnabled, boolean uploaderMatchesChangeOwner) throws Exception {
     TestAccount bot =
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
+    TestAccount projectOwner = admin;
 
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange(bot, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
+
+    if (uploaderMatchesChangeOwner) {
+      amendChange(bot, changeId);
+    } else {
+      amendChange(projectOwner, changeId);
+    }
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
@@ -148,7 +165,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(
-            implicitApprovalsEnabled
+            implicitApprovalsEnabled && uploaderMatchesChangeOwner
                 ? CodeOwnerStatus.APPROVED
                 : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
   }
@@ -254,7 +271,16 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void everyoneIsGlobalCodeOwner_noImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ false);
+        /* implicitApprovalsEnabled= */ false, /* uploaderMatchesChangeOwner= */ true);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void everyoneIsGlobalCodeOwner_noImplicitApproval_uploaderDoesntMatchChangeOwner()
+      throws Exception {
+    testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
+        /* implicitApprovalsEnabled= */ true, /* uploaderMatchesChangeOwner= */ false);
   }
 
   @Test
@@ -262,15 +288,24 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void everyoneIsGlobalCodeOwner_withImplicitApproval() throws Exception {
     testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-        /* implicitApprovalsEnabled= */ true);
+        /* implicitApprovalsEnabled= */ true, /* uploaderMatchesChangeOwner= */ true);
   }
 
   private void testImplicitlyApprovedByGlobalCodeOwnerWhenEveryoneIsGlobalCodeOwner(
-      boolean implicitApprovalsEnabled) throws Exception {
-    // Create a change as a user that is a code owner only through the global code ownership.
+      boolean implicitApprovalsEnabled, boolean uploaderMatchesChangeOwner) throws Exception {
+    TestAccount projectOwner = admin;
+    TestAccount otherProjectOwner = accountCreator.admin2();
+
+    // Create a change as a user that is a project code owner.
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    if (uploaderMatchesChangeOwner) {
+      amendChange(projectOwner, changeId);
+    } else {
+      amendChange(otherProjectOwner, changeId);
+    }
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
@@ -282,7 +317,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(
-            implicitApprovalsEnabled
+            implicitApprovalsEnabled && uploaderMatchesChangeOwner
                 ? CodeOwnerStatus.APPROVED
                 : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
   }
@@ -416,26 +451,39 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
   }
 
   @Test
-  public void getStatus_noImplicitApprovalByPatchSetUploader() throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnGetStatus(/* implicitApprovalsEnabled= */ false);
+  public void getStatus_noImplicitApproval() throws Exception {
+    testImplicitApprovalOnGetStatus(
+        /* implicitApprovalsEnabled= */ false, /* uploaderMatchesChangeOwner= */ true);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void getStatus_withImplicitApprovalByPatchSetUploader() throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnGetStatus(/* implicitApprovalsEnabled= */ true);
+  public void getStatus_noImplicitApproval_uploaderDoesntMatchChangeOwner() throws Exception {
+    testImplicitApprovalOnGetStatus(
+        /* implicitApprovalsEnabled= */ true, /* uploaderMatchesChangeOwner= */ false);
   }
 
-  private void testImplicitApprovalByPatchSetUploaderOnGetStatus(boolean implicitApprovalsEnabled)
-      throws Exception {
-    // Create change with a user that is not a project owner.
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void getStatus_withImplicitApproval() throws Exception {
+    testImplicitApprovalOnGetStatus(
+        /* implicitApprovalsEnabled= */ true, /* uploaderMatchesChangeOwner= */ true);
+  }
+
+  private void testImplicitApprovalOnGetStatus(
+      boolean implicitApprovalsEnabled, boolean uploaderMatchesChangeOwner) throws Exception {
+    TestAccount projectOwner = admin;
+
+    // Create change with a user that is a project owner.
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
-        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
-            .getChangeId();
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
-    // Amend change with a user that is a project owner.
-    amendChange(admin, changeId);
+    if (uploaderMatchesChangeOwner) {
+      amendChange(projectOwner, changeId);
+    } else {
+      amendChange(user, changeId);
+    }
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
@@ -447,7 +495,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(
-            implicitApprovalsEnabled
+            implicitApprovalsEnabled && uploaderMatchesChangeOwner
                 ? CodeOwnerStatus.APPROVED
                 : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
@@ -457,14 +505,17 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
 
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  public void getStatus_noImplicitlyApprovalByChangeOwner() throws Exception {
+  public void getStatus_noImplicitlyApprovalByPatchSetUploaderThatDoesntOwnTheChange()
+      throws Exception {
+    TestAccount admin2 = accountCreator.admin2();
+
     // Create change with a user that is a project owner.
     Path path = Paths.get("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
-    // Amend change with a user that is not a project owner.
-    amendChange(user, changeId);
+    // Amend change with a user that is another project owner.
+    amendChange(admin2, changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
         codeOwnerApprovalCheck.getFileStatusesAsSet(getChangeNotes(changeId));
