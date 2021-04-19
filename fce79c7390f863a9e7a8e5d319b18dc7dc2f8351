@@ -22,6 +22,30 @@
       },
       "revId": "fce79c7390f863a9e7a8e5d319b18dc7dc2f8351",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "30b5aa19_68ad5bed",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-19T14:12:03Z",
+      "side": 1,
+      "message": "My calculation comes to ~87.2 MB\n\nPlease find the detailed calculation at:\nhttps://paste.googleplex.com/5408240562077696",
+      "parentUuid": "22795e33_3a9e5f99",
+      "range": {
+        "startLine": 52,
+        "startChar": 81,
+        "endLine": 52,
+        "endChar": 86
+      },
+      "revId": "fce79c7390f863a9e7a8e5d319b18dc7dc2f8351",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
