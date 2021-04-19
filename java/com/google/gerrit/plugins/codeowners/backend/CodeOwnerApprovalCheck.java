@@ -335,8 +335,7 @@ public class CodeOwnerApprovalCheck {
                       branch,
                       revision,
                       globalCodeOwners,
-                      enableImplicitApprovalFromUploader,
-                      patchSetUploader,
+                      enableImplicitApprovalFromUploader ? patchSetUploader : null,
                       reviewerAccountIds,
                       approverAccountIds,
                       fallbackCodeOwners,
@@ -405,8 +404,7 @@ public class CodeOwnerApprovalCheck {
                       // should be ignored. For the given account we do not need to check for
                       // implicit approvals since all owned files are already covered by the
                       // explicit approval.
-                      /* enableImplicitApprovalFromUploader= */ false,
-                      /* patchSetUploader= */ null,
+                      /* implicitApprover= */ null,
                       /* reviewerAccountIds= */ ImmutableSet.of(),
                       // Assume an explicit approval of the given account.
                       /* approverAccountIds= */ ImmutableSet.of(accountId),
@@ -454,8 +452,7 @@ public class CodeOwnerApprovalCheck {
       BranchNameKey branch,
       ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader,
+      @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       FallbackCodeOwners fallbackCodeOwners,
@@ -475,8 +472,7 @@ public class CodeOwnerApprovalCheck {
                           branch,
                           revision,
                           globalCodeOwners,
-                          enableImplicitApprovalFromUploader,
-                          patchSetUploader,
+                          implicitApprover,
                           reviewerAccountIds,
                           approverAccountIds,
                           fallbackCodeOwners,
@@ -498,8 +494,7 @@ public class CodeOwnerApprovalCheck {
                     branch,
                     revision,
                     globalCodeOwners,
-                    enableImplicitApprovalFromUploader,
-                    patchSetUploader,
+                    implicitApprover,
                     reviewerAccountIds,
                     approverAccountIds,
                     fallbackCodeOwners,
@@ -519,8 +514,7 @@ public class CodeOwnerApprovalCheck {
       BranchNameKey branch,
       ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader,
+      @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       FallbackCodeOwners fallbackCodeOwners,
@@ -538,12 +532,7 @@ public class CodeOwnerApprovalCheck {
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
 
-    if (isApproved(
-        absolutePath,
-        globalCodeOwners,
-        approverAccountIds,
-        enableImplicitApprovalFromUploader,
-        patchSetUploader)) {
+    if (isApproved(absolutePath, globalCodeOwners, approverAccountIds, implicitApprover)) {
       logger.atFine().log("%s was approved by a global code owner", absolutePath);
       codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
     } else {
@@ -573,12 +562,7 @@ public class CodeOwnerApprovalCheck {
                   hasRevelantCodeOwnerDefinitions.set(true);
                 }
 
-                if (isApproved(
-                    absolutePath,
-                    codeOwners,
-                    approverAccountIds,
-                    enableImplicitApprovalFromUploader,
-                    patchSetUploader)) {
+                if (isApproved(absolutePath, codeOwners, approverAccountIds, implicitApprover)) {
                   codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
                   return false;
                 } else if (isPending(absolutePath, codeOwners, reviewerAccountIds)) {
@@ -611,8 +595,7 @@ public class CodeOwnerApprovalCheck {
                 codeOwnerStatus.get(),
                 branch,
                 globalCodeOwners,
-                enableImplicitApprovalFromUploader,
-                patchSetUploader,
+                implicitApprover,
                 reviewerAccountIds,
                 approverAccountIds,
                 fallbackCodeOwners,
@@ -633,8 +616,7 @@ public class CodeOwnerApprovalCheck {
   private CodeOwnerStatus getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
       BranchNameKey branch,
       CodeOwnerResolverResult globalCodeOwners,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader,
+      @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       Path absolutePath) {
@@ -644,12 +626,7 @@ public class CodeOwnerApprovalCheck {
 
     CodeOwnerStatus codeOwnerStatus = CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
     if (isApprovedByProjectOwnerOrGlobalOwner(
-        branch.project(),
-        absolutePath,
-        globalCodeOwners,
-        approverAccountIds,
-        enableImplicitApprovalFromUploader,
-        patchSetUploader)) {
+        branch.project(), absolutePath, globalCodeOwners, approverAccountIds, implicitApprover)) {
       codeOwnerStatus = CodeOwnerStatus.APPROVED;
     } else if (isPendingByProjectOwnerOrGlobalOwner(
         branch.project(), absolutePath, globalCodeOwners, reviewerAccountIds)) {
@@ -665,11 +642,10 @@ public class CodeOwnerApprovalCheck {
       Path absolutePath,
       CodeOwnerResolverResult globalCodeOwners,
       ImmutableSet<Account.Id> approverAccountIds,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader) {
-    return (enableImplicitApprovalFromUploader
+      @Nullable Account.Id implicitApprover) {
+    return (implicitApprover != null
             && isImplicitlyApprovedByProjectOwnerOrGlobalOwner(
-                projectName, absolutePath, globalCodeOwners, patchSetUploader))
+                projectName, absolutePath, globalCodeOwners, implicitApprover))
         || isExplicitlyApprovedByProjectOwnerOrGlobalOwner(
             projectName, absolutePath, globalCodeOwners, approverAccountIds);
   }
@@ -678,10 +654,9 @@ public class CodeOwnerApprovalCheck {
       Project.NameKey projectName,
       Path absolutePath,
       CodeOwnerResolverResult globalCodeOwners,
-      Account.Id patchSetUploader) {
-    requireNonNull(
-        patchSetUploader, "patchSetUploader must be set if implicit approvals are enabled");
-    if (isProjectOwner(projectName, patchSetUploader)) {
+      Account.Id implicitApprover) {
+    requireNonNull(implicitApprover, "implicitApprover");
+    if (isProjectOwner(projectName, implicitApprover)) {
       // The uploader of the patch set is a project owner and thus a code owner. This means there
       // is an implicit code owner approval from the patch set uploader so that the path is
       // automatically approved.
@@ -692,7 +667,7 @@ public class CodeOwnerApprovalCheck {
     }
 
     if (globalCodeOwners.ownedByAllUsers()
-        || globalCodeOwners.codeOwnersAccountIds().contains(patchSetUploader)) {
+        || globalCodeOwners.codeOwnersAccountIds().contains(implicitApprover)) {
       // If the uploader of the patch set is a global code owner, there is an implicit code owner
       // approval from the patch set uploader so that the path is automatically approved.
       logger.atFine().log(
@@ -754,8 +729,7 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerStatus codeOwnerStatus,
       BranchNameKey branch,
       CodeOwnerResolverResult globalCodeOwners,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader,
+      @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       FallbackCodeOwners fallbackCodeOwners,
@@ -771,17 +745,13 @@ public class CodeOwnerApprovalCheck {
         return getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
             branch,
             globalCodeOwners,
-            enableImplicitApprovalFromUploader,
-            patchSetUploader,
+            implicitApprover,
             reviewerAccountIds,
             approverAccountIds,
             absolutePath);
       case ALL_USERS:
         return getCodeOwnerStatusIfAllUsersAreCodeOwners(
-            enableImplicitApprovalFromUploader,
-            reviewerAccountIds,
-            approverAccountIds,
-            absolutePath);
+            implicitApprover != null, reviewerAccountIds, approverAccountIds, absolutePath);
     }
 
     throw new CodeOwnersInternalServerErrorException(
@@ -821,12 +791,9 @@ public class CodeOwnerApprovalCheck {
       Path absolutePath,
       CodeOwnerResolverResult codeOwners,
       ImmutableSet<Account.Id> approverAccountIds,
-      boolean enableImplicitApprovalFromUploader,
-      @Nullable Account.Id patchSetUploader) {
-    if (enableImplicitApprovalFromUploader) {
-      requireNonNull(
-          patchSetUploader, "patchSetUploader must be set if implicit approvals are enabled");
-      if (codeOwners.codeOwnersAccountIds().contains(patchSetUploader)
+      @Nullable Account.Id implicitApprover) {
+    if (implicitApprover != null) {
+      if (codeOwners.codeOwnersAccountIds().contains(implicitApprover)
           || codeOwners.ownedByAllUsers()) {
         // If the uploader of the patch set owns the path, there is an implicit code owner
         // approval from the patch set uploader so that the path is automatically approved.

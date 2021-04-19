@@ -3,6 +3,8 @@
 The @PLUGIN@ plugin exports several metrics which can give insights into the
 usage and performance of the code owners functionality.
 
+All metrics have the following prefix: `plugins/@PLUGIN@/`
+
 ## <a id="latencyMetrics"> Latency Metrics
 
 * `add_change_message_on_add_reviewer`:
