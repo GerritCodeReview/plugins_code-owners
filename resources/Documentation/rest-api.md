@@ -526,6 +526,24 @@ code owners are returned in this order:
 5\. [score=3] User E\
 * `owned_by_all_users` in the response is `true`
 
+#### <a id="rootOwnersFaq">Why are root code owners not suggested first?
+
+Root code owners can normally approve all files in a repository. Due to this
+change owners often want to add them as reviewers to their changes, since they
+find it desirable to add as few code owners as possible. This is problematic
+since it means that the root code owners would receive all reviews which likely
+overloads them.
+
+To avoid that the root code owners become the bottleneck, the @PLUGIN@ plugin
+prefers local code owners and suggests them first (also see distant score
+[above](#scoringFactors)). This means that root code owners are ranked lower and
+often don't appear amonst the top suggestions.
+
+Local code owners are also preferred because it is more likely that they are
+experts of the modified code.
+
+The same applies for [default code owners](config-guide.html#codeOwners).
+
 #### Request
 
 ```
