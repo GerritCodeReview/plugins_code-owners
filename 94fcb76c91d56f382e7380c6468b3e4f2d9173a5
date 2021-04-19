@@ -46,6 +46,30 @@
       },
       "revId": "94fcb76c91d56f382e7380c6468b3e4f2d9173a5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "124f4328_0ec5b2e2",
+        "filename": "resources/Documentation/config-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-19T11:55:26Z",
+      "side": 1,
+      "message": "My attempt to fix this is here:\nhttps://gerrit-review.googlesource.com/c/plugins/code-owners/+/303644\n\nWe may consider tying this to the change kind, but I\u0027m afraid that it makes it even more obscure for users to understand implicit approvals and it may break bots which rely on their changes always having an implicit approval.",
+      "parentUuid": "3d986775_705d619e",
+      "range": {
+        "startLine": 184,
+        "startChar": 0,
+        "endLine": 184,
+        "endChar": 8
+      },
+      "revId": "94fcb76c91d56f382e7380c6468b3e4f2d9173a5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
