@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "873356be_337ed40b",
+        "filename": "resources/Documentation/config-guide.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-19T10:30:21Z",
+      "side": 1,
+      "message": "btw, you can solve those issues by deciding that implicit approvals are only valid if the change is CHANGE_KIND \u003d REWORK or something like that. Does that make sense?\n\nMaybe a new setting is required (explicit, implicit, sometimes implicit). Is this useful?",
+      "range": {
+        "startLine": 184,
+        "startChar": 0,
+        "endLine": 184,
+        "endChar": 8
+      },
+      "revId": "94fcb76c91d56f382e7380c6468b3e4f2d9173a5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
