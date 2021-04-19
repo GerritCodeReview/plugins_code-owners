@@ -163,6 +163,15 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
   }
 
   @Test
+  public void cannotGetCodeOwnersWithInvalidHexAccountOption() throws Exception {
+    String invalidHexOption = "INVALID";
+    RestResponse r = adminRestSession.get(getUrl(TEST_PATH, "O=" + invalidHexOption));
+    r.assertBadRequest();
+    assertThat(r.getEntityContent())
+        .isEqualTo(String.format("\"%s\" is not a valid value for \"-O\"", invalidHexOption));
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
   public void cannotGetCodeOwnersIfPluginConfigurationIsInvalid() throws Exception {
     RestResponse r = adminRestSession.get(getUrl(TEST_PATH));
