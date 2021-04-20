@@ -543,7 +543,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         files are cached in memory for the time of the request.\
         This configuration parameter allows to set a limit for the number of
         code owner config files that are cached per request.\
-        By default `0` (unlimited).
+        By default `10000`.
 
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
