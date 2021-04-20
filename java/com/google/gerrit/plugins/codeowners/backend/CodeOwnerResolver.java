@@ -225,42 +225,45 @@ public class CodeOwnerResolver {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
     requireNonNull(unresolvedImports, "unresolvedImports");
     requireNonNull(pathCodeOwnersMessages, "pathCodeOwnersMessages");
-    AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
-    AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
-    List<String> messages = new ArrayList<>(pathCodeOwnersMessages);
-    unresolvedImports.forEach(
-        unresolvedImport -> messages.add(unresolvedImportFormatter.format(unresolvedImport)));
-    ImmutableSet<CodeOwner> codeOwners =
-        codeOwnerReferences.stream()
-            .filter(
-                codeOwnerReference -> {
-                  if (ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
-                    ownedByAllUsers.set(true);
-                    return false;
-                  }
-                  return true;
-                })
-            .map(this::resolveWithMessages)
-            .filter(
-                resolveResult -> {
-                  messages.addAll(resolveResult.messages());
-                  if (!resolveResult.isPresent()) {
-                    hasUnresolvedCodeOwners.set(true);
-                    return false;
-                  }
-                  return true;
-                })
-            .map(OptionalResultWithMessages::get)
-            .collect(toImmutableSet());
-    CodeOwnerResolverResult codeOwnerResolverResult =
-        CodeOwnerResolverResult.create(
-            codeOwners,
-            ownedByAllUsers.get(),
-            hasUnresolvedCodeOwners.get(),
-            !unresolvedImports.isEmpty(),
-            messages);
-    logger.atFine().log("resolve result = %s", codeOwnerResolverResult);
-    return codeOwnerResolverResult;
+
+    try (Timer0.Context ctx = codeOwnerMetrics.resolveCodeOwnerReferences.start()) {
+      AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
+      AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
+      List<String> messages = new ArrayList<>(pathCodeOwnersMessages);
+      unresolvedImports.forEach(
+          unresolvedImport -> messages.add(unresolvedImportFormatter.format(unresolvedImport)));
+      ImmutableSet<CodeOwner> codeOwners =
+          codeOwnerReferences.stream()
+              .filter(
+                  codeOwnerReference -> {
+                    if (ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
+                      ownedByAllUsers.set(true);
+                      return false;
+                    }
+                    return true;
+                  })
+              .map(this::resolveWithMessages)
+              .filter(
+                  resolveResult -> {
+                    messages.addAll(resolveResult.messages());
+                    if (!resolveResult.isPresent()) {
+                      hasUnresolvedCodeOwners.set(true);
+                      return false;
+                    }
+                    return true;
+                  })
+              .map(OptionalResultWithMessages::get)
+              .collect(toImmutableSet());
+      CodeOwnerResolverResult codeOwnerResolverResult =
+          CodeOwnerResolverResult.create(
+              codeOwners,
+              ownedByAllUsers.get(),
+              hasUnresolvedCodeOwners.get(),
+              !unresolvedImports.isEmpty(),
+              messages);
+      logger.atFine().log("resolve result = %s", codeOwnerResolverResult);
+      return codeOwnerResolverResult;
+    }
   }
 
   /**
