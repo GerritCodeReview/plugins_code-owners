@@ -37,6 +37,8 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
   Latency for resolving an import of a code owner config file.
 * `resolve_code_owner_config_imports`:
   Latency for resolving all imports of a code owner config file.
+* `resolve_path_code_owners`:
+  Latency for resolving the code owners of a path.
 * `run_code_owner_submit_rule`:
   Latency for running the code owner submit rule.
 
