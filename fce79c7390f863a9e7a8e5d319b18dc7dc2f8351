@@ -46,6 +46,30 @@
       },
       "revId": "fce79c7390f863a9e7a8e5d319b18dc7dc2f8351",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "38c2ae9e_43ad1687",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfiguration.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-04-20T09:36:35Z",
+      "side": 1,
+      "message": "Nice calculation!!!\n\nIn that case, can we limit to 10k? Should be enough to speed up most changes will only consume 34 MiB.",
+      "parentUuid": "30b5aa19_68ad5bed",
+      "range": {
+        "startLine": 52,
+        "startChar": 81,
+        "endLine": 52,
+        "endChar": 86
+      },
+      "revId": "fce79c7390f863a9e7a8e5d319b18dc7dc2f8351",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
