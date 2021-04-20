@@ -643,7 +643,7 @@ suggestion.
 
 The following code owners are filtered out additionally:
 
-* service users (members of the `Service Users` group)
+* [service users](#serviceUsers) (members of the `Service Users` group)
 * the change owner (since the change owner cannot be added as reviewer)
 
 In addition, by default the change number is used as seed if none was specified.
@@ -1027,6 +1027,39 @@ Administrators have this capability implicitly assigned.
 The same as all global capabilities, the `Check Code Owner` global capability is
 assigned on the `All-Project` project in the `Global Capabilities` access
 section.
+
+---
+
+## <a id="serviceUsers">Service Users
+
+Some of the @PLUGIN@ REST endpoints have special handling of code owners that
+are service users:
+
+* The [Suggest Code Owners for path in change](#list-code-owners-for-path-in-change)
+  REST endpoint filters out code owners that are service users.
+
+To detect service users the @PLUGIN@ plugin relies on the `Service Users` group.
+This group should contain all service users, such as bots, and is maintained by
+the host admins.
+
+If you are a host admin, please make sure all bots that run against your host
+are part of the `Service Users` group.
+
+If you are a bot owner, please make sure your bot is part of the `Service Users`
+group on all hosts it runs on.
+
+To add users to the "Service Users" group, first ensure that the group exists on
+your host. If it doesn't, create it. The name must exactly be `Service Users`.
+
+To create a group, use the Gerrit UI: `BROWSE` -> `Groups` -> `CREATE NEW`.
+
+Then, add the bots as members in this group. Alternatively, add an existing
+group that only contains bots as a subgroup of the `Service Users` group.
+
+To add members or subgroups, use the Gerrit UI: `BROWSE` -> `Groups` ->
+search for `Service Users` -> `Members`.
+
+---
 
 Back to [@PLUGIN@ documentation index](index.html)
 
