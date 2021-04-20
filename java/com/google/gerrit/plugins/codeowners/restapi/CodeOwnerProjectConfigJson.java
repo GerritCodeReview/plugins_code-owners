@@ -33,8 +33,8 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.GeneralInfo;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.project.BranchResource;
@@ -79,7 +79,7 @@ public class CodeOwnerProjectConfigJson {
   }
 
   CodeOwnerBranchConfigInfo format(BranchResource branchResource) {
-    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(branchResource.getNameKey());
 
     CodeOwnerBranchConfigInfo info = new CodeOwnerBranchConfigInfo();
@@ -102,7 +102,7 @@ public class CodeOwnerProjectConfigJson {
   }
 
   private GeneralInfo formatGeneralInfo(Project.NameKey projectName) {
-    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(projectName);
 
     GeneralInfo generalInfo = new GeneralInfo();

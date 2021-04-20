@@ -16,11 +16,8 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
-import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import org.junit.Before;
 import org.junit.Test;
@@ -59,59 +56,5 @@ public class CodeOwnersPluginConfigurationTest extends AbstractCodeOwnersTest {
         .hasMessageThat()
         .isEqualTo(
             "cannot get code-owners plugin config for non-existing project non-existing-project");
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "false")
-  public void checkExperimentalRestEndpointsEnabledThrowsExceptionIfDisabled() throws Exception {
-    MethodNotAllowedException exception =
-        assertThrows(
-            MethodNotAllowedException.class,
-            () -> codeOwnersPluginConfiguration.checkExperimentalRestEndpointsEnabled());
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo("experimental code owners REST endpoints are disabled");
-  }
-
-  @Test
-  public void experimentalRestEndpointsNotEnabled() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
-  public void experimentalRestEndpointsEnabled() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isTrue();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "invalid")
-  public void experimentalRestEndpointsNotEnabled_invalidConfig() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.areExperimentalRestEndpointsEnabled()).isFalse();
-  }
-
-  @Test
-  public void codeOwnerConfigCacheSizeIsUnlimitedByDefault() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize()).isEmpty();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "0")
-  public void codeOwnerConfigCacheSizeIsUnlimited() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize()).isEmpty();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "10")
-  public void codeOwnerConfigCacheSizeIsLimited() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize())
-        .value()
-        .isEqualTo(10);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "invalid")
-  public void maxCodeOwnerConfigCacheSize_invalidConfig() throws Exception {
-    assertThat(codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize()).isEmpty();
   }
 }

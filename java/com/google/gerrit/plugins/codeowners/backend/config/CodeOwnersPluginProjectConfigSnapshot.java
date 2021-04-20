@@ -48,11 +48,11 @@ import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
 /** Snapshot of the code-owners plugin configuration for one project. */
-public class CodeOwnersPluginConfigSnapshot {
+public class CodeOwnersPluginProjectConfigSnapshot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   public interface Factory {
-    CodeOwnersPluginConfigSnapshot create(Project.NameKey projectName);
+    CodeOwnersPluginProjectConfigSnapshot create(Project.NameKey projectName);
   }
 
   private final ProjectCache projectCache;
@@ -65,10 +65,33 @@ public class CodeOwnersPluginConfigSnapshot {
   private final Project.NameKey projectName;
   private final Config pluginConfig;
 
+  @Nullable private Optional<String> fileExtension;
+  @Nullable private Boolean codeOwnerConfigsReadOnly;
+  @Nullable private Boolean exemptPureReverts;
+  @Nullable private Boolean rejectNonResolvableCodeOwners;
+  @Nullable private Boolean rejectNonResolvableImports;
+
+  @Nullable
+  private CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicyForCommitReceived;
+
+  @Nullable private CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicyForSubmit;
+  @Nullable private MergeCommitStrategy mergeCommitStrategy;
+  @Nullable private FallbackCodeOwners fallbackCodeOwners;
+  @Nullable private Integer maxPathsInChangeMessages;
+  @Nullable private ImmutableSet<CodeOwnerReference> globalCodeOwners;
   @Nullable private ImmutableSet<Account.Id> exemptedAccounts;
+  @Nullable private Optional<String> overrideInfoUrl;
+  @Nullable private Optional<String> invalidCodeOwnerConfigInfoUrl;
+  private Map<String, Boolean> disabledByBranch = new HashMap<>();
+  @Nullable private Boolean isDisabled;
+  private Map<String, CodeOwnerBackend> backendByBranch = new HashMap<>();
+  @Nullable private CodeOwnerBackend backend;
+  @Nullable private Boolean implicitApprovalsEnabled;
+  @Nullable private RequiredApproval requiredApproval;
+  @Nullable private ImmutableSortedSet<RequiredApproval> overrideApprovals;
 
   @Inject
-  CodeOwnersPluginConfigSnapshot(
+  CodeOwnersPluginProjectConfigSnapshot(
       CodeOwnersPluginConfig.Factory codeOwnersPluginConfigFactory,
       ProjectCache projectCache,
       Emails emails,
@@ -91,19 +114,28 @@ public class CodeOwnersPluginConfigSnapshot {
 
   /** Gets the file extension of code owner config files, if any configured. */
   public Optional<String> getFileExtension() {
-    return generalConfig.getFileExtension(pluginConfig);
+    if (fileExtension == null) {
+      fileExtension = generalConfig.getFileExtension(pluginConfig);
+    }
+    return fileExtension;
   }
 
   /** Checks whether code owner configs are read-only. */
   public boolean areCodeOwnerConfigsReadOnly() {
-    return generalConfig.getReadOnly(projectName, pluginConfig);
+    if (codeOwnerConfigsReadOnly == null) {
+      codeOwnerConfigsReadOnly = generalConfig.getReadOnly(projectName, pluginConfig);
+    }
+    return codeOwnerConfigsReadOnly;
   }
 
   /**
    * Checks whether pure revert changes are exempted from needing code owner approvals for submit.
    */
   public boolean arePureRevertsExempted() {
-    return generalConfig.getExemptPureReverts(projectName, pluginConfig);
+    if (exemptPureReverts == null) {
+      exemptPureReverts = generalConfig.getExemptPureReverts(projectName, pluginConfig);
+    }
+    return exemptPureReverts;
   }
 
   /**
@@ -114,6 +146,13 @@ public class CodeOwnersPluginConfigSnapshot {
    *     should be rejected
    */
   public boolean rejectNonResolvableCodeOwners(String branchName) {
+    if (rejectNonResolvableCodeOwners == null) {
+      rejectNonResolvableCodeOwners = readRejectNonResolvableCodeOwners(branchName);
+    }
+    return rejectNonResolvableCodeOwners;
+  }
+
+  private boolean readRejectNonResolvableCodeOwners(String branchName) {
     requireNonNull(branchName, "branchName");
 
     Optional<Boolean> branchSpecificFlag =
@@ -134,6 +173,13 @@ public class CodeOwnersPluginConfigSnapshot {
    *     should be rejected
    */
   public boolean rejectNonResolvableImports(String branchName) {
+    if (rejectNonResolvableImports == null) {
+      rejectNonResolvableImports = readRejectNonResolvableImports(branchName);
+    }
+    return rejectNonResolvableImports;
+  }
+
+  private boolean readRejectNonResolvableImports(String branchName) {
     requireNonNull(branchName, "branchName");
 
     Optional<Boolean> branchSpecificFlag =
@@ -153,6 +199,15 @@ public class CodeOwnersPluginConfigSnapshot {
    *     be validated on commit received
    */
   public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForCommitReceived(
+      String branchName) {
+    if (codeOwnerConfigValidationPolicyForCommitReceived == null) {
+      codeOwnerConfigValidationPolicyForCommitReceived =
+          readCodeOwnerConfigValidationPolicyForCommitReceived(branchName);
+    }
+    return codeOwnerConfigValidationPolicyForCommitReceived;
+  }
+
+  private CodeOwnerConfigValidationPolicy readCodeOwnerConfigValidationPolicyForCommitReceived(
       String branchName) {
     requireNonNull(branchName, "branchName");
 
@@ -175,6 +230,15 @@ public class CodeOwnersPluginConfigSnapshot {
    */
   public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForSubmit(
       String branchName) {
+    if (codeOwnerConfigValidationPolicyForSubmit == null) {
+      codeOwnerConfigValidationPolicyForSubmit =
+          readCodeOwnerConfigValidationPolicyForSubmit(branchName);
+    }
+    return codeOwnerConfigValidationPolicyForSubmit;
+  }
+
+  private CodeOwnerConfigValidationPolicy readCodeOwnerConfigValidationPolicyForSubmit(
+      String branchName) {
     requireNonNull(branchName, "branchName");
 
     Optional<CodeOwnerConfigValidationPolicy> branchSpecificPolicy =
@@ -189,22 +253,35 @@ public class CodeOwnersPluginConfigSnapshot {
 
   /** Gets the merge commit strategy. */
   public MergeCommitStrategy getMergeCommitStrategy() {
-    return generalConfig.getMergeCommitStrategy(projectName, pluginConfig);
+    if (mergeCommitStrategy == null) {
+      mergeCommitStrategy = generalConfig.getMergeCommitStrategy(projectName, pluginConfig);
+    }
+    return mergeCommitStrategy;
   }
 
   /** Gets the fallback code owners. */
   public FallbackCodeOwners getFallbackCodeOwners() {
-    return generalConfig.getFallbackCodeOwners(projectName, pluginConfig);
+    if (fallbackCodeOwners == null) {
+      fallbackCodeOwners = generalConfig.getFallbackCodeOwners(projectName, pluginConfig);
+    }
+    return fallbackCodeOwners;
   }
 
   /** Gets the max paths in change messages. */
   public int getMaxPathsInChangeMessages() {
-    return generalConfig.getMaxPathsInChangeMessages(projectName, pluginConfig);
+    if (maxPathsInChangeMessages == null) {
+      maxPathsInChangeMessages =
+          generalConfig.getMaxPathsInChangeMessages(projectName, pluginConfig);
+    }
+    return maxPathsInChangeMessages;
   }
 
   /** Gets the global code owners. */
   public ImmutableSet<CodeOwnerReference> getGlobalCodeOwners() {
-    return generalConfig.getGlobalCodeOwners(pluginConfig);
+    if (globalCodeOwners == null) {
+      globalCodeOwners = generalConfig.getGlobalCodeOwners(pluginConfig);
+    }
+    return globalCodeOwners;
   }
 
   /** Gets the accounts that are exempted from requiring code owner approvals. */
@@ -241,12 +318,18 @@ public class CodeOwnersPluginConfigSnapshot {
 
   /** Gets the override info URL that is configured. */
   public Optional<String> getOverrideInfoUrl() {
-    return generalConfig.getOverrideInfoUrl(pluginConfig);
+    if (overrideInfoUrl == null) {
+      overrideInfoUrl = generalConfig.getOverrideInfoUrl(pluginConfig);
+    }
+    return overrideInfoUrl;
   }
 
   /** Gets the invalid code owner config info URL that is configured. */
   public Optional<String> getInvalidCodeOwnerConfigInfoUrl() {
-    return generalConfig.getInvalidCodeOwnerConfigInfoUrl(pluginConfig);
+    if (invalidCodeOwnerConfigInfoUrl == null) {
+      invalidCodeOwnerConfigInfoUrl = generalConfig.getInvalidCodeOwnerConfigInfoUrl(pluginConfig);
+    }
+    return invalidCodeOwnerConfigInfoUrl;
   }
 
   /**
@@ -273,14 +356,16 @@ public class CodeOwnersPluginConfigSnapshot {
   public boolean isDisabled(String branchName) {
     requireNonNull(branchName, "branchName");
 
-    boolean isDisabled =
-        statusConfig.isDisabledForBranch(
-            pluginConfig, BranchNameKey.create(projectName, branchName));
-    if (isDisabled) {
-      return true;
-    }
-
-    return isDisabled();
+    BranchNameKey branchNameKey = BranchNameKey.create(projectName, branchName);
+    return disabledByBranch.computeIfAbsent(
+        branchNameKey.branch(),
+        b -> {
+          boolean isDisabled = statusConfig.isDisabledForBranch(pluginConfig, branchNameKey);
+          if (isDisabled) {
+            return true;
+          }
+          return isDisabled();
+        });
   }
 
   /**
@@ -298,7 +383,10 @@ public class CodeOwnersPluginConfigSnapshot {
    * @return {@code true} if the code owners functionality is disabled, otherwise {@code false}
    */
   public boolean isDisabled() {
-    return statusConfig.isDisabledForProject(pluginConfig, projectName);
+    if (isDisabled == null) {
+      isDisabled = statusConfig.isDisabledForProject(pluginConfig, projectName);
+    }
+    return isDisabled;
   }
 
   /**
@@ -319,15 +407,20 @@ public class CodeOwnersPluginConfigSnapshot {
    * @return the {@link CodeOwnerBackend} that should be used for the branch
    */
   public CodeOwnerBackend getBackend(String branchName) {
-    // check if a branch specific backend is configured
-    Optional<CodeOwnerBackend> codeOwnerBackend =
-        backendConfig.getBackendForBranch(
-            pluginConfig, BranchNameKey.create(projectName, branchName));
-    if (codeOwnerBackend.isPresent()) {
-      return codeOwnerBackend.get();
-    }
+    requireNonNull(branchName, "branchName");
 
-    return getBackend();
+    BranchNameKey branchNameKey = BranchNameKey.create(projectName, branchName);
+    return backendByBranch.computeIfAbsent(
+        branchNameKey.branch(),
+        b -> {
+          Optional<CodeOwnerBackend> codeOwnerBackend =
+              backendConfig.getBackendForBranch(
+                  pluginConfig, BranchNameKey.create(projectName, branchName));
+          if (codeOwnerBackend.isPresent()) {
+            return codeOwnerBackend.get();
+          }
+          return getBackend();
+        });
   }
 
   /**
@@ -345,6 +438,13 @@ public class CodeOwnersPluginConfigSnapshot {
    * @return the {@link CodeOwnerBackend} that should be used
    */
   public CodeOwnerBackend getBackend() {
+    if (backend == null) {
+      backend = readBackend();
+    }
+    return backend;
+  }
+
+  private CodeOwnerBackend readBackend() {
     // check if a project specific backend is configured
     Optional<CodeOwnerBackend> codeOwnerBackend =
         backendConfig.getBackendForProject(pluginConfig, projectName);
@@ -358,6 +458,13 @@ public class CodeOwnersPluginConfigSnapshot {
 
   /** Checks whether an implicit code owner approval from the last uploader is assumed. */
   public boolean areImplicitApprovalsEnabled() {
+    if (implicitApprovalsEnabled == null) {
+      implicitApprovalsEnabled = readImplicitApprovalsEnabled();
+    }
+    return implicitApprovalsEnabled;
+  }
+
+  private boolean readImplicitApprovalsEnabled() {
     EnableImplicitApprovals enableImplicitApprovals =
         generalConfig.getEnableImplicitApprovals(projectName, pluginConfig);
     switch (enableImplicitApprovals) {
@@ -406,6 +513,13 @@ public class CodeOwnersPluginConfigSnapshot {
    * @return the required code owner approval that should be used
    */
   public RequiredApproval getRequiredApproval() {
+    if (requiredApproval == null) {
+      requiredApproval = readRequiredApproval();
+    }
+    return requiredApproval;
+  }
+
+  private RequiredApproval readRequiredApproval() {
     ImmutableList<RequiredApproval> configuredRequiredApprovalConfig =
         getConfiguredRequiredApproval(requiredApprovalConfig);
     if (!configuredRequiredApprovalConfig.isEmpty()) {
@@ -442,6 +556,13 @@ public class CodeOwnersPluginConfigSnapshot {
    *     configured, in this case the override functionality is disabled
    */
   public ImmutableSortedSet<RequiredApproval> getOverrideApprovals() {
+    if (overrideApprovals == null) {
+      overrideApprovals = readOverrideApprovals();
+    }
+    return overrideApprovals;
+  }
+
+  private ImmutableSortedSet<RequiredApproval> readOverrideApprovals() {
     try {
       return ImmutableSortedSet.copyOf(
           filterOutDuplicateRequiredApprovals(
