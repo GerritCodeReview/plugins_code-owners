@@ -56,17 +56,18 @@ import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@link CodeOwnersPluginConfigSnapshot}. */
-public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
+/** Tests for {@link CodeOwnersPluginProjectConfigSnapshot}. */
+public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwnersTest {
   @Inject private ProjectOperations projectOperations;
 
-  private CodeOwnersPluginConfigSnapshot.Factory codeOwnersPluginConfigSnapshotFactory;
+  private CodeOwnersPluginProjectConfigSnapshot.Factory
+      codeOwnersPluginProjectConfigSnapshotFactory;
   private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    codeOwnersPluginConfigSnapshotFactory =
-        plugin.getSysInjector().getInstance(CodeOwnersPluginConfigSnapshot.Factory.class);
+    codeOwnersPluginProjectConfigSnapshotFactory =
+        plugin.getSysInjector().getInstance(CodeOwnersPluginProjectConfigSnapshot.Factory.class);
     codeOwnerBackends =
         plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
@@ -861,6 +862,14 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     configureDisabledBranch(project, "");
 
     assertThat(cfgSnapshot().isDisabled("master")).isTrue();
+  }
+
+  @Test
+  public void cannotGetBackendForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class, () -> cfgSnapshot().getBackend(/* branchName= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("branchName");
   }
 
   @Test
@@ -1775,8 +1784,8 @@ public class CodeOwnersPluginConfigSnapshotTest extends AbstractCodeOwnersTest {
     assertThat(cfgSnapshot().rejectNonResolvableImports("master")).isFalse();
   }
 
-  private CodeOwnersPluginConfigSnapshot cfgSnapshot() {
-    return codeOwnersPluginConfigSnapshotFactory.create(project);
+  private CodeOwnersPluginProjectConfigSnapshot cfgSnapshot() {
+    return codeOwnersPluginProjectConfigSnapshotFactory.create(project);
   }
 
   private void configureFileExtension(Project.NameKey project, String fileExtension)

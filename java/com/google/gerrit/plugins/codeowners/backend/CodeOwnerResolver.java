@@ -557,7 +557,7 @@ public class CodeOwnerResolver {
     requireNonNull(email, "email");
 
     ImmutableSet<String> allowedEmailDomains =
-        codeOwnersPluginConfiguration.getAllowedEmailDomains();
+        codeOwnersPluginConfiguration.getGlobalConfig().getAllowedEmailDomains();
     if (allowedEmailDomains.isEmpty()) {
       return OptionalResultWithMessages.create(true, "all domains are allowed");
     }

@@ -34,8 +34,8 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersStatusInfo;
 import com.google.gerrit.plugins.codeowners.api.RequiredApprovalInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
@@ -64,7 +64,7 @@ public class CodeOwnerProjectConfigJsonTest extends AbstractCodeOwnersTest {
   @Rule public final MockitoRule mockito = MockitoJUnit.rule().strictness(Strictness.STRICT_STUBS);
 
   @Mock private CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  @Mock private CodeOwnersPluginConfigSnapshot codeOwnersPluginConfigSnapshot;
+  @Mock private CodeOwnersPluginProjectConfigSnapshot codeOwnersPluginConfigSnapshot;
 
   @Inject private CurrentUser currentUser;
 

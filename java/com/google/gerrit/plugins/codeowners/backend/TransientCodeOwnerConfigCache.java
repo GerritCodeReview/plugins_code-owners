@@ -55,7 +55,8 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
       CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwners = codeOwners;
-    this.maxCacheSize = codeOwnersPluginConfiguration.getMaxCodeOwnerConfigCacheSize();
+    this.maxCacheSize =
+        codeOwnersPluginConfiguration.getGlobalConfig().getMaxCodeOwnerConfigCacheSize();
     this.counters = new Counters(codeOwnerMetrics);
   }
 
