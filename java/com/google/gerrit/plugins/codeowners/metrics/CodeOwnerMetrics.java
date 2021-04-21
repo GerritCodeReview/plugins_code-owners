@@ -45,6 +45,7 @@ public class CodeOwnerMetrics {
   public final Timer0 resolveCodeOwnerConfig;
   public final Timer0 resolveCodeOwnerConfigImport;
   public final Timer0 resolveCodeOwnerConfigImports;
+  public final Timer0 resolveCodeOwnerReferences;
   public final Timer0 resolvePathCodeOwners;
   public final Timer0 runCodeOwnerSubmitRule;
 
@@ -117,6 +118,9 @@ public class CodeOwnerMetrics {
         createLatencyTimer(
             "resolve_code_owner_config_imports",
             "Latency for resolving all imports of a code owner config file");
+    this.resolveCodeOwnerReferences =
+        createLatencyTimer(
+            "resolve_code_owner_references", "Latency for resolving the code owner references");
     this.resolvePathCodeOwners =
         createLatencyTimer(
             "resolve_path_code_owners", "Latency for resolving the code owners of a path");
