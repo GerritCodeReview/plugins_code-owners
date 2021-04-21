@@ -106,13 +106,14 @@ be used.
    Root code owners can differ from branch to branch.
 3. Default code owners:
    [Default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration)
-   are stored in the code owner config file in the `refs/meta/config` branch
-   that apply for all branches (unless inheritance is ignored).\
-   The same as root code owners these are experienced developers that can
-   approve changes to all the code base if needed.\
-   However in contrast to root code owners that apply to all branches (including
-   newly created branches), and hence can be used if code owners should be kept
-   consistent across all branches.\
+   are stored in the code owner config file (e.g. the `OWNERS` file) in the
+   `refs/meta/config` branch and apply for all branches (unless inheritance is
+   ignored).\
+   The same as root code owners, default code owners are experienced developers
+   that can approve changes to all the code base if needed.\
+   However in contrast to root code owners, default code owners apply to all
+   branches (including newly created branches), and hence can be used if code
+   owners should be kept consistent across all branches.\
    A small disadvantage is that this code owner definition is not very well
    discoverable since it is stored in the `refs/meta/config` branch, but default
    code owners are suggested to users the same way as other code owners.
