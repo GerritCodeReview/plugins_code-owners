@@ -49,7 +49,6 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
@@ -1581,23 +1580,15 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
                 project.get(),
                 getCodeOwnerConfigFileName(),
                 nonExistingProject.get()),
-            String.format(
-                "resolving code owner reference %s", CodeOwnerReference.create(user.email())),
-            String.format("resolved to account %d", user.id().get()),
+            String.format("resolved email %s to account %d", user.email(), user.id().get()),
             String.format("resolve code owners for %s from code owner config %s", path, fooKey),
-            String.format(
-                "resolving code owner reference %s", CodeOwnerReference.create(nonExistingEmail)),
             String.format(
                 "cannot resolve code owner email %s: no account with this email exists",
                 nonExistingEmail),
             String.format("resolve code owners for %s from code owner config %s", path, rootKey),
-            String.format(
-                "resolving code owner reference %s", CodeOwnerReference.create(admin.email())),
-            String.format("resolved to account %d", admin.id().get()),
+            String.format("resolved email %s to account %d", admin.email(), admin.id().get()),
             "resolve global code owners",
             String.format(
-                "resolving code owner reference %s",
-                CodeOwnerReference.create(globalOwner.email())),
-            String.format("resolved to account %d", globalOwner.id().get()));
+                "resolved email %s to account %d", globalOwner.email(), globalOwner.id().get()));
   }
 }
