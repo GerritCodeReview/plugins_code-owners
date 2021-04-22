@@ -198,7 +198,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
-        .contains(String.format("account %s for email %s is inactive", user.id(), user.email()));
+        .contains(
+            String.format("ignoring inactive account %s for email %s", user.id(), user.email()));
   }
 
   @Test

@@ -141,7 +141,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in %s",
                 codeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
-            String.format("resolved to account %s", codeOwner.id()));
+            String.format("resolved email %s to account %s", codeOwner.email(), codeOwner.id()));
   }
 
   @Test
@@ -178,7 +178,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in %s",
                 codeOwner.email(), getCodeOwnerConfigFilePath(ROOT_PATH)),
-            String.format("resolved to account %s", codeOwner.id()));
+            String.format("resolved email %s to account %s", codeOwner.email(), codeOwner.id()));
   }
 
   @Test
@@ -220,7 +220,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "found email %s as code owner in %s",
                 codeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
             "parent code owners are ignored",
-            String.format("resolved to account %s", codeOwner.id()));
+            String.format("resolved email %s to account %s", codeOwner.email(), codeOwner.id()));
   }
 
   @Test
@@ -251,7 +251,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in %s",
                 secondaryEmail, getCodeOwnerConfigFilePath(ROOT_PATH)),
-            String.format("resolved to account %s", codeOwner.id()));
+            String.format("resolved email %s to account %s", secondaryEmail, codeOwner.id()));
   }
 
   @Test
@@ -315,7 +315,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
     assertThat(checkCodeOwnerInfo)
-        .hasDebugLogsThatContainAllOf(String.format("resolved to account %s", user.id()));
+        .hasDebugLogsThatContainAllOf(
+            String.format("resolved email %s to account %s", user.email(), user.id()));
   }
 
   @Test
@@ -431,7 +432,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "found email %s as code owner in %s",
                 inactiveUser.email(), getCodeOwnerConfigFilePath(ROOT_PATH)),
             String.format(
-                "account %s for email %s is inactive", inactiveUser.id(), inactiveUser.email()));
+                "ignoring inactive account %s for email %s",
+                inactiveUser.id(), inactiveUser.email()));
   }
 
   @Test
@@ -558,7 +560,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in default code owner config",
                 defaultCodeOwner.email()),
-            String.format("resolved to account %s", defaultCodeOwner.id()));
+            String.format(
+                "resolved email %s to account %s",
+                defaultCodeOwner.email(), defaultCodeOwner.id()));
   }
 
   @Test
@@ -584,7 +588,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in default code owner config",
                 CodeOwnerResolver.ALL_USERS_WILDCARD),
-            String.format("resolved to account %s", defaultCodeOwner.id()));
+            String.format(
+                "resolved email %s to account %s",
+                defaultCodeOwner.email(), defaultCodeOwner.id()));
   }
 
   @Test
@@ -608,7 +614,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format("found email %s as global code owner", globalCodeOwner.email()),
-            String.format("resolved to account %s", globalCodeOwner.id()));
+            String.format(
+                "resolved email %s to account %s", globalCodeOwner.email(), globalCodeOwner.id()));
   }
 
   @Test
@@ -635,7 +642,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .hasDebugLogsThatContainAllOf(
             String.format(
                 "found email %s as global code owner", CodeOwnerResolver.ALL_USERS_WILDCARD),
-            String.format("resolved to account %s", globalCodeOwner.id()));
+            String.format(
+                "resolved email %s to account %s", globalCodeOwner.email(), globalCodeOwner.id()));
   }
 
   @Test
@@ -661,7 +669,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "found email %s as code owner in %s",
                 codeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
             String.format("account %s is visible to user %s", codeOwner.id(), user.username()),
-            String.format("resolved to account %s", codeOwner.id()));
+            String.format("resolved email %s to account %s", codeOwner.email(), codeOwner.id()));
   }
 
   @Test
@@ -918,7 +926,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in %s",
                 mdOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
-            String.format("resolved to account %s", mdOwner.id()));
+            String.format("resolved email %s to account %s", mdOwner.email(), mdOwner.id()));
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatDoNotContainAnyOf(
             String.format(
@@ -989,7 +997,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in %s",
                 fileCodeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
-            String.format("resolved to account %s", fileCodeOwner.id()));
+            String.format(
+                "resolved email %s to account %s", fileCodeOwner.email(), fileCodeOwner.id()));
   }
 
   @Test
@@ -1043,7 +1052,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in %s",
                 codeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
-            String.format("resolved to account %s", codeOwner.id()));
+            String.format("resolved email %s to account %s", codeOwner.email(), codeOwner.id()));
   }
 
   @Test
@@ -1107,7 +1116,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "found email %s as code owner in %s",
                 mdCodeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
-            String.format("resolved to account %s", mdCodeOwner.id()));
+            String.format(
+                "resolved email %s to account %s", mdCodeOwner.email(), mdCodeOwner.id()));
 
     // 2. check for user and path of an md file
     checkCodeOwnerInfo = checkCodeOwner(path, user.email());
@@ -1129,7 +1139,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 testPathExpressions.matchFileType("md"),
                 getCodeOwnerConfigFileName(),
                 testPathExpressions.matchFileType("md")),
-            String.format("resolved to account %s", user.id()));
+            String.format("resolved email %s to account %s", user.email(), user.id()));
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatDoNotContainAnyOf(String.format("email %s", user.email()));
 
@@ -1145,7 +1155,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "Code owner config %s:%s:/foo/%s imports:\n"
                     + "* /bar/%s (global import, import mode = ALL)",
                 project, "master", getCodeOwnerConfigFileName(), getCodeOwnerConfigFileName()),
-            String.format("resolved to account %s", mdCodeOwner.id()));
+            String.format(
+                "resolved email %s to account %s", mdCodeOwner.email(), mdCodeOwner.id()));
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatDoNotContainAnyOf(String.format("email %s", mdCodeOwner.email()));
   }
