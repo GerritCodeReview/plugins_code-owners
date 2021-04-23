@@ -96,6 +96,7 @@ public interface BranchCodeOwners {
   abstract class CodeOwnerCheckRequest {
     private String email;
     private String path;
+    private String change;
     private String user;
 
     /**
@@ -128,6 +129,24 @@ public interface BranchCodeOwners {
     @Nullable
     public String getPath() {
       return path;
+    }
+
+    /**
+     * Sets the change for which permissions should be checked.
+     *
+     * <p>If not specified permissions are not checked.
+     *
+     * @param change the change for which permissions should be checked
+     */
+    public CodeOwnerCheckRequest change(@Nullable String change) {
+      this.change = change;
+      return this;
+    }
+
+    /** Returns the change for which permissions should be checked. */
+    @Nullable
+    public String getChange() {
+      return change;
     }
 
     /**

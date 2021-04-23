@@ -69,6 +69,42 @@ public class CodeOwnerCheckInfoSubject extends Subject {
     check("isResolvable").that(codeOwnerCheckInfo().isResolvable).isFalse();
   }
 
+  public void canReadRef() {
+    check("canReadRef").that(codeOwnerCheckInfo().canReadRef).isTrue();
+  }
+
+  public void cannotReadRef() {
+    check("canReadRef").that(codeOwnerCheckInfo().canReadRef).isFalse();
+  }
+
+  public void canReadRefNotSet() {
+    check("canReadRef").that(codeOwnerCheckInfo().canReadRef).isNull();
+  }
+
+  public void canSeeChange() {
+    check("canSeeChange").that(codeOwnerCheckInfo().canSeeChange).isTrue();
+  }
+
+  public void cannotSeeChange() {
+    check("canSeeChange").that(codeOwnerCheckInfo().canSeeChange).isFalse();
+  }
+
+  public void canSeeChangeNotSet() {
+    check("canSeeChange").that(codeOwnerCheckInfo().canSeeChange).isNull();
+  }
+
+  public void canApproveChange() {
+    check("canApproveChange").that(codeOwnerCheckInfo().canApproveChange).isTrue();
+  }
+
+  public void cannotApproveChange() {
+    check("canApproveChange").that(codeOwnerCheckInfo().canApproveChange).isFalse();
+  }
+
+  public void canApproveChangeNotSet() {
+    check("canApproveChange").that(codeOwnerCheckInfo().canApproveChange).isNull();
+  }
+
   public IterableSubject hasCodeOwnerConfigFilePathsThat() {
     return check("codeOwnerConfigFilePaths").that(codeOwnerCheckInfo().codeOwnerConfigFilePaths);
   }

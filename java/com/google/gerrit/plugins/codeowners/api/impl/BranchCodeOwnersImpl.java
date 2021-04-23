@@ -99,6 +99,7 @@ public class BranchCodeOwnersImpl implements BranchCodeOwners {
         CheckCodeOwner checkCodeOwner = checkCodeOwnerProvider.get();
         checkCodeOwner.setEmail(getEmail());
         checkCodeOwner.setPath(getPath());
+        checkCodeOwner.setChange(getChange());
         checkCodeOwner.setUser(getUser());
         try {
           return checkCodeOwner.apply(branchResource).value();

@@ -38,12 +38,18 @@ import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnersResult;
 import com.google.gerrit.plugins.codeowners.backend.UnresolvedImportFormatter;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.account.AccountResource;
+import com.google.gerrit.server.change.ChangeFinder;
+import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.permissions.ChangePermission;
+import com.google.gerrit.server.permissions.LabelPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
+import com.google.gerrit.server.permissions.RefPermission;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.restapi.account.AccountsCollection;
 import com.google.inject.Inject;
@@ -74,9 +80,12 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   private final CodeOwners codeOwners;
   private final AccountsCollection accountsCollection;
   private final UnresolvedImportFormatter unresolvedImportFormatter;
+  private final ChangeFinder changeFinder;
 
   private String email;
   private String path;
+  private String change;
+  private ChangeNotes changeNotes;
   private String user;
   private IdentifiedUser identifiedUser;
 
@@ -90,7 +99,8 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       Provider<CodeOwnerResolver> codeOwnerResolverProvider,
       CodeOwners codeOwners,
       AccountsCollection accountsCollection,
-      UnresolvedImportFormatter unresolvedImportFormatter) {
+      UnresolvedImportFormatter unresolvedImportFormatter,
+      ChangeFinder changeFinder) {
     this.checkCodeOwnerCapability = checkCodeOwnerCapability;
     this.permissionBackend = permissionBackend;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -100,6 +110,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     this.codeOwners = codeOwners;
     this.accountsCollection = accountsCollection;
     this.unresolvedImportFormatter = unresolvedImportFormatter;
+    this.changeFinder = changeFinder;
   }
 
   @Option(name = "--email", usage = "email for which the code ownership should be checked")
@@ -110,6 +121,15 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   @Option(name = "--path", usage = "path for which the code ownership should be checked")
   public void setPath(String path) {
     this.path = path;
+  }
+
+  @Option(
+      name = "--change",
+      usage =
+          "change for which permissions should be checked,"
+              + " if not specified permissions are not checked")
+  public void setChange(String change) {
+    this.change = change;
   }
 
   @Option(
@@ -127,7 +147,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
           PermissionBackendException {
     permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
 
-    validateInput();
+    validateInput(branchResource);
 
     Path absolutePath = JgitPath.of(path).getAsAbsolutePath();
     List<String> messages = new ArrayList<>();
@@ -231,9 +251,36 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       isCodeOwnershipAssignedToAllUsers.set(true);
     }
 
-    OptionalResultWithMessages<Boolean> isResolvableResult = isResolvable();
-    boolean isResolvable = isResolvableResult.get();
-    messages.addAll(isResolvableResult.messages());
+    boolean isResolvable;
+    Boolean canReadRef = null;
+    Boolean canSeeChange = null;
+    Boolean canApproveChange = null;
+    if (email.equals(CodeOwnerResolver.ALL_USERS_WILDCARD)) {
+      isResolvable = true;
+    } else {
+      OptionalResultWithMessages<CodeOwner> isResolvableResult = isResolvable();
+      isResolvable = isResolvableResult.isPresent();
+      messages.addAll(isResolvableResult.messages());
+
+      if (isResolvable) {
+        PermissionBackend.WithUser withUser =
+            permissionBackend.absentUser(isResolvableResult.get().accountId());
+        canReadRef = withUser.ref(branchResource.getBranchKey()).test(RefPermission.READ);
+
+        if (changeNotes != null) {
+          PermissionBackend.ForChange forChange = withUser.change(changeNotes);
+          canSeeChange = forChange.test(ChangePermission.READ);
+          RequiredApproval requiredApproval =
+              codeOwnersPluginConfiguration
+                  .getProjectConfig(branchResource.getNameKey())
+                  .getRequiredApproval();
+          canApproveChange =
+              forChange.test(
+                  new LabelPermission.WithValue(
+                      requiredApproval.labelType(), requiredApproval.value()));
+        }
+      }
+    }
 
     boolean isFallbackCodeOwner =
         !isCodeOwnershipAssignedToEmail.get()
@@ -249,6 +296,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                 || isFallbackCodeOwner)
             && isResolvable;
     codeOwnerCheckInfo.isResolvable = isResolvable;
+    codeOwnerCheckInfo.canReadRef = canReadRef;
+    codeOwnerCheckInfo.canSeeChange = canSeeChange;
+    codeOwnerCheckInfo.canApproveChange = canApproveChange;
     codeOwnerCheckInfo.codeOwnerConfigFilePaths =
         codeOwnerConfigFilePaths.stream().map(Path::toString).collect(toList());
     codeOwnerCheckInfo.isFallbackCodeOwner = isFallbackCodeOwner && isResolvable;
@@ -259,8 +309,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     return Response.ok(codeOwnerCheckInfo);
   }
 
-  private void validateInput()
-      throws BadRequestException, AuthException, IOException, ConfigInvalidException {
+  private void validateInput(BranchResource branchResource)
+      throws BadRequestException, AuthException, IOException, ConfigInvalidException,
+          PermissionBackendException {
     if (email == null) {
       throw new BadRequestException("email required");
     }
@@ -276,6 +327,21 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
       } catch (ResourceNotFoundException e) {
         throw new BadRequestException(String.format("user %s not found", user), e);
       }
+    }
+    if (change != null) {
+      Optional<ChangeNotes> changeNotes = changeFinder.findOne(change);
+      if (!changeNotes.isPresent()
+          || !permissionBackend
+              .currentUser()
+              .change(changeNotes.get())
+              .test(ChangePermission.READ)) {
+        throw new BadRequestException(String.format("change %s not found", change));
+      }
+      if (!changeNotes.get().getChange().getDest().equals(branchResource.getBranchKey())) {
+        throw new BadRequestException(
+            "target branch of specified change must match branch from the request URL");
+      }
+      this.changeNotes = changeNotes.get();
     }
   }
 
@@ -324,11 +390,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     }
   }
 
-  private OptionalResultWithMessages<Boolean> isResolvable() {
-    if (email.equals(CodeOwnerResolver.ALL_USERS_WILDCARD)) {
-      return OptionalResultWithMessages.create(true);
-    }
-
+  private OptionalResultWithMessages<CodeOwner> isResolvable() {
     CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get();
     if (identifiedUser != null) {
       codeOwnerResolver.forUser(identifiedUser);
@@ -341,6 +403,9 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     List<String> messages = new ArrayList<>();
     messages.add(String.format("trying to resolve email %s", email));
     messages.addAll(resolveResult.messages());
-    return OptionalResultWithMessages.create(resolveResult.isPresent(), messages);
+    if (resolveResult.isPresent()) {
+      return OptionalResultWithMessages.create(resolveResult.get(), messages);
+    }
+    return OptionalResultWithMessages.createEmpty(messages);
   }
 }
