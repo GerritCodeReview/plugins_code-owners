@@ -268,6 +268,7 @@ The following request parameters can be specified:
 | ----------- | --------- | ----------- |
 | `email`     | mandatory | Email for which the code ownership should be checked.
 | `path`      | mandatory | Path for which the code ownership should be checked.
+| `change`    | optional  | Change for which permissions should be checked. If not specified change permissions are not checked.
 | `user`      | optional  | User for which the code owner visibility should be checked. If not specified the code owner visibility is not checked. Can be used to investigate why a code owner is not shown/suggested to this user.
 
 Requires that the caller has the [Check Code Owner](#checkCodeOwner) or the
@@ -300,6 +301,7 @@ As response a [CodeOwnerCheckInfo](#code-owner-check-info) entity is returned.
   {
     "is_code_owner": "false",
     "is_resolvable": "false",
+    "can_read_ref": "true",
     "code_owner_config_file_paths": [
       "/OWNERS",
     ],
@@ -823,6 +825,9 @@ ownership of a user for a path in a branch.
 | --------------- | ----------- |
 | `is_code_owner` | Whether the given email owns the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) any code owner config file assigns codeownership to the email for the path (see field `code_owner_config_file_paths`) or the email is configured as default code owner (see field `is_default_code_owner` or the email is configured as global code owner (see field `is_global_code_owner`) or the user is a fallback code owner (see field `is_fallback_code_owner`).
 | `is_resolvable` | Whether the given email is resolvable for the specified user or the calling user if no user was specified.
+| `can_read_ref` | Whether the user to which the given email was resolved has read permissions on the branch. Not set if the given email is not resolvable or if the given email is the all users wildcard (aka '*').
+| `can_see_change`| Whether the user to which the given email was resolved can see the specified change. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
+| `can_approve_change`| Whether the user to which the given email was resolved can code-owner approve the specified change. Being able to code-owner approve the change means that the user has permissions to vote on the label that is [required as code owner approval](config.html#pluginCodeOwnersRequiredApproval). Other permissions are not considered for computing this flag. In particular missing read permissions on the change don't have any effect on this flag. Whether the user misses read permissions on the change (and hence cannot apply the code owner approval) can be seen from the `can_see_change` flag. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
 | `code_owner_config_file_paths` | Paths of the code owner config files that assign code ownership to the specified email and path as a list. Note that if code ownership is assigned to the email via a code owner config files, but the email is not resolvable (see field `is_resolvable` field), the user is not a code owner.
 | `is_fallback_code_owner` | Whether the given email is a fallback code owner of the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) no code owners are defined for the specified path in the branch and c) parent code owners are not ignored and d) the user is a fallback code owner according to the [configured fallback code owner policy](config.html#pluginCodeOwnersFallbackCodeOwners)
 | `is_default_code_owner` | Whether the given email is configured as a default code owner in the code owner config file in `refs/meta/config`. Note that if the email is configured as default code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.

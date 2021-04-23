@@ -15,7 +15,10 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.labelPermissionKey;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.permissionKey;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerCheckInfoSubject.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -27,8 +30,10 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Account;
+import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
+import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -130,6 +135,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).canReadRef();
+    assertThat(checkCodeOwnerInfo).canSeeChangeNotSet();
+    assertThat(checkCodeOwnerInfo).canApproveChangeNotSet();
     assertThat(checkCodeOwnerInfo)
         .hasCodeOwnerConfigFilePathsThat()
         .containsExactly(getCodeOwnerConfigFilePath("/foo/"));
@@ -508,6 +516,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         checkCodeOwner(ROOT_PATH, CodeOwnerResolver.ALL_USERS_WILDCARD);
     assertThat(checkCodeOwnerInfo).isNotCodeOwner();
     assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).canReadRefNotSet();
+    assertThat(checkCodeOwnerInfo).canSeeChangeNotSet();
+    assertThat(checkCodeOwnerInfo).canApproveChangeNotSet();
     assertThat(checkCodeOwnerInfo).hasCodeOwnerConfigFilePathsThat().isEmpty();
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
@@ -1290,8 +1301,150 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).hasDebugLogsThatDoNotContainAnyOf("");
   }
 
+  @Test
+  public void checkCodeOwnerThatCannotReadRef() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    // Make read permission on master branch exclusive for admins, so that the code owner cannot
+    // read master.
+    projectOperations
+        .allProjectsForUpdate()
+        .add(allow(Permission.READ).ref("refs/heads/master").group(adminGroupUuid()))
+        .setExclusiveGroup(permissionKey(Permission.READ).ref("refs/heads/master"), true)
+        .update();
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).cannotReadRef();
+    assertThat(checkCodeOwnerInfo).canSeeChangeNotSet();
+    assertThat(checkCodeOwnerInfo).canApproveChangeNotSet();
+  }
+
+  @Test
+  public void cannotCheckForNonExistingChange() throws Exception {
+    String nonExistingChange = "non-existing";
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class,
+            () -> checkCodeOwnerForChange("/", user.email(), nonExistingChange));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("change %s not found", nonExistingChange));
+  }
+
+  @Test
+  public void cannotCheckForNonVisibleChange() throws Exception {
+    String changeId = createChange().getChangeId();
+    gApi.changes().id(changeId).setPrivate(true);
+
+    projectOperations
+        .allProjectsForUpdate()
+        .add(allowCapability("code-owners-" + CheckCodeOwnerCapability.ID).group(REGISTERED_USERS))
+        .update();
+
+    requestScopeOperations.setApiUser(user.id());
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class, () -> checkCodeOwnerForChange("/", user.email(), changeId));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(String.format("change %s not found", changeId));
+  }
+
+  @Test
+  public void cannotCheckForChangeOfOtherBranch() throws Exception {
+    // Create another branch
+    String branchName = "foo";
+    BranchInput branchInput = new BranchInput();
+    branchInput.ref = branchName;
+    branchInput.revision = projectOperations.project(project).getHead("master").name();
+    gApi.projects().name(project.get()).branch(branchInput.ref).create(branchInput);
+
+    String changeId = createChange("refs/for/" + branchName).getChangeId();
+    BadRequestException exception =
+        assertThrows(
+            BadRequestException.class, () -> checkCodeOwnerForChange("/", user.email(), changeId));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo("target branch of specified change must match branch from the request URL");
+  }
+
+  @Test
+  public void checkCodeOwnerThatCannotSeeChange_privateChange() throws Exception {
+    String changeId = createChange().getChangeId();
+    gApi.changes().id(changeId).setPrivate(true);
+
+    testCheckCodeOwnerThatCannotSeeChange(changeId, /* canReadRef= */ true);
+  }
+
+  @Test
+  public void checkCodeOwnerThatCannotSeeChange_cannotReadRef() throws Exception {
+    String changeId = createChange().getChangeId();
+
+    // Make read permission on master branch exclusive for admins, so that the code owner cannot
+    // read master.
+    projectOperations
+        .allProjectsForUpdate()
+        .add(allow(Permission.READ).ref("refs/heads/master").group(adminGroupUuid()))
+        .setExclusiveGroup(permissionKey(Permission.READ).ref("refs/heads/master"), true)
+        .update();
+
+    testCheckCodeOwnerThatCannotSeeChange(changeId, /* canReadRef= */ false);
+  }
+
+  private void testCheckCodeOwnerThatCannotSeeChange(String changeId, boolean canReadRef)
+      throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo =
+        checkCodeOwnerForChange(path, codeOwner.email(), changeId);
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    if (canReadRef) {
+      assertThat(checkCodeOwnerInfo).canReadRef();
+    } else {
+      assertThat(checkCodeOwnerInfo).cannotReadRef();
+    }
+    assertThat(checkCodeOwnerInfo).cannotSeeChange();
+    assertThat(checkCodeOwnerInfo).canApproveChange();
+  }
+
+  @Test
+  public void checkCodeOwnerThatCannotApproveChange() throws Exception {
+    String changeId = createChange().getChangeId();
+
+    // Remove permission to vote on the Code-Review label.
+    projectOperations
+        .allProjectsForUpdate()
+        .remove(labelPermissionKey("Code-Review").ref("refs/heads/*"))
+        .update();
+
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo =
+        checkCodeOwnerForChange(path, codeOwner.email(), changeId);
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo).isResolvable();
+    assertThat(checkCodeOwnerInfo).canReadRef();
+    assertThat(checkCodeOwnerInfo).canSeeChange();
+    assertThat(checkCodeOwnerInfo).cannotApproveChange();
+  }
+
   private CodeOwnerCheckInfo checkCodeOwner(String path, String email) throws RestApiException {
-    return checkCodeOwner(path, email, null);
+    return checkCodeOwner(path, email, /* user= */ null);
   }
 
   private CodeOwnerCheckInfo checkCodeOwner(String path, String email, @Nullable String user)
@@ -1303,6 +1456,18 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .path(path)
         .email(email)
         .user(user)
+        .check();
+  }
+
+  private CodeOwnerCheckInfo checkCodeOwnerForChange(
+      String path, String email, @Nullable String change) throws RestApiException {
+    return projectCodeOwnersApiFactory
+        .project(project)
+        .branch("master")
+        .checkCodeOwner()
+        .path(path)
+        .email(email)
+        .change(change)
         .check();
   }
 
