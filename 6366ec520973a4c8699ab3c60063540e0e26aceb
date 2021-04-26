@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "49613cef_6d3d73e0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerCheckInfo.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T08:55:37Z",
+      "side": 1,
+      "message": "forgot close bracket here and below",
+      "range": {
+        "startLine": 55,
+        "startChar": 53,
+        "endLine": 55,
+        "endChar": 54
+      },
+      "revId": "6366ec520973a4c8699ab3c60063540e0e26aceb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f90bb14c_1f094351",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1342,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T08:55:37Z",
+      "side": 1,
+      "message": "omit",
+      "range": {
+        "startLine": 1342,
+        "startChar": 45,
+        "endLine": 1342,
+        "endChar": 56
+      },
+      "revId": "6366ec520973a4c8699ab3c60063540e0e26aceb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1fae463a_ebff646b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1430,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T08:55:37Z",
+      "side": 1,
+      "message": "to approve changes you also need to see them",
+      "range": {
+        "startLine": 1430,
+        "startChar": 0,
+        "endLine": 1430,
+        "endChar": 54
+      },
+      "revId": "6366ec520973a4c8699ab3c60063540e0e26aceb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ab67d933_d18944f5",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1480,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T08:55:37Z",
+      "side": 1,
+      "message": "here and in other tests: consider removing all this stuff since it\u0027s not really relevant and it\u0027s tested in other tests.",
+      "range": {
+        "startLine": 1471,
+        "startChar": 0,
+        "endLine": 1480,
+        "endChar": 0
+      },
+      "revId": "6366ec520973a4c8699ab3c60063540e0e26aceb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "406901e8_2d90925c",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 271,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T08:55:37Z",
+      "side": 1,
+      "message": "canReadRef is still checked even without it though",
+      "range": {
+        "startLine": 271,
+        "startChar": 83,
+        "endLine": 271,
+        "endChar": 120
+      },
+      "revId": "6366ec520973a4c8699ab3c60063540e0e26aceb",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
