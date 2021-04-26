@@ -39,8 +39,8 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.InvalidCodeOwnerConfigException;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
@@ -315,7 +315,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevCommit revCommit,
       IdentifiedUser user,
       boolean force) {
-    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project());
     logger.atFine().log("force = %s", force);
     if (!force && codeOwnersConfig.isDisabled(branchNameKey.branch())) {

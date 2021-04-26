@@ -54,7 +54,7 @@ public class GetCodeOwnerConfigForPathInBranch
   @Override
   public Response<CodeOwnerConfigInfo> apply(PathResource rsrc)
       throws MethodNotAllowedException, IOException {
-    codeOwnersPluginConfiguration.checkExperimentalRestEndpointsEnabled();
+    codeOwnersPluginConfiguration.getGlobalConfig().checkExperimentalRestEndpointsEnabled();
 
     Optional<CodeOwnerConfig> codeOwnerConfig =
         codeOwners.get(rsrc.getCodeOwnerConfigKey(), rsrc.getRevision());

@@ -33,8 +33,8 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.metrics.Timer0;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
@@ -260,7 +260,7 @@ public class CodeOwnerApprovalCheck {
           "prepare stream to compute file statuses (project = %s, change = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get());
 
-      CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+      CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
           codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
 
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
@@ -373,7 +373,7 @@ public class CodeOwnerApprovalCheck {
           changeNotes.getChangeId().get(),
           patchSet.id().get());
 
-      CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+      CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
           codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
 
       RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();

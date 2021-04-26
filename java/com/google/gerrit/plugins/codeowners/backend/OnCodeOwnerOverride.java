@@ -22,8 +22,8 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.metrics.Timer0;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.IdentifiedUser;
@@ -64,7 +64,7 @@ class OnCodeOwnerOverride implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals) {
-    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
     if (codeOwnersConfig.isDisabled(changeNotes.getChange().getDest().branch())) {
       return Optional.empty();

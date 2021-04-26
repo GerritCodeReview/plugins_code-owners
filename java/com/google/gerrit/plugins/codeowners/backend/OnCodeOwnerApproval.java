@@ -21,8 +21,8 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.metrics.Timer0;
-import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -75,7 +75,7 @@ class OnCodeOwnerApproval implements OnPostReview {
       PatchSet patchSet,
       Map<String, Short> oldApprovals,
       Map<String, Short> approvals) {
-    CodeOwnersPluginConfigSnapshot codeOwnersConfig =
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
     int maxPathsInChangeMessage = codeOwnersConfig.getMaxPathsInChangeMessages();
     if (codeOwnersConfig.isDisabled(changeNotes.getChange().getDest().branch())
