@@ -66,17 +66,22 @@ export class OwnerRequirementValue extends
         <template is="dom-if" if="[[!_isLoading]]">
           <template is="dom-if" if="[[!_pluginFailed(model.pluginStatus)]]">
             <template is="dom-if" if="[[!model.branchConfig.no_code_owners_defined]]">
-              <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
-              <template is="dom-if" if="[[_overrideInfoUrl]]">
-                <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
-                  target="_blank">
-                  <iron-icon icon="gr-icons:help-outline"
-                    title="Documentation for overriding code owners"></iron-icon>
-                </a>
+              <template is="dom-if" if="[[!_newerPatchsetUploaded]]">
+                <span>[[_computeStatusText(_statusCount, _isOverriden)]]</span>
+                <template is="dom-if" if="[[_overrideInfoUrl]]">
+                  <a on-click="_reportDocClick" href="[[_overrideInfoUrl]]"
+                    target="_blank">
+                    <iron-icon icon="gr-icons:help-outline"
+                      title="Documentation for overriding code owners"></iron-icon>
+                  </a>
+                </template>
+                <gr-button link on-click="_openReplyDialog">
+                  [[_getSuggestOwnersText(_statusCount)]]
+                </gr-button>
               </template>
-              <gr-button link on-click="_openReplyDialog">
-                [[_getSuggestOwnersText(_statusCount)]]
-              </gr-button>
+              <template is="dom-if" if="[[_newerPatchsetUploaded]]">
+                <span>A newer patch set has been uploaded.</span>
+              </template>
             </template>
             <template is="dom-if" if="[[model.branchConfig.no_code_owners_defined]]">
               <span>No code-owners file</span>
@@ -99,6 +104,7 @@ export class OwnerRequirementValue extends
   static get properties() {
     return {
       _statusCount: Object,
+      _newerPatchsetUploaded: Boolean,
       _isLoading: {
         type: Boolean,
         computed: '_computeIsLoading(model.branchConfig, model.status, ' +
@@ -143,10 +149,12 @@ export class OwnerRequirementValue extends
   _onStatusChanged(status, userRole) {
     if (!status || !userRole) {
       this._statusCount = undefined;
+      this._newerPatchsetUploaded = undefined;
       return;
     }
     const rawStatuses = status.rawStatuses;
     this._statusCount = this._getStatusCount(rawStatuses);
+    this._newerPatchsetUploaded = status.newerPatchsetUploaded;
     this.reporting.reportLifeCycle('owners-submit-requirement-summary-shown',
         {...this._statusCount, user_role: userRole});
   }

@@ -136,11 +136,13 @@ export class CodeOwnerService {
 
   async getStatus() {
     const status = await this._getStatus();
-    if (status.enabled && !this.isOnLatestPatchset(status.patchsetNumber)) {
-      // status is outdated, abort and re-init
+    if (status.enabled && this._isOnOlderPatchset(status.patchsetNumber)) {
+      // status is returned for an older patchset. Abort, re-init and refetch
+      // new status - it is expected, that after several retry a status
+      // for the newest patchset is returned
       this.reset();
       this.prefetch();
-      return await this.codeOwnersCacheApi.getStatus();
+      return await this.getStatus();
     }
     return status;
   }
@@ -153,18 +155,21 @@ export class CodeOwnerService {
         enabled: false,
         codeOwnerStatusMap: new Map(),
         rawStatuses: [],
+        newerPatchsetUploaded: false,
       };
     }
 
-    const onwerStatus = await this.codeOwnersCacheApi.listOwnerStatus();
+    const ownerStatus = await this.codeOwnersCacheApi.listOwnerStatus();
 
     return {
       enabled: true,
-      patchsetNumber: onwerStatus.patch_set_number,
+      patchsetNumber: ownerStatus.patch_set_number,
       codeOwnerStatusMap: this._formatStatuses(
-          onwerStatus.file_code_owner_statuses
+          ownerStatus.file_code_owner_statuses
       ),
-      rawStatuses: onwerStatus.file_code_owner_statuses,
+      rawStatuses: ownerStatus.file_code_owner_statuses,
+      newerPatchsetUploaded:
+        this._isOnNewerPatchset(ownerStatus.patch_set_number),
     };
   }
 
@@ -274,9 +279,14 @@ export class CodeOwnerService {
     });
   }
 
-  isOnLatestPatchset(patchsetId) {
+  _isOnNewerPatchset(patchsetId) {
     const latestRevision = this.change.revisions[this.change.current_revision];
-    return `${latestRevision._number}` === `${patchsetId}`;
+    return patchsetId > latestRevision._number;
+  }
+
+  _isOnOlderPatchset(patchsetId) {
+    const latestRevision = this.change.revisions[this.change.current_revision];
+    return patchsetId < latestRevision._number;
   }
 
   reset() {
