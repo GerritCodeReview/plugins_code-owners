@@ -18,8 +18,8 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.LegacySubmitRequirement;
 import com.google.gerrit.entities.SubmitRecord;
-import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.extensions.annotations.Exports;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -51,8 +51,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
     }
   }
 
-  private static final SubmitRequirement SUBMIT_REQUIREMENT =
-      SubmitRequirement.builder().setFallbackText("Code Owners").setType("code-owners").build();
+  private static final LegacySubmitRequirement SUBMIT_REQUIREMENT =
+      LegacySubmitRequirement.builder()
+          .setFallbackText("Code Owners")
+          .setType("code-owners")
+          .build();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;

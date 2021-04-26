@@ -14,14 +14,14 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
-import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementSubject.submitRecordRequirements;
+import static com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementSubject.submitRecordRequirements;
 import static com.google.gerrit.truth.ListSubject.elements;
 
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.entities.LegacySubmitRequirement;
 import com.google.gerrit.entities.SubmitRecord;
-import com.google.gerrit.entities.SubmitRequirement;
 import com.google.gerrit.truth.ListSubject;
 import com.google.gerrit.truth.OptionalSubject;
 import java.util.Optional;
@@ -64,7 +64,8 @@ public class SubmitRecordSubject extends Subject {
   }
 
   /** Returns a {@link ListSubject} for the submit requirements. */
-  public ListSubject<SubmitRequirementSubject, SubmitRequirement> hasSubmitRequirementsThat() {
+  public ListSubject<LegacySubmitRequirementSubject, LegacySubmitRequirement>
+      hasSubmitRequirementsThat() {
     return check("submitRequirements()")
         .about(elements())
         .thatCustom(submitRecord().requirements, submitRecordRequirements());

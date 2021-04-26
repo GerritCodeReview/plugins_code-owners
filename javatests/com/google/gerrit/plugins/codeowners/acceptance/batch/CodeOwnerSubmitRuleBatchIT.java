@@ -2,7 +2,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.batch;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowLabel;
-import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject.assertThatCollection;
+import static com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject.assertThatCollection;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
@@ -13,7 +13,7 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
-import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject;
+import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject;
 import com.google.inject.Inject;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
@@ -54,7 +54,7 @@ public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
     assertThat(changeInfo.submittable).isFalse();
 
     // Check the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
