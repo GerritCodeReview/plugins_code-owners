@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f03e667b_2e0b8dd6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-26T16:01:11Z",
+      "side": 1,
+      "message": "Requires this change [1] from Gerrit core to build.\nVerified manually.\n\n[1] 301765: Rename SubmitRequirement to LegacySubmitRequirement | https://gerrit-review.googlesource.com/c/gerrit/+/301765",
+      "revId": "3937f902a44f74a184d6e24a549f9756d5ff4651",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
