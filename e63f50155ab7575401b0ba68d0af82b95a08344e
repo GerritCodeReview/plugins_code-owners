@@ -22,6 +22,30 @@
       },
       "revId": "e63f50155ab7575401b0ba68d0af82b95a08344e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7ffd85d5_d2077183",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2021-04-26T12:50:35Z",
+      "side": 1,
+      "message": "\u003e\u003e the delay is the latency to make the _getStatus()\nYes\n\n\u003e\u003e Is it possible to make a lot of these calls in succession? should you maybe debounce this call then in that case?\n\ndebounce is not needed. codeOwnersCacheApi ensures that only one requests is made.",
+      "parentUuid": "dae2a11d_1fe70438",
+      "range": {
+        "startLine": 141,
+        "startChar": 22,
+        "endLine": 142,
+        "endChar": 44
+      },
+      "revId": "e63f50155ab7575401b0ba68d0af82b95a08344e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
