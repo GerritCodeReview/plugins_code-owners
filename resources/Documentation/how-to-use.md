@@ -151,20 +151,25 @@ There are 3 possible reasons for encountering a "Not found" text:
 
 ![no owners found](./no-owners-found.png "no owners found")
 
-- No owners were defined for these files.
+- No code owners were defined for these files.
   Reason: This could be due to missing `OWNERS` defined for these files.
 
 - None of the code owners of these files are visible.
   Reason: The code owners accounts are not visible to you.
 
+- None of the code owners can see the change.
+  Reason: The code owners have no read permission on the target branch of the
+  change and hence cannot approve the change.
+
 - Code owners defined for these files are invalid.
   Reason: The emails cannot be resolved.
 
-For these 3 cases, we advise you to:
+For these cases, we advise you to:
 
 1. Ask someone with override powers (e.g. sheriff) to grant an override vote to
    unblock the change submission.
-2. Contact the project owner to ask them to fix the code owner definitions.
+2. Contact the project owner to ask them to fix the code owner definitions, or
+   permissions if needed.
 
 ### Renamed files
 
