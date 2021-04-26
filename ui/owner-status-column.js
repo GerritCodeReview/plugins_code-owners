@@ -48,13 +48,17 @@ const STATUS_TOOLTIP = {
 };
 
 class BaseEl extends CodeOwnersModelMixin(Polymer.Element) {
-  computeHidden(change, patchRange) {
-    if ([change, patchRange].includes(undefined)) return true;
+  computeHidden(change, patchRange, newerPatchsetUploaded) {
+    if ([change, patchRange, newerPatchsetUploaded].includes(undefined)) {
+      return true;
+    }
     // if code-owners is not a submit requirement, don't show status column
     if (change.requirements &&
         !change.requirements.find(r => r.type === 'code-owners')) {
       return true;
     }
+
+    if (newerPatchsetUploaded) return true;
 
     const latestPatchset = change.revisions[change.current_revision];
     // only show if its comparing against base
@@ -97,7 +101,8 @@ export class OwnerStatusColumnHeader extends BaseEl {
       hidden: {
         type: Boolean,
         reflectToAttribute: true,
-        computed: 'computeHidden(change, patchRange)',
+        computed: 'computeHidden(change, patchRange, ' +
+          'model.status.newerPatchsetUploaded)',
       },
     };
   }
