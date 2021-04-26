@@ -46,6 +46,51 @@ public class CodeOwnerCheckInfo {
   public boolean isResolvable;
 
   /**
+   * Whether the user to which the given email was resolved has read permissions on the branch.
+   *
+   * <p>Not set if:
+   *
+   * <ul>
+   *   <li>the given email is not resolvable
+   *   <li>the given email is the all users wildcard (aka {@code *})
+   * </ul>
+   */
+  public Boolean canReadRef;
+
+  /**
+   * Whether the user to which the given email was resolved can see the specified change.
+   *
+   * <p>Not set if:
+   *
+   * <ul>
+   *   <li>the given email is not resolvable
+   *   <li>the given email is the all users wildcard (aka {@code *})
+   *   <li>no change was specified
+   * </ul>
+   */
+  public Boolean canSeeChange;
+
+  /**
+   * Whether the user to which the given email was resolved can code-owner approve the specified
+   * change.
+   *
+   * <p>Being able to code-owner approve the change means that the user has permissions to vote on
+   * the label that is required as code owner approval. Other permissions are not considered for
+   * computing this flag. In particular missing read permissions on the change don't have any effect
+   * on this flag. Whether the user misses read permissions on the change (and hence cannot apply
+   * the code owner approval) can be seen from the {@link #canSeeChange} flag.
+   *
+   * <p>Not set if:
+   *
+   * <ul>
+   *   <li>the given email is not resolvable
+   *   <li>the given email is the all users wildcard (aka {@code *})
+   *   <li>no change was specified
+   * </ul>
+   */
+  public Boolean canApproveChange;
+
+  /**
    * Paths of the code owner config files that assign code ownership to the given email for the
    * specified path.
    *
