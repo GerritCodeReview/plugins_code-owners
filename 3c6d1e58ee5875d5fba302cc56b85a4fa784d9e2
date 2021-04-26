@@ -204,6 +204,30 @@
       },
       "revId": "3c6d1e58ee5875d5fba302cc56b85a4fa784d9e2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5bdc9aee_c6712138",
+        "filename": "resources/Documentation/validation.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T15:02:59Z",
+      "side": 1,
+      "message": "I don\u0027t have a super strong opinion either, but what I\u0027m thinking is something like an admin wanting to skip code owner validation, then they try to skip and fail, and now they have to do this extra step of granting themselves this permission. I don\u0027t see a reason to make them to do that.",
+      "parentUuid": "2d64b9b3_8f7abc5c",
+      "range": {
+        "startLine": 64,
+        "startChar": 59,
+        "endLine": 65,
+        "endChar": 64
+      },
+      "revId": "3c6d1e58ee5875d5fba302cc56b85a4fa784d9e2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
