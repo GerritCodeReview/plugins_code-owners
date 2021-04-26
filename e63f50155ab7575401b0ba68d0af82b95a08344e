@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dae2a11d_1fe70438",
+        "filename": "ui/code-owners-service.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2021-04-26T12:34:44Z",
+      "side": 1,
+      "message": "how is this supposed to happen? the delay is the latency to make the _getStatus()? (which in turn awaits this.codeOwnersCacheApi.listOwnerStatus I think).\nIs it possible to make a lot of these calls in succession? should you maybe debounce this call then in that case?",
+      "range": {
+        "startLine": 141,
+        "startChar": 22,
+        "endLine": 142,
+        "endChar": 44
+      },
+      "revId": "e63f50155ab7575401b0ba68d0af82b95a08344e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
