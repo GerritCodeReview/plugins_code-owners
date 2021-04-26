@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "11f776ba_79b105a1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T16:13:23Z",
+      "side": 1,
+      "message": "didn\u0027t really review it yet.",
+      "revId": "710e8cb9d9e53871b0d922c2e06cfc7a71bb97f4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7b2db119_b0ee62b7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImmutableMapEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-04-26T16:13:23Z",
+      "side": 1,
+      "message": "I think this is \"illegal\" according to java readability stuff.\nThe reason is that in theory you could be assuming that Map.Entry works in a specific way, and then you would be breaking the behavior with this implementation; there is a more reasonable example in Effective Java chapter 18 (sending you in pm, since it\u0027s an internal link).\n\nIs there any other way to do this?",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 74
+      },
+      "revId": "710e8cb9d9e53871b0d922c2e06cfc7a71bb97f4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
