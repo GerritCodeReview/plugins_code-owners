@@ -17,17 +17,19 @@ package com.google.gerrit.plugins.codeowners.testing;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
-import com.google.gerrit.entities.SubmitRequirement;
+import com.google.gerrit.entities.LegacySubmitRequirement;
 
-/** {@link Subject} for doing assertions on {@link SubmitRequirement}s. */
-public class SubmitRequirementSubject extends Subject {
-  public static Factory<SubmitRequirementSubject, SubmitRequirement> submitRecordRequirements() {
-    return SubmitRequirementSubject::new;
+/** {@link Subject} for doing assertions on {@link LegacySubmitRequirement}s. */
+public class LegacySubmitRequirementSubject extends Subject {
+  public static Factory<LegacySubmitRequirementSubject, LegacySubmitRequirement>
+      submitRecordRequirements() {
+    return LegacySubmitRequirementSubject::new;
   }
 
-  private final SubmitRequirement submitRequirement;
+  private final LegacySubmitRequirement submitRequirement;
 
-  private SubmitRequirementSubject(FailureMetadata metadata, SubmitRequirement submitRequirement) {
+  private LegacySubmitRequirementSubject(
+      FailureMetadata metadata, LegacySubmitRequirement submitRequirement) {
     super(metadata, submitRequirement);
     this.submitRequirement = submitRequirement;
   }
@@ -42,7 +44,7 @@ public class SubmitRequirementSubject extends Subject {
     return check("fallbackText()").that(submitRequirement().fallbackText());
   }
 
-  private SubmitRequirement submitRequirement() {
+  private LegacySubmitRequirement submitRequirement() {
     isNotNull();
     return submitRequirement;
   }

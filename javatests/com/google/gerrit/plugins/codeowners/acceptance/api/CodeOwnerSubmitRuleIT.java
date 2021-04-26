@@ -16,7 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
-import static com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject.assertThatCollection;
+import static com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject.assertThatCollection;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -38,7 +38,7 @@ import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
-import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementInfoSubject;
+import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import org.eclipse.jgit.lib.ObjectId;
@@ -117,7 +117,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     assertThat(changeInfo.submittable).isFalse();
 
     // Check the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
@@ -170,7 +170,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     assertThat(changeInfo.submittable).isFalse();
 
     // Check the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
@@ -220,7 +220,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     assertThat(changeInfo.submittable).isTrue();
 
     // Check the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
@@ -260,7 +260,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     approve(changeId);
 
     // Check the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(gApi.changes().id(changeId).get().requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
@@ -297,7 +297,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     assertThat(changeInfo.submittable).isFalse();
 
     // Check that the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
@@ -340,7 +340,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isTrue();
 
     // Check the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
@@ -485,7 +485,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isTrue();
 
     // Check the submit requirement.
-    SubmitRequirementInfoSubject submitRequirementInfoSubject =
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");

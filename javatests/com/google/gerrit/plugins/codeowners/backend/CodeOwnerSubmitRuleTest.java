@@ -25,8 +25,8 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
+import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementSubject;
 import com.google.gerrit.plugins.codeowners.testing.SubmitRecordSubject;
-import com.google.gerrit.plugins.codeowners.testing.SubmitRequirementSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.inject.Inject;
@@ -87,7 +87,7 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     SubmitRecordSubject submitRecordSubject =
         assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
     submitRecordSubject.hasStatusThat().isNotReady();
-    SubmitRequirementSubject submitRequirementSubject =
+    LegacySubmitRequirementSubject submitRequirementSubject =
         submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
     submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
     submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code Owners");
@@ -113,7 +113,7 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     SubmitRecordSubject submitRecordSubject =
         assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
     submitRecordSubject.hasStatusThat().isOk();
-    SubmitRequirementSubject submitRequirementSubject =
+    LegacySubmitRequirementSubject submitRequirementSubject =
         submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
     submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
     submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code Owners");

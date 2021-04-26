@@ -18,27 +18,27 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
-import com.google.gerrit.extensions.common.SubmitRequirementInfo;
+import com.google.gerrit.extensions.common.LegacySubmitRequirementInfo;
 import com.google.gerrit.truth.ListSubject;
 import java.util.Collection;
 
-/** {@link Subject} for doing assertions on {@link SubmitRequirementInfo}s. */
-public class SubmitRequirementInfoSubject extends Subject {
-  public static ListSubject<SubmitRequirementInfoSubject, SubmitRequirementInfo>
-      assertThatCollection(Collection<SubmitRequirementInfo> submitRequirementInfos) {
+/** {@link Subject} for doing assertions on {@link LegacySubmitRequirementInfo}s. */
+public class LegacySubmitRequirementInfoSubject extends Subject {
+  public static ListSubject<LegacySubmitRequirementInfoSubject, LegacySubmitRequirementInfo>
+      assertThatCollection(Collection<LegacySubmitRequirementInfo> submitRequirementInfos) {
     return ListSubject.assertThat(
         ImmutableList.copyOf(submitRequirementInfos), submitRecordRequirementInfos());
   }
 
-  private static Factory<SubmitRequirementInfoSubject, SubmitRequirementInfo>
+  private static Factory<LegacySubmitRequirementInfoSubject, LegacySubmitRequirementInfo>
       submitRecordRequirementInfos() {
-    return SubmitRequirementInfoSubject::new;
+    return LegacySubmitRequirementInfoSubject::new;
   }
 
-  private final SubmitRequirementInfo submitRequirementInfo;
+  private final LegacySubmitRequirementInfo submitRequirementInfo;
 
-  private SubmitRequirementInfoSubject(
-      FailureMetadata metadata, SubmitRequirementInfo submitRequirementInfo) {
+  private LegacySubmitRequirementInfoSubject(
+      FailureMetadata metadata, LegacySubmitRequirementInfo submitRequirementInfo) {
     super(metadata, submitRequirementInfo);
     this.submitRequirementInfo = submitRequirementInfo;
   }
@@ -58,7 +58,7 @@ public class SubmitRequirementInfoSubject extends Subject {
     return check("fallbackText()").that(submitRequirementInfo().fallbackText);
   }
 
-  private SubmitRequirementInfo submitRequirementInfo() {
+  private LegacySubmitRequirementInfo submitRequirementInfo() {
     isNotNull();
     return submitRequirementInfo;
   }
