@@ -39,6 +39,30 @@
       },
       "revId": "710e8cb9d9e53871b0d922c2e06cfc7a71bb97f4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fc97b1e2_c4a75b94",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImmutableMapEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-27T11:03:21Z",
+      "side": 1,
+      "message": "Not sure I understand the issue here.\n\nPlease note that Map.Entry is an interface, not a class. So we are not overriding any Map.Entry behaviour here.\n\nAlso com.google.common.collect does something very similar, they also have an ImmutableEntry/ImmutableMapEntry implementation.\n\nBut to avoid confusion we can also have our own type that is not a Map.Entry.\nDone. Is this better?",
+      "parentUuid": "7b2db119_b0ee62b7",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 74
+      },
+      "revId": "710e8cb9d9e53871b0d922c2e06cfc7a71bb97f4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
