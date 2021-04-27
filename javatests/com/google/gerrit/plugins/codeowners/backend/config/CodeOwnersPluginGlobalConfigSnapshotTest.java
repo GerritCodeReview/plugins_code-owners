@@ -88,6 +88,31 @@ public class CodeOwnersPluginGlobalConfigSnapshotTest extends AbstractCodeOwners
     assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize()).isEmpty();
   }
 
+  @Test
+  public void codeOwnerCacheSizeIsLimitedByDefault() throws Exception {
+    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize())
+        .value()
+        .isEqualTo(CodeOwnersPluginGlobalConfigSnapshot.DEFAULT_MAX_CODE_OWNER_CACHE_SIZE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerCacheSize", value = "0")
+  public void codeOwnerCacheSizeIsUnlimited() throws Exception {
+    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerCacheSize", value = "10")
+  public void codeOwnerCacheSizeIsLimited() throws Exception {
+    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize()).value().isEqualTo(10);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.maxCodeOwnerCacheSize", value = "invalid")
+  public void maxCodeOwnerCacheSize_invalidConfig() throws Exception {
+    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize()).isEmpty();
+  }
+
   private CodeOwnersPluginGlobalConfigSnapshot cfgSnapshot() {
     return codeOwnersPluginGlobalConfigSnapshotFactory.create();
   }
