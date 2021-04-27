@@ -58,7 +58,7 @@ export class SuggestOwnersTrigger extends
           <a on-click="_reportBugClick" href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin" target="_blank">
             <iron-icon icon="gr-icons:bug" title="report a problem"></iron-icon>
           </a>
-          <a on-click="_reportDocClick" href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md" target="_blank">
+          <a on-click="_reportDocClick" href="https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/how-to-use.md" target="_blank">
             <iron-icon icon="gr-icons:help-outline" title="read documentation"></iron-icon>
           </a>
         </span>

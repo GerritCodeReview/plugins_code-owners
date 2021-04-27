@@ -48,7 +48,7 @@ import org.eclipse.jgit.lib.ObjectId;
  * OWNERS} files as they are used by the {@code find-owners} plugin.
  *
  * <p>The syntax is described at in the {@code find-owners} plugin documentation at:
- * https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md
+ * https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/syntax.md
  *
  * <p>Comment lines are silently ignored.
  *

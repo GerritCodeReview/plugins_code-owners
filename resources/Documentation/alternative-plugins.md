@@ -9,7 +9,7 @@ Similar functionality is provided by the following plugins:
 
 **Status:** deprecated, from Gerrit 3.4 on the `code-owners` plugin should be used instead\
 **Repository:** [plugins/find-owners](https://gerrit-review.googlesource.com/admin/repos/plugins/find-owners)\
-**Documentation:** [about](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/about.md), [syntax](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md), [REST API](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/rest-api.md), [config](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/config.md)
+**Documentation:** [about](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/about.md), [syntax](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/syntax.md), [REST API](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/rest-api.md), [config](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/config.md)
 
 ### <a id="findOwnersCompatibility">Compatibility with the code-owners plugin
 
@@ -39,7 +39,7 @@ additional features. This means that `OWNERS` files that work with the
     * Including an `OWNERS` file from another directory in the same project or
       from another project on the same host is possible (same branch is assumed).
     * File globs can be used.
-    * See [documentation](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/syntax.md) for the supported syntax.
+    * See [documentation](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/syntax.md) for the supported syntax.
 <br><br>
 * Prolog rule to prevent submitting changes without owner approvals.
     * A change can be exempted from owners approval by setting a footer in the
@@ -52,23 +52,23 @@ additional features. This means that `OWNERS` files that work with the
     * Owner approval is granted by voting on the `Code-Review` label.
 <br><br>
 * REST endpoints:
-    * [Action](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/java/com/googlesource/gerrit/plugins/findowners/Action.java) REST endpoint:
+    * [Action](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/java/com/googlesource/gerrit/plugins/findowners/Action.java) REST endpoint:
         * `GET /changes/<change-id>/revisions/<revision-id>/find-owners`
-        * returns a [RestResult](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/java/com/googlesource/gerrit/plugins/findowners/RestResult.java) which contains:
+        * returns a [RestResult](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/java/com/googlesource/gerrit/plugins/findowners/RestResult.java) which contains:
             * a file to list of owners map
             * a list of owner infos with weight infos
             * fields for debugging
             * fields for change, patch set, current reviewers and changed files
-    * [GetOwners](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/java/com/googlesource/gerrit/plugins/findowners/GetOwners.java) REST endpoint:
+    * [GetOwners](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/java/com/googlesource/gerrit/plugins/findowners/GetOwners.java) REST endpoint:
         * `GET /changes/<change-id>/owners`
         * Delegates to Action REST endpoint (see above)
-    * Also see [REST endpoint documentation](https://gerrit.googlesource.com/plugins/find-owners/+/master/src/main/resources/Documentation/rest-api.md)
+    * Also see [REST endpoint documentation](https://gerrit.googlesource.com/plugins/find-owners/+/HEAD/src/main/resources/Documentation/rest-api.md)
 
 ## <a id="owners">owners plugin + owners-autoassign plugin
 
 **Status:** maintained by the Gerrit open source community (no Google involvement)\
 **Repository:** [plugins/owners](https://gerrit-review.googlesource.com/admin/repos/plugins/owners)\
-**Documentation:** [readme](https://gerrit.googlesource.com/plugins/owners/+/master/README.md), [config & syntax](https://gerrit.googlesource.com/plugins/owners/+/master/owners/src/main/resources/Documentation/config.md)
+**Documentation:** [readme](https://gerrit.googlesource.com/plugins/owners/+/HEAD/README.md), [config & syntax](https://gerrit.googlesource.com/plugins/owners/+/HEAD/owners/src/main/resources/Documentation/config.md)
 
 ### <a id="ownersCompatibility">Compatibility with the code-owners plugin
 
@@ -97,7 +97,7 @@ supported by the `code-owners` plugin.
     * Inheritance from parent directories is supported and can be disabled.
     * Regular expressions can be used.
     * Syntax is based on YAML.
-    * See [documentation](https://gerrit.googlesource.com/plugins/owners/+/master/owners/src/main/resources/Documentation/config.md) for the supported syntax.
+    * See [documentation](https://gerrit.googlesource.com/plugins/owners/+/HEAD/owners/src/main/resources/Documentation/config.md) for the supported syntax.
 <br><br>
 * Prolog rule to prevent submitting changes without code owner approvals.
     * The label on which code owners must vote is configurable.

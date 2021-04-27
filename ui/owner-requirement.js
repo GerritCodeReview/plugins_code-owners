@@ -85,7 +85,7 @@ export class OwnerRequirementValue extends
             </template>
             <template is="dom-if" if="[[model.branchConfig.no_code_owners_defined]]">
               <span>No code-owners file</span>
-              <a href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/user-guide.md#how-to-submit-changes-with-files-that-have-no-code-owners" target="_blank">
+              <a href="https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/user-guide.md#how-to-submit-changes-with-files-that-have-no-code-owners" target="_blank">
                 <iron-icon icon="gr-icons:help-outline"
                   title="Documentation about submitting changes with files that have no code owners?"></iron-icon>
               </a>

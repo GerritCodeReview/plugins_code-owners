@@ -78,7 +78,7 @@ export class CodeOwnersApi {
   /**
    * Returns a promise fetching the owner statuses for all files within the change.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#change-endpoints
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#change-endpoints
    * @param {string} changeId
    */
   listOwnerStatus(changeId) {
@@ -88,7 +88,7 @@ export class CodeOwnersApi {
   /**
    * Returns a promise fetching the owners for a given path.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
    * @param {string} changeId
    * @param {string} path
    */
@@ -102,7 +102,7 @@ export class CodeOwnersApi {
   /**
    * Returns a promise fetching the owners config for a given path.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#branch-endpoints
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#branch-endpoints
    * @param {string} project
    * @param {string} branch
    * @param {string} path
@@ -118,7 +118,7 @@ export class CodeOwnersApi {
   /**
    * Returns a promise fetching the owners config for a given branch.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/rest-api.md#branch-endpoints
+   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#branch-endpoints
    * @param {string} project
    * @param {string} branch
    */

@@ -297,7 +297,7 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
               <template is="dom-if" if="[[!_areOwnersFound(suggestion.owners)]]">
                 <div class="no-owners-content">
                   <span>Not found</span>
-                  <a on-click="_reportDocClick" href="https://gerrit.googlesource.com/plugins/code-owners/+/master/resources/Documentation/how-to-use.md#no-code-owners-found" target="_blank">
+                  <a on-click="_reportDocClick" href="https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/how-to-use.md#no-code-owners-found" target="_blank">
                     <iron-icon icon="gr-icons:help-outline" title="read documentation"></iron-icon>
                   </a>
                 </div>
