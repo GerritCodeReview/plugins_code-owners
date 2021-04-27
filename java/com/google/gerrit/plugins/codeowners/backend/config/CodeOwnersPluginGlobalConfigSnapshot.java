@@ -32,8 +32,10 @@ public class CodeOwnersPluginGlobalConfigSnapshot {
   static final String KEY_ENABLE_EXPERIMENTAL_REST_ENDPOINTS = "enableExperimentalRestEndpoints";
 
   @VisibleForTesting static final int DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE = 10000;
+  @VisibleForTesting static final int DEFAULT_MAX_CODE_OWNER_CACHE_SIZE = 10000;
 
   private static final String KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE = "maxCodeOwnerConfigCacheSize";
+  private static final String KEY_MAX_CODE_OWNER_CACHE_SIZE = "maxCodeOwnerCacheSize";
 
   public interface Factory {
     CodeOwnersPluginGlobalConfigSnapshot create();
@@ -115,30 +117,39 @@ public class CodeOwnersPluginGlobalConfigSnapshot {
    */
   public Optional<Integer> getMaxCodeOwnerConfigCacheSize() {
     if (maxCodeOwnerConfigCacheSize == null) {
-      maxCodeOwnerConfigCacheSize = readMaxCodeOwnerConfigCacheSize();
+      maxCodeOwnerConfigCacheSize =
+          readMaxCacheSize(
+              KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE, DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
     }
     return maxCodeOwnerConfigCacheSize;
   }
 
-  private Optional<Integer> readMaxCodeOwnerConfigCacheSize() {
+  /**
+   * Gets the maximum size for the {@link
+   * com.google.gerrit.plugins.codeowners.backend.TransientCodeOwnerConfigCache}.
+   *
+   * @return the maximum cache size, {@link Optional#empty()} if the cache size is not limited
+   */
+  public Optional<Integer> getMaxCodeOwnerCacheSize() {
+    if (maxCodeOwnerConfigCacheSize == null) {
+      maxCodeOwnerConfigCacheSize =
+          readMaxCacheSize(KEY_MAX_CODE_OWNER_CACHE_SIZE, DEFAULT_MAX_CODE_OWNER_CACHE_SIZE);
+    }
+    return maxCodeOwnerConfigCacheSize;
+  }
+
+  private Optional<Integer> readMaxCacheSize(String key, int defaultCacheSize) {
     try {
       int maxCodeOwnerConfigCacheSize =
-          pluginConfigFactory
-              .getFromGerritConfig(pluginName)
-              .getInt(
-                  KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE, DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
+          pluginConfigFactory.getFromGerritConfig(pluginName).getInt(key, defaultCacheSize);
       return maxCodeOwnerConfigCacheSize > 0
           ? Optional.of(maxCodeOwnerConfigCacheSize)
           : Optional.empty();
     } catch (IllegalArgumentException e) {
       logger.atWarning().withCause(e).log(
           "Value '%s' in gerrit.config (parameter plugin.%s.%s) is invalid.",
-          pluginConfigFactory
-              .getFromGerritConfig(pluginName)
-              .getString(KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE),
-          pluginName,
-          KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
-      return Optional.of(DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
+          pluginConfigFactory.getFromGerritConfig(pluginName).getString(key), pluginName, key);
+      return Optional.of(defaultCacheSize);
     }
   }
 }

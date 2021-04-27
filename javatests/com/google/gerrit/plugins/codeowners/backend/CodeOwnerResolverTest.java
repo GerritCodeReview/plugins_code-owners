@@ -21,6 +21,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.TestMetricMaker;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
@@ -51,12 +52,13 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private AccountOperations accountOperations;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
+  @Inject private TestMetricMaker testMetricMaker;
 
-  private Provider<CodeOwnerResolver> codeOwnerResolver;
+  private Provider<CodeOwnerResolver> codeOwnerResolverProvider;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
-    codeOwnerResolver =
+    codeOwnerResolverProvider =
         plugin.getSysInjector().getInstance(new Key<Provider<CodeOwnerResolver>>() {});
   }
 
@@ -66,7 +68,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                codeOwnerResolver
+                codeOwnerResolverProvider
                     .get()
                     .resolve(/* codeOwnerReference= */ (CodeOwnerReference) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReference");
@@ -75,7 +77,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                codeOwnerResolver
+                codeOwnerResolverProvider
                     .get()
                     .resolve(/* codeOwnerReferences= */ (Set<CodeOwnerReference>) null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerReferences");
@@ -85,7 +87,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveCodeOwnerReferenceForNonExistingEmail() throws Exception {
     String nonExistingEmail = "non-existing@example.com";
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(nonExistingEmail));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(nonExistingEmail));
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
@@ -98,7 +102,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void resolveCodeOwnerReferenceForEmail() throws Exception {
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(admin.email()));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(admin.email()));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
     assertThat(result)
         .hasMessagesThat()
@@ -108,7 +114,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void cannotResolveCodeOwnerReferenceForStarAsEmail() throws Exception {
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver
+        codeOwnerResolverProvider
             .get()
             .resolveWithMessages(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD));
     assertThat(result).isEmpty();
@@ -138,7 +144,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     accountOperations.account(user.id()).forUpdate().inactive().update();
 
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(admin.email()));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(admin.email()));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
   }
 
@@ -156,7 +164,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                         "foo", "bar", user.id(), admin.email(), /* hashedPassword= */ null)));
 
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(admin.email()));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(admin.email()));
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
@@ -177,7 +187,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     }
 
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(email));
+        codeOwnerResolverProvider.get().resolveWithMessages(CodeOwnerReference.create(email));
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
@@ -194,7 +204,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   public void resolveCodeOwnerReferenceForInactiveUser() throws Exception {
     accountOperations.account(user.id()).forUpdate().inactive().update();
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(user.email()));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(user.email()));
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
@@ -213,7 +225,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // user2 cannot see the admin account since they do not share any group and
     // "accounts.visibility" is set to "SAME_GROUP".
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(admin.email()));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(admin.email()));
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
@@ -234,7 +248,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // admin has the "Modify Account" global capability and hence can see the secondary email of the
     // user account.
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(user.id());
     assertThat(result)
         .hasMessagesThat()
@@ -247,7 +263,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // user account if another user is the calling user
     requestScopeOperations.setApiUser(user2.id());
     result =
-        codeOwnerResolver
+        codeOwnerResolverProvider
             .get()
             .forUser(identifiedUserFactory.create(admin.id()))
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
@@ -261,7 +277,10 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
     // user can see its own secondary email.
     requestScopeOperations.setApiUser(user.id());
-    result = codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
+    result =
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result.get()).hasAccountIdThat().isEqualTo(user.id());
     assertThat(result)
         .hasMessagesThat()
@@ -273,7 +292,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // user can see its own secondary email if another user is the calling user.
     requestScopeOperations.setApiUser(user2.id());
     result =
-        codeOwnerResolver
+        codeOwnerResolverProvider
             .get()
             .forUser(identifiedUserFactory.create(user.id()))
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
@@ -296,7 +315,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // email of the admin account.
     requestScopeOperations.setApiUser(user.id());
     OptionalResultWithMessages<CodeOwner> result =
-        codeOwnerResolver.get().resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
+        codeOwnerResolverProvider
+            .get()
+            .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
     assertThat(result).isEmpty();
     assertThat(result)
         .hasMessagesThat()
@@ -309,7 +330,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     // email of the admin account if another user is the calling user
     requestScopeOperations.setApiUser(admin.id());
     result =
-        codeOwnerResolver
+        codeOwnerResolverProvider
             .get()
             .forUser(identifiedUserFactory.create(user.id()))
             .resolveWithMessages(CodeOwnerReference.create(secondaryEmail));
@@ -328,7 +349,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .build();
     CodeOwnerResolverResult result =
-        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwners()).isEmpty();
     assertThat(result.ownedByAllUsers()).isFalse();
     assertThat(result.hasUnresolvedCodeOwners()).isFalse();
@@ -342,7 +365,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .build();
 
     CodeOwnerResolverResult result =
-        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
     assertThat(result.ownedByAllUsers()).isFalse();
     assertThat(result.hasUnresolvedCodeOwners()).isFalse();
@@ -357,7 +382,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             .build();
 
     CodeOwnerResolverResult result =
-        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwnersAccountIds()).isEmpty();
     assertThat(result.ownedByAllUsers()).isTrue();
     assertThat(result.hasUnresolvedCodeOwners()).isFalse();
@@ -372,7 +399,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                     admin.email(), "non-existing@example.com"))
             .build();
     CodeOwnerResolverResult result =
-        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
     assertThat(result.ownedByAllUsers()).isFalse();
     assertThat(result.hasUnresolvedCodeOwners()).isTrue();
@@ -388,7 +417,9 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
                     "*", admin.email(), "non-existing@example.com"))
             .build();
     CodeOwnerResolverResult result =
-        codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
     assertThat(result.ownedByAllUsers()).isTrue();
     assertThat(result.hasUnresolvedCodeOwners()).isTrue();
@@ -400,7 +431,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                codeOwnerResolver
+                codeOwnerResolverProvider
                     .get()
                     .resolvePathCodeOwners(/* codeOwnerConfig= */ null, Paths.get("/README.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
@@ -416,7 +447,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                codeOwnerResolver
+                codeOwnerResolverProvider
                     .get()
                     .resolvePathCodeOwners(codeOwnerConfig, /* absolutePath= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("absolutePath");
@@ -427,7 +458,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().resolvePathCodeOwners(/* pathCodeOwners= */ null));
+            () ->
+                codeOwnerResolverProvider.get().resolvePathCodeOwners(/* pathCodeOwners= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("pathCodeOwners");
   }
 
@@ -442,7 +474,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         assertThrows(
             IllegalStateException.class,
             () ->
-                codeOwnerResolver
+                codeOwnerResolverProvider
                     .get()
                     .resolvePathCodeOwners(codeOwnerConfig, Paths.get(relativePath)));
     assertThat(npe)
@@ -462,11 +494,11 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
     // user2 cannot see the admin account since they do not share any group and
     // "accounts.visibility" is set to "SAME_GROUP".
-    assertThat(codeOwnerResolver.get().resolve(adminCodeOwnerReference)).isEmpty();
+    assertThat(codeOwnerResolverProvider.get().resolve(adminCodeOwnerReference)).isEmpty();
 
     // if visibility is not enforced the code owner reference can be resolved regardless
     Optional<CodeOwner> codeOwner =
-        codeOwnerResolver.get().enforceVisibility(false).resolve(adminCodeOwnerReference);
+        codeOwnerResolverProvider.get().enforceVisibility(false).resolve(adminCodeOwnerReference);
     assertThat(codeOwner).value().hasAccountIdThat().isEqualTo(admin.id());
   }
 
@@ -478,10 +510,10 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     TestAccount user2 = accountCreator.user2();
 
     // admin is the current user and can see the account
-    assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create(user.email())))
+    assertThat(codeOwnerResolverProvider.get().resolve(CodeOwnerReference.create(user.email())))
         .isPresent();
     assertThat(
-            codeOwnerResolver
+            codeOwnerResolverProvider
                 .get()
                 .forUser(identifiedUserFactory.create(admin.id()))
                 .resolve(CodeOwnerReference.create(user.email())))
@@ -489,7 +521,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
     // user2 cannot see the account
     assertThat(
-            codeOwnerResolver
+            codeOwnerResolverProvider
                 .get()
                 .forUser(identifiedUserFactory.create(user2.id()))
                 .resolve(CodeOwnerReference.create(user.email())))
@@ -499,7 +531,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   @GerritConfig(name = "plugin.code-owners.allowedEmailDomain", value = "example.net")
   public void resolveCodeOwnerReferenceForEmailWithNonAllowedEmailDomain() throws Exception {
-    assertThat(codeOwnerResolver.get().resolve(CodeOwnerReference.create("foo@example.com")))
+    assertThat(
+            codeOwnerResolverProvider.get().resolve(CodeOwnerReference.create("foo@example.com")))
         .isEmpty();
   }
 
@@ -508,7 +541,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> codeOwnerResolver.get().isEmailDomainAllowed(/* email= */ null));
+            () -> codeOwnerResolverProvider.get().isEmailDomainAllowed(/* email= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("email");
   }
 
@@ -551,7 +584,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   private void assertIsEmailDomainAllowed(
       String email, boolean expectedResult, String expectedMessage) {
     OptionalResultWithMessages<Boolean> isEmailDomainAllowedResult =
-        codeOwnerResolver.get().isEmailDomainAllowed(email);
+        codeOwnerResolverProvider.get().isEmailDomainAllowed(email);
     assertThat(isEmailDomainAllowedResult.get()).isEqualTo(expectedResult);
     assertThat(isEmailDomainAllowedResult.messages()).containsExactly(expectedMessage);
   }
@@ -559,7 +592,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void resolveCodeOwnerReferences() throws Exception {
     CodeOwnerResolverResult result =
-        codeOwnerResolver
+        codeOwnerResolverProvider
             .get()
             .resolve(
                 ImmutableSet.of(
@@ -573,7 +606,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Test
   public void resolveCodeOwnerReferencesNonResolveableCodeOwnersAreFilteredOut() throws Exception {
     CodeOwnerResolverResult result =
-        codeOwnerResolver
+        codeOwnerResolverProvider
             .get()
             .resolve(
                 ImmutableSet.of(
@@ -586,14 +619,64 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
 
   @Test
   public void isResolvable() throws Exception {
-    assertThat(codeOwnerResolver.get().isResolvable(CodeOwnerReference.create(admin.email())))
+    assertThat(
+            codeOwnerResolverProvider.get().isResolvable(CodeOwnerReference.create(admin.email())))
         .isTrue();
   }
 
   @Test
   public void isNotResolvable() throws Exception {
     assertThat(
-            codeOwnerResolver.get().isResolvable(CodeOwnerReference.create("unknown@example.com")))
+            codeOwnerResolverProvider
+                .get()
+                .isResolvable(CodeOwnerReference.create("unknown@example.com")))
         .isFalse();
+  }
+
+  @Test
+  public void emailIsResolvedOnlyOnce() throws Exception {
+    testMetricMaker.reset();
+    CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get();
+    OptionalResultWithMessages<CodeOwner> result =
+        codeOwnerResolver.resolveWithMessages(CodeOwnerReference.create(admin.email()));
+    assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
+        .isEqualTo(1);
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+        .isEqualTo(0);
+
+    // Doing the same lookup again doesn't resolve the code owner again.
+    testMetricMaker.reset();
+    result = codeOwnerResolver.resolveWithMessages(CodeOwnerReference.create(admin.email()));
+    assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
+        .isEqualTo(0);
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+        .isEqualTo(1);
+  }
+
+  @Test
+  public void nonExistingEmailIsResolvedOnlyOnce() throws Exception {
+    testMetricMaker.reset();
+    CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get();
+    OptionalResultWithMessages<CodeOwner> result =
+        codeOwnerResolver.resolveWithMessages(
+            CodeOwnerReference.create("non-existing@example.com"));
+    assertThat(result).isEmpty();
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
+        .isEqualTo(1);
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+        .isEqualTo(0);
+
+    // Doing the same lookup again doesn't resolve the code owner again.
+    testMetricMaker.reset();
+    result =
+        codeOwnerResolver.resolveWithMessages(
+            CodeOwnerReference.create("non-existing@example.com"));
+    assertThat(result).isEmpty();
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
+        .isEqualTo(0);
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+        .isEqualTo(1);
   }
 }
