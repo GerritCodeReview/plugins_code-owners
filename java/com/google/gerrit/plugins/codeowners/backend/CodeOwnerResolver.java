@@ -88,6 +88,10 @@ import java.util.stream.Stream;
  *   <li>users with the {@code Modify Account} global capability can see the secondary emails of all
  *       accounts
  * </ul>
+ *
+ * <p>Resolved code owners are cached within this class so that each email needs to be only resolved
+ * once. To take advantage of this caching callers should reuse {@link CodeOwnerResolver} instances
+ * where possible.
  */
 public class CodeOwnerResolver {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -103,6 +107,7 @@ public class CodeOwnerResolver {
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final UnresolvedImportFormatter unresolvedImportFormatter;
+  private final TransientCodeOwnerCache transientCodeOwnerCache;
 
   // Enforce visibility by default.
   private boolean enforceVisibility = true;
@@ -122,7 +127,8 @@ public class CodeOwnerResolver {
       AccountControl.Factory accountControlFactory,
       PathCodeOwners.Factory pathCodeOwnersFactory,
       CodeOwnerMetrics codeOwnerMetrics,
-      UnresolvedImportFormatter unresolvedImportFormatter) {
+      UnresolvedImportFormatter unresolvedImportFormatter,
+      TransientCodeOwnerCache transientCodeOwnerCache) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
@@ -132,6 +138,7 @@ public class CodeOwnerResolver {
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
     this.codeOwnerMetrics = codeOwnerMetrics;
     this.unresolvedImportFormatter = unresolvedImportFormatter;
+    this.transientCodeOwnerCache = transientCodeOwnerCache;
   }
 
   /**
@@ -144,6 +151,7 @@ public class CodeOwnerResolver {
   public CodeOwnerResolver enforceVisibility(boolean enforceVisibility) {
     logger.atFine().log("enforceVisibility = %s", enforceVisibility);
     this.enforceVisibility = enforceVisibility;
+    transientCodeOwnerCache.clear();
     return this;
   }
 
@@ -165,6 +173,7 @@ public class CodeOwnerResolver {
   public CodeOwnerResolver forUser(IdentifiedUser user) {
     logger.atFine().log("user = %s", user.getLoggableName());
     this.user = user;
+    transientCodeOwnerCache.clear();
     return this;
   }
 
@@ -372,8 +381,12 @@ public class CodeOwnerResolver {
             .filter(filterOutAllUsersWildCard(ownedByAllUsers))
             .collect(toImmutableSet());
 
+    ImmutableMap<String, Optional<CodeOwner>> cachedCodeOwnersByEmail =
+        transientCodeOwnerCache.get(emailsToResolve);
+
     ImmutableSet<String> emailsToLookup =
         emailsToResolve.stream()
+            .filter(email -> !cachedCodeOwnersByEmail.containsKey(email))
             .filter(filterOutEmailsWithNonAllowedDomains(messages))
             .collect(toImmutableSet());
 
@@ -403,7 +416,16 @@ public class CodeOwnerResolver {
       hasUnresolvedCodeOwners.set(true);
     }
 
-    return ImmutableSet.copyOf(codeOwnersByEmail.values());
+    ImmutableSet<CodeOwner> cachedCodeOwners =
+        cachedCodeOwnersByEmail.values().stream()
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(toImmutableSet());
+
+    ImmutableSet.Builder<CodeOwner> codeOwners = ImmutableSet.builder();
+    codeOwners.addAll(cachedCodeOwners);
+    codeOwners.addAll(codeOwnersByEmail.values());
+    return codeOwners.build();
   }
 
   /**
@@ -432,7 +454,13 @@ public class CodeOwnerResolver {
    */
   private Predicate<String> filterOutEmailsWithNonAllowedDomains(
       ImmutableList.Builder<String> messages) {
-    return email -> isEmailDomainAllowedWithMessages(messages, email);
+    return email -> {
+      boolean isEmailDomainAllowed = isEmailDomainAllowedWithMessages(messages, email);
+      if (!isEmailDomainAllowed) {
+        transientCodeOwnerCache.cacheNonResolvable(email);
+      }
+      return isEmailDomainAllowed;
+    };
   }
 
   /**
@@ -515,11 +543,13 @@ public class CodeOwnerResolver {
       emails.stream()
           .filter(email -> !extIdsByEmail.containsKey(email))
           .forEach(
-              email ->
-                  messages.add(
-                      String.format(
-                          "cannot resolve code owner email %s: no account with this email exists",
-                          email)));
+              email -> {
+                transientCodeOwnerCache.cacheNonResolvable(email);
+                messages.add(
+                    String.format(
+                        "cannot resolve code owner email %s: no account with this email exists",
+                        email));
+              });
       return extIdsByEmail;
     } catch (IOException e) {
       throw new CodeOwnersInternalServerErrorException(
@@ -623,6 +653,7 @@ public class CodeOwnerResolver {
     return e -> {
       if (e.value().isEmpty()) {
         String email = e.key();
+        transientCodeOwnerCache.cacheNonResolvable(email);
         messages.add(
             String.format(
                 "cannot resolve code owner email %s: no active account with this email found",
@@ -647,6 +678,7 @@ public class CodeOwnerResolver {
     return e -> {
       if (e.value().size() > 1) {
         String email = e.key();
+        transientCodeOwnerCache.cacheNonResolvable(email);
         messages.add(
             String.format("cannot resolve code owner email %s: email is ambiguous", email));
         return false;
@@ -687,6 +719,7 @@ public class CodeOwnerResolver {
       String email = e.key();
       AccountState accountState = e.value();
       if (!canSee(accountState)) {
+        transientCodeOwnerCache.cacheNonResolvable(email);
         messages.add(
             String.format(
                 "cannot resolve code owner email %s: account %s is not visible to user %s",
@@ -753,6 +786,7 @@ public class CodeOwnerResolver {
       try {
         if (user != null) {
           if (!permissionBackend.user(user).test(GlobalPermission.MODIFY_ACCOUNT)) {
+            transientCodeOwnerCache.cacheNonResolvable(email);
             messages.add(
                 String.format(
                     "cannot resolve code owner email %s: account %s is referenced by secondary email"
@@ -767,6 +801,7 @@ public class CodeOwnerResolver {
                   email, accountState.account().id(), user.getLoggableName()));
           return true;
         } else if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
+          transientCodeOwnerCache.cacheNonResolvable(email);
           messages.add(
               String.format(
                   "cannot resolve code owner email %s: account %s is referenced by secondary email"
@@ -796,6 +831,16 @@ public class CodeOwnerResolver {
    * <p>The pair which is provided as input to the function maps an email to an account states.
    */
   private Function<Pair<String, AccountState>, Pair<String, CodeOwner>> mapToCodeOwner() {
-    return e -> Pair.create(e.key(), CodeOwner.create(e.value().account().id()));
+    return e -> {
+      String email = e.key();
+      CodeOwner codeOwner = CodeOwner.create(e.value().account().id());
+      transientCodeOwnerCache.cache(email, codeOwner);
+      return Pair.create(email, codeOwner);
+    };
+  }
+
+  /** Returns the counters for resolutions and cache reads of code owners. */
+  public TransientCodeOwnerCache.Counters getCodeOwnerCounters() {
+    return transientCodeOwnerCache.getCounters();
   }
 }
