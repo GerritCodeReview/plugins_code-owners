@@ -89,7 +89,7 @@ public class CodeOwnerApprovalCheck {
   private final ChangedFiles changedFiles;
   private final PureRevertCache pureRevertCache;
   private final Provider<CodeOwnerConfigHierarchy> codeOwnerConfigHierarchyProvider;
-  private final Provider<CodeOwnerResolver> codeOwnerResolver;
+  private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
   private final ApprovalsUtil approvalsUtil;
   private final CodeOwnerMetrics codeOwnerMetrics;
 
@@ -101,7 +101,7 @@ public class CodeOwnerApprovalCheck {
       ChangedFiles changedFiles,
       PureRevertCache pureRevertCache,
       Provider<CodeOwnerConfigHierarchy> codeOwnerConfigHierarchyProvider,
-      Provider<CodeOwnerResolver> codeOwnerResolver,
+      Provider<CodeOwnerResolver> codeOwnerResolverProvider,
       ApprovalsUtil approvalsUtil,
       CodeOwnerMetrics codeOwnerMetrics) {
     this.permissionBackend = permissionBackend;
@@ -110,7 +110,7 @@ public class CodeOwnerApprovalCheck {
     this.changedFiles = changedFiles;
     this.pureRevertCache = pureRevertCache;
     this.codeOwnerConfigHierarchyProvider = codeOwnerConfigHierarchyProvider;
-    this.codeOwnerResolver = codeOwnerResolver;
+    this.codeOwnerResolverProvider = codeOwnerResolverProvider;
     this.approvalsUtil = approvalsUtil;
     this.codeOwnerMetrics = codeOwnerMetrics;
   }
@@ -180,9 +180,10 @@ public class CodeOwnerApprovalCheck {
         "checking if change %d in project %s is submittable",
         changeNotes.getChangeId().get(), changeNotes.getProjectName());
     CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
+    CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get().enforceVisibility(false);
     try {
       boolean isSubmittable =
-          !getFileStatuses(codeOwnerConfigHierarchy, changeNotes)
+          !getFileStatuses(codeOwnerConfigHierarchy, codeOwnerResolver, changeNotes)
               .anyMatch(
                   fileStatus ->
                       (fileStatus.newPathStatus().isPresent()
@@ -202,6 +203,10 @@ public class CodeOwnerApprovalCheck {
           codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getBackendReadCount());
       codeOwnerMetrics.codeOwnerConfigCacheReadsPerChange.record(
           codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getCacheReadCount());
+      codeOwnerMetrics.codeOwnerResolutionsPerChange.record(
+          codeOwnerResolver.getCodeOwnerCounters().getResolutionCount());
+      codeOwnerMetrics.codeOwnerConfigCacheReadsPerChange.record(
+          codeOwnerResolver.getCodeOwnerCounters().getCacheReadCount());
     }
   }
 
@@ -209,7 +214,7 @@ public class CodeOwnerApprovalCheck {
    * Gets the code owner statuses for all files/paths that were changed in the current revision of
    * the given change as a set.
    *
-   * @see #getFileStatuses(CodeOwnerConfigHierarchy, ChangeNotes)
+   * @see #getFileStatuses(CodeOwnerConfigHierarchy, CodeOwnerResolver, ChangeNotes)
    */
   public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(ChangeNotes changeNotes)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
@@ -218,7 +223,10 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log(
           "compute file statuses (project = %s, change = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get());
-      return getFileStatuses(codeOwnerConfigHierarchyProvider.get(), changeNotes)
+      return getFileStatuses(
+              codeOwnerConfigHierarchyProvider.get(),
+              codeOwnerResolverProvider.get().enforceVisibility(false),
+              changeNotes)
           .collect(toImmutableSet());
     }
   }
@@ -252,7 +260,9 @@ public class CodeOwnerApprovalCheck {
    *     returned
    */
   private Stream<FileCodeOwnerStatus> getFileStatuses(
-      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy, ChangeNotes changeNotes)
+      CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
+      CodeOwnerResolver codeOwnerResolver,
+      ChangeNotes changeNotes)
       throws ResourceConflictException, IOException, PatchListNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.prepareFileStatusComputation.start()) {
@@ -311,10 +321,7 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
       CodeOwnerResolverResult globalCodeOwners =
-          codeOwnerResolver
-              .get()
-              .enforceVisibility(false)
-              .resolveGlobalCodeOwners(changeNotes.getProjectName());
+          codeOwnerResolver.resolveGlobalCodeOwners(changeNotes.getProjectName());
       logger.atFine().log("global code owners = %s", globalCodeOwners);
 
       ImmutableSet<Account.Id> reviewerAccountIds =
@@ -332,6 +339,7 @@ public class CodeOwnerApprovalCheck {
               changedFile ->
                   getFileStatus(
                       codeOwnerConfigHierarchy,
+                      codeOwnerResolver,
                       branch,
                       revision,
                       globalCodeOwners,
@@ -392,11 +400,14 @@ public class CodeOwnerApprovalCheck {
       }
 
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
+      CodeOwnerResolver codeOwnerResolver =
+          codeOwnerResolverProvider.get().enforceVisibility(false);
       return changedFiles.compute(changeNotes.getProjectName(), patchSet.commitId()).stream()
           .map(
               changedFile ->
                   getFileStatus(
                       codeOwnerConfigHierarchy,
+                      codeOwnerResolver,
                       branch,
                       revision,
                       /* globalCodeOwners= */ CodeOwnerResolverResult.createEmpty(),
@@ -449,6 +460,7 @@ public class CodeOwnerApprovalCheck {
 
   private FileCodeOwnerStatus getFileStatus(
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
+      CodeOwnerResolver codeOwnerResolver,
       BranchNameKey branch,
       ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,
@@ -469,6 +481,7 @@ public class CodeOwnerApprovalCheck {
                   newPath ->
                       getPathCodeOwnerStatus(
                           codeOwnerConfigHierarchy,
+                          codeOwnerResolver,
                           branch,
                           revision,
                           globalCodeOwners,
@@ -491,6 +504,7 @@ public class CodeOwnerApprovalCheck {
             Optional.of(
                 getPathCodeOwnerStatus(
                     codeOwnerConfigHierarchy,
+                    codeOwnerResolver,
                     branch,
                     revision,
                     globalCodeOwners,
@@ -511,6 +525,7 @@ public class CodeOwnerApprovalCheck {
 
   private PathCodeOwnerStatus getPathCodeOwnerStatus(
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
+      CodeOwnerResolver codeOwnerResolver,
       BranchNameKey branch,
       ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,
@@ -551,7 +566,8 @@ public class CodeOwnerApprovalCheck {
           absolutePath,
           (PathCodeOwnersVisitor)
               pathCodeOwners -> {
-                CodeOwnerResolverResult codeOwners = resolveCodeOwners(pathCodeOwners);
+                CodeOwnerResolverResult codeOwners =
+                    resolveCodeOwners(codeOwnerResolver, pathCodeOwners);
                 logger.atFine().log(
                     "code owners = %s (code owner config folder path = %s, file name = %s)",
                     codeOwners,
@@ -849,10 +865,13 @@ public class CodeOwnerApprovalCheck {
   /**
    * Resolves the given path code owners.
    *
+   * @param codeOwnerResolver the {@code CodeOwnerResolver} that should be used to resolve code
+   *     owners
    * @param pathCodeOwners the path code owners that should be resolved
    */
-  private CodeOwnerResolverResult resolveCodeOwners(PathCodeOwners pathCodeOwners) {
-    return codeOwnerResolver.get().enforceVisibility(false).resolvePathCodeOwners(pathCodeOwners);
+  private CodeOwnerResolverResult resolveCodeOwners(
+      CodeOwnerResolver codeOwnerResolver, PathCodeOwners pathCodeOwners) {
+    return codeOwnerResolver.resolvePathCodeOwners(pathCodeOwners);
   }
 
   /**

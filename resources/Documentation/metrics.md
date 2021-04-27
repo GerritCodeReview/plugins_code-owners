@@ -46,10 +46,14 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
 
 ## <a id="codeOwnerConfigMetrics"> Code Owner Config Metrics
 
+* `code_owner_cache_reads_per_change`:
+  Number of code owner cache reads per change.
 * `code_owner_config_cache_reads_per_change`:
   Number of code owner config cache reads per change.
 * `code_owner_config_backend_reads_per_change`:
   Number of code owner config backend reads per change.
+* `code_owner_resolutions_per_change`:
+  Number of code owner resolutions per change.
 * `load_code_owner_config`:
   Latency for loading a code owner config file (read + parse).
 * `parse_code_owner_config`:
@@ -60,9 +64,13 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
 ## <a id="counterMetrics"> Counter Metrics
 
 * `count_code_owner_config_reads`:
+  Total number of code owner reads from cache.
+* `count_code_owner_config_reads`:
   Total number of code owner config reads from backend.
 * `count_code_owner_config_cache_reads`:
   Total number of code owner config reads from cache.
+* `count_code_owner_resolutions
+  Total number of code owner resolutions.
 * `count_code_owner_submit_rule_errors`:
   Total number of code owner submit rule errors.
     * `cause`:

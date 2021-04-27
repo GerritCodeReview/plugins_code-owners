@@ -545,6 +545,16 @@ endpoint or by touching the change (e.g. by adding a comment).
         code owner config files that are cached per request.\
         By default `10000`.
 
+<a id="pluginCodeOwnersMaxCodeOwnerCacheSize">plugin.@PLUGIN@.maxCodeOwnerCacheSize</a>
+:       When computing code owner file statuses for a change (e.g. to compute
+        the results for the code owners submit rule) emails that are mentioned
+        in relevant code owner config files need to be resolved to Gerrit
+        accounts. The resolved code owners are cached in memory for the time of
+        the request so that this resolution has to be done only once per email.\
+        This configuration parameter allows to set a limit for the number of
+        resolved code owners that are cached per request.\
+        By default `10000`.
+
 # <a id="projectConfiguration">Project configuration in @PLUGIN@.config</a>
 
 <a id="codeOwnersDisabled">codeOwners.disabled</a>
