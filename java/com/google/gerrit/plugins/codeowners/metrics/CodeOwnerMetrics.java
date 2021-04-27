@@ -51,17 +51,21 @@ public class CodeOwnerMetrics {
   public final Timer0 runCodeOwnerSubmitRule;
 
   // code owner config metrics
+  public final Histogram0 codeOwnerCacheReadsPerChange;
   public final Histogram0 codeOwnerConfigBackendReadsPerChange;
   public final Histogram0 codeOwnerConfigCacheReadsPerChange;
+  public final Histogram0 codeOwnerResolutionsPerChange;
   public final Timer1<String> loadCodeOwnerConfig;
   public final Timer0 readCodeOwnerConfig;
   public final Timer1<String> parseCodeOwnerConfig;
 
   // counter metrics
+  public final Counter0 countCodeOwnerCacheReads;
   public final Counter0 countCodeOwnerConfigReads;
   public final Counter0 countCodeOwnerConfigCacheReads;
   public final Counter3<ValidationTrigger, ValidationResult, Boolean>
       countCodeOwnerConfigValidations;
+  public final Counter0 countCodeOwnerResolutions;
   public final Counter1<String> countCodeOwnerSubmitRuleErrors;
   public final Counter0 countCodeOwnerSubmitRuleRuns;
   public final Counter1<Boolean> countCodeOwnerSuggestions;
@@ -136,6 +140,9 @@ public class CodeOwnerMetrics {
             "run_code_owner_submit_rule", "Latency for running the code owner submit rule");
 
     // code owner config metrics
+    this.codeOwnerCacheReadsPerChange =
+        createHistogram(
+            "code_owner_cache_reads_per_change", "Number of code owner cache reads per change");
     this.codeOwnerConfigBackendReadsPerChange =
         createHistogram(
             "code_owner_config_backend_reads_per_change",
@@ -144,6 +151,9 @@ public class CodeOwnerMetrics {
         createHistogram(
             "code_owner_config_cache_reads_per_change",
             "Number of code owner config cache reads per change");
+    this.codeOwnerResolutionsPerChange =
+        createHistogram(
+            "code_owner_resolutions_per_change", "Number of code owner resolutions per change");
     this.loadCodeOwnerConfig =
         createTimerWithClassField(
             "load_code_owner_config",
@@ -157,6 +167,9 @@ public class CodeOwnerMetrics {
             "read_code_owner_config", "Latency for reading a code owner config file");
 
     // counter metrics
+    this.countCodeOwnerCacheReads =
+        createCounter(
+            "count_code_owner_config_reads", "Total number of code owner reads from cache");
     this.countCodeOwnerConfigReads =
         createCounter(
             "count_code_owner_config_reads",
@@ -179,6 +192,8 @@ public class CodeOwnerMetrics {
             Field.ofBoolean("dry_run", (metadataBuilder, resolveAllUsers) -> {})
                 .description("Whether the validation was a dry run.")
                 .build());
+    this.countCodeOwnerResolutions =
+        createCounter("count_code_owner_resolutions", "Total number of code owner resolutions");
     this.countCodeOwnerSubmitRuleErrors =
         createCounter1(
             "count_code_owner_submit_rule_errors",
