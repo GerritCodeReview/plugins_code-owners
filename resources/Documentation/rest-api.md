@@ -79,7 +79,7 @@ entity.
   Content-Type: application/json; charset=UTF-8
 
   {
-    "disabled": "true"
+    "disabled": true
   }
 ```
 
@@ -96,7 +96,7 @@ As a response the updated code owner project config is returned as
   )]}'
   {
     "status": {
-      "disabled": "true"
+      "disabled": true
     }
   }
 ```
@@ -299,15 +299,15 @@ As response a [CodeOwnerCheckInfo](#code-owner-check-info) entity is returned.
 
   )]}'
   {
-    "is_code_owner": "false",
-    "is_resolvable": "false",
-    "can_read_ref": "true",
+    "is_code_owner": false,
+    "is_resolvable": false,
+    "can_read_ref": true,
     "code_owner_config_file_paths": [
       "/OWNERS",
     ],
-    "is_fallback_code_owner": "false",
-    "is_default_code_owner": "false",
-    "is_global_code_owner": "false",
+    "is_fallback_code_owner": false,
+    "is_default_code_owner": false,
+    "is_global_code_owner": false,
     "debug_logs": [
       "checking code owner config file foo/bar:master:/OWNERS",
       "found email xyz@example.com as code owner in /OWNERS",
