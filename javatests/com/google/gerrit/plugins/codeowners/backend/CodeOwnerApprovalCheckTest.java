@@ -151,19 +151,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileRename_insufficientReviewers() throws Exception {
-    testGetStatusForFileRename_insufficientReviewers(/* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void getStatusForFileRename_insufficientReviewers_useNewDiffCache() throws Exception {
-    testGetStatusForFileRename_insufficientReviewers(/* useNewDiffCache= */ true);
-  }
-
-  private void testGetStatusForFileRename_insufficientReviewers(boolean useNewDiffCache)
-      throws Exception {
     TestAccount user2 = accountCreator.user2();
 
     Path oldPath = Paths.get("/foo/old.bar");
@@ -178,20 +165,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    if (useNewDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    } else {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    }
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -263,18 +243,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileRename_pendingOldPath() throws Exception {
-    testGetStatusForFileRename_pendingOldPath(/* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void getStatusForFileRename_pendingOldPath_useNewDiffCache() throws Exception {
-    testGetStatusForFileRename_pendingOldPath(/* useNewDiffCache= */ true);
-  }
-
-  private void testGetStatusForFileRename_pendingOldPath(boolean useNewDiffCache) throws Exception {
     TestAccount user2 = accountCreator.user2();
 
     setAsCodeOwners("/foo/bar/", user);
@@ -291,36 +259,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    if (useNewDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.PENDING,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    } else {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    }
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
   public void getStatusForFileRename_pendingNewPath() throws Exception {
-    testGetStatusForFileRename_pendingNewPath(/* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void getStatusForFileRename_pendingNewPath_useNewDiffCache() throws Exception {
-    testGetStatusForFileRename_pendingNewPath(/* useNewDiffCache= */ true);
-  }
-
-  private void testGetStatusForFileRename_pendingNewPath(boolean useNewDiffCache) throws Exception {
     TestAccount user2 = accountCreator.user2();
 
     setAsCodeOwners("/foo/baz/", user);
@@ -337,20 +283,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    if (useNewDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  CodeOwnerStatus.PENDING));
-    } else {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.PENDING));
-    }
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS, newPath, CodeOwnerStatus.PENDING));
   }
 
   @Test
@@ -407,19 +343,6 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getStatusForFileRename_approvedOldPath() throws Exception {
-    testGetStatusForFileRename_approvedOldPath(/* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void getStatusForFileRename_approvedOldPath_useNewDiffCache() throws Exception {
-    testGetStatusForFileRename_approvedOldPath(/* useNewDiffCache= */ true);
-  }
-
-  private void testGetStatusForFileRename_approvedOldPath(boolean useNewDiffCache)
-      throws Exception {
     setAsCodeOwners("/foo/bar/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
@@ -432,37 +355,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    if (useNewDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.APPROVED,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    } else {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.APPROVED),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    }
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.APPROVED,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
   public void getStatusForFileRename_approvedNewPath() throws Exception {
-    testGetStatusForFileRename_approvedNewPath(/* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void getStatusForFileRename_approvedNewPath_useNewDiffCache() throws Exception {
-    testGetStatusForFileRename_approvedNewPath(/* useNewDiffCache= */ true);
-  }
-
-  private void testGetStatusForFileRename_approvedNewPath(boolean useNewDiffCache)
-      throws Exception {
     setAsCodeOwners("/foo/baz/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
@@ -475,20 +378,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    if (useNewDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  CodeOwnerStatus.APPROVED));
-    } else {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.APPROVED));
-    }
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.APPROVED));
   }
 
   @Test
@@ -593,17 +489,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnOldPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
-        /* implicitApprovalsEnabled= */ false, /* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnOldPath_useNewDiffCache()
-      throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
-        /* implicitApprovalsEnabled= */ false, /* useNewDiffCache= */ true);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
@@ -611,23 +497,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnOldPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
-        /* implicitApprovalsEnabled= */ true, /* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void
-      getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnOldPath_useNewDiffCache()
-          throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
-        /* implicitApprovalsEnabled= */ true, /* useNewDiffCache= */ true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnOldPath(
-      boolean implicitApprovalsEnabled, boolean useNewDiffCache) throws Exception {
+      boolean implicitApprovalsEnabled) throws Exception {
     setAsCodeOwners("/foo/bar/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
@@ -636,43 +510,22 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     amendChange(user, changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    if (useNewDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  implicitApprovalsEnabled
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    } else {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(
-                  oldPath,
-                  implicitApprovalsEnabled
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    }
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                implicitApprovalsEnabled
+                    ? CodeOwnerStatus.APPROVED
+                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
   public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnNewPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
-        /* implicitApprovalsEnabled= */ false, /* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void getStatusForFileRename_noImplicitApprovalByPatchSetUploaderOnNewPath_useNewDiffCache()
-      throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
-        /* implicitApprovalsEnabled= */ false, /* useNewDiffCache= */ true);
+        /* implicitApprovalsEnabled= */ false);
   }
 
   @Test
@@ -680,23 +533,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnNewPath()
       throws Exception {
     testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
-        /* implicitApprovalsEnabled= */ true, /* useNewDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)
-  public void
-      getStatusForFileRename_withImplicitApprovalByPatchSetUploaderOnNewPath_useNewDiffCache()
-          throws Exception {
-    testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
-        /* implicitApprovalsEnabled= */ true, /* useNewDiffCache= */ true);
+        /* implicitApprovalsEnabled= */ true);
   }
 
   private void testImplicitApprovalByPatchSetUploaderOnStatusForFileRenameOnNewPath(
-      boolean implicitApprovalsEnabled, boolean useNewDiffCache) throws Exception {
+      boolean implicitApprovalsEnabled) throws Exception {
     setAsCodeOwners("/foo/baz/", user);
 
     Path oldPath = Paths.get("/foo/bar/abc.txt");
@@ -705,26 +546,15 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     amendChange(user, changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    if (useNewDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  implicitApprovalsEnabled
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    } else {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(
-                  newPath,
-                  implicitApprovalsEnabled
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    }
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                implicitApprovalsEnabled
+                    ? CodeOwnerStatus.APPROVED
+                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test

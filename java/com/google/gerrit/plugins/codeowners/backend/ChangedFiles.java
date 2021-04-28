@@ -30,7 +30,6 @@ import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.gerrit.server.experiments.ExperimentFeatures;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.InMemoryInserter;
 import com.google.gerrit.server.git.MergeUtil;
@@ -87,7 +86,6 @@ public class ChangedFiles {
   private final Provider<AutoMerger> autoMergerProvider;
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final ThreeWayMergeStrategy mergeStrategy;
-  private final ExperimentFeatures experimentFeatures;
 
   @Inject
   public ChangedFiles(
@@ -96,38 +94,13 @@ public class ChangedFiles {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       DiffOperations diffOperations,
       Provider<AutoMerger> autoMergerProvider,
-      CodeOwnerMetrics codeOwnerMetrics,
-      ExperimentFeatures experimentFeatures) {
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.diffOperations = diffOperations;
     this.autoMergerProvider = autoMergerProvider;
     this.codeOwnerMetrics = codeOwnerMetrics;
-    this.experimentFeatures = experimentFeatures;
     this.mergeStrategy = MergeUtil.getMergeStrategy(cfg);
-  }
-
-  /**
-   * Returns the changed files for the given revision.
-   *
-   * <p>By default the changed files are computed on access (see {@link #compute(Project.NameKey,
-   * ObjectId)}).
-   *
-   * <p>Only if enabled via the {@link CodeOwnersExperimentFeaturesConstants#USE_NEW_DIFF_CACHE}
-   * experiment feature flag the changed files are retrieved from the new diff cache (see {@link
-   * #getFromDiffCache(Project.NameKey, ObjectId)}).
-   *
-   * @param project the project
-   * @param revision the revision for which the changed files should be computed
-   * @return the files that have been changed in the given revision, sorted alphabetically by path
-   */
-  public ImmutableList<ChangedFile> getOrCompute(Project.NameKey project, ObjectId revision)
-      throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
-    if (experimentFeatures.isFeatureEnabled(
-        CodeOwnersExperimentFeaturesConstants.USE_NEW_DIFF_CACHE)) {
-      return getFromDiffCache(project, revision);
-    }
-    return compute(project, revision);
   }
 
   /**
