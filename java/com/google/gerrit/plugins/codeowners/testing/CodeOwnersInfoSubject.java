@@ -20,6 +20,7 @@ import static com.google.gerrit.truth.ListSubject.elements;
 
 import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
@@ -56,6 +57,16 @@ public class CodeOwnersInfoSubject extends Subject {
 
   public BooleanSubject hasOwnedByAllUsersThat() {
     return check("ownedByAllUsers").that(codeOwnersInfo().ownedByAllUsers);
+  }
+
+  public void hasDebugLogsThatContainAllOf(String... expectedMessages) {
+    for (String expectedMessage : expectedMessages) {
+      check("debugLogs").that(codeOwnersInfo().debugLogs).contains(expectedMessage);
+    }
+  }
+
+  public IterableSubject hasDebugLogsThat() {
+    return check("debugLogs").that(codeOwnersInfo().debugLogs);
   }
 
   private CodeOwnersInfo codeOwnersInfo() {

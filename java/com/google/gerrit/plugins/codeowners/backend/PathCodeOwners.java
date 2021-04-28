@@ -222,6 +222,9 @@ public class PathCodeOwners {
           "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key());
 
       List<String> messages = new ArrayList<>();
+      messages.add(
+          String.format(
+              "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key()));
 
       // Create a code owner config builder to create the resolved code owner config (= code owner
       // config that is scoped to the path and which has imports resolved)

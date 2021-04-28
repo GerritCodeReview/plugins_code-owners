@@ -49,6 +49,7 @@ public interface CodeOwners {
     private Long seed;
     private Boolean resolveAllUsers;
     private Boolean highestScoreOnly;
+    private Boolean debug;
 
     /**
      * Lists the code owners for the given path.
@@ -128,6 +129,18 @@ public interface CodeOwners {
     }
 
     /**
+     * Sets whether debug logs should be included into the response.
+     *
+     * <p>Requires the 'Check Code Owner' global capability.
+     *
+     * @param debug whether debug logs should be included into the response
+     */
+    public QueryRequest withDebug(boolean debug) {
+      this.debug = debug;
+      return this;
+    }
+
+    /**
      * Sets the branch revision from which the code owner configs should be read.
      *
      * <p>Not supported for querying code owners for a path in a change.
@@ -164,6 +177,11 @@ public interface CodeOwners {
     /** Whether only the code owners with the highest score should be returned. */
     public Optional<Boolean> getHighestScoreOnly() {
       return Optional.ofNullable(highestScoreOnly);
+    }
+
+    /** Whether debug logs should be included into the response. */
+    public Optional<Boolean> getDebug() {
+      return Optional.ofNullable(debug);
     }
 
     /** Returns the branch revision from which the code owner configs should be read. */

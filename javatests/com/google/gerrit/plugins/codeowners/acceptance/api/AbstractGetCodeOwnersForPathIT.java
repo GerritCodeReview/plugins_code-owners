@@ -35,6 +35,7 @@ import com.google.gerrit.common.data.GlobalCapability;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.AccountGroup;
 import com.google.gerrit.entities.Permission;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.AuthException;
@@ -45,8 +46,13 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerCo
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.inject.Inject;
 import java.util.List;
@@ -167,6 +173,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .comparingElementsUsing(hasAccountName())
         .containsExactly(null, null, null);
     assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isNull();
+    assertThat(codeOwnersInfo).hasDebugLogsThat().isNull();
   }
 
   @Test
@@ -1463,5 +1470,133 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             getCodeOwnersApi().query().withHighestScoreOnly(/* highestScoreOnly= */ true),
             "/foo/bar/baz.md");
     assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+  }
+
+  @Test
+  public void debugRequireCallerToBeAdminOrHaveTheCheckCodeOwnerCapability() throws Exception {
+    requestScopeOperations.setApiUser(user.id());
+    AuthException authException =
+        assertThrows(
+            AuthException.class,
+            () ->
+                queryCodeOwners(
+                    getCodeOwnersApi().query().withDebug(/* debug= */ true), "/foo/bar/baz.md"));
+    assertThat(authException)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format("%s for plugin code-owners not permitted", CheckCodeOwnerCapability.ID));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "global.owner@example.com")
+  public void getCodeOwnersWithDebug_byAdmin() throws Exception {
+    testGetCodeOwnersWithDebug();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "global.owner@example.com")
+  public void getCodeOwnersWithDebug_byUserThatHasTheCheckCodeOwnerCapability() throws Exception {
+    projectOperations
+        .allProjectsForUpdate()
+        .add(allowCapability("code-owners-" + CheckCodeOwnerCapability.ID).group(REGISTERED_USERS))
+        .update();
+
+    requestScopeOperations.setApiUser(user.id());
+    testGetCodeOwnersWithDebug();
+  }
+
+  private void testGetCodeOwnersWithDebug() throws Exception {
+    TestAccount globalOwner =
+        accountCreator.create("global_owner", "global.owner@example.com", "Global Owner", null);
+
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    CodeOwnerConfig.Key rootKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    String nonExistingEmail = "non-existing@example.com";
+    CodeOwnerConfig.Key fooKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(nonExistingEmail)
+            .create();
+
+    Project.NameKey nonExistingProject = Project.nameKey("non-existing");
+    CodeOwnerConfigReference nonResolvableCodeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonExistingProject, "master", "/"))
+                    .getFilePath())
+            .setProject(nonExistingProject)
+            .build();
+
+    CodeOwnerConfig.Key fooBarKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/bar/")
+            .addImport(nonResolvableCodeOwnerConfigReference)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("md"))
+                    .addCodeOwnerEmail(user.email())
+                    .build())
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addPathExpression(testPathExpressions.matchFileType("txt"))
+                    .addCodeOwnerEmail(user2.email())
+                    .build())
+            .create();
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().withDebug(/* debug= */ true), path);
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), admin.id(), globalOwner.id())
+        .inOrder();
+    assertThat(codeOwnersInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format("resolve code owners for %s from code owner config %s", path, fooBarKey),
+            "per-file code owner set with path expressions [*.md] matches",
+            String.format(
+                "The import of %s:master:/%s in %s:master:/foo/bar/%s cannot be resolved: project %s not found",
+                nonExistingProject.get(),
+                getCodeOwnerConfigFileName(),
+                project.get(),
+                getCodeOwnerConfigFileName(),
+                nonExistingProject.get()),
+            String.format(
+                "resolving code owner reference %s", CodeOwnerReference.create(user.email())),
+            String.format("resolved to account %d", user.id().get()),
+            String.format("resolve code owners for %s from code owner config %s", path, fooKey),
+            String.format(
+                "resolving code owner reference %s", CodeOwnerReference.create(nonExistingEmail)),
+            String.format(
+                "cannot resolve code owner email %s: no account with this email exists",
+                nonExistingEmail),
+            String.format("resolve code owners for %s from code owner config %s", path, rootKey),
+            String.format(
+                "resolving code owner reference %s", CodeOwnerReference.create(admin.email())),
+            String.format("resolved to account %d", admin.id().get()),
+            "resolve global code owners",
+            String.format(
+                "resolving code owner reference %s",
+                CodeOwnerReference.create(globalOwner.email())),
+            String.format("resolved to account %d", globalOwner.id().get()));
   }
 }
