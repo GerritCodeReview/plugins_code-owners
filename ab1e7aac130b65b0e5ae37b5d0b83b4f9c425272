@@ -146,6 +146,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "e412b110_e51222ff",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-28T08:16:12Z",
+      "side": 1,
+      "message": "I\u0027ve protected the usage of the new diff cache with an experiment flag now. This means we can submit this change now and do a safe rollout later.",
+      "parentUuid": "d5b8601a_ddb2e24e",
+      "range": {
+        "startLine": 22,
+        "startChar": 0,
+        "endLine": 23,
+        "endChar": 3
+      },
+      "revId": "ab1e7aac130b65b0e5ae37b5d0b83b4f9c425272",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "27baec06_acfc1ecd",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 3
