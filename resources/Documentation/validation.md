@@ -41,6 +41,8 @@ No validation is done when:
   [enableValidationOnCommitReceived](config.html#codeOwnersEnableValidationOnCommitReceived)
   or [enableValidationOnSubmit](config.html#codeOwnersEnableValidationOnSubmit)
   config options
+* the [--code-owners~skip-validation](#skipCodeOwnerConfigValidationOnDemand)
+  push option was specified on push
 
 In addition for [code owner config files](user-guide.html#codeOwnerConfigFiles)
 no validation is done when:
@@ -52,6 +54,22 @@ no validation is done when:
   which files are code owner config files, so we allow all uploads rather than
   blocking all uploads, to reduce the risk of breaking the plugin configuration
   `code-owner.config` files are validated too)
+
+## <a id="skipCodeOwnerConfigValidationOnDemand">Skip code owner config validation on demand
+
+By setting the `--code-owners~skip-validation` push option it is possible to
+skip the code owner config validation on push.
+
+Using this push option requires the calling user to have to
+`Can Skip Code Owner Config Validation` global capability. Host administrators
+have this capability implicitly assigned via the `Administrate Server` global
+capability.
+
+**NOTE:** Using this option only makes sense if the [code owner config validation
+on submit](config.html#pluginCodeOwnersEnableValidationOnSubmit) is disabled, as
+otherwise it's not possible to submit the created change (using the push option
+only skips the validation for the push, but not for the submission of the
+change).
 
 ## <a id="howCodeOwnerConfigsCanGetIssuesAfterSubmit">
 In addition it is possible that [code owner config
