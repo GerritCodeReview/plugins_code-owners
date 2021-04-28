@@ -4,6 +4,7 @@
 * [How to check if the code owners functionality is enabled for a project or branch](#checkIfEnabled)
 * [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
 * [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
+* [How to investigate issues with the code owner suggestion](#investigateIssuesWithCodeOwnerSuggestion)
 * [How to define default code owners](#defineDefaultCodeOwners)
 * [How to setup code owner overrides](#setupOverrides)
 * [What's the best place to keep the global plugin
@@ -86,6 +87,7 @@ by:
 
 Since code owner config files are part of the source code, any issues with them
 should be investigated and fixed by the project owners and host administrators.
+
 To do this they can:
 
 * Check the code owner config files for issues by calling the [Check Code Owner
@@ -97,6 +99,39 @@ To do this they can:
 
 Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
 only after issues with the code owner config files have been excluded.
+
+Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
+owner config files in the first place.
+
+## <a id="investigateIssuesWithCodeOwnerSuggestion">How to investigate issues with the code owner suggestion
+
+If the code owners config suggestion is not working as expected, this is either
+caused by:
+
+* issues in the code owner config files
+* user permissions
+* account visibility
+* account states
+* a bug in the @PLUGIN@ plugin
+
+Issues with code owner config files, user permissions, account visibility and
+account states should be investigated and fixed by the project owners and host
+administrators.
+
+To do this they can:
+
+* Use the `--debug` option of the [List Code
+  Owners](rest-api.html#list-code-owners-for-path-in-branch) REST endpoints to
+  get debug logs included into the response.
+* Check the code owner config files for issues by calling the [Check Code Owner
+  Config File REST endpoint](rest-api.html#check-code-owner-config-files)
+* Check the code ownership of a user for a certain path by calling the [Check
+  Code Owner REST endpoint](rest-api.html#check-code-owner) (requires the caller
+  to be host administrator or have the [Check Code Owner
+  capability](rest-api.html#checkCodeOwner))
+
+Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
+only after other causes have been excluded.
 
 Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
 owner config files in the first place.

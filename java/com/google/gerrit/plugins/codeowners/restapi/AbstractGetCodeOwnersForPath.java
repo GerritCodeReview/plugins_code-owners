@@ -79,6 +79,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private final Accounts accounts;
   private final AccountControl.Factory accountControlFactory;
   private final PermissionBackend permissionBackend;
+  private final CheckCodeOwnerCapability checkCodeOwnerCapability;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
@@ -90,6 +91,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private Optional<Long> seed = Optional.empty();
   private boolean resolveAllUsers;
   private boolean highestScoreOnly;
+  private boolean debug;
 
   @Option(
       name = "-o",
@@ -138,11 +140,21 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     this.highestScoreOnly = highestScoreOnly;
   }
 
+  @Option(
+      name = "--debug",
+      usage =
+          "whether debug logs should be included into the response"
+              + " (requires the 'Check Code Owner' global capability)")
+  public void setDebug(boolean debug) {
+    this.debug = debug;
+  }
+
   protected AbstractGetCodeOwnersForPath(
       AccountVisibility accountVisibility,
       Accounts accounts,
       AccountControl.Factory accountControlFactory,
       PermissionBackend permissionBackend,
+      CheckCodeOwnerCapability checkCodeOwnerCapability,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
@@ -151,6 +163,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     this.accounts = accounts;
     this.accountControlFactory = accountControlFactory;
     this.permissionBackend = permissionBackend;
+    this.checkCodeOwnerCapability = checkCodeOwnerCapability;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
@@ -163,6 +176,10 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       throws AuthException, BadRequestException, PermissionBackendException {
     parseHexOptions();
     validateLimit();
+
+    if (debug) {
+      permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
+    }
 
     if (!seed.isPresent()) {
       seed = getDefaultSeed(rsrc);
@@ -180,6 +197,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
     Set<CodeOwner> codeOwners = new HashSet<>();
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
+    List<String> debugLogs = new ArrayList<>();
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
         rsrc.getRevision(),
@@ -187,6 +205,11 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         codeOwnerConfig -> {
           CodeOwnerResolverResult pathCodeOwners =
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
+
+          if (debug) {
+            debugLogs.addAll(pathCodeOwners.messages());
+          }
+
           codeOwners.addAll(filterCodeOwners(rsrc, pathCodeOwners.codeOwners()));
 
           int distance =
@@ -224,6 +247,12 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
     if (codeOwners.size() < limit || !ownedByAllUsers.get()) {
       CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
+
+      if (debug) {
+        debugLogs.add("resolve global code owners");
+        debugLogs.addAll(globalCodeOwners.messages());
+      }
+
       globalCodeOwners
           .codeOwners()
           .forEach(
@@ -261,6 +290,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
+    codeOwnersInfo.debugLogs = debug ? debugLogs : null;
     return Response.ok(codeOwnersInfo);
   }
 

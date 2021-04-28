@@ -33,4 +33,11 @@ public class CodeOwnersInfo {
    * <p>Not set if {@code false}.
    */
   public Boolean ownedByAllUsers;
+
+  /**
+   * Debug logs that may help to understand why a user is or isn't suggested as a code owner.
+   *
+   * <p>Only set if requested via {@code --debug}.
+   */
+  public List<String> debugLogs;
 }
