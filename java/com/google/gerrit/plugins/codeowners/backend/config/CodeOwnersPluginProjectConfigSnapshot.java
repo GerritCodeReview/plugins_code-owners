@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
-/** Snapshot of the code-owners plugin configuration for one project. */
+/** Snapshot of the project-specific code-owners plugin configuration. */
 public class CodeOwnersPluginProjectConfigSnapshot {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -120,7 +120,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
     return fileExtension;
   }
 
-  /** Checks whether code owner configs are read-only. */
+  /** Whether code owner configs are read-only. */
   public boolean areCodeOwnerConfigsReadOnly() {
     if (codeOwnerConfigsReadOnly == null) {
       codeOwnerConfigsReadOnly = generalConfig.getReadOnly(projectName, pluginConfig);
@@ -128,9 +128,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
     return codeOwnerConfigsReadOnly;
   }
 
-  /**
-   * Checks whether pure revert changes are exempted from needing code owner approvals for submit.
-   */
+  /** Whether pure revert changes are exempted from needing code owner approvals for submit. */
   public boolean arePureRevertsExempted() {
     if (exemptPureReverts == null) {
       exemptPureReverts = generalConfig.getExemptPureReverts(projectName, pluginConfig);
@@ -139,7 +137,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   }
 
   /**
-   * Checks whether newly added non-resolvable code owners should be rejected on commit received and
+   * Whether newly added non-resolvable code owners should be rejected on commit received and
    * submit.
    *
    * @param branchName the branch for which it should be checked whether non-resolvable code owners
@@ -166,8 +164,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   }
 
   /**
-   * Checks whether newly added non-resolvable imports should be rejected on commit received and
-   * submit.
+   * Whether newly added non-resolvable imports should be rejected on commit received and submit.
    *
    * @param branchName the branch for which it should be checked whether non-resolvable imports
    *     should be rejected
@@ -334,9 +331,6 @@ public class CodeOwnersPluginProjectConfigSnapshot {
 
   /**
    * Whether the code owners functionality is disabled for the given branch.
-   *
-   * <p>Callers must ensure that the project of the specified branch exists. If the project doesn't
-   * exist the call fails with {@link IllegalStateException}.
    *
    * <p>The configuration is evaluated in the following order:
    *
@@ -540,14 +534,15 @@ public class CodeOwnersPluginProjectConfigSnapshot {
    * <p>If multiple approvals are returned, any of them is sufficient to override the code owners
    * submit check.
    *
-   * <p>The override approval configuration is evaluated in the following order:
+   * <p>The override approval configuration is read from:
    *
    * <ul>
-   *   <li>override approval configuration for project (with inheritance)
-   *   <li>globally configured override approval
+   *   <li>the override approval configuration for project (with inheritance)
+   *   <li>the globally configured override approval
    * </ul>
    *
-   * <p>The first override approval configuration that exists counts and the evaluation is stopped.
+   * <p>Override approvals that are configured on project-level extend the inherited override
+   * approval configuration.
    *
    * <p>The returned override approvals are sorted alphabetically by their string representation
    * (e.g. {@code Owners-Override+1}).
@@ -608,7 +603,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
    * Gets the required approvals that are configured.
    *
    * @param requiredApprovalConfig the config from which the required approvals should be read
-   * @return the required approvals that is configured, an empty list if no required approvals are
+   * @return the required approvals that are configured, an empty list if no required approvals are
    *     configured
    */
   private ImmutableList<RequiredApproval> getConfiguredRequiredApproval(
