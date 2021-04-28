@@ -16,7 +16,7 @@ The following configuration steps are recommended:
 3. [Opt-out branches that should not use code owners](#optOutBranches)
 4. [Configure the label vote that should count as code owner approval](#configureCodeOwnerApproval)
 5. [Grant code owners permission to vote on the label that counts as code owner approval](#grantCodeOwnerPermissions)
-6. [Configure code owner overrides](#configureCodeOwnerOverrides)
+6. [Configure code owner overrides & fallback code owners](#configureCodeOwnerOverridesAndFallbackCodeOwners)
 7. [Configure allowed email domains](#configureAllowedEmailDomains)
 8. [Optional Configuration](#optionalConfiguration)
 9. [Stop using the find-owners Prolog submit rule](#stopUsingFindOwners)
@@ -237,13 +237,22 @@ As for any other permission, the
 needs to be granted via the access screen of the project or a parent project (at
 `https://<host>/admin/repos/<project-name>,access`).
 
-### <a id="configureCodeOwnerOverrides">6. Configure code owner overrides
+### <a id="configureCodeOwnerOverridesAndFallbackCodeOwners">6. Configure code owner overrides & fallback code owners
+
+It's possible that some files have no code owners defined (e.g. missing root
+code owner config file). In this case changes for these files cannot be code
+owner approved and hence cannot be submitted.
+
+To avoid that this leads to unsubmittable changes it is recommended to configure
+code owner overrides and/or fallback code owners.
+
+#### <a id="configureCodeOwnerOverrides">Configure code owner overrides
 
 It's possible to configure code owner overrides that allow privileged users to
 override code owner approvals. This means they can approve changes without being
 a code owner.
 
-Configuring code owner overrides is optional.
+Configuring code owner overrides is optional, but recommended.
 
 To enable code owner overrides, you must define which label vote is required for
 an override. This can be done globally by setting
@@ -287,6 +296,18 @@ done by 2 separate commits that are pushed one after another (not being able to
 add both configurations in one commit is a known issue that still needs to be
 fixed).
 
+#### <a id="configureFallbackCodeOwners">Configure fallback code owners
+
+It is possible to configure a policy for [fallback code
+owners](config.html#pluginCodeOwnersFallbackCodeOwners) that controls who should
+own files for which no code owners have been defined, e.g. project owners, all
+users or no one (default).
+
+Configuring fallback code owners is optional. For the initial rollout of the
+code-owners plugin it is highly recommended to allow fallback code owners so
+that projects that do not have any code owner config files yet are not
+disrupted.
+
 ### <a id="configureAllowedEmailDomains">7. Configure allowed email domains
 
 By default, the emails in code owner config files that make users code owners
@@ -315,10 +336,6 @@ documentation](config.html).
 Examples (not an exhaustive list):
 
 * [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner)
-* Configure a policy for [fallback code
-  owners](config.html#pluginCodeOwnersFallbackCodeOwners) (who should own files
-  for which no code owners have been defined, e.g. project owners, all users or
-  no one)
 * Whether [an implicit code owner approval from the last uploader is
   assumed](config.html#codeOwnersEnableImplicitApprovals)
 * [Merge commit strategy](config.html#codeOwnersMergeCommitStrategy) that
@@ -347,7 +364,7 @@ If code owners are not defined yet, changes can only be submitted
 * with a code owner override (if override labels have been configured, see
   [above](#configureCodeOwnerOverrides))
 * with an approval from a fallback code owner (if fallback code owners have been
-  configured, see [above](#optionalConfiguration)).
+  configured, see [above](#configureFallbackCodeOwners)).
 
 Right after the code owners functionality got enabled for a project/branch, it
 is recommended to add an initial code owner configuration at the root level that
