@@ -491,7 +491,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> changedFiles.getFromDiffCache(/* project= */ null, ObjectId.zeroId()));
+            () -> changedFiles.getFromDiffCacheIfPossible(/* project= */ null, ObjectId.zeroId()));
     assertThat(npe).hasMessageThat().isEqualTo("project");
   }
 
@@ -500,7 +500,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> changedFiles.getFromDiffCache(project, /* revision= */ null));
+            () -> changedFiles.getFromDiffCacheIfPossible(project, /* revision= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
@@ -510,7 +510,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     RevCommit commit =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
 
-    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCacheIfPossible(project, commit);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
@@ -528,7 +529,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
             .getCommit();
 
-    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCacheIfPossible(project, commit);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
@@ -543,7 +545,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     String changeId = createChangeWithFileDeletion(path);
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.getFromDiffCacheIfPossible(
             project, getRevisionResource(changeId).getPatchSet().commitId());
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
@@ -562,7 +564,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     gApi.changes().id(changeId).current().files();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.getFromDiffCacheIfPossible(
             project, getRevisionResource(changeId).getPatchSet().commitId());
     ChangedFileSubject changedFile = assertThatCollection(changedFilesSet).onlyElement();
     changedFile.hasNewPath().value().isEqualTo(Paths.get(newPath));
@@ -579,10 +581,14 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
     assertThat(commit.getParents()).isEmpty();
 
-    IllegalStateException exception =
-        assertThrows(
-            IllegalStateException.class, () -> changedFiles.getFromDiffCache(project, commit));
-    assertThat(exception).hasMessageThat().isEqualTo("diff cache doesn't support initial commits");
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCacheIfPossible(project, commit);
+    assertThat(changedFilesSet).hasSize(1);
+    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().isEmpty();
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
   }
 
   @Test
@@ -657,7 +663,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.getFromDiffCacheIfPossible(
             project,
             getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId());
 
@@ -733,7 +739,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.getFromDiffCacheIfPossible(
             project,
             getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId());
     ImmutableSet<String> oldPaths =
@@ -766,7 +772,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
                     "file content"))
             .getCommit();
 
-    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    ImmutableList<ChangedFile> changedFilesSet =
+        changedFiles.getFromDiffCacheIfPossible(project, commit);
     assertThat(changedFilesSet)
         .comparingElementsUsing(hasPath())
         .containsExactly(file4, file3, file5, file1, file2)
@@ -878,7 +885,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             .create();
 
     ImmutableList<ChangedFile> changedFilesSet =
-        changedFiles.getFromDiffCache(
+        changedFiles.getFromDiffCacheIfPossible(
             project,
             getRevisionResource(Integer.toString(mergeChange.get())).getPatchSet().commitId());
 

@@ -22,12 +22,10 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
-import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersExperimentFeaturesConstants;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -273,18 +271,6 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getStatusWithLimitForRename() throws Exception {
-    testGetStatusWithLimitForRenamedFile(/* useDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE)
-  public void getStatusWithLimitForRename_useDiffCache() throws Exception {
-    testGetStatusWithLimitForRenamedFile(/* useDiffCache= */ true);
-  }
-
-  private void testGetStatusWithLimitForRenamedFile(boolean useDiffCache) throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -302,35 +288,13 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
     CodeOwnerStatusInfo codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(1).get();
-    if (useDiffCache) {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.PENDING,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-      assertThat(codeOwnerStatus).hasMoreThat().isNull();
-    } else {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-      assertThat(codeOwnerStatus).hasMoreThat().isTrue();
-
-      codeOwnerStatus =
-          changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withLimit(2).get();
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING));
-      assertThat(codeOwnerStatus).hasMoreThat().isNull();
-    }
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThat(codeOwnerStatus).hasMoreThat().isNull();
   }
 
   @Test
@@ -432,18 +396,6 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
   @Test
   public void getStatusForRenamedFile() throws Exception {
-    testGetStatusForRenamedFile(/* useDiffCache= */ false);
-  }
-
-  @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE)
-  public void getStatusForRenamedFile_useDiffCache() throws Exception {
-    testGetStatusForRenamedFile(/* useDiffCache= */ true);
-  }
-
-  private void testGetStatusForRenamedFile(boolean useDiffCache) throws Exception {
     TestAccount user2 = accountCreator.user2();
 
     setAsCodeOwners("/foo/bar/", user);
@@ -455,67 +407,37 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
 
     CodeOwnerStatusInfo codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    if (useDiffCache) {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    } else {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    }
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a reviewer that is a code owner of the old path.
     gApi.changes().id(changeId).addReviewer(user.email());
 
     codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    if (useDiffCache) {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.PENDING,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    } else {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-    }
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a reviewer that is a code owner of the new path.
     gApi.changes().id(changeId).addReviewer(user2.email());
 
     codeOwnerStatus = changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().get();
-    if (useDiffCache) {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.PENDING));
-    } else {
-      assertThat(codeOwnerStatus)
-          .hasFileCodeOwnerStatusesThat()
-          .comparingElementsUsing(isFileCodeOwnerStatus())
-          .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.PENDING));
-    }
+    assertThat(codeOwnerStatus)
+        .hasFileCodeOwnerStatusesThat()
+        .comparingElementsUsing(isFileCodeOwnerStatus())
+        .containsExactly(
+            FileCodeOwnerStatus.rename(
+                oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.PENDING));
   }
 
   @Test

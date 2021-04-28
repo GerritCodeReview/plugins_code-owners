@@ -19,7 +19,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -32,7 +31,6 @@ import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.config.GerritServerConfig;
-import com.google.gerrit.server.experiments.ExperimentFeatures;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.InMemoryInserter;
 import com.google.gerrit.server.git.MergeUtil;
@@ -89,7 +87,6 @@ public class ChangedFiles {
   private final Provider<AutoMerger> autoMergerProvider;
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final ThreeWayMergeStrategy mergeStrategy;
-  private final ExperimentFeatures experimentFeatures;
 
   @Inject
   public ChangedFiles(
@@ -98,42 +95,13 @@ public class ChangedFiles {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       DiffOperations diffOperations,
       Provider<AutoMerger> autoMergerProvider,
-      CodeOwnerMetrics codeOwnerMetrics,
-      ExperimentFeatures experimentFeatures) {
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.diffOperations = diffOperations;
     this.autoMergerProvider = autoMergerProvider;
     this.codeOwnerMetrics = codeOwnerMetrics;
-    this.experimentFeatures = experimentFeatures;
     this.mergeStrategy = MergeUtil.getMergeStrategy(cfg);
-  }
-
-  /**
-   * Returns the changed files for the given revision.
-   *
-   * <p>By default the changed files are computed on access (see {@link #compute(Project.NameKey,
-   * ObjectId)}).
-   *
-   * <p>Only if enabled via the {@link CodeOwnersExperimentFeaturesConstants#USE_DIFF_CACHE}
-   * experiment feature flag the changed files are retrieved from the diff cache (see {@link
-   * #getFromDiffCache(Project.NameKey, ObjectId)}).
-   *
-   * @param project the project
-   * @param revision the revision for which the changed files should be computed
-   * @return the files that have been changed in the given revision, sorted alphabetically by path
-   */
-  public ImmutableList<ChangedFile> getOrCompute(Project.NameKey project, ObjectId revision)
-      throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
-    if (experimentFeatures.isFeatureEnabled(CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE)) {
-      if (isInitialCommit(project, revision)) {
-        // DiffOperations doesn't support getting the list of modified files for the initial commit.
-        return compute(project, revision);
-      }
-
-      return getFromDiffCache(project, revision);
-    }
-    return compute(project, revision);
   }
 
   /**
@@ -275,6 +243,26 @@ public class ChangedFiles {
   }
 
   /**
+   * Gets the changed files from the diff cache unless the given revision is an initial commit.
+   *
+   * <p>If the given revision is an initial commit the changed files are newly computed on each
+   * access and not retrieved from the diff cache. This is because the diff cache doesn't support
+   * getting changed files for commits that don't have any parent.
+   */
+  public ImmutableList<ChangedFile> getFromDiffCacheIfPossible(
+      Project.NameKey project, ObjectId revision)
+      throws IOException, DiffNotAvailableException, PatchListNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+
+    if (isInitialCommit(project, revision)) {
+      // DiffOperations doesn't support getting the list of modified files for the initial commit.
+      return compute(project, revision);
+    }
+    return getFromDiffCache(project, revision);
+  }
+
+  /**
    * Gets the changed files from the diff cache.
    *
    * <p>Doesn't support getting changed files for an initial revision. This is because the diff
@@ -284,8 +272,7 @@ public class ChangedFiles {
    *
    * @throws IllegalStateException thrown if invoked for an initial revision
    */
-  @VisibleForTesting
-  ImmutableList<ChangedFile> getFromDiffCache(Project.NameKey project, ObjectId revision)
+  private ImmutableList<ChangedFile> getFromDiffCache(Project.NameKey project, ObjectId revision)
       throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
