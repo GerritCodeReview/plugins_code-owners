@@ -65,6 +65,7 @@ public class CodeOwnersInChangeImpl implements CodeOwners {
           getSeed().ifPresent(getCodeOwners::setSeed);
           getResolveAllUsers().ifPresent(getCodeOwners::setResolveAllUsers);
           getHighestScoreOnly().ifPresent(getCodeOwners::setHighestScoreOnly);
+          getDebug().ifPresent(getCodeOwners::setDebug);
           CodeOwnersInChangeCollection.PathResource pathInChangeResource =
               codeOwnersInChangeCollection.parse(
                   revisionResource, IdString.fromDecoded(path.toString()));

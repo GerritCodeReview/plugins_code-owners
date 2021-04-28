@@ -462,6 +462,7 @@ The following request parameters can be specified:
 | `seed`       | optional | Seed, as a long value, that should be used to shuffle code owners that have the same score. Can be used to make the sort order stable across several requests, e.g. to get the same set of random code owners for different file paths that have the same code owners. Important: the sort order is only stable if the requests use the same seed **and** the same limit. In addition, the sort order is not guaranteed to be stable if new accounts are created in between the requests, or if the account visibility is changed.
 | `resolve-all-users` | optional | Whether code ownerships that are assigned to all users should be resolved to random users. If not set, `false` by default. Also see the [sorting example](#sortingExample) below to see how this parameter affects the returned code owners.
 | `highest-score-only` | optional | Whether only code owners with the highest score should be returned. If not set, `false` by default.
+| `debug`      | optional | Whether debug logs should be included into the response. Requires the [Check Code Owner](#checkCodeOwner) global capability.
 | `revision`   | optional | Revision from which the code owner configs should be read as commit SHA1. Can be used to read historic code owners from this branch, but imports from other branches or repositories as well as default and global code owners from `refs/meta/config` are still read from the current revisions. If not specified the code owner configs are read from the HEAD revision of the branch. Not supported for getting code owners for a path in a change.
 
 As a response a [CodeOwnersInfo](#code-owners-info) entity is returned that
@@ -959,6 +960,7 @@ The `CodeOwnersInfo` entity contains information about a list of code owners.
 | ------------- | -------- | ----------- |
 | `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by a score that is computed from mutliple [scoring factors](#scoringFactors).
 | `owned_by_all_users` | optional | Whether the path is owned by all users. Not set if `false`.
+| `debug_logs`  | optional | Debug logs that may help to understand why a user is or isn't suggested as a code owner. Only set if requested via `--debug`.
 
 ### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
 The `FileCodeOwnerStatusInfo` entity describes the code owner statuses for a
@@ -1039,7 +1041,8 @@ action.
 ### <a id="checkCodeOwner">Check Code Owner
 
 Global capability that allows a user to call the [Check Code
-Owner](#check-code-owner) REST endpoint.
+Owner](#check-code-owner) REST endpoint and use the `--debug` option of the
+[List Code Owners](#list-code-owners-for-path-in-branch) REST endpoints.
 
 Assigning this capability allows users to inspect code ownerships. This may
 reveal accounts and secondary emails to the user that the user cannot see
