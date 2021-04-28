@@ -145,10 +145,6 @@ public class CodeOwnerCheckInfoSubject extends Subject {
     }
   }
 
-  public IterableSubject hasDebugLogsThat() {
-    return check("debugLogs").that(codeOwnerCheckInfo().debugLogs);
-  }
-
   private CodeOwnerCheckInfo codeOwnerCheckInfo() {
     isNotNull();
     return codeOwnerCheckInfo;
