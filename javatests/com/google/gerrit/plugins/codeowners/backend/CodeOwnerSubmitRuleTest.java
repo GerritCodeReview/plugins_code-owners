@@ -25,6 +25,7 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementSubject;
@@ -189,5 +190,44 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
                 invalidCodeOwnerConfigInfoUrl != null
                     ? String.format("\nFor help check %s.", invalidCodeOwnerConfigInfoUrl)
                     : ""));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void overrideWhenCodeOwnerConfigIsNonParsable() throws Exception {
+    createOwnersOverrideLabel();
+
+    String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
+    createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
+
+    ChangeData changeData = createChange().getChange();
+    String changeId = changeData.change().getKey().get();
+
+    SubmitRecordSubject submitRecordSubject =
+        assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
+    submitRecordSubject.hasStatusThat().isRuleError();
+    submitRecordSubject
+        .hasErrorMessageThat()
+        .isEqualTo(
+            String.format(
+                "Failed to evaluate code owner statuses for patch set %d of change %d"
+                    + " (cause: invalid code owner config file '%s' (project = %s, branch = master):\n"
+                    + "  %s).",
+                changeData.change().currentPatchSetId().get(),
+                changeData.change().getId().get(),
+                JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath(),
+                project,
+                getParsingErrorMessageForNonParseableCodeOwnerConfig()));
+
+    // Apply an override.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+    changeData.reloadChange();
+
+    submitRecordSubject = assertThatOptional(codeOwnerSubmitRule.evaluate(changeData)).value();
+    submitRecordSubject.hasStatusThat().isOk();
+    LegacySubmitRequirementSubject submitRequirementSubject =
+        submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
+    submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
+    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code Owners");
   }
 }

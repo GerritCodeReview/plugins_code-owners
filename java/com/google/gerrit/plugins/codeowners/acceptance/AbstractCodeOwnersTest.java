@@ -200,6 +200,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
 
   protected void createOwnersOverrideLabel(String labelName) throws RestApiException {
     LabelDefinitionInput input = new LabelDefinitionInput();
+    input.function = "NoOp";
     input.values = ImmutableMap.of("+1", "Override", " 0", "No Override");
     gApi.projects().name(project.get()).label(labelName).create(input).get();
 
