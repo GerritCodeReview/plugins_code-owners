@@ -154,17 +154,17 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
 
   @Test
   public void ruleError_nonParsableCodeOwnerConfig() throws Exception {
-    testRuleErrorForNonParsableCodeOwnerConfigl(/* invalidCodeOwnerConfigInfoUrl= */ null);
+    testRuleErrorForNonParsableCodeOwnerConfig(/* invalidCodeOwnerConfigInfoUrl= */ null);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.invalidCodeOwnerConfigInfoUrl", value = "http://foo.bar")
   public void ruleError_nonParsableCodeOwnerConfig_withInvalidCodeOwnerConfigInfoUrl()
       throws Exception {
-    testRuleErrorForNonParsableCodeOwnerConfigl("http://foo.bar");
+    testRuleErrorForNonParsableCodeOwnerConfig("http://foo.bar");
   }
 
-  public void testRuleErrorForNonParsableCodeOwnerConfigl(
+  private void testRuleErrorForNonParsableCodeOwnerConfig(
       @Nullable String invalidCodeOwnerConfigInfoUrl) throws Exception {
     String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
     createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
