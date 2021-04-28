@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "401106c4_cae53cca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-28T09:43:38Z",
+      "side": 1,
+      "message": "Submit this only after the usage of the new diff cache has been rolled out by use of the experiment flag.",
+      "revId": "91bd6ac6a017d5fec776efff45fe99e98fca19fc",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
