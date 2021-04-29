@@ -16,6 +16,24 @@
       "message": "@Youssef, do you want to do the first review?",
       "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3478b077_a42df5ca",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-29T11:54:51Z",
+      "side": 1,
+      "message": "Yes. I will do the review today.",
+      "parentUuid": "a076f6c1_354e5e66",
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
