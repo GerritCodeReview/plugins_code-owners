@@ -40,7 +40,7 @@ that are inherited from the parent directories. To prevent this the
 
 ### <a id="ignoreParentCodeOwners">Ignore parent code owners
 
-To ignore code owners that are defined in the `OWNERS` file of the parent
+To ignore code owners that are defined in the `OWNERS` files of the parent
 directories the [set noparent](backend-find-owners.html#setNoparent) file-level
 rule can be used:
 
@@ -51,6 +51,19 @@ rule can be used:
   richard.roe@example.com
 ```
 \
+For example, if code owners for the file '/foo/bar/baz.txt' are computed the
+`OWNERS` files are evaluated in this order:
+
+1. `/foo/bar/OWNERS`
+2. `/foo/OWNERS`
+3. `/OWNERS`
+4. `/OWNERS` in `refs/meta/config`
+   (contains [default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration))
+
+If any `set noparent` file-level rule is seen the evaluation is stopped and
+further `OWNERS` files are ignored. E.g. if `/foo/OWNERS` contains
+`set noparent` the `OWNERS` files mentioned at 3. and 4. are ignored.
+
 **NOTE:** When the [set noparent](backend-find-owners.html#setNoparent)
 file-level rule is used you should always define code owners which should be
 used instead of the code owners from the parent directories. Otherwise the files
@@ -58,6 +71,9 @@ in the directory stay [without code owners](#noCodeOwners) and nobody can grant
 code owner approval on them. To [exempt a directory from requiring code owner
 approvals](#exemptFiles), assign the code ownership to [all
 users](backend-find-owners.html#allUsers) instead ([example](#exemptFiles)).
+
+**NOTE:** The usage of `set noparent` has no effect on `OWNERS` files in
+subfolders.
 
 ### <a id="defineCodeOwnersForAFile">Define code owners for a certain file
 
@@ -113,13 +129,33 @@ line with [set noparent](backend-find-owners.html#setNoparent).
   per-file BUILD=tina.toe@example.com,martha.moe@example.com
 ```
 \
+For example, if code owners for the file '/foo/bar/baz.txt' are computed the
+code owners in the `OWNERS` files are evaluated in this order:
+
+1. matching per-file code owners in `/foo/bar/OWNERS`
+2. non-restricted code owners in `/foo/bar/OWNERS`
+3. matching per-file code owners in `/foo/OWNERS`
+4. non-restricted code owners in `/foo/OWNERS`
+5. matching per-file code owners in `/OWNERS`
+6. non-restricted code owners in `/OWNERS`
+7. matching per-file code owners in `/OWNERS` in `refs/meta/config`
+   (contains [default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration))
+8. non-restricted code owners in `/OWNERS` in `refs/meta/config`
+   (contains [default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration))
+
+If any `set noparent` file-level rule is seen the evaluation is stopped and
+code owners on further levels are ignored. E.g. if `/foo/OWNERS` contains a
+matching per-file rule with `set noparent` the code owners mentioned at 4. to 8.
+are ignored.
+
 **NOTE:** When the [set noparent](backend-find-owners.html#setNoparent) rule is
-used you should always define code owners which should be used instead of the
-non-restricted code owners and the code owners from the parent directories.
-Otherwise the matched files stay [without code owners](#noCodeOwners) and nobody
-can grant code owner approval on them. To [exempt matched files from requiring
-code owner approvals](#exemptFiles), assign the code ownership to [all
-users](backend-find-owners.html#allUsers) instead ([example](#exemptFiles)).
+used on a per-file rule you should always define code owners which should be
+used instead of the non-restricted code owners and the code owners from the
+parent directories. Otherwise the matched files stay [without code
+owners](#noCodeOwners) and nobody can grant code owner approval on them. To
+[exempt matched files from requiring code owner approvals](#exemptFiles), assign
+the code ownership to [all users](backend-find-owners.html#allUsers) instead
+([example](#exemptFiles)).
 
 **NOTE:** The syntax for path expressions / globs is explained
 [here](path-expressions.html#globs).
