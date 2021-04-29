@@ -1,6 +1,29 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "0283eac7_23306260",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-29T14:17:43Z",
+      "side": 1,
+      "message": "We discussed this offline. This behaviour will also happen with old diff cache.\n\nMaybe state that using the new diff cache is not blocked by this, but this is a problem that we may need to address anyway.",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 30
+      },
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "a076f6c1_354e5e66",
@@ -32,6 +55,86 @@
       "side": 1,
       "message": "Yes. I will do the review today.",
       "parentUuid": "a076f6c1_354e5e66",
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e14c6ef6_8aecb21a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 7
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-29T14:17:43Z",
+      "side": 1,
+      "message": "Looks good to me overall.",
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ab435c3d_1e7e8df2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-29T14:17:43Z",
+      "side": 1,
+      "message": "\u003d\u003d 0 is better and more explicit.",
+      "range": {
+        "startLine": 310,
+        "startChar": 43,
+        "endLine": 310,
+        "endChar": 63
+      },
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "93d11151_be64b062",
+        "filename": "java/com/google/gerrit/plugins/codeowners/common/ChangedFile.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-29T14:17:43Z",
+      "side": 1,
+      "message": "[This comment is not related to this change]\n\nThe diff cache converts change types from the JGit type to Patch.ChangeType, which should become our representation of the change types in Gerrit. Is there a need to convert it back to the JGit representation?",
+      "range": {
+        "startLine": 177,
+        "startChar": 8,
+        "endLine": 177,
+        "endChar": 19
+      },
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9a08cb2b_f800f14a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ChangedFilesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-29T14:17:43Z",
+      "side": 1,
+      "message": "[Optional] This and all tests below.\n\nYou could add the experiment flag feature to the test, use ChangedFiles#getOrCompute and mark ChangedFiles#getFromDiffCache as private.\n\nWhether now or in future, I think ChangedFiles#getFromDiffCache should be private anyway.",
       "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
