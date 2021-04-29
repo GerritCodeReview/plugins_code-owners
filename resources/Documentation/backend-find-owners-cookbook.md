@@ -87,8 +87,8 @@ If a file is matched by the path expressions of multiple
 users that are mentioned in these [per-file](backend-find-owners.html#perFile)
 lines.
 
-If non-restricted code owners are present, the file is also owned by any
-non-restricted code owners:
+If folder code owners are present, the file is also owned by any folder code
+owners:
 
 ```
   jane.roe@example.com
@@ -101,9 +101,9 @@ In addition, the file is also owned by code owners that are inherited from
 parent directories.
 
 #### <a id="perFileWithSetNoparent">
-Ignoring non-restricted code owners and inherited parent code owners for a file
-is possible by using a matching [per-file](backend-find-owners.html#perFile)
-line with [set noparent](backend-find-owners.html#setNoparent).
+Ignoring folder code owners and inherited parent code owners for a file is
+possible by using a matching [per-file](backend-find-owners.html#perFile) line
+with [set noparent](backend-find-owners.html#setNoparent).
 
 ```
   jane.roe@example.com
@@ -115,10 +115,10 @@ line with [set noparent](backend-find-owners.html#setNoparent).
 \
 **NOTE:** When the [set noparent](backend-find-owners.html#setNoparent) rule is
 used you should always define code owners which should be used instead of the
-non-restricted code owners and the code owners from the parent directories.
-Otherwise the matched files stay [without code owners](#noCodeOwners) and nobody
-can grant code owner approval on them. To [exempt matched files from requiring
-code owner approvals](#exemptFiles), assign the code ownership to [all
+folder code owners and the code owners from the parent directories.  Otherwise
+the matched files stay [without code owners](#noCodeOwners) and nobody can grant
+code owner approval on them. To [exempt matched files from requiring code owner
+approvals](#exemptFiles), assign the code ownership to [all
 users](backend-find-owners.html#allUsers) instead ([example](#exemptFiles)).
 
 **NOTE:** The syntax for path expressions / globs is explained
@@ -189,10 +189,10 @@ This is equivalent to having:
 ```
 \
 **NOTE:** The `per-file` line from `/OWNERS_BUILD` is not imported, since the
-[file](backend-find-owners.html#fileKeyword) keyword only imports non-restricted
-code owners. Using the [include](backend-find-owners.html#includeKeyword)
-keyword, that would also consider per-file code owners, is not supported for
-`per-file` lines.
+[file](backend-find-owners.html#fileKeyword) keyword only imports folder code
+owners. Using the [include](backend-find-owners.html#includeKeyword) keyword,
+that would also consider per-file code owners, is not supported for `per-file`
+lines.
 
 ### <a id="importOtherOwnersFile">Import code owners from other OWNERS file
 
@@ -223,9 +223,8 @@ This is equivalent to having:
 \
 **NOTE:** The `per-file` line from `java/com/example/foo/OWNERS` is not
 imported, since the [file](backend-find-owners.html#fileKeyword) keyword only
-imports non-restricted code owners. If also `per-line` files should be imported
-the [include](backend-find-owners.html#includeKeyword) keyword can be used
-instead:
+imports folder code owners. If also `per-line` lines should be imported the
+[include](backend-find-owners.html#includeKeyword) keyword can be used instead:
 
 `javatests/com/example/foo/OWNERS`:
 ```
@@ -330,8 +329,8 @@ files without code owners, e.g. the following configurations should be avoided:
 
 * an `OWNERS` file with only `set noparent` (ignores code owners from parent
   directories, but doesn't define code owners that should be used instead)
-* a `per-file` line with only `set noparent` (ignores non-restricted code owners
-  and code owners from parent directories, but doesn't define code owners that
+* a `per-file` line with only `set noparent` (ignores folder code owners and
+  code owners from parent directories, but doesn't define code owners that
   should be used instead)
 * no `OWNERS` file at root level
 
