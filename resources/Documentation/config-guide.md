@@ -121,7 +121,8 @@ be used.
    [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner) are defined
    in the plugin configuration and apply to all projects or all child projects.\
    They are intended to configure bots as code owners that need to operate on
-   all or multiple projects.\
+   all or multiple projects. Alternatively bots may be configured as exempted
+   users (see further below).\
    Global code owners still apply if parent code owners are ignored.
 5. Fallback code owners:
    [Fallback code owners](config.html#pluginCodeOwnersFallbackCodeOwners) is a
@@ -130,6 +131,13 @@ be used.
    Fallback code owners are not included in the code owner suggestion.\
    Configuring all users as fallback code owners may allow bypassing the code
    owners check (see [security pitfalls](#securityFallbackCodeOwners) below).
+6. Exempted users:
+   [Exempted users](config.html#pluginCodeOwnersExemptedUser) are exempted from
+   requiring code owner approvals.\
+   If a user is exempted from requiring code owner approvals changes that  are
+   uploaded by this user are automatically code-owner approved.\
+   Exempted users are intended to be used for bots that need to create changes
+   on all or multiple projects that should not require code owner approvals.
 
 In addition users can be allowed to [override the code owner submit
 check](user-guide.html#codeOwnerOverride). This permission is normally granted
