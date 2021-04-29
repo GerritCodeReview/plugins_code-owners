@@ -26,6 +26,7 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.change.IncludedInResolver;
@@ -75,6 +76,7 @@ public class GetCodeOwnersForPathInBranch
       AccountControl.Factory accountControlFactory,
       PermissionBackend permissionBackend,
       CheckCodeOwnerCapability checkCodeOwnerCapability,
+      CodeOwnerMetrics codeOwnerMetrics,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
@@ -86,6 +88,7 @@ public class GetCodeOwnersForPathInBranch
         accountControlFactory,
         permissionBackend,
         checkCodeOwnerCapability,
+        codeOwnerMetrics,
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
