@@ -69,6 +69,11 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
       The cause of the submit rule error.
 * `count_code_owner_submit_rule_runs`:
   Total number of code owner submit rule runs.
+* `count_code_owner_suggestions`:
+  Total number of code owner suggestions.
+    * `resolve_all_users`:
+      Whether code ownerships that are assigned to all users are resolved to
+      random users.
 * `count_invalid_code_owner_config_files`:
   Total number of failed requests caused by an invalid / non-parsable code owner
   config file.

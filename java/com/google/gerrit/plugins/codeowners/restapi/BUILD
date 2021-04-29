@@ -9,6 +9,7 @@ java_library(
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/metrics",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/validation",
         "//plugins/code-owners/proto:owners_metadata_java_proto",

@@ -61,6 +61,7 @@ public class CodeOwnerMetrics {
   public final Counter0 countCodeOwnerConfigCacheReads;
   public final Counter1<String> countCodeOwnerSubmitRuleErrors;
   public final Counter0 countCodeOwnerSubmitRuleRuns;
+  public final Counter1<Boolean> countCodeOwnerSuggestions;
   public final Counter3<String, String, String> countInvalidCodeOwnerConfigFiles;
 
   private final MetricMaker metricMaker;
@@ -168,6 +169,15 @@ public class CodeOwnerMetrics {
     this.countCodeOwnerSubmitRuleRuns =
         createCounter(
             "count_code_owner_submit_rule_runs", "Total number of code owner submit rule runs");
+    this.countCodeOwnerSuggestions =
+        createCounter1(
+            "count_code_owner_suggestions",
+            "Total number of code owner suggestions",
+            Field.ofBoolean("resolve_all_users", (metadataBuilder, resolveAllUsers) -> {})
+                .description(
+                    "Whether code ownerships that are assigned to all users are resolved to random"
+                        + " users.")
+                .build());
     this.countInvalidCodeOwnerConfigFiles =
         createCounter3(
             "count_invalid_code_owner_config_files",

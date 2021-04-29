@@ -42,6 +42,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountDirectory.FillOptions;
 import com.google.gerrit.server.account.AccountLoader;
@@ -80,6 +81,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private final AccountControl.Factory accountControlFactory;
   private final PermissionBackend permissionBackend;
   private final CheckCodeOwnerCapability checkCodeOwnerCapability;
+  private final CodeOwnerMetrics codeOwnerMetrics;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
@@ -155,6 +157,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       AccountControl.Factory accountControlFactory,
       PermissionBackend permissionBackend,
       CheckCodeOwnerCapability checkCodeOwnerCapability,
+      CodeOwnerMetrics codeOwnerMetrics,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
@@ -164,6 +167,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     this.accountControlFactory = accountControlFactory;
     this.permissionBackend = permissionBackend;
     this.checkCodeOwnerCapability = checkCodeOwnerCapability;
+    this.codeOwnerMetrics = codeOwnerMetrics;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
@@ -184,6 +188,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     if (!seed.isPresent()) {
       seed = getDefaultSeed(rsrc);
     }
+
+    codeOwnerMetrics.countCodeOwnerSuggestions.increment(resolveAllUsers);
 
     // The distance that applies to code owners that are defined in the root code owner
     // configuration.

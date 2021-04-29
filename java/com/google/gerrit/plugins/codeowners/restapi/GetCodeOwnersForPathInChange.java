@@ -30,6 +30,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.ServiceUserClassifier;
@@ -63,6 +64,7 @@ public class GetCodeOwnersForPathInChange
       AccountControl.Factory accountControlFactory,
       PermissionBackend permissionBackend,
       CheckCodeOwnerCapability checkCodeOwnerCapability,
+      CodeOwnerMetrics codeOwnerMetrics,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
@@ -74,6 +76,7 @@ public class GetCodeOwnersForPathInChange
         accountControlFactory,
         permissionBackend,
         checkCodeOwnerCapability,
+        codeOwnerMetrics,
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
