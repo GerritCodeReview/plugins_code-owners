@@ -22,6 +22,30 @@
       },
       "revId": "3f5116bd75fd82adb3bdf0bcefc3400f96dcde20",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d14e59e5_db68d8ab",
+        "filename": "resources/Documentation/backend-find-owners-cookbook.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 138,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-29T12:36:38Z",
+      "side": 1,
+      "message": "These are the code owners that are listed without any per-file restriction prefix :D\nEverywhere else we name them \u0027folder code owners\u0027. Fixed in https://gerrit-review.googlesource.com/c/plugins/code-owners/+/304558",
+      "parentUuid": "c375c094_c9610796",
+      "range": {
+        "startLine": 138,
+        "startChar": 3,
+        "endLine": 138,
+        "endChar": 17
+      },
+      "revId": "3f5116bd75fd82adb3bdf0bcefc3400f96dcde20",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
