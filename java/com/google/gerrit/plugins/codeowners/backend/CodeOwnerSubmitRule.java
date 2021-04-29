@@ -145,10 +145,10 @@ class CodeOwnerSubmitRule implements SubmitRule {
         }
       }
       errorMessage += ".";
-      logger.atSevere().withCause(t).log(errorMessage);
       codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
 
       if (isRuleError) {
+        logger.atWarning().log(errorMessage);
         return Optional.of(ruleError(errorMessage));
       }
       throw new CodeOwnersInternalServerErrorException(errorMessage, t);
