@@ -47,6 +47,8 @@ import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigur
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
+import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
+import com.google.gerrit.plugins.codeowners.metrics.ValidationTrigger;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.PatchSetUtil;
@@ -140,6 +142,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   private final PatchSetUtil patchSetUtil;
   private final IdentifiedUser.GenericFactory userFactory;
   private final SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption;
+  private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
   CodeOwnerConfigValidator(
@@ -153,7 +156,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       ChangeNotes.Factory changeNotesFactory,
       PatchSetUtil patchSetUtil,
       IdentifiedUser.GenericFactory userFactory,
-      SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption) {
+      SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption,
+      CodeOwnerMetrics codeOwnerMetrics) {
     this.pluginName = pluginName;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
@@ -165,6 +169,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     this.patchSetUtil = patchSetUtil;
     this.userFactory = userFactory;
     this.skipCodeOwnerConfigValidationPushOption = skipCodeOwnerConfigValidationPushOption;
+    this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
   @Override
@@ -205,6 +210,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   codeOwnerConfigValidationPolicy.isForced(),
                   receiveEvent.pushOptions);
         } catch (RuntimeException e) {
+          codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
+              ValidationTrigger.COMMIT_RECEIVED,
+              com.google.gerrit.plugins.codeowners.metrics.ValidationResult.FAILED,
+              codeOwnerConfigValidationPolicy.isDryRun());
+
           if (!codeOwnerConfigValidationPolicy.isDryRun()) {
             throw e;
           }
@@ -225,6 +235,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       }
 
       logger.atFine().log("validation result = %s", validationResult.get());
+      codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
+          ValidationTrigger.COMMIT_RECEIVED,
+          validationResult.get().hasError()
+              ? com.google.gerrit.plugins.codeowners.metrics.ValidationResult.REJECTED
+              : com.google.gerrit.plugins.codeowners.metrics.ValidationResult.PASSED,
+          codeOwnerConfigValidationPolicy.isDryRun());
       return validationResult
           .get()
           .processForOnCommitReceived(codeOwnerConfigValidationPolicy.isDryRun());
@@ -281,6 +297,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   codeOwnerConfigValidationPolicy.isForced(),
                   /* pushOptions= */ ImmutableListMultimap.of());
         } catch (RuntimeException e) {
+          codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
+              ValidationTrigger.PRE_MERGE,
+              com.google.gerrit.plugins.codeowners.metrics.ValidationResult.FAILED,
+              codeOwnerConfigValidationPolicy.isDryRun());
+
           if (!codeOwnerConfigValidationPolicy.isDryRun()) {
             throw e;
           }
@@ -296,6 +317,12 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       }
       if (validationResult.isPresent()) {
         logger.atFine().log("validation result = %s", validationResult.get());
+        codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
+            ValidationTrigger.PRE_MERGE,
+            validationResult.get().hasError()
+                ? com.google.gerrit.plugins.codeowners.metrics.ValidationResult.REJECTED
+                : com.google.gerrit.plugins.codeowners.metrics.ValidationResult.PASSED,
+            codeOwnerConfigValidationPolicy.isDryRun());
         validationResult.get().processForOnPreMerge(codeOwnerConfigValidationPolicy.isDryRun());
       }
     }
@@ -1260,7 +1287,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
 
     /** Checks whether any of the validation messages is an error. */
-    private boolean hasError() {
+    public boolean hasError() {
       return validationMessages().stream()
           .anyMatch(
               validationMessage ->

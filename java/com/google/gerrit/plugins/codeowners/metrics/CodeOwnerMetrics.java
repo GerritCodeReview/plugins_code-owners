@@ -59,6 +59,8 @@ public class CodeOwnerMetrics {
   // counter metrics
   public final Counter0 countCodeOwnerConfigReads;
   public final Counter0 countCodeOwnerConfigCacheReads;
+  public final Counter3<ValidationTrigger, ValidationResult, Boolean>
+      countCodeOwnerConfigValidations;
   public final Counter1<String> countCodeOwnerSubmitRuleErrors;
   public final Counter0 countCodeOwnerSubmitRuleRuns;
   public final Counter1<Boolean> countCodeOwnerSuggestions;
@@ -159,6 +161,20 @@ public class CodeOwnerMetrics {
         createCounter(
             "count_code_owner_config_cache_reads",
             "Total number of code owner config reads from cache");
+    this.countCodeOwnerConfigValidations =
+        createCounter3(
+            "count_code_owner_config_validations",
+            "Total number of code owner config file validations",
+            Field.ofEnum(
+                    ValidationTrigger.class, "trigger", (metadataBuilder, resolveAllUsers) -> {})
+                .description("The trigger of the validation.")
+                .build(),
+            Field.ofEnum(ValidationResult.class, "result", (metadataBuilder, resolveAllUsers) -> {})
+                .description("The result of the validation.")
+                .build(),
+            Field.ofBoolean("dry_run", (metadataBuilder, resolveAllUsers) -> {})
+                .description("Whether the validation was a dry run.")
+                .build());
     this.countCodeOwnerSubmitRuleErrors =
         createCounter1(
             "count_code_owner_submit_rule_errors",

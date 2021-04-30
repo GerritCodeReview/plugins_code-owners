@@ -8,6 +8,7 @@ java_library(
     deps = PLUGIN_DEPS_NEVERLINK + [
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/metrics",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )
