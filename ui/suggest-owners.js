@@ -105,9 +105,6 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           padding: 0 var(--spacing-m);
           margin: var(--spacing-m) 0;
         }
-        p.loading {
-          text-align: center;
-        }
         .loadingSpin {
           display: inline-block;
         }
@@ -130,12 +127,17 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
         }
         .suggestion-row {
           flex-wrap: wrap;
-          border-bottom: 1px solid var(--border-color);
+          border-top: 1px solid var(--border-color);
           padding: var(--spacing-s) 0;
         }
         .show-all-owners-row {
-          padding: var(--spacing-m) var(--spacing-xl) var(--spacing-s);
-          justify-content: flex-end;
+          padding: var(--spacing-m) var(--spacing-xl) var(--spacing-s) 0;
+        }
+        .show-all-owners-row .loading {
+          padding: 0;
+        }
+        .show-all-owners-row .show-all-label {
+          margin-left: auto; /* align label to the right */
         }
         .suggestion-row-indicator {
           margin-right: var(--spacing-s);
@@ -247,10 +249,22 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
           margin-right: var(--spacing-m);
         }
       </style>
-      <p class="loading" hidden="[[!isLoading]]">
-        <span class="loadingSpin"></span>
-        [[progressText]]
-      </p>
+      <ul class="suggestion-container">
+        <li class="show-all-owners-row">
+          <p class="loading" hidden="[[!isLoading]]">
+            <span class="loadingSpin"></span>
+            [[progressText]]
+          </p>
+          <label class="show-all-label">
+            <input
+              id="showAllOwnersCheckbox"
+              type="checkbox"
+              checked="{{_showAllOwners::change}}"
+            />
+            Show all owners
+          </label>
+        </li>
+      </ul>
       <ul class="suggestion-container">
         <template
           is="dom-repeat"
@@ -332,16 +346,6 @@ export class SuggestOwners extends CodeOwnersModelMixin(Polymer.Element) {
             </template>
           </li>
         </template>
-        <li class="show-all-owners-row">
-          <label>
-            <input
-              id="showAllOwnersCheckbox"
-              type="checkbox"
-              checked="{{_showAllOwners::change}}"
-            />
-            Show all owners
-          </label>
-        </li>
       </ul>
     `;
   }
