@@ -26,6 +26,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "d8051010_0e7178e4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-30T10:13:47Z",
+      "side": 1,
+      "message": "\u003e We discussed this offline. This behaviour will also happen with old diff cache.\nAdded a sentence saying that this is the same for the old diff cache.\n\n\u003e Maybe state that using the new diff cache is not blocked by this,\nWell, this problem is blocking the usage of the diff cache for the OWNERS validation, which is why in this change we do not use the diff cache in the validation path.",
+      "parentUuid": "0283eac7_23306260",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 30
+      },
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "a076f6c1_354e5e66",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 7
@@ -101,6 +125,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "612a04bd_0480b058",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-30T10:13:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab435c3d_1e7e8df2",
+      "range": {
+        "startLine": 310,
+        "startChar": 43,
+        "endLine": 310,
+        "endChar": 63
+      },
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "93d11151_be64b062",
         "filename": "java/com/google/gerrit/plugins/codeowners/common/ChangedFile.java",
         "patchSetId": 7
@@ -124,6 +172,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "b838f70f_09f3a583",
+        "filename": "java/com/google/gerrit/plugins/codeowners/common/ChangedFile.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 177,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-30T10:13:47Z",
+      "side": 1,
+      "message": "\u003e The diff cache converts change types from the JGit type to Patch.ChangeType, \n\u003e which should become our representation of the change types in Gerrit.\n\nGood to know. I wasn\u0027t aware of this decision.\n\n\u003e Is there a need to convert it back to the JGit representation?\n\nWe don\u0027t care which type is used to represent the change type internally, only at the moment the code-owners plugin is using the JGit representation. If needed we can change this (but this would be a separate change).\n\nWhich type is used to represent the change type internally is not really important since in the end it gets converted into com.google.gerrit.extensions.common.ChangeType when we expose it in the REST API. com.google.gerrit.extensions.common.ChangeType is also the type that Gerrit core is using to expose change types in the REST API (e.g. in DiffInfo).",
+      "parentUuid": "93d11151_be64b062",
+      "range": {
+        "startLine": 177,
+        "startChar": 8,
+        "endLine": 177,
+        "endChar": 19
+      },
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "9a08cb2b_f800f14a",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ChangedFilesTest.java",
         "patchSetId": 7
@@ -135,6 +207,24 @@
       "writtenOn": "2021-04-29T14:17:43Z",
       "side": 1,
       "message": "[Optional] This and all tests below.\n\nYou could add the experiment flag feature to the test, use ChangedFiles#getOrCompute and mark ChangedFiles#getFromDiffCache as private.\n\nWhether now or in future, I think ChangedFiles#getFromDiffCache should be private anyway.",
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "32cefde0_9b45479f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ChangedFilesTest.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 489,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-04-30T10:13:47Z",
+      "side": 1,
+      "message": "These are unit tests for the new method and hence they should not use the experiment flag (as they always should test that method regardless of which method is used according to the experiment flag).\n\n\u003e Whether now or in future, I think ChangedFiles#getFromDiffCache should be private anyway.\nRight, at this stage it can be package-private (with @VisibleForTesting). Done.",
+      "parentUuid": "9a08cb2b_f800f14a",
       "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
