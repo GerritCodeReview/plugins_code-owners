@@ -16,6 +16,46 @@
       "message": "Thanks for the review!",
       "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "011a12e3_1c34105d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 8
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-30T11:06:16Z",
+      "side": 1,
+      "message": "LGTM.\n\nGal, Patrick, please feel free to review/approve.",
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ce681f22_fc50ab1f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 282,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-30T11:06:16Z",
+      "side": 1,
+      "message": "Nice! Thanks for adding.",
+      "range": {
+        "startLine": 282,
+        "startChar": 2,
+        "endLine": 282,
+        "endChar": 20
+      },
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }

@@ -50,6 +50,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "7076439d_c3b10b20",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-04-30T11:06:16Z",
+      "side": 1,
+      "message": "OK I see. SGTM.",
+      "parentUuid": "d8051010_0e7178e4",
+      "range": {
+        "startLine": 41,
+        "startChar": 2,
+        "endLine": 46,
+        "endChar": 30
+      },
+      "revId": "ef8722d4a1eaa155071c371121cb4249324c5aa7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "a076f6c1_354e5e66",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 7
