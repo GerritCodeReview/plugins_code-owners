@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7be5b08c_f88fdeb1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-03T06:33:24Z",
+      "side": 1,
+      "message": "Unblocked. Android confirmed that this change is fine for them.",
+      "revId": "d39883dd6e60d40963083e944e9911260ebf326b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
