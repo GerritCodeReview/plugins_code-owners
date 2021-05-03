@@ -35,6 +35,29 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "4d029f45_44f20304",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-03T08:56:30Z",
+      "side": 1,
+      "message": "nit: using the phrase \"new\" will be misleading to someone reading this code in 3 years - not so new anymore, especially if a newer one will be created. It reminds me of uploading homework in University and the final file was always called HomeworksFinalFinalREALLYFINALLAST.pdf\n\nMaybe replace \"new\" with \"core\"/\"gerrit\" and the old one can be called legacy cache?",
+      "range": {
+        "startLine": 128,
+        "startChar": 50,
+        "endLine": 128,
+        "endChar": 53
+      },
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "ce681f22_fc50ab1f",
@@ -53,6 +76,52 @@
         "startChar": 2,
         "endLine": 282,
         "endChar": 20
+      },
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dc17839a_426d20c5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-03T08:56:30Z",
+      "side": 1,
+      "message": "nit: a bit clearer if you move this logic to the getOrCompute method.",
+      "range": {
+        "startLine": 288,
+        "startChar": 0,
+        "endLine": 292,
+        "endChar": 0
+      },
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d5ef7789_9dc07f4d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-03T08:56:30Z",
+      "side": 1,
+      "message": "this code needs a comment explaining the relation between the MergeCommitStrategy and changing the parent from null to 1",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 304,
+        "endChar": 0
       },
       "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
