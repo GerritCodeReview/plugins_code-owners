@@ -88,6 +88,28 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
                 filePath, project.get()));
   }
 
+  @Test
+  public void cannotGetStatusWithInvalidStart() throws Exception {
+    String changeId = createChange().getChangeId();
+    RestResponse r =
+        adminRestSession.get(
+            String.format(
+                "/changes/%s/code_owners.status?start=invalid", IdString.fromDecoded(changeId)));
+    r.assertBadRequest();
+    assertThat(r.getEntityContent()).contains("\"invalid\" is not a valid value for \"--start\"");
+  }
+
+  @Test
+  public void cannotGetStatusWithInvalidLimit() throws Exception {
+    String changeId = createChange().getChangeId();
+    RestResponse r =
+        adminRestSession.get(
+            String.format(
+                "/changes/%s/code_owners.status?limit=invalid", IdString.fromDecoded(changeId)));
+    r.assertBadRequest();
+    assertThat(r.getEntityContent()).contains("\"invalid\" is not a valid value for \"--limit\"");
+  }
+
   private CodeOwnerConfig.Key createCodeOwnerConfigKey(String folderPath) {
     return CodeOwnerConfig.Key.create(project, "master", folderPath);
   }

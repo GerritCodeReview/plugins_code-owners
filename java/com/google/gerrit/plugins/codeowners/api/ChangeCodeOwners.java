@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
+import java.util.Optional;
 
 /**
  * Java API for change code owners.
@@ -40,6 +41,39 @@ public interface ChangeCodeOwners {
    * <p>Allows to set parameters on the request before executing it by calling {@link #get()}.
    */
   abstract class CodeOwnerStatusRequest {
+    private Integer start;
+    private Integer limit;
+
+    /**
+     * Sets a limit on the number of code owner statuses that should be returned.
+     *
+     * @param start number of code owner statuses to skip
+     */
+    public CodeOwnerStatusRequest withStart(int start) {
+      this.start = start;
+      return this;
+    }
+
+    /** Returns the number of code owner statuses to skip. */
+    public Optional<Integer> getStart() {
+      return Optional.ofNullable(start);
+    }
+
+    /**
+     * Sets a limit on the number of code owner statuses that should be returned.
+     *
+     * @param limit the limit
+     */
+    public CodeOwnerStatusRequest withLimit(int limit) {
+      this.limit = limit;
+      return this;
+    }
+
+    /** Returns the limit. */
+    public Optional<Integer> getLimit() {
+      return Optional.ofNullable(limit);
+    }
+
     /**
      * Executes this request and retrieves the code owner status.
      *
