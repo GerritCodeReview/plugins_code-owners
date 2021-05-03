@@ -60,6 +60,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "5e76094f_3c314e71",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 128,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-03T11:34:04Z",
+      "side": 1,
+      "message": "Hah :D you are right. Done.",
+      "parentUuid": "4d029f45_44f20304",
+      "range": {
+        "startLine": 128,
+        "startChar": 50,
+        "endLine": 128,
+        "endChar": 53
+      },
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "ce681f22_fc50ab1f",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
         "patchSetId": 8
@@ -104,6 +128,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8389916f_b557c0ec",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 292,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-03T11:34:04Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "dc17839a_426d20c5",
+      "range": {
+        "startLine": 288,
+        "startChar": 0,
+        "endLine": 292,
+        "endChar": 0
+      },
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d5ef7789_9dc07f4d",
@@ -117,6 +165,30 @@
       "writtenOn": "2021-05-03T08:56:30Z",
       "side": 1,
       "message": "this code needs a comment explaining the relation between the MergeCommitStrategy and changing the parent from null to 1",
+      "range": {
+        "startLine": 298,
+        "startChar": 0,
+        "endLine": 304,
+        "endChar": 0
+      },
+      "revId": "06adb931c5a823314f5c9c4e26054b19ec463373",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "076e0359_03df0102",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 8
+      },
+      "lineNbr": 304,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-03T11:34:04Z",
+      "side": 1,
+      "message": "Thanks for pointing this out. I agree that this requires some comments to explain. \n\nDone.\n\nMaybe the DiffOperations in Gerrit core could be improved to make this easier for callers and readers.",
+      "parentUuid": "d5ef7789_9dc07f4d",
       "range": {
         "startLine": 298,
         "startChar": 0,
