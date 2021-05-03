@@ -40,6 +40,7 @@ public class CodeOwnerMetrics {
   public final Timer0 computePatchSetApprovals;
   public final Timer0 extendChangeMessageOnPostReview;
   public final Timer0 getAutoMerge;
+  public final Timer0 getChangedFiles;
   public final Timer0 prepareFileStatusComputation;
   public final Timer0 prepareFileStatusComputationForAccount;
   public final Timer0 resolveCodeOwnerConfig;
@@ -101,6 +102,9 @@ public class CodeOwnerMetrics {
     this.getAutoMerge =
         createLatencyTimer(
             "get_auto_merge", "Latency for getting the auto merge commit of a merge commit");
+    this.getChangedFiles =
+        createLatencyTimer(
+            "get_changed_files", "Latency for getting changed files from diff cache");
     this.prepareFileStatusComputation =
         createLatencyTimer(
             "prepare_file_status_computation", "Latency for preparing the file status computation");
