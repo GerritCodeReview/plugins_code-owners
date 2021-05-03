@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "983d6654_631d37fc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 217,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-03T11:21:50Z",
+      "side": 1,
+      "message": "aren\u0027t you logging this twice in case of dry run?\nOnce here, and then again in line 238.",
+      "range": {
+        "startLine": 213,
+        "startChar": 0,
+        "endLine": 217,
+        "endChar": 0
+      },
+      "revId": "4d5e3af732bc1135642c75fc740fa9cdc2f0ec1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1f595a33_cde3a829",
+        "filename": "resources/Documentation/metrics.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-03T11:21:50Z",
+      "side": 1,
+      "message": "n",
+      "range": {
+        "startLine": 66,
+        "startChar": 36,
+        "endLine": 66,
+        "endChar": 37
+      },
+      "revId": "4d5e3af732bc1135642c75fc740fa9cdc2f0ec1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
