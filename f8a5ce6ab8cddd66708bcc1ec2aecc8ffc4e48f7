@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "329e8fde_950fda60",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2021-05-03T11:40:48Z",
+      "side": 1,
+      "message": "Why do we need a second \u003cul suggestion-container\u003e? Can \u003cli show-all-owners-row\u003e go here above the \u003ctemplate\u003e?",
+      "range": {
+        "startLine": 269,
+        "startChar": 9,
+        "endLine": 269,
+        "endChar": 17
+      },
+      "revId": "f8a5ce6ab8cddd66708bcc1ec2aecc8ffc4e48f7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
