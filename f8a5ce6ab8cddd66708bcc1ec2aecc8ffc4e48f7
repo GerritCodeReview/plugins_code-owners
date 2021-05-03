@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "35cae0c2_f8c7ee74",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2021-05-03T12:58:33Z",
+      "side": 1,
+      "message": "Using `margin-left: auto` for alignment feels a bit hacky. I think a proper solution could look like this:\n\n  .show-all-owners-row {\n    display: flex;\n    justify-content: space-between;\n  }\n\nBut just a nit and thus optional.",
+      "revId": "f8a5ce6ab8cddd66708bcc1ec2aecc8ffc4e48f7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "329e8fde_950fda60",
