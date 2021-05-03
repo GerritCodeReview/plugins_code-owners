@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca4f4244_cd6ded2e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 9
+      },
+      "lineNbr": 119,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-03T12:48:09Z",
+      "side": 1,
+      "message": "omit",
+      "range": {
+        "startLine": 119,
+        "startChar": 70,
+        "endLine": 119,
+        "endChar": 73
+      },
+      "revId": "b0248f9b99e04b1ab0b46dc0a034bf9fae3edd6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
