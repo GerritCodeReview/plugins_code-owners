@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d1865241_255361a7",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 140,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2021-05-03T13:34:55Z",
+      "side": 1,
+      "message": "It was my first idea, but it doesn\u0027t work. The first item in the row is a \u003cp\u003e with loading text. When the \u003cp\u003e is hidden, a browser doesn\u0027t add spacing before the label and aligns it to the left.",
+      "parentUuid": "35cae0c2_f8c7ee74",
+      "revId": "f8a5ce6ab8cddd66708bcc1ec2aecc8ffc4e48f7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "329e8fde_950fda60",
@@ -31,6 +49,30 @@
       "writtenOn": "2021-05-03T11:40:48Z",
       "side": 1,
       "message": "Why do we need a second \u003cul suggestion-container\u003e? Can \u003cli show-all-owners-row\u003e go here above the \u003ctemplate\u003e?",
+      "range": {
+        "startLine": 269,
+        "startChar": 9,
+        "endLine": 269,
+        "endChar": 17
+      },
+      "revId": "f8a5ce6ab8cddd66708bcc1ec2aecc8ffc4e48f7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f0892d5_ceb2dd5f",
+        "filename": "ui/suggest-owners.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2021-05-03T13:34:55Z",
+      "side": 1,
+      "message": "We want to always keep \u003cli show-all-owners-row\u003e visible. The second \u003cul...\u003e shows vertical scrolling when there is not enough space. Placing \u003cli\u003e in the separate \u003cul\u003e ensures that it can\u0027t be scrolled away and is always visible.",
+      "parentUuid": "329e8fde_950fda60",
       "range": {
         "startLine": 269,
         "startChar": 9,
