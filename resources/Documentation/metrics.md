@@ -65,6 +65,14 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
   Total number of code owner config reads from backend.
 * `count_code_owner_config_cache_reads`:
   Total number of code owner config reads from cache.
+* `count_code_owner_config_validations`:
+  Total number of code owner config validations.
+    * `trigger`:
+      The trigger of the validation.
+    * `result`:
+      The result of the validation.
+    * `dry_run`:
+      Whether the validation was a dry run.
 * `count_code_owner_submit_rule_errors`:
   Total number of code owner submit rule errors.
     * `cause`:
