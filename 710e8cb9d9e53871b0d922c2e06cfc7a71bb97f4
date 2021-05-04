@@ -63,6 +63,30 @@
       },
       "revId": "710e8cb9d9e53871b0d922c2e06cfc7a71bb97f4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4d03e5ea_8187f79d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImmutableMapEntry.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-04T15:10:50Z",
+      "side": 1,
+      "message": "You\u0027re right. Either way, that\u0027s more clear now.",
+      "parentUuid": "fc97b1e2_c4a75b94",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 53,
+        "endChar": 74
+      },
+      "revId": "710e8cb9d9e53871b0d922c2e06cfc7a71bb97f4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
