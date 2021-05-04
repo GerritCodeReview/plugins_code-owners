@@ -146,9 +146,10 @@ class CodeOwnerSubmitRule implements SubmitRule {
         }
       }
       errorMessage += ".";
-      codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
 
       if (isRuleError) {
+        codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
+
         logger.atWarning().log(errorMessage);
         return Optional.of(ruleError(errorMessage));
       }
