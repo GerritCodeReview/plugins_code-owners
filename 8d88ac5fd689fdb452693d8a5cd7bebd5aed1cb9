@@ -41,6 +41,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5bb86bf0_8bf34261",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 154,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-05T09:28:36Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ded9c1a_7db1cae0",
+      "range": {
+        "startLine": 154,
+        "startChar": 59,
+        "endLine": 154,
+        "endChar": 60
+      },
+      "revId": "8d88ac5fd689fdb452693d8a5cd7bebd5aed1cb9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0a91fd24_0df7c951",
@@ -54,6 +78,30 @@
       "writtenOn": "2021-05-05T09:18:19Z",
       "side": 1,
       "message": "this is not applicable anymore, is it?\n\nThis example is about a code owner that is an uploader, but not a change owner.\n\nThis issue still applies for cherry-picks, I guess.",
+      "range": {
+        "startLine": 72,
+        "startChar": 55,
+        "endLine": 75,
+        "endChar": 60
+      },
+      "revId": "8d88ac5fd689fdb452693d8a5cd7bebd5aed1cb9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "530c299d_98c3a844",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-05T09:28:36Z",
+      "side": 1,
+      "message": "The case that is described here is basically a cherry-pick and hence it still applies.\n\n\"contributor pushes a change to a wrong branch and a code owner helps them to get it rebased onto the correct branch\" means that the code owner does a cherry-pick which creates a new change on the correct branch. For this new change the code owner will be both owner and uploader.",
+      "parentUuid": "0a91fd24_0df7c951",
       "range": {
         "startLine": 72,
         "startChar": 55,
