@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2aafb3cb_2ee06acf",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginGlobalConfigSnapshotTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-05T15:30:02Z",
+      "side": 1,
+      "message": "maybe this should be default instead of 0.",
+      "range": {
+        "startLine": 113,
+        "startChar": 57,
+        "endLine": 113,
+        "endChar": 64
+      },
+      "revId": "5272ba18e3c93e55c193cb0681dc895094b21d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
