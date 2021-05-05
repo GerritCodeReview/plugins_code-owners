@@ -181,33 +181,34 @@ endpoint or by touching the change (e.g. by adding a comment).
         By default unset (no invalid code owner config info URL).
 
 <a id="pluginCodeOwnersEnableImplicitApprovals">plugin.@PLUGIN@.enableImplicitApprovals</a>
-:       Whether an implicit code owner approval from the last uploader is
+:       Whether an implicit code owner approval from the change owner is
         assumed.\
+        Implicit code owner approvals are only applied on patch sets that are
+        uploaded by the change owner (change owner == last patch set uploader).\
         \
         Can be `FALSE`, `TRUE` or `FORCED`.\
         \
         `FALSE`:\
-        Implicit code-owner approvals of the the patch set uploader are
-        disabled.\
+        Implicit code-owner approvals of change owners are disabled.\
         \
         `TRUE`:\
-        Implicit code-owner approvals of the patch set uploader are enabled, but
-        only if the configured [required
-        label](#pluginCodeOwnersRequiredApproval) is not configured to [ignore
-        self approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        Implicit code-owner approvals of change owners are enabled, but only if
+        the configured [required label](#pluginCodeOwnersRequiredApproval) is
+        not configured to [ignore self
+        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
         from the uploader.\
         \
         `FORCED`:\
-        Implicit code-owner approvals of the patch set uploader are enabled,
-        even if the configured [required
-        label](#pluginCodeOwnersRequiredApproval) disallows self approvals.\
+        Implicit code-owner approvals of change owners are enabled, even if the
+        configured [required label](#pluginCodeOwnersRequiredApproval) disallows
+        self approvals.\
         \
         If enabled/enforced, code owners need to be aware of their implicit
-        approval when they upload new patch sets for other users (e.g. if a
+        approval when they upload new changes for other users (e.g. if a
         contributor pushes a change to a wrong branch and a code owner helps
         them to get it rebased onto the correct branch, the rebased change has
         implicit approvals from the code owner, since the code owner is the
-        uploader).\
+        change owner).\
         If implicit code owner approvals are disabled, code owners can still
         self-approve their own changes by voting on the change.\
         Can be overridden per project by setting
@@ -656,17 +657,19 @@ endpoint or by touching the change (e.g. by adding a comment).
         in `gerrit.config` is used.
 
 <a id="codeOwnersEnableImplicitApprovals">codeOwners.enableImplicitApprovals</a>
-:       Whether an implicit code owner approval from the last uploader is
+:       Whether an implicit code owner approval from the change owner is
         assumed.\
+        Implicit code owner approvals are only applied on patch sets that are
+        uploaded by the change owner (change owner == last patch set uploader).\
         Can be `FALSE`, `TRUE` or `FORCED` (see
         [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersEnableImplicitApprovals)
         for an explanation of these values).\
         If enabled/enforced, code owners need to be aware of their implicit
-        approval when they upload new patch sets for other users (e.g. if a
+        approval when they upload new changes for other users (e.g. if a
         contributor pushes a change to a wrong branch and a code owner helps
         them to get it rebased onto the correct branch, the rebased change has
         implicit approvals from the code owner, since the code owner is the
-        uploader).\
+        change owner).\
         If implicit code owner approvals are disabled, code owners can still
         self-approve their own changes by voting on the change.\
         Overrides the global setting
