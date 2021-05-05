@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d987b8b0_9db1edfc",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-05T14:36:42Z",
+      "side": 1,
+      "message": "The new patch set 4 was only a rebase, the reviewer comments have not been addressed yet. Will upload another patch set to address them.",
+      "revId": "cddf7cb45965e02cdb4c06954f4d889c48435248",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
