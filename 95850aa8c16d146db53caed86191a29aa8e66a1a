@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3692a557_eb4dcf70",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-05T09:31:51Z",
+      "side": 1,
+      "message": "(fyi there are merge conflicts here)\nI\u0027ll review today anyway",
+      "revId": "95850aa8c16d146db53caed86191a29aa8e66a1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
