@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e63f02c7_7ccbdf69",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/Pair.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-05-05T11:25:04Z",
+      "side": 0,
+      "message": "You could reuse Pair class from apache commons.",
+      "revId": "3937f902a44f74a184d6e24a549f9756d5ff4651",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
