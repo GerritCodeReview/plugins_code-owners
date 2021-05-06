@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
 
 /**
  * Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s.
@@ -267,14 +268,7 @@ public class CodeOwnerResolver {
       AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
       ImmutableSet<CodeOwner> codeOwners =
           codeOwnerReferences.stream()
-              .filter(
-                  codeOwnerReference -> {
-                    if (ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
-                      ownedByAllUsers.set(true);
-                      return false;
-                    }
-                    return true;
-                  })
+              .filter(filterOutAllUsersWildCard(ownedByAllUsers))
               .map(codeOwnerReference -> resolve(messageBuilder, codeOwnerReference))
               .filter(
                   codeOwner -> {
@@ -370,6 +364,22 @@ public class CodeOwnerResolver {
     CodeOwner codeOwner = CodeOwner.create(accountState.account().id());
     messages.add(String.format("resolved email %s to account %s", email, codeOwner.accountId()));
     return Optional.of(codeOwner);
+  }
+
+  /**
+   * Creates a predicate to filter out emails that are all users wild card (aka {@code *}).
+   *
+   * @param ownedByAllUsers flag that is set if any of the emails is the all users wild card (aka
+   *     {@code *})
+   */
+  private Predicate<CodeOwnerReference> filterOutAllUsersWildCard(AtomicBoolean ownedByAllUsers) {
+    return codeOwnerReference -> {
+      if (ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
+        ownedByAllUsers.set(true);
+        return false;
+      }
+      return true;
+    };
   }
 
   /** Whether the given account can be seen. */
