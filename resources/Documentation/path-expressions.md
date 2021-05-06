@@ -18,7 +18,8 @@ Which syntax is used depends on the used code owner backend:
 
 Globs support the following wildcards:
 
-* `*`: matches any string, including slashes
+* `*`: matches any string that does not include slashes
+* `**`: matches any string, including slashes
 * `?`: matches any character
 * `[abc]`: matches one character given in the bracket
 * `[a-c]`: matches one character from the range given in the bracket
