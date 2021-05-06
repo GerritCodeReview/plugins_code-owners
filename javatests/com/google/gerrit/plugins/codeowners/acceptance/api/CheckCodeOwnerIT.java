@@ -440,7 +440,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "found email %s as code owner in %s",
                 inactiveUser.email(), getCodeOwnerConfigFilePath(ROOT_PATH)),
             String.format(
-                "account %s for email %s is inactive", inactiveUser.id(), inactiveUser.email()));
+                "ignoring inactive account %s for email %s",
+                inactiveUser.id(), inactiveUser.email()));
   }
 
   @Test

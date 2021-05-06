@@ -440,7 +440,7 @@ public class CodeOwnerResolver {
       } else {
         messages.add(
             String.format(
-                "account %s for email %s is inactive", accountState.account().id(), email));
+                "ignoring inactive account %s for email %s", accountState.account().id(), email));
       }
     }
     return activeAccounts.build();
