@@ -47,7 +47,40 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-/** Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s. */
+/**
+ * Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s.
+ *
+ * <p>Code owners are defined by {@link CodeOwnerReference}s (e.g. emails) that need to be resolved
+ * to accounts. The accounts are wrapped in {@link CodeOwner}s so that we can support different kind
+ * of code owners later (e.g. groups).
+ *
+ * <p>Code owners that cannot be resolved are filtered out:
+ *
+ * <ul>
+ *   <li>Emails that have a non-allowed email domain (see config parameter {@code
+ *       plugin.code-owners.allowedEmailDomain}).
+ *   <li>Emails for which no account exists: If no account exists, we cannot return any account.
+ *       It's fine to filter them out as it just means nobody can claim the ownership that was
+ *       assigned for this email.
+ *   <li>Emails for which multiple accounts exist: If an email is ambiguous it is treated the same
+ *       way as if there was no account for the email. That's because we can't tell which account
+ *       was meant to have the ownership. This behaviour is consistent with the behaviour in Gerrit
+ *       core that also treats ambiguous identifiers as non-resolveable.
+ * </ul>
+ *
+ * <p>Unless {@link CodeOwnerResolver#enforceVisibility} is {@code false} it is checked whether the
+ * {@link #user} or the calling user (if {@link #user} is unset) can see the accounts of the code
+ * owners and code owners whose accounts are not visible are filtered out.
+ *
+ * <p>In addition code owners that are referenced by a secondary email are filtered out if the
+ * {@link #user} or the calling user (if {@link #user} is unset) cannot see the secondary email:
+ *
+ * <ul>
+ *   <li>every user can see their own secondary emails
+ *   <li>users with the {@code Modify Account} global capability can see the secondary emails of all
+ *       accounts
+ * </ul>
+ */
 public class CodeOwnerResolver {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -199,7 +232,6 @@ public class CodeOwnerResolver {
    *
    * @param codeOwnerReferences the code owner references that should be resolved
    * @return the {@link CodeOwner} for the given code owner references
-   * @see #resolve(CodeOwnerReference)
    */
   public CodeOwnerResolverResult resolve(Set<CodeOwnerReference> codeOwnerReferences) {
     return resolve(
@@ -215,7 +247,6 @@ public class CodeOwnerResolver {
    * @param unresolvedImports list of unresolved imports
    * @param pathCodeOwnersMessages messages that were collected when resolving path code owners
    * @return the {@link CodeOwner} for the given code owner references
-   * @see #resolve(CodeOwnerReference)
    */
   private CodeOwnerResolverResult resolve(
       Set<CodeOwnerReference> codeOwnerReferences,
@@ -268,38 +299,7 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Resolves a {@link CodeOwnerReference} to {@link CodeOwner}s.
-   *
-   * <p>Code owners are defined by {@link CodeOwnerReference}s (e.g. emails) that need to be
-   * resolved to accounts. The accounts are wrapped in {@link CodeOwner}s so that we can support
-   * different kind of code owners later (e.g. groups).
-   *
-   * <p>Code owners that cannot be resolved are filtered out:
-   *
-   * <ul>
-   *   <li>Emails that have a non-allowed email domain (see config parameter {@code
-   *       plugin.code-owners.allowedEmailDomain}).
-   *   <li>Emails for which no account exists: If no account exists, we cannot return any account.
-   *       It's fine to filter them out as it just means nobody can claim the ownership that was
-   *       assigned for this email.
-   *   <li>Emails for which multiple accounts exist: If an email is ambiguous it is treated the same
-   *       way as if there was no account for the email. That's because we can't tell which account
-   *       was meant to have the ownership. This behaviour is consistent with the behaviour in
-   *       Gerrit core that also treats ambiguous identifiers as non-resolveable.
-   * </ul>
-   *
-   * <p>This methods checks whether the {@link #user} or the calling user (if {@link #user} is
-   * unset) can see the accounts of the code owners and returns code owners whose accounts are
-   * visible.
-   *
-   * <p>In addition code owners that are referenced by a secondary email are only returned if the
-   * {@link #user} or the calling user (if {@link #user} is unset) can see the secondary email:
-   *
-   * <ul>
-   *   <li>every user can see the own secondary emails
-   *   <li>users with the {@code Modify Account} global capability can see the secondary emails of
-   *       all accounts
-   * </ul>
+   * Resolves a {@link CodeOwnerReference} to a {@link CodeOwner}.
    *
    * <p>This method does not resolve {@link CodeOwnerReference}s that assign the code ownership to
    * all user by using {@link #ALL_USERS_WILDCARD} as email.
