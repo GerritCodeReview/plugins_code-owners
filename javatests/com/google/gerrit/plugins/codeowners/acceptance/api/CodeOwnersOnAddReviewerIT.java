@@ -25,6 +25,7 @@ import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import java.util.Collection;
 import org.junit.Test;
 
@@ -34,7 +35,8 @@ import org.junit.Test;
 public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
-  public void noChangeMessageAddedIfCodeOwnersFuctionalityIsDisabled() throws Exception {
+  public void noChangeMessageAddedIfCodeOwners
+  ctionalityIsDisabled() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -89,7 +91,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "%s who was added as reviewer owns the following files:\n* %s\n",
-                user.fullName(), path));
+                ChangeMessagesUtil.getAccountTemplate(user.id()), path));
   }
 
   @Test
@@ -125,7 +127,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "%s who was added as reviewer owns the following files:\n* %s\n* %s\n",
-                user.fullName(), path1, path2));
+                ChangeMessagesUtil.getAccountTemplate(user.id()), path1, path2));
   }
 
   @Test
@@ -192,7 +194,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "* %s\n",
-                user.fullName(), path4, path3, path1, path2));
+                ChangeMessagesUtil.getAccountTemplate(user.id()), path4, path3, path1, path2));
   }
 
   @Test
@@ -238,7 +240,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "(more files)\n",
-                user.fullName(), path4, path3, path5));
+                ChangeMessagesUtil.getAccountTemplate(user.id()), path4, path3, path5));
   }
 
   @Test
@@ -321,7 +323,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "%s who was added as reviewer owns the following files:\n* %s\n",
-                user.fullName(), path));
+                ChangeMessagesUtil.getAccountTemplate(user.id()), path));
   }
 
   @Test
@@ -352,11 +354,11 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                admin.fullName(), path));
+                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
                 "%s who was added as reviewer owns the following files:\n* %s\n",
-                user.fullName(), path));
+                ChangeMessagesUtil.getAccountTemplate(user.id()), path));
   }
 }
