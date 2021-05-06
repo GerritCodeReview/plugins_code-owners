@@ -16,6 +16,23 @@
       "message": "Thanks for making this change!",
       "revId": "36116d911becbaeb4d804b1b8eece2a28e05c912",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fc0b994_ecc60b2c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-06T18:48:55Z",
+      "side": 1,
+      "message": "Ah, the CI cannot verify this change because the Gerrit core change is not submitted yet. Unfortunately the CI doesn\u0027t know how to checkout a corresponding Gerrit core change that is linked with a topic or hashtag.",
+      "revId": "36116d911becbaeb4d804b1b8eece2a28e05c912",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
