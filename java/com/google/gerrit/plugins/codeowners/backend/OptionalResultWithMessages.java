@@ -80,4 +80,12 @@ public abstract class OptionalResultWithMessages<T> {
     return new AutoValue_OptionalResultWithMessages<>(
         Optional.of(result), ImmutableList.copyOf(messages));
   }
+
+  /** Creates a {@link OptionalResultWithMessages} instance with messages. */
+  public static <T> OptionalResultWithMessages<T> create(
+      Optional<T> result, List<String> messages) {
+    requireNonNull(result, "result");
+    requireNonNull(messages, "messages");
+    return new AutoValue_OptionalResultWithMessages<>(result, ImmutableList.copyOf(messages));
+  }
 }
