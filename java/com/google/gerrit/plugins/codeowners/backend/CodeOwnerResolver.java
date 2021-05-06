@@ -347,21 +347,47 @@ public class CodeOwnerResolver {
       return Optional.empty();
     }
 
-    Optional<AccountState> activeAccount = lookupActiveAccountForEmail(messages, email);
-    if (!activeAccount.isPresent()) {
+    Optional<ImmutableSet<ExternalId>> extIds = lookupExternalIdsForEmail(messages, email);
+    if (!extIds.isPresent()) {
       return Optional.empty();
     }
 
-    AccountState accountState = activeAccount.get();
+    ImmutableSet<AccountState> accountStates = lookupAccounts(messages, extIds.get());
+    ImmutableSet<AccountState> activeAccountStates =
+        removeInactiveAccounts(messages, email, accountStates);
+    if (activeAccountStates.isEmpty()) {
+      messages.add(
+          String.format(
+              "cannot resolve code owner email %s: no active account with this email found",
+              email));
+      return Optional.empty();
+    }
+
+    if (activeAccountStates.size() > 1) {
+      messages.add(String.format("cannot resolve code owner email %s: email is ambiguous", email));
+      return Optional.empty();
+    }
+
+    AccountState activeAccountState = Iterables.getOnlyElement(activeAccountStates);
     if (enforceVisibility) {
-      if (!isVisible(messages, accountState, email)) {
+      if (!canSee(activeAccountState)) {
+        messages.add(
+            String.format(
+                "cannot resolve code owner email %s: account %s is not visible to user %s",
+                email,
+                activeAccountState.account().id(),
+                user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
+        return Optional.empty();
+      }
+
+      if (!isEmailVisible(messages, activeAccountState, email)) {
         return Optional.empty();
       }
     } else {
       messages.add("code owner visibility is not checked");
     }
 
-    CodeOwner codeOwner = CodeOwner.create(accountState.account().id());
+    CodeOwner codeOwner = CodeOwner.create(activeAccountState.account().id());
     messages.add(String.format("resolved email %s to account %s", email, codeOwner.accountId()));
     return Optional.of(codeOwner);
   }
@@ -443,24 +469,13 @@ public class CodeOwnerResolver {
     return false;
   }
 
-  /** Whether the given account can be seen. */
-  private boolean canSee(AccountState accountState) {
-    AccountControl accountControl =
-        user != null ? accountControlFactory.get(user) : accountControlFactory.get();
-    return accountControl.canSee(accountState);
-  }
-
   /**
-   * Looks up an email and returns the ID of the active account to which it belongs.
-   *
-   * <p>If the email is ambiguous (it belongs to multiple active accounts) it is considered as
-   * non-resolvable and empty result is returned.
+   * Looks up the external IDs for the given email.
    *
    * @param messages a builder to which debug messages are added
-   * @param email the email that should be looked up
-   * @return the ID of the account to which the email belongs if was found
+   * @param email the email for which the external IDs should be looked up
    */
-  private Optional<AccountState> lookupActiveAccountForEmail(
+  private Optional<ImmutableSet<ExternalId>> lookupExternalIdsForEmail(
       ImmutableList.Builder<String> messages, String email) {
     ImmutableSet<ExternalId> extIds;
     try {
@@ -477,44 +492,22 @@ public class CodeOwnerResolver {
       return Optional.empty();
     }
 
-    ImmutableSet<AccountState> activeAccounts = lookupActiveAccounts(messages, extIds, email);
-
-    if (activeAccounts.isEmpty()) {
-      messages.add(
-          String.format(
-              "cannot resolve code owner email %s: no active account with this email found",
-              email));
-      return Optional.empty();
-    }
-
-    if (activeAccounts.size() > 1) {
-      messages.add(String.format("cannot resolve code owner email %s: email is ambiguous", email));
-      return Optional.empty();
-    }
-
-    return Optional.of(Iterables.getOnlyElement(activeAccounts));
+    return Optional.of(extIds);
   }
 
-  private ImmutableSet<AccountState> lookupActiveAccounts(
-      ImmutableList.Builder<String> messages, ImmutableSet<ExternalId> extIds, String email) {
-    ImmutableSet<AccountState> accountStates =
-        extIds.stream()
-            .map(externalId -> lookupAccount(messages, externalId.accountId(), externalId.email()))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(toImmutableSet());
-
-    ImmutableSet.Builder<AccountState> activeAccounts = ImmutableSet.builder();
-    for (AccountState accountState : accountStates) {
-      if (accountState.account().isActive()) {
-        activeAccounts.add(accountState);
-      } else {
-        messages.add(
-            String.format(
-                "ignoring inactive account %s for email %s", accountState.account().id(), email));
-      }
-    }
-    return activeAccounts.build();
+  /**
+   * Looks up the accounts for the given external IDs.
+   *
+   * @param messages a builder to which debug messages are added
+   * @param extIds the external IDs for which the accounts should be looked up
+   */
+  private ImmutableSet<AccountState> lookupAccounts(
+      ImmutableList.Builder<String> messages, ImmutableSet<ExternalId> extIds) {
+    return extIds.stream()
+        .map(externalId -> lookupAccount(messages, externalId.accountId(), externalId.email()))
+        .filter(Optional::isPresent)
+        .map(Optional::get)
+        .collect(toImmutableSet());
   }
 
   /**
@@ -538,8 +531,44 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Checks whether the given account and email are visible to the {@link #user} or the calling user
-   * (if {@link #user} is unset).
+   * Removes inactive accounts from the given collection of account states.
+   *
+   * @param messages builder to which debug messages are added
+   * @param email email to which the accounts belong
+   * @param accountStates the set of account states from which inactive accounts should be removed
+   * @return the account states that belong to active accounts
+   */
+  private ImmutableSet<AccountState> removeInactiveAccounts(
+      ImmutableList.Builder<String> messages,
+      String email,
+      ImmutableSet<AccountState> accountStates) {
+    return accountStates.stream()
+        .filter(
+            accountState -> {
+              if (!accountState.account().isActive()) {
+                messages.add(
+                    String.format(
+                        "ignoring inactive account %s for email %s",
+                        accountState.account().id(), email));
+                return false;
+              }
+              return true;
+            })
+        .collect(toImmutableSet());
+  }
+
+  /** Whether the given account can be seen. */
+  private boolean canSee(AccountState accountState) {
+    AccountControl accountControl =
+        user != null ? accountControlFactory.get(user) : accountControlFactory.get();
+    return accountControl.canSee(accountState);
+  }
+
+  /**
+   * Checks whether the email is visible to the {@link #user} or the calling user (if {@link #user}
+   * is unset).
+   *
+   * <p>Primary emails are always visible if the account is visible.
    *
    * <p>If the email is a secondary email it is only visible if
    *
@@ -550,24 +579,14 @@ public class CodeOwnerResolver {
    * </ul>
    *
    * @param messages a builder to which debug messages are added
-   * @param accountState the account for which it should be checked whether it's visible to the user
-   * @param email email that was used to reference the account
-   * @return {@code true} if the given account and email are visible to the user, otherwise {@code
-   *     false}
+   * @param visibleAccountState account to which the given email belongs and that is visible to the
+   *     user
+   * @param email email for which it should be checked if it is visible to the user
+   * @return {@code true} if the given email is visible to the user, otherwise {@code false}
    */
-  private boolean isVisible(
-      ImmutableList.Builder<String> messages, AccountState accountState, String email) {
-    if (!canSee(accountState)) {
-      messages.add(
-          String.format(
-              "cannot resolve code owner email %s: account %s is not visible to user %s",
-              email,
-              accountState.account().id(),
-              user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
-      return false;
-    }
-
-    if (!email.equals(accountState.account().preferredEmail())) {
+  private boolean isEmailVisible(
+      ImmutableList.Builder<String> messages, AccountState visibleAccountState, String email) {
+    if (!email.equals(visibleAccountState.account().preferredEmail())) {
       // the email is a secondary email of the account
 
       if (user != null) {
@@ -600,28 +619,28 @@ public class CodeOwnerResolver {
                 String.format(
                     "cannot resolve code owner email %s: account %s is referenced by secondary email"
                         + " but user %s cannot see secondary emails",
-                    email, accountState.account().id(), user.getLoggableName()));
+                    email, visibleAccountState.account().id(), user.getLoggableName()));
             return false;
           }
           messages.add(
               String.format(
                   "resolved code owner email %s: account %s is referenced by secondary email"
                       + " and user %s can see secondary emails",
-                  email, accountState.account().id(), user.getLoggableName()));
+                  email, visibleAccountState.account().id(), user.getLoggableName()));
           return true;
         } else if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
           messages.add(
               String.format(
                   "cannot resolve code owner email %s: account %s is referenced by secondary email"
                       + " but the calling user %s cannot see secondary emails",
-                  email, accountState.account().id(), currentUser.get().getLoggableName()));
+                  email, visibleAccountState.account().id(), currentUser.get().getLoggableName()));
           return false;
         } else {
           messages.add(
               String.format(
                   "resolved code owner email %s: account %s is referenced by secondary email"
                       + " and the calling user %s can see secondary emails",
-                  email, accountState.account().id(), currentUser.get().getLoggableName()));
+                  email, visibleAccountState.account().id(), currentUser.get().getLoggableName()));
           return true;
         }
       } catch (PermissionBackendException e) {
@@ -634,7 +653,7 @@ public class CodeOwnerResolver {
     messages.add(
         String.format(
             "account %s is visible to user %s",
-            accountState.account().id(),
+            visibleAccountState.account().id(),
             user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
     return true;
   }
