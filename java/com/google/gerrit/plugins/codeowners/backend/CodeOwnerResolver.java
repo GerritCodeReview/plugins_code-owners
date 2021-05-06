@@ -349,8 +349,6 @@ public class CodeOwnerResolver {
       ImmutableList.Builder<String> messages, CodeOwnerReference codeOwnerReference) {
     String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
 
-    messages.add(String.format("resolving code owner reference %s", codeOwnerReference));
-
     if (!isEmailDomainAllowed(messages, email)) {
       return Optional.empty();
     }
@@ -370,7 +368,7 @@ public class CodeOwnerResolver {
     }
 
     CodeOwner codeOwner = CodeOwner.create(accountState.account().id());
-    messages.add(String.format("resolved to account %s", codeOwner.accountId()));
+    messages.add(String.format("resolved email %s to account %s", email, codeOwner.accountId()));
     return Optional.of(codeOwner);
   }
 
