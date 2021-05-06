@@ -382,6 +382,67 @@ public class CodeOwnerResolver {
     };
   }
 
+  /**
+   * Whether the domain of the given email is allowed for code owners.
+   *
+   * <p>Which emails domains are allowed is controlled via the plugin configuration (see {@link
+   * com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginGlobalConfigSnapshot#getAllowedEmailDomains()}
+   *
+   * <p>Debug messages are returned with the result.
+   *
+   * @param email the email for which the domain should be checked
+   * @return a {@link OptionalResultWithMessages} that contains {@code true} if the domain of the
+   *     given email is allowed for code owners, otherwise {@link OptionalResultWithMessages} that
+   *     contains {@code false}
+   */
+  public OptionalResultWithMessages<Boolean> isEmailDomainAllowed(String email) {
+    ImmutableList.Builder<String> messages = ImmutableList.builder();
+    boolean isEmailDomainAllowed = isEmailDomainAllowed(messages, email);
+    return OptionalResultWithMessages.create(isEmailDomainAllowed, messages.build());
+  }
+
+  /**
+   * Whether the domain of the given email is allowed for code owners.
+   *
+   * <p>Which emails domains are allowed is controlled via the plugin configuration (see {@link
+   * com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginGlobalConfigSnapshot#getAllowedEmailDomains()}
+   *
+   * @param messages builder to which debug messages are added
+   * @param email the email for which the domain should be checked
+   * @return {@code true} if the domain of the given email is allowed for code owners, otherwise
+   *     {@code false}
+   */
+  private boolean isEmailDomainAllowed(ImmutableList.Builder<String> messages, String email) {
+    requireNonNull(messages, "messages");
+    requireNonNull(email, "email");
+
+    ImmutableSet<String> allowedEmailDomains =
+        codeOwnersPluginConfiguration.getGlobalConfig().getAllowedEmailDomains();
+    if (allowedEmailDomains.isEmpty()) {
+      messages.add("all domains are allowed");
+      return true;
+    }
+
+    if (email.equals(ALL_USERS_WILDCARD)) {
+      messages.add("all users wildcard is allowed");
+      return true;
+    }
+
+    int emailAtIndex = email.lastIndexOf('@');
+    if (emailAtIndex >= 0 && emailAtIndex < email.length() - 1) {
+      String emailDomain = email.substring(emailAtIndex + 1);
+      boolean isEmailDomainAllowed = allowedEmailDomains.contains(emailDomain);
+      messages.add(
+          String.format(
+              "domain %s of email %s is %s",
+              emailDomain, email, isEmailDomainAllowed ? "allowed" : "not allowed"));
+      return isEmailDomainAllowed;
+    }
+
+    messages.add(String.format("email %s has no domain", email));
+    return false;
+  }
+
   /** Whether the given account can be seen. */
   private boolean canSee(AccountState accountState) {
     AccountControl accountControl =
@@ -576,66 +637,5 @@ public class CodeOwnerResolver {
             accountState.account().id(),
             user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
     return true;
-  }
-
-  /**
-   * Whether the domain of the given email is allowed for code owners.
-   *
-   * <p>Which emails domains are allowed is controlled via the plugin configuration (see {@link
-   * com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginGlobalConfigSnapshot#getAllowedEmailDomains()}
-   *
-   * <p>Debug messages are returned with the result.
-   *
-   * @param email the email for which the domain should be checked
-   * @return a {@link OptionalResultWithMessages} that contains {@code true} if the domain of the
-   *     given email is allowed for code owners, otherwise {@link OptionalResultWithMessages} that
-   *     contains {@code false}
-   */
-  public OptionalResultWithMessages<Boolean> isEmailDomainAllowed(String email) {
-    ImmutableList.Builder<String> messages = ImmutableList.builder();
-    boolean isEmailDomainAllowed = isEmailDomainAllowed(messages, email);
-    return OptionalResultWithMessages.create(isEmailDomainAllowed, messages.build());
-  }
-
-  /**
-   * Whether the domain of the given email is allowed for code owners.
-   *
-   * <p>Which emails domains are allowed is controlled via the plugin configuration (see {@link
-   * com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginGlobalConfigSnapshot#getAllowedEmailDomains()}
-   *
-   * @param messages builder to which debug messages are added
-   * @param email the email for which the domain should be checked
-   * @return {@code true} if the domain of the given email is allowed for code owners, otherwise
-   *     {@code false}
-   */
-  private boolean isEmailDomainAllowed(ImmutableList.Builder<String> messages, String email) {
-    requireNonNull(messages, "messages");
-    requireNonNull(email, "email");
-
-    ImmutableSet<String> allowedEmailDomains =
-        codeOwnersPluginConfiguration.getGlobalConfig().getAllowedEmailDomains();
-    if (allowedEmailDomains.isEmpty()) {
-      messages.add("all domains are allowed");
-      return true;
-    }
-
-    if (email.equals(ALL_USERS_WILDCARD)) {
-      messages.add("all users wildcard is allowed");
-      return true;
-    }
-
-    int emailAtIndex = email.lastIndexOf('@');
-    if (emailAtIndex >= 0 && emailAtIndex < email.length() - 1) {
-      String emailDomain = email.substring(emailAtIndex + 1);
-      boolean isEmailDomainAllowed = allowedEmailDomains.contains(emailDomain);
-      messages.add(
-          String.format(
-              "domain %s of email %s is %s",
-              emailDomain, email, isEmailDomainAllowed ? "allowed" : "not allowed"));
-      return isEmailDomainAllowed;
-    }
-
-    messages.add(String.format("email %s has no domain", email));
-    return false;
   }
 }
