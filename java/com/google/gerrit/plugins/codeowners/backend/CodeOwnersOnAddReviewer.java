@@ -20,7 +20,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Change;
-import com.google.gerrit.entities.ChangeMessage;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.events.ReviewerAddedListener;
@@ -149,9 +148,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
         return false;
       }
 
-      ChangeMessage changeMessage = ChangeMessagesUtil.newMessage(ctx, message, TAG_ADD_REVIEWER);
-      changeMessageUtil.addChangeMessage(
-          ctx.getUpdate(ctx.getChange().currentPatchSetId()), changeMessage);
+      changeMessageUtil.setChangeMessage(ctx, message, TAG_ADD_REVIEWER);
       return true;
     }
 
@@ -181,13 +178,11 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
         return Optional.empty();
       }
 
-      Account reviewerAccount = accountCache.getEvenIfMissing(reviewerAccountId).account();
-
       StringBuilder message = new StringBuilder();
       message.append(
           String.format(
               "%s who was added as reviewer owns the following files:\n",
-              reviewerAccount.getName()));
+              ChangeMessagesUtil.getAccountTemplate(reviewerAccountId)));
 
       if (ownedPaths.size() <= limit) {
         appendPaths(message, ownedPaths.stream());

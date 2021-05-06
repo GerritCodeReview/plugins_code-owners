@@ -26,6 +26,7 @@ import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfi
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.restapi.change.OnPostReview;
@@ -127,24 +128,24 @@ class OnCodeOwnerOverride implements OnPostReview {
       return Optional.of(
           String.format(
               "By voting %s the code-owners submit requirement is overridden by %s",
-              newVote, user.getName()));
+              newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
     } else if (isCodeOwnerOverrideRemoved(overrideApproval, oldApprovals, newVote)) {
       if (newVote.value() == 0) {
         return Optional.of(
             String.format(
                 "By removing the %s vote the code-owners submit requirement is no longer overridden"
                     + " by %s",
-                newVote.label(), user.getName()));
+                newVote.label(), ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
       }
       return Optional.of(
           String.format(
               "By voting %s the code-owners submit requirement is no longer overridden by %s",
-              newVote, user.getName()));
+              newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
     } else if (isCodeOwnerOverrideUpOrDowngraded(overrideApproval, oldApprovals, newVote)) {
       return Optional.of(
           String.format(
               "By voting %s the code-owners submit requirement is still overridden by %s",
-              newVote, user.getName()));
+              newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
     }
     // non-approval was downgraded (e.g. -1 to -2)
     return Optional.empty();
