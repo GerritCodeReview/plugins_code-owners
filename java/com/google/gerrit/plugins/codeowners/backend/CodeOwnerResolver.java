@@ -15,11 +15,13 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.flogger.FluentLogger;
@@ -42,11 +44,16 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Class to resolve {@link CodeOwnerReference}s to {@link CodeOwner}s.
@@ -244,10 +251,13 @@ public class CodeOwnerResolver {
   /**
    * Resolves the given {@link CodeOwnerReference}s to {@link CodeOwner}s.
    *
+   * <p>The accounts for the given {@link CodeOwnerReference}s are loaded from the account cache in
+   * parallel (via {@link AccountCache#get(Set)}.
+   *
    * @param codeOwnerReferences the code owner references that should be resolved
    * @param unresolvedImports list of unresolved imports
    * @param pathCodeOwnersMessages messages that were collected when resolving path code owners
-   * @return the {@link CodeOwner} for the given code owner references
+   * @return the resolved code owner references as a {@link CodeOwnerResolverResult}
    */
   private CodeOwnerResolverResult resolve(
       Set<CodeOwnerReference> codeOwnerReferences,
@@ -267,19 +277,8 @@ public class CodeOwnerResolver {
       AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
       AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
       ImmutableSet<CodeOwner> codeOwners =
-          codeOwnerReferences.stream()
-              .filter(filterOutAllUsersWildCard(ownedByAllUsers))
-              .map(codeOwnerReference -> resolve(messageBuilder, codeOwnerReference))
-              .filter(
-                  codeOwner -> {
-                    if (!codeOwner.isPresent()) {
-                      hasUnresolvedCodeOwners.set(true);
-                      return false;
-                    }
-                    return true;
-                  })
-              .map(Optional::get)
-              .collect(toImmutableSet());
+          resolve(messageBuilder, ownedByAllUsers, hasUnresolvedCodeOwners, codeOwnerReferences);
+
       CodeOwnerResolverResult codeOwnerResolverResult =
           CodeOwnerResolverResult.create(
               codeOwners,
@@ -321,75 +320,90 @@ public class CodeOwnerResolver {
    */
   public OptionalResultWithMessages<CodeOwner> resolveWithMessages(
       CodeOwnerReference codeOwnerReference) {
+    requireNonNull(codeOwnerReference, "codeOwnerReference");
+
+    if (CodeOwnerResolver.ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
+      return OptionalResultWithMessages.createEmpty(
+          String.format(
+              "cannot resolve code owner email %s: no account with this email exists",
+              CodeOwnerResolver.ALL_USERS_WILDCARD));
+    }
+
     ImmutableList.Builder<String> messageBuilder = ImmutableList.builder();
-    Optional<CodeOwner> codeOwner = resolve(messageBuilder, codeOwnerReference);
-    return OptionalResultWithMessages.create(codeOwner, messageBuilder.build());
+    AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
+    AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
+    ImmutableSet<CodeOwner> codeOwners =
+        resolve(
+            messageBuilder,
+            ownedByAllUsers,
+            hasUnresolvedCodeOwners,
+            ImmutableSet.of(codeOwnerReference));
+    ImmutableList<String> messages = messageBuilder.build();
+    if (codeOwners.isEmpty()) {
+      return OptionalResultWithMessages.createEmpty(messages);
+    }
+    return OptionalResultWithMessages.create(Iterables.getOnlyElement(codeOwners), messages);
   }
 
   /**
-   * Resolves a {@link CodeOwnerReference} to a {@link CodeOwner}.
+   * Resolves the given {@link CodeOwnerReference}s to {@link CodeOwner}s.
    *
-   * <p>This method does not resolve {@link CodeOwnerReference}s that assign the code ownership to
-   * all user by using {@link #ALL_USERS_WILDCARD} as email.
-   *
-   * <p>Debug messages are returned with the result.
+   * <p>The accounts for the given {@link CodeOwnerReference}s are loaded from the account cache in
+   * parallel (via {@link AccountCache#get(Set)}.
    *
    * @param messages a builder to which debug messages are added
-   * @param codeOwnerReference the code owner reference that should be resolved
-   * @return the code owner to which the given code owner reference was resolved, {@link
-   *     Optional#empty()} if the code owner reference couldn't be resolved
+   * @param ownedByAllUsers a flag that is set if any of the given {@link CodeOwnerReference}s
+   *     assigns code ownership to all users
+   * @param hasUnresolvedCodeOwners a flag that is set any of the given {@link CodeOwnerReference}s
+   *     cannot be resolved
+   * @param codeOwnerReferences the code owner references that should be resolved
+   * @return the resolved code owner references as a {@link CodeOwner}s
    */
-  private Optional<CodeOwner> resolve(
-      ImmutableList.Builder<String> messages, CodeOwnerReference codeOwnerReference) {
-    String email = requireNonNull(codeOwnerReference, "codeOwnerReference").email();
+  private ImmutableSet<CodeOwner> resolve(
+      ImmutableList.Builder<String> messages,
+      AtomicBoolean ownedByAllUsers,
+      AtomicBoolean hasUnresolvedCodeOwners,
+      Set<CodeOwnerReference> codeOwnerReferences) {
+    requireNonNull(codeOwnerReferences, "codeOwnerReferences");
 
-    if (!isEmailDomainAllowed(messages, email)) {
-      return Optional.empty();
-    }
+    ImmutableSet<String> emailsToResolve =
+        codeOwnerReferences.stream()
+            .map(CodeOwnerReference::email)
+            .filter(filterOutAllUsersWildCard(ownedByAllUsers))
+            .collect(toImmutableSet());
 
-    Optional<ImmutableSet<ExternalId>> extIds = lookupExternalIdsForEmail(messages, email);
-    if (!extIds.isPresent()) {
-      return Optional.empty();
-    }
+    ImmutableSet<String> emailsToLookup =
+        emailsToResolve.stream()
+            .filter(filterOutEmailsWithNonAllowedDomains(messages))
+            .collect(toImmutableSet());
 
-    ImmutableSet<AccountState> accountStates = lookupAccounts(messages, extIds.get());
-    ImmutableSet<AccountState> activeAccountStates =
-        removeInactiveAccounts(messages, email, accountStates);
-    if (activeAccountStates.isEmpty()) {
-      messages.add(
-          String.format(
-              "cannot resolve code owner email %s: no active account with this email found",
-              email));
-      return Optional.empty();
-    }
+    ImmutableMap<String, Collection<ExternalId>> externalIdsByEmail =
+        lookupExternalIds(messages, emailsToLookup);
 
-    if (activeAccountStates.size() > 1) {
-      messages.add(String.format("cannot resolve code owner email %s: email is ambiguous", email));
-      return Optional.empty();
-    }
+    Stream<Pair<String, AccountState>> accountsByEmail =
+        lookupAccounts(messages, externalIdsByEmail)
+            .map(removeInactiveAccounts(messages))
+            .filter(filterOutEmailsWithoutAccounts(messages))
+            .filter(filterOutAmbiguousEmails(messages))
+            .map(mapToOnlyAccount(messages));
 
-    AccountState activeAccountState = Iterables.getOnlyElement(activeAccountStates);
     if (enforceVisibility) {
-      if (!canSee(activeAccountState)) {
-        messages.add(
-            String.format(
-                "cannot resolve code owner email %s: account %s is not visible to user %s",
-                email,
-                activeAccountState.account().id(),
-                user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
-        return Optional.empty();
-      }
-
-      if (!isEmailVisible(messages, activeAccountState, email)) {
-        return Optional.empty();
-      }
+      accountsByEmail =
+          accountsByEmail
+              .filter(filterOutEmailsOfNonVisibleAccounts(messages))
+              .filter(filterOutNonVisibleSecondaryEmails(messages));
     } else {
       messages.add("code owner visibility is not checked");
     }
 
-    CodeOwner codeOwner = CodeOwner.create(activeAccountState.account().id());
-    messages.add(String.format("resolved email %s to account %s", email, codeOwner.accountId()));
-    return Optional.of(codeOwner);
+    ImmutableMap<String, CodeOwner> codeOwnersByEmail =
+        accountsByEmail.map(mapToCodeOwner()).collect(toImmutableMap(Pair::key, Pair::value));
+
+    if (codeOwnersByEmail.keySet().size() < emailsToResolve.size()) {
+      hasUnresolvedCodeOwners.set(true);
+    }
+
+    return ImmutableSet.copyOf(codeOwnersByEmail.values());
   }
 
   /**
@@ -398,14 +412,27 @@ public class CodeOwnerResolver {
    * @param ownedByAllUsers flag that is set if any of the emails is the all users wild card (aka
    *     {@code *})
    */
-  private Predicate<CodeOwnerReference> filterOutAllUsersWildCard(AtomicBoolean ownedByAllUsers) {
-    return codeOwnerReference -> {
-      if (ALL_USERS_WILDCARD.equals(codeOwnerReference.email())) {
+  private Predicate<String> filterOutAllUsersWildCard(AtomicBoolean ownedByAllUsers) {
+    return email -> {
+      if (ALL_USERS_WILDCARD.equals(email)) {
         ownedByAllUsers.set(true);
         return false;
       }
       return true;
     };
+  }
+
+  /**
+   * Creates a predicate to filter out emails that have a non-allowed email domain.
+   *
+   * <p>Which emails domains are allowed is controlled via the plugin configuration (see {@link
+   * com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginGlobalConfigSnapshot#getAllowedEmailDomains()}
+   *
+   * @param messages builder to which debug messages are added
+   */
+  private Predicate<String> filterOutEmailsWithNonAllowedDomains(
+      ImmutableList.Builder<String> messages) {
+    return email -> isEmailDomainAllowed(messages, email);
   }
 
   /**
@@ -470,64 +497,89 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Looks up the external IDs for the given email.
+   * Looks up the external IDs for the given emails.
    *
-   * @param messages a builder to which debug messages are added
-   * @param email the email for which the external IDs should be looked up
+   * <p>Looks up all emails from the external ID cache at once, which is more efficient than looking
+   * up external IDs for emails one by one (see {@link ExternalIds#byEmails(String...)}).
+   *
+   * @param messages builder to which debug messages are added
+   * @param emails the emails for which the external IDs should be looked up
+   * @return external IDs per email
    */
-  private Optional<ImmutableSet<ExternalId>> lookupExternalIdsForEmail(
-      ImmutableList.Builder<String> messages, String email) {
-    ImmutableSet<ExternalId> extIds;
+  private ImmutableMap<String, Collection<ExternalId>> lookupExternalIds(
+      ImmutableList.Builder<String> messages, ImmutableSet<String> emails) {
     try {
-      extIds = externalIds.byEmail(email);
+      ImmutableMap<String, Collection<ExternalId>> extIdsByEmail =
+          externalIds.byEmails(emails.toArray(new String[0])).asMap();
+      emails.stream()
+          .filter(email -> !extIdsByEmail.containsKey(email))
+          .forEach(
+              email ->
+                  messages.add(
+                      String.format(
+                          "cannot resolve code owner email %s: no account with this email exists",
+                          email)));
+      return extIdsByEmail;
     } catch (IOException e) {
       throw new CodeOwnersInternalServerErrorException(
-          String.format("cannot resolve code owner email %s", email), e);
+          String.format("cannot resolve code owner emails: %s", emails), e);
     }
-
-    if (extIds.isEmpty()) {
-      messages.add(
-          String.format(
-              "cannot resolve code owner email %s: no account with this email exists", email));
-      return Optional.empty();
-    }
-
-    return Optional.of(extIds);
   }
 
   /**
    * Looks up the accounts for the given external IDs.
    *
-   * @param messages a builder to which debug messages are added
-   * @param extIds the external IDs for which the accounts should be looked up
+   * <p>Looks up all accounts from the account cache at once, which is more efficient than looking
+   * up accounts one by one (see {@link AccountCache#get(Set)}).
+   *
+   * @param messages builder to which debug messages are added
+   * @param externalIdsByEmail external IDs for which the accounts should be looked up
+   * @return account states per email
    */
-  private ImmutableSet<AccountState> lookupAccounts(
-      ImmutableList.Builder<String> messages, ImmutableSet<ExternalId> extIds) {
-    return extIds.stream()
-        .map(externalId -> lookupAccount(messages, externalId.accountId(), externalId.email()))
-        .filter(Optional::isPresent)
-        .map(Optional::get)
-        .collect(toImmutableSet());
+  private Stream<Pair<String, Collection<AccountState>>> lookupAccounts(
+      ImmutableList.Builder<String> messages,
+      ImmutableMap<String, Collection<ExternalId>> externalIdsByEmail) {
+    ImmutableSet<Account.Id> accountIds =
+        externalIdsByEmail.values().stream()
+            .flatMap(Collection::stream)
+            .map(ExternalId::accountId)
+            .collect(toImmutableSet());
+    Map<Account.Id, AccountState> accounts = accountCache.get(accountIds);
+    return externalIdsByEmail.entrySet().stream()
+        .map(
+            e ->
+                Pair.of(
+                    e.getKey(),
+                    e.getValue().stream()
+                        .map(
+                            extId -> {
+                              Account.Id accountId = extId.accountId();
+                              AccountState accountState = accounts.get(accountId);
+                              if (accountState == null) {
+                                messages.add(
+                                    String.format(
+                                        "cannot resolve account %s for email %s: account does not"
+                                            + " exists",
+                                        accountId, e.getKey()));
+                              }
+                              return accountState;
+                            })
+                        .filter(Objects::nonNull)
+                        .collect(toImmutableSet())));
   }
 
   /**
-   * Looks up an account by account ID and returns the corresponding {@link AccountState} if it is
-   * found.
+   * Creates a map function that removes inactive accounts from a {@code Pair<String,
+   * Collection<AccountState>>}.
    *
-   * @param messages a builder to which debug messages are added
-   * @param accountId the ID of the account that should be looked up
-   * @param email the email that was resolved to the account ID
-   * @return the {@link AccountState} of the account with the given account ID, if it exists
+   * <p>The pair which is provided as input to the function maps an email to a collection of account
+   * states.
+   *
+   * @param messages builder to which debug messages are added
    */
-  private Optional<AccountState> lookupAccount(
-      ImmutableList.Builder<String> messages, Account.Id accountId, String email) {
-    Optional<AccountState> accountState = accountCache.get(accountId);
-    if (!accountState.isPresent()) {
-      messages.add(
-          String.format(
-              "cannot resolve account %s for email %s: account does not exists", accountId, email));
-    }
-    return accountState;
+  private Function<Pair<String, Collection<AccountState>>, Pair<String, Collection<AccountState>>>
+      removeInactiveAccounts(ImmutableList.Builder<String> messages) {
+    return e -> Pair.of(e.key(), removeInactiveAccounts(messages, e.key(), e.value()));
   }
 
   /**
@@ -541,7 +593,7 @@ public class CodeOwnerResolver {
   private ImmutableSet<AccountState> removeInactiveAccounts(
       ImmutableList.Builder<String> messages,
       String email,
-      ImmutableSet<AccountState> accountStates) {
+      Collection<AccountState> accountStates) {
     return accountStates.stream()
         .filter(
             accountState -> {
@@ -557,6 +609,96 @@ public class CodeOwnerResolver {
         .collect(toImmutableSet());
   }
 
+  /**
+   * Creates a predicate to filter out emails without accounts.
+   *
+   * <p>The pair which is provided as input to the predicate maps an email to a collection of
+   * account states. If the collection of account states is empty, the email is filtered out.
+   *
+   * @param messages builder to which debug messages are added
+   */
+  private Predicate<Pair<String, Collection<AccountState>>> filterOutEmailsWithoutAccounts(
+      ImmutableList.Builder<String> messages) {
+    return e -> {
+      if (e.value().isEmpty()) {
+        String email = e.key();
+        messages.add(
+            String.format(
+                "cannot resolve code owner email %s: no active account with this email found",
+                email));
+        return false;
+      }
+      return true;
+    };
+  }
+
+  /**
+   * Creates a predicate to filter out ambiguous emails (emails that belong to multiple accounts).
+   *
+   * <p>The pair which is provided as input to the predicate maps an email to a collection of
+   * account states. If the collection of account states contains more than 1 entry, the email is
+   * filtered out.
+   *
+   * @param messages builder to which debug messages are added
+   */
+  private Predicate<Pair<String, Collection<AccountState>>> filterOutAmbiguousEmails(
+      ImmutableList.Builder<String> messages) {
+    return e -> {
+      if (e.value().size() > 1) {
+        String email = e.key();
+        messages.add(
+            String.format("cannot resolve code owner email %s: email is ambiguous", email));
+        return false;
+      }
+      return true;
+    };
+  }
+
+  /**
+   * Creates a map function that maps a {@code Pair<String, Collection<AccountState>>} to a {@code
+   * Pair<String, AccountState>}.
+   *
+   * <p>The pair which is provided as input to the function maps an email to a collection of account
+   * states, which must contain exactly one entry. As output the function returns a pair that maps
+   * the email to the only account state.
+   *
+   * @param messages builder to which debug messages are added
+   */
+  private Function<Pair<String, Collection<AccountState>>, Pair<String, AccountState>>
+      mapToOnlyAccount(ImmutableList.Builder<String> messages) {
+    return e -> {
+      String email = e.key();
+      AccountState accountState = Iterables.getOnlyElement(e.value());
+      messages.add(
+          String.format("resolved email %s to account %s", email, accountState.account().id()));
+      return Pair.of(email, accountState);
+    };
+  }
+
+  /**
+   * Creates a predicate to filter out emails that belong to non-visible accounts.
+   *
+   * @param messages builder to which debug messages are added
+   */
+  private Predicate<Pair<String, AccountState>> filterOutEmailsOfNonVisibleAccounts(
+      ImmutableList.Builder<String> messages) {
+    return e -> {
+      String email = e.key();
+      AccountState accountState = e.value();
+      if (!canSee(accountState)) {
+        messages.add(
+            String.format(
+                "cannot resolve code owner email %s: account %s is not visible to user %s",
+                email,
+                accountState.account().id(),
+                user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
+        return false;
+      }
+
+      return true;
+    };
+  }
+
   /** Whether the given account can be seen. */
   private boolean canSee(AccountState accountState) {
     AccountControl accountControl =
@@ -565,12 +707,9 @@ public class CodeOwnerResolver {
   }
 
   /**
-   * Checks whether the email is visible to the {@link #user} or the calling user (if {@link #user}
-   * is unset).
+   * Creates a predicate to filter out non-visible secondary emails.
    *
-   * <p>Primary emails are always visible if the account is visible.
-   *
-   * <p>If the email is a secondary email it is only visible if
+   * <p>A secondary email is only visible if
    *
    * <ul>
    *   <li>it is owned by the {@link #user} or the calling user (if {@link #user} is unset)
@@ -578,16 +717,22 @@ public class CodeOwnerResolver {
    *       Modify Account} global capability
    * </ul>
    *
-   * @param messages a builder to which debug messages are added
-   * @param visibleAccountState account to which the given email belongs and that is visible to the
-   *     user
-   * @param email email for which it should be checked if it is visible to the user
-   * @return {@code true} if the given email is visible to the user, otherwise {@code false}
+   * @param messages builder to which debug messages are added
    */
-  private boolean isEmailVisible(
-      ImmutableList.Builder<String> messages, AccountState visibleAccountState, String email) {
-    if (!email.equals(visibleAccountState.account().preferredEmail())) {
-      // the email is a secondary email of the account
+  private Predicate<Pair<String, AccountState>> filterOutNonVisibleSecondaryEmails(
+      ImmutableList.Builder<String> messages) {
+    return e -> {
+      String email = e.key();
+      AccountState accountState = e.value();
+      if (email.equals(accountState.account().preferredEmail())) {
+        // the email is a primary email of the account
+        messages.add(
+            String.format(
+                "account %s is visible to user %s",
+                accountState.account().id(),
+                user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
+        return true;
+      }
 
       if (user != null) {
         if (user.hasEmailAddress(email)) {
@@ -619,42 +764,45 @@ public class CodeOwnerResolver {
                 String.format(
                     "cannot resolve code owner email %s: account %s is referenced by secondary email"
                         + " but user %s cannot see secondary emails",
-                    email, visibleAccountState.account().id(), user.getLoggableName()));
+                    email, accountState.account().id(), user.getLoggableName()));
             return false;
           }
           messages.add(
               String.format(
                   "resolved code owner email %s: account %s is referenced by secondary email"
                       + " and user %s can see secondary emails",
-                  email, visibleAccountState.account().id(), user.getLoggableName()));
+                  email, accountState.account().id(), user.getLoggableName()));
           return true;
         } else if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
           messages.add(
               String.format(
                   "cannot resolve code owner email %s: account %s is referenced by secondary email"
                       + " but the calling user %s cannot see secondary emails",
-                  email, visibleAccountState.account().id(), currentUser.get().getLoggableName()));
+                  email, accountState.account().id(), currentUser.get().getLoggableName()));
           return false;
         } else {
           messages.add(
               String.format(
                   "resolved code owner email %s: account %s is referenced by secondary email"
                       + " and the calling user %s can see secondary emails",
-                  email, visibleAccountState.account().id(), currentUser.get().getLoggableName()));
+                  email, accountState.account().id(), currentUser.get().getLoggableName()));
           return true;
         }
-      } catch (PermissionBackendException e) {
+      } catch (PermissionBackendException ex) {
         throw new CodeOwnersInternalServerErrorException(
             String.format(
                 "failed to test the %s global capability", GlobalPermission.MODIFY_ACCOUNT),
-            e);
+            ex);
       }
-    }
-    messages.add(
-        String.format(
-            "account %s is visible to user %s",
-            visibleAccountState.account().id(),
-            user != null ? user.getLoggableName() : currentUser.get().getLoggableName()));
-    return true;
+    };
+  }
+
+  /**
+   * Creates a map function that maps a {@code Pair<String, AccountState>} to a code owner.
+   *
+   * <p>The pair which is provided as input to the function maps an email to an account states.
+   */
+  private Function<Pair<String, AccountState>, Pair<String, CodeOwner>> mapToCodeOwner() {
+    return e -> Pair.of(e.key(), CodeOwner.create(e.value().account().id()));
   }
 }
