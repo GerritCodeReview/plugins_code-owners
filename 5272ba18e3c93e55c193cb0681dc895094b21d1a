@@ -22,6 +22,30 @@
       },
       "revId": "5272ba18e3c93e55c193cb0681dc895094b21d1a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a27303e6_b79b2f4b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginGlobalConfigSnapshotTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-06T16:37:57Z",
+      "side": 1,
+      "message": "I considered this, but think it\u0027s safer to represent \"no limit\" as Optional#empty() rather than as \"limit \u003d\u003d 0\" as it forces callers to handle this case:\n\n  Optional\u003cInteger\u003e limit \u003d ...\n  if (!limit.isPresent() || cache.size() \u003c limit.get()) {\n    // add to cache\n  }\n\nIf the limit would be an int with special meaning of \u00270\u0027 it\u0027s easier to write this wrong as:\n\n  int limit \u003d ...\n  if (cache.size() \u003c limit) {\n    // add to cache\n  }\n\nwhile it would need to be:\n\n  int limit \u003d ...\n  if (limit \u003d\u003d 0 || cache.size() \u003c limit) {\n    // add to cache\n  }\n\nUsing Optional#empty() is also consistent with how we represent the limit for maxCodeOwnerConfigCacheSize above (see line 88).",
+      "parentUuid": "2aafb3cb_2ee06acf",
+      "range": {
+        "startLine": 113,
+        "startChar": 57,
+        "endLine": 113,
+        "endChar": 64
+      },
+      "revId": "5272ba18e3c93e55c193cb0681dc895094b21d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
