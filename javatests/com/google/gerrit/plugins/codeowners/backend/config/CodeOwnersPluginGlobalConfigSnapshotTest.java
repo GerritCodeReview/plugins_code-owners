@@ -85,7 +85,9 @@ public class CodeOwnersPluginGlobalConfigSnapshotTest extends AbstractCodeOwners
   @Test
   @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "invalid")
   public void maxCodeOwnerConfigCacheSize_invalidConfig() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize()).isEmpty();
+    assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize())
+        .value()
+        .isEqualTo(CodeOwnersPluginGlobalConfigSnapshot.DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
   }
 
   private CodeOwnersPluginGlobalConfigSnapshot cfgSnapshot() {
