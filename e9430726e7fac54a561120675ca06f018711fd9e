@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f85a9027_72876985",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-07T07:22:19Z",
+      "side": 1,
+      "message": "CI is not working correctly at the moment and since this is a doc only change it doesn\u0027t require any verification.",
+      "revId": "e9430726e7fac54a561120675ca06f018711fd9e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
