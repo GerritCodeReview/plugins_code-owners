@@ -41,6 +41,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "02fec8aa_b1e555ed",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 355,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-07T13:26:35Z",
+      "side": 1,
+      "message": "Yes. Done.",
+      "parentUuid": "105cbecc_fca66121",
+      "range": {
+        "startLine": 355,
+        "startChar": 43,
+        "endLine": 355,
+        "endChar": 50
+      },
+      "revId": "e8d854cc362a53a11f50da47b0bc1b2be309090d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4112bb35_3abe365e",
@@ -64,6 +88,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d6711609_fe33462b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 566,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-07T13:26:35Z",
+      "side": 1,
+      "message": "Yes, it can be null, see line 558 above.\n\n\u003e (You always return Pair.of() in the previous map step).\nNo, this is the conversion of the externalIds in the pair value here, which maps external ID to account, and the account can be missing.",
+      "parentUuid": "4112bb35_3abe365e",
+      "range": {
+        "startLine": 566,
+        "startChar": 24,
+        "endLine": 566,
+        "endChar": 49
+      },
+      "revId": "e8d854cc362a53a11f50da47b0bc1b2be309090d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "66449b17_18fed240",
@@ -77,6 +125,30 @@
       "writtenOn": "2021-05-07T10:46:26Z",
       "side": 1,
       "message": "nit: primary",
+      "range": {
+        "startLine": 727,
+        "startChar": 26,
+        "endLine": 727,
+        "endChar": 32
+      },
+      "revId": "e8d854cc362a53a11f50da47b0bc1b2be309090d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c41ebe9a_383e7019",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolver.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 727,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-07T13:26:35Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "66449b17_18fed240",
       "range": {
         "startLine": 727,
         "startChar": 26,
