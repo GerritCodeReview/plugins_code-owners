@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4eb1ed2b_f0b42086",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-07T06:45:05Z",
+      "side": 1,
+      "message": "Something wrong with the CI. Verifying manually.",
+      "revId": "a9d8e3e57842cd8dba38b2ea3fc1cb7480d8b792",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
