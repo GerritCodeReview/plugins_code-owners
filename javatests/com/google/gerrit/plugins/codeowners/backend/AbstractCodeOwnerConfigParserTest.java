@@ -366,6 +366,25 @@ public abstract class AbstractCodeOwnerConfigParserTest extends AbstractCodeOwne
   }
 
   @Test
+  public void setCodeOwnerSetsWithGlobPathExpression() throws Exception {
+    CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
+    CodeOwnerSet codeOwnerSet2 =
+        CodeOwnerSet.builder()
+            .addPathExpression("{foo,bar}/**/baz[1-5]/a[,]b*.md")
+            .addCodeOwnerEmail(EMAIL_2)
+            .build();
+    assertParseAndFormat(
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig)
+              .hasCodeOwnerSetsThat()
+              .containsExactly(codeOwnerSet1, codeOwnerSet2)
+              .inOrder();
+        },
+        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
+  }
+
+  @Test
   public void setMultipleCodeOwnerSetsWithPathExpressions() throws Exception {
     CodeOwnerSet codeOwnerSet1 =
         CodeOwnerSet.builder()
