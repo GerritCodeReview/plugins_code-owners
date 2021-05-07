@@ -138,7 +138,7 @@ public class CodeOwnersPluginGlobalConfigSnapshot {
               .getString(KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE),
           pluginName,
           KEY_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
-      return Optional.empty();
+      return Optional.of(DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
     }
   }
 }
