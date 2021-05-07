@@ -40,13 +40,23 @@ See [below](#examples) for examples.
 
 | To Match | Glob | find-owners | Simple Path Expression |
 | -------- | ---- | ----------- | ---------------------- |
-| Concrete file in current folder | `BUILD` | not possible | `BUILD` |
-| File type in current folder | `*.md` | not possible | `*.md` |
+| Concrete file in current folder | `BUILD` | not possible (1) | `BUILD` |
+| File type in current folder | `*.md` | not possible (1) | `*.md` |
 | Concrete file in the current folder and in all subfolders | `{**/,}BUILD` | `BUILD` | needs 2 expressions: `BUILD` + `.../BUILD` |
 | File type in the current folder and in all subfolders | `**.md` | `*.md` or `**.md` | `....md` |
-| All files in a subfolder | `my-folder/**` | not possible, but you can add a `my-folder/OWNERS` file instead of using a glob | `my-folder/...` |
+| All files in a subfolder | `my-folder/**` | not possible (1), but you can add a `my-folder/OWNERS` file instead of using a glob | `my-folder/...` |
 | All “foo-<1-digit-number>.txt” files in all subfolders | `{**/,}foo-[0-9].txt` | `foo-[0-9].txt` |not possible |
 | All “foo-<n-digit-number>.txt” files in all subfolders | not possible | not possible | not possible
+
+(1): To be compatible with the `find-owners` plugin find-owners path expressions
+are prefixes with `{**/,}` which matches any folder (see
+[above](path-expressions.html)). This means if path expressions like  `BUILD`,
+`*.md` or `my-folder/**` are used in `OWNERS` files the effective path
+expression are `{**/,}BUILD`, `{**/,}*.md` and `{**/,}my-folder/**`. These path
+expression do not only match `BUILD`, `*.md` and `my-folder/**` directly in the
+folder that contains the `OWNERS` file but also `BUILD`, `*.md` and
+`my-folder/**` in any subfolder (e.g. `foo/bar/BUILD`, `foo/bar/baz.md` and
+`foo/bar/my-folder/`).
 
 ---
 
