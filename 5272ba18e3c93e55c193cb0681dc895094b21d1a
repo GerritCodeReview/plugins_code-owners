@@ -70,6 +70,30 @@
       },
       "revId": "5272ba18e3c93e55c193cb0681dc895094b21d1a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c3bfa0b1_dd918484",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginGlobalConfigSnapshotTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-07T07:31:06Z",
+      "side": 1,
+      "message": "Ah, got it, sorry for misunderstanding!! Yes, this makes sense. Thanks for suggesting. I fixed it here and also made a predecessor change to fix it for the other cache size config param.",
+      "parentUuid": "64cf2ed2_0e978cf2",
+      "range": {
+        "startLine": 113,
+        "startChar": 57,
+        "endLine": 113,
+        "endChar": 64
+      },
+      "revId": "5272ba18e3c93e55c193cb0681dc895094b21d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
