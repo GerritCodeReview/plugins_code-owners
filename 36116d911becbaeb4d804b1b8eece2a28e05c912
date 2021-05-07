@@ -50,6 +50,23 @@
       "message": "But there is also something broken with the CI right now, so we need to verify this manually.\nPlease submit this together with the corresponding Gerrit core change.",
       "revId": "36116d911becbaeb4d804b1b8eece2a28e05c912",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4d861019_c246b21e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1118500
+      },
+      "writtenOn": "2021-05-07T07:47:30Z",
+      "side": 1,
+      "message": "Thank you for the review!\n\nI run the tests like:\n\nbazel test plugins/code-owners/...\n\nAnd they all pass. I think that should be enough as for the validation?",
+      "revId": "36116d911becbaeb4d804b1b8eece2a28e05c912",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
