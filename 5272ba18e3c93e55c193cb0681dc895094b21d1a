@@ -46,6 +46,30 @@
       },
       "revId": "5272ba18e3c93e55c193cb0681dc895094b21d1a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "64cf2ed2_0e978cf2",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginGlobalConfigSnapshotTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-07T06:47:54Z",
+      "side": 1,
+      "message": "I\u0027m fine with representing no limit like that, that makes sense.\nI was suggesting that it should be DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE, and not \"no limit\" in case of invalid configs.",
+      "parentUuid": "a27303e6_b79b2f4b",
+      "range": {
+        "startLine": 113,
+        "startChar": 57,
+        "endLine": 113,
+        "endChar": 64
+      },
+      "revId": "5272ba18e3c93e55c193cb0681dc895094b21d1a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
