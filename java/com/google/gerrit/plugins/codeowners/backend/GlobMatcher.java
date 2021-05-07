@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.common.flogger.FluentLogger;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.regex.PatternSyntaxException;
 
 /**
  * Matcher that checks for a given path expression as Java NIO glob if it matches a given path.
@@ -47,9 +48,15 @@ public class GlobMatcher implements PathExpressionMatcher {
 
   @Override
   public boolean matches(String glob, Path relativePath) {
-    boolean isMatching =
-        FileSystems.getDefault().getPathMatcher("glob:" + glob).matches(relativePath);
-    logger.atFine().log("path %s %s matching %s", relativePath, isMatching ? "is" : "is not", glob);
-    return isMatching;
+    try {
+      boolean isMatching =
+          FileSystems.getDefault().getPathMatcher("glob:" + glob).matches(relativePath);
+      logger.atFine().log(
+          "path %s %s matching %s", relativePath, isMatching ? "is" : "is not", glob);
+      return isMatching;
+    } catch (PatternSyntaxException e) {
+      logger.atFine().log("glob %s is invalid: %s", glob, e.getMessage());
+      return false;
+    }
   }
 }
