@@ -82,4 +82,10 @@ public class GlobMatcherTest extends AbstractPathExpressionMatcherTest {
     assertMatch(pathExpression2, "foo-1.txt", "foo-2.txt");
     assertNoMatch(pathExpression2, "foo-5.txt", "foo-11.txt", "sub/foo-3.txt", "sub/sub/foo-4.txt");
   }
+
+  @Test
+  public void invalidPattern() throws Exception {
+    // the path expressions is invalid because '{' is not closed
+    assertNoMatch("{foo-[1-4].txt", "foo-1.txt", "foo-2.txt", "foo-5.txt", "foo-11.txt");
+  }
 }

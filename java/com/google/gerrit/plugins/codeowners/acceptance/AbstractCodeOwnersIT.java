@@ -78,7 +78,7 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
   protected ChangeCodeOwnersFactory changeCodeOwnersApiFactory;
   protected ProjectCodeOwnersFactory projectCodeOwnersApiFactory;
 
-  private BackendConfig backendConfig;
+  protected BackendConfig backendConfig;
 
   @Before
   public void baseSetup() throws Exception {

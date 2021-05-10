@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject.assertThatCollection;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -38,6 +39,8 @@ import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -467,6 +470,50 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
     // Check the submittable flag.
     changeInfo =
+        gApi.changes()
+            .id(changeId)
+            .get(
+                ListChangesOption.SUBMITTABLE,
+                ListChangesOption.ALL_REVISIONS,
+                ListChangesOption.CURRENT_ACTIONS);
+    assertThat(changeInfo.submittable).isTrue();
+
+    // Check the submit requirement.
+    LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
+        assertThatCollection(changeInfo.requirements).onlyElement();
+    submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
+
+    // Submit the change.
+    gApi.changes().id(changeId).current().submit();
+    assertThat(gApi.changes().id(changeId).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  public void changeIsSubmittableIfOwnersFileContainsInvalidPathExpression() throws Exception {
+    assume().that(backendConfig.getDefaultBackend()).isInstanceOf(FindOwnersBackend.class);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression("{foo") // invalid because '{' is not closed
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+
+    // Apply Code-Review+2 to satisfy the MaxWithBlock function of the Code-Review label.
+    approve(changeId);
+
+    ChangeInfo changeInfo =
         gApi.changes()
             .id(changeId)
             .get(

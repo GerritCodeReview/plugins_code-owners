@@ -753,4 +753,40 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     assertThat(FindOwnersCodeOwnerConfigParser.replaceEmail(content + "\n", oldEmail, newEmail))
         .isEqualTo(expectedContent + "\n");
   }
+
+  @Test
+  public void splitGlobs() throws Exception {
+    // empty globs
+    assertSplitGlobs("");
+    assertSplitGlobs(",", "");
+
+    // single globs
+    assertSplitGlobs("BUILD", "BUILD");
+    assertSplitGlobs("*.md", "*.md");
+    assertSplitGlobs("foo/*", "foo/*");
+    assertSplitGlobs("{foo,bar}", "{foo,bar}");
+    assertSplitGlobs("{foo,bar}/**", "{foo,bar}/**");
+    assertSplitGlobs("{{foo,bar}}", "{{foo,bar}}");
+    assertSplitGlobs("foo[1-5]", "foo[1-5]");
+    assertSplitGlobs("a[,]b", "a[,]b");
+    assertSplitGlobs("a[[,]]b", "a[[,]]b");
+
+    // multiple globs
+    assertSplitGlobs("BUILD,*.md,foo/*", "BUILD", "*.md", "foo/*");
+    assertSplitGlobs(
+        "{foo,bar},{foo,bar}/**,{{foo,bar}}", "{foo,bar}", "{foo,bar}/**", "{{foo,bar}}");
+    assertSplitGlobs("foo[1-5],a[,]b,a[[,]]b", "foo[1-5]", "a[,]b", "a[[,]]b");
+    assertSplitGlobs("a[,]b,{foo,bar}", "a[,]b", "{foo,bar}");
+
+    // invalid globs
+    assertSplitGlobs("{foo,bar", "{foo,bar");
+    assertSplitGlobs("[abc,", "[abc,");
+    assertSplitGlobs("{foo,bar,a[,]b", "{foo,bar,a[,]b");
+  }
+
+  private static void assertSplitGlobs(String commaSeparatedGlobs, String... expectedGlobs) {
+    assertThat(FindOwnersCodeOwnerConfigParser.Parser.splitGlobs(commaSeparatedGlobs))
+        .asList()
+        .containsExactlyElementsIn(expectedGlobs);
+  }
 }

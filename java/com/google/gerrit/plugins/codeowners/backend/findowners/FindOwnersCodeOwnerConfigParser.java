@@ -126,7 +126,8 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     return Joiner.on("\n").join(updatedLines);
   }
 
-  private static class Parser implements ValidationError.Sink {
+  @VisibleForTesting
+  static class Parser implements ValidationError.Sink {
     private static final String COMMA = "[\\s]*,[\\s]*";
 
     // Separator for project and file paths in an include line.
@@ -241,7 +242,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
       String[] globsAndOwners =
           new String[] {removeExtraSpaces(m.group(1)), removeExtraSpaces(m.group(2))};
-      String[] dirGlobs = globsAndOwners[0].split(COMMA, -1);
+      String[] dirGlobs = splitGlobs(globsAndOwners[0]);
       String directive = globsAndOwners[1];
       if (directive.equals(TOK_SET_NOPARENT)) {
         return CodeOwnerSet.builder()
@@ -264,6 +265,58 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
           .setCodeOwners(
               ownerEmails.stream().map(CodeOwnerReference::create).collect(toImmutableSet()))
           .build();
+    }
+
+    /**
+     * Splits the given glob string by the commas that separate the globs.
+     *
+     * <p>Commas that appear within a glob do not cause the string to be split at this position:
+     *
+     * <ul>
+     *   <li>commas that are used as separator when matching choices via {@code {choice1,choice2}}
+     *   <li>commas that appears as part of a character class via {@code
+     *       [<any-chars-including-comma>]}
+     * </ul>
+     *
+     * @param commaSeparatedGlobs globs as comma-separated list
+     * @return the globs as array
+     */
+    @VisibleForTesting
+    static String[] splitGlobs(String commaSeparatedGlobs) {
+      ArrayList<String> globList = new ArrayList<>();
+      StringBuilder nextGlob = new StringBuilder();
+      int curlyBracesIndentionLevel = 0;
+      int squareBracesIndentionLevel = 0;
+      for (int i = 0; i < commaSeparatedGlobs.length(); i++) {
+        char c = commaSeparatedGlobs.charAt(i);
+        if (c == ',') {
+          if (curlyBracesIndentionLevel == 0 && squareBracesIndentionLevel == 0) {
+            globList.add(nextGlob.toString());
+            nextGlob = new StringBuilder();
+          } else {
+            nextGlob.append(c);
+          }
+        } else {
+          nextGlob.append(c);
+          if (c == '{') {
+            curlyBracesIndentionLevel++;
+          } else if (c == '}') {
+            if (curlyBracesIndentionLevel > 0) {
+              curlyBracesIndentionLevel--;
+            }
+          } else if (c == '[') {
+            squareBracesIndentionLevel++;
+          } else if (c == ']') {
+            if (squareBracesIndentionLevel > 0) {
+              squareBracesIndentionLevel--;
+            }
+          }
+        }
+      }
+      if (nextGlob.length() > 0) {
+        globList.add(nextGlob.toString());
+      }
+      return globList.toArray(new String[globList.size()]);
     }
 
     private static boolean isComment(String line) {
