@@ -232,8 +232,8 @@ endpoint or by touching the change (e.g. by adding a comment).
 <a id="pluginCodeOwnersExemptedUser">plugin.@PLUGIN@.exemptedUser</a>
 :       The email of a user that should be exempted from requiring code owner
         approvals.\
-        If a user is exempted from requiring code owner approvals changes that
-        are uploaded by this user are automatically code-owner approved.\
+        If a user is exempted from requiring code owner approvals patch sets
+        that are uploaded by this user are automatically code-owner approved.\
         Can be specified multiple times to exempt multiple users.\
         The configured value list can be extended on project-level by setting
         [codeOwners.exemptedUser](#codeOwnersExemptedUser) in
@@ -699,8 +699,8 @@ endpoint or by touching the change (e.g. by adding a comment).
 <a id="codeOwnersExemptedUser">codeOwners.exemptedUser</a>
 :       The email of a user that should be exempted from requiring code owner
         approvals.\
-        If a user is exempted from requiring code owner approvals changes that
-        are uploaded by this user are automatically code-owner approved.\
+        If a user is exempted from requiring code owner approvals patch sets
+        that are uploaded by this user are automatically code-owner approved.\
         Can be specified multiple times to exempt multiple users.\
         Extends the global setting
         [plugin.@PLUGIN@.exemptedUser](#pluginCodeOwnersExemptedUser) in
