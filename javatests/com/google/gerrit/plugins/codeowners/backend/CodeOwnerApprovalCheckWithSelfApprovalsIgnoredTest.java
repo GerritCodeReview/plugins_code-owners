@@ -27,6 +27,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
@@ -127,7 +128,13 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     // current patch set).
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id()))));
   }
 
   @Test
@@ -240,7 +247,13 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     // Verify that the file is approved.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "implicitly approved by the patch set uploader %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(codeOwner.id()))));
   }
 
   @Test
@@ -327,7 +340,9 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     // current patch set and hence the override counts).
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path, CodeOwnerStatus.APPROVED, "override approval is present"));
   }
 
   @Test

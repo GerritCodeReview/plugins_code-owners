@@ -30,6 +30,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
@@ -99,7 +100,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a global code owner",
+                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -142,14 +149,23 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
       amendChange(projectOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a global code"
+                      + " owner",
+                  ChangeMessagesUtil.getAccountTemplate(bot.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -178,7 +194,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a global code owner",
+                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
 
     // Let the bot approve the change.
     projectOperations
@@ -193,7 +215,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a global code owner",
+                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -219,7 +247,14 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a global code owner"
+                        + " (all users are global code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -262,14 +297,23 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
       amendChange(otherProjectOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a global code owner"
+                      + " (all users are global code owners)",
+                  ChangeMessagesUtil.getAccountTemplate(projectOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -293,7 +337,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     // Check that the status of the file is PENDING now.
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a global code owner (all users are global code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -340,7 +390,14 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a fallback code owner"
+                        + " (all project owners are fallback code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -357,7 +414,14 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a fallback code owner"
+                        + " (all project owners are fallback code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -395,14 +459,23 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
       amendChange(user, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a fallback code"
+                      + " owner (all project owners are fallback code owners)",
+                  ChangeMessagesUtil.getAccountTemplate(projectOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -460,8 +533,10 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
+            FileCodeOwnerStatus.addition(
+                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+            FileCodeOwnerStatus.addition(
+                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
   }
 
   @Test
@@ -503,8 +578,10 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
+            FileCodeOwnerStatus.addition(
+                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+            FileCodeOwnerStatus.addition(
+                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
 
     // Delete the override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
@@ -523,8 +600,10 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
+            FileCodeOwnerStatus.addition(
+                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+            FileCodeOwnerStatus.addition(
+                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
   }
 
   @Test
@@ -568,7 +647,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a default code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)
