@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowLabel;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThatCollection;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
@@ -25,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.GitUtil;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
@@ -32,9 +34,12 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
+import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
+import com.google.gerrit.extensions.client.ChangeStatus;
+import com.google.gerrit.extensions.client.SubmitType;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
@@ -1911,6 +1916,61 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // Check that the file is no longer approved since the uploader is not exempted from requiring
     // code owner approvals.
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  @TestProjectInput(submitType = SubmitType.REBASE_ALWAYS)
+  public void implicitApproval_rebaseAlways() throws Exception {
+    TestAccount changeOwner = admin;
+    setAsRootCodeOwners(changeOwner);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+
+    // The change is implicitly approved because the change owner and uploader is a code owner.
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+
+    // Allow all users to approve and submit changes.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Code-Review")
+                .range(0, 2)
+                .ref("refs/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .add(allow(Permission.SUBMIT).ref("refs/*").group(REGISTERED_USERS))
+        .update();
+
+    // Add a Code-Review+2 vote from a non code owner to satisfy the submit requirement for the
+    // Code-Review label.
+    requestScopeOperations.setApiUser(user.id());
+    approve(changeId);
+
+    // Submit the change as a non code owner.
+    gApi.changes().id(changeId).current().submit();
+
+    ChangeInfo changeInfo = gApi.changes().id(changeId).get();
+    assertThat(changeInfo.status).isEqualTo(ChangeStatus.MERGED);
+
+    // Since the submit type is REBASE_ALWAYS we expect that a new patch set was added that has the
+    // submitter as uploader.
+    assertThat(changeInfo.revisions).hasSize(2);
+    assertThat(changeInfo.revisions.get(changeInfo.currentRevision).uploader._accountId)
+        .isEqualTo(user.id().get());
+
+    // Asking for the code owner status now reports the file with status INSUFFICIENT_REVIEWERS
+    // because the implicit approval does not apply to the newly created patch set (since the
+    // uploader of the latest patch set is not a code owner and doesn't match the change owner).
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
