@@ -47,6 +47,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -217,7 +218,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -241,7 +248,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.modification(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.modification(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -262,7 +275,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.deletion(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -301,12 +320,21 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               FileCodeOwnerStatus.rename(
                   oldPath,
                   CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id())),
                   newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                  /* reasonNewPath= */ null));
     } else {
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
+              FileCodeOwnerStatus.deletion(
+                  oldPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
     }
   }
@@ -347,13 +375,22 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               FileCodeOwnerStatus.rename(
                   oldPath,
                   CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                  /* reasonOldPath= */ null,
                   newPath,
-                  CodeOwnerStatus.PENDING));
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
     } else {
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
               FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.PENDING));
+              FileCodeOwnerStatus.addition(
+                  newPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
     }
   }
 
@@ -371,7 +408,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -390,7 +433,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.modification(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.modification(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -406,7 +455,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.deletion(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -441,12 +496,21 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               FileCodeOwnerStatus.rename(
                   oldPath,
                   CodeOwnerStatus.APPROVED,
+                  String.format(
+                      "approved by %s who is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id())),
                   newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                  /* reasonNewPath= */ null));
     } else {
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.APPROVED),
+              FileCodeOwnerStatus.deletion(
+                  oldPath,
+                  CodeOwnerStatus.APPROVED,
+                  String.format(
+                      "approved by %s who is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
     }
   }
@@ -483,13 +547,22 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               FileCodeOwnerStatus.rename(
                   oldPath,
                   CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                  /* reasonOldPath= */ null,
                   newPath,
-                  CodeOwnerStatus.APPROVED));
+                  CodeOwnerStatus.APPROVED,
+                  String.format(
+                      "approved by %s who is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
     } else {
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
               FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.APPROVED));
+              FileCodeOwnerStatus.addition(
+                  newPath,
+                  CodeOwnerStatus.APPROVED,
+                  String.format(
+                      "approved by %s who is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
     }
   }
 
@@ -533,14 +606,22 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       amendChange(otherCodeOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a code owner",
+                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -585,14 +666,22 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       amendChange(otherCodeOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.modification(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a code owner",
+                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.modification(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.modification(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -634,14 +723,22 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       amendChange(otherCodeOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.deletion(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a code owner",
+                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.deletion(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -730,23 +827,46 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     if (useDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+      FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+      if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+        expectedFileCodeOwnerStatus =
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "implicitly approved by the patch set uploader %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())),
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                /* reasonNewPath= */ null);
+      } else {
+        expectedFileCodeOwnerStatus =
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+      }
+
+      assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
     } else {
+      FileCodeOwnerStatus expectedFileDeletionCodeOwnerStatus;
+      if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+        expectedFileDeletionCodeOwnerStatus =
+            FileCodeOwnerStatus.deletion(
+                oldPath,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "implicitly approved by the patch set uploader %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+      } else {
+        expectedFileDeletionCodeOwnerStatus =
+            FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+      }
+
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
-              FileCodeOwnerStatus.deletion(
-                  oldPath,
-                  implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+              expectedFileDeletionCodeOwnerStatus,
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
     }
   }
@@ -838,24 +958,47 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     if (useDiffCache) {
-      assertThatCollection(fileCodeOwnerStatuses)
-          .containsExactly(
-              FileCodeOwnerStatus.rename(
-                  oldPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                  newPath,
-                  implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+      FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+      if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+        expectedFileCodeOwnerStatus =
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                /* reasonOldPath= */ null,
+                newPath,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "implicitly approved by the patch set uploader %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+      } else {
+        expectedFileCodeOwnerStatus =
+            FileCodeOwnerStatus.rename(
+                oldPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                newPath,
+                CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+      }
+
+      assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
     } else {
+      FileCodeOwnerStatus expectedAddtitionFileCodeOwnerStatus;
+      if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+        expectedAddtitionFileCodeOwnerStatus =
+            FileCodeOwnerStatus.addition(
+                newPath,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "implicitly approved by the patch set uploader %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+      } else {
+        expectedAddtitionFileCodeOwnerStatus =
+            FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+      }
+
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
               FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.addition(
-                  newPath,
-                  implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                      ? CodeOwnerStatus.APPROVED
-                      : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+              expectedAddtitionFileCodeOwnerStatus);
     }
   }
 
@@ -908,7 +1051,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner (all users are code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -957,14 +1106,23 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       amendChange(otherCodeOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a code owner"
+                      + " (all users are code owners)",
+                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -996,7 +1154,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // Check that the status of the file is PENDING now.
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner (all users are code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1031,7 +1195,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a global code owner",
+                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -1082,14 +1252,23 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       amendChange(otherBot, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a global code"
+                      + " owner",
+                  ChangeMessagesUtil.getAccountTemplate(bot.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -1118,7 +1297,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a global code owner",
+                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
 
     // Let the bot approve the change.
     projectOperations
@@ -1133,7 +1318,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a global code owner",
+                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -1159,7 +1350,14 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a global code owner"
+                        + " (all users are global code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1201,14 +1399,23 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       amendChange(otherCodeOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a global code owner"
+                      + " (all users are global code owners)",
+                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -1232,7 +1439,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // Check that the status of the file is PENDING now.
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a global code owner (all users are global code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1261,7 +1474,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // The expected status is APPROVED since 'user' which is configured as code owner on the root
     // level approved the change.
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1299,8 +1518,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
+            FileCodeOwnerStatus.addition(
+                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+            FileCodeOwnerStatus.addition(
+                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
   }
 
   @Test
@@ -1341,8 +1562,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
+            FileCodeOwnerStatus.addition(
+                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+            FileCodeOwnerStatus.addition(
+                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
 
     // Delete the override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
@@ -1361,8 +1584,10 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
+            FileCodeOwnerStatus.addition(
+                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+            FileCodeOwnerStatus.addition(
+                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
   }
 
   @Test
@@ -1527,7 +1752,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
 
     // Change some other file ('user' who uploads the change is a code owner and hence owner
     // approvals are implicit for this change)
@@ -1547,7 +1778,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // Check that the file is still approved.
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1579,7 +1816,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path, CodeOwnerStatus.APPROVED, "override approval is present"));
 
     // Change some other file and submit the change with an override.
     String changeId2 =
@@ -1598,7 +1837,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // Check that the file is still approved.
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path, CodeOwnerStatus.APPROVED, "override approval is present"));
   }
 
   @Test
@@ -1633,7 +1874,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1679,7 +1926,9 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path, CodeOwnerStatus.APPROVED, "override approval is present"));
   }
 
   @Test
@@ -1713,7 +1962,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a default code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1756,14 +2011,22 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
       amendChange(otherCodeOwner, changeId);
     }
 
+    FileCodeOwnerStatus expectedFileCodeOwnerStatus;
+    if (implicitApprovalsEnabled && uploaderMatchesChangeOwner) {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(
+              path,
+              CodeOwnerStatus.APPROVED,
+              String.format(
+                  "implicitly approved by the patch set uploader %s who is a default code owner",
+                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+    } else {
+      expectedFileCodeOwnerStatus =
+          FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    }
+
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(
-            FileCodeOwnerStatus.addition(
-                path,
-                implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                    ? CodeOwnerStatus.APPROVED
-                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThatCollection(fileCodeOwnerStatuses).containsExactly(expectedFileCodeOwnerStatus);
   }
 
   @Test
@@ -1791,7 +2054,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a default code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
 
     // Let the default code owner approve the change.
     projectOperations
@@ -1806,7 +2075,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a default code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1848,7 +2123,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses =
         getFileCodeOwnerStatuses(changeIdOfRevert);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.deletion(
+                path,
+                CodeOwnerStatus.APPROVED,
+                "change is a pure revert and is exempted from requiring code owner approvals"));
   }
 
   @Test
@@ -1904,7 +2183,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // approvals.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "patch set uploader %s is exempted from requiring code owner approvals",
+                    ChangeMessagesUtil.getAccountTemplate(exemptedUser.id()))));
 
     // Amend the change by another user, so that the other non-exempted user becomes the last
     // uploader.
@@ -1932,7 +2217,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     // The change is implicitly approved because the change owner and uploader is a code owner.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "implicitly approved by the patch set uploader %s who is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id()))));
 
     // Allow all users to approve and submit changes.
     projectOperations

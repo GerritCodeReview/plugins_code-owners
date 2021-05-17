@@ -30,6 +30,7 @@ import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.metrics.Timer0;
@@ -40,6 +41,7 @@ import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.ApprovalsUtil;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.PureRevertCache;
 import com.google.gerrit.server.notedb.ChangeNotes;
@@ -295,7 +297,12 @@ public class CodeOwnerApprovalCheck {
         logger.atFine().log(
             "patch set uploader %d is exempted from requiring code owner approvals",
             patchSetUploader.get());
-        return getAllPathsAsApproved(changeNotes, changeNotes.getCurrentPatchSet());
+        return getAllPathsAsApproved(
+            changeNotes,
+            changeNotes.getCurrentPatchSet(),
+            String.format(
+                "patch set uploader %s is exempted from requiring code owner approvals",
+                ChangeMessagesUtil.getAccountTemplate(patchSetUploader)));
       }
 
       boolean arePureRevertsExempted = codeOwnersConfig.arePureRevertsExempted();
@@ -303,7 +310,10 @@ public class CodeOwnerApprovalCheck {
       if (arePureRevertsExempted && isPureRevert(changeNotes)) {
         logger.atFine().log(
             "change is a pure revert and is exempted from requiring code owner approvals");
-        return getAllPathsAsApproved(changeNotes, changeNotes.getCurrentPatchSet());
+        return getAllPathsAsApproved(
+            changeNotes,
+            changeNotes.getCurrentPatchSet(),
+            "change is a pure revert and is exempted from requiring code owner approvals");
       }
 
       boolean implicitApprovalConfig = codeOwnersConfig.areImplicitApprovalsEnabled();
@@ -457,8 +467,9 @@ public class CodeOwnerApprovalCheck {
   }
 
   private Stream<FileCodeOwnerStatus> getAllPathsAsApproved(
-      ChangeNotes changeNotes, PatchSet patchSet)
+      ChangeNotes changeNotes, PatchSet patchSet, String reason)
       throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
+    logger.atFine().log("all paths are approved (reason = %s)", reason);
     return changedFiles.getOrCompute(changeNotes.getProjectName(), patchSet.commitId()).stream()
         .map(
             changedFile ->
@@ -468,12 +479,14 @@ public class CodeOwnerApprovalCheck {
                         .newPath()
                         .map(
                             newPath ->
-                                PathCodeOwnerStatus.create(newPath, CodeOwnerStatus.APPROVED)),
+                                PathCodeOwnerStatus.create(
+                                    newPath, CodeOwnerStatus.APPROVED, reason)),
                     changedFile
                         .oldPath()
                         .map(
                             oldPath ->
-                                PathCodeOwnerStatus.create(oldPath, CodeOwnerStatus.APPROVED))));
+                                PathCodeOwnerStatus.create(
+                                    oldPath, CodeOwnerStatus.APPROVED, reason))));
   }
 
   private FileCodeOwnerStatus getFileStatus(
@@ -559,20 +572,31 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log(
           "the status for path %s is %s since an override is present",
           absolutePath, CodeOwnerStatus.APPROVED.name());
-      return PathCodeOwnerStatus.create(absolutePath, CodeOwnerStatus.APPROVED);
+      return PathCodeOwnerStatus.create(
+          absolutePath, CodeOwnerStatus.APPROVED, "override approval is present");
     }
 
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    AtomicReference<String> reason = new AtomicReference<>(/* initialValue= */ null);
 
-    if (isApproved(absolutePath, globalCodeOwners, approverAccountIds, implicitApprover)) {
-      logger.atFine().log("%s was approved by a global code owner", absolutePath);
+    if (isApproved(
+        absolutePath,
+        globalCodeOwners,
+        CodeOwnerKind.GLOBAL_CODE_OWNER,
+        approverAccountIds,
+        implicitApprover,
+        reason)) {
       codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
     } else {
       logger.atFine().log("%s was not approved by a global code owner", absolutePath);
 
-      if (isPending(absolutePath, globalCodeOwners, reviewerAccountIds)) {
-        logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
+      if (isPending(
+          absolutePath,
+          globalCodeOwners,
+          CodeOwnerKind.GLOBAL_CODE_OWNER,
+          reviewerAccountIds,
+          reason)) {
         codeOwnerStatus.set(CodeOwnerStatus.PENDING);
       }
 
@@ -584,11 +608,18 @@ public class CodeOwnerApprovalCheck {
           absolutePath,
           (PathCodeOwnersVisitor)
               pathCodeOwners -> {
+                CodeOwnerKind codeOwnerKind =
+                    RefNames.REFS_CONFIG.equals(pathCodeOwners.getCodeOwnerConfig().key().ref())
+                        ? CodeOwnerKind.DEFAULT_CODE_OWNER
+                        : CodeOwnerKind.REGULAR_CODE_OWNER;
+
                 CodeOwnerResolverResult codeOwners =
                     resolveCodeOwners(codeOwnerResolver, pathCodeOwners);
                 logger.atFine().log(
-                    "code owners = %s (code owner config folder path = %s, file name = %s)",
+                    "code owners = %s (code owner kind = %s, code owner config folder path = %s,"
+                        + " file name = %s)",
                     codeOwners,
+                    codeOwnerKind,
                     pathCodeOwners.getCodeOwnerConfig().key().folderPath(),
                     pathCodeOwners.getCodeOwnerConfig().key().fileName().orElse("<default>"));
 
@@ -596,10 +627,17 @@ public class CodeOwnerApprovalCheck {
                   hasRevelantCodeOwnerDefinitions.set(true);
                 }
 
-                if (isApproved(absolutePath, codeOwners, approverAccountIds, implicitApprover)) {
+                if (isApproved(
+                    absolutePath,
+                    codeOwners,
+                    codeOwnerKind,
+                    approverAccountIds,
+                    implicitApprover,
+                    reason)) {
                   codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
                   return false;
-                } else if (isPending(absolutePath, codeOwners, reviewerAccountIds)) {
+                } else if (isPending(
+                    absolutePath, codeOwners, codeOwnerKind, reviewerAccountIds, reason)) {
                   codeOwnerStatus.set(CodeOwnerStatus.PENDING);
 
                   // We need to continue to check if any of the higher-level code owners approved
@@ -632,7 +670,8 @@ public class CodeOwnerApprovalCheck {
                 reviewerAccountIds,
                 approverAccountIds,
                 fallbackCodeOwners,
-                absolutePath);
+                absolutePath,
+                reason);
         // Merge codeOwnerStatusForFallbackCodeOwners into codeOwnerStatus:
         // * codeOwnerStatus is the code owner status without taking fallback code owners into
         //   account
@@ -658,8 +697,11 @@ public class CodeOwnerApprovalCheck {
       }
     }
 
+    logger.atFine().log(
+        "%s has code owner status %s (reason = %s)",
+        absolutePath, codeOwnerStatus.get(), reason.get() != null ? reason.get() : "n/a");
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get());
+        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get(), reason.get());
     logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
     return pathCodeOwnerStatus;
   }
@@ -673,65 +715,88 @@ public class CodeOwnerApprovalCheck {
       @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
-      Path absolutePath) {
+      Path absolutePath,
+      AtomicReference<String> reason) {
     logger.atFine().log(
         "computing code owner status for %s with project owners as fallback code owners",
         absolutePath);
 
     CodeOwnerStatus codeOwnerStatus = CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
-    if (isApprovedByProjectOwner(
-        branch.project(), absolutePath, approverAccountIds, implicitApprover)) {
+    if (isApprovedByProjectOwner(branch.project(), approverAccountIds, implicitApprover, reason)) {
       codeOwnerStatus = CodeOwnerStatus.APPROVED;
-    } else if (isPendingByProjectOwner(branch.project(), absolutePath, reviewerAccountIds)) {
+    } else if (isPendingByProjectOwner(branch.project(), reviewerAccountIds, reason)) {
       codeOwnerStatus = CodeOwnerStatus.PENDING;
     }
 
-    logger.atFine().log("codeOwnerStatus = %s", codeOwnerStatus);
     return codeOwnerStatus;
   }
 
   private boolean isApprovedByProjectOwner(
       Project.NameKey projectName,
-      Path absolutePath,
       ImmutableSet<Account.Id> approverAccountIds,
-      @Nullable Account.Id implicitApprover) {
+      @Nullable Account.Id implicitApprover,
+      AtomicReference<String> reason) {
     return (implicitApprover != null
-            && isImplicitlyApprovedByProjectOwner(projectName, absolutePath, implicitApprover))
-        || isExplicitlyApprovedByProjectOwner(projectName, absolutePath, approverAccountIds);
+            && isImplicitlyApprovedByProjectOwner(projectName, implicitApprover, reason))
+        || isExplicitlyApprovedByProjectOwner(projectName, approverAccountIds, reason);
   }
 
   private boolean isImplicitlyApprovedByProjectOwner(
-      Project.NameKey projectName, Path absolutePath, Account.Id implicitApprover) {
+      Project.NameKey projectName, Account.Id implicitApprover, AtomicReference<String> reason) {
     requireNonNull(implicitApprover, "implicitApprover");
     if (isProjectOwner(projectName, implicitApprover)) {
       // The uploader of the patch set is a project owner and thus a code owner. This means there
       // is an implicit code owner approval from the patch set uploader so that the path is
       // automatically approved.
-      logger.atFine().log(
-          "%s was implicitly approved by the patch set uploader who is a project owner",
-          absolutePath);
+      reason.set(
+          String.format(
+              "implicitly approved by the patch set uploader %s who is a %s"
+                  + " (all project owners are %ss)",
+              ChangeMessagesUtil.getAccountTemplate(implicitApprover),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return true;
     }
     return false;
   }
 
   private boolean isExplicitlyApprovedByProjectOwner(
-      Project.NameKey projectName, Path absolutePath, ImmutableSet<Account.Id> approverAccountIds) {
-    if (approverAccountIds.stream()
-        .anyMatch(approverAccountId -> isProjectOwner(projectName, approverAccountId))) {
+      Project.NameKey projectName,
+      ImmutableSet<Account.Id> approverAccountIds,
+      AtomicReference<String> reason) {
+    Optional<Account.Id> approver =
+        approverAccountIds.stream()
+            .filter(approverAccountId -> isProjectOwner(projectName, approverAccountId))
+            .findAny();
+    if (approver.isPresent()) {
       // At least one of the approvers is a project owner and thus a code owner.
-      logger.atFine().log("%s was approved by a project owner", absolutePath);
+      reason.set(
+          String.format(
+              "approved by %s who is a %s (all project owners are %ss)",
+              ChangeMessagesUtil.getAccountTemplate(approver.get()),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return true;
     }
     return false;
   }
 
   private boolean isPendingByProjectOwner(
-      Project.NameKey projectName, Path absolutePath, ImmutableSet<Account.Id> reviewerAccountIds) {
-    if (reviewerAccountIds.stream()
-        .anyMatch(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))) {
+      Project.NameKey projectName,
+      ImmutableSet<Account.Id> reviewerAccountIds,
+      AtomicReference<String> reason) {
+    Optional<Account.Id> reviewer =
+        reviewerAccountIds.stream()
+            .filter(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))
+            .findAny();
+    if (reviewer.isPresent()) {
       // At least one of the reviewers is a project owner and thus a code owner.
-      logger.atFine().log("%s is owned by a reviewer who is project owner", absolutePath);
+      reason.set(
+          String.format(
+              "reviewer %s is a %s (all project owners are %ss)",
+              ChangeMessagesUtil.getAccountTemplate(reviewer.get()),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return true;
     }
 
@@ -748,7 +813,8 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       FallbackCodeOwners fallbackCodeOwners,
-      Path absolutePath) {
+      Path absolutePath,
+      AtomicReference<String> reason) {
     logger.atFine().log(
         "getting code owner status for fallback code owners (fallback code owners = %s)",
         fallbackCodeOwners);
@@ -758,10 +824,10 @@ public class CodeOwnerApprovalCheck {
         return codeOwnerStatus;
       case PROJECT_OWNERS:
         return getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
-            branch, implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath);
+            branch, implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath, reason);
       case ALL_USERS:
         return getCodeOwnerStatusIfAllUsersAreCodeOwners(
-            implicitApprover != null, reviewerAccountIds, approverAccountIds, absolutePath);
+            implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath, reason);
     }
 
     throw new CodeOwnersInternalServerErrorException(
@@ -770,26 +836,44 @@ public class CodeOwnerApprovalCheck {
 
   /** Computes the code owner status for the given path assuming that all users are code owners. */
   private CodeOwnerStatus getCodeOwnerStatusIfAllUsersAreCodeOwners(
-      boolean enableImplicitApprovalFromUploader,
+      @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
-      Path absolutePath) {
+      Path absolutePath,
+      AtomicReference<String> reason) {
     logger.atFine().log(
         "getting code owner status for fallback code owners (all users are fallback code owners)");
 
-    if (enableImplicitApprovalFromUploader) {
-      logger.atFine().log(
-          "%s was implicitly approved by the patch set uploader since the uploader is a fallback"
-              + " code owner",
-          absolutePath);
+    if (implicitApprover != null) {
+      reason.set(
+          String.format(
+              "implicitly approved by the patch set uploader %s who is a %s"
+                  + " (all users are %ss)",
+              ChangeMessagesUtil.getAccountTemplate(implicitApprover),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return CodeOwnerStatus.APPROVED;
     }
 
     if (!approverAccountIds.isEmpty()) {
-      logger.atFine().log("%s was approved by a fallback code owner", absolutePath);
+      Optional<Account.Id> approver = approverAccountIds.stream().findAny();
+      checkState(approver.isPresent(), "no approver found");
+      reason.set(
+          String.format(
+              "approved by %s who is a %s (all users are %ss)",
+              ChangeMessagesUtil.getAccountTemplate(approver.get()),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return CodeOwnerStatus.APPROVED;
     } else if (!reviewerAccountIds.isEmpty()) {
-      logger.atFine().log("%s has a fallback code owner as reviewer", absolutePath);
+      Optional<Account.Id> reviewer = reviewerAccountIds.stream().findAny();
+      checkState(reviewer.isPresent(), "no reviewer found");
+      reason.set(
+          String.format(
+              "reviewer %s is a %s (all users are %ss)",
+              ChangeMessagesUtil.getAccountTemplate(reviewer.get()),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
+              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return CodeOwnerStatus.PENDING;
     }
 
@@ -797,38 +881,100 @@ public class CodeOwnerApprovalCheck {
     return CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
   }
 
+  /**
+   * Checks whether the given path was implicitly or explicitly approved.
+   *
+   * @param absolutePath the path of the file for which the code owner approval is checked
+   * @param codeOwners users that own the path
+   * @param codeOwnerKind the kind of the given {@code codeOwners}
+   * @param approverAccountIds the IDs of the accounts that have approved the change
+   * @param implicitApprover the ID of the account the could be an implicit approver (aka last patch
+   *     set uploader)
+   * @param reason {@link AtomicReference} on which the reason is being set if the path is approved
+   * @return whether the path was approved
+   */
   private boolean isApproved(
       Path absolutePath,
       CodeOwnerResolverResult codeOwners,
+      CodeOwnerKind codeOwnerKind,
       ImmutableSet<Account.Id> approverAccountIds,
-      @Nullable Account.Id implicitApprover) {
+      @Nullable Account.Id implicitApprover,
+      AtomicReference<String> reason) {
     if (implicitApprover != null) {
       if (codeOwners.codeOwnersAccountIds().contains(implicitApprover)
           || codeOwners.ownedByAllUsers()) {
         // If the uploader of the patch set owns the path, there is an implicit code owner
         // approval from the patch set uploader so that the path is automatically approved.
-        logger.atFine().log("%s was implicitly approved by the patch set uploader", absolutePath);
+        reason.set(
+            String.format(
+                "implicitly approved by the patch set uploader %s who is a %s%s",
+                ChangeMessagesUtil.getAccountTemplate(implicitApprover),
+                codeOwnerKind.getDisplayName(),
+                codeOwners.ownedByAllUsers()
+                    ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())
+                    : ""));
         return true;
       }
     }
 
     if (!Collections.disjoint(approverAccountIds, codeOwners.codeOwnersAccountIds())
         || (codeOwners.ownedByAllUsers() && !approverAccountIds.isEmpty())) {
-      // At least one of the global code owners approved the change.
-      logger.atFine().log("%s was explicitly approved by a code owner", absolutePath);
+      // At least one of the code owners approved the change.
+      Optional<Account.Id> approver =
+          codeOwners.ownedByAllUsers()
+              ? approverAccountIds.stream().findAny()
+              : approverAccountIds.stream()
+                  .filter(accountId -> codeOwners.codeOwnersAccountIds().contains(accountId))
+                  .findAny();
+      checkState(approver.isPresent(), "no approver found");
+      reason.set(
+          String.format(
+              "approved by %s who is a %s%s",
+              ChangeMessagesUtil.getAccountTemplate(approver.get()),
+              codeOwnerKind.getDisplayName(),
+              codeOwners.ownedByAllUsers()
+                  ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())
+                  : ""));
       return true;
     }
 
     return false;
   }
 
+  /**
+   * Checks whether any of the reviewers is a code owner of the path.
+   *
+   * @param absolutePath the path of the file for which the code owner status is checked
+   * @param codeOwners users that own the path
+   * @param codeOwnerKind the kind of the given {@code codeOwners}
+   * @param reviewerAccountIds the IDs of the accounts that are reviewer of the change
+   * @param reason {@link AtomicReference} on which the reason is being set if the status for the
+   *     path is {@code PENDING}
+   * @return whether the path was approved
+   */
   private boolean isPending(
       Path absolutePath,
       CodeOwnerResolverResult codeOwners,
-      ImmutableSet<Account.Id> reviewerAccountIds) {
+      CodeOwnerKind codeOwnerKind,
+      ImmutableSet<Account.Id> reviewerAccountIds,
+      AtomicReference<String> reason) {
     if (!Collections.disjoint(codeOwners.codeOwnersAccountIds(), reviewerAccountIds)
         || (codeOwners.ownedByAllUsers() && !reviewerAccountIds.isEmpty())) {
-      logger.atFine().log("%s is owned by a reviewer", absolutePath);
+      Optional<Account.Id> reviewer =
+          codeOwners.ownedByAllUsers()
+              ? reviewerAccountIds.stream().findAny()
+              : reviewerAccountIds.stream()
+                  .filter(accountId -> codeOwners.codeOwnersAccountIds().contains(accountId))
+                  .findAny();
+      checkState(reviewer.isPresent(), "no reviewer found");
+      reason.set(
+          String.format(
+              "reviewer %s is a %s%s",
+              ChangeMessagesUtil.getAccountTemplate(reviewer.get()),
+              codeOwnerKind.getDisplayName(),
+              codeOwners.ownedByAllUsers()
+                  ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())
+                  : ""));
       return true;
     }
 

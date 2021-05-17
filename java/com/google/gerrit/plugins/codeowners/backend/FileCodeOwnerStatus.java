@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -63,28 +64,43 @@ public abstract class FileCodeOwnerStatus {
   }
 
   public static FileCodeOwnerStatus addition(String path, CodeOwnerStatus codeOwnerStatus) {
+    return addition(path, codeOwnerStatus, /* reason= */ null);
+  }
+
+  public static FileCodeOwnerStatus addition(
+      String path, CodeOwnerStatus codeOwnerStatus, @Nullable String reason) {
     requireNonNull(path, "path");
 
-    return addition(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus);
+    return addition(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus, reason);
   }
 
   public static FileCodeOwnerStatus addition(Path path, CodeOwnerStatus codeOwnerStatus) {
+    return addition(path, codeOwnerStatus, /* reason= */ null);
+  }
+
+  public static FileCodeOwnerStatus addition(
+      Path path, CodeOwnerStatus codeOwnerStatus, @Nullable String reason) {
     requireNonNull(path, "path");
     requireNonNull(codeOwnerStatus, "codeOwnerStatus");
 
     return create(
         ChangedFile.addition(path),
-        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus)),
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason)),
         Optional.empty());
   }
 
   public static FileCodeOwnerStatus modification(Path path, CodeOwnerStatus codeOwnerStatus) {
+    return modification(path, codeOwnerStatus, /* reason= */ null);
+  }
+
+  public static FileCodeOwnerStatus modification(
+      Path path, CodeOwnerStatus codeOwnerStatus, @Nullable String reason) {
     requireNonNull(path, "path");
     requireNonNull(codeOwnerStatus, "codeOwnerStatus");
 
     return create(
         ChangedFile.modification(path),
-        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus)),
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason)),
         Optional.empty());
   }
 
@@ -95,13 +111,18 @@ public abstract class FileCodeOwnerStatus {
   }
 
   public static FileCodeOwnerStatus deletion(Path path, CodeOwnerStatus codeOwnerStatus) {
+    return deletion(path, codeOwnerStatus, /* reason= */ null);
+  }
+
+  public static FileCodeOwnerStatus deletion(
+      Path path, CodeOwnerStatus codeOwnerStatus, @Nullable String reason) {
     requireNonNull(path, "path");
     requireNonNull(codeOwnerStatus, "codeOwnerStatus");
 
     return create(
         ChangedFile.deletion(path),
         Optional.empty(),
-        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus)));
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason)));
   }
 
   public static FileCodeOwnerStatus rename(
@@ -124,6 +145,22 @@ public abstract class FileCodeOwnerStatus {
       CodeOwnerStatus oldPathCodeOwnerStatus,
       Path newPath,
       CodeOwnerStatus newPathCodeOwnerStatus) {
+    return rename(
+        oldPath,
+        oldPathCodeOwnerStatus,
+        /* reasonOldPath= */ null,
+        newPath,
+        newPathCodeOwnerStatus,
+        /* reasonNewPath= */ null);
+  }
+
+  public static FileCodeOwnerStatus rename(
+      Path oldPath,
+      CodeOwnerStatus oldPathCodeOwnerStatus,
+      @Nullable String reasonOldPath,
+      Path newPath,
+      CodeOwnerStatus newPathCodeOwnerStatus,
+      @Nullable String reasonNewPath) {
     requireNonNull(oldPath, "oldPath");
     requireNonNull(oldPathCodeOwnerStatus, "oldPathCodeOwnerStatus");
     requireNonNull(newPath, "newPath");
@@ -131,7 +168,7 @@ public abstract class FileCodeOwnerStatus {
 
     return create(
         ChangedFile.rename(newPath, oldPath),
-        Optional.of(PathCodeOwnerStatus.create(newPath, newPathCodeOwnerStatus)),
-        Optional.of(PathCodeOwnerStatus.create(oldPath, oldPathCodeOwnerStatus)));
+        Optional.of(PathCodeOwnerStatus.create(newPath, newPathCodeOwnerStatus, reasonNewPath)),
+        Optional.of(PathCodeOwnerStatus.create(oldPath, oldPathCodeOwnerStatus, reasonOldPath)));
   }
 }
