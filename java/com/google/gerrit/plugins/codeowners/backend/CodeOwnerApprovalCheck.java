@@ -408,9 +408,6 @@ public class CodeOwnerApprovalCheck {
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
       logger.atFine().log(
           "fallbackCodeOwner = %s, isProjectOwner = %s", fallbackCodeOwners, isProjectOwner);
-      if (fallbackCodeOwners.equals(FallbackCodeOwners.PROJECT_OWNERS) && isProjectOwner) {
-        return getAllPathsAsApproved(changeNotes, patchSet);
-      }
 
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
       return changedFiles.getOrCompute(changeNotes.getProjectName(), patchSet.commitId()).stream()

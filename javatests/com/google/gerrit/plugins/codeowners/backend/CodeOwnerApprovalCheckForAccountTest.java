@@ -257,6 +257,36 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .isEqualTo(CodeOwnerStatus.APPROVED);
   }
 
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  public void notApprovedByProjectOwner_projectOwnersAreFallbackCodeOwner_otherOwnerDefined()
+      throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+    setAsRootCodeOwners(codeOwner);
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    ChangeNotes changeNotes = getChangeNotes(changeId);
+
+    // Verify that the file would be not approved by the 'admin' user. The 'admin' user is a
+    // project owner, but fallback code owners are not applied if code ownership was explicitly
+    // defined.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatusesForAccount(
+            changeNotes, changeNotes.getCurrentPatchSet(), admin.id());
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
   @Test
   public void approvedByFallbackCodeOwner() throws Exception {
