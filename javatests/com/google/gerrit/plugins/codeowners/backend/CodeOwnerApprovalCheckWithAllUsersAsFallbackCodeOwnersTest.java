@@ -26,6 +26,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfig
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
@@ -199,13 +200,19 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
-    // Add a user a fallback code owner as reviewer.
+    // Add a user who is fallback code owner as reviewer.
     gApi.changes().id(changeId).addReviewer(user.email());
 
     // Verify that the status is pending now .
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a fallback code owner (all users are fallback code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
 
     // Add a Code-Review+1 (= code owner approval) from a fallback code owner.
     requestScopeOperations.setApiUser(user.id());
@@ -214,7 +221,14 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     // Verify that the status is approved now
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a fallback code owner"
+                        + " (all users are fallback code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -228,7 +242,14 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     // enabled).
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
     assertThatCollection(fileCodeOwnerStatuses)
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "implicitly approved by the patch set uploader %s who is a fallback code"
+                        + " owner (all users are fallback code owners)",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
