@@ -608,16 +608,21 @@ public class CodeOwnerApprovalCheck {
       if (codeOwnerStatus.get() != CodeOwnerStatus.APPROVED
           && !hasRevelantCodeOwnerDefinitions.get()
           && !parentCodeOwnersAreIgnored.get()) {
-        codeOwnerStatus.set(
+        CodeOwnerStatus codeOwnerStatusForFallbackCodeOwners =
             getCodeOwnerStatusForFallbackCodeOwners(
                 codeOwnerStatus.get(),
                 branch,
-                globalCodeOwners,
                 implicitApprover,
                 reviewerAccountIds,
                 approverAccountIds,
                 fallbackCodeOwners,
-                absolutePath));
+                absolutePath);
+        // Do not override the status if codeOwnerStatusForFallbackCodeOwners is
+        // INSUFFICIENT_REVIEWERS as it can be that codeOwnerStatus was set to PENDING before (e.g.
+        // if a global code owner is a reviewer).
+        if (!codeOwnerStatusForFallbackCodeOwners.equals(CodeOwnerStatus.INSUFFICIENT_REVIEWERS)) {
+          codeOwnerStatus.set(codeOwnerStatusForFallbackCodeOwners);
+        }
       }
     }
 
@@ -633,7 +638,6 @@ public class CodeOwnerApprovalCheck {
    */
   private CodeOwnerStatus getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
       BranchNameKey branch,
-      CodeOwnerResolverResult globalCodeOwners,
       @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
@@ -646,8 +650,7 @@ public class CodeOwnerApprovalCheck {
     if (isApprovedByProjectOwner(
         branch.project(), absolutePath, approverAccountIds, implicitApprover)) {
       codeOwnerStatus = CodeOwnerStatus.APPROVED;
-    } else if (isPendingByProjectOwnerOrGlobalOwner(
-        branch.project(), absolutePath, globalCodeOwners, reviewerAccountIds)) {
+    } else if (isPendingByProjectOwner(branch.project(), absolutePath, reviewerAccountIds)) {
       codeOwnerStatus = CodeOwnerStatus.PENDING;
     }
 
@@ -691,21 +694,12 @@ public class CodeOwnerApprovalCheck {
     return false;
   }
 
-  private boolean isPendingByProjectOwnerOrGlobalOwner(
-      Project.NameKey projectName,
-      Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
-      ImmutableSet<Account.Id> reviewerAccountIds) {
+  private boolean isPendingByProjectOwner(
+      Project.NameKey projectName, Path absolutePath, ImmutableSet<Account.Id> reviewerAccountIds) {
     if (reviewerAccountIds.stream()
         .anyMatch(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))) {
       // At least one of the reviewers is a project owner and thus a code owner.
       logger.atFine().log("%s is owned by a reviewer who is project owner", absolutePath);
-      return true;
-    }
-
-    if (isPending(absolutePath, globalCodeOwners, reviewerAccountIds)) {
-      // At least one of the reviewers is a global code owner.
-      logger.atFine().log("%s is owned by a reviewer who is a global owner", absolutePath);
       return true;
     }
 
@@ -718,7 +712,6 @@ public class CodeOwnerApprovalCheck {
   private CodeOwnerStatus getCodeOwnerStatusForFallbackCodeOwners(
       CodeOwnerStatus codeOwnerStatus,
       BranchNameKey branch,
-      CodeOwnerResolverResult globalCodeOwners,
       @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
@@ -733,12 +726,7 @@ public class CodeOwnerApprovalCheck {
         return codeOwnerStatus;
       case PROJECT_OWNERS:
         return getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
-            branch,
-            globalCodeOwners,
-            implicitApprover,
-            reviewerAccountIds,
-            approverAccountIds,
-            absolutePath);
+            branch, implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath);
       case ALL_USERS:
         return getCodeOwnerStatusIfAllUsersAreCodeOwners(
             implicitApprover != null, reviewerAccountIds, approverAccountIds, absolutePath);
