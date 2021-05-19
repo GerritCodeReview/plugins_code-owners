@@ -48,6 +48,19 @@ const STATUS_TOOLTIP = {
 };
 
 class BaseEl extends CodeOwnersModelMixin(Polymer.Element) {
+  static get properties() {
+    return {
+      patchRange: Object,
+
+      hidden: {
+        type: Boolean,
+        reflectToAttribute: true,
+        computed: 'computeHidden(change, patchRange, ' +
+            'model.status.newerPatchsetUploaded)',
+      },
+    };
+  }
+
   computeHidden(change, patchRange, newerPatchsetUploaded) {
     if ([change, patchRange, newerPatchsetUploaded].includes(undefined)) {
       return true;
@@ -93,19 +106,6 @@ export class OwnerStatusColumnHeader extends BaseEl {
         <div></div>
       `;
   }
-
-  static get properties() {
-    return {
-      patchRange: Object,
-
-      hidden: {
-        type: Boolean,
-        reflectToAttribute: true,
-        computed: 'computeHidden(change, patchRange, ' +
-          'model.status.newerPatchsetUploaded)',
-      },
-    };
-  }
 }
 
 customElements.define(OwnerStatusColumnHeader.is, OwnerStatusColumnHeader);
@@ -122,12 +122,6 @@ export class OwnerStatusColumnContent extends BaseEl {
     return {
       path: String,
       oldPath: String,
-      patchRange: Object,
-      hidden: {
-        type: Boolean,
-        reflectToAttribute: true,
-        computed: 'computeHidden(change, patchRange)',
-      },
       ownerService: Object,
       statusIcon: {
         type: String,
