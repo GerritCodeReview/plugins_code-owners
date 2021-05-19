@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowLabel;
-import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThatCollection;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
@@ -30,7 +29,6 @@ import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
-import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.testing.ConfigSuite;
@@ -84,14 +82,9 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
 
     // Verify that the file is not approved yet.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Let the bot approve the change.
     projectOperations
@@ -105,13 +98,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
 
   @Test
@@ -155,17 +143,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     }
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(
-            implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                ? CodeOwnerStatus.APPROVED
-                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                implicitApprovalsEnabled && uploaderMatchesChangeOwner
+                    ? CodeOwnerStatus.APPROVED
+                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -183,14 +167,9 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
 
     // Verify that the status of the file is INSUFFICIENT_REVIEWERS.
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add the bot approve as reviewer.
     gApi.changes().id(changeId).addReviewer(bot.email());
@@ -198,13 +177,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     // Check that the status of the file is PENDING now.
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
 
     // Let the bot approve the change.
     projectOperations
@@ -218,13 +192,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
 
   @Test
@@ -239,14 +208,9 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     // Verify that the file is not approved yet (the change owner is a global code owner, but
     // implicit approvals are disabled).
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add an approval by a user that is a code owner only through the global code ownership.
     approve(changeId);
@@ -254,13 +218,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     // Check that the file is approved now.
     requestScopeOperations.setApiUser(admin.id());
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
 
   @Test
@@ -304,17 +263,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     }
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(
-            implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                ? CodeOwnerStatus.APPROVED
-                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                implicitApprovalsEnabled && uploaderMatchesChangeOwner
+                    ? CodeOwnerStatus.APPROVED
+                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -328,27 +283,17 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     // Verify that the status of the file is INSUFFICIENT_REVIEWERS (since there is no implicit
     // approval by default).
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add a user as reviewer that is a code owner only through the global code ownership.
     gApi.changes().id(changeId).addReviewer(user.email());
 
     // Check that the status of the file is PENDING now.
     fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    fileCodeOwnerStatusSubject = assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
   }
 
   @Test
@@ -371,17 +316,9 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -402,17 +339,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.PENDING);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
   }
 
   @Test
@@ -428,17 +356,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     recommend(changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.APPROVED);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.APPROVED));
   }
 
   @Test
@@ -477,20 +396,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     }
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(
-            implicitApprovalsEnabled && uploaderMatchesChangeOwner
-                ? CodeOwnerStatus.APPROVED
-                : CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                implicitApprovalsEnabled && uploaderMatchesChangeOwner
+                    ? CodeOwnerStatus.APPROVED
+                    : CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -508,17 +420,9 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     amendChange(admin2, changeId);
 
     ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
-    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
-        assertThatCollection(fileCodeOwnerStatuses).onlyElement();
-    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
-    fileCodeOwnerStatusSubject
-        .hasNewPathStatus()
-        .value()
-        .hasStatusThat()
-        .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    fileCodeOwnerStatusSubject.hasOldPathStatus().isEmpty();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoRename();
-    fileCodeOwnerStatusSubject.hasChangedFile().isNoDeletion();
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
   }
 
   @Test
@@ -528,6 +432,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
 
     // Create a change with a user that is not a project owner.
     TestRepository<InMemoryRepository> testRepo = cloneProject(project, user);
+    String path1 = "bar/baz.config";
+    String path2 = "foo/baz.config";
     String changeId =
         pushFactory
             .create(
@@ -535,31 +441,27 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 testRepo,
                 "Test Change",
                 ImmutableMap.of(
-                    "foo/baz.config", "content",
-                    "bar/baz.config", "other content"))
+                    path2, "content",
+                    path1, "other content"))
             .to("refs/for/master")
             .getChangeId();
 
     // Without Owners-Override approval the expected status is INSUFFICIENT_REVIEWERS.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus : getFileCodeOwnerStatuses(changeId)) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    }
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add an override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
 
     // With Owners-Override approval the expected status is APPROVED.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus : getFileCodeOwnerStatuses(changeId)) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.APPROVED);
-    }
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
   }
 
   @Test
@@ -572,6 +474,8 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
 
     // Create a change with a user that is not a project owner.
     TestRepository<InMemoryRepository> testRepo = cloneProject(project, user);
+    String path1 = "bar/baz.config";
+    String path2 = "foo/baz.config";
     String changeId =
         pushFactory
             .create(
@@ -579,56 +483,48 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 testRepo,
                 "Test Change",
                 ImmutableMap.of(
-                    "foo/baz.config", "content",
-                    "bar/baz.config", "other content"))
+                    path2, "content",
+                    path1, "other content"))
             .to("refs/for/master")
             .getChangeId();
 
     // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus : getFileCodeOwnerStatuses(changeId)) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    }
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add an override approval (by a user that is not a project owners, and hence no code owner).
     requestScopeOperations.setApiUser(user.id());
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
 
     // With override approval the expected status is APPROVED.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus : getFileCodeOwnerStatuses(changeId)) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.APPROVED);
-    }
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
 
     // Delete the override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
 
     // Without override approval the expected status is INSUFFICIENT_REVIEWERS.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus : getFileCodeOwnerStatuses(changeId)) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
-    }
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
 
     // Add another override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Another-Override", 1));
 
     // With override approval the expected status is APPROVED.
-    for (FileCodeOwnerStatus fileCodeOwnerStatus : getFileCodeOwnerStatuses(changeId)) {
-      assertThat(fileCodeOwnerStatus)
-          .hasNewPathStatus()
-          .value()
-          .hasStatusThat()
-          .isEqualTo(CodeOwnerStatus.APPROVED);
-    }
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.APPROVED),
+            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.APPROVED));
   }
 
   @Test
