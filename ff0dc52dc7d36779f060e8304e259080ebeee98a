@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "50385ec8_b108c5af",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-05-19T07:03:14Z",
+      "side": 1,
+      "message": "So the fix is to not override BaseEl properties in OwnerStatusColumnContent?",
+      "revId": "ff0dc52dc7d36779f060e8304e259080ebeee98a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
