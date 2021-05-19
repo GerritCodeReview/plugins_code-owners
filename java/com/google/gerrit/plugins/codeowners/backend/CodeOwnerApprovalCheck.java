@@ -643,8 +643,8 @@ public class CodeOwnerApprovalCheck {
         absolutePath);
 
     CodeOwnerStatus codeOwnerStatus = CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
-    if (isApprovedByProjectOwnerOrGlobalOwner(
-        branch.project(), absolutePath, globalCodeOwners, approverAccountIds, implicitApprover)) {
+    if (isApprovedByProjectOwner(
+        branch.project(), absolutePath, approverAccountIds, implicitApprover)) {
       codeOwnerStatus = CodeOwnerStatus.APPROVED;
     } else if (isPendingByProjectOwnerOrGlobalOwner(
         branch.project(), absolutePath, globalCodeOwners, reviewerAccountIds)) {
@@ -655,24 +655,18 @@ public class CodeOwnerApprovalCheck {
     return codeOwnerStatus;
   }
 
-  private boolean isApprovedByProjectOwnerOrGlobalOwner(
+  private boolean isApprovedByProjectOwner(
       Project.NameKey projectName,
       Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
       ImmutableSet<Account.Id> approverAccountIds,
       @Nullable Account.Id implicitApprover) {
     return (implicitApprover != null
-            && isImplicitlyApprovedByProjectOwnerOrGlobalOwner(
-                projectName, absolutePath, globalCodeOwners, implicitApprover))
-        || isExplicitlyApprovedByProjectOwnerOrGlobalOwner(
-            projectName, absolutePath, globalCodeOwners, approverAccountIds);
+            && isImplicitlyApprovedByProjectOwner(projectName, absolutePath, implicitApprover))
+        || isExplicitlyApprovedByProjectOwner(projectName, absolutePath, approverAccountIds);
   }
 
-  private boolean isImplicitlyApprovedByProjectOwnerOrGlobalOwner(
-      Project.NameKey projectName,
-      Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
-      Account.Id implicitApprover) {
+  private boolean isImplicitlyApprovedByProjectOwner(
+      Project.NameKey projectName, Path absolutePath, Account.Id implicitApprover) {
     requireNonNull(implicitApprover, "implicitApprover");
     if (isProjectOwner(projectName, implicitApprover)) {
       // The uploader of the patch set is a project owner and thus a code owner. This means there
@@ -683,39 +677,17 @@ public class CodeOwnerApprovalCheck {
           absolutePath);
       return true;
     }
-
-    if (globalCodeOwners.ownedByAllUsers()
-        || globalCodeOwners.codeOwnersAccountIds().contains(implicitApprover)) {
-      // If the uploader of the patch set is a global code owner, there is an implicit code owner
-      // approval from the patch set uploader so that the path is automatically approved.
-      logger.atFine().log(
-          "%s was implicitly approved by the patch set uploader who is a global owner",
-          absolutePath);
-      return true;
-    }
-
     return false;
   }
 
-  private boolean isExplicitlyApprovedByProjectOwnerOrGlobalOwner(
-      Project.NameKey projectName,
-      Path absolutePath,
-      CodeOwnerResolverResult globalCodeOwners,
-      ImmutableSet<Account.Id> approverAccountIds) {
-    if (!Collections.disjoint(approverAccountIds, globalCodeOwners.codeOwnersAccountIds())
-        || (globalCodeOwners.ownedByAllUsers() && !approverAccountIds.isEmpty())) {
-      // At least one of the global code owners approved the change.
-      logger.atFine().log("%s was approved by a global code owner", absolutePath);
-      return true;
-    }
-
+  private boolean isExplicitlyApprovedByProjectOwner(
+      Project.NameKey projectName, Path absolutePath, ImmutableSet<Account.Id> approverAccountIds) {
     if (approverAccountIds.stream()
         .anyMatch(approverAccountId -> isProjectOwner(projectName, approverAccountId))) {
       // At least one of the approvers is a project owner and thus a code owner.
       logger.atFine().log("%s was approved by a project owner", absolutePath);
       return true;
     }
-
     return false;
   }
 
