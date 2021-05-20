@@ -19,8 +19,10 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import java.util.Arrays;
+import java.util.Set;
 
 /**
  * A code owner set defines a set of code owners for a set of path expressions.
@@ -70,6 +72,9 @@ public abstract class CodeOwnerSet {
 
   /** Gets the code owners of this code owner set. */
   public abstract ImmutableSet<CodeOwnerReference> codeOwners();
+
+  /** Gets the annotations of the {@link #codeOwners()}. */
+  public abstract ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotations();
 
   /**
    * Creates a builder from this code owner set.
@@ -196,6 +201,26 @@ public abstract class CodeOwnerSet {
      */
     public Builder addCodeOwner(CodeOwnerReference codeOwnerReference) {
       codeOwnersBuilder().add(requireNonNull(codeOwnerReference, "codeOwnerReference"));
+      return this;
+    }
+
+    /** Gets a builder to add code owner annotations. */
+    abstract ImmutableMultimap.Builder<CodeOwnerReference, CodeOwnerAnnotation>
+        annotationsBuilder();
+
+    /**
+     * Adds annotations for a code owner.
+     *
+     * @param codeOwnerReference reference to the code owner for which the annotations should be
+     *     added
+     * @param annotations annotations that should be added
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addAnnotations(
+        CodeOwnerReference codeOwnerReference, Set<CodeOwnerAnnotation> annotations) {
+      requireNonNull(codeOwnerReference, "codeOwnerReference");
+      requireNonNull(annotations, "annotations");
+      annotationsBuilder().putAll(codeOwnerReference, annotations);
       return this;
     }
 

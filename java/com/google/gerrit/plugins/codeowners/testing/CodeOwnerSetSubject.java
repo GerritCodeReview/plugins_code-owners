@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.testing;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubject.codeOwnerConfigReferences;
 import static com.google.gerrit.truth.ListSubject.elements;
@@ -22,7 +24,9 @@ import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.Correspondence;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
+import com.google.common.truth.MapSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
@@ -83,6 +87,19 @@ public class CodeOwnerSetSubject extends Subject {
    */
   public IterableSubject.UsingCorrespondence<CodeOwnerReference, String> hasCodeOwnersEmailsThat() {
     return hasCodeOwnersThat().comparingElementsUsing(hasEmail());
+  }
+
+  public MapSubject hasAnnotationsThat() {
+    return check("codeOwners()")
+        .that(
+            codeOwnerSet().annotations().asMap().entrySet().stream()
+                .collect(
+                    toImmutableMap(
+                        e -> e.getKey().email(),
+                        e ->
+                            e.getValue().stream()
+                                .map(CodeOwnerAnnotation::key)
+                                .collect(toImmutableSet()))));
   }
 
   /**

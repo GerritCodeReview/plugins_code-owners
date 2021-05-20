@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
@@ -25,6 +26,8 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.SortedSetMultimap;
+import com.google.common.collect.TreeMultimap;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
@@ -161,6 +164,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     // Simple input lines with 0 or 1 sub-pattern.
     private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
     private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL_OR_STAR + EOL);
+    private static final Pattern PAT_ANNOTATION = Pattern.compile("#\\{([A-Za-z_]+)\\}");
     private static final Pattern PAT_INCLUDE =
         Pattern.compile(BOL + INCLUDE_OR_FILE + PROJECT_BRANCH_AND_FILE + EOL);
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
@@ -206,15 +210,17 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         CodeOwnerSet.Builder globalCodeOwnerSetBuilder,
         List<CodeOwnerSet> perFileCodeOwnerSets,
         String line) {
-      String email;
+      ParsedEmailLine parsedEmailLine;
       CodeOwnerSet codeOwnerSet;
       CodeOwnerConfigReference codeOwnerConfigReference;
       if (isNoParent(line)) {
         codeOwnerConfigBuilder.setIgnoreParentCodeOwners();
       } else if (isComment(line)) {
         // ignore comment lines and empty lines
-      } else if ((email = parseEmail(line)) != null) {
-        globalCodeOwnerSetBuilder.addCodeOwner(CodeOwnerReference.create(email));
+      } else if ((parsedEmailLine = parseEmailLine(line)) != null) {
+        globalCodeOwnerSetBuilder.addCodeOwner(parsedEmailLine.codeOwnerReference());
+        globalCodeOwnerSetBuilder.addAnnotations(
+            parsedEmailLine.codeOwnerReference(), parsedEmailLine.annotations());
       } else if ((codeOwnerSet = parsePerFile(line)) != null) {
         perFileCodeOwnerSets.add(codeOwnerSet);
       } else if ((codeOwnerConfigReference = parseInclude(line)) != null) {
@@ -260,6 +266,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       }
 
       List<String> ownerEmails = Arrays.asList(directive.split(COMMA, -1));
+
       return CodeOwnerSet.builder()
           .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
           .setCodeOwners(
@@ -327,9 +334,24 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       return PAT_NO_PARENT.matcher(line).matches();
     }
 
-    private static String parseEmail(String line) {
-      Matcher m = PAT_EMAIL.matcher(line);
-      return m.matches() ? m.group(1).trim() : null;
+    private static ParsedEmailLine parseEmailLine(String line) {
+      Matcher emailMatcher = PAT_EMAIL.matcher(line);
+      if (!emailMatcher.matches()) {
+        return null;
+      }
+      String email = emailMatcher.group(1).trim();
+      ParsedEmailLine.Builder parsedEmailLine = ParsedEmailLine.builder(email);
+
+      String eol = emailMatcher.group(2);
+      if (eol != null) {
+        Matcher annotationMatcher = PAT_ANNOTATION.matcher(eol);
+        while (annotationMatcher.find()) {
+          String annotation = annotationMatcher.group(1);
+          parsedEmailLine.addAnnotation(annotation);
+        }
+      }
+
+      return parsedEmailLine.build();
     }
 
     private static CodeOwnerConfigReference parseInclude(String line) {
@@ -403,7 +425,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     static String formatAsString(CodeOwnerConfig codeOwnerConfig) {
       return formatIgnoreParentCodeOwners(codeOwnerConfig)
           + formatImports(codeOwnerConfig)
-          + formatGlobalCodeOwners(codeOwnerConfig)
+          + formatFolderCodeOwners(codeOwnerConfig)
           + formatPerFileCodeOwners(codeOwnerConfig);
     }
 
@@ -411,22 +433,37 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       return codeOwnerConfig.ignoreParentCodeOwners() ? SET_NOPARENT_LINE : "";
     }
 
-    private static String formatGlobalCodeOwners(CodeOwnerConfig codeOwnerConfig) {
-      String emails =
+    private static String formatFolderCodeOwners(CodeOwnerConfig codeOwnerConfig) {
+      ImmutableSet<CodeOwnerSet> folderCodeOwnerSets =
           codeOwnerConfig.codeOwnerSets().stream()
               // Filter out code owner sets with path expressions. If path expressions are present
               // the code owner set defines per-file code owners and is handled in
               // formatPerFileCodeOwners(CodeOwnerConfig).
               .filter(codeOwnerSet -> codeOwnerSet.pathExpressions().isEmpty())
+              .collect(toImmutableSet());
+      ImmutableList<String> emails =
+          folderCodeOwnerSets.stream()
               .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
               .map(CodeOwnerReference::email)
               .sorted()
               .distinct()
-              .collect(joining("\n"));
-      if (!emails.isEmpty()) {
-        return emails + "\n";
+              .collect(toImmutableList());
+      SortedSetMultimap<String, String> annotations = TreeMultimap.create();
+      folderCodeOwnerSets.forEach(
+          codeOwnerSet ->
+              codeOwnerSet
+                  .annotations()
+                  .forEach(
+                      (codeOwnerReference, annotation) ->
+                          annotations.put(codeOwnerReference.email(), annotation.key())));
+
+      StringBuilder b = new StringBuilder();
+      for (String email : emails) {
+        b.append(email);
+        annotations.get(email).forEach(annotation -> b.append(" #{" + annotation + "}"));
+        b.append('\n');
       }
-      return emails;
+      return b.toString();
     }
 
     private static String formatPerFileCodeOwners(CodeOwnerConfig codeOwnerConfig) {

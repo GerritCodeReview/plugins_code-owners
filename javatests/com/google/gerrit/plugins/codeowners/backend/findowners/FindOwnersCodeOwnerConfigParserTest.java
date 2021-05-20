@@ -22,6 +22,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.backend.AbstractCodeOwnerConfigParserTest;
@@ -178,6 +179,47 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+  }
+
+  @Test
+  public void codeOwnerConfigWithAnnotations() throws Exception {
+    assertParseAndFormat(
+        getCodeOwnerConfig(
+            EMAIL_1,
+            EMAIL_2 + " #{FOO_BAR}#{BAR_BAZ} #NO_ANNOTATION, #{FOO} #{bar} #{bAz} other comment",
+            EMAIL_3),
+        codeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2, EMAIL_3);
+          codeOwnerSetSubject
+              .hasAnnotationsThat()
+              .containsExactly(EMAIL_2, ImmutableSet.of("FOO_BAR", "BAR_BAZ", "FOO", "bar", "bAz"));
+        },
+        // annotations are sorted alphabetically, the normal comment is dropped,
+        EMAIL_1
+            + "\n"
+            + EMAIL_2
+            + " #{BAR_BAZ} #{FOO} #{FOO_BAR} #{bAz} #{bar}\n"
+            + EMAIL_3
+            + "\n");
+  }
+
+  @Test
+  public void codeOwnerConfigWithAnnotationsOnAllUsersWildcard() throws Exception {
+    assertParseAndFormat(
+        getCodeOwnerConfig(
+            "* #{FOO_BAR}#{BAR_BAZ} #NO_ANNOTATION, #{FOO} #{bar} #{bAz} other comment"),
+        codeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasCodeOwnersEmailsThat().containsExactly("*");
+          codeOwnerSetSubject
+              .hasAnnotationsThat()
+              .containsExactly("*", ImmutableSet.of("FOO_BAR", "BAR_BAZ", "FOO", "bar", "bAz"));
+        },
+        // annotations are sorted alphabetically, the normal comment is dropped,
+        "* #{BAR_BAZ} #{FOO} #{FOO_BAR} #{bAz} #{bar}\n");
   }
 
   @Test
