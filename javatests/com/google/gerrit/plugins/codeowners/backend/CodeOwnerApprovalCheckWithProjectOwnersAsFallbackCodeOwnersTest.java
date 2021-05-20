@@ -534,9 +534,17 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+                path1,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
-                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path2,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -579,9 +587,17 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+                path1,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
-                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path2,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
 
     // Delete the override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
@@ -601,9 +617,17 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+                path1,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Another-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
-                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path2,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Another-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
