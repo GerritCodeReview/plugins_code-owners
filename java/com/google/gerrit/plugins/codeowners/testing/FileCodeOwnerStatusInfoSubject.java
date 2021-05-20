@@ -80,7 +80,12 @@ public class FileCodeOwnerStatusInfoSubject extends Subject {
   private static PathCodeOwnerStatus toPathCodeOwnerStatus(
       PathCodeOwnerStatusInfo pathCodeOwnerStatusInfo) {
     requireNonNull(pathCodeOwnerStatusInfo, "pathCodeOwnerStatusInfo");
-    return PathCodeOwnerStatus.create(pathCodeOwnerStatusInfo.path, pathCodeOwnerStatusInfo.status);
+    PathCodeOwnerStatus.Builder pathCodeOwnerStatus =
+        PathCodeOwnerStatus.builder(pathCodeOwnerStatusInfo.path, pathCodeOwnerStatusInfo.status);
+    if (pathCodeOwnerStatusInfo.reasons != null) {
+      pathCodeOwnerStatusInfo.reasons.forEach(reason -> pathCodeOwnerStatus.addReason(reason));
+    }
+    return pathCodeOwnerStatus.build();
   }
 
   /**

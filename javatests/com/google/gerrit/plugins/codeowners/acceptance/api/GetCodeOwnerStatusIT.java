@@ -31,6 +31,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnersExperimentFeatures
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -73,8 +74,15 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
-        .containsExactly(FileCodeOwnerStatus.addition(path, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
     assertThat(codeOwnerStatus).hasMoreThat().isNull();
+    assertThat(codeOwnerStatus).hasAccounts(user);
   }
 
   @Test
@@ -126,9 +134,20 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .containsExactly(
             FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
             FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+            FileCodeOwnerStatus.addition(
+                path1,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+            FileCodeOwnerStatus.addition(
+                path2,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
         .inOrder();
+    assertThat(codeOwnerStatus).hasAccounts(user);
 
     codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(1).get();
@@ -140,9 +159,20 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(
             FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+            FileCodeOwnerStatus.addition(
+                path1,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+            FileCodeOwnerStatus.addition(
+                path2,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
         .inOrder();
+    assertThat(codeOwnerStatus).hasAccounts(user);
 
     codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(2).get();
@@ -153,9 +183,20 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+            FileCodeOwnerStatus.addition(
+                path1,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+            FileCodeOwnerStatus.addition(
+                path2,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
         .inOrder();
+    assertThat(codeOwnerStatus).hasAccounts(user);
 
     codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(3).get();
@@ -165,7 +206,14 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerStatus)
         .hasFileCodeOwnerStatusesThat()
         .comparingElementsUsing(isFileCodeOwnerStatus())
-        .containsExactly(FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING));
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path2,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+    assertThat(codeOwnerStatus).hasAccounts(user);
 
     codeOwnerStatus =
         changeCodeOwnersApiFactory.change(changeId).getCodeOwnerStatus().withStart(4).get();
@@ -173,6 +221,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .hasPatchSetNumberThat()
         .isEqualTo(r.getChange().currentPatchSet().id().get());
     assertThat(codeOwnerStatus).hasFileCodeOwnerStatusesThat().isEmpty();
+    assertThat(codeOwnerStatus).hasAccountsThat().isNull();
   }
 
   @Test
@@ -223,6 +272,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(
             FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+    assertThat(codeOwnerStatus).hasAccountsThat().isNull();
     assertThat(codeOwnerStatus).hasMoreThat().isTrue();
 
     codeOwnerStatus =
@@ -237,6 +287,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
             FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
             FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS))
         .inOrder();
+    assertThat(codeOwnerStatus).hasAccountsThat().isNull();
     assertThat(codeOwnerStatus).hasMoreThat().isTrue();
 
     codeOwnerStatus =
@@ -250,8 +301,14 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .containsExactly(
             FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
             FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING))
+            FileCodeOwnerStatus.addition(
+                path1,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
         .inOrder();
+    assertThat(codeOwnerStatus).hasAccounts(user);
     assertThat(codeOwnerStatus).hasMoreThat().isTrue();
 
     codeOwnerStatus =
@@ -265,9 +322,20 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .containsExactly(
             FileCodeOwnerStatus.addition(path4, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
             FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING),
-            FileCodeOwnerStatus.addition(path2, CodeOwnerStatus.PENDING))
+            FileCodeOwnerStatus.addition(
+                path1,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+            FileCodeOwnerStatus.addition(
+                path2,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
         .inOrder();
+    assertThat(codeOwnerStatus).hasAccounts(user);
     assertThat(codeOwnerStatus).hasMoreThat().isNull();
   }
 
@@ -310,9 +378,12 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
               FileCodeOwnerStatus.rename(
                   oldPath,
                   CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id())),
                   newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
-      assertThat(codeOwnerStatus).hasMoreThat().isNull();
+                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                  /* reasonNewPath= */ null));
     } else {
       assertThat(codeOwnerStatus)
           .hasFileCodeOwnerStatusesThat()
@@ -328,9 +399,15 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
           .comparingElementsUsing(isFileCodeOwnerStatus())
           .containsExactly(
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING));
-      assertThat(codeOwnerStatus).hasMoreThat().isNull();
+              FileCodeOwnerStatus.deletion(
+                  oldPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
     }
+    assertThat(codeOwnerStatus).hasMoreThat().isNull();
+    assertThat(codeOwnerStatus).hasAccounts(user);
   }
 
   @Test
@@ -386,8 +463,14 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .comparingElementsUsing(isFileCodeOwnerStatus())
         .containsExactly(
             FileCodeOwnerStatus.addition(path3, CodeOwnerStatus.INSUFFICIENT_REVIEWERS),
-            FileCodeOwnerStatus.addition(path1, CodeOwnerStatus.PENDING))
+            FileCodeOwnerStatus.addition(
+                path1,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
         .inOrder();
+    assertThat(codeOwnerStatus).hasAccounts(user);
     assertThat(codeOwnerStatus).hasMoreThat().isTrue();
   }
 
@@ -486,16 +569,26 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
               FileCodeOwnerStatus.rename(
                   oldPath,
                   CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id())),
                   newPath,
-                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+                  CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
+                  /* reasonNewPath= */ null));
     } else {
       assertThat(codeOwnerStatus)
           .hasFileCodeOwnerStatusesThat()
           .comparingElementsUsing(isFileCodeOwnerStatus())
           .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
+              FileCodeOwnerStatus.deletion(
+                  oldPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
     }
+    assertThat(codeOwnerStatus).hasAccounts(user);
 
     // Add a reviewer that is a code owner of the new path.
     gApi.changes().id(changeId).addReviewer(user2.email());
@@ -507,15 +600,35 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
           .comparingElementsUsing(isFileCodeOwnerStatus())
           .containsExactly(
               FileCodeOwnerStatus.rename(
-                  oldPath, CodeOwnerStatus.PENDING, newPath, CodeOwnerStatus.PENDING));
+                  oldPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id())),
+                  newPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user2.id()))));
     } else {
       assertThat(codeOwnerStatus)
           .hasFileCodeOwnerStatusesThat()
           .comparingElementsUsing(isFileCodeOwnerStatus())
           .containsExactly(
-              FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.PENDING),
-              FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.PENDING));
+              FileCodeOwnerStatus.deletion(
+                  oldPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
+              FileCodeOwnerStatus.addition(
+                  newPath,
+                  CodeOwnerStatus.PENDING,
+                  String.format(
+                      "reviewer %s is a code owner",
+                      ChangeMessagesUtil.getAccountTemplate(user2.id()))));
     }
+    assertThat(codeOwnerStatus).hasAccounts(user, user2);
   }
 
   @Test
