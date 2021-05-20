@@ -14,7 +14,9 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.extensions.common.AccountInfo;
 import java.util.List;
+import java.util.Map;
 
 /**
  * JSON entity that describes the response of the {@link
@@ -41,4 +43,12 @@ public class CodeOwnerStatusInfo {
    * <p>Not set if {@code false}.
    */
   public Boolean more;
+
+  /**
+   * Accounts that are referenced in the reason messages that are returned with the {@link
+   * PathCodeOwnerStatusInfo}s in the {@link #fileCodeOwnerStatuses}.
+   *
+   * <p>Not set if no accounts are referenced from reasons.
+   */
+  public Map<Integer, AccountInfo> accounts;
 }

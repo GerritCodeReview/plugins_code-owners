@@ -105,13 +105,18 @@ public abstract class FileCodeOwnerStatus {
   }
 
   public static FileCodeOwnerStatus deletion(String path, CodeOwnerStatus codeOwnerStatus) {
-    requireNonNull(path, "path");
-
-    return deletion(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus);
+    return deletion(path, codeOwnerStatus, /* reason= */ null);
   }
 
   public static FileCodeOwnerStatus deletion(Path path, CodeOwnerStatus codeOwnerStatus) {
     return deletion(path, codeOwnerStatus, /* reason= */ null);
+  }
+
+  public static FileCodeOwnerStatus deletion(
+      String path, CodeOwnerStatus codeOwnerStatus, @Nullable String reason) {
+    requireNonNull(path, "path");
+
+    return deletion(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus, reason);
   }
 
   public static FileCodeOwnerStatus deletion(
@@ -130,14 +135,13 @@ public abstract class FileCodeOwnerStatus {
       CodeOwnerStatus oldPathCodeOwnerStatus,
       String newPath,
       CodeOwnerStatus newPathCodeOwnerStatus) {
-    requireNonNull(oldPath, "oldPath");
-    requireNonNull(newPath, "newPath");
-
     return rename(
-        JgitPath.of(oldPath).getAsAbsolutePath(),
+        oldPath,
         oldPathCodeOwnerStatus,
-        JgitPath.of(newPath).getAsAbsolutePath(),
-        newPathCodeOwnerStatus);
+        /* reasonOldPath= */ null,
+        newPath,
+        newPathCodeOwnerStatus,
+        /* reasonNewPath= */ null);
   }
 
   public static FileCodeOwnerStatus rename(
@@ -152,6 +156,25 @@ public abstract class FileCodeOwnerStatus {
         newPath,
         newPathCodeOwnerStatus,
         /* reasonNewPath= */ null);
+  }
+
+  public static FileCodeOwnerStatus rename(
+      String oldPath,
+      CodeOwnerStatus oldPathCodeOwnerStatus,
+      @Nullable String reasonOldPath,
+      String newPath,
+      CodeOwnerStatus newPathCodeOwnerStatus,
+      @Nullable String reasonNewPath) {
+    requireNonNull(oldPath, "oldPath");
+    requireNonNull(newPath, "newPath");
+
+    return rename(
+        JgitPath.of(oldPath).getAsAbsolutePath(),
+        oldPathCodeOwnerStatus,
+        reasonOldPath,
+        JgitPath.of(newPath).getAsAbsolutePath(),
+        newPathCodeOwnerStatus,
+        reasonNewPath);
   }
 
   public static FileCodeOwnerStatus rename(
