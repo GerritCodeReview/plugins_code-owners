@@ -27,6 +27,7 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.entities.LabelValue;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
@@ -333,18 +334,19 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log("requiredApproval = %s", requiredApproval);
 
       ImmutableSet<RequiredApproval> overrideApprovals = codeOwnersConfig.getOverrideApprovals();
-      boolean hasOverride =
-          hasOverride(currentPatchSetApprovals, overrideApprovals, patchSetUploader);
+      ImmutableSet<PatchSetApproval> overrides =
+          getOverride(currentPatchSetApprovals, overrideApprovals, patchSetUploader);
       logger.atFine().log(
-          "hasOverride = %s (overrideApprovals = %s)",
-          hasOverride,
+          "hasOverride = %s (overrideApprovals = %s, overrides = %s)",
+          !overrides.isEmpty(),
           overrideApprovals.stream()
               .map(
                   overrideApproval ->
                       String.format(
                           "%s (ignoreSelfApproval = %s)",
                           overrideApproval, overrideApproval.labelType().isIgnoreSelfApproval()))
-              .collect(toImmutableList()));
+              .collect(toImmutableList()),
+          overrides);
 
       BranchNameKey branch = changeNotes.getChange().getDest();
       ObjectId revision = getDestBranchRevision(changeNotes.getChange());
@@ -377,7 +379,7 @@ public class CodeOwnerApprovalCheck {
                       reviewerAccountIds,
                       approverAccountIds,
                       fallbackCodeOwners,
-                      hasOverride,
+                      overrides,
                       changedFile));
     }
   }
@@ -448,7 +450,7 @@ public class CodeOwnerApprovalCheck {
                       // Assume an explicit approval of the given account.
                       /* approverAccountIds= */ ImmutableSet.of(accountId),
                       fallbackCodeOwners,
-                      /* hasOverride= */ false,
+                      /* overrides= */ ImmutableSet.of(),
                       changedFile));
     }
   }
@@ -498,7 +500,7 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       FallbackCodeOwners fallbackCodeOwners,
-      boolean hasOverride,
+      ImmutableSet<PatchSetApproval> overrides,
       ChangedFile changedFile) {
     try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatus.start()) {
       logger.atFine().log("computing file status for %s", changedFile);
@@ -519,7 +521,7 @@ public class CodeOwnerApprovalCheck {
                           reviewerAccountIds,
                           approverAccountIds,
                           fallbackCodeOwners,
-                          hasOverride,
+                          overrides,
                           newPath));
 
       // Compute the code owner status for the old path, if the file was deleted or renamed.
@@ -542,7 +544,7 @@ public class CodeOwnerApprovalCheck {
                     reviewerAccountIds,
                     approverAccountIds,
                     fallbackCodeOwners,
-                    hasOverride,
+                    overrides,
                     changedFile.oldPath().get()));
       }
 
@@ -563,16 +565,23 @@ public class CodeOwnerApprovalCheck {
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
       FallbackCodeOwners fallbackCodeOwners,
-      boolean hasOverride,
+      ImmutableSet<PatchSetApproval> overrides,
       Path absolutePath) {
     logger.atFine().log("computing path status for %s", absolutePath);
 
-    if (hasOverride) {
+    if (!overrides.isEmpty()) {
       logger.atFine().log(
-          "the status for path %s is %s since an override is present",
-          absolutePath, CodeOwnerStatus.APPROVED.name());
+          "the status for path %s is %s since an override is present (overrides = %s)",
+          absolutePath, CodeOwnerStatus.APPROVED.name(), overrides);
+      Optional<PatchSetApproval> override = overrides.stream().findAny();
+      checkState(override.isPresent(), "no override found");
       return PathCodeOwnerStatus.create(
-          absolutePath, CodeOwnerStatus.APPROVED, "override approval is present");
+          absolutePath,
+          CodeOwnerStatus.APPROVED,
+          String.format(
+              "override approval %s by %s is present",
+              override.get().label() + LabelValue.formatValue(override.get().value()),
+              ChangeMessagesUtil.getAccountTemplate(override.get().accountId())));
     }
 
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
@@ -1113,13 +1122,13 @@ public class CodeOwnerApprovalCheck {
   }
 
   /**
-   * Checks whether the given change has an override approval.
+   * Gets the overrides that were applied on the change.
    *
    * @param overrideApprovals approvals that count as override for the code owners submit check.
    * @param patchSetUploader account ID of the patch set uploader
-   * @return whether the given change has an override approval
+   * @return the overrides that were applied on the change
    */
-  private boolean hasOverride(
+  private ImmutableSet<PatchSetApproval> getOverride(
       ImmutableList<PatchSetApproval> currentPatchSetApprovals,
       ImmutableSet<RequiredApproval> overrideApprovals,
       Account.Id patchSetUploader) {
@@ -1147,10 +1156,11 @@ public class CodeOwnerApprovalCheck {
               }
               return true;
             })
-        .anyMatch(
+        .filter(
             patchSetApproval ->
                 overrideApprovals.stream()
-                    .anyMatch(overrideApproval -> overrideApproval.isApprovedBy(patchSetApproval)));
+                    .anyMatch(overrideApproval -> overrideApproval.isApprovedBy(patchSetApproval)))
+        .collect(toImmutableSet());
   }
 
   /**
