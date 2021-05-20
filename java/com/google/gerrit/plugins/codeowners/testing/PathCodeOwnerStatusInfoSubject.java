@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertAbout;
 
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.plugins.codeowners.api.PathCodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
@@ -61,6 +62,11 @@ public class PathCodeOwnerStatusInfoSubject extends Subject {
   /** Returns a {@link ComparableSubject} for the code owner status. */
   public ComparableSubject<CodeOwnerStatus> hasStatusThat() {
     return check("status()").that(pathCodeOwnerStatusInfo().status);
+  }
+
+  /** Returns an {@link IterableSubject} for the reasons. */
+  public IterableSubject hasReasonsThat() {
+    return check("reasons()").that(pathCodeOwnerStatusInfo().reasons);
   }
 
   private PathCodeOwnerStatusInfo pathCodeOwnerStatusInfo() {
