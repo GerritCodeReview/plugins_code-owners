@@ -23,6 +23,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.common.ChangeType;
@@ -35,14 +36,23 @@ import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject;
+import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.truth.ListSubject;
 import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.diff.DiffEntry;
+import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerStatusInfoJson}. */
 public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
+  private CodeOwnerStatusInfoJson codeOwnerStatusInfoJson;
+
+  @Before
+  public void setUpCodeOwnersPlugin() throws Exception {
+    codeOwnerStatusInfoJson = plugin.getSysInjector().getInstance(CodeOwnerStatusInfoJson.class);
+  }
+
   @Test
   public void cannotFormatNullPathCodeOwnerStatus() throws Exception {
     NullPointerException npe =
@@ -62,6 +72,23 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
         CodeOwnerStatusInfoJson.format(pathCodeOwnerStatus);
     assertThat(pathCodeOwnerStatusInfo).hasPathThat().isEqualTo("foo/bar.baz");
     assertThat(pathCodeOwnerStatusInfo).hasStatusThat().isEqualTo(CodeOwnerStatus.APPROVED);
+    assertThat(pathCodeOwnerStatusInfo).hasReasonsThat().isNull();
+  }
+
+  @Test
+  public void formatPathCodeOwnerStatusWithReasons() throws Exception {
+    PathCodeOwnerStatus pathCodeOwnerStatus =
+        PathCodeOwnerStatus.builder(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
+            .addReason("one reason")
+            .addReason("another reason")
+            .build();
+    PathCodeOwnerStatusInfo pathCodeOwnerStatusInfo =
+        CodeOwnerStatusInfoJson.format(pathCodeOwnerStatus);
+    assertThat(pathCodeOwnerStatusInfo).hasPathThat().isEqualTo("foo/bar.baz");
+    assertThat(pathCodeOwnerStatusInfo).hasStatusThat().isEqualTo(CodeOwnerStatus.APPROVED);
+    assertThat(pathCodeOwnerStatusInfo)
+        .hasReasonsThat()
+        .containsExactly("one reason", "another reason");
   }
 
   @Test
@@ -189,7 +216,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
         assertThrows(
             NullPointerException.class,
             () ->
-                CodeOwnerStatusInfoJson.format(
+                codeOwnerStatusInfoJson.format(
                     PatchSet.id(Change.id(1), 1), /* fileCodeOwnerStatuses= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("fileCodeOwnerStatuses");
   }
@@ -199,7 +226,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> CodeOwnerStatusInfoJson.format(/* patchSetId= */ null, ImmutableSet.of()));
+            () -> codeOwnerStatusInfoJson.format(/* patchSetId= */ null, ImmutableSet.of()));
     assertThat(npe).hasMessageThat().isEqualTo("patchSetId");
   }
 
@@ -212,7 +239,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     FileCodeOwnerStatus fileCodeOwnerStatus =
         FileCodeOwnerStatus.create(changedFile, Optional.of(pathCodeOwnerStatus), Optional.empty());
     CodeOwnerStatusInfo codeOwnerStatusInfo =
-        CodeOwnerStatusInfoJson.format(
+        codeOwnerStatusInfoJson.format(
             PatchSet.id(Change.id(1), 1), ImmutableSet.of(fileCodeOwnerStatus));
     assertThat(codeOwnerStatusInfo).hasPatchSetNumberThat().isEqualTo(1);
     FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
@@ -228,7 +255,92 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusInfoSubject.hasNewPathStatusThat().value().hasReasonsThat().isNull();
     fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().isEmpty();
+    assertThat(codeOwnerStatusInfo).hasAccountsThat().isNull();
+  }
+
+  @Test
+  public void formatCodeOwnerStatusInfoWithReasons() throws Exception {
+    ChangedFile changedFile = mock(ChangedFile.class);
+    when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
+    PathCodeOwnerStatus pathCodeOwnerStatus =
+        PathCodeOwnerStatus.builder(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
+            .addReason("one reason")
+            .addReason("another reason")
+            .build();
+    FileCodeOwnerStatus fileCodeOwnerStatus =
+        FileCodeOwnerStatus.create(changedFile, Optional.of(pathCodeOwnerStatus), Optional.empty());
+    CodeOwnerStatusInfo codeOwnerStatusInfo =
+        codeOwnerStatusInfoJson.format(
+            PatchSet.id(Change.id(1), 1), ImmutableSet.of(fileCodeOwnerStatus));
+    assertThat(codeOwnerStatusInfo).hasPatchSetNumberThat().isEqualTo(1);
+    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatusInfo).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasPathThat()
+        .isEqualTo("foo/bar.baz");
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasReasonsThat()
+        .containsExactly("one reason", "another reason");
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().isEmpty();
+    assertThat(codeOwnerStatusInfo).hasAccountsThat().isNull();
+  }
+
+  @Test
+  public void formatCodeOwnerStatusInfoWithReasonsThatReferenceAccounts() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+    String reason1 =
+        String.format("because %s did something", ChangeMessagesUtil.getAccountTemplate(user.id()));
+    String reason2 =
+        String.format(
+            "because %s, %s and %s did something else",
+            ChangeMessagesUtil.getAccountTemplate(admin.id()),
+            ChangeMessagesUtil.getAccountTemplate(user.id()),
+            ChangeMessagesUtil.getAccountTemplate(user2.id()));
+    ChangedFile changedFile = mock(ChangedFile.class);
+    when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
+    PathCodeOwnerStatus pathCodeOwnerStatus =
+        PathCodeOwnerStatus.builder(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
+            .addReason(reason1)
+            .addReason(reason2)
+            .build();
+    FileCodeOwnerStatus fileCodeOwnerStatus =
+        FileCodeOwnerStatus.create(changedFile, Optional.of(pathCodeOwnerStatus), Optional.empty());
+    CodeOwnerStatusInfo codeOwnerStatusInfo =
+        codeOwnerStatusInfoJson.format(
+            PatchSet.id(Change.id(1), 1), ImmutableSet.of(fileCodeOwnerStatus));
+    assertThat(codeOwnerStatusInfo).hasPatchSetNumberThat().isEqualTo(1);
+    FileCodeOwnerStatusInfoSubject fileCodeOwnerStatusInfoSubject =
+        assertThat(codeOwnerStatusInfo).hasFileCodeOwnerStatusesThat().onlyElement();
+    fileCodeOwnerStatusInfoSubject.hasChangeTypeThat().isEqualTo(ChangeType.ADDED);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasPathThat()
+        .isEqualTo("foo/bar.baz");
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusInfoSubject
+        .hasNewPathStatusThat()
+        .value()
+        .hasReasonsThat()
+        .containsExactly(reason1, reason2);
+    fileCodeOwnerStatusInfoSubject.hasOldPathStatusThat().isEmpty();
+    assertThat(codeOwnerStatusInfo).hasAccounts(admin, user, user2);
   }
 
   @Test
@@ -262,7 +374,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
             Optional.of(oldPathCodeOwnerStatus3));
 
     CodeOwnerStatusInfo codeOwnerStatusInfo =
-        CodeOwnerStatusInfoJson.format(
+        codeOwnerStatusInfoJson.format(
             PatchSet.id(Change.id(1), 1),
             ImmutableSet.of(fileCodeOwnerStatus3, fileCodeOwnerStatus2, fileCodeOwnerStatus1));
     ListSubject<FileCodeOwnerStatusInfoSubject, FileCodeOwnerStatusInfo> listSubject =

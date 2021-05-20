@@ -56,6 +56,7 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
   private static final int UNLIMITED = 0;
 
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
+  private final CodeOwnerStatusInfoJson codeOwnerStatusInfoJson;
 
   private int start;
   private int limit;
@@ -79,8 +80,11 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
   }
 
   @Inject
-  public GetCodeOwnerStatus(CodeOwnerApprovalCheck codeOwnerApprovalCheck) {
+  public GetCodeOwnerStatus(
+      CodeOwnerApprovalCheck codeOwnerApprovalCheck,
+      CodeOwnerStatusInfoJson codeOwnerStatusInfoJson) {
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
+    this.codeOwnerStatusInfoJson = codeOwnerStatusInfoJson;
   }
 
   @Override
@@ -93,7 +97,7 @@ public class GetCodeOwnerStatus implements RestReadView<ChangeResource> {
         codeOwnerApprovalCheck.getFileStatusesAsSet(
             changeResource.getNotes(), start, limit == UNLIMITED ? UNLIMITED : limit + 1);
     CodeOwnerStatusInfo codeOwnerStatusInfo =
-        CodeOwnerStatusInfoJson.format(
+        codeOwnerStatusInfoJson.format(
             changeResource.getNotes().getCurrentPatchSet().id(),
             limit == UNLIMITED
                 ? fileCodeOwnerStatuses

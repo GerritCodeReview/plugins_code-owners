@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.api;
 
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
+import java.util.List;
 
 /** JSON entity that describes the code owner status for a path that was touched in a change. */
 public class PathCodeOwnerStatusInfo {
@@ -27,4 +28,15 @@ public class PathCodeOwnerStatusInfo {
 
   /** The code owner status for the path. */
   public CodeOwnerStatus status;
+
+  /**
+   * Reasons explaining the status.
+   *
+   * <p>The reasons may contain placeholders for accounts as {@code <GERRIT_ACCOUNT_XXXXXXX>} (where
+   * {@code XXXXXXX} is the account ID). The referenced accounts are returned in the {@link
+   * CodeOwnerStatusInfo} that contains the path code owner statuses.
+   *
+   * <p>Not set if there are no reasons.
+   */
+  public List<String> reasons;
 }
