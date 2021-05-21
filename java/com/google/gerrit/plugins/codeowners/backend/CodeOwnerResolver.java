@@ -22,8 +22,10 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
@@ -228,6 +230,7 @@ public class CodeOwnerResolver {
           pathCodeOwners.resolveCodeOwnerConfig();
       return resolve(
           pathCodeOwnersResult.get().getPathCodeOwners(),
+          pathCodeOwnersResult.get().getAnnotations(),
           pathCodeOwnersResult.get().unresolvedImports(),
           pathCodeOwnersResult.messages());
     }
@@ -253,6 +256,7 @@ public class CodeOwnerResolver {
   public CodeOwnerResolverResult resolve(Set<CodeOwnerReference> codeOwnerReferences) {
     return resolve(
         codeOwnerReferences,
+        /* annotations= */ ImmutableMultimap.of(),
         /* unresolvedImports= */ ImmutableList.of(),
         /* pathCodeOwnersMessages= */ ImmutableList.of());
   }
@@ -264,12 +268,14 @@ public class CodeOwnerResolver {
    * parallel (via {@link AccountCache#get(Set)}.
    *
    * @param codeOwnerReferences the code owner references that should be resolved
+   * @param annotationsByCodeOwnerReference annotations by code owner reference
    * @param unresolvedImports list of unresolved imports
    * @param pathCodeOwnersMessages messages that were collected when resolving path code owners
    * @return the resolved code owner references as a {@link CodeOwnerResolverResult}
    */
   private CodeOwnerResolverResult resolve(
       Set<CodeOwnerReference> codeOwnerReferences,
+      ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotationsByCodeOwnerReference,
       List<UnresolvedImport> unresolvedImports,
       ImmutableList<String> pathCodeOwnersMessages) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
@@ -285,12 +291,23 @@ public class CodeOwnerResolver {
 
       AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
       AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
-      ImmutableSet<CodeOwner> codeOwners =
-          resolve(messageBuilder, ownedByAllUsers, hasUnresolvedCodeOwners, codeOwnerReferences);
+      ImmutableMap<CodeOwner, ImmutableSet<CodeOwnerAnnotation>> codeOwnersWithAnnotations =
+          resolve(
+              messageBuilder,
+              ownedByAllUsers,
+              hasUnresolvedCodeOwners,
+              codeOwnerReferences,
+              annotationsByCodeOwnerReference);
+
+      ImmutableMultimap.Builder<CodeOwner, CodeOwnerAnnotation> annotationsByCodeOwner =
+          ImmutableMultimap.builder();
+      codeOwnersWithAnnotations.forEach(
+          (codeOwner, annotations) -> annotationsByCodeOwner.putAll(codeOwner, annotations));
 
       CodeOwnerResolverResult codeOwnerResolverResult =
           CodeOwnerResolverResult.create(
-              codeOwners,
+              codeOwnersWithAnnotations.keySet(),
+              annotationsByCodeOwner.build(),
               ownedByAllUsers.get(),
               hasUnresolvedCodeOwners.get(),
               !unresolvedImports.isEmpty(),
@@ -341,17 +358,19 @@ public class CodeOwnerResolver {
     ImmutableList.Builder<String> messageBuilder = ImmutableList.builder();
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
     AtomicBoolean hasUnresolvedCodeOwners = new AtomicBoolean(false);
-    ImmutableSet<CodeOwner> codeOwners =
+    ImmutableMap<CodeOwner, ImmutableSet<CodeOwnerAnnotation>> codeOwnersWithAnnotations =
         resolve(
             messageBuilder,
             ownedByAllUsers,
             hasUnresolvedCodeOwners,
-            ImmutableSet.of(codeOwnerReference));
+            ImmutableSet.of(codeOwnerReference),
+            /* annotations= */ ImmutableMultimap.of());
     ImmutableList<String> messages = messageBuilder.build();
-    if (codeOwners.isEmpty()) {
+    if (codeOwnersWithAnnotations.isEmpty()) {
       return OptionalResultWithMessages.createEmpty(messages);
     }
-    return OptionalResultWithMessages.create(Iterables.getOnlyElement(codeOwners), messages);
+    return OptionalResultWithMessages.create(
+        Iterables.getOnlyElement(codeOwnersWithAnnotations.keySet()), messages);
   }
 
   /**
@@ -366,13 +385,17 @@ public class CodeOwnerResolver {
    * @param hasUnresolvedCodeOwners a flag that is set any of the given {@link CodeOwnerReference}s
    *     cannot be resolved
    * @param codeOwnerReferences the code owner references that should be resolved
-   * @return the resolved code owner references as a {@link CodeOwner}s
+   * @param annotations annotations by code owner reference
+   * @return map that maps the resolved {@link CodeOwner}s to their annotations (note: we cannot
+   *     return a {@code Multimap<CodeOwner, CodeOwnerAnnotation>} here since there may be code
+   *     owners without annotations and Multimap doesn't store keys for which no values are stored)
    */
-  private ImmutableSet<CodeOwner> resolve(
+  private ImmutableMap<CodeOwner, ImmutableSet<CodeOwnerAnnotation>> resolve(
       ImmutableList.Builder<String> messages,
       AtomicBoolean ownedByAllUsers,
       AtomicBoolean hasUnresolvedCodeOwners,
-      Set<CodeOwnerReference> codeOwnerReferences) {
+      Set<CodeOwnerReference> codeOwnerReferences,
+      ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotations) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
 
     ImmutableSet<String> emailsToResolve =
@@ -416,16 +439,30 @@ public class CodeOwnerResolver {
       hasUnresolvedCodeOwners.set(true);
     }
 
-    ImmutableSet<CodeOwner> cachedCodeOwners =
-        cachedCodeOwnersByEmail.values().stream()
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(toImmutableSet());
+    // Merge code owners that have been newly resolved with code owners which have been looked up
+    // from cache and return them with their annotations.
+    Stream<Pair<String, CodeOwner>> newlyResolvedCodeOwnersStream =
+        codeOwnersByEmail.entrySet().stream().map(e -> Pair.of(e.getKey(), e.getValue()));
+    Stream<Pair<String, CodeOwner>> cachedCodeOwnersStream =
+        cachedCodeOwnersByEmail.entrySet().stream()
+            .filter(e -> e.getValue().isPresent())
+            .map(e -> Pair.of(e.getKey(), e.getValue().get()));
+    return Streams.concat(newlyResolvedCodeOwnersStream, cachedCodeOwnersStream)
+        .collect(
+            toImmutableMap(
+                Pair::value,
+                p -> {
+                  ImmutableSet.Builder<CodeOwnerAnnotation> annotationBuilder =
+                      ImmutableSet.builder();
 
-    ImmutableSet.Builder<CodeOwner> codeOwners = ImmutableSet.builder();
-    codeOwners.addAll(cachedCodeOwners);
-    codeOwners.addAll(codeOwnersByEmail.values());
-    return codeOwners.build();
+                  annotationBuilder.addAll(annotations.get(CodeOwnerReference.create(p.key())));
+
+                  // annotations for the all users wildcard (aka '*') apply to all code owners
+                  annotationBuilder.addAll(
+                      annotations.get(CodeOwnerReference.create(ALL_USERS_WILDCARD)));
+
+                  return annotationBuilder.build();
+                }));
   }
 
   /**
