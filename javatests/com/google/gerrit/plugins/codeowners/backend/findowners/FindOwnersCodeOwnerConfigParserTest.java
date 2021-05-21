@@ -470,6 +470,41 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
+  public void perFileCodeOwnerConfigWithAnnotations() throws Exception {
+    assertParseAndFormat(
+        "per-file foo="
+            + EMAIL_1
+            + ","
+            + EMAIL_2
+            + ","
+            + EMAIL_3
+            + " #{FOO_BAR}#{BAR_BAZ} #NO_ANNOTATION, #{FOO} #{bar} #{bAz} other comment",
+        codeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasPathExpressionsThat().containsExactly("foo");
+          codeOwnerSetSubject.hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2, EMAIL_3);
+          codeOwnerSetSubject
+              .hasAnnotationsThat()
+              .containsExactly(
+                  EMAIL_1,
+                  ImmutableSet.of("FOO_BAR", "BAR_BAZ", "FOO", "bar", "bAz"),
+                  EMAIL_2,
+                  ImmutableSet.of("FOO_BAR", "BAR_BAZ", "FOO", "bar", "bAz"),
+                  EMAIL_3,
+                  ImmutableSet.of("FOO_BAR", "BAR_BAZ", "FOO", "bar", "bAz"));
+        },
+        // annotations are sorted alphabetically, the normal comment is dropped, a newline is added
+        "per-file foo="
+            + EMAIL_1
+            + ","
+            + EMAIL_2
+            + ","
+            + EMAIL_3
+            + " #{BAR_BAZ} #{FOO} #{FOO_BAR} #{bAz} #{bar}\n");
+  }
+
+  @Test
   public void perFileCodeOwnerConfigImportFromSameProjectAndBranch() throws Exception {
     Path path = Paths.get("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =

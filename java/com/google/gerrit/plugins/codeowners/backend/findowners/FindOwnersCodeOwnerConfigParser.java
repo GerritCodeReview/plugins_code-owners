@@ -17,6 +17,8 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.ImmutableSortedSet.toImmutableSortedSet;
+import static java.util.Comparator.naturalOrder;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
@@ -26,9 +28,12 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SortedSetMultimap;
 import com.google.common.collect.TreeMultimap;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParseException;
@@ -40,7 +45,11 @@ import com.google.gerrit.server.git.ValidationError;
 import com.google.inject.Singleton;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -221,7 +230,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
         globalCodeOwnerSetBuilder.addCodeOwner(parsedEmailLine.codeOwnerReference());
         globalCodeOwnerSetBuilder.addAnnotations(
             parsedEmailLine.codeOwnerReference(), parsedEmailLine.annotations());
-      } else if ((codeOwnerSet = parsePerFile(line)) != null) {
+      } else if ((codeOwnerSet = parsePerFileLine(line)) != null) {
         perFileCodeOwnerSets.add(codeOwnerSet);
       } else if ((codeOwnerConfigReference = parseInclude(line)) != null) {
         codeOwnerConfigBuilder.addImport(codeOwnerConfigReference);
@@ -230,13 +239,13 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       }
     }
 
-    private static CodeOwnerSet parsePerFile(String line) {
-      Matcher m = PAT_PER_FILE.matcher(line);
-      if (!m.matches() || !isGlobs(m.group(1).trim())) {
+    private static CodeOwnerSet parsePerFileLine(String line) {
+      Matcher perFileMatcher = PAT_PER_FILE.matcher(line);
+      if (!perFileMatcher.matches() || !isGlobs(perFileMatcher.group(1).trim())) {
         return null;
       }
 
-      String matchedGroup2 = m.group(2).trim();
+      String matchedGroup2 = perFileMatcher.group(2).trim();
       if (!PAT_PER_FILE_OWNERS.matcher(matchedGroup2).matches()) {
         checkState(
             !PAT_PER_FILE_INCLUDE.matcher(matchedGroup2).matches(),
@@ -247,7 +256,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       }
 
       String[] globsAndOwners =
-          new String[] {removeExtraSpaces(m.group(1)), removeExtraSpaces(m.group(2))};
+          new String[] {
+            removeExtraSpaces(perFileMatcher.group(1)), removeExtraSpaces(perFileMatcher.group(2))
+          };
       String[] dirGlobs = splitGlobs(globsAndOwners[0]);
       String directive = globsAndOwners[1];
       if (directive.equals(TOK_SET_NOPARENT)) {
@@ -267,11 +278,26 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
       List<String> ownerEmails = Arrays.asList(directive.split(COMMA, -1));
 
-      return CodeOwnerSet.builder()
-          .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
-          .setCodeOwners(
-              ownerEmails.stream().map(CodeOwnerReference::create).collect(toImmutableSet()))
-          .build();
+      // Get the comment part of the line (the first '#' and everything that follows).
+      String comment = perFileMatcher.group(3);
+      Set<CodeOwnerAnnotation> annotations = new HashSet<>();
+      if (comment != null) {
+        Matcher annotationMatcher = PAT_ANNOTATION.matcher(comment);
+        while (annotationMatcher.find()) {
+          String annotation = annotationMatcher.group(1);
+          annotations.add(CodeOwnerAnnotation.create(annotation));
+        }
+      }
+
+      CodeOwnerSet.Builder codeOwnerSet =
+          CodeOwnerSet.builder()
+              .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
+              .setCodeOwners(
+                  ownerEmails.stream().map(CodeOwnerReference::create).collect(toImmutableSet()));
+      ownerEmails.stream()
+          .forEach(
+              email -> codeOwnerSet.addAnnotations(CodeOwnerReference.create(email), annotations));
+      return codeOwnerSet.build();
     }
 
     /**
@@ -496,18 +522,46 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       }
 
       if (!codeOwnerSet.codeOwners().isEmpty()) {
-        b.append(
-            String.format(
-                PER_FILE_LINE_FORMAT,
-                formattedPathExpressions,
-                formatCodeOwnerReferencesAsList(codeOwnerSet.codeOwners())));
+        // group code owners that have the same annotations
+        ListMultimap<SortedSet<String>, CodeOwnerReference> codeOwnersByAnnotations =
+            MultimapBuilder.hashKeys().arrayListValues().build();
+        codeOwnerSet
+            .codeOwners()
+            .forEach(
+                codeOwnerReference ->
+                    codeOwnersByAnnotations.put(
+                        codeOwnerSet.annotations().get(codeOwnerReference).stream()
+                            .map(CodeOwnerAnnotation::key)
+                            .collect(toImmutableSortedSet(naturalOrder())),
+                        codeOwnerReference));
+
+        codeOwnersByAnnotations
+            .asMap()
+            .forEach(
+                (annotations, codeOwners) ->
+                    b.append(
+                        String.format(
+                            PER_FILE_LINE_FORMAT,
+                            formattedPathExpressions,
+                            formatCodeOwnerReferencesAsList(codeOwners)
+                                + formatAnnotations(annotations))));
       }
       return b.toString();
     }
 
     private static String formatCodeOwnerReferencesAsList(
-        ImmutableSet<CodeOwnerReference> codeOwnerReferences) {
+        Collection<CodeOwnerReference> codeOwnerReferences) {
       return formatValuesAsList(codeOwnerReferences.stream().map(CodeOwnerReference::email));
+    }
+
+    private static String formatAnnotations(SortedSet<String> annotations) {
+      if (annotations.isEmpty()) {
+        return "";
+      }
+
+      return annotations.stream()
+          .map(annotation -> "#{" + annotation + "}")
+          .collect(joining(" ", " ", ""));
     }
 
     private static String formatValuesAsList(ImmutableSet<String> values) {
