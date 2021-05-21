@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.Account;
 import java.util.List;
@@ -38,6 +39,9 @@ public abstract class CodeOwnerResolverResult {
   public ImmutableSet<Account.Id> codeOwnersAccountIds() {
     return codeOwners().stream().map(CodeOwner::accountId).collect(toImmutableSet());
   }
+
+  /** Returns the annotations for the {@link #codeOwners()}. */
+  public abstract ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations();
 
   /**
    * Whether the code ownership was assigned to all users by using the {@link
@@ -69,6 +73,7 @@ public abstract class CodeOwnerResolverResult {
   public final String toString() {
     return MoreObjects.toStringHelper(this)
         .add("codeOwners", codeOwners())
+        .add("annotations", annotations())
         .add("ownedByAllUsers", ownedByAllUsers())
         .add("hasUnresolvedCodeOwners", hasUnresolvedCodeOwners())
         .add("hasUnresolvedImports", hasUnresolvedImports())
@@ -79,12 +84,14 @@ public abstract class CodeOwnerResolverResult {
   /** Creates a {@link CodeOwnerResolverResult} instance. */
   public static CodeOwnerResolverResult create(
       ImmutableSet<CodeOwner> codeOwners,
+      ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       boolean ownedByAllUsers,
       boolean hasUnresolvedCodeOwners,
       boolean hasUnresolvedImports,
       List<String> messages) {
     return new AutoValue_CodeOwnerResolverResult(
         codeOwners,
+        annotations,
         ownedByAllUsers,
         hasUnresolvedCodeOwners,
         hasUnresolvedImports,
@@ -95,6 +102,7 @@ public abstract class CodeOwnerResolverResult {
   public static CodeOwnerResolverResult createEmpty() {
     return new AutoValue_CodeOwnerResolverResult(
         /* codeOwners= */ ImmutableSet.of(),
+        /* annotations= */ ImmutableMultimap.of(),
         /* ownedByAllUsers= */ false,
         /* hasUnresolvedCodeOwners= */ false,
         /* hasUnresolvedImports= */ false,

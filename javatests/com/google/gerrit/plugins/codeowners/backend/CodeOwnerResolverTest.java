@@ -426,6 +426,65 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void resolvePathCodeOwnersWithAnnotations() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addCodeOwnerEmail(admin.email())
+                    .addAnnotation(admin.email(), CodeOwnerAnnotation.create("FOO"))
+                    .addAnnotation(admin.email(), CodeOwnerAnnotation.create("BAR"))
+                    .addCodeOwnerEmail(user.email())
+                    .addAnnotation(user.email(), CodeOwnerAnnotation.create("BAZ"))
+                    .addCodeOwnerEmail(user2.email())
+                    .build())
+            .build();
+
+    CodeOwnerResolverResult result =
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id(), user2.id());
+    assertThat(result.annotations().keySet())
+        .containsExactly(CodeOwner.create(admin.id()), CodeOwner.create(user.id()));
+    assertThat(result.annotations().get(CodeOwner.create(admin.id())))
+        .containsExactly(CodeOwnerAnnotation.create("FOO"), CodeOwnerAnnotation.create("BAR"));
+    assertThat(result.annotations().get(CodeOwner.create(user.id())))
+        .containsExactly(CodeOwnerAnnotation.create("BAZ"));
+  }
+
+  @Test
+  public void resolvePathCodeOwnersWithAnnotations_annotationOnAllUsersWildcard()
+      throws Exception {
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addCodeOwnerEmail(admin.email())
+                    .addAnnotation(admin.email(), CodeOwnerAnnotation.create("FOO"))
+                    .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
+                    .addAnnotation(
+                        CodeOwnerResolver.ALL_USERS_WILDCARD, CodeOwnerAnnotation.create("BAR"))
+                    .addCodeOwnerEmail(user.email())
+                    .build())
+            .build();
+
+    CodeOwnerResolverResult result =
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
+    assertThat(result.annotations().keySet())
+        .containsExactly(CodeOwner.create(admin.id()), CodeOwner.create(user.id()));
+    assertThat(result.annotations().get(CodeOwner.create(admin.id())))
+        .containsExactly(CodeOwnerAnnotation.create("FOO"), CodeOwnerAnnotation.create("BAR"));
+    assertThat(result.annotations().get(CodeOwner.create(user.id())))
+        .containsExactly(CodeOwnerAnnotation.create("BAR"));
+  }
+
+  @Test
   public void cannotResolvePathCodeOwnersOfNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(

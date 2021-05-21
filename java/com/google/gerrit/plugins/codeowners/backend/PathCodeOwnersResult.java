@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import com.google.auto.value.AutoValue;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import java.nio.file.Path;
@@ -52,13 +53,34 @@ public abstract class PathCodeOwnersResult {
    */
   public ImmutableSet<CodeOwnerReference> getPathCodeOwners() {
     logger.atFine().log(
-        "computing path code owners for %s from %s", path(), codeOwnerConfig().key());
+        "retrieving path code owners for %s from %s", path(), codeOwnerConfig().key());
     ImmutableSet<CodeOwnerReference> pathCodeOwners =
         codeOwnerConfig().codeOwnerSets().stream()
             .flatMap(codeOwnerSet -> codeOwnerSet.codeOwners().stream())
             .collect(toImmutableSet());
     logger.atFine().log("pathCodeOwners = %s", pathCodeOwners);
     return pathCodeOwners;
+  }
+
+  /**
+   * Gets the annotations for all path code owners that are returned by {@link
+   * #getPathCodeOwners()}.
+   *
+   * @return annotations by code owner
+   */
+  public ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> getAnnotations() {
+    logger.atFine().log(
+        "retrieving path code owner annotations for %s from %s", path(), codeOwnerConfig().key());
+    ImmutableMultimap.Builder<CodeOwnerReference, CodeOwnerAnnotation> annotationsBuilder =
+        ImmutableMultimap.builder();
+    codeOwnerConfig()
+        .codeOwnerSets()
+        .forEach(codeOwnerSet -> annotationsBuilder.putAll(codeOwnerSet.annotations()));
+
+    ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotations =
+        annotationsBuilder.build();
+    logger.atFine().log("annotations = %s", annotations);
+    return annotations;
   }
 
   /**
