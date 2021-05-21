@@ -209,6 +209,17 @@ public abstract class CodeOwnerSet {
         annotationsBuilder();
 
     /**
+     * Adds an annotation for a code owner.
+     *
+     * @param email email of the code owner for which the annotation should be added
+     * @param annotation annotation that should be added
+     * @return the Builder instance for chaining calls
+     */
+    public Builder addAnnotation(String email, CodeOwnerAnnotation annotation) {
+      return addAnnotations(CodeOwnerReference.create(email), ImmutableSet.of(annotation));
+    }
+
+    /**
      * Adds annotations for a code owner.
      *
      * @param codeOwnerReference reference to the code owner for which the annotations should be

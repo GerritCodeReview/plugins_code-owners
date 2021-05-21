@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
@@ -25,6 +26,7 @@ public class CodeOwnerResolverResultTest extends AbstractAutoValueTest {
     CodeOwnerResolverResult codeOwnerResolverResult =
         CodeOwnerResolverResult.create(
             ImmutableSet.of(CodeOwner.create(admin.id())),
+            /* annotations= */ ImmutableMultimap.of(),
             /* ownedByAllUsers= */ false,
             /* hasUnresolvedCodeOwners= */ false,
             /* hasUnresolvedImports= */ false,
