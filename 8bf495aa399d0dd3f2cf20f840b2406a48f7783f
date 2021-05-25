@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dd5d0bc8_7074c8dc",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-25T13:19:11Z",
+      "side": 0,
+      "message": "should this have been removed?",
+      "range": {
+        "startLine": 382,
+        "startChar": 0,
+        "endLine": 385,
+        "endChar": 0
+      },
+      "revId": "8bf495aa399d0dd3f2cf20f840b2406a48f7783f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
