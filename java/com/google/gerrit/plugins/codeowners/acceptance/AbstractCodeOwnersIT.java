@@ -102,6 +102,11 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
     assumeThatCodeOwnersBackendIsNotProtoBackend();
   }
 
+  protected void skipTestIfAnnotationsNotSupportedByCodeOwnersBackend() {
+    // the proto backend doesn't support annotations on code owners
+    assumeThatCodeOwnersBackendIsNotProtoBackend();
+  }
+
   protected void assumeThatCodeOwnersBackendIsNotProtoBackend() {
     assume().that(backendConfig.getDefaultBackend()).isNotInstanceOf(ProtoBackend.class);
   }

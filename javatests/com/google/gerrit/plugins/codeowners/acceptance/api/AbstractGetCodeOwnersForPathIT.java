@@ -77,7 +77,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   @Inject private GroupOperations groupOperations;
   @Inject private ProjectOperations projectOperations;
 
-  private TestPathExpressions testPathExpressions;
+  protected TestPathExpressions testPathExpressions;
 
   @Before
   public void setup() throws Exception {
