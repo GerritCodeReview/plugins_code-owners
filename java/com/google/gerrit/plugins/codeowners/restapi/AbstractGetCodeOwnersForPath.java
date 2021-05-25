@@ -22,7 +22,10 @@ import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NOT_EX
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
@@ -36,6 +39,7 @@ import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolverResult;
@@ -206,6 +210,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         CodeOwnerScore.IS_EXPLICITLY_MENTIONED.createScoring();
 
     Set<CodeOwner> codeOwners = new HashSet<>();
+    ListMultimap<CodeOwner, CodeOwnerAnnotation> annotations = LinkedListMultimap.create();
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
     List<String> debugLogs = new ArrayList<>();
     codeOwnerConfigHierarchy.visit(
@@ -221,6 +226,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
           }
 
           codeOwners.addAll(pathCodeOwners.codeOwners());
+          annotations.putAll(pathCodeOwners.annotations());
 
           int distance =
               codeOwnerConfig.key().branchNameKey().branch().equals(RefNames.REFS_CONFIG)
@@ -293,7 +299,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     }
 
     ImmutableSet<CodeOwner> filteredCodeOwners =
-        filterCodeOwners(rsrc, ImmutableSet.copyOf(codeOwners));
+        filterCodeOwners(
+            rsrc, ImmutableMultimap.copyOf(annotations), ImmutableSet.copyOf(codeOwners));
     CodeOwnerScorings codeOwnerScorings =
         createScorings(
             rsrc,
@@ -367,18 +374,26 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    *       normally doesn't make sense since they will not react to review requests.
    * </ul>
    */
-  private ImmutableSet<CodeOwner> filterCodeOwners(R rsrc, ImmutableSet<CodeOwner> codeOwners) {
-    return filterCodeOwners(rsrc, getVisibleCodeOwners(rsrc, codeOwners)).collect(toImmutableSet());
+  private ImmutableSet<CodeOwner> filterCodeOwners(
+      R rsrc,
+      ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
+      ImmutableSet<CodeOwner> codeOwners) {
+    return filterCodeOwners(rsrc, annotations, getVisibleCodeOwners(rsrc, codeOwners))
+        .collect(toImmutableSet());
   }
 
   /**
    * To be overridden by subclasses to filter out additional code owners.
    *
    * @param rsrc resource on which the request is being performed
+   * @param annotations annotations that were set on the code owners
    * @param codeOwners stream of code owners that should be filtered
    * @return the filtered stream of code owners
    */
-  protected Stream<CodeOwner> filterCodeOwners(R rsrc, Stream<CodeOwner> codeOwners) {
+  protected Stream<CodeOwner> filterCodeOwners(
+      R rsrc,
+      ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
+      Stream<CodeOwner> codeOwners) {
     return codeOwners;
   }
 
