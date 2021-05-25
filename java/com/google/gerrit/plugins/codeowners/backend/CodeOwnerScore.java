@@ -53,7 +53,21 @@ public enum CodeOwnerScore {
    * <p>The IS_REVIEWER score has a higher weight than the {@link #DISTANCE} score so that it takes
    * precedence and code owners that are reviewers are always returned first.
    */
-  IS_REVIEWER(Kind.GREATER_VALUE_IS_BETTER, /* weight= */ 2, /* maxValue= */ 1);
+  IS_REVIEWER(Kind.GREATER_VALUE_IS_BETTER, /* weight= */ 2, /* maxValue= */ 1),
+
+  /**
+   * Score to take into account when a user is explicitly mentioned as a code owner
+   *
+   * <p>Users that are explicitly mentioned as code owner in a code owner config file get scored
+   * with 1 (see {@link #IS_EXPLICITLY_MENTIONED_SCORING_VALUE}), while users that are not
+   * explicitly mentioned as code owners in the code owner config file, and are only code owners
+   * because the code ownership is assigned to all users aka {@code *}, get scored with 0 (see
+   * {@link #NOT_EXPLICITLY_MENTIONED_SCORING_VALUE}).
+   *
+   * <p>The IS_EXPLICITLY_MENTIONED score has a lower weight than the {@link #DISTANCE} score so
+   * that the {@link #DISTANCE} score takes precedence.
+   */
+  IS_EXPLICITLY_MENTIONED(Kind.GREATER_VALUE_IS_BETTER, /* weight= */ 0.5, /* maxValue= */ 1);
 
   /**
    * Scoring value for the {@link #IS_REVIEWER} score for users that are not a reviewer of the
@@ -65,6 +79,19 @@ public enum CodeOwnerScore {
    * Scoring value for the {@link #IS_REVIEWER} score for users that are a reviewer of the change.
    */
   public static int IS_REVIEWER_SCORING_VALUE = 1;
+
+  /**
+   * Scoring value for the {@link #IS_EXPLICITLY_MENTIONED} score for users that are not explicitly
+   * mentioned as code owners in the code owner config file and are only code owners because the
+   * code ownership is assigned to all users aka {@code *}.
+   */
+  public static int NOT_EXPLICITLY_MENTIONED_SCORING_VALUE = 0;
+
+  /**
+   * Scoring value for the {@link #IS_EXPLICITLY_MENTIONED} score for users that are explicitly
+   * mentioned as code owners in the code owner config file.
+   */
+  public static int IS_EXPLICITLY_MENTIONED_SCORING_VALUE = 1;
 
   /**
    * Score kind.

@@ -483,6 +483,9 @@ listed code owners:
 * distance of the code owner config file that defines the code owner to the
   path for which code owners are listed (the lower the distance the better the
   code owner)
+* whether the user is explicitly mentioned as a code owner in the code owner
+  config file vs. the user being a code owner only because the code ownership
+  has been assigned to all users (aka `*`)
 * whether the code owner is a reviewer of the change (only when listing code
   owners for a change)
 
