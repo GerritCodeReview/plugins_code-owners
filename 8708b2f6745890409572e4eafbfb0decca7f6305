@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d26f9342_34d94ac3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-25T13:39:30Z",
+      "side": 1,
+      "message": "you say \"Do not override if it\u0027s INSUFFICIENT\", but then you override as long as it\u0027s NOT INSUFFICIENT - I\u0027m confused",
+      "range": {
+        "startLine": 620,
+        "startChar": 11,
+        "endLine": 621,
+        "endChar": 33
+      },
+      "revId": "8708b2f6745890409572e4eafbfb0decca7f6305",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
