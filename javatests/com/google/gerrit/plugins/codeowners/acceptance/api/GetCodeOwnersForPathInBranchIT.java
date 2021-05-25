@@ -33,7 +33,9 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
+import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange;
 import com.google.inject.Inject;
 import java.util.List;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -242,5 +244,64 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(serviceUser.id());
+  }
+
+  @Test
+  public void codeOwnersWithNeverSuggestAnnotationAreIncluded() throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .addCodeOwnerEmail(user2.email())
+                .build())
+        .create();
+
+    // Expectation: admin is included because GetCodeOwnersForPathInBranch ignores the NEVER_SUGGEST
+    // suggestion.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  public void perFileCodeOwnersWithNeverSuggestAnnotationAreIncluded() throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .addCodeOwnerEmail(user2.email())
+                .build())
+        .create();
+
+    // Expectation: admin is included because GetCodeOwnersForPathInBranch ignores the NEVER_SUGGEST
+    // suggestion.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
   }
 }

@@ -17,6 +17,8 @@ package com.google.gerrit.plugins.codeowners.restapi;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REVIEWER_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
@@ -25,6 +27,7 @@ import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
@@ -54,6 +57,10 @@ import java.util.stream.Stream;
 public class GetCodeOwnersForPathInChange
     extends AbstractGetCodeOwnersForPath<CodeOwnersInChangeCollection.PathResource> {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+  @VisibleForTesting
+  public static final CodeOwnerAnnotation NEVER_SUGGEST_ANNOTATION =
+      CodeOwnerAnnotation.create("NEVER_SUGGEST");
 
   private final ServiceUserClassifier serviceUserClassifier;
 
@@ -123,8 +130,13 @@ public class GetCodeOwnersForPathInChange
 
   @Override
   protected Stream<CodeOwner> filterCodeOwners(
-      CodeOwnersInChangeCollection.PathResource rsrc, Stream<CodeOwner> codeOwners) {
-    return codeOwners.filter(filterOutChangeOwner(rsrc)).filter(filterOutServiceUsers());
+      CodeOwnersInChangeCollection.PathResource rsrc,
+      ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
+      Stream<CodeOwner> codeOwners) {
+    return codeOwners
+        .filter(filterOutChangeOwner(rsrc))
+        .filter(filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(annotations))
+        .filter(filterOutServiceUsers());
   }
 
   private Predicate<CodeOwner> filterOutChangeOwner(
@@ -136,6 +148,22 @@ public class GetCodeOwnersForPathInChange
       }
       logger.atFine().log(
           "Filtering out %s because this code owner is the change owner", codeOwner);
+      // Returning false from the Predicate here means that the code owner should be filtered out.
+      return false;
+    };
+  }
+
+  private Predicate<CodeOwner> filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(
+      ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations) {
+    return codeOwner -> {
+      boolean neverSuggest = annotations.containsEntry(codeOwner, NEVER_SUGGEST_ANNOTATION);
+      if (!neverSuggest) {
+        // Returning true from the Predicate here means that the code owner should be kept.
+        return true;
+      }
+      logger.atFine().log(
+          "Filtering out %s because this code owner is annotated with %s",
+          codeOwner, NEVER_SUGGEST_ANNOTATION);
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };

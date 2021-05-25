@@ -37,6 +37,8 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
+import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import java.util.List;
@@ -324,6 +326,211 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())
         .containsExactly(user.id());
+  }
+
+  @Test
+  public void codeOwnersWithNeverSuggestAnnotationAreFilteredOut() throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .addCodeOwnerEmail(user2.email())
+                .build())
+        .create();
+
+    // Expectation: admin is filtered out because it is annotated with NEVER_SUGGEST.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id());
+  }
+
+  @Test
+  public void codeOwnersWithNeverSuggestAnnotationAreFilteredOut_annotationSetForAllUsersWildcard()
+      throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
+                .addAnnotation(
+                    CodeOwnerResolver.ALL_USERS_WILDCARD,
+                    GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(admin.email())
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    // Expectation: none of the code owners is suggested since NEVER_SUGGEST was set for the all
+    // users wildcard.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+  }
+
+  @Test
+  public void perFileCodeOwnersWithNeverSuggestAnnotationAreFilteredOut() throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .addCodeOwnerEmail(user2.email())
+                .build())
+        .create();
+
+    // Expectation: admin is filtered out because it is annotated with NEVER_SUGGEST.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id());
+  }
+
+  @Test
+  public void
+      perFileCodeOwnersWithNeverSuggestAnnotationAreFilteredOut_annotationSetForAllUsersWildcard()
+          throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
+                .addAnnotation(
+                    CodeOwnerResolver.ALL_USERS_WILDCARD,
+                    GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(admin.email())
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    // Expectation: none of the code owners is suggested since NEVER_SUGGEST was set for the all
+    // users wildcard.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+  }
+
+  @Test
+  public void neverSuggestTakesEffectEvenIfCodeOwnerIsAlsoSpecifiedWithoutThisAnnotation()
+      throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    // Code owner config with admin as code owner, but without annotation.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // Code owner config that specifies admin multiple times as code owner, but only once with the
+    // NEVER_SUGGEST annotation.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .addCodeOwnerEmail(user2.email())
+                .build())
+        // Another code owner set with admin as folder code owner, but without annotation.
+        .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
+        // A per-file code owner with admin as file code owner, but without annotation.
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(admin.email())
+                .build())
+        .create();
+
+    // Another code owner config with admin as code owner, but without annotation.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // Expectation: admin is filtered out because at once place it is annotated with NEVER_SUGGEST.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id(), user2.id());
+  }
+
+  @Test
+  public void neverSuggestOnNonMatchingPerFileRuleDoesntHaveAnyEffect() throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(admin.email())
+                .addCodeOwnerEmail(user.email())
+                .addCodeOwnerEmail(user2.email())
+                .build())
+        // Non-matching per-file code owner with NEVER_SUGGEST annotation.
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("txt"))
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .build())
+        .create();
+
+    // Expectation: admin is suggested since the NEVER_SUGGEST annotation is set on the per-file
+    // rule which doesn't match.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
   }
 
   @Test
