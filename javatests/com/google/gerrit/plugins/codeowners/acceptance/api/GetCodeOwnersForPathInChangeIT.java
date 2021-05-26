@@ -37,9 +37,9 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
-import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import java.util.List;
@@ -343,7 +343,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
@@ -372,7 +372,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
                 .addAnnotation(
                     CodeOwnerResolver.ALL_USERS_WILDCARD,
-                    GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                    CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
                 .addCodeOwnerEmail(admin.email())
                 .addCodeOwnerEmail(user.email())
                 .build())
@@ -399,7 +399,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
             CodeOwnerSet.builder()
                 .addPathExpression(testPathExpressions.matchFileType("md"))
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
@@ -430,7 +430,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
                 .addAnnotation(
                     CodeOwnerResolver.ALL_USERS_WILDCARD,
-                    GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                    CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
                 .addCodeOwnerEmail(admin.email())
                 .addCodeOwnerEmail(user.email())
                 .build())
@@ -468,7 +468,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
@@ -521,7 +521,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
             CodeOwnerSet.builder()
                 .addPathExpression(testPathExpressions.matchFileType("txt"))
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
                 .build())
         .create();
 
@@ -661,7 +661,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(changeOwner.email())
                 .addCodeOwnerEmail(serviceUser.email())
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .build())
         .create();
@@ -683,7 +683,6 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 CodeOwner.create(serviceUser.id())),
             String.format(
                 "filtering out %s because this code owner is annotated with %s",
-                CodeOwner.create(admin.id()),
-                GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION.key()));
+                CodeOwner.create(admin.id()), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key()));
   }
 }

@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.restapi;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REVIEWER_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -28,6 +27,7 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotations;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
@@ -56,10 +56,6 @@ import java.util.stream.Stream;
  */
 public class GetCodeOwnersForPathInChange
     extends AbstractGetCodeOwnersForPath<CodeOwnersInChangeCollection.PathResource> {
-
-  @VisibleForTesting
-  public static final CodeOwnerAnnotation NEVER_SUGGEST_ANNOTATION =
-      CodeOwnerAnnotation.create("NEVER_SUGGEST");
 
   private final ServiceUserClassifier serviceUserClassifier;
 
@@ -157,7 +153,8 @@ public class GetCodeOwnersForPathInChange
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       ImmutableList.Builder<String> debugLogs) {
     return codeOwner -> {
-      boolean neverSuggest = annotations.containsEntry(codeOwner, NEVER_SUGGEST_ANNOTATION);
+      boolean neverSuggest =
+          annotations.containsEntry(codeOwner, CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION);
       if (!neverSuggest) {
         // Returning true from the Predicate here means that the code owner should be kept.
         return true;
@@ -165,7 +162,7 @@ public class GetCodeOwnersForPathInChange
       debugLogs.add(
           String.format(
               "filtering out %s because this code owner is annotated with %s",
-              codeOwner, NEVER_SUGGEST_ANNOTATION.key()));
+              codeOwner, CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key()));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
