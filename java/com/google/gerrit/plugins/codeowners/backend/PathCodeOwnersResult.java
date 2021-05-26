@@ -83,6 +83,13 @@ public abstract class PathCodeOwnersResult {
     return annotations;
   }
 
+  /** Gets the annotations for the given email. */
+  public ImmutableSet<String> getAnnotationsFor(String email) {
+    return getAnnotations().get(CodeOwnerReference.create(email)).stream()
+        .map(CodeOwnerAnnotation::key)
+        .collect(toImmutableSet());
+  }
+
   /**
    * Whether parent code owners should be ignored for the path.
    *

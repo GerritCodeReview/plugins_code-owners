@@ -131,6 +131,16 @@ public class CodeOwnerCheckInfo {
   /** Whether the the specified path in the branch is owned by all users (aka {@code *}). */
   public boolean isOwnedByAllUsers;
 
+  /**
+   * Annotations that were set for the user.
+   *
+   * <p>Contains only supported annotations (unsupported annotations are reported in the {@link
+   * #debugLogs}).
+   *
+   * <p>Sorted alphabetically.
+   */
+  public List<String> annotations;
+
   /** Debug logs that may help to understand why the user is or isn't a code owner. */
   public List<String> debugLogs;
 }
