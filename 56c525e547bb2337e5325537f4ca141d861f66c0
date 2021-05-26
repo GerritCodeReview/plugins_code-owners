@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e28de4af_13bbbc3e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CheckCodeOwner.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 245,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-26T12:08:22Z",
+      "side": 1,
+      "message": "omit?",
+      "range": {
+        "startLine": 245,
+        "startChar": 23,
+        "endLine": 245,
+        "endChar": 28
+      },
+      "revId": "56c525e547bb2337e5325537f4ca141d861f66c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "73a258ef_fcc7bdf6",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CheckCodeOwnerIT.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 1529,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-26T12:08:22Z",
+      "side": 1,
+      "message": "this seems a bit confusing since ALL_USERS is annotated with ANNOTATION, but we don\u0027t see it directly in the logs of codeOwner (only in ALL_USERS logs).\n\nOptional: Maybe we should just add the log of annotations to all users 1 by 1 instead of just saying ALL_USERS is annotated with something?",
+      "range": {
+        "startLine": 1529,
+        "startChar": 21,
+        "endLine": 1529,
+        "endChar": 37
+      },
+      "revId": "56c525e547bb2337e5325537f4ca141d861f66c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3e99aacc_75384a72",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 3
+      },
+      "lineNbr": 850,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-26T12:08:22Z",
+      "side": 1,
+      "message": "..including invalid annotations.\n\nMaybe we should only return valid annotations?\nIt could be confusing if a user is debugging and they see NEVR_SUGGEST or something and don\u0027t get what\u0027s the issue (the issue is a typo).",
+      "range": {
+        "startLine": 850,
+        "startChar": 0,
+        "endLine": 850,
+        "endChar": 79
+      },
+      "revId": "56c525e547bb2337e5325537f4ca141d861f66c0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
