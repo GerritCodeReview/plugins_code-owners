@@ -221,15 +221,17 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             if (RefNames.isConfigRef(codeOwnerConfig.key().ref())) {
               messages.add(
                   String.format(
-                      "found email %s as a code owner in the default code owner config",
-                      CodeOwnerResolver.ALL_USERS_WILDCARD));
+                      "found the all users wildcard ('%s') as a code owner in the default code"
+                          + " owner config which makes %s a code owner",
+                      CodeOwnerResolver.ALL_USERS_WILDCARD, email));
               isDefaultCodeOwner.set(true);
             } else {
               Path codeOwnerConfigFilePath = codeOwners.getFilePath(codeOwnerConfig.key());
               messages.add(
                   String.format(
-                      "found email %s as a code owner in %s",
-                      CodeOwnerResolver.ALL_USERS_WILDCARD, codeOwnerConfigFilePath));
+                      "found the all users wildcard ('%s') as a code owner in %s which makes %s a"
+                          + " code owner",
+                      CodeOwnerResolver.ALL_USERS_WILDCARD, codeOwnerConfigFilePath, email));
               if (!codeOwnerConfigFilePaths.contains(codeOwnerConfigFilePath)) {
                 codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
               }

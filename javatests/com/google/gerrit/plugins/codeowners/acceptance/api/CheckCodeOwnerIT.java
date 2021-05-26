@@ -286,8 +286,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
-                "found email %s as a code owner in %s",
-                CodeOwnerResolver.ALL_USERS_WILDCARD, getCodeOwnerConfigFilePath(ROOT_PATH)));
+                "found the all users wildcard ('%s') as a code owner in %s which makes %s a code"
+                    + " owner",
+                CodeOwnerResolver.ALL_USERS_WILDCARD,
+                getCodeOwnerConfigFilePath(ROOT_PATH),
+                codeOwner.email()));
   }
 
   @Test
@@ -313,8 +316,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "found email %s as a code owner in %s",
                 codeOwner.email(), getCodeOwnerConfigFilePath(ROOT_PATH)),
             String.format(
-                "found email %s as a code owner in %s",
-                CodeOwnerResolver.ALL_USERS_WILDCARD, getCodeOwnerConfigFilePath(ROOT_PATH)));
+                "found the all users wildcard ('%s') as a code owner in %s which makes %s a code"
+                    + " owner",
+                CodeOwnerResolver.ALL_USERS_WILDCARD,
+                getCodeOwnerConfigFilePath(ROOT_PATH),
+                codeOwner.email()));
   }
 
   @Test
@@ -548,8 +554,10 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
-                "found email %s as a code owner in %s",
-                CodeOwnerResolver.ALL_USERS_WILDCARD, getCodeOwnerConfigFilePath(ROOT_PATH)));
+                "found the all users wildcard ('%s') as a code owner in %s which makes %s a code owner",
+                CodeOwnerResolver.ALL_USERS_WILDCARD,
+                getCodeOwnerConfigFilePath(ROOT_PATH),
+                CodeOwnerResolver.ALL_USERS_WILDCARD));
   }
 
   @Test
@@ -601,8 +609,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
-                "found email %s as a code owner in the default code owner config",
-                CodeOwnerResolver.ALL_USERS_WILDCARD),
+                "found the all users wildcard ('%s') as a code owner in the default code owner"
+                    + " config which makes %s a code owner",
+                CodeOwnerResolver.ALL_USERS_WILDCARD, defaultCodeOwner.email()),
             String.format(
                 "resolved email %s to account %s",
                 defaultCodeOwner.email(), defaultCodeOwner.id()));
@@ -1522,8 +1531,11 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 ImmutableSet.of(
                     CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key(), "OTHER_ANNOTATION")),
             String.format(
-                "found email %s as a code owner in %s",
-                CodeOwnerResolver.ALL_USERS_WILDCARD, getCodeOwnerConfigFilePath("/foo/")),
+                "found the all users wildcard ('%s') as a code owner in %s which makes %s a code"
+                    + " owner",
+                CodeOwnerResolver.ALL_USERS_WILDCARD,
+                getCodeOwnerConfigFilePath("/foo/"),
+                codeOwner.email()),
             String.format(
                 "found annotations for the all users wildcard ('%s') which apply to %s: %s",
                 CodeOwnerResolver.ALL_USERS_WILDCARD,
