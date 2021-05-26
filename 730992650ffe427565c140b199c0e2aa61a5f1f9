@@ -16,6 +16,24 @@
       "message": "at this point is it possible to add tests in CodeOwnerResolverTest?",
       "revId": "730992650ffe427565c140b199c0e2aa61a5f1f9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c63665f5_75b69c9a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-26T11:50:30Z",
+      "side": 1,
+      "message": "Right, added a test.",
+      "parentUuid": "2ce5bb51_695c0ed9",
+      "revId": "730992650ffe427565c140b199c0e2aa61a5f1f9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
