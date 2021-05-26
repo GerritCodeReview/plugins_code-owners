@@ -212,7 +212,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     Set<CodeOwner> codeOwners = new HashSet<>();
     ListMultimap<CodeOwner, CodeOwnerAnnotation> annotations = LinkedListMultimap.create();
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
-    List<String> debugLogs = new ArrayList<>();
+    ImmutableList.Builder<String> debugLogsBuilder = ImmutableList.builder();
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
         rsrc.getRevision(),
@@ -221,7 +221,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
           CodeOwnerResolverResult pathCodeOwners =
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
 
-          debugLogs.addAll(pathCodeOwners.messages());
+          debugLogsBuilder.addAll(pathCodeOwners.messages());
           codeOwners.addAll(pathCodeOwners.codeOwners());
           annotations.putAll(pathCodeOwners.annotations());
 
@@ -268,8 +268,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     if (!ownedByAllUsers.get()) {
       CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
 
-      debugLogs.add("resolve global code owners");
-      debugLogs.addAll(globalCodeOwners.messages());
+      debugLogsBuilder.add("resolve global code owners");
+      debugLogsBuilder.addAll(globalCodeOwners.messages());
 
       globalCodeOwners
           .codeOwners()
@@ -295,7 +295,10 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
     ImmutableSet<CodeOwner> filteredCodeOwners =
         filterCodeOwners(
-            rsrc, ImmutableMultimap.copyOf(annotations), ImmutableSet.copyOf(codeOwners));
+            rsrc,
+            ImmutableMultimap.copyOf(annotations),
+            ImmutableSet.copyOf(codeOwners),
+            debugLogsBuilder);
     CodeOwnerScorings codeOwnerScorings =
         createScorings(
             rsrc,
@@ -322,8 +325,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
-    codeOwnersInfo.debugLogs = debug ? debugLogs : null;
 
+    ImmutableList<String> debugLogs = debugLogsBuilder.build();
+    codeOwnersInfo.debugLogs = debug ? debugLogs : null;
     logger.atFine().log("debug logs: %s", debugLogs);
 
     return Response.ok(codeOwnersInfo);
@@ -375,8 +379,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private ImmutableSet<CodeOwner> filterCodeOwners(
       R rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
-      ImmutableSet<CodeOwner> codeOwners) {
-    return filterCodeOwners(rsrc, annotations, getVisibleCodeOwners(rsrc, codeOwners))
+      ImmutableSet<CodeOwner> codeOwners,
+      ImmutableList.Builder<String> debugLogs) {
+    return filterCodeOwners(rsrc, annotations, getVisibleCodeOwners(rsrc, codeOwners), debugLogs)
         .collect(toImmutableSet());
   }
 
@@ -386,12 +391,14 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    * @param rsrc resource on which the request is being performed
    * @param annotations annotations that were set on the code owners
    * @param codeOwners stream of code owners that should be filtered
+   * @param debugLogs builder to collect debug logs that may be returned to the caller
    * @return the filtered stream of code owners
    */
   protected Stream<CodeOwner> filterCodeOwners(
       R rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
-      Stream<CodeOwner> codeOwners) {
+      Stream<CodeOwner> codeOwners,
+      ImmutableList.Builder<String> debugLogs) {
     return codeOwners;
   }
 

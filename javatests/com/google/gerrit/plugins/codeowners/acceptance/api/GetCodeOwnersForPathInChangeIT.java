@@ -36,6 +36,7 @@ import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.api.CodeOwners;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange;
@@ -635,5 +636,54 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .containsExactly(user2.id(), user.id(), admin.id())
         .inOrder();
     assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isTrue();
+  }
+
+  @Test
+  public void filteredOutCodeOwnersAreMentionedInDebugLogs() throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    // Create a service user.
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(changeOwner.email())
+                .addCodeOwnerEmail(serviceUser.email())
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .build())
+        .create();
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().withDebug(/* debug= */ true), path);
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user.id());
+    assertThat(codeOwnersInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "filtering out %s because this code owner is the change owner",
+                CodeOwner.create(changeOwner.id())),
+            String.format(
+                "filtering out %s because this code owner is a service user",
+                CodeOwner.create(serviceUser.id())),
+            String.format(
+                "filtering out %s because this code owner is annotated with %s",
+                CodeOwner.create(admin.id()),
+                GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION.key()));
   }
 }
