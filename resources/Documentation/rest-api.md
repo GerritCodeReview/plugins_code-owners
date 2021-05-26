@@ -847,6 +847,7 @@ ownership of a user for a path in a branch.
 | `is_global_code_owner` | Whether the given email is configured as a global
 code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_owned_by_all_users` | Whether the the specified path in the branch is owned by all users (aka `*`).
+| `annotation` | Annotations that were set for the user. Contains only supported annotations (unsupported annotations are reported in the `debugs_logs`). Sorted alphabetically.
 | `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner.
 
 ---

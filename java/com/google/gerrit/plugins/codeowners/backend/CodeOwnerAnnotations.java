@@ -14,6 +14,9 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Class that defines all known/supported {@link CodeOwnerAnnotation}s on code owners. */
 public class CodeOwnerAnnotations {
   /**
@@ -22,6 +25,18 @@ public class CodeOwnerAnnotations {
    */
   public static final CodeOwnerAnnotation NEVER_SUGGEST_ANNOTATION =
       CodeOwnerAnnotation.create("NEVER_SUGGEST");
+
+  private static final List<String> KEYS_ALL;
+
+  static {
+    KEYS_ALL = new ArrayList<>();
+    KEYS_ALL.add(NEVER_SUGGEST_ANNOTATION.key());
+  }
+
+  /** Whether the given annotation is known and supported. */
+  public static boolean isSupported(String annotation) {
+    return KEYS_ALL.contains(annotation);
+  }
 
   /**
    * Private constructor to prevent instantiation of this class.
