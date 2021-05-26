@@ -195,13 +195,13 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             if (RefNames.isConfigRef(codeOwnerConfig.key().ref())) {
               messages.add(
                   String.format(
-                      "found email %s as code owner in default code owner config", email));
+                      "found email %s as a code owner in the default code owner config", email));
               isDefaultCodeOwner.set(true);
             } else {
               Path codeOwnerConfigFilePath = codeOwners.getFilePath(codeOwnerConfig.key());
               messages.add(
                   String.format(
-                      "found email %s as code owner in %s", email, codeOwnerConfigFilePath));
+                      "found email %s as a code owner in %s", email, codeOwnerConfigFilePath));
               codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
             }
 
@@ -221,14 +221,14 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
             if (RefNames.isConfigRef(codeOwnerConfig.key().ref())) {
               messages.add(
                   String.format(
-                      "found email %s as code owner in default code owner config",
+                      "found email %s as a code owner in the default code owner config",
                       CodeOwnerResolver.ALL_USERS_WILDCARD));
               isDefaultCodeOwner.set(true);
             } else {
               Path codeOwnerConfigFilePath = codeOwners.getFilePath(codeOwnerConfig.key());
               messages.add(
                   String.format(
-                      "found email %s as code owner in %s",
+                      "found email %s as a code owner in %s",
                       CodeOwnerResolver.ALL_USERS_WILDCARD, codeOwnerConfigFilePath));
               if (!codeOwnerConfigFilePaths.contains(codeOwnerConfigFilePath)) {
                 codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
