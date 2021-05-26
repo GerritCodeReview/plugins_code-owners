@@ -221,10 +221,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
           CodeOwnerResolverResult pathCodeOwners =
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
 
-          if (debug) {
-            debugLogs.addAll(pathCodeOwners.messages());
-          }
-
+          debugLogs.addAll(pathCodeOwners.messages());
           codeOwners.addAll(pathCodeOwners.codeOwners());
           annotations.putAll(pathCodeOwners.annotations());
 
@@ -271,10 +268,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     if (!ownedByAllUsers.get()) {
       CodeOwnerResolverResult globalCodeOwners = getGlobalCodeOwners(rsrc.getBranch().project());
 
-      if (debug) {
-        debugLogs.add("resolve global code owners");
-        debugLogs.addAll(globalCodeOwners.messages());
-      }
+      debugLogs.add("resolve global code owners");
+      debugLogs.addAll(globalCodeOwners.messages());
 
       globalCodeOwners
           .codeOwners()
