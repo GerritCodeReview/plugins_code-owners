@@ -46,6 +46,30 @@
       },
       "revId": "8708b2f6745890409572e4eafbfb0decca7f6305",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a9c03802_acae5bd8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 621,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-05-26T12:57:24Z",
+      "side": 1,
+      "message": "woops, double negative confused me for no reason, it\u0027s better now anyway",
+      "parentUuid": "89173d30_bc12e167",
+      "range": {
+        "startLine": 620,
+        "startChar": 11,
+        "endLine": 621,
+        "endChar": 33
+      },
+      "revId": "8708b2f6745890409572e4eafbfb0decca7f6305",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
