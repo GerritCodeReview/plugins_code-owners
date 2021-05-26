@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "28569ad9_4701eb2d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParser.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 345,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-26T11:22:39Z",
+      "side": 1,
+      "message": "Yeah, it was supposed to mean \"end of line\", but I agree it\u0027s not a good name.\nI renamed it to \u0027comment\u0027 now, but if you have a better suggestion please let me know :)",
+      "parentUuid": "6113a4f9_c23821e7",
+      "range": {
+        "startLine": 345,
+        "startChar": 13,
+        "endLine": 345,
+        "endChar": 16
+      },
+      "revId": "02761155ec19c9ea66ce887c2e4efe2709bc44fe",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "46b2c2de_e931e97e",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-05-26T10:02:23Z",
       "side": 1,
       "message": "omit here and below",
+      "range": {
+        "startLine": 199,
+        "startChar": 79,
+        "endLine": 199,
+        "endChar": 80
+      },
+      "revId": "02761155ec19c9ea66ce887c2e4efe2709bc44fe",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cfa6f001_c0c4ad1f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/findowners/FindOwnersCodeOwnerConfigParserTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-26T11:22:39Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "46b2c2de_e931e97e",
       "range": {
         "startLine": 199,
         "startChar": 79,
