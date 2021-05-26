@@ -22,6 +22,30 @@
       },
       "revId": "8bf495aa399d0dd3f2cf20f840b2406a48f7783f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99b80e53_c03e4d71",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 385,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-26T11:59:41Z",
+      "side": 0,
+      "message": "Yes. This is all covered by the new assertion:\n\n  assertThatCollection(fileCodeOwnerStatuses)\n        .containsExactly(\n            FileCodeOwnerStatus.addition(path, \n              CodeOwnerStatus.INSUFFICIENT_REVIEWERS));\n\nThis assertion would fail if the fileCodeOwnerStatus in fileCodeOwnerStatuses has an old path or if its changedFile is not an addition. This is because FileCodeOwnerStatus.addition(...) sets ChangedFile.addition(path) as changedFile and Optional.empty() as oldPathCodeOwnerStatus internally.",
+      "parentUuid": "dd5d0bc8_7074c8dc",
+      "range": {
+        "startLine": 382,
+        "startChar": 0,
+        "endLine": 385,
+        "endChar": 0
+      },
+      "revId": "8bf495aa399d0dd3f2cf20f840b2406a48f7783f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
