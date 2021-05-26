@@ -1472,7 +1472,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   }
 
   @Test
-  public void debugRequireCallerToBeAdminOrHaveTheCheckCodeOwnerCapability() throws Exception {
+  public void debugRequiresCallerToBeAdminOrHaveTheCheckCodeOwnerCapability() throws Exception {
     requestScopeOperations.setApiUser(user.id());
     AuthException authException =
         assertThrows(
