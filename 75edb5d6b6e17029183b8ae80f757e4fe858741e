@@ -16,6 +16,24 @@
       "message": "fyi Merge Conflict here.\n\nI will review this later either way.",
       "revId": "75edb5d6b6e17029183b8ae80f757e4fe858741e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4dd15e9d_efa1a53a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-26T12:40:33Z",
+      "side": 1,
+      "message": "Thanks, I didn\u0027t notice.\nI\u0027ve rebased the series now. Fortunately the conflict was rather trivial to resolve.",
+      "parentUuid": "c8800293_681eeb7e",
+      "revId": "75edb5d6b6e17029183b8ae80f757e4fe858741e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
