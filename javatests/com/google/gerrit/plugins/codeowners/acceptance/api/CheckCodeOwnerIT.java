@@ -23,6 +23,7 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerCheckInfoSub
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
@@ -44,12 +45,14 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestPathExpressions;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
+import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
@@ -144,6 +147,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isNotDefaultCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotGlobalCodeOwner();
     assertThat(checkCodeOwnerInfo).isNotOwnedByAllUsers();
+    assertThat(checkCodeOwnerInfo).hasAnnotationsThat().isEmpty();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
@@ -1452,6 +1456,90 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).canReadRef();
     assertThat(checkCodeOwnerInfo).canSeeChange();
     assertThat(checkCodeOwnerInfo).cannotApproveChange();
+  }
+
+  @Test
+  public void checkCodeOwnerWithAnnotations() throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(codeOwner.email())
+                .addAnnotation(
+                    codeOwner.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .build())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
+                .addAnnotation(
+                    CodeOwnerResolver.ALL_USERS_WILDCARD, CodeOwnerAnnotation.create("ANNOTATION"))
+                .build())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(codeOwner.email())
+                .addAnnotation(
+                    codeOwner.email(), GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(codeOwner.email(), CodeOwnerAnnotation.create("OTHER_ANNOTATION"))
+                .build())
+        .create();
+
+    String path = "/foo/bar/baz.md";
+    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
+    assertThat(checkCodeOwnerInfo).isCodeOwner();
+    assertThat(checkCodeOwnerInfo)
+        .hasAnnotationsThat()
+        .containsExactly(
+            "ANNOTATION",
+            GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION.key(),
+            "OTHER_ANNOTATION")
+        .inOrder();
+    assertThat(checkCodeOwnerInfo)
+        .hasDebugLogsThatContainAllOf(
+            String.format(
+                "found email %s as code owner in %s",
+                codeOwner.email(), getCodeOwnerConfigFilePath("/foo/bar/")),
+            String.format(
+                "email %s is annotated with %s",
+                codeOwner.email(),
+                ImmutableSet.of(
+                    GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION.key(),
+                    "OTHER_ANNOTATION")),
+            String.format(
+                "found email %s as code owner in %s",
+                CodeOwnerResolver.ALL_USERS_WILDCARD, getCodeOwnerConfigFilePath("/foo/")),
+            String.format(
+                "email %s is annotated with %s",
+                CodeOwnerResolver.ALL_USERS_WILDCARD, ImmutableSet.of("ANNOTATION")),
+            String.format(
+                "found email %s as code owner in %s",
+                codeOwner.email(), getCodeOwnerConfigFilePath("/")),
+            String.format(
+                "email %s is annotated with %s",
+                codeOwner.email(),
+                ImmutableSet.of(GetCodeOwnersForPathInChange.NEVER_SUGGEST_ANNOTATION.key())));
   }
 
   private CodeOwnerCheckInfo checkCodeOwner(String path, String email) throws RestApiException {
