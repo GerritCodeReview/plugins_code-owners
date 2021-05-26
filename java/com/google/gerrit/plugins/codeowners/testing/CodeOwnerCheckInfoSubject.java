@@ -133,6 +133,10 @@ public class CodeOwnerCheckInfoSubject extends Subject {
     check("isOwnedByAllUsers").that(codeOwnerCheckInfo().isOwnedByAllUsers).isFalse();
   }
 
+  public IterableSubject hasAnnotationsThat() {
+    return check("annotations").that(codeOwnerCheckInfo().annotations);
+  }
+
   public void hasDebugLogsThatContainAllOf(String... expectedMessages) {
     for (String expectedMessage : expectedMessages) {
       check("debugLogs").that(codeOwnerCheckInfo().debugLogs).contains(expectedMessage);

@@ -27,6 +27,7 @@ import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.extensions.restapi.TopLevelResource;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerCheckInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
@@ -57,8 +58,10 @@ import com.google.inject.Provider;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -157,6 +160,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     AtomicBoolean isDefaultCodeOwner = new AtomicBoolean(false);
     AtomicBoolean hasRevelantCodeOwnerDefinitions = new AtomicBoolean(false);
     AtomicBoolean parentCodeOwnersAreIgnored = new AtomicBoolean(false);
+    Set<String> allAnnotations = new HashSet<>();
     codeOwnerConfigHierarchy.visit(
         branchResource.getBranchKey(),
         ObjectId.fromString(branchResource.getRevision()),
@@ -196,6 +200,16 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
                       "found email %s as code owner in %s", email, codeOwnerConfigFilePath));
               codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
             }
+
+            List<String> annotations =
+                pathCodeOwnersResult.get().getAnnotations().get(codeOwnerReference.get()).stream()
+                    .map(CodeOwnerAnnotation::key)
+                    .sorted()
+                    .collect(toList());
+            if (!annotations.isEmpty()) {
+              messages.add(String.format("email %s is annotated with %s", email, annotations));
+              allAnnotations.addAll(annotations);
+            }
           }
 
           if (pathCodeOwnersResult.get().getPathCodeOwners().stream()
@@ -217,6 +231,20 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
               if (!codeOwnerConfigFilePaths.contains(codeOwnerConfigFilePath)) {
                 codeOwnerConfigFilePaths.add(codeOwnerConfigFilePath);
               }
+            }
+
+            List<String> annotations =
+                pathCodeOwnersResult.get().getAnnotations()
+                    .get(CodeOwnerReference.create(CodeOwnerResolver.ALL_USERS_WILDCARD)).stream()
+                    .map(CodeOwnerAnnotation::key)
+                    .sorted()
+                    .collect(toList());
+            if (!annotations.isEmpty()) {
+              messages.add(
+                  String.format(
+                      "email %s is annotated with %s",
+                      CodeOwnerResolver.ALL_USERS_WILDCARD, annotations));
+              allAnnotations.addAll(annotations);
             }
           }
 
@@ -305,6 +333,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     codeOwnerCheckInfo.isDefaultCodeOwner = isDefaultCodeOwner.get();
     codeOwnerCheckInfo.isGlobalCodeOwner = isGlobalCodeOwner;
     codeOwnerCheckInfo.isOwnedByAllUsers = isCodeOwnershipAssignedToAllUsers.get();
+    codeOwnerCheckInfo.annotations = allAnnotations.stream().sorted().collect(toList());
     codeOwnerCheckInfo.debugLogs = messages;
     return Response.ok(codeOwnerCheckInfo);
   }
