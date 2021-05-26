@@ -18,9 +18,9 @@ import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REV
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.Response;
@@ -56,7 +56,6 @@ import java.util.stream.Stream;
  */
 public class GetCodeOwnersForPathInChange
     extends AbstractGetCodeOwnersForPath<CodeOwnersInChangeCollection.PathResource> {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   @VisibleForTesting
   public static final CodeOwnerAnnotation NEVER_SUGGEST_ANNOTATION =
@@ -132,50 +131,54 @@ public class GetCodeOwnersForPathInChange
   protected Stream<CodeOwner> filterCodeOwners(
       CodeOwnersInChangeCollection.PathResource rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
-      Stream<CodeOwner> codeOwners) {
+      Stream<CodeOwner> codeOwners,
+      ImmutableList.Builder<String> debugLogs) {
     return codeOwners
-        .filter(filterOutChangeOwner(rsrc))
-        .filter(filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(annotations))
-        .filter(filterOutServiceUsers());
+        .filter(filterOutChangeOwner(rsrc, debugLogs))
+        .filter(filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(annotations, debugLogs))
+        .filter(filterOutServiceUsers(debugLogs));
   }
 
   private Predicate<CodeOwner> filterOutChangeOwner(
-      CodeOwnersInChangeCollection.PathResource rsrc) {
+      CodeOwnersInChangeCollection.PathResource rsrc, ImmutableList.Builder<String> debugLogs) {
     return codeOwner -> {
       if (!codeOwner.accountId().equals(rsrc.getRevisionResource().getChange().getOwner())) {
         // Returning true from the Predicate here means that the code owner should be kept.
         return true;
       }
-      logger.atFine().log(
-          "Filtering out %s because this code owner is the change owner", codeOwner);
+      debugLogs.add(
+          String.format("filtering out %s because this code owner is the change owner", codeOwner));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
   }
 
   private Predicate<CodeOwner> filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(
-      ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations) {
+      ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
+      ImmutableList.Builder<String> debugLogs) {
     return codeOwner -> {
       boolean neverSuggest = annotations.containsEntry(codeOwner, NEVER_SUGGEST_ANNOTATION);
       if (!neverSuggest) {
         // Returning true from the Predicate here means that the code owner should be kept.
         return true;
       }
-      logger.atFine().log(
-          "Filtering out %s because this code owner is annotated with %s",
-          codeOwner, NEVER_SUGGEST_ANNOTATION);
+      debugLogs.add(
+          String.format(
+              "filtering out %s because this code owner is annotated with %s",
+              codeOwner, NEVER_SUGGEST_ANNOTATION.key()));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
   }
 
-  private Predicate<CodeOwner> filterOutServiceUsers() {
+  private Predicate<CodeOwner> filterOutServiceUsers(ImmutableList.Builder<String> debugLogs) {
     return codeOwner -> {
       if (!isServiceUser(codeOwner)) {
         // Returning true from the Predicate here means that the code owner should be kept.
         return true;
       }
-      logger.atFine().log("Filtering out %s because this code owner is a service user", codeOwner);
+      debugLogs.add(
+          String.format("filtering out %s because this code owner is a service user", codeOwner));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
