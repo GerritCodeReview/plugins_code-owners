@@ -323,6 +323,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     codeOwnersInfo.debugLogs = debug ? debugLogs : null;
+
+    logger.atFine().log("debug logs: %s", debugLogs);
+
     return Response.ok(codeOwnersInfo);
   }
 
