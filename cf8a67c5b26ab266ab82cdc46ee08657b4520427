@@ -16,6 +16,24 @@
       "message": "The original motivation is to show this column on merge commits when the base patchset is set to Parent 1, but it seems like we should show it in all base patchset cases. Is there a reason to hide it when viewing Patchset2--\u003ePatchset3(newest)?\n\n",
       "revId": "cf8a67c5b26ab266ab82cdc46ee08657b4520427",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ff2a2715_8ba2181e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-05-27T13:09:58Z",
+      "side": 1,
+      "message": "Not that I\u0027m aware of.\n\nCode-owner statuses can only be retrieved for the current/latest patch set, hence you wouldn\u0027t be able to show them when viewing Patchset2--\u003ePatchset3(non-current), but for viewing Patchset2--\u003ePatchset3(newest) I don\u0027t see a reason not to show them.",
+      "parentUuid": "3bd639e6_e0401b61",
+      "revId": "cf8a67c5b26ab266ab82cdc46ee08657b4520427",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
