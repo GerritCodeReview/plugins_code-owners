@@ -34,6 +34,24 @@
       "parentUuid": "3bd639e6_e0401b61",
       "revId": "cf8a67c5b26ab266ab82cdc46ee08657b4520427",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "98868ca0_4447528a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2021-05-27T13:12:51Z",
+      "side": 1,
+      "message": "Thanks for verifying. The logic is consistent with your explanation. Resolving",
+      "parentUuid": "ff2a2715_8ba2181e",
+      "revId": "cf8a67c5b26ab266ab82cdc46ee08657b4520427",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
