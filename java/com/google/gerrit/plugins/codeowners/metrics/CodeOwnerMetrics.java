@@ -169,7 +169,7 @@ public class CodeOwnerMetrics {
     // counter metrics
     this.countCodeOwnerCacheReads =
         createCounter(
-            "count_code_owner_config_reads", "Total number of code owner reads from cache");
+            "count_code_owner_cache_reads", "Total number of code owner reads from cache");
     this.countCodeOwnerConfigReads =
         createCounter(
             "count_code_owner_config_reads",

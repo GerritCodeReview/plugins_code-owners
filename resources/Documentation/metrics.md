@@ -65,7 +65,7 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
 
 ## <a id="counterMetrics"> Counter Metrics
 
-* `count_code_owner_config_reads`:
+* `count_code_owner_cache_reads`:
   Total number of code owner reads from cache.
 * `count_code_owner_config_reads`:
   Total number of code owner config reads from backend.
