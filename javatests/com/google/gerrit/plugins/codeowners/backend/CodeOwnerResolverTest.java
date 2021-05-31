@@ -701,7 +701,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
         .isEqualTo(1);
-    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_cache_reads"))
         .isEqualTo(0);
 
     // Doing the same lookup again doesn't resolve the code owner again.
@@ -710,7 +710,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(result.get()).hasAccountIdThat().isEqualTo(admin.id());
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
         .isEqualTo(0);
-    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_cache_reads"))
         .isEqualTo(1);
   }
 
@@ -724,7 +724,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(result).isEmpty();
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
         .isEqualTo(1);
-    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_cache_reads"))
         .isEqualTo(0);
 
     // Doing the same lookup again doesn't resolve the code owner again.
@@ -735,7 +735,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     assertThat(result).isEmpty();
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_resolutions"))
         .isEqualTo(0);
-    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_config_reads"))
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_cache_reads"))
         .isEqualTo(1);
   }
 }
