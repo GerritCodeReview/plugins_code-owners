@@ -485,6 +485,36 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void resolvePathCodeOwnersWithAnnotations_annotationOnMultipleEmailsOfTheSameUser()
+      throws Exception {
+    // add secondary email to user account
+    String secondaryEmail = "user@foo.bar";
+    accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
+
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+            .addCodeOwnerSet(
+                CodeOwnerSet.builder()
+                    .addCodeOwnerEmail(user.email())
+                    .addAnnotation(user.email(), CodeOwnerAnnotation.create("FOO"))
+                    .addCodeOwnerEmail(secondaryEmail)
+                    .addAnnotation(secondaryEmail, CodeOwnerAnnotation.create("BAR"))
+                    .build())
+            .build();
+
+    // admin has the "Modify Account" global capability and hence can see the secondary email of the
+    // user account.
+    CodeOwnerResolverResult result =
+        codeOwnerResolverProvider
+            .get()
+            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(user.id());
+    assertThat(result.annotations().keySet()).containsExactly(CodeOwner.create(user.id()));
+    assertThat(result.annotations().get(CodeOwner.create(user.id())))
+        .containsExactly(CodeOwnerAnnotation.create("FOO"), CodeOwnerAnnotation.create("BAR"));
+  }
+
+  @Test
   public void cannotResolvePathCodeOwnersOfNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
@@ -737,5 +767,25 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         .isEqualTo(0);
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_cache_reads"))
         .isEqualTo(1);
+  }
+
+  @Test
+  public void resolveCodeOwnerReferencesThatPointToTheSameAccount() throws Exception {
+    // add secondary email to user account
+    String secondaryEmail = "user@foo.bar";
+    accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
+
+    // admin has the "Modify Account" global capability and hence can see the secondary email of the
+    // user account.
+    CodeOwnerResolverResult result =
+        codeOwnerResolverProvider
+            .get()
+            .resolve(
+                ImmutableSet.of(
+                    CodeOwnerReference.create(user.email()),
+                    CodeOwnerReference.create(secondaryEmail)));
+    assertThat(result.codeOwnersAccountIds()).containsExactly(user.id());
+    assertThat(result.ownedByAllUsers()).isFalse();
+    assertThat(result.hasUnresolvedCodeOwners()).isFalse();
   }
 }

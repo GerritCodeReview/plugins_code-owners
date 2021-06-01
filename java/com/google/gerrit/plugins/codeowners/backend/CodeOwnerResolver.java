@@ -47,6 +47,8 @@ import com.google.inject.Provider;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -439,6 +441,8 @@ public class CodeOwnerResolver {
       hasUnresolvedCodeOwners.set(true);
     }
 
+    Map<CodeOwner, Set<CodeOwnerAnnotation>> codeOwnersWithAnnotations = new HashMap<>();
+
     // Merge code owners that have been newly resolved with code owners which have been looked up
     // from cache and return them with their annotations.
     Stream<Pair<String, CodeOwner>> newlyResolvedCodeOwnersStream =
@@ -447,22 +451,25 @@ public class CodeOwnerResolver {
         cachedCodeOwnersByEmail.entrySet().stream()
             .filter(e -> e.getValue().isPresent())
             .map(e -> Pair.of(e.getKey(), e.getValue().get()));
-    return Streams.concat(newlyResolvedCodeOwnersStream, cachedCodeOwnersStream)
-        .collect(
-            toImmutableMap(
-                Pair::value,
-                p -> {
-                  ImmutableSet.Builder<CodeOwnerAnnotation> annotationBuilder =
-                      ImmutableSet.builder();
+    Streams.concat(newlyResolvedCodeOwnersStream, cachedCodeOwnersStream)
+        .forEach(
+            p -> {
+              ImmutableSet.Builder<CodeOwnerAnnotation> annotationBuilder = ImmutableSet.builder();
 
-                  annotationBuilder.addAll(annotations.get(CodeOwnerReference.create(p.key())));
+              annotationBuilder.addAll(annotations.get(CodeOwnerReference.create(p.key())));
 
-                  // annotations for the all users wildcard (aka '*') apply to all code owners
-                  annotationBuilder.addAll(
-                      annotations.get(CodeOwnerReference.create(ALL_USERS_WILDCARD)));
+              // annotations for the all users wildcard (aka '*') apply to all code owners
+              annotationBuilder.addAll(
+                  annotations.get(CodeOwnerReference.create(ALL_USERS_WILDCARD)));
 
-                  return annotationBuilder.build();
-                }));
+              if (!codeOwnersWithAnnotations.containsKey(p.value())) {
+                codeOwnersWithAnnotations.put(p.value(), new HashSet<>());
+              }
+              codeOwnersWithAnnotations.get(p.value()).addAll(annotationBuilder.build());
+            });
+
+    return codeOwnersWithAnnotations.entrySet().stream()
+        .collect(toImmutableMap(Map.Entry::getKey, e -> ImmutableSet.copyOf(e.getValue())));
   }
 
   /**
