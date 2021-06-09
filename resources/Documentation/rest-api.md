@@ -677,7 +677,8 @@ The following code owners are filtered out additionally:
 * [service users](#serviceUsers) (members of the `Service Users` group)
 * the change owner (since the change owner cannot be added as reviewer)
 * code owners that are annotated with
-  [NEVER_SUGGEST](backend-find-owners.html#neverSuggest)
+  [NEVER_SUGGEST](backend-find-owners.html#neverSuggest), except if dropping
+  these code owners would make the suggestion result empty
 
 In addition, by default the change number is used as seed if none was specified.
 This way the sort order on a change is always the same for files that have the

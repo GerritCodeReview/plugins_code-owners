@@ -358,7 +358,48 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void codeOwnersWithNeverSuggestAnnotationAreFilteredOut_annotationSetForAllUsersWildcard()
+  public void codeOwnersWithNeverSuggestAnnotation_annotationIgnoredIfResultWouldBeEmpty()
+      throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+
+    // Make 'serviceUser' a service user.
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(serviceUser.email())
+                .addCodeOwnerEmail(changeOwner.email())
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .addAnnotation(user.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .build())
+        .create();
+
+    // Expectation: The service user and the change owner are filtered out. admin and user get
+    // suggested despite of the NEVER_SUGGEST annotation since ignoring them would make the result
+    // empty. This is a special case in which the NEVER_SUGGEST annotation is ignored.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
+  }
+
+  @Test
+  public void codeOwnersWithNeverSuggestAnnotation_annotationSetForAllUsersWildcard()
       throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
@@ -378,10 +419,14 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .build())
         .create();
 
-    // Expectation: none of the code owners is suggested since NEVER_SUGGEST was set for the all
-    // users wildcard.
+    // Expectation: Since all code owners are annotated with NEVER_SUGGEST (via the annotation on
+    // the all users wildcard) the result would be empty. This is a special case in which the
+    // NEVER_SUGGEST annotation is ignored, hence we expect admin and user to be suggested.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
-    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
   }
 
   @Test
@@ -414,9 +459,50 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void
-      perFileCodeOwnersWithNeverSuggestAnnotationAreFilteredOut_annotationSetForAllUsersWildcard()
-          throws Exception {
+  public void perFileCodeOwnersWithNeverSuggestAnnotation_annotationIgnoredIfResultWouldBeEmpty()
+      throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+
+    // Make 'serviceUser' a service user.
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(serviceUser.email())
+                .addCodeOwnerEmail(changeOwner.email())
+                .addCodeOwnerEmail(admin.email())
+                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addCodeOwnerEmail(user.email())
+                .addAnnotation(user.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .build())
+        .create();
+
+    // Expectation: The service user and the change owner are filtered out. admin and user get
+    // suggested despite of the NEVER_SUGGEST annotation since ignoring them would make the result
+    // empty. This is a special case in which the NEVER_SUGGEST annotation is ignored.
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
+  }
+
+  @Test
+  public void perFileCodeOwnersWithNeverSuggestAnnotation_annotationSetForAllUsersWildcard()
+      throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
     codeOwnerConfigOperations
@@ -436,10 +522,14 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .build())
         .create();
 
-    // Expectation: none of the code owners is suggested since NEVER_SUGGEST was set for the all
-    // users wildcard.
+    // Expectation: Since all code owners are annotated with NEVER_SUGGEST (via the annotation on
+    // the all users wildcard) the result would be empty. This is a special case in which the
+    // NEVER_SUGGEST annotation is ignored, hence we expect admin and user to be suggested.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
-    assertThat(codeOwnersInfo).hasCodeOwnersThat().isEmpty();
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
   }
 
   @Test
