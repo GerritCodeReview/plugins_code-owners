@@ -24,6 +24,47 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "92f93391_0a1b272b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerStatusInfoJson.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 121,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-09T10:24:09Z",
+      "side": 1,
+      "message": "Interesting that you propose this, since initially I had implemented something like this (Reason was an object consisting out of message string and a set of referenced accounts). But then I found it not working well.\n\nTo construct the reason, you would need to specify the account twice (once to compute the placeholder in the message and once to store the account ID in the reason):\n \n  Reason.create(String.format(\"patch set uploader %s is exempted from requiring code owner approvals\", ChangeMessagesUtil.getAccountTemplate(accountId)), accountId)\n\nIt\u0027s not only annoying that you need to specify the account ID twice, but it also turned out to be error-prone, as you could easily use one account ID for the template and another account ID for the second arg.\n\nTo avoid this you could either\n- parse the account ID from the message and check that it matches the provided account ID\n- just parse the account ID from the message and do not require passing in the account ID once again as second arg\n\nBut then if you already need to parse the message, you can as well do it here and simplify how the reasons are stored in PathCodeOwnerStatus (just store them as a String).\n\nDoes this make sense?",
+      "parentUuid": "2e7a1cc3_57c1858c",
+      "range": {
+        "startLine": 121,
+        "startChar": 35,
+        "endLine": 121,
+        "endChar": 56
+      },
+      "revId": "445da8242148bc40213d48b72da779f5138c6eb6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "72ca4922_fb3bc212",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerStatusInfoJson.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 147,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-09T10:24:09Z",
+      "side": 1,
+      "message": "nit: long line\n\nDone",
+      "revId": "445da8242148bc40213d48b72da779f5138c6eb6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "673e022e_3242f051",
@@ -37,6 +78,30 @@
       "writtenOn": "2021-06-02T15:21:59Z",
       "side": 1,
       "message": "is this test meaningful compared to the previous test?",
+      "range": {
+        "startLine": 95,
+        "startChar": 14,
+        "endLine": 95,
+        "endChar": 71
+      },
+      "revId": "445da8242148bc40213d48b72da779f5138c6eb6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee3bf2ac_4ea9b87c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerStatusInfoJsonTest.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 95,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-09T10:24:09Z",
+      "side": 1,
+      "message": "Not really. I think you are right, that this test can be dropped.\n\nDone.",
+      "parentUuid": "673e022e_3242f051",
       "range": {
         "startLine": 95,
         "startChar": 14,
