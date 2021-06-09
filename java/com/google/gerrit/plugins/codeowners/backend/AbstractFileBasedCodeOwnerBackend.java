@@ -21,6 +21,7 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -170,11 +171,12 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
    * @return whether the given file name is code owner config file with an extension in the name
    */
   private boolean isCodeOwnerConfigFileWithExtension(Project.NameKey project, String fileName) {
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersPluginProjectConfigSnapshot =
+        codeOwnersPluginConfiguration.getProjectConfig(project);
     String quotedDefaultFileName = Pattern.quote(defaultFileName);
     String quotedFileExtension =
         Pattern.quote(
-            codeOwnersPluginConfiguration
-                .getProjectConfig(project)
+            codeOwnersPluginProjectConfigSnapshot
                 .getFileExtension()
                 .map(ext -> "." + ext)
                 .orElse(""));
@@ -187,7 +189,12 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
         || Pattern.compile(
                 "^" + nameExtension + "_" + quotedDefaultFileName + quotedFileExtension + "$")
             .matcher(fileName)
-            .matches();
+            .matches()
+        || (codeOwnersPluginProjectConfigSnapshot.enableCodeOwnerConfigFilesWithFileExtensions()
+            && Pattern.compile(
+                    "^" + quotedDefaultFileName + Pattern.quote(".") + nameExtension + "$")
+                .matcher(fileName)
+                .matches());
   }
 
   private String getFileName(Project.NameKey project) {

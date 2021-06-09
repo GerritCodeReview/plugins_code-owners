@@ -158,7 +158,33 @@ endpoint or by touching the change (e.g. by adding a comment).
         Can be overridden per project by setting
         [codeOwners.fileExtension](#codeOwnersFileExtension) in
         `@PLUGIN@.config`.\
-        By default unset (no file extension is used).
+        By default unset (no file extension is used).\
+        If a file extension is configured,
+        [plugin.@PLUGIN@.enableCodeOwnerConfigFilesWithFileExtensions](#pluginCodeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+        should be set to `false`, as otherwise code owner config files with any
+        file extension will be validated, which causes validation errors if code
+        owner config files with other file extensions use a different owners
+        syntax or reference users that do not exist on this Gerrit host.
+
+<a id="pluginCodeOwnersEnableCodeOwnerConfigFilesWithFileExtensions">plugin.@PLUGIN@.enableCodeOwnerConfigFilesWithFileExtensions</a>
+:       Whether file extensions for code owner config files are enabled.\
+        If enabled, code owner config files with file extensions are treated as
+        regular code owner config files. This means they are validated on
+        push/submit (if validation is enabled) and can be imported by other code
+        owner config files (regardless of whether they have the same file
+        extension or not).\
+        Enabling this option should not be used in combination with the
+        [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) option
+        as that option uses file extensions to differentiate different sets of
+        code owner config files in the same repository/branch which may use
+        different code owner syntaxes or reference users that do not exist on
+        this Gerrit host. In this case, code owner config files with (other)
+        file extensions should not be validated as they likely will fail the
+        validation.\
+        Can be overridden per project by setting
+        [codeOwners.enableCodeOwnerConfigFilesWithFileExtensions](#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+        in `@PLUGIN@.config`.\
+        By default `false`.
 
 <a id="pluginCodeOwnersOverrideInfoUrl">plugin.@PLUGIN@.overrideInfoUrl</a>
 :       A URL for a page that provides host-specific information about how to
@@ -638,7 +664,36 @@ endpoint or by touching the change (e.g. by adding a comment).
         projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) in
-        `gerrit.config` is used.
+        `gerrit.config` is used.\
+        If a file extension is configured,
+        [codeOwners.enableCodeOwnerConfigFilesWithFileExtensions](#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+        should be set to `false`, as otherwise code owner config files with any
+        file extension will be validated, which causes validation errors if code
+        owner config files with other file extensions use a different owners
+        syntax or reference users that do not exist on this Gerrit host.
+
+<a id="codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions">codeOwners.enableCodeOwnerConfigFilesWithFileExtensions</a>
+:       Whether file extensions for code owner config files are enabled.\
+        If enabled, code owner config files with file extensions are treated as
+        regular code owner config files. This means they are validated on
+        push/submit (if validation is enabled) and can be imported by other code
+        owner config files (regardless of whether they have the same file
+        extension or not).\
+        Enabling this option should not be used in combination with the
+        [plugin.@PLUGIN@.fileExtension](#pluginCodeOwnersFileExtension) option
+        as that option uses file extensions to differentiate different sets of
+        code owner config files in the same repository/branch which may use
+        different code owner syntaxes or reference users that do not exist on
+        this Gerrit host. In this case, code owner config files with (other)
+        file extensions should not be validated as they likely will fail the
+        validation.
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableCodeOwnerConfigFilesWithFileExtensions](#pluginCodeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+        in `gerrit.config` and the `codeOwners.fileExtension` setting from
+        parent projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableCodeOwnerConfigFilesWithFileExtensions](#pluginCodeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+        in `gerrit.config` is used.\
 
 <a id="codeOwnersOverrideInfoUrl">codeOwners.overrideInfoUrl</a>
 :       A URL for a page that provides project-specific information about how to

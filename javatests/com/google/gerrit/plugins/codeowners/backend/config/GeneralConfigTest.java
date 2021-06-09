@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
@@ -88,6 +89,90 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION, "bar");
     assertThat(generalConfig.getFileExtension(cfg)).value().isEqualTo("bar");
+  }
+
+  @Test
+  public void cannotGetEnableCodeOwnerConfigFilesWithFileExtensionsForNullProject()
+      throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(
+                    /* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetEnableCodeOwnerConfigFilesWithFileExtensionsForNullPluginConfig()
+      throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(
+                    project, /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noEnableCodeOwnerConfigFilesWithFileExtensionsConfiguration() throws Exception {
+    assertThat(generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(project, new Config()))
+        .isFalse();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "true")
+  public void
+      enableCodeOwnerConfigFilesWithFileExtensionsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(project, new Config()))
+        .isTrue();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "true")
+  public void
+      enableCodeOwnerConfigFilesWithFileExtensionsConfigurationInPluginConfigOverridesReadOnlyConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS,
+        "false");
+    assertThat(generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "true")
+  public void
+      invalidEnableCodeOwnerConfigFilesWithFileExtensionsConfigurationInPluginConfigIsIgnored()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS,
+        "INVALID");
+    assertThat(generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "INVALID")
+  public void
+      invalidEnableCodeOwnerConfigFilesWithFileExtensionsConfigurationInGerritConfigIsIgnored()
+          throws Exception {
+    assertThat(generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(project, new Config()))
+        .isFalse();
   }
 
   @Test

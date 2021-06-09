@@ -110,6 +110,47 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void codeOwnerConfigFileWithNonMatchingFileExtensionIsNotValidated() throws Exception {
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owner config with file extension",
+            getCodeOwnerConfigFileName() + ".foo",
+            "INVALID");
+    assertOkWithoutMessages(r);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void codeOwnerConfigFileWithMatchingFileExtensionIsValidated() throws Exception {
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owner config with file extension",
+            getCodeOwnerConfigFileName() + ".foo",
+            "INVALID");
+    String abbreviatedCommit = abbreviateName(r.getCommit());
+    r.assertErrorStatus(
+        String.format(
+            "commit %s: [code-owners] %s", abbreviatedCommit, "invalid code owner config files"));
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "true")
+  public void codeOwnerConfigFileWithFileExtensionIsValidatedIfFileExtensionsAreEnabled()
+      throws Exception {
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owner config with file extension",
+            getCodeOwnerConfigFileName() + ".foo",
+            "INVALID");
+    String abbreviatedCommit = abbreviateName(r.getCommit());
+    r.assertErrorStatus(
+        String.format(
+            "commit %s: [code-owners] %s", abbreviatedCommit, "invalid code owner config files"));
+  }
+
+  @Test
   public void canUploadConfigWithoutIssues() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
 
@@ -1385,6 +1426,121 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             .branch("master")
             .folderPath("/")
             .fileName(getCodeOwnerConfigFileName() + "_extension")
+            .addCodeOwnerEmail(user.email())
+            .create();
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+    testRepo.reset(projectOperations.project(project).getHead("master"));
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getFilePath())
+            .setProject(project)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    r.assertOkStatus();
+  }
+
+  @Test
+  public void cannotUploadConfigWithGlobalImportOfFileWithFileExtension() throws Exception {
+    testCannotUploadConfigWithImportOfFileWithFileExtension(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportOfFileWithFileExtension() throws Exception {
+    testCannotUploadConfigWithImportOfFileWithFileExtension(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testCannotUploadConfigWithImportOfFileWithFileExtension(
+      CodeOwnerConfigImportType importType) throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // create a code owner config that imports a code owner config from the same folder but with a
+    // file extension in the file name
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .fileName(getCodeOwnerConfigFileName() + ".extension")
+            .addCodeOwnerEmail(user.email())
+            .create();
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+    testRepo.reset(projectOperations.project(project).getHead("master"));
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
+                    .getFilePath())
+            .setProject(project)
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid %s import in '%s':" + " '%s' is not a code owner config file",
+            importType.getType(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath(),
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath()));
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "true")
+  public void canUploadConfigWithGlobalImportOfFileWithFileExtensionIfFileExtensionsAreEnabled()
+      throws Exception {
+    testUploadConfigWithImportOfFileWithFileExtension(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "true")
+  public void canUploadConfigWithPerFileImportOfFileWithFileExtensionIfFileExtensionsAreEnabled()
+      throws Exception {
+    testUploadConfigWithImportOfFileWithFileExtension(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportOfFileWithFileExtension(
+      CodeOwnerConfigImportType importType) throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // create a code owner config that imports a code owner config from the same folder but with a
+    // file extension in the file name
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/");
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .fileName(getCodeOwnerConfigFileName() + ".extension")
             .addCodeOwnerEmail(user.email())
             .create();
     GitUtil.fetch(testRepo, "refs/*:refs/*");

@@ -151,12 +151,23 @@ Absolute paths are recommended for distant paths, but also to make it easier to
 copy or integrate the line between multiple `OWNERS` files.
 
 The file that is referenced by the `file` keyword must be a code owner config
-file. This means it cannot have an arbitrary name, but the file name must be
-`OWNERS` or `OWNER.<file-extension>`, if a
-[file extension](#codeOwnerConfigFileExtension) is configured. In addition it is
-allowed that the file names have an arbitray prefix (`<prefix>_OWNERS`, e.g.
-`BUILD_OWNERS`) or an arbitrary extension (`OWNERS_<extension>`, e.g.
-`OWNERS_BUILD`).
+file.
+
+By default, only `OWNERS` files and `OWNERS` files with an arbitratry prefix or
+extension (`<prefix>_OWNERS`, e.g. `BUILD_OWNERS` and `OWNERS_<extension>`, e.g.
+`OWNERS_BUILD`) are considered as code owner config files.
+
+If a [file extension](#codeOwnerConfigFileExtension) is configured, only
+`OWNERS.<file-extension>`, `<prefix>_OWNERS.<file-extension>` and
+`OWNERS_<extension>.<file-extension>` files where `<file-extension>` matches the
+configured file extension are considered as code owner config files.
+
+If arbitrary file extensions for code owner config files are
+[enabled](config.html#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+`OWNERS.<file-extension>` files with any file extension are considered as code
+owner config files in addition to `OWNERS`, `<prefix>_OWNERS` and
+`OWNERS_<extension>` files (using this configuration option is not compatible
+with configuring a [file extension](#codeOwnerConfigFileExtension)).
 
 It's also possible to reference code owner config files from other projects or
 branches (only within the same host):
