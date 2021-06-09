@@ -55,8 +55,6 @@ import org.junit.Test;
 public class GetCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   @Inject private ProjectOperations projectOperations;
 
-  private BackendConfig backendConfig;
-
   @Before
   public void setup() throws Exception {
     backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);

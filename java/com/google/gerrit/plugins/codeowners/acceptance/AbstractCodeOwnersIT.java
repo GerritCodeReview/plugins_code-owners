@@ -77,7 +77,6 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
   protected CodeOwnersFactory codeOwnersApiFactory;
   protected ChangeCodeOwnersFactory changeCodeOwnersApiFactory;
   protected ProjectCodeOwnersFactory projectCodeOwnersApiFactory;
-
   protected BackendConfig backendConfig;
 
   @Before

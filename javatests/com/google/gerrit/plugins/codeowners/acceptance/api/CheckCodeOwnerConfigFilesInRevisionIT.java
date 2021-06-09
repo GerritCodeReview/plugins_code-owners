@@ -47,7 +47,6 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
   private static final ObjectId TEST_REVISION =
       ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
 
-  private BackendConfig backendConfig;
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
   private ProtoCodeOwnerConfigParser protoCodeOwnerConfigParser;
 
