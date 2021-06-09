@@ -638,17 +638,39 @@ The code owner statuses are returned as a
         "change_type": "ADDED",
         "new_path_status" {
           "path": "docs/readme.md",
-          "status": "APPROVED"
+          "status": "APPROVED",
+          "reasons": [
+            "approved by <GERRIT_ACCOUNT_1001439> who is a default code owner"
+          ]
         }
       },
       {
         "change_type": "DELETED",
         "old_path_status" {
           "path": "docs/todo.txt",
-          "status": "PENDING"
+          "status": "PENDING",
+          "reasons": [
+            "reviewer <GERRIT_ACCOUNT_1000096> is a code owner"
+          ]
         }
       }
-    ]
+    ],
+    "accounts": {
+      1000096: {
+        "_account_id": 1000025,
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "username": "john"
+        "display_name": "John D"
+      },
+      1001439: {
+        "_account_id": 1001439,
+        "name": "John Smith",
+        "email": "john.smith@example.com",
+        "username": "jsmith"
+        "display_name": "Johnny"
+      }
+    }
   }
 ```
 
@@ -957,6 +979,7 @@ in a change.
 | `patch_set_number` |          | The number of the patch set for which the code owner statuses are returned.
 | `file_code_owner_statuses` |  | List of the code owner statuses for the files in the change as [FileCodeOwnerStatusInfo](#file-code-owner-status-info) entities, sorted by new path, then old path.
 | `more`             | optional | Whether the request would deliver more results if not limited. Not set if `false`.
+| `accounts`         | optional | An account ID to detailed [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entities map that contains the accounts that are referenced in the reason messages that are returned with the [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entities in the `file_code_owner_statuses`. Not set if no accounts are referenced from reasons.
 
 ### <a id="code-owners-status-info"> CodeOwnersStatusInfo
 The `CodeOwnersStatusInfo` contains information about whether the code owners
@@ -1011,10 +1034,11 @@ The `OwnedPathsInfo` entity contains paths that are owned by a user.
 The `PathCodeOwnerStatusInfo` entity describes the code owner status for a path
 in a change.
 
-| Field Name         | Description |
-| ------------------ | ----------- |
-| `path` | The path to which the code owner status applies.
-| `status` | The code owner status for the path. Can be 'INSUFFICIENT_REVIEWERS' (the path needs a code owner approval, but none of its code owners is currently a reviewer of the change), `PENDING` (a code owner of this path has been added as reviewer, but no code owner approval for this path has been given yet) or `APPROVED` (the path has been approved by a code owner or a code owners override is present).
+| Field Name |          | Description |
+| ---------- | -------- | ----------- |
+| `path`     |          | The path to which the code owner status applies.
+| `status`   |          | The code owner status for the path. Can be 'INSUFFICIENT_REVIEWERS' (the path needs a code owner approval, but none of its code owners is currently a reviewer of the change), `PENDING` (a code owner of this path has been added as reviewer, but no code owner approval for this path has been given yet) or `APPROVED` (the path has been approved by a code owner or a code owners override is present).
+| `reasons`  | optional | A list of reasons explaining the status. The reasons may contain placeholders for accounts as `<GERRIT_ACCOUNT_XXXXXXX>` (where `XXXXXXX` is the account ID). The referenced accounts are returned in the [CodeOwnerStatusInfo](#code-owner-status-info) entity that contains this PathCodeOwnerStatusInfo (see field `accounts`). Not set if there are no reasons.
 
 ---
 

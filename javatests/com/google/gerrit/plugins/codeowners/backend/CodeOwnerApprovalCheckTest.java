@@ -1519,9 +1519,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+                path1,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
-                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path2,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1563,9 +1571,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+                path1,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
-                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path2,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
 
     // Delete the override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
@@ -1585,9 +1601,17 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path1, CodeOwnerStatus.APPROVED, "override approval is present"),
+                path1,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Another-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
-                path2, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path2,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Another-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1818,7 +1842,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
 
     // Change some other file and submit the change with an override.
     String changeId2 =
@@ -1839,7 +1867,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1928,7 +1960,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+2 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(user2.id()))));
   }
 
   @Test

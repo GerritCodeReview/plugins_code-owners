@@ -342,7 +342,11 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(
-                path, CodeOwnerStatus.APPROVED, "override approval is present"));
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id()))));
   }
 
   @Test

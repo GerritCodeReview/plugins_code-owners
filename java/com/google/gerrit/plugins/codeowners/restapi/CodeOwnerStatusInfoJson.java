@@ -15,13 +15,18 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static java.util.Comparator.comparing;
 import static java.util.Objects.requireNonNull;
 
+import autovaluegson.factory.shaded.com.google.common.collect.Streams;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.Account;
+import com.google.gerrit.entities.ChangeMessage;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.common.ChangeType;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
@@ -30,11 +35,22 @@ import com.google.gerrit.plugins.codeowners.api.PathCodeOwnerStatusInfo;
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.account.AccountLoader;
+import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.util.Comparator;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.stream.Stream;
 import org.eclipse.jgit.diff.DiffEntry;
 
 /** Collection of routines to populate {@link CodeOwnerStatusInfo}. */
+@Singleton
 public class CodeOwnerStatusInfoJson {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   /** Comparator that sorts {@link FileCodeOwnerStatus} by new path and then old path. */
   private static final Comparator<FileCodeOwnerStatus> FILE_CODE_OWNER_STATUS_COMPARATOR =
       comparing(
@@ -60,6 +76,13 @@ public class CodeOwnerStatusInfoJson {
               .put(DiffEntry.ChangeType.COPY, ChangeType.COPIED)
               .build());
 
+  private final AccountLoader.Factory accountLoaderFactory;
+
+  @Inject
+  public CodeOwnerStatusInfoJson(AccountLoader.Factory accountLoaderFactory) {
+    this.accountLoaderFactory = accountLoaderFactory;
+  }
+
   /**
    * Formats a {@link CodeOwnerStatusInfo} from the provided file code owner statuses.
    *
@@ -68,10 +91,12 @@ public class CodeOwnerStatusInfoJson {
    *     CodeOwnerStatusInfo}
    * @return the created {@link CodeOwnerStatusInfo}
    */
-  public static CodeOwnerStatusInfo format(
-      PatchSet.Id patchSetId, ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses) {
+  public CodeOwnerStatusInfo format(
+      PatchSet.Id patchSetId, ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses)
+      throws PermissionBackendException {
     requireNonNull(patchSetId, "patchSetId");
     requireNonNull(fileCodeOwnerStatuses, "fileCodeOwnerStatuses");
+
     CodeOwnerStatusInfo info = new CodeOwnerStatusInfo();
     info.patchSetNumber = patchSetId.get();
     info.fileCodeOwnerStatuses =
@@ -79,7 +104,53 @@ public class CodeOwnerStatusInfoJson {
             .sorted(FILE_CODE_OWNER_STATUS_COMPARATOR)
             .map(CodeOwnerStatusInfoJson::format)
             .collect(toImmutableList());
+
+    AccountLoader accountLoader = accountLoaderFactory.create(/* detailed= */ true);
+    ImmutableSet<Account.Id> referencedAccounts = getReferencedAccounts(patchSetId, info);
+    info.accounts =
+        !referencedAccounts.isEmpty()
+            ? referencedAccounts.stream()
+                .map(accountLoader::get)
+                .collect(toImmutableMap(accountInfo -> accountInfo._accountId, Function.identity()))
+            : null;
+    accountLoader.fill();
+
     return info;
+  }
+
+  private ImmutableSet<Account.Id> getReferencedAccounts(
+      PatchSet.Id patchSetId, CodeOwnerStatusInfo codeOwnerStatusInfo) {
+    ImmutableSet.Builder<Account.Id> referencedAccounts = ImmutableSet.builder();
+
+    codeOwnerStatusInfo.fileCodeOwnerStatuses.stream()
+        .flatMap(
+            fileCodeOwnerStatus ->
+                Streams.concat(
+                    fileCodeOwnerStatus.newPathStatus != null
+                            && fileCodeOwnerStatus.newPathStatus.reasons != null
+                        ? fileCodeOwnerStatus.newPathStatus.reasons.stream()
+                        : Stream.empty(),
+                    fileCodeOwnerStatus.oldPathStatus != null
+                            && fileCodeOwnerStatus.oldPathStatus.reasons != null
+                        ? fileCodeOwnerStatus.oldPathStatus.reasons.stream()
+                        : Stream.empty()))
+        .forEach(
+            reason -> {
+              Matcher matcher = ChangeMessage.ACCOUNT_TEMPLATE_PATTERN.matcher(reason);
+              while (matcher.find()) {
+                String accountIdString = matcher.group(1);
+                Optional<Account.Id> accountId = Account.Id.tryParse(accountIdString);
+                if (accountId.isPresent()) {
+                  referencedAccounts.add(accountId.get());
+                } else {
+                  logger.atWarning().log(
+                      "reason that is returned for patchset %s of change %s references invalid"
+                          + " account ID %s (reason = \"%s\")",
+                      patchSetId.get(), patchSetId.changeId(), accountIdString, reason);
+                }
+              }
+            });
+    return referencedAccounts.build();
   }
 
   /**
@@ -119,13 +190,7 @@ public class CodeOwnerStatusInfoJson {
     PathCodeOwnerStatusInfo info = new PathCodeOwnerStatusInfo();
     info.path = JgitPath.of(pathCodeOwnerStatus.path()).get();
     info.status = pathCodeOwnerStatus.status();
+    info.reasons = !pathCodeOwnerStatus.reasons().isEmpty() ? pathCodeOwnerStatus.reasons() : null;
     return info;
   }
-
-  /**
-   * Private constructor to prevent instantiation of this class.
-   *
-   * <p>The class only contains static methods, hence the class never needs to be instantiated.
-   */
-  private CodeOwnerStatusInfoJson() {}
 }
