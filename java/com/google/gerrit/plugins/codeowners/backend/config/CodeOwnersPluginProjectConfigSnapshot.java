@@ -66,6 +66,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   private final Config pluginConfig;
 
   @Nullable private Optional<String> fileExtension;
+  @Nullable private Boolean enableCodeOwnerConfigFilesWithFileExtensions;
   @Nullable private Boolean codeOwnerConfigsReadOnly;
   @Nullable private Boolean exemptPureReverts;
   @Nullable private Boolean rejectNonResolvableCodeOwners;
@@ -118,6 +119,15 @@ public class CodeOwnersPluginProjectConfigSnapshot {
       fileExtension = generalConfig.getFileExtension(pluginConfig);
     }
     return fileExtension;
+  }
+
+  /** Whether file extensions for code owner config files are enabled. */
+  public boolean enableCodeOwnerConfigFilesWithFileExtensions() {
+    if (enableCodeOwnerConfigFilesWithFileExtensions == null) {
+      enableCodeOwnerConfigFilesWithFileExtensions =
+          generalConfig.enableCodeOwnerConfigFilesWithFileExtensions(projectName, pluginConfig);
+    }
+    return enableCodeOwnerConfigFilesWithFileExtensions;
   }
 
   /** Whether code owner configs are read-only. */

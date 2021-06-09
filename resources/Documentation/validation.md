@@ -66,7 +66,9 @@ submitted:
   configured](setup-guide.html#configureCodeOwnersBackend) which now uses a
   different syntax or different names for code owner config files, the [file
   extension for code owner config file is set/changed](config.html#codeOwnersFileExtension),
-  or the [allowed email domains are changed](config.html#pluginCodeOwnersAllowedEmailDomain))
+  [arbitrary file extensions for code owner config files](config.html#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+  get enabled/disabled or the [allowed email domains are
+  changed](config.html#pluginCodeOwnersAllowedEmailDomain))
 * emails of users may change so that emails in code owner configs can no longer
   be resolved
 * imported code owner config files may get deleted or renamed so that import
