@@ -590,7 +590,6 @@ public class CodeOwnerApprovalCheck {
     AtomicReference<String> reason = new AtomicReference<>(/* initialValue= */ null);
 
     if (isApproved(
-        absolutePath,
         globalCodeOwners,
         CodeOwnerKind.GLOBAL_CODE_OWNER,
         approverAccountIds,
@@ -601,11 +600,7 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log("%s was not approved by a global code owner", absolutePath);
 
       if (isPending(
-          absolutePath,
-          globalCodeOwners,
-          CodeOwnerKind.GLOBAL_CODE_OWNER,
-          reviewerAccountIds,
-          reason)) {
+          globalCodeOwners, CodeOwnerKind.GLOBAL_CODE_OWNER, reviewerAccountIds, reason)) {
         codeOwnerStatus.set(CodeOwnerStatus.PENDING);
       }
 
@@ -637,16 +632,10 @@ public class CodeOwnerApprovalCheck {
                 }
 
                 if (isApproved(
-                    absolutePath,
-                    codeOwners,
-                    codeOwnerKind,
-                    approverAccountIds,
-                    implicitApprover,
-                    reason)) {
+                    codeOwners, codeOwnerKind, approverAccountIds, implicitApprover, reason)) {
                   codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
                   return false;
-                } else if (isPending(
-                    absolutePath, codeOwners, codeOwnerKind, reviewerAccountIds, reason)) {
+                } else if (isPending(codeOwners, codeOwnerKind, reviewerAccountIds, reason)) {
                   codeOwnerStatus.set(CodeOwnerStatus.PENDING);
 
                   // We need to continue to check if any of the higher-level code owners approved
@@ -893,7 +882,6 @@ public class CodeOwnerApprovalCheck {
   /**
    * Checks whether the given path was implicitly or explicitly approved.
    *
-   * @param absolutePath the path of the file for which the code owner approval is checked
    * @param codeOwners users that own the path
    * @param codeOwnerKind the kind of the given {@code codeOwners}
    * @param approverAccountIds the IDs of the accounts that have approved the change
@@ -903,7 +891,6 @@ public class CodeOwnerApprovalCheck {
    * @return whether the path was approved
    */
   private boolean isApproved(
-      Path absolutePath,
       CodeOwnerResolverResult codeOwners,
       CodeOwnerKind codeOwnerKind,
       ImmutableSet<Account.Id> approverAccountIds,
@@ -953,7 +940,6 @@ public class CodeOwnerApprovalCheck {
   /**
    * Checks whether any of the reviewers is a code owner of the path.
    *
-   * @param absolutePath the path of the file for which the code owner status is checked
    * @param codeOwners users that own the path
    * @param codeOwnerKind the kind of the given {@code codeOwners}
    * @param reviewerAccountIds the IDs of the accounts that are reviewer of the change
@@ -962,7 +948,6 @@ public class CodeOwnerApprovalCheck {
    * @return whether the path was approved
    */
   private boolean isPending(
-      Path absolutePath,
       CodeOwnerResolverResult codeOwners,
       CodeOwnerKind codeOwnerKind,
       ImmutableSet<Account.Id> reviewerAccountIds,
