@@ -16,6 +16,24 @@
       "message": "LGTM with nits should work here.",
       "revId": "2c660340720d1e4cc7ae58ca948cd1cfe5955897",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c293766_6c6d0cac",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-10T09:50:53Z",
+      "side": 1,
+      "message": "I got confused, LGTM with push doesn\u0027t work yet anyway.",
+      "parentUuid": "ddf3ac4e_d8e42457",
+      "revId": "2c660340720d1e4cc7ae58ca948cd1cfe5955897",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
