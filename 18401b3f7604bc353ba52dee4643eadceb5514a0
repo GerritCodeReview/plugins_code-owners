@@ -22,6 +22,30 @@
       },
       "revId": "18401b3f7604bc353ba52dee4643eadceb5514a0",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8229d2b4_00208ed2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-10T09:23:02Z",
+      "side": 0,
+      "message": "It really looks like the wrong line was removed, but actually this diff is correct :D\n\nThis is the base class from which the other classes inherit this field.\n\nEarlier this field was private here which is why it was separated with a blank line from the protected fields above. But the change that made this field protected forgot to remove the newline, which I noticed now. Since it\u0027s kind of related to this change, I just included this modification into this change.",
+      "parentUuid": "6c4312c4_338895a8",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 40
+      },
+      "revId": "18401b3f7604bc353ba52dee4643eadceb5514a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
