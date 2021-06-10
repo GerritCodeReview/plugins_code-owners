@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_REVIEWER_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REVIEWER_SCORING_VALUE;
 
@@ -129,10 +130,27 @@ public class GetCodeOwnersForPathInChange
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       Stream<CodeOwner> codeOwners,
       ImmutableList.Builder<String> debugLogs) {
-    return codeOwners
-        .filter(filterOutChangeOwner(rsrc, debugLogs))
-        .filter(filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(annotations, debugLogs))
-        .filter(filterOutServiceUsers(debugLogs));
+
+    // The change owner and service users should never be suggested, hence filter them out.
+    ImmutableList<CodeOwner> filteredCodeOwners =
+        codeOwners
+            .filter(filterOutChangeOwner(rsrc, debugLogs))
+            .filter(filterOutServiceUsers(debugLogs))
+            .collect(toImmutableList());
+
+    // Code owners that are annotated with #{NEVER_SUGGEST} should be dropped from the suggestion,
+    // but only if it doesn't make the result empty. This means despite what the name of the
+    // annotation suggests those code owners should be suggested if there are no other code owners.
+    ImmutableList<CodeOwner> filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithNeverSuggest =
+        filteredCodeOwners.stream()
+            .filter(filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(annotations, debugLogs))
+            .collect(toImmutableList());
+    if (filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithNeverSuggest.isEmpty()) {
+      // The result would be empty, hence return code owners even if they are annotated with
+      // #{NEVER_SUGGEST}.
+      return filteredCodeOwners.stream();
+    }
+    return filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithNeverSuggest.stream();
   }
 
   private Predicate<CodeOwner> filterOutChangeOwner(

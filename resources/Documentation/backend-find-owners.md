@@ -314,11 +314,12 @@ The following annotations are supported:
 #### <a id="neverSuggest">
 * `NEVER_SUGGEST`:
   Code owners with this annotation are omitted when [suggesting code
-  owners](rest-api.html#list-code-owners-for-path-in-change). If code ownership
-  is assigned to the same code owner through multiple relevant access grants in
-  the same code owner config file or in other relevant code owner config files
-  the code owner gets omitted from the suggestion if it has the `NEVER_SUGGEST`
-  set on any of the access grants.
+  owners](rest-api.html#list-code-owners-for-path-in-change), except if dropping
+  these code owners would make the suggestion result empty. If code ownership is
+  assigned to the same code owner through multiple relevant access grants in the
+  same code owner config file or in other relevant code owner config files the
+  code owner gets omitted from the suggestion if it has the `NEVER_SUGGEST` set
+  on any of the access grants.
 
 Unknown annotations are silently ignored.
 
