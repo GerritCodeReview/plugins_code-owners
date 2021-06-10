@@ -40,8 +40,6 @@ import org.junit.Test;
 public class RenameEmailRestIT extends AbstractCodeOwnersIT {
   @Inject private AccountOperations accountOperations;
 
-  private BackendConfig backendConfig;
-
   @Before
   public void setup() throws Exception {
     backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);

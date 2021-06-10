@@ -88,7 +88,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
 
-  private BackendConfig backendConfig;
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
   private ProtoCodeOwnerConfigParser protoCodeOwnerConfigParser;
   private DynamicMap<CodeOwnerBackend> codeOwnerBackends;

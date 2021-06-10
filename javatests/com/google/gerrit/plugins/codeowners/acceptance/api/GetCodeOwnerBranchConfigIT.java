@@ -48,8 +48,6 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnerBranchConfigRestIT}.
  */
 public class GetCodeOwnerBranchConfigIT extends AbstractCodeOwnersIT {
-  private BackendConfig backendConfig;
-
   @Before
   public void setup() throws Exception {
     backendConfig = plugin.getSysInjector().getInstance(BackendConfig.class);
