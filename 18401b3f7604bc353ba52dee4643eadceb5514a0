@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6c4312c4_338895a8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/acceptance/AbstractCodeOwnersIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 81,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-10T08:26:02Z",
+      "side": 0,
+      "message": "lol, you removed the wrong line :-)",
+      "range": {
+        "startLine": 81,
+        "startChar": 0,
+        "endLine": 81,
+        "endChar": 40
+      },
+      "revId": "18401b3f7604bc353ba52dee4643eadceb5514a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
