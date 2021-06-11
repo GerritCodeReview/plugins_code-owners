@@ -81,6 +81,30 @@
       },
       "revId": "e65fe767b7363755d5c5b4582bf785ee0a9cfbef",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4f3d2428_a6a45295",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetCodeOwnersForPathInBranchIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 303,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-11T09:54:53Z",
+      "side": 1,
+      "message": "I meant it\u0027s not ignored, it\u0027s WAI but the comment change is exactly what I meant :-)",
+      "parentUuid": "e14db707_0dce096c",
+      "range": {
+        "startLine": 301,
+        "startChar": 0,
+        "endLine": 303,
+        "endChar": 0
+      },
+      "revId": "e65fe767b7363755d5c5b4582bf785ee0a9cfbef",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
