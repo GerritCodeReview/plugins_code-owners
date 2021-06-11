@@ -134,6 +134,30 @@
       },
       "revId": "07b2586186bee6617e12a24584ed9dc266873878",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c8416306_d613d000",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 243,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-11T10:57:14Z",
+      "side": 1,
+      "message": "Sounds good. Thanks for bringing this, I didn\u0027t think much about this before, but seems we are fine :)",
+      "parentUuid": "ef4434f7_cb0beeeb",
+      "range": {
+        "startLine": 243,
+        "startChar": 37,
+        "endLine": 243,
+        "endChar": 44
+      },
+      "revId": "07b2586186bee6617e12a24584ed9dc266873878",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
