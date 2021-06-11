@@ -1483,7 +1483,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(codeOwner.email())
-                .addAnnotation(codeOwner.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    codeOwner.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .build())
         .create();
 
@@ -1508,7 +1509,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(codeOwner.email())
-                .addAnnotation(codeOwner.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    codeOwner.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addAnnotation(codeOwner.email(), CodeOwnerAnnotation.create("OTHER_ANNOTATION"))
                 .build())
         .create();
@@ -1518,7 +1520,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo).isCodeOwner();
     assertThat(checkCodeOwnerInfo)
         .hasAnnotationsThat()
-        .containsExactly(CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key())
+        .containsExactly(CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key())
         .inOrder();
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
@@ -1529,7 +1531,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
                 "email %s is annotated with %s",
                 codeOwner.email(),
                 ImmutableSet.of(
-                    CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key(), "OTHER_ANNOTATION")),
+                    CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key(),
+                    "OTHER_ANNOTATION")),
             String.format(
                 "found the all users wildcard ('%s') as a code owner in %s which makes %s a code"
                     + " owner",
@@ -1547,7 +1550,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             String.format(
                 "email %s is annotated with %s",
                 codeOwner.email(),
-                ImmutableSet.of(CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key())),
+                ImmutableSet.of(CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key())),
             String.format(
                 "dropping unsupported annotations for %s: %s",
                 codeOwner.email(), ImmutableSet.of("ANNOTATION", "OTHER_ANNOTATION")));

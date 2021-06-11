@@ -23,14 +23,14 @@ public class CodeOwnerAnnotations {
    * Code owners with this annotation are omitted when suggesting code owners (see {@link
    * com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInChange}).
    */
-  public static final CodeOwnerAnnotation NEVER_SUGGEST_ANNOTATION =
-      CodeOwnerAnnotation.create("NEVER_SUGGEST");
+  public static final CodeOwnerAnnotation LAST_RESORT_SUGGESTION_ANNOTATION =
+      CodeOwnerAnnotation.create("LAST_RESORT_SUGGESTION");
 
   private static final List<String> KEYS_ALL;
 
   static {
     KEYS_ALL = new ArrayList<>();
-    KEYS_ALL.add(NEVER_SUGGEST_ANNOTATION.key());
+    KEYS_ALL.add(LAST_RESORT_SUGGESTION_ANNOTATION.key());
   }
 
   /** Whether the given annotation is known and supported. */
