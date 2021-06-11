@@ -126,11 +126,6 @@ public class ChangedFiles {
   public ImmutableList<ChangedFile> getOrCompute(Project.NameKey project, ObjectId revision)
       throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
     if (experimentFeatures.isFeatureEnabled(CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE)) {
-      if (isInitialCommit(project, revision)) {
-        // DiffOperations doesn't support getting the list of modified files for the initial commit.
-        return compute(project, revision);
-      }
-
       return getFromDiffCache(project, revision);
     }
     return compute(project, revision);
@@ -277,9 +272,6 @@ public class ChangedFiles {
   /**
    * Gets the changed files from the diff cache.
    *
-   * <p>Doesn't support getting changed files for an initial revision. This is because the diff
-   * cache doesn't support getting changed files for commits that don't have any parent.
-   *
    * <p>Rename detection is enabled.
    *
    * @throws IllegalStateException thrown if invoked for an initial revision
@@ -297,7 +289,8 @@ public class ChangedFiles {
 
     try (Timer0.Context ctx = codeOwnerMetrics.getChangedFiles.start()) {
       Map<String, FileDiffOutput> fileDiffOutputs;
-      if (mergeCommitStrategy.equals(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION)) {
+      if (mergeCommitStrategy.equals(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION)
+          || isInitialCommit(project, revision)) {
         // Use parentNum=null to do the comparison against the default base.
         // For non-merge commits the default base is the only parent (aka parent 1, initial commits
         // are not supported).
@@ -308,8 +301,8 @@ public class ChangedFiles {
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.
-        // Non-merge commits should always be compared against against the first parent (initial
-        // commits are not supported).
+        // Non-merge commits should always be compared against the first parent (initial commits are
+        // handled above).
         // For merge commits also the first parent should be used if the merge commit strategy is
         // ALL_CHANGED_FILES.
         fileDiffOutputs = diffOperations.listModifiedFilesAgainstParent(project, revision, 1);
