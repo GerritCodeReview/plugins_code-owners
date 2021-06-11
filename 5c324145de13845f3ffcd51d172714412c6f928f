@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "983deca8_b5941766",
+        "filename": "resources/Documentation/backend-find-owners.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-11T09:29:29Z",
+      "side": 1,
+      "message": "No, if a file extension is configured we are using\n\n  OWNERS.\u003cconfigured-file-extension\u003e\n  \u003cprefix\u003e_OWNERS.\u003cconfigured-file-extension\u003e\n  OWNERS_\u003cextension\u003e.\u003cconfigured-file-extension\u003e\n  \ninstead of \n\n  OWNERS\n  \u003cprefix\u003e_OWNERS\n  OWNERS_\u003cextension\u003e\n  \nThe use case is this:\n- upstream already uses OWNERS files (e.g. with some syntax that is not supported by the code-owners plugin, because they use some other plugin)\n- internally these OWNERS files do not work, e.g. cannot be parsed\n- by configuring a file extension, we use a different set of OWNERS files, and the OWNERS files from upstream are just ignored.\n\nTried to make this a bit clearer.",
+      "parentUuid": "308f8530_cfc51e22",
+      "range": {
+        "startLine": 160,
+        "startChar": 68,
+        "endLine": 160,
+        "endChar": 72
+      },
+      "revId": "5c324145de13845f3ffcd51d172714412c6f928f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f8b2887f_af06aefa",
@@ -37,6 +61,30 @@
       "writtenOn": "2021-06-11T08:28:28Z",
       "side": 1,
       "message": "I didn\u0027t fully understand what happens if I do use both of those options at the same time. Doesn\u0027t codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions kind of overrides pluginCodeOwnersFileExtension?",
+      "range": {
+        "startLine": 682,
+        "startChar": 29,
+        "endLine": 682,
+        "endChar": 39
+      },
+      "revId": "5c324145de13845f3ffcd51d172714412c6f928f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b997d50a_cc7b8bca",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 682,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-11T09:29:29Z",
+      "side": 1,
+      "message": "Not really.\n\nIf you set both options we use \n\n  OWNERS.\u003cconfigured-file-extension\u003e\n  \u003cprefix\u003e_OWNERS.\u003cconfigured-file-extension\u003e\n  OWNERS_\u003cextension\u003e.\u003cconfigured-file-extension\u003e\n  \ninstead of \n\n  OWNERS\n  \u003cprefix\u003e_OWNERS\n  OWNERS_\u003cextension\u003e\n  \nbut \n\n  OWNERS.\u003cconfigured-file-extension\u003e\n  \u003cprefix\u003e_OWNERS.\u003cconfigured-file-extension\u003e\n  OWNERS_\u003cextension\u003e.\u003cconfigured-file-extension\u003e\n  \nwould be allowed to import  \n\n  OWNERS.\u003carbitrary-file-extension\u003e\n\nValidation would happen for \n\n  OWNERS.\u003cconfigured-file-extension\u003e\n  \u003cprefix\u003e_OWNERS.\u003cconfigured-file-extension\u003e\n  OWNERS_\u003cextension\u003e.\u003cconfigured-file-extension\u003e\n  \nbut also for\n\n   OWNERS.\u003carbitrary-file-extension\u003e\n\nIf you configured a file extension because upstream already uses OWNERS and OWNERS.\u003cother-file-extension\u003e files which are not parseable internally, the validation of OWNERS.\u003cother-file-extension\u003e would now always fail. That\u0027s why these options don\u0027t work well together and we don\u0027t recommend using them together. If you do use both options, it could maybe still work, but I don\u0027t see a use-case why you would want to use both at the same time.",
+      "parentUuid": "f8b2887f_af06aefa",
       "range": {
         "startLine": 682,
         "startChar": 29,
