@@ -298,28 +298,28 @@ have the format `#{ANNOTATION_NAME}` and can appear at the end of the line.
 E.g.:
 
 ```
-  john.doe@example.com #{NEVER_SUGGEST}
-  per-file docs.config,*.md=richard.roe@example.com #{NEVER_SUGGEST}
+  john.doe@example.com #{LAST_RESORT_SUGGESTION}
+  per-file docs.config,*.md=richard.roe@example.com #{LAST_RESORT_SUGGESTION}
 ```
 \
 Annotations can be mixed with [comments](#comments) that can appear before and
 after annotations, E.g.:
 
 ```
-  jane.roe@example.com # foo bar #{NEVER_SUGGEST} baz
+  jane.roe@example.com # foo bar #{LAST_RESORT_SUGGESTION} baz
 ```
 \
 The following annotations are supported:
 
-#### <a id="neverSuggest">
-* `NEVER_SUGGEST`:
+#### <a id="lastResortSuggestion">
+* `LAST_RESORT_SUGGESTION`:
   Code owners with this annotation are omitted when [suggesting code
   owners](rest-api.html#list-code-owners-for-path-in-change), except if dropping
   these code owners would make the suggestion result empty. If code ownership is
   assigned to the same code owner through multiple relevant access grants in the
   same code owner config file or in other relevant code owner config files the
-  code owner gets omitted from the suggestion if it has the `NEVER_SUGGEST` set
-  on any of the access grants.
+  code owner gets omitted from the suggestion if it has the
+  `LAST_RESORT_SUGGESTION` set on any of the access grants.
 
 Unknown annotations are silently ignored.
 

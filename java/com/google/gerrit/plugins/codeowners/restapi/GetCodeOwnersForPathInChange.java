@@ -138,19 +138,22 @@ public class GetCodeOwnersForPathInChange
             .filter(filterOutServiceUsers(debugLogs))
             .collect(toImmutableList());
 
-    // Code owners that are annotated with #{NEVER_SUGGEST} should be dropped from the suggestion,
-    // but only if it doesn't make the result empty. This means despite what the name of the
-    // annotation suggests those code owners should be suggested if there are no other code owners.
-    ImmutableList<CodeOwner> filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithNeverSuggest =
-        filteredCodeOwners.stream()
-            .filter(filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(annotations, debugLogs))
-            .collect(toImmutableList());
-    if (filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithNeverSuggest.isEmpty()) {
-      // The result would be empty, hence return code owners even if they are annotated with
-      // #{NEVER_SUGGEST}.
+    // Code owners that are annotated with #{LAST_RESORT_SUGGESTION} should be dropped from the
+    // suggestion, but only if it doesn't make the result empty. In other words this means that
+    // those code owners should be suggested if there are no other code owners.
+    ImmutableList<CodeOwner>
+        filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion =
+            filteredCodeOwners.stream()
+                .filter(
+                    filterOutCodeOwnersThatAreAnnotatedWithLastResortSuggestion(
+                        annotations, debugLogs))
+                .collect(toImmutableList());
+    if (filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.isEmpty()) {
+      // The result would be empty, hence return code owners that are annotated with
+      // #{LAST_RESORT_SUGGESTION}.
       return filteredCodeOwners.stream();
     }
-    return filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithNeverSuggest.stream();
+    return filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.stream();
   }
 
   private Predicate<CodeOwner> filterOutChangeOwner(
@@ -167,20 +170,21 @@ public class GetCodeOwnersForPathInChange
     };
   }
 
-  private Predicate<CodeOwner> filterOutCodeOwnersThatAreAnnotatedWithNeverSuggest(
+  private Predicate<CodeOwner> filterOutCodeOwnersThatAreAnnotatedWithLastResortSuggestion(
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       ImmutableList.Builder<String> debugLogs) {
     return codeOwner -> {
-      boolean neverSuggest =
-          annotations.containsEntry(codeOwner, CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION);
-      if (!neverSuggest) {
+      boolean lastResortSuggestion =
+          annotations.containsEntry(
+              codeOwner, CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION);
+      if (!lastResortSuggestion) {
         // Returning true from the Predicate here means that the code owner should be kept.
         return true;
       }
       debugLogs.add(
           String.format(
               "filtering out %s because this code owner is annotated with %s",
-              codeOwner, CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key()));
+              codeOwner, CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key()));
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
