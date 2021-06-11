@@ -330,7 +330,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void codeOwnersWithNeverSuggestAnnotationAreFilteredOut() throws Exception {
+  public void codeOwnersWithLastResortSuggestionAnnotationAreFilteredOut() throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
     TestAccount user2 = accountCreator.user2();
@@ -343,13 +343,14 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
         .create();
 
-    // Expectation: admin is filtered out because it is annotated with NEVER_SUGGEST.
+    // Expectation: admin is filtered out because it is annotated with LAST_RESORT_SUGGESTION.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -358,7 +359,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void codeOwnersWithNeverSuggestAnnotation_annotationIgnoredIfResultWouldBeEmpty()
+  public void codeOwnersWithLastResortSuggestionAnnotation_annotationIgnoredIfResultWouldBeEmpty()
       throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
@@ -382,15 +383,16 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(serviceUser.email())
                 .addCodeOwnerEmail(changeOwner.email())
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
-                .addAnnotation(user.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(user.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .build())
         .create();
 
     // Expectation: The service user and the change owner are filtered out. admin and user get
-    // suggested despite of the NEVER_SUGGEST annotation since ignoring them would make the result
-    // empty. This is a special case in which the NEVER_SUGGEST annotation is ignored.
+    // suggested despite of the LAST_RESORT_SUGGESTION annotation since ignoring them would make
+    // the result empty.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -399,7 +401,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void codeOwnersWithNeverSuggestAnnotation_annotationSetForAllUsersWildcard()
+  public void codeOwnersWithLastResortSuggestionAnnotation_annotationSetForAllUsersWildcard()
       throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
@@ -413,15 +415,16 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
                 .addAnnotation(
                     CodeOwnerResolver.ALL_USERS_WILDCARD,
-                    CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                    CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(admin.email())
                 .addCodeOwnerEmail(user.email())
                 .build())
         .create();
 
-    // Expectation: Since all code owners are annotated with NEVER_SUGGEST (via the annotation on
-    // the all users wildcard) the result would be empty. This is a special case in which the
-    // NEVER_SUGGEST annotation is ignored, hence we expect admin and user to be suggested.
+    // Expectation: Since all code owners are annotated with LAST_RESORT_SUGGESTION (via the
+    // annotation on the all users wildcard) the result would be empty if code owners with the
+    // LAST_RESORT_SUGGESTION annotation are omitted. Hence in this case the LAST_RESORT_SUGGESTION
+    // annotation is ignored and we expect admin and user to be suggested.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -430,7 +433,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void perFileCodeOwnersWithNeverSuggestAnnotationAreFilteredOut() throws Exception {
+  public void perFileCodeOwnersWithLastResortSuggestionAnnotationAreFilteredOut() throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
     TestAccount user2 = accountCreator.user2();
@@ -444,13 +447,14 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
             CodeOwnerSet.builder()
                 .addPathExpression(testPathExpressions.matchFileType("md"))
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
         .create();
 
-    // Expectation: admin is filtered out because it is annotated with NEVER_SUGGEST.
+    // Expectation: admin is filtered out because it is annotated with LAST_RESORT_SUGGESTION.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -459,8 +463,9 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void perFileCodeOwnersWithNeverSuggestAnnotation_annotationIgnoredIfResultWouldBeEmpty()
-      throws Exception {
+  public void
+      perFileCodeOwnersWithLastResortSuggestionAnnotation_annotationIgnoredIfResultWouldBeEmpty()
+          throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
     TestAccount serviceUser =
@@ -484,15 +489,16 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(serviceUser.email())
                 .addCodeOwnerEmail(changeOwner.email())
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
-                .addAnnotation(user.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(user.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .build())
         .create();
 
     // Expectation: The service user and the change owner are filtered out. admin and user get
-    // suggested despite of the NEVER_SUGGEST annotation since ignoring them would make the result
-    // empty. This is a special case in which the NEVER_SUGGEST annotation is ignored.
+    // suggested despite of the LAST_RESORT_SUGGESTION annotation since ignoring them would make
+    // the result empty.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -501,7 +507,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void perFileCodeOwnersWithNeverSuggestAnnotation_annotationSetForAllUsersWildcard()
+  public void perFileCodeOwnersWithLastResortSuggestionAnnotation_annotationSetForAllUsersWildcard()
       throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
@@ -516,15 +522,16 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(CodeOwnerResolver.ALL_USERS_WILDCARD)
                 .addAnnotation(
                     CodeOwnerResolver.ALL_USERS_WILDCARD,
-                    CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                    CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(admin.email())
                 .addCodeOwnerEmail(user.email())
                 .build())
         .create();
 
-    // Expectation: Since all code owners are annotated with NEVER_SUGGEST (via the annotation on
-    // the all users wildcard) the result would be empty. This is a special case in which the
-    // NEVER_SUGGEST annotation is ignored, hence we expect admin and user to be suggested.
+    // Expectation: Since all code owners are annotated with LAST_RESORT_SUGGESTION (via the
+    // annotation on the all users wildcard) the result would be empty if code owners with the
+    // LAST_RESORT_SUGGESTION annotation are omitted. Hence in this case the LAST_RESORT_SUGGESTION
+    // annotation is ignored and we expect admin and user to be suggested.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -533,7 +540,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void neverSuggestTakesEffectEvenIfCodeOwnerIsAlsoSpecifiedWithoutThisAnnotation()
+  public void lastResortSuggestionTakesEffectEvenIfCodeOwnerIsAlsoSpecifiedWithoutThisAnnotation()
       throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
@@ -549,7 +556,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .create();
 
     // Code owner config that specifies admin multiple times as code owner, but only once with the
-    // NEVER_SUGGEST annotation.
+    // LAST_RESORT_SUGGESTION annotation.
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
@@ -558,7 +565,8 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
@@ -581,7 +589,8 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    // Expectation: admin is filtered out because at once place it is annotated with NEVER_SUGGEST.
+    // Expectation: admin is filtered out because at one place it is annotated with
+    // LAST_RESORT_SUGGESTION.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -590,7 +599,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void neverSuggestOnNonMatchingPerFileRuleDoesntHaveAnyEffect() throws Exception {
+  public void lastResortSuggestionOnNonMatchingPerFileRuleDoesntHaveAnyEffect() throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
     TestAccount user2 = accountCreator.user2();
@@ -606,17 +615,18 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
-        // Non-matching per-file code owner with NEVER_SUGGEST annotation.
+        // Non-matching per-file code owner with LAST_RESORT_SUGGESTION annotation.
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addPathExpression(testPathExpressions.matchFileType("txt"))
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .build())
         .create();
 
-    // Expectation: admin is suggested since the NEVER_SUGGEST annotation is set on the per-file
-    // rule which doesn't match.
+    // Expectation: admin is suggested since the LAST_RESORT_SUGGESTION annotation is set on the
+    // per-file rule which doesn't match.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -751,7 +761,8 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 .addCodeOwnerEmail(changeOwner.email())
                 .addCodeOwnerEmail(serviceUser.email())
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .build())
         .create();
@@ -773,6 +784,7 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
                 CodeOwner.create(serviceUser.id())),
             String.format(
                 "filtering out %s because this code owner is annotated with %s",
-                CodeOwner.create(admin.id()), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION.key()));
+                CodeOwner.create(admin.id()),
+                CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key()));
   }
 }

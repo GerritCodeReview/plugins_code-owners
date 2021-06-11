@@ -247,7 +247,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void codeOwnersWithNeverSuggestAnnotationAreIncluded() throws Exception {
+  public void codeOwnersWithLastResortSuggestionAnnotationAreIncluded() throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
     TestAccount user2 = accountCreator.user2();
@@ -260,14 +260,15 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
         .addCodeOwnerSet(
             CodeOwnerSet.builder()
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
         .create();
 
-    // Expectation: admin is included because GetCodeOwnersForPathInBranch ignores the NEVER_SUGGEST
-    // suggestion.
+    // Expectation: admin is included because GetCodeOwnersForPathInBranch ignores the
+    // LAST_RESORT_SUGGESTION annotation
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
@@ -276,7 +277,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
-  public void perFileCodeOwnersWithNeverSuggestAnnotationAreIncluded() throws Exception {
+  public void perFileCodeOwnersWithLastResortSuggestionAnnotationAreIncluded() throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
 
     TestAccount user2 = accountCreator.user2();
@@ -290,14 +291,15 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
             CodeOwnerSet.builder()
                 .addPathExpression(testPathExpressions.matchFileType("md"))
                 .addCodeOwnerEmail(admin.email())
-                .addAnnotation(admin.email(), CodeOwnerAnnotations.NEVER_SUGGEST_ANNOTATION)
+                .addAnnotation(
+                    admin.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
                 .addCodeOwnerEmail(user.email())
                 .addCodeOwnerEmail(user2.email())
                 .build())
         .create();
 
-    // Expectation: admin is included because GetCodeOwnersForPathInBranch ignores the NEVER_SUGGEST
-    // suggestion.
+    // Expectation: admin is included because GetCodeOwnersForPathInBranch ignores the
+    // LAST_RESORT_SUGGESTION annotation
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
