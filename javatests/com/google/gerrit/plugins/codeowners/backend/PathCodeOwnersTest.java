@@ -543,6 +543,98 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void importOfCodeOwnerConfigFileWithFileExtensionIsIgnored() throws Exception {
+    // Create a code owner config file with a file extension. This file is only considered as a code
+    // owner config file if either the file extension matches the configured file extension (config
+    // parameter fileExtension) or file extensions are enabled for code owner config files (config
+    // paramater enableCodeOwnerConfigFilesWithFileExtensions). Both is not the case here, hence any
+    // import of this file in another code owner config file should get ignored.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .fileName("OWNERS.foo")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create the importing config
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/OWNERS.FOO"))
+            .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global code owner from the importing code owner config, the
+    // import of the code owner config file with the file extension is silently ignored since it is
+    // not considered as a code owner config file
+    PathCodeOwnersResult pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig().get();
+    assertThat(pathCodeOwnersResult.getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email());
+    assertThat(pathCodeOwnersResult.hasUnresolvedImports()).isTrue();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableCodeOwnerConfigFilesWithFileExtensions",
+      value = "true")
+  public void importOfCodeOwnerConfigFileWithFileExtension() throws Exception {
+    // Create a code owner config file with a file extension. This file is considered as a code
+    // owner config file since file extensions for code owner config files are enabled (paramater
+    // enableCodeOwnerConfigFilesWithFileExtensions).
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .fileName("OWNERS.FOO")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // create the importing config
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addImport(
+                CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/OWNERS.FOO"))
+            .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
+            .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global code owner from the importing code owner config and the global
+    // code owner from the imported code owner config
+    PathCodeOwnersResult pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig().get();
+    assertThat(pathCodeOwnersResult.getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email());
+    assertThat(pathCodeOwnersResult.hasUnresolvedImports()).isFalse();
+  }
+
+  @Test
   public void importGlobalCodeOwners_importModeAll() throws Exception {
     testImportGlobalCodeOwners(CodeOwnerConfigImportMode.ALL);
   }

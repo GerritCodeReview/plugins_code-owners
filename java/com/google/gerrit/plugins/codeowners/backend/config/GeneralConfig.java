@@ -65,6 +65,8 @@ public class GeneralConfig {
   public static final String SECTION_VALIDATION = "validation";
 
   public static final String KEY_FILE_EXTENSION = "fileExtension";
+  public static final String KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS =
+      "enableCodeOwnerConfigFilesWithFileExtensions";
   public static final String KEY_READ_ONLY = "readOnly";
   public static final String KEY_EXEMPT_PURE_REVERTS = "exemptPureReverts";
   public static final String KEY_FALLBACK_CODE_OWNERS = "fallbackCodeOwners";
@@ -183,6 +185,27 @@ public class GeneralConfig {
    */
   Optional<String> getFileExtension(Config pluginConfig) {
     return getStringValue(pluginConfig, KEY_FILE_EXTENSION);
+  }
+
+  /**
+   * Whether file extensions for code owner config files are enabled.
+   *
+   * <p>If enabled, code owner config files with file extensions are treated as regular code owner
+   * config files. This means they are validated on push/submit (if validation is enabled) and can
+   * be imported by other code owner config files (regardless of whether they have the same file
+   * extension or not).
+   *
+   * @param project the project for which the configuration should be read
+   * @param pluginConfig the plugin config from which the configuration should be read.
+   * @return whether file extensions for code owner config files are enabled
+   */
+  boolean enableCodeOwnerConfigFilesWithFileExtensions(
+      Project.NameKey project, Config pluginConfig) {
+    return getBooleanConfig(
+        project,
+        pluginConfig,
+        KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS,
+        /* defaultValue= */ false);
   }
 
   /**
