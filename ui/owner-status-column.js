@@ -74,8 +74,6 @@ class BaseEl extends CodeOwnersModelMixin(Polymer.Element) {
     if (newerPatchsetUploaded) return true;
 
     const latestPatchset = change.revisions[change.current_revision];
-    // only show if its comparing against base
-    if (patchRange.basePatchNum !== 'PARENT') return true;
     // Note: in some special cases, patchNum is undefined on latest patchset like
     // after publishing the edit, still show for them
     // TODO: this should be fixed in Gerrit
