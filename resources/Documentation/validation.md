@@ -95,8 +95,9 @@ done from the perspective of the uploader.
 
 ## <a id="skipCodeOwnerConfigValidationOnDemand">Skip code owner config validation on demand
 
-By setting the `--code-owners~skip-validation` push option it is possible to
-skip the code owner config validation on push.
+By setting the `code-owners~skip-validation` push option it is possible to skip
+the code owner config validation on push:
+`git push -o code-owners~skip-validation origin HEAD:refs/for/master`
 
 Using this push option requires the calling user to have to
 `Can Skip Code Owner Config Validation` global capability. Host administrators
