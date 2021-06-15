@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b28bbdf3_52f88193",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-15T13:02:11Z",
+      "side": 1,
+      "message": "Depends on this change in Gerrit core:\nhttps://gerrit-review.googlesource.com/c/gerrit/+/309347",
+      "revId": "0be91190714fa0a3e82f5202c25e2a1da112b31c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
