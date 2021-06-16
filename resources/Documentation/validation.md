@@ -97,13 +97,20 @@ done from the perspective of the uploader.
 
 ## <a id="skipCodeOwnerConfigValidationOnDemand">Skip code owner config validation on demand
 
-By setting the `--code-owners~skip-validation` push option it is possible to
-skip the code owner config validation on push.
+By setting the `code-owners~skip-validation` push option it is possible to skip
+the code owner config validation on push:
+`git push -o code-owners~skip-validation origin HEAD:refs/for/master`
 
-Using this push option requires the calling user to have to
-`Can Skip Code Owner Config Validation` global capability. Host administrators
-have this capability implicitly assigned via the `Administrate Server` global
-capability.
+For the [Create Change](../../../Documentation/rest-api-changes.html#create-change)
+REST endpoint skipping the code owner config validation is possible by setting
+`code-owners~skip-validation` with the value `true` as a validation option in
+the [ChangeInput](../../../Documentation/rest-api-changes.html#change-input)
+(see field `validation_options`).
+
+Using the push option or the validation option requires the calling user to
+have the `Can Skip Code Owner Config Validation` global capability. Host
+administrators have this capability implicitly assigned via the `Administrate
+Server` global capability.
 
 **NOTE:** Using this option only makes sense if the [code owner config validation
 on submit](config.html#pluginCodeOwnersEnableValidationOnSubmit) is disabled, as

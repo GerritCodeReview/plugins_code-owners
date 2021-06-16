@@ -43,6 +43,7 @@ import com.google.gerrit.extensions.common.MergeInput;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
+import com.google.gerrit.extensions.restapi.MergeConflictException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -2270,6 +2271,91 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     mergeInput.source = gApi.projects().name(project.get()).branch(branchName).get().revision;
     changeInput.merge = mergeInput;
     gApi.changes().create(changeInput);
+  }
+
+  @Test
+  public void skipValidationForMergeCommitCreatedViaTheCreateChangeRestApi() throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // Create another branch.
+    String branchName = "stable";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    // Create a code owner config file in the other branch.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch(branchName)
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    // Create a conflicting code owner config file in the target branch.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Try creating a change that merges the other branch into master. The change creation fails
+    // because the code owner config file in the other branch conflicts with the code owner config
+    // file in the master branch.
+    ChangeInput changeInput = new ChangeInput();
+    changeInput.project = project.get();
+    changeInput.branch = "master";
+    changeInput.subject = "A change";
+    changeInput.status = ChangeStatus.NEW;
+    MergeInput mergeInput = new MergeInput();
+    mergeInput.source = gApi.projects().name(project.get()).branch(branchName).get().revision;
+    changeInput.merge = mergeInput;
+    MergeConflictException mergeConflictException =
+        assertThrows(MergeConflictException.class, () -> gApi.changes().create(changeInput));
+    assertThat(mergeConflictException)
+        .hasMessageThat()
+        .isEqualTo(String.format("merge conflict(s):\n%s", getCodeOwnerConfigFileName()));
+
+    // Try creating the merge change with conflicts. Fails because the code owner config file
+    // contains conflict markers which fails the code owner config file validation.
+    mergeInput.allowConflicts = true;
+    ResourceConflictException resourceConflictException =
+        assertThrows(ResourceConflictException.class, () -> gApi.changes().create(changeInput));
+    assertThat(resourceConflictException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "[code-owners] invalid code owner config file '/%s'",
+                getCodeOwnerConfigFileName()));
+
+    // Create the merge change with skipping code owners validation.
+    changeInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    gApi.changes().create(changeInput);
+  }
+
+  @Test
+  public void userWithoutCapabilitySkipValidationCannotSkipValidationWithCreateChangeRestApi()
+      throws Exception {
+    requestScopeOperations.setApiUser(user.id());
+
+    ChangeInput changeInput = new ChangeInput();
+    changeInput.project = project.get();
+    changeInput.branch = "master";
+    changeInput.subject = "A change";
+    changeInput.status = ChangeStatus.NEW;
+    changeInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    ResourceConflictException resourceConflictException =
+        assertThrows(ResourceConflictException.class, () -> gApi.changes().create(changeInput));
+    assertThat(resourceConflictException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "[code-owners] %s for plugin code-owners not permitted",
+                SkipCodeOwnerConfigValidationCapability.ID));
   }
 
   @Test
