@@ -1,6 +1,7 @@
 ### User Guides
 
 * [Intro](how-to-use.html)
+* [Feature Set](feature-set.html)
 * [User Guide](user-guide.html)
 * [Syntax for OWNERS files](backend-find-owners.html#syntax)
 * [Cookbook for OWNERS files](backend-find-owners-cookbook.html)
