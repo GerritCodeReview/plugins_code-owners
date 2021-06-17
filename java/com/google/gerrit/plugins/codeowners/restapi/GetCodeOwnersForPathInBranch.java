@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.common.AccountVisibility;
@@ -36,12 +37,14 @@ import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.io.IOException;
+import java.util.Optional;
 import org.eclipse.jgit.errors.IncorrectObjectTypeException;
 import org.eclipse.jgit.errors.InvalidObjectIdException;
 import org.eclipse.jgit.errors.MissingObjectException;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.ReachabilityChecker;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
 import org.kohsuke.args4j.Option;
@@ -119,7 +122,13 @@ public class GetCodeOwnersForPathInBranch
           branchNameKey.branch(),
           branchNameKey.project());
       RevCommit commit = rw.parseCommit(revisionId);
-      if (!IncludedInResolver.includedInAny(repository, rw, commit, ImmutableSet.of(ref))) {
+      RevCommit refCommit = rw.parseCommit(ref.getObjectId());
+
+      ReachabilityChecker checker = rw.getObjectReader().createReachabilityChecker(rw);
+      Optional<RevCommit> unreachable =
+          checker.areAllReachable(ImmutableList.of(commit), ImmutableList.of(refCommit).stream());
+
+      if (unreachable.isPresent()) {
         throw new BadRequestException("unknown revision");
       }
     } catch (InvalidObjectIdException | IncorrectObjectTypeException e) {
