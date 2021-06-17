@@ -16,6 +16,7 @@
 * [Configuration](config.html)
 * [Backends](backends.html)
 * [Metrics](metrics.html)
+* [Disclaimer](disclaimer.html)
 * [Alternative Plugins](alternative-plugins.html)
 
 ### Contributor Guides
