@@ -1,4 +1,4 @@
-The @PLUGIN@ plugin provides support for defining
+The @PLUGIN@ plugin provides support to define
 [code owners](user-guide.html#codeOwners) for directories and files in a
 repository/branch.
 
