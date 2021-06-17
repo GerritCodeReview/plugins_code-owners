@@ -310,4 +310,8 @@ When a user with certain permissions has voted "Owners-Override+1" and the
 
 ![code owner override label in change page](./code-owner-override-label-in-change.png "Owners-override label")
 
+---
 
+Back to [@PLUGIN@ documentation index](index.html)
+
+Part of [Gerrit Code Review](../../../Documentation/index.html)
