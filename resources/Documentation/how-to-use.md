@@ -272,3 +272,9 @@ the same way as any other source file.
 Back to [@PLUGIN@ documentation index](index.html)
 
 Part of [Gerrit Code Review](../../../Documentation/index.html)
+
+<style>
+img {
+   border: 1px solid rgba(0, 0, 0, .8);
+}
+</style>
