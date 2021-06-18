@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dfb35735_5f385530",
+        "filename": "resources/Documentation/feature-set.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-18T12:21:33Z",
+      "side": 1,
+      "message": "nit: it\u0027s a bit strange to have 2 links like that, maybe move one of those links elsewhere?",
+      "range": {
+        "startLine": 47,
+        "startChar": 6,
+        "endLine": 48,
+        "endChar": 14
+      },
+      "revId": "309fbf1180915638a8f3d8a30cdf2c6c78d8db7c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
