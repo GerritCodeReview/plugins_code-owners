@@ -36,20 +36,22 @@ You can also report bugs through the bug icon in the reply dialog next to the
 
 ![suggest owners from reply dialog](./suggest-owners-from-reply-dialog.png "Suggest owners")
 
-## What is the `code-owners` plugin?
+## How does the @PLUGIN@ plugin work?
 
-### How does it work?
+The `@PLUGIN@` plugin provides suggestions of code owners for files that you are
+modifying in your change, so that you can easily add them as reviewers, as
+you'll need their approval to submit your change.
 
-The plugin provides suggestions of owners for the directory or files that you
-are modifying in your change based on a score. It also informs you at a glance
-about the status of code owners for the change and the status of code owners per
-file.
+For each file (or group of files that share the same code owners) you get the 5
+best suitable code owners suggested. Which code owners are best suitable to
+review a file is computed based on multiple [scoring
+factors](rest-api.html#scoringFactors), e.g. the distance of the code owner
+config file that defines the code owner to the path for which code owners are
+listed (the lower the distance the better the code owner). If wanted the code
+owner suggestion can be expanded to all code owners.
 
-#### Score
-
-The `code-owners` plugin suggests a maximum of 5 closest code owners based on
-their score. The code owner score is calculated based on the distance of code
-owners to the files.
+The `@PLUGIN@` plugin also informs you at a glance about the status of the code
+owners approvals for the change and the status of code owner approvals per file.
 
 ## <a id="definingCodeOwners">Defining code owners
 
