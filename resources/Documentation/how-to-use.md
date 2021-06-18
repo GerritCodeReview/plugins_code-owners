@@ -147,7 +147,7 @@ In the change page, you can get an overview of the code owner statuses.
 
 If applicable, the code owner status is displayed:
 
-- Next to the `Code-Owners` submit requirement
+- Next to the `Code Owners` submit requirement
 
 ![submit requirement](./submit-requirement.png "Submit requirement")
 
@@ -157,9 +157,9 @@ If applicable, the code owner status is displayed:
 
 ### Code owner status
 
-#### `Code-Owners` submit requirement
+#### `Code Owners` submit requirement
 
-The `Code-Owners` submit requirement is providing an overview about the code
+The `Code Owners` submit requirement is providing an overview about the code
 owner status at a glance.
 
 - Missing a reviewer that can grant the code owner approval
@@ -194,19 +194,21 @@ required that all code owners approve a change.
 
 #### File status
 
-Additionally, the `code-owners` plugin provides a more detailed overview of code
-owner status per file in the change with 3 statuses and you can **hover over the
-icon** to display a tooltip.
+The `@PLUGIN@` plugin also shows the code owner statuses per file in the file
+list.
+
+For each file the code owner status is shown as an icon. You can **hover over
+the icon** to get additional information displayed a tooltip.
 
 **Missing code owner approval**
 
-A code owner of this file is missing as a reviewer to the change.
+A code owner for this file is missing as a reviewer.
 
 ![missing owner tooltip](./tooltip-missing-owner.png "Tooltip for missing status")
 
 **Pending code owner approval**
 
-A code owner of this file has been added to the change but have not voted yet.
+A code owner for this file has been added to the change but has not voted yet.
 
 ![pending owner tooltip](./tooltip-pending-owner.png "Tooltip for pending status")
 
@@ -214,7 +216,7 @@ A code owner of this file has been added to the change but have not voted yet.
 
 A code owner of this file has approved the change. You can also see this icon if
 you are a code owner of the file as in this case the file is implicitly approved
-by you.
+by you, or if the change has been exempted from requiring code owner approvals.
 
 ![approved owner tooltip](./tooltip-approved-owner.png "Tooltip for approved status")
 
@@ -227,7 +229,7 @@ This status is informing you about a failed API call.
 
 #### No label and no status
 
-When you own all the files in your change, the `code-owners` plugin will:
+When you own all the files in your change, the `@PLUGIN@` plugin will:
 
 - Not show the `Code-Owners` submit requirement
 - Not show the file status
