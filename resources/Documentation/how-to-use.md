@@ -103,7 +103,7 @@ There are several possible reasons for encountering a "Not found" text:
 For these cases, we advise you to:
 
 1. Ask someone with override powers (e.g. sheriff) to grant a [code owner
-   override](#codeOwnerOverride) vote to unblock the change submission.
+   override](#applyingCodeOwnerOverride) vote to unblock the change submission.
 2. Contact the project owner to ask them to fix the code owner definitions, or
    permissions if needed.
 
@@ -234,21 +234,22 @@ When you own all the files in your change, the `@PLUGIN@` plugin will:
 - Not show the `Code-Owners` submit requirement
 - Not show the file status
 
-### Owners-Override label
+### <a id="applyingCodeOwnerOverride">Applying a code owner override
 
-#### In the reply dialog
+Users with certain permissions (e.g. sheriffs) can bypass the `Code Owners`
+submit requirement by applying a [code owner
+override](user-guide.html#codeOwnerOverride) approval (usually a
+`Owners-Override+1` vote).
 
-The `Owners-Override` label is votable by a user with certain permissions (e.g.
-sheriff). The `Owner-Override` label will show in the reply dialog and you can
-vote on it if you have certain permissions.
+The code owner override approval is applied by voting on the override label in
+the reply dialog, the same way as voting on any other label is done. Voting on
+the override label is only offered to users that have permissions to vote on
+this label.
 
 ![code owner override label in reply dialog](./code-owner-override-label-in-reply.png "Vote on owners-override label")
 
-#### In the change page
-
-When a user with certain permissions has voted "Owners-Override+1" and the
-`Code-Owners` submit requirement returns the status `Approved
-(Owners-Override)`.
+If a code owner override approval has been applied, the `Code Owners` submit
+requirement returns the status `Approved (Owners-Override)`.
 
 ![code owner override label in change page](./code-owner-override-label-in-change.png "Owners-override label")
 
