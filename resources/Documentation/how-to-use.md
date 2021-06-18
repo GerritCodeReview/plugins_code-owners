@@ -18,7 +18,7 @@ status.
 This document focuses on the workflows in the UI. Further information can be
 found in the [user guide](user-guide.html).
 
-## Enable the plugin
+## <a id="enableThePlugin">Enable the plugin
 
 As a user you don’t need to do anything as the plugin is enabled by the host
 administrator.
@@ -26,7 +26,7 @@ administrator.
 **NOTE:** As host administrator please follow the instructions in the [setup
 guide](setup-guide.html).
 
-## Bug report / Feedback
+## <a id="reportBug">Bug report / Feedback
 
 Please report bugs or send feedback using this [Monorail
 template](https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin).
@@ -36,7 +36,7 @@ You can also report bugs through the bug icon in the reply dialog next to the
 
 ![suggest owners from reply dialog](./suggest-owners-from-reply-dialog.png "Suggest owners")
 
-## How does the @PLUGIN@ plugin work?
+## <a id="howDoesItWork">How does the @PLUGIN@ plugin work?
 
 The `@PLUGIN@` plugin provides suggestions of code owners for files that you are
 modifying in your change, so that you can easily add them as reviewers, as
@@ -79,9 +79,9 @@ owners approvals for the change and the status of code owner approvals per file.
 
 5. Click `SEND` to notify the code owners you selected on your change.
 
-## Reply dialog use cases
+## <a id="replyDialogUseCases">Reply dialog use cases
 
-### No code owners found
+### <a id="noCodeOwnersFound">No code owners found
 
 There are several possible reasons for encountering a "Not found" text:
 
@@ -107,7 +107,7 @@ For these cases, we advise you to:
 2. Contact the project owner to ask them to fix the code owner definitions, or
    permissions if needed.
 
-### Renamed files
+### <a id="renamedFiles">Renamed files
 
 ![renamed file from file list](./renamed-file-from-file-list.png "Renamed files")
 
@@ -117,14 +117,14 @@ Renamed files (new path) will have a "Renamed" chip attached to them. A renamed
 file will be considered as approved only if both old path/name and new path/name
 are approved.
 
-### Failed to fetch file
+### <a id="failedToFetch">Failed to fetch file
 
 This status is informing you about a failed API call.
 **Refresh the page** to recover from this error.
 
 ![failed to fetch](./failed-to-fetch-owners.png "Failed to fetch owners")
 
-### Large change
+### <a id="largeChange">Large change
 
 If a change contains a large number of files (hundreds or even thousands), it
 will take some time to fetch all suggested code owners. In this case the reply
@@ -141,7 +141,7 @@ possible even when suggestions for some files are still being fetched.
 **NOTE:** If retrieving suggestions fails for some files, these files will show
 up as a single group.
 
-## Code owner status on change page
+## <a id="codeOwnerStatus">Code owner status on change page
 
 In the change page, you can get an overview of the code owner statuses.
 
@@ -155,7 +155,7 @@ If applicable, the code owner status is displayed:
 
 ![owner status](./owner-status.png "Owner status")
 
-### `Code Owners` submit requirement
+### <a id="codeOwnersSubmitRequirement">`Code Owners` submit requirement
 
 The `Code Owners` submit requirement is providing an overview about the code
 owner status at a glance.
@@ -190,7 +190,7 @@ required that all code owners approve a change.
 
 ![owner approved](./owner-status-approved.png "Code owner approved")
 
-### Per file code owner statuses
+### <a id="perFilCodeOwnerStatuses">Per file code owner statuses
 
 The `@PLUGIN@` plugin also shows the code owner statuses per file in the file
 list.
@@ -225,7 +225,7 @@ This status is informing you about a failed API call.
 
 ![failed owner tooltip](./tooltip-failed-owner.png "Tooltip for failed status")
 
-### No label and no status
+### <a id="noStatus">No label and no status
 
 When you own all the files in your change, the `@PLUGIN@` plugin will:
 
