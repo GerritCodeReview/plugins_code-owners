@@ -81,12 +81,6 @@ owners approvals for the change and the status of code owner approvals per file.
 
 ## Reply dialog use cases
 
-### Approved files
-
-Once a file has received an approval vote by the code owner, the file disappears
-from the file list in the reply dialog. This lets you focus on the files that
-are not yet assigned to a code owner or are pending approval.
-
 ### No code owners found
 
 There are 3 possible reasons for encountering a "Not found" text:
