@@ -30,9 +30,9 @@ The @PLUGIN@ plugin supports the following features:
     * see [override setup](config-faqs.html#setupOverrides)
 <br><br>
 * UI extensions on change screen:
-    * Code owner suggestion
-    * Display of the code owners submit requirement
-    * Display of code owner statuses in the file list
+    * [Code owner suggestion](how-to-use.html#howDoesItWork)
+    * [Display of the code owners submit requirement](how-to-use.html#codeOwnersSubmitRequirement)
+    * [Display of code owner statuses in the file list](how-to-use.html#perFilCodeOwnerStatuses)
     * Change messages that list the owned paths.
     * see [UI walkthrough](how-to-use.html) and [user guide](user-guide.html)
 <br><br>
@@ -43,7 +43,9 @@ The @PLUGIN@ plugin supports the following features:
 * Validation:
     * updates to `OWNERS` files are [validated](validation.html) on commit
       received and submit
-    * `OWNERS` files can be validated on demand to detect consistency issues
+    * `OWNERS` files in a [project](rest-api.html#check-code-owner-config-files)
+      or [revision](rest-api.html#check-code-owner-config-files-in-revision) can
+      be validated on demand to detect consistency issues
 <br><br>
 * Rich REST API:
     * see [REST API documentation](rest-api.html)
