@@ -18,19 +18,10 @@ found in the [user guide](user-guide.html).
 
 ### Enable the plugin
 
-#### As a user
+As a user you don’t need to do anything as the plugin is enabled by the host
+administrator.
 
-You don’t need to do anything as the plugin is enabled by the host admin.
-
-#### As an admin
-
-The `code-owners` plugin is only supported for the Gerrit version that is
-currently developed in master. The first Gerrit release that supports the
-`code-owners` plugin is Gerrit 3.3.0.
-
-Before installing/enabling the plugin, or enabling the code owners functionality
-for further projects, it is important that the plugin is correctly configured.
-The required configuration is described in the plugin [setup
+**NOTE:** As host administrator please follow the instructions in the [setup
 guide](setup-guide.html).
 
 ### Bug report / Feedback
