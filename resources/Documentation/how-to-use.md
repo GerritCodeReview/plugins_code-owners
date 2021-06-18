@@ -18,7 +18,7 @@ status.
 This document focuses on the workflows in the UI. Further information can be
 found in the [user guide](user-guide.html).
 
-### Enable the plugin
+## Enable the plugin
 
 As a user you don’t need to do anything as the plugin is enabled by the host
 administrator.
@@ -26,7 +26,7 @@ administrator.
 **NOTE:** As host administrator please follow the instructions in the [setup
 guide](setup-guide.html).
 
-### Bug report / Feedback
+## Bug report / Feedback
 
 Please report bugs or send feedback using this [Monorail
 template](https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin).
@@ -141,7 +141,7 @@ possible even when suggestions for some files are still being fetched.
 **NOTE:** If retrieving suggestions fails for some files, these files will show
 up as a single group.
 
-## Change page overview
+## Code owner status on change page
 
 In the change page, you can get an overview of the code owner statuses.
 
@@ -155,9 +155,7 @@ If applicable, the code owner status is displayed:
 
 ![owner status](./owner-status.png "Owner status")
 
-### Code owner status
-
-#### `Code Owners` submit requirement
+### `Code Owners` submit requirement
 
 The `Code Owners` submit requirement is providing an overview about the code
 owner status at a glance.
@@ -192,7 +190,7 @@ required that all code owners approve a change.
 
 ![owner approved](./owner-status-approved.png "Code owner approved")
 
-#### File status
+### Per file code owner statuses
 
 The `@PLUGIN@` plugin also shows the code owner statuses per file in the file
 list.
@@ -227,14 +225,14 @@ This status is informing you about a failed API call.
 
 ![failed owner tooltip](./tooltip-failed-owner.png "Tooltip for failed status")
 
-#### No label and no status
+### No label and no status
 
 When you own all the files in your change, the `@PLUGIN@` plugin will:
 
 - Not show the `Code-Owners` submit requirement
 - Not show the file status
 
-### <a id="applyingCodeOwnerOverride">Applying a code owner override
+## <a id="applyingCodeOwnerOverride">Applying a code owner override
 
 Users with certain permissions (e.g. sheriffs) can bypass the `Code Owners`
 submit requirement by applying a [code owner
