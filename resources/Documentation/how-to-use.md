@@ -1,18 +1,20 @@
 # Intro
 
-The `code-owners` plugin provides support for code owners in Gerrit and is
-replacing the `find-owners` plugin.
+The `@PLUGIN@` plugin provides support for
+[code owners](user-guide.html#codeOwners) in Gerrit.
 
-For projects that used code owners with the `find-owners` plugin before, the
-existing `OWNERS` files continue to work and the only major difference is that
-the `code-owners` plugin comes with a new UI for selecting code owners and
-showing the code owner status.
+If the `@PLUGIN@` plugin is enabled, changes can only be submitted if all
+touched files are covered by [approvals](user-guide.html#codeOwnerApproval) from
+code owners.
 
-The `code-owners` plugin is an open-source plugin and is maintained by the
-Gerrit team at Google.
+**NOTE:** The `@PLUGIN@` is replacing the `find-owners` plugin. For projects that
+used code owners with the `find-owners` plugin before, the existing `OWNERS`
+files continue to work and the only major difference is that the `@PLUGIN@`
+plugin comes with a new UI for selecting code owners and showing the code owner
+status.
 
 This document focuses on the workflows in the UI. Further information can be
-found in the [backend user guide](user-guide.html).
+found in the [user guide](user-guide.html).
 
 ### Enable the plugin
 
