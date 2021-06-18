@@ -53,27 +53,27 @@ owner suggestion can be expanded to all code owners.
 The `@PLUGIN@` plugin also informs you at a glance about the status of the code
 owners approvals for the change and the status of code owner approvals per file.
 
-## <a id="addCodeOwnersAsReviewers">Add owners to your change
+## <a id="addCodeOwnersAsReviewers">Add code owners to your change
 
-1. To add owners of the files in your change, click on `SUGGEST OWNERS` next to
-   the `Code-Owners` submit requirement.
+1. To add code owners for the files in your change, click on `SUGGEST OWNERS` or
+   `ADD OWNERS` next to the `Code Owners` submit requirement.
 
-![suggest owners from change page](./suggest-owners-from-change-page.png "Suggest owners from change page")
+![suggest code owners from change page](./suggest-owners-from-change-page.png "Suggest code owners from change page")
 
-2. The Reply dialog opens with the code owners section expanded by default with
-   owners suggestions. Code owners are suggested by groups of files which share
-   the same code owners.
+2. The Reply dialog opens with the code owners section expanded that shows the
+   code owners suggestions. Code owners are suggested by groups of files which
+   share the same code owners.
 
 ![owner suggestions](./owner-suggestions.png "owner suggestions")
 
-3. Hover over a file to view the list of files and their full file path.
+3. Hover over a file group to view the list of files and their full file paths.
 
 ![suggestion file groups](./suggestions-file-groups.png "suggestion file groups")
 
-4. Click user chips to select code owners for each file or group of files. The
-   selected code owner is automatically added to the reviewers section and
-   automatically selected on other files the code owner owns in the change (if
-   applicable).
+4. Click on user chips to select a code owner for each file or file group.
+   The selected code owner is automatically added to the reviewers section and
+   automatically selected on other files / file groups that this code owner owns
+   (if applicable).
 
 ![add or modify reviewers from suggestions](./add-owner-to-reviewer.png "add owner to reviewer")
 
