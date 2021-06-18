@@ -34,18 +34,6 @@ You can also report bugs through the bug icon in the reply dialog next to the
 
 ![suggest owners from reply dialog](./suggest-owners-from-reply-dialog.png "Suggest owners")
 
-## Code Owners
-
-### Why do we leverage Code Owners?
-
-Owners are gatekeepers before a CL is submitted, they enforce standards across
-the code base, help disseminate knowledge around their specific area of
-ownership, ensure their is appropriate code review coverage, and provide timely
-reviews. Code owners is designed as a code quality feature to ensure someone
-familiar with the code base reviews any changes to the codebase or a subset of
-the codebase they are the Owner of, by making sure the change is appropriate for
-the system.
-
 ## What is the `code-owners` plugin?
 
 ### What is the benefit?

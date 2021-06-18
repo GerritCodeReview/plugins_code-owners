@@ -24,6 +24,20 @@ files under that path.
 Who is a code owner of a path is controlled via [code owner config
 files](#codeOwnerConfigFiles) (e.g. `OWNERS` files).
 
+## <a id="whyCodeOwners">Why should code owners be used?
+
+Code owners are gatekeepers before a change is submitted, they enforce standards
+across the code base, help disseminate knowledge around their specific area of
+ownership, ensure there is appropriate code review coverage, and provide timely
+reviews.
+
+Enforcing code owner approvals is designed as a code quality feature. Code
+owners are defined to ensure someone familiar with the codebase reviews and
+approves all changes that are done to the codebase.
+
+By granting a code owner approvel the code owner confirms that the change is
+appropriate for the system and is done correctly.
+
 ## <a id="codeOwnerConfigFiles">Code owner config files
 
 Code owner config files are stored in the source tree of the repository and
