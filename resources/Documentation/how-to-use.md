@@ -126,16 +126,20 @@ This status is informing you about a failed API call.
 
 ### Large change
 
-In case of a large change containing a large number of files (hundreds or even
-thousands), it will take some time to fetch all suggested code owners. In the
-reply dialog, the plugin will show the overall status of the fetching and
-results as soon as it has results together with the loading indicator. The
-loading will disappear until all files finished fetching, failed files will be
-grouped into a single group.
+If a change contains a large number of files (hundreds or even thousands), it
+will take some time to fetch all suggested code owners. In this case the reply
+dialog will show the overall status of fetching code owners and display results
+as soon as they come in. Files for which the suggestions are still being
+computed have a loading indicator that will disappear as soon as the suggestions
+are available.
 
-The fetching of suggested code owners should not block the reply itself. So you
-still can select from suggestions even when not all files are finished and sent
-for reviewing.
+Fetching code owner suggestions does not block the reply itself. So you can
+select code owners from suggestions that are already available, while
+suggestions for other files are still being fetched. Sending the reply is
+possible even when suggestions for some files are still being fetched.
+
+**NOTE:** If retrieving suggestions fails for some files, these files will show
+up as a single group.
 
 ## Change page overview
 
