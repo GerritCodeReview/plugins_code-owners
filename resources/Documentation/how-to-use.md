@@ -7,6 +7,8 @@ If the `@PLUGIN@` plugin is enabled, changes can only be submitted if all
 touched files are covered by [approvals](user-guide.html#codeOwnerApproval) from
 code owners.
 
+The features of the `@PLUGIN@` plugin are described [here](feature-set.html).
+
 **NOTE:** The `@PLUGIN@` is replacing the `find-owners` plugin. For projects that
 used code owners with the `find-owners` plugin before, the existing `OWNERS`
 files continue to work and the only major difference is that the `@PLUGIN@`
@@ -35,19 +37,6 @@ You can also report bugs through the bug icon in the reply dialog next to the
 ![suggest owners from reply dialog](./suggest-owners-from-reply-dialog.png "Suggest owners")
 
 ## What is the `code-owners` plugin?
-
-### What is the benefit?
-
-Code owners in Gerrit will be supported by a new `code-owners` plugin which is
-developed as an open-source plugin and maintained by the Gerrit team at Google.
-
-The `code-owners` plugin supports:
-
-- [defining code owners](#definingCodeOwners)
-- requiring owner approvals for submitting changes
-- displaying owner information in the UI & suggesting code owners as reviewers
-- overriding owner checks
-- a [REST API](rest-api.html) to inspect code owners
 
 ### How does it work?
 
