@@ -214,7 +214,9 @@ A code owner for this file has been added to the change but has not voted yet.
 
 A code owner of this file has approved the change. You can also see this icon if
 you are a code owner of the file as in this case the file is implicitly approved
-by you, or if the change has been exempted from requiring code owner approvals.
+by you, or if the change has been
+[exempted](user-guide.html#codeOwnerExemptions) from requiring code owner
+approvals.
 
 ![approved owner tooltip](./tooltip-approved-owner.png "Tooltip for approved status")
 
