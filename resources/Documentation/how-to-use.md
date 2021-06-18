@@ -36,16 +36,6 @@ You can also report bugs through the bug icon in the reply dialog next to the
 
 ## Code Owners
 
-### Who are code owners?
-
-A code owner is a user whose approval is required to modify files under a
-certain path. Who is a code owner of a path is controlled via `OWNERS` files
-that are checked into the repository. For submitting a change Gerrit requires
-that all files that were touched in the change are approved by a code owner.
-Code owners usually apply their approval by voting with "Code-Review+1" on the
-change. Their approval is to confirm that “This change is appropriate for our
-system and belongs in this directory."
-
 ### Why do we leverage Code Owners?
 
 Owners are gatekeepers before a CL is submitted, they enforce standards across

@@ -18,10 +18,11 @@ from the [Gerrit Contributor Summit
 ## <a id="codeOwners">What are code owners?
 
 A code owner is a user that is configured as owner of a path (directory or file)
-and whose approval is required to modify the path or files under that path.
+and whose [approval](#codeOwnerApproval) is required to modify the directory or
+files under that path.
 
 Who is a code owner of a path is controlled via [code owner config
-files](#codeOwnerConfigFiles).
+files](#codeOwnerConfigFiles) (e.g. `OWNERS` files).
 
 ## <a id="codeOwnerConfigFiles">Code owner config files
 
@@ -58,6 +59,9 @@ Code owners apply their approval by voting on the change. By default, voting
 with `Code-Review+1` counts as code owner approval, but it's possible that the
 host administrators or the project owners have [configured a different label/vote
 that is required as code owner approval](setup-guide.html#configureCodeOwnerApproval).
+
+By granting a code owner approvel the code owner confirms that the change is
+appropriate for the system and is done correctly.
 
 The code owner check for a file is satisfied as soon as one of its code owners
 grants the code owner approval. Negative votes from other code owners do not
