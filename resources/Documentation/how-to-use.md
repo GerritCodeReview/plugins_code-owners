@@ -53,27 +53,6 @@ owner suggestion can be expanded to all code owners.
 The `@PLUGIN@` plugin also informs you at a glance about the status of the code
 owners approvals for the change and the status of code owner approvals per file.
 
-## <a id="definingCodeOwners">Defining code owners
-
-If you have used code owners via the `find-owners` plugin before, your code
-owners are already defined in `OWNERS` files and you don’t need to do anything
-since the new `code-owners` plugin just reads the existing `OWNERS` files.
-
-If you haven’t used code owners before, you can now define code owners in
-`OWNERS` files which are stored in the source tree. The code owners that are
-defined in an `OWNERS` file apply to the directory that contains the `OWNERS`
-file, and all its subdirectories (except if a subdirectory contains an `OWNERS`
-file that disables the inheritance of code owners from the parent directories).
-
-The syntax of `OWNERS` file is explained in the [backend
-documentation](backend-find-owners.html#syntax) and examples can be found in the
-[cookbook](backend-find-owners-cookbook.html).
-
-The code-owners plugin does not support an editor to create and edit `OWNERS`
-files from the UI. `OWNERS` files must be created and edited manually in the
-local repository and then be pushed to the remote repository, the same way as
-any other source file.
-
 ## <a id="addCodeOwnersAsReviewers">Add owners to your change
 
 1. To add owners of the files in your change, click on `SUGGEST OWNERS` next to
@@ -272,6 +251,22 @@ When a user with certain permissions has voted "Owners-Override+1" and the
 (Owners-Override)`.
 
 ![code owner override label in change page](./code-owner-override-label-in-change.png "Owners-override label")
+
+## <a id="definingCodeOwners">Defining code owners
+
+Code owners are defined in [code owner config
+files](user-guide.html#codeOwnerConfigFiles) (e.g.
+[OWNERS](backend-find-owners.html#syntax) files) that are stored in the source
+tree of the repository.
+
+**NOTE:** If you have used code owners via the `find-owners` plugin before, code
+owners are already defined in `OWNERS` files and you don’t need to do anything
+since the `@PLUGIN@` plugin just reads the existing `OWNERS` files.
+
+**NOTE:** The `@PLUGIN@` plugin does not support an editor to create and edit
+`OWNERS` files from the UI. This means `OWNERS` files must be created and edited
+manually in the local repository and then be pushed to the remote repository,
+the same way as any other source file.
 
 ---
 
