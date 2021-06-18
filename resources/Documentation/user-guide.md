@@ -151,6 +151,20 @@ counts as code owner override depends on the
 
 **NOTE:** It's possible that overrides are disabled for a project.
 
+## <a id="codeOwnerExemptions">Code owner exemptions
+
+Some changes may be exempted from requiring [code owner
+approvals](#codeOwnerApproval):
+
+* changes of projects / branches for which the code owners functionality has
+  [been](config.html#pluginCodeOwnersDisabled)
+  [disabled](config.html#pluginCodeOwnersDisabledBranch)
+* changes that were uploaded by users that are
+  [exempted](config.html#pluginCodeOwnersExemptedUser) from requiring code owner
+  approvals
+* changes that are pure revert, if
+  [configured](config.html#pluginCodeOwnersExemptPureReverts)
+
 ## <a id="codeOwnerSuggestion">Code owner Suggestion
 
 As a change owner, you need to request code owner approvals for the files that

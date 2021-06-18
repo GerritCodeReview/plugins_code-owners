@@ -22,6 +22,7 @@ The @PLUGIN@ plugin supports the following features:
     * Which votes count as code owner approvals is
       [configurable](setup-guide.html#configureCodeOwnerApproval).
     * Implemented as Java submit rule (no Prolog).
+    * Configuring [exemptions](user-guide.html#codeOwnerExemptions) is possible.
 <br><br>
 * Support for overrides:
     * Privileged users can be allowed to override the code owner submit check.
