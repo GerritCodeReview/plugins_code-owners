@@ -26,9 +26,10 @@ guide](setup-guide.html).
 
 ### Bug report / Feedback
 
-Report a bug or send feedback using this [Monorail
+Please report bugs or send feedback using this [Monorail
 template](https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin).
-You can also report a bug through the bug icon in the reply dialog next to the
+
+You can also report bugs through the bug icon in the reply dialog next to the
 `HIDE OWNERS` / `SUGGEST OWNERS` button.
 
 ![suggest owners from reply dialog](./suggest-owners-from-reply-dialog.png "Suggest owners")
