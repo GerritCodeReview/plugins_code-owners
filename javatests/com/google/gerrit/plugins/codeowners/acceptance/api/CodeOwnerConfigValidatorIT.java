@@ -15,7 +15,6 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
@@ -33,30 +32,23 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
-import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.MergeInput;
-import com.google.gerrit.extensions.registration.DynamicMap;
-import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
-import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.extensions.restapi.MergeConflictException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportType;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
-import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
@@ -66,22 +58,21 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigPa
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationCapability;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationPushOption;
-import com.google.gerrit.server.IdentifiedUser;
 import com.google.inject.Inject;
-import com.google.inject.Key;
-import com.google.inject.util.Providers;
-import java.nio.file.Path;
-import java.util.Optional;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
-/** Tests for {@code com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator}. */
+/**
+ * Tests for {@code com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator}.
+ * {@link CodeOwnerConfigValidatorOnSubmitIT} and {@link CodeOwnerConfigValidatorErrorHandlingIT}
+ * contain further tests for {@code
+ * com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator}.
+ */
 public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private static final ObjectId TEST_REVISION =
       ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
@@ -91,7 +82,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
   private ProtoCodeOwnerConfigParser protoCodeOwnerConfigParser;
-  private DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
@@ -100,8 +90,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         plugin.getSysInjector().getInstance(FindOwnersCodeOwnerConfigParser.class);
     protoCodeOwnerConfigParser =
         plugin.getSysInjector().getInstance(ProtoCodeOwnerConfigParser.class);
-    codeOwnerBackends =
-        plugin.getSysInjector().getInstance(new Key<DynamicMap<CodeOwnerBackend>>() {});
   }
 
   @Test
@@ -211,30 +199,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                             CodeOwnerResolver.ALL_USERS_WILDCARD))
                     .build()));
     assertOkWithHints(r, "code owner config files validated, no issues found");
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
-  public void canSubmitConfigWithoutIssues() throws Exception {
-    setAsDefaultCodeOwners(admin);
-
-    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-
-    // Create a code owner config without issues.
-    PushOneCommit.Result r =
-        createChange(
-            "Add code owners",
-            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            format(
-                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-                    .build()));
-    r.assertOkStatus();
-
-    // Approve and submit the change.
-    approve(r.getChangeId());
-    gApi.changes().id(r.getChangeId()).current().submit();
-    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
   @Test
@@ -1152,53 +1116,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
-  public void cannotSubmitConfigWithNewIssues() throws Exception {
-    setAsDefaultCodeOwners(admin);
-
-    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-
-    // disable the code owners functionality so that we can upload a a change with a code owner
-    // config that has issues
-    disableCodeOwnersForProject(project);
-
-    // upload a change with a code owner config that has issues (non-resolvable code owners)
-    String unknownEmail = "non-existing-email@example.com";
-    PushOneCommit.Result r =
-        createChange(
-            "Add code owners",
-            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            format(
-                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
-                    .build()));
-    r.assertOkStatus();
-
-    // re-enable the code owners functionality for the project
-    enableCodeOwnersForProject(project);
-
-    // approve the change
-    approve(r.getChangeId());
-
-    // try to submit the change
-    ResourceConflictException exception =
-        assertThrows(
-            ResourceConflictException.class,
-            () -> gApi.changes().id(r.getChangeId()).current().submit());
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: [code-owners] invalid code owner config files:\n"
-                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
-                r.getChange().getId().get(),
-                unknownEmail,
-                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
-                identifiedUserFactory.create(admin.id()).getLoggableName()));
-  }
-
-  @Test
   @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "dry_run")
   public void canUploadConfigWithNewIssuesIfValidationIsDoneAsDryRun() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
@@ -1258,103 +1175,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             identifiedUserFactory.create(admin.id()).getLoggableName()));
 
     r.assertNotMessage("hint");
-  }
-
-  @Test
-  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
-  public void cannotSubmitConfigWithCodeOwnersThatAreNotVisibleToThePatchSetUploader()
-      throws Exception {
-    setAsDefaultCodeOwners(admin);
-
-    // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
-    // visible to this user since they do not share any group.
-    TestAccount user2 = accountCreator.user2();
-
-    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-
-    // disable the code owners functionality so that we can upload a change with a code owner
-    // config that has issues
-    disableCodeOwnersForProject(project);
-
-    // upload a change as user2 with a code owner config that contains a code owner that is not
-    // visible to user2
-    PushOneCommit.Result r =
-        createChange(
-            user2,
-            "Add code owners",
-            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            format(
-                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
-                    .build()));
-    r.assertOkStatus();
-
-    // re-enable the code owners functionality for the project
-    enableCodeOwnersForProject(project);
-
-    // approve the change
-    approve(r.getChangeId());
-
-    // try to submit the change as admin who can see the code owners in the config, the submit still
-    // fails because it is checked that the uploader (user2) can see the code owners
-    ResourceConflictException exception =
-        assertThrows(
-            ResourceConflictException.class,
-            () -> gApi.changes().id(r.getChangeId()).current().submit());
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: [code-owners] invalid code owner config files:\n"
-                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
-                r.getChange().getId().get(),
-                admin.email(),
-                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
-                identifiedUserFactory.create(user2.id()).getLoggableName()));
-  }
-
-  @Test
-  @GerritConfig(name = "accounts.visibility", value = "SAME_GROUP")
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
-  public void canSubmitConfigWithCodeOwnersThatAreNotVisibleToTheSubmitterButVisibleToTheUploader()
-      throws Exception {
-    setAsDefaultCodeOwners(admin);
-
-    // Create a new user that is not a member of any group. This means 'user' and 'admin' are not
-    // visible to this user since they do not share any group.
-    TestAccount user2 = accountCreator.user2();
-
-    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-
-    // upload a change as admin with a code owner config that contains a code owner that is not
-    // visible to user2
-    PushOneCommit.Result r =
-        createChange(
-            "Add code owners",
-            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            format(
-                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(user.email()))
-                    .build()));
-    r.assertOkStatus();
-
-    // approve the change
-    approve(r.getChangeId());
-
-    // grant user2 submit permissions
-    projectOperations
-        .project(project)
-        .forUpdate()
-        .add(allow(Permission.SUBMIT).ref("refs/*").group(REGISTERED_USERS))
-        .update();
-
-    // submit the change as user2 who cannot see the code owners in the config, the submit succeeds
-    // because it is checked that the uploader (admin) can see the code owners
-    requestScopeOperations.setApiUser(user2.id());
-    gApi.changes().id(r.getChangeId()).current().submit();
-    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
   }
 
   @Test
@@ -2359,134 +2179,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
-  public void canSubmitNonParseableConfigIfValidationIsDisabled() throws Exception {
-    testCanSubmitNonParseableConfig();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "dry_run")
-  public void canSubmitNonParseableConfigIfValidationIsDoneAsDryRun() throws Exception {
-    testCanSubmitNonParseableConfig();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "forced_dry_run")
-  public void canSubmitNonParseableConfigIfValidationIsDoneAsForcedDryRun() throws Exception {
-    disableCodeOwnersForProject(project);
-    testCanSubmitNonParseableConfig();
-  }
-
-  private void testCanSubmitNonParseableConfig() throws Exception {
-    setAsDefaultCodeOwners(admin);
-
-    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-
-    // disable the code owners functionality so that we can upload a non-parseable code owner config
-    // that we then try to submit
-    disableCodeOwnersForProject(project);
-
-    PushOneCommit.Result r =
-        createChange(
-            "Add code owners",
-            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
-    r.assertOkStatus();
-
-    // re-enable the code owners functionality for the project
-    enableCodeOwnersForProject(project);
-
-    // submit the change
-    approve(r.getChangeId());
-    gApi.changes().id(r.getChangeId()).current().submit();
-    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "forced")
-  public void
-      cannotSubmitConfigWithIssuesIfCodeOwnersFunctionalityIsDisabledButValidationIsEnforced()
-          throws Exception {
-    disableCodeOwnersForProject(project);
-
-    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-
-    // upload a change with a code owner config that has issues (non-resolvable code owners)
-    String unknownEmail = "non-existing-email@example.com";
-    PushOneCommit.Result r =
-        createChange(
-            "Add code owners",
-            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            format(
-                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
-                    .build()));
-    r.assertOkStatus();
-
-    // approve the change
-    approve(r.getChangeId());
-
-    // try to submit the change
-    ResourceConflictException exception =
-        assertThrows(
-            ResourceConflictException.class,
-            () -> gApi.changes().id(r.getChangeId()).current().submit());
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: [code-owners] invalid code owner config files:\n"
-                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
-                r.getChange().getId().get(),
-                unknownEmail,
-                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
-                identifiedUserFactory.create(admin.id()).getLoggableName()));
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "false")
-  public void canSubmitConfigWithIssuesIfValidationIsDisabled() throws Exception {
-    testCanSubmitConfigWithIssues();
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "dry_run")
-  public void canSubmitConfigWithIssuesIfValidationIsDoneAsDryRun() throws Exception {
-    testCanSubmitConfigWithIssues();
-  }
-
-  private void testCanSubmitConfigWithIssues() throws Exception {
-    setAsDefaultCodeOwners(admin);
-
-    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
-
-    // disable the code owners functionality so that we can upload a code owner config with issues
-    // that we then try to submit
-    disableCodeOwnersForProject(project);
-
-    // upload a code owner config that has issues (non-resolvable code owners)
-    String unknownEmail1 = "non-existing-email@example.com";
-    PushOneCommit.Result r =
-        createChange(
-            "Add code owners",
-            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            format(
-                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail1))
-                    .build()));
-    r.assertOkStatus();
-
-    // re-enable the code owners functionality for the project
-    enableCodeOwnersForProject(project);
-
-    // submit the change
-    approve(r.getChangeId());
-    gApi.changes().id(r.getChangeId()).current().submit();
-    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
-  }
-
-  @Test
   @GerritConfig(name = "plugin.code-owners.rejectNonResolvableCodeOwners", value = "false")
   @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void canUploadAndSubmitConfigWithUnresolvableCodeOwners() throws Exception {
@@ -2623,60 +2315,6 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     approve(r.getChangeId());
     gApi.changes().id(r.getChangeId()).current().submit();
     assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
-  public void pushFailsOnInternalError() throws Exception {
-    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
-      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
-      r.assertErrorStatus("internal error");
-    }
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnCommitReceived", value = "DRY_RUN")
-  public void pushSucceedsOnInternalErrorIfValidationIsDoneAsDryRun() throws Exception {
-    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
-      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
-      r.assertOkStatus();
-    }
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
-  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
-  public void submitFailsOnInternalError() throws Exception {
-    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
-      disableCodeOwnersForProject(project);
-      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
-      r.assertOkStatus();
-      enableCodeOwnersForProject(project);
-      approve(r.getChangeId());
-      IllegalStateException exception =
-          assertThrows(
-              IllegalStateException.class,
-              () -> gApi.changes().id(r.getChangeId()).current().submit());
-      assertThat(exception).hasMessageThat().isEqualTo(FailingCodeOwnerBackend.EXCEPTION_MESSAGE);
-    }
-  }
-
-  @Test
-  @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
-  @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "DRY_RUN")
-  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
-  public void submitSucceedsOnInternalErrorIfValidationIsDoneAsDryRun() throws Exception {
-    try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
-      disableCodeOwnersForProject(project);
-      PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "content");
-      r.assertOkStatus();
-      enableCodeOwnersForProject(project);
-      approve(r.getChangeId());
-      gApi.changes().id(r.getChangeId()).current().submit();
-      assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
-    }
   }
 
   @Test
@@ -2942,46 +2580,5 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
     pushResult.assertNotMessage("hint");
-  }
-
-  private AutoCloseable registerTestBackend(CodeOwnerBackend codeOwnerBackend) {
-    RegistrationHandle registrationHandle =
-        ((PrivateInternals_DynamicMapImpl<CodeOwnerBackend>) codeOwnerBackends)
-            .put("gerrit", FailingCodeOwnerBackend.ID, Providers.of(codeOwnerBackend));
-    return registrationHandle::remove;
-  }
-
-  private static class FailingCodeOwnerBackend implements CodeOwnerBackend {
-    static final String ID = "test-backend";
-    static final String EXCEPTION_MESSAGE = "failure from test";
-
-    @Override
-    public boolean isCodeOwnerConfigFile(NameKey project, String fileName) {
-      throw new IllegalStateException(EXCEPTION_MESSAGE);
-    }
-
-    @Override
-    public Optional<CodeOwnerConfig> getCodeOwnerConfig(
-        CodeOwnerConfig.Key codeOwnerConfigKey, RevWalk revWalk, ObjectId revision) {
-      return Optional.empty();
-    }
-
-    @Override
-    public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-      return codeOwnerConfigKey.filePath("OWNERS");
-    }
-
-    @Override
-    public Optional<CodeOwnerConfig> upsertCodeOwnerConfig(
-        CodeOwnerConfig.Key codeOwnerConfigKey,
-        CodeOwnerConfigUpdate codeOwnerConfigUpdate,
-        IdentifiedUser currentUser) {
-      return Optional.empty();
-    }
-
-    @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
-      return Optional.empty();
-    }
   }
 }
