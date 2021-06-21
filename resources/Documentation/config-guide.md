@@ -200,6 +200,23 @@ Example:
 To avoid situations like this it is recommended to not enable implicit
 approvals.
 
+**NOTE:** Why are implicit approvals not always applied for the change owner?\
+If implicit approvals would be always applied for the change owner, and not
+only when the change owner is also the last uploader, anyone could upload a new
+patch set to a change that is owned by a code owner and get it implicitly
+approved by the change owner. This would be really bad, as it means that anyone
+could submit arbitrary code without a code owner having actually looked at it
+before the submission.
+
+**NOTE:** Why are implicit approvals not always applied for the last uploader?\
+If implicit approvals would be always applied for the last uploader, and not
+only when the last uploader is also the change owner, changes would get
+implicitly approved whenever a code owner touches a change of somebody else
+(e.g. when editing the commit message, since editing the commit message creates
+a new patch set which has the user editing the commit message as an uploader).
+This would be bad, because code owners are not aware that editing the commit
+message of a change would implictly code-owner approve it.
+
 ### <a id="securityMergeCommits">Required code owner approvals on merge commits
 
 If any branch doesn't require code owner approvals or if the code owners in any

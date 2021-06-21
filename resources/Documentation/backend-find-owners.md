@@ -345,11 +345,8 @@ annotation is set for the all users wildcard (aka `*`) it applies to all users.
 The '#' character indicates the beginning of a comment. Arbitrary text may be
 added in comments.
 
-Comments are only supported in 2 places:
-
-* comment lines:
-  A line starting with '#' (`# <comment-text>`).
-* comments after [user emails](#userEmails) (`<user-email> # <comment-text>`).
+Comments can appear at the end of any line or consume the whole line (a line
+starting with '#', `# <comment-test`).
 
 Comments are not interpreted by the `code-owners` plugin and are intended for
 human readers of the `OWNERS` files. However some projects/teams may have own
