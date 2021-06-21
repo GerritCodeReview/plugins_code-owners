@@ -294,7 +294,9 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   @Test
   public void setNoParentCanBeSetMultipleTimes() throws Exception {
     assertParseAndFormat(
-        getCodeOwnerConfig(true, CodeOwnerSet.createWithoutPathExpressions(EMAIL_1))
+        getCodeOwnerConfig(
+                /* ignoreParentCodeOwners= */ true,
+                CodeOwnerSet.createWithoutPathExpressions(EMAIL_1))
             + "\nset noparent\nset noparent",
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
@@ -304,7 +306,9 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
               .hasCodeOwnersEmailsThat()
               .containsExactly(EMAIL_1);
         },
-        getCodeOwnerConfig(true, CodeOwnerSet.createWithoutPathExpressions(EMAIL_1)));
+        getCodeOwnerConfig(
+            /* ignoreParentCodeOwners= */ true,
+            CodeOwnerSet.createWithoutPathExpressions(EMAIL_1)));
   }
 
   @Test
@@ -313,14 +317,16 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         CodeOwnerSet.builder().addPathExpression("foo").addCodeOwnerEmail(EMAIL_2).build();
     CodeOwnerSet globalCodeOwnerSet = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
     assertParseAndFormat(
-        getCodeOwnerConfig(false, perFileCodeOwnerSet, globalCodeOwnerSet),
+        getCodeOwnerConfig(
+            /* ignoreParentCodeOwners= */ false, perFileCodeOwnerSet, globalCodeOwnerSet),
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig)
               .hasCodeOwnerSetsThat()
               .containsExactly(globalCodeOwnerSet, perFileCodeOwnerSet)
               .inOrder();
         },
-        getCodeOwnerConfig(false, globalCodeOwnerSet, perFileCodeOwnerSet));
+        getCodeOwnerConfig(
+            /* ignoreParentCodeOwners= */ false, globalCodeOwnerSet, perFileCodeOwnerSet));
   }
 
   @Test
@@ -328,7 +334,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
     CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_2);
     assertParseAndFormat(
-        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        getCodeOwnerConfig(/* ignoreParentCodeOwners= */ false, codeOwnerSet1, codeOwnerSet2),
         codeOwnerConfig -> {
           assertThat(codeOwnerConfig)
               .hasCodeOwnerSetsThat()
@@ -338,7 +344,8 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
         },
         // The code owner sets without path expressions are merged into one code owner set.
         getCodeOwnerConfig(
-            false, CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_2, EMAIL_3)));
+            /* ignoreParentCodeOwners= */ false,
+            CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_2, EMAIL_3)));
   }
 
   @Test
@@ -352,7 +359,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
             .addCodeOwnerEmail(EMAIL_2)
             .build();
     assertParseAndFormat(
-        getCodeOwnerConfig(false, codeOwnerSet),
+        getCodeOwnerConfig(/* ignoreParentCodeOwners= */ false, codeOwnerSet),
         codeOwnerConfig -> {
           // we expect 2 code owner sets:
           // 1. code owner set for line "per-file *.md,foo=set noparent"

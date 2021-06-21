@@ -127,12 +127,12 @@ public class ProtoCodeOwnerConfigParserTest extends AbstractCodeOwnerConfigParse
     CodeOwnerSet codeOwnerSet1 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_1, EMAIL_3);
     CodeOwnerSet codeOwnerSet2 = CodeOwnerSet.createWithoutPathExpressions(EMAIL_2);
     assertParseAndFormat(
-        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2),
+        getCodeOwnerConfig(/* ignoreParentCodeOwners= */ false, codeOwnerSet1, codeOwnerSet2),
         codeOwnerConfig ->
             assertThat(codeOwnerConfig.codeOwnerSets())
                 .containsExactly(codeOwnerSet1, codeOwnerSet2)
                 .inOrder(),
-        getCodeOwnerConfig(false, codeOwnerSet1, codeOwnerSet2));
+        getCodeOwnerConfig(/* ignoreParentCodeOwners= */ false, codeOwnerSet1, codeOwnerSet2));
   }
 
   /**
