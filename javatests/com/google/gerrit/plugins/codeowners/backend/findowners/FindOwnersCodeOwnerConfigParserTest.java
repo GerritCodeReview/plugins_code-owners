@@ -169,7 +169,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   @Test
-  public void codeOwnerConfigWithInlineComments() throws Exception {
+  public void codeOwnerConfigWithComment() throws Exception {
     assertParseAndFormat(
         getCodeOwnerConfig(EMAIL_1, EMAIL_2 + " # some comment", EMAIL_3),
         codeOwnerConfig ->
@@ -178,7 +178,63 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                 .onlyElement()
                 .hasCodeOwnersEmailsThat()
                 .containsExactly(EMAIL_1, EMAIL_2, EMAIL_3),
+        // inline comments are dropped
         getCodeOwnerConfig(EMAIL_1, EMAIL_2, EMAIL_3));
+  }
+
+  @Test
+  public void perFileCodeOwnerConfigWithComment() throws Exception {
+    assertParseAndFormat(
+        "per-file foo=" + EMAIL_1 + "," + EMAIL_2 + "," + EMAIL_3 + " # some comment",
+        codeOwnerConfig -> {
+          CodeOwnerSetSubject codeOwnerSetSubject =
+              assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().onlyElement();
+          codeOwnerSetSubject.hasPathExpressionsThat().containsExactly("foo");
+          codeOwnerSetSubject.hasCodeOwnersEmailsThat().containsExactly(EMAIL_1, EMAIL_2, EMAIL_3);
+        },
+        // inline comments are dropped
+        getCodeOwnerConfig(
+            /* ignoreParentCodeOwners= */ false,
+            CodeOwnerSet.builder()
+                .addPathExpression("foo")
+                .addCodeOwnerEmail(EMAIL_1)
+                .addCodeOwnerEmail(EMAIL_2)
+                .addCodeOwnerEmail(EMAIL_3)
+                .build()));
+  }
+
+  @Test
+  public void setNoParentWithComment() throws Exception {
+    assertParseAndFormat(
+        "set noparent # some comment",
+        codeOwnerConfig -> {
+          assertThat(codeOwnerConfig).hasIgnoreParentCodeOwnersThat().isTrue();
+          assertThat(codeOwnerConfig).hasCodeOwnerSetsThat().isEmpty();
+        },
+        // inline comments are dropped
+        getCodeOwnerConfig(
+            CodeOwnerConfig.builder(
+                    CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+                .setIgnoreParentCodeOwners()
+                .build()));
+  }
+
+  @Test
+  public void importCodeOwnerConfigWithComment() throws Exception {
+    Path path = Paths.get("/foo/bar/OWNERS");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path).build();
+    assertParseAndFormat(
+        "include " + path + " # some comment",
+        codeOwnerConfig -> {
+          CodeOwnerConfigReferenceSubject codeOwnerConfigReferenceSubject =
+              assertThat(codeOwnerConfig).hasImportsThat().onlyElement();
+          codeOwnerConfigReferenceSubject.hasProjectThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasBranchThat().isEmpty();
+          codeOwnerConfigReferenceSubject.hasFilePathThat().isEqualTo(path);
+        },
+        // inline comments are dropped
+        getCodeOwnerConfig(codeOwnerConfigReference));
   }
 
   @Test
