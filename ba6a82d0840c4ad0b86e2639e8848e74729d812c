@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e50bbfc9_de622623",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-21T07:14:40Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "524f03b5_158cf4fc",
+      "range": {
+        "startLine": 160,
+        "startChar": 9,
+        "endLine": 160,
+        "endChar": 45
+      },
+      "revId": "ba6a82d0840c4ad0b86e2639e8848e74729d812c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b2ab4882_0f2c867a",
@@ -37,6 +61,24 @@
       "writtenOn": "2021-06-18T12:25:45Z",
       "side": 1,
       "message": "changes that got code owner override? (maybe the semantic of it is just \"approved, though).",
+      "revId": "ba6a82d0840c4ad0b86e2639e8848e74729d812c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "105fec93_a9360939",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-21T07:14:40Z",
+      "side": 1,
+      "message": "Yeah, I would say that semantically overrides count as approved, and overrides are already documented in their own section right above (l. 137).",
+      "parentUuid": "b2ab4882_0f2c867a",
       "revId": "ba6a82d0840c4ad0b86e2639e8848e74729d812c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
