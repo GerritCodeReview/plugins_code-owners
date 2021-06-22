@@ -18,8 +18,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFile;
-import com.google.gerrit.plugins.codeowners.backend.FindOwnersGlobMatcher;
-import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -63,8 +62,8 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
   }
 
   @Override
-  public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
-    return Optional.of(FindOwnersGlobMatcher.INSTANCE);
+  public Optional<PathExpressions> getDefaultPathExpressions() {
+    return Optional.of(PathExpressions.FIND_OWNERS_GLOB);
   }
 
   @Override

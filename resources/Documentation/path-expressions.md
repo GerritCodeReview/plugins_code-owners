@@ -5,15 +5,27 @@ to only apply to a subset of files in a directory (e.g. see
 [per-file](backend-find-owners.html#perFile) rule for the
 [find-owners](backend-find-owners.html) backend).
 
-Which syntax is used depends on the used code owner backend:
+The following path expression syntaxes are supported:
+
+* `GLOB`:
+  Uses [globs](#globs) to match paths.
+* `FIND_OWNERS_GLOB`:
+  Uses [globs](#globs) to match paths, but each glob is automatically prefixed
+  with `{**/,}` so that subfolders are always matched, e.g. `*.md` matches all
+  md files in all subfolders, rather then only md files in the current folder
+  (also see the [caveat](#findOwnersCaveat) section below).
+* `SIMPLE`:
+  Uses [simple path expressions](#simplePathExpressions) to match paths.
+
+Which syntax is used by default depends on the used code owner backend:
 
 * [find-owners](backend-find-owners.html) backend:
-  uses [globs](#globs), but each glob is automatically prefixed with `{**/,}`
-  so that subfolders are always matched, e.g. `*.md` matches all md files in all
-  subfolders, rather then only md files in the current folder (also see the
-  [caveat](#findOwnersCaveat) section below)
+  Uses `FIND_OWNERS_GLOB` as path expression syntax.
 * [proto](backend-proto.html) backend:
-  uses [simple path expressions](#simplePathExpressions)
+  Uses `SIMPLE` as path expression syntax.
+
+The default path expression syntax that is derived from the backend can be
+overriden by [configuration](config.html#pluginCodeOwnersPathExpressions).
 
 ## <a id="globs">Globs
 

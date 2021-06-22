@@ -19,6 +19,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -142,7 +143,7 @@ public class CodeOwnerConfigValidatorErrorHandlingIT extends AbstractCodeOwnersI
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.empty();
     }
   }
