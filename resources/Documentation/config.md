@@ -637,7 +637,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         the one for the full name takes precedence.\
         Overrides the per repository setting
         [codeOwners.backend](#codeOwnersBackend) and the
-        `codeOwners.\<branch\>.backend` setting from parent projects.\
+        `codeOwners.<branch>.backend` setting from parent projects.\
         The supported code owner backends are listed at the
         [Backends](backends.html) page.\
         If not set, the project level configuration
