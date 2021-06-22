@@ -2980,7 +2980,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.empty();
     }
   }

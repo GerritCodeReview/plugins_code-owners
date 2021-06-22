@@ -131,7 +131,7 @@ public class PathCodeOwners {
               .getProjectConfig(codeOwnerConfigKey.project())
               .getBackend(codeOwnerConfigKey.branchNameKey().branch());
       return codeOwnerBackend
-          .getPathExpressionMatcher()
+          .getPathExpressionMatcher(codeOwnerConfigKey.branchNameKey())
           .orElse((pathExpression, relativePath) -> false);
     }
   }

@@ -14,10 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 
+import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.FindOwnersGlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.GlobMatcher;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
 import com.google.gerrit.plugins.codeowners.backend.SimplePathExpressionMatcher;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.inject.Inject;
@@ -83,8 +85,20 @@ public class TestPathExpressions {
 
   private PathExpressionMatcher getPathExpressionMatcher() {
     CodeOwnerBackend defaultBackend = backendConfig.getDefaultBackend();
+    if (defaultBackend instanceof AbstractFileBasedCodeOwnerBackend) {
+      return ((AbstractFileBasedCodeOwnerBackend) defaultBackend)
+          .getDefaultPathExpressions()
+          .map(PathExpressions::getMatcher)
+          .orElseThrow(
+              () ->
+                  new IllegalStateException(
+                      String.format(
+                          "code owner backend %s doesn't support path expressions",
+                          defaultBackend.getClass().getName())));
+    }
+
     return defaultBackend
-        .getPathExpressionMatcher()
+        .getPathExpressionMatcher(/* branchNameKey= */ null)
         .orElseThrow(
             () ->
                 new IllegalStateException(

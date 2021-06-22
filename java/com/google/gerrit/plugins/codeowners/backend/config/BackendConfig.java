@@ -26,6 +26,7 @@ import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
 import com.google.gerrit.server.config.PluginConfigFactory;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
@@ -57,12 +58,16 @@ public class BackendConfig {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   @VisibleForTesting public static final String KEY_BACKEND = "backend";
+  @VisibleForTesting public static final String KEY_PATH_EXPRESSIONS = "pathExpressions";
 
   private final String pluginName;
   private final DynamicMap<CodeOwnerBackend> codeOwnerBackends;
 
   /** The name of the configured code owners default backend. */
   private final String defaultBackendName;
+
+  /** The name of the configured default path expressions. */
+  private final Optional<String> defaultPathExpressionsName;
 
   @Inject
   BackendConfig(
@@ -76,6 +81,12 @@ public class BackendConfig {
         pluginConfigFactory
             .getFromGerritConfig(pluginName)
             .getString(KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
+
+    this.defaultPathExpressionsName =
+        Optional.ofNullable(
+            pluginConfigFactory
+                .getFromGerritConfig(pluginName)
+                .getString(KEY_PATH_EXPRESSIONS, /* defaultValue= */ null));
   }
 
   /**
@@ -232,5 +243,122 @@ public class BackendConfig {
     // We must use "gerrit" as plugin name since DynamicMapProvider#get() hard-codes "gerrit" as
     // plugin name.
     return Optional.ofNullable(codeOwnerBackends.get("gerrit", backendName));
+  }
+
+  /**
+   * Gets the path expressions that are configured for the given branch.
+   *
+   * <p>The path expressions configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>path expressions for branch by full name (with inheritance)
+   *   <li>path expressions for branch by short name (with inheritance)
+   * </ul>
+   *
+   * @param pluginConfig the plugin config from which the path expressions should be read.
+   * @param branch the project and branch for which the configured path expressions should be read
+   * @return the path expressions that are configured for the given branch, {@link Optional#empty()}
+   *     if there is no branch-specific path expressions configuration
+   */
+  Optional<PathExpressions> getPathExpressionsForBranch(Config pluginConfig, BranchNameKey branch) {
+    requireNonNull(pluginConfig, "pluginConfig");
+    requireNonNull(branch, "branch");
+
+    // check for branch specific path expressions by full branch name
+    Optional<PathExpressions> pathExpressions =
+        getPathExpressionsForBranch(pluginConfig, branch.project(), branch.branch());
+    if (!pathExpressions.isPresent()) {
+      // check for branch specific path expressions by short branch name
+      pathExpressions =
+          getPathExpressionsForBranch(pluginConfig, branch.project(), branch.shortName());
+    }
+    return pathExpressions;
+  }
+
+  private Optional<PathExpressions> getPathExpressionsForBranch(
+      Config pluginConfig, Project.NameKey project, String branch) {
+    String pathExpressionsName =
+        pluginConfig.getString(SECTION_CODE_OWNERS, branch, KEY_PATH_EXPRESSIONS);
+    if (pathExpressionsName == null) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        PathExpressions.tryParse(pathExpressionsName)
+            .orElseThrow(
+                () -> {
+                  InvalidPluginConfigurationException e =
+                      new InvalidPluginConfigurationException(
+                          pluginName,
+                          String.format(
+                              "Path expressions '%s' that are configured for project %s in"
+                                  + " %s.config (parameter %s.%s.%s) not found.",
+                              pathExpressionsName,
+                              project,
+                              pluginName,
+                              SECTION_CODE_OWNERS,
+                              branch,
+                              KEY_PATH_EXPRESSIONS));
+                  logger.atSevere().log(e.getMessage());
+                  return e;
+                }));
+  }
+
+  /**
+   * Gets the path expressions that are configured for the given project.
+   *
+   * @param pluginConfig the plugin config from which the path expressions should be read.
+   * @param project the project for which the configured path expressions should be read
+   * @return the path expressions that are configured for the given project, {@link
+   *     Optional#empty()} if there is no project-specific path expression configuration
+   */
+  Optional<PathExpressions> getPathExpressionsForProject(
+      Config pluginConfig, Project.NameKey project) {
+    requireNonNull(pluginConfig, "pluginConfig");
+    requireNonNull(project, "project");
+
+    String pathExpressionsName =
+        pluginConfig.getString(SECTION_CODE_OWNERS, null, KEY_PATH_EXPRESSIONS);
+    if (pathExpressionsName == null) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        PathExpressions.tryParse(pathExpressionsName)
+            .orElseThrow(
+                () -> {
+                  InvalidPluginConfigurationException e =
+                      new InvalidPluginConfigurationException(
+                          pluginName,
+                          String.format(
+                              "Path expressions '%s' that are configured for project %s in"
+                                  + " %s.config (parameter %s.%s) not found.",
+                              pathExpressionsName,
+                              project,
+                              pluginName,
+                              SECTION_CODE_OWNERS,
+                              KEY_PATH_EXPRESSIONS));
+                  logger.atSevere().log(e.getMessage());
+                  return e;
+                }));
+  }
+
+  /** Gets the default path expressions. */
+  public Optional<PathExpressions> getDefaultPathExpressions() {
+    if (!defaultPathExpressionsName.isPresent()) {
+      return Optional.empty();
+    }
+    return Optional.of(
+        PathExpressions.tryParse(defaultPathExpressionsName.get())
+            .orElseThrow(
+                () -> {
+                  InvalidPluginConfigurationException e =
+                      new InvalidPluginConfigurationException(
+                          pluginName,
+                          String.format(
+                              "Path expressions '%s' that are configured in gerrit.config"
+                                  + " (parameter plugin.%s.%s) not found.",
+                              defaultPathExpressionsName.get(), pluginName, KEY_PATH_EXPRESSIONS));
+                  logger.atSevere().log(e.getMessage());
+                  return e;
+                }));
   }
 }
