@@ -2241,7 +2241,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.ofNullable(pathExpressionMatcher);
     }
 

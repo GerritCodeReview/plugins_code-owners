@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.backend.config.BackendConfig.KEY_BACKEND;
+import static com.google.gerrit.plugins.codeowners.backend.config.BackendConfig.KEY_PATH_EXPRESSIONS;
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
@@ -26,6 +27,7 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -186,6 +188,106 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void cannotGetPathExpressionsForBranchWithNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                backendConfig.getPathExpressionsForBranch(
+                    null, BranchNameKey.create(project, "master")));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void cannotGetPathExpressionsForBranchForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> backendConfig.getPathExpressionsForBranch(new Config(), null));
+    assertThat(npe).hasMessageThat().isEqualTo("branch");
+  }
+
+  @Test
+  public void getPathExpressionsForBranchWhenPathExpressionsAreNotSet() throws Exception {
+    assertThat(
+            backendConfig.getPathExpressionsForBranch(
+                new Config(), BranchNameKey.create(project, "master")))
+        .isEmpty();
+  }
+
+  @Test
+  public void getPathExpressionsForBranch() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        "refs/heads/master",
+        KEY_PATH_EXPRESSIONS,
+        PathExpressions.GLOB.name());
+    assertThat(
+            backendConfig.getPathExpressionsForBranch(cfg, BranchNameKey.create(project, "master")))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void getPathExpressionsForBranchShortName() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, "master", KEY_PATH_EXPRESSIONS, PathExpressions.GLOB.name());
+    assertThat(
+            backendConfig.getPathExpressionsForBranch(cfg, BranchNameKey.create(project, "master")))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void getPathExpressionsForBranchIfConfigIsInvalid() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, "master", KEY_PATH_EXPRESSIONS, "INVALID");
+    assertThat(
+            backendConfig.getPathExpressionsForBranch(cfg, BranchNameKey.create(project, "master")))
+        .isEmpty();
+  }
+
+  @Test
+  public void cannotGetPathExpressionsForProjectWithNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> backendConfig.getPathExpressionsForProject(null, project));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void cannotGetPathExpressionsForProjectForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> backendConfig.getPathExpressionsForProject(new Config(), null));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void getPathExpressionsForProjectWhenBackendIsNotSet() throws Exception {
+    assertThat(backendConfig.getPathExpressionsForProject(new Config(), project)).isEmpty();
+  }
+
+  @Test
+  public void getPathExpressionsForProject() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_PATH_EXPRESSIONS, PathExpressions.GLOB.name());
+    assertThat(backendConfig.getPathExpressionsForProject(cfg, project))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void getPathExpressionsForProjectIfConfigIsInvalid() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_PATH_EXPRESSIONS, "INVALID");
+    assertThat(backendConfig.getPathExpressionsForProject(cfg, project)).isEmpty();
+  }
+
+  @Test
   public void cannotValidateProjectLevelConfigWithNullFileName() throws Exception {
     NullPointerException npe =
         assertThrows(
@@ -204,6 +306,23 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void getDefaultPathExpressions() throws Exception {
+    assertThat(backendConfig.getDefaultPathExpressions()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
+  public void getConfiguredDefaultPathExpressions() throws Exception {
+    assertThat(backendConfig.getDefaultPathExpressions()).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "INVALID")
+  public void getDefaultPathExpressionsIfConfigIsInvalid() throws Exception {
+    assertThat(backendConfig.getDefaultPathExpressions()).isEmpty();
+  }
+
+  @Test
   public void validateEmptyProjectLevelConfig() throws Exception {
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         backendConfig.validateProjectLevelConfig("code-owners.config", new Config());
@@ -215,13 +334,15 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, null, KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_PATH_EXPRESSIONS, PathExpressions.GLOB.name());
     ImmutableList<CommitValidationMessage> commitValidationMessage =
         backendConfig.validateProjectLevelConfig("code-owners.config", cfg);
     assertThat(commitValidationMessage).isEmpty();
   }
 
   @Test
-  public void validateInvalidProjectLevelConfig_invalidProjectConfiguration() throws Exception {
+  public void validateInvalidProjectLevelConfig_invalidProjectLevelBackendConfiguration()
+      throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_BACKEND, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
@@ -237,7 +358,25 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void validateInvalidProjectLevelConfig_invalidBranchConfiguration() throws Exception {
+  public void validateInvalidProjectLevelConfig_invalidProjectLevelPathExpressionsConfiguration()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, null, KEY_PATH_EXPRESSIONS, "INVALID");
+    ImmutableList<CommitValidationMessage> commitValidationMessages =
+        backendConfig.validateProjectLevelConfig("code-owners.config", cfg);
+    assertThat(commitValidationMessages).hasSize(1);
+    CommitValidationMessage commitValidationMessage =
+        Iterables.getOnlyElement(commitValidationMessages);
+    assertThat(commitValidationMessage.getType()).isEqualTo(ValidationMessage.Type.ERROR);
+    assertThat(commitValidationMessage.getMessage())
+        .isEqualTo(
+            "Path expressions 'INVALID' that are configured in code-owners.config (parameter"
+                + " codeOwners.pathExpressions) not found.");
+  }
+
+  @Test
+  public void validateInvalidProjectLevelConfig_invalidBranchLevelBackendConfiguration()
+      throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, "someBranch", KEY_BACKEND, "INVALID");
     ImmutableList<CommitValidationMessage> commitValidationMessages =
@@ -250,5 +389,22 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
         .isEqualTo(
             "Code owner backend 'INVALID' that is configured in code-owners.config (parameter"
                 + " codeOwners.someBranch.backend) not found.");
+  }
+
+  @Test
+  public void validateInvalidProjectLevelConfig_invalidBranchLevelPathExpressionsConfiguration()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(SECTION_CODE_OWNERS, "someBranch", KEY_PATH_EXPRESSIONS, "INVALID");
+    ImmutableList<CommitValidationMessage> commitValidationMessages =
+        backendConfig.validateProjectLevelConfig("code-owners.config", cfg);
+    assertThat(commitValidationMessages).hasSize(1);
+    CommitValidationMessage commitValidationMessage =
+        Iterables.getOnlyElement(commitValidationMessages);
+    assertThat(commitValidationMessage.getType()).isEqualTo(ValidationMessage.Type.ERROR);
+    assertThat(commitValidationMessage.getMessage())
+        .isEqualTo(
+            "Path expressions 'INVALID' that are configured in code-owners.config (parameter"
+                + " codeOwners.someBranch.pathExpressions) not found.");
   }
 }
