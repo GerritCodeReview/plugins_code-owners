@@ -29,6 +29,7 @@ import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.entities.RefNames;
@@ -42,6 +43,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigUpdate;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressionMatcher;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
@@ -1032,6 +1034,163 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
   }
 
   @Test
+  public void cannotGetPathExpressionsForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> cfgSnapshot().getPathExpressions(/* branchName= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("branchName");
+  }
+
+  @Test
+  public void getPathExpressionsForNonExistingBranch() throws Exception {
+    assertThat(cfgSnapshot().getPathExpressions("non-existing")).isEmpty();
+  }
+
+  @Test
+  public void getPathExpressionsWhenNoPathExpressionsAreConfigured() throws Exception {
+    assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
+  public void getConfiguredPathExpressions() throws Exception {
+    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.pathExpressions",
+      value = "non-existing-path-expressions")
+  public void cannotGetPathExpressionsIfNonExistingPathExpressionsAreConfigured() throws Exception {
+    InvalidPluginConfigurationException exception =
+        assertThrows(
+            InvalidPluginConfigurationException.class,
+            () -> cfgSnapshot().getPathExpressions("master"));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            "Invalid configuration of the code-owners plugin. Path expressions"
+                + " 'non-existing-path-expressions' that are configured in gerrit.config"
+                + " (parameter plugin.code-owners.pathExpressions) not found.");
+  }
+
+  @Test
+  public void getPathExpressionsConfiguredOnProjectLevel() throws Exception {
+    configurePathExpressions(project, PathExpressions.GLOB.name());
+    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.backend", value = "GLOB")
+  public void pathExpressionsConfiguredOnProjectLevelOverrideDefaultPathExpressions()
+      throws Exception {
+    configurePathExpressions(project, PathExpressions.SIMPLE.name());
+    assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.SIMPLE);
+  }
+
+  @Test
+  public void pathExpressionsAreInheritedFromParentProject() throws Exception {
+    configurePathExpressions(allProjects, PathExpressions.GLOB.name());
+    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
+  public void inheritedPathExpressionsOverrideDefaultPathExpressions() throws Exception {
+    configurePathExpressions(allProjects, PathExpressions.SIMPLE.name());
+    assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.SIMPLE);
+  }
+
+  @Test
+  public void projectLevelPathExpressionsOverrideInheritedPathExpressions() throws Exception {
+    configurePathExpressions(allProjects, PathExpressions.GLOB.name());
+    configurePathExpressions(project, PathExpressions.SIMPLE.name());
+    assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.SIMPLE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
+  public void
+      pathExpressionsAreReadFromGlobalConfigIfNonExistingPathExpressionsAreConfiguredOnProjectLevel()
+          throws Exception {
+    configurePathExpressions(project, "non-existing-path-expressions");
+    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void projectLevelPathExpressionsForOtherProjectHasNoEffect() throws Exception {
+    Project.NameKey otherProject = projectOperations.newProject().create();
+    configurePathExpressions(otherProject, PathExpressions.GLOB.name());
+    assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
+  }
+
+  @Test
+  public void getPathExpressionsConfiguredOnBranchLevel() throws Exception {
+    configurePathExpressions(project, "refs/heads/master", PathExpressions.GLOB.name());
+    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void getPathExpressionsConfiguredOnBranchLevelShortName() throws Exception {
+    configurePathExpressions(project, "master", PathExpressions.GLOB.name());
+    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void
+      branchLevelPathExpressionsOnFullNameTakePrecedenceOverBranchLevelPathExpressionsOnShortName()
+          throws Exception {
+    configurePathExpressions(project, "master", PathExpressions.GLOB.name());
+    configurePathExpressions(project, "refs/heads/master", PathExpressions.SIMPLE.name());
+    assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.SIMPLE);
+  }
+
+  @Test
+  public void branchLevelPathExpressionsOverridesProjectLevelPathExpressions() throws Exception {
+    configurePathExpressions(project, PathExpressions.GLOB.name());
+    configurePathExpressions(project, "master", PathExpressions.SIMPLE.name());
+    assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.SIMPLE);
+  }
+
+  @Test
+  public void
+      pathExpressionsAreReadFromProjectIfNonExistingPathExpressionsAreConfiguredOnBranchLevel()
+          throws Exception {
+    updateCodeOwnersConfig(
+        project,
+        codeOwnersConfig -> {
+          codeOwnersConfig.setString(
+              CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+              /* subsection= */ null,
+              BackendConfig.KEY_PATH_EXPRESSIONS,
+              PathExpressions.GLOB.name());
+          codeOwnersConfig.setString(
+              CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+              "master",
+              BackendConfig.KEY_PATH_EXPRESSIONS,
+              "non-existing-path-expressions");
+        });
+    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void branchLevelPathExpressionsForOtherBranchHaveNoEffect() throws Exception {
+    configurePathExpressions(project, "foo", PathExpressions.GLOB.name());
+    assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
+  }
+
+  @Test
   public void getDefaultRequiredApprovalWhenNoRequiredApprovalIsConfigured() throws Exception {
     RequiredApproval requiredApproval = cfgSnapshot().getRequiredApproval();
     assertThat(requiredApproval).hasLabelNameThat().isEqualTo(RequiredApprovalConfig.DEFAULT_LABEL);
@@ -1858,6 +2017,17 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
     setCodeOwnersConfig(project, branch, BackendConfig.KEY_BACKEND, backendName);
   }
 
+  private void configurePathExpressions(Project.NameKey project, String pathExpressionsName)
+      throws Exception {
+    configurePathExpressions(project, /* branch= */ null, pathExpressionsName);
+  }
+
+  private void configurePathExpressions(
+      Project.NameKey project, @Nullable String branch, String pathExpressionsName)
+      throws Exception {
+    setCodeOwnersConfig(project, branch, BackendConfig.KEY_PATH_EXPRESSIONS, pathExpressionsName);
+  }
+
   private void configureRequiredApproval(Project.NameKey project, String requiredApproval)
       throws Exception {
     setCodeOwnersConfig(
@@ -2005,7 +2175,7 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.empty();
     }
   }

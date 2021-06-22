@@ -20,6 +20,7 @@ import static com.google.gerrit.acceptance.GitUtil.pushHead;
 import static com.google.gerrit.extensions.client.ListChangesOption.CURRENT_REVISION;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -35,6 +36,7 @@ import com.google.gerrit.git.ObjectIds;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
@@ -239,6 +241,86 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
         .contains(
             "Code owner backend 'INVALID' that is configured in code-owners.config"
                 + " (parameter codeOwners.master.backend) not found.");
+  }
+
+  @Test
+  public void configurePathExpressionsForProject() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        BackendConfig.KEY_PATH_EXPRESSIONS,
+        PathExpressions.GLOB.name());
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void configurePathExpressionsForBranch() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        "master",
+        BackendConfig.KEY_PATH_EXPRESSIONS,
+        PathExpressions.GLOB.name());
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
+  }
+
+  @Test
+  public void cannotConfigureInvalidPathExpressionsForProject() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        BackendConfig.KEY_PATH_EXPRESSIONS,
+        "INVALID");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            "Path expressions 'INVALID' that are configured in code-owners.config"
+                + " (parameter codeOwners.pathExpressions) not found.");
+  }
+
+  @Test
+  public void cannotConfigureInvalidPathExpressionsForBranch() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setString(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        "master",
+        BackendConfig.KEY_PATH_EXPRESSIONS,
+        "INVALID");
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus())
+        .isEqualTo(Status.REJECTED_OTHER_REASON);
+    assertThat(r.getMessages())
+        .contains(
+            "Path expressions 'INVALID' that are configured in code-owners.config"
+                + " (parameter codeOwners.master.pathExpressions) not found.");
   }
 
   @Test

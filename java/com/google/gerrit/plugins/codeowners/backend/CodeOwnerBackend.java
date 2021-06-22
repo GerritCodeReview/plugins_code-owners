@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.server.IdentifiedUser;
@@ -111,8 +112,11 @@ public interface CodeOwnerBackend {
    * <p>May return {@link Optional#empty()} if path expressions are not supported by the code owner
    * backend. It this case all {@link CodeOwnerSet}s that have path expressions are ignored and will
    * not have any effect.
+   *
+   * @param branchNameKey project and branch for which the path expression matcher should be
+   *     returned
    */
-  Optional<PathExpressionMatcher> getPathExpressionMatcher();
+  Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey);
 
   /**
    * Replaces the old email in the given code owner config file content with the new email.

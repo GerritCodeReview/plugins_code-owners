@@ -33,6 +33,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
+import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.account.Emails;
@@ -87,6 +88,8 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   @Nullable private Boolean isDisabled;
   private Map<String, CodeOwnerBackend> backendByBranch = new HashMap<>();
   @Nullable private CodeOwnerBackend backend;
+  private Map<String, Optional<PathExpressions>> pathExpressionsByBranch = new HashMap<>();
+  @Nullable private Optional<PathExpressions> pathExpressions;
   @Nullable private Boolean implicitApprovalsEnabled;
   @Nullable private RequiredApproval requiredApproval;
   @Nullable private ImmutableSortedSet<RequiredApproval> overrideApprovals;
@@ -458,6 +461,74 @@ public class CodeOwnersPluginProjectConfigSnapshot {
 
     // fall back to the default backend
     return backendConfig.getDefaultBackend();
+  }
+
+  /**
+   * Returns the configured {@link PathExpressions} for the given branch.
+   *
+   * <p>The path expression configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>path expression configuration for branch (with inheritance, first by full branch name,
+   *       then by short branch name)
+   *   <li>path expressions configuration for project (with inheritance)
+   * </ul>
+   *
+   * <p>The first path expressions configuration that exists counts and the evaluation is stopped.
+   *
+   * @param branchName the branch for which the configured path expressions should be returned
+   * @return the {@link PathExpressions} that should be used for the branch, {@link
+   *     Optional#empty()} if no path expressions are configured for the branch
+   */
+  public Optional<PathExpressions> getPathExpressions(String branchName) {
+    requireNonNull(branchName, "branchName");
+
+    BranchNameKey branchNameKey = BranchNameKey.create(projectName, branchName);
+    return pathExpressionsByBranch.computeIfAbsent(
+        branchNameKey.branch(),
+        b -> {
+          Optional<PathExpressions> pathExpressions =
+              backendConfig.getPathExpressionsForBranch(
+                  pluginConfig, BranchNameKey.create(projectName, branchName));
+          if (pathExpressions.isPresent()) {
+            return pathExpressions;
+          }
+          return getPathExpressions();
+        });
+  }
+
+  /**
+   * Returns the configured {@link PathExpressions}.
+   *
+   * <p>The path expression configuration is evaluated in the following order:
+   *
+   * <ul>
+   *   <li>path expression configuration for project (with inheritance)
+   *   <li>default path expressions (globally configured path expressions)
+   * </ul>
+   *
+   * <p>The first path expression configuration that exists counts and the evaluation is stopped.
+   *
+   * @return the {@link PathExpressions} that should be used, {@link Optional#empty()} if no path
+   *     expressions are configured
+   */
+  public Optional<PathExpressions> getPathExpressions() {
+    if (pathExpressions == null) {
+      pathExpressions = readPathExpressions();
+    }
+    return pathExpressions;
+  }
+
+  private Optional<PathExpressions> readPathExpressions() {
+    // check if project specific path expressions are configured
+    Optional<PathExpressions> pathExpressions =
+        backendConfig.getPathExpressionsForProject(pluginConfig, projectName);
+    if (pathExpressions.isPresent()) {
+      return pathExpressions;
+    }
+
+    // fall back to the default path expressions
+    return backendConfig.getDefaultPathExpressions();
   }
 
   /**

@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
@@ -75,7 +76,7 @@ public class CodeOwnerBackendIdTest extends AbstractCodeOwnersTest {
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.empty();
     }
   }

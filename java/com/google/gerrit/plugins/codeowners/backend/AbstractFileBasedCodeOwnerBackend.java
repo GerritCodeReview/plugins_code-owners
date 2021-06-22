@@ -16,9 +16,11 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Throwables;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
@@ -225,6 +227,28 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
           String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
     }
   }
+
+  @Override
+  public final Optional<PathExpressionMatcher> getPathExpressionMatcher(
+      BranchNameKey branchNameKey) {
+    Optional<PathExpressions> pathExpressions =
+        codeOwnersPluginConfiguration
+            .getProjectConfig(branchNameKey.project())
+            .getPathExpressions(branchNameKey.branch());
+    boolean hasConfiguredPathExpressions = pathExpressions.isPresent();
+    if (!hasConfiguredPathExpressions) {
+      pathExpressions = getDefaultPathExpressions();
+    }
+    logger.atFine().log(
+        "using %s path expression syntax %s for project/branch %s",
+        (hasConfiguredPathExpressions ? "configured" : "default"),
+        pathExpressions.map(PathExpressions::name).orElse("<none>"),
+        branchNameKey);
+    return pathExpressions.map(PathExpressions::getMatcher);
+  }
+
+  @VisibleForTesting
+  public abstract Optional<PathExpressions> getDefaultPathExpressions();
 
   private Optional<CodeOwnerConfig> upsertCodeOwnerConfigInSourceBranch(
       @Nullable IdentifiedUser currentUser,

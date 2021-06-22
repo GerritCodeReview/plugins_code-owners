@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.findowners;
 
 import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.AbstractFileBasedCodeOwnerBackendTest;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigParser;
@@ -41,7 +42,7 @@ public class FindOwnersBackendTest extends AbstractFileBasedCodeOwnerBackendTest
 
   @Test
   public void getPathExpressionMatcher() throws Exception {
-    assertThat(codeOwnerBackend.getPathExpressionMatcher())
+    assertThat(codeOwnerBackend.getPathExpressionMatcher(BranchNameKey.create(project, "master")))
         .value()
         .isInstanceOf(FindOwnersGlobMatcher.class);
   }
