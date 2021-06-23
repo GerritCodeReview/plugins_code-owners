@@ -640,7 +640,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         The supported code owner backends are listed at the
         [Backends](backends.html) page.\
         If not set, the global setting
-        [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`\
+        [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`
         is used.\
         \
         **NOTE:** Be careful with changing this parameter as it invalidates all
