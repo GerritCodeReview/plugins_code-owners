@@ -39,7 +39,6 @@ import com.google.gerrit.server.git.MergeUtil;
 import com.google.gerrit.server.patch.AutoMerger;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.DiffOperations;
-import com.google.gerrit.server.patch.PatchListNotAvailableException;
 import com.google.gerrit.server.patch.filediff.FileDiffOutput;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -63,13 +62,16 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
 /**
  * Class to get/compute the files that have been changed in a revision.
  *
- * <p>The {@link #getFromDiffCache(Project.NameKey, ObjectId)} method is retrieving the file diff
- * from the diff cache and has rename detection enabled.
+ * <p>The {@link #getFromDiffCache(Project.NameKey, ObjectId, MergeCommitStrategy)} method is
+ * retrieving the file diff from the diff cache and has rename detection enabled.
  *
- * <p>In contrast to this, for the {@code compute} methods the file diff is newly computed on each
- * access and rename detection is disabled (as it's too expensive to do it on each access).
+ * <p>In contrast to this, for the {@link #compute(Project.NameKey, ObjectId, MergeCommitStrategy)}
+ * method the file diff is newly computed on each access and rename detection is disabled (as it's
+ * too expensive to do it on each access).
  *
- * <p>If possible, using {@link #getFromDiffCache(Project.NameKey, ObjectId)} is preferred.
+ * <p>Which of these methods is invoked when calling any of {@code getOrCompute} methods is
+ * controlled by the {@link CodeOwnersExperimentFeaturesConstants#USE_DIFF_CACHE} experiment feature
+ * flag.
  *
  * <p>The {@link com.google.gerrit.server.patch.PatchListCache} is deprecated, and hence it not
  * being used here.
@@ -110,69 +112,79 @@ public class ChangedFiles {
    * Returns the changed files for the given revision.
    *
    * <p>By default the changed files are computed on access (see {@link #compute(Project.NameKey,
-   * ObjectId)}).
+   * ObjectId, MergeCommitStrategy)}).
    *
    * <p>Only if enabled via the {@link CodeOwnersExperimentFeaturesConstants#USE_DIFF_CACHE}
    * experiment feature flag the changed files are retrieved from the diff cache (see {@link
-   * #getFromDiffCache(Project.NameKey, ObjectId)}).
+   * #getFromDiffCache(Project.NameKey, ObjectId, MergeCommitStrategy)}).
    *
    * @param project the project
    * @param revision the revision for which the changed files should be computed
    * @return the files that have been changed in the given revision, sorted alphabetically by path
+   */
+  public ImmutableList<ChangedFile> getOrCompute(
+      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
+      throws IOException, DiffNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+    requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
+
+    if (experimentFeatures.isFeatureEnabled(CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE)) {
+      return getFromDiffCache(project, revision, mergeCommitStrategy);
+    }
+    return compute(project, revision, mergeCommitStrategy);
+  }
+
+  /**
+   * Returns the changed files for the given revision.
+   *
+   * <p>Uses the configured merge commit strategy.
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be computed
+   * @throws IOException thrown if the computation fails due to an I/O error
+   * @see #getOrCompute(Project.NameKey, ObjectId, MergeCommitStrategy)
    */
   public ImmutableList<ChangedFile> getOrCompute(Project.NameKey project, ObjectId revision)
-      throws IOException, PatchListNotAvailableException, DiffNotAvailableException {
-    if (experimentFeatures.isFeatureEnabled(CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE)) {
-      return getFromDiffCache(project, revision);
-    }
-    return compute(project, revision);
-  }
-
-  /**
-   * Computes the files that have been changed in the given revision.
-   *
-   * <p>The diff is computed against the parent commit.
-   *
-   * <p>Rename detection is disabled.
-   *
-   * @param revisionResource the revision resource for which the changed files should be computed
-   * @return the files that have been changed in the given revision, sorted alphabetically by path
-   * @throws IOException thrown if the computation fails due to an I/O error
-   * @throws PatchListNotAvailableException thrown if getting the patch list for a merge commit
-   *     against the auto merge failed
-   */
-  public ImmutableList<ChangedFile> compute(RevisionResource revisionResource)
-      throws IOException, PatchListNotAvailableException {
-    requireNonNull(revisionResource, "revisionResource");
-    return compute(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
-  }
-
-  /**
-   * Computes the files that have been changed in the given revision.
-   *
-   * <p>The diff is computed against the parent commit.
-   *
-   * <p>Rename detection is disabled.
-   *
-   * @param project the project
-   * @param revision the revision for which the changed files should be computed
-   * @return the files that have been changed in the given revision, sorted alphabetically by path
-   * @throws IOException thrown if the computation fails due to an I/O error
-   * @throws PatchListNotAvailableException thrown if getting the patch list for a merge commit
-   *     against the auto merge failed
-   */
-  public ImmutableList<ChangedFile> compute(Project.NameKey project, ObjectId revision)
-      throws IOException, PatchListNotAvailableException {
+      throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
 
-    return compute(
+    return getOrCompute(
         project,
         revision,
         codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
   }
 
-  public ImmutableList<ChangedFile> compute(
+  /**
+   * Returns the changed files for the given revision.
+   *
+   * <p>Uses the configured merge commit strategy.
+   *
+   * @param revisionResource the revision resource for which the changed files should be computed
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   * @throws IOException thrown if the computation fails due to an I/O error
+   * @see #getOrCompute(Project.NameKey, ObjectId, MergeCommitStrategy)
+   */
+  public ImmutableList<ChangedFile> getOrCompute(RevisionResource revisionResource)
+      throws IOException, DiffNotAvailableException {
+    requireNonNull(revisionResource, "revisionResource");
+    return getOrCompute(revisionResource.getProject(), revisionResource.getPatchSet().commitId());
+  }
+
+  /**
+   * Computed the changed files for the given revision.
+   *
+   * <p>The changed files are newly computed on each access. Rename detection is disabled (as it's
+   * too expensive to do it on each access).
+   *
+   * @param project the project
+   * @param revision the revision for which the changed files should be computed
+   * @param mergeCommitStrategy the merge commit strategy that should be used to compute the changed
+   *     files for merge commits
+   * @return the changed files
+   */
+  private ImmutableList<ChangedFile> compute(
       Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
       throws IOException {
     requireNonNull(project, "project");
@@ -258,13 +270,12 @@ public class ChangedFiles {
    * <p>Rename detection is enabled.
    */
   @VisibleForTesting
-  ImmutableList<ChangedFile> getFromDiffCache(Project.NameKey project, ObjectId revision)
+  ImmutableList<ChangedFile> getFromDiffCache(
+      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
       throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
-
-    MergeCommitStrategy mergeCommitStrategy =
-        codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy();
+    requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
 
     try (Timer0.Context ctx = codeOwnerMetrics.getChangedFiles.start()) {
       Map<String, FileDiffOutput> fileDiffOutputs;

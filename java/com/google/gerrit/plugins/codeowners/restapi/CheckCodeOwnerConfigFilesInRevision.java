@@ -29,7 +29,7 @@ import com.google.gerrit.plugins.codeowners.validation.CodeOwnerConfigValidator;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
-import com.google.gerrit.server.patch.PatchListNotAvailableException;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class CheckCodeOwnerConfigFilesInRevision
   @Override
   public Response<Map<String, List<ConsistencyProblemInfo>>> apply(
       RevisionResource revisionResource, CheckCodeOwnerConfigFilesInRevisionInput input)
-      throws IOException, PatchListNotAvailableException {
+      throws IOException, DiffNotAvailableException {
     logger.atFine().log(
         "checking code owner config files for revision %d of change %d (path = %s)",
         revisionResource.getPatchSet().number(),
@@ -95,7 +95,7 @@ public class CheckCodeOwnerConfigFilesInRevision
         RevWalk rw = new RevWalk(repository)) {
       RevCommit commit = rw.parseCommit(revisionResource.getPatchSet().commitId());
       return Response.ok(
-          changedFiles.compute(revisionResource.getProject(), commit).stream()
+          changedFiles.getOrCompute(revisionResource.getProject(), commit).stream()
               // filter out deletions (files without new path)
               .filter(changedFile -> changedFile.newPath().isPresent())
               // filter out non code owner config files
