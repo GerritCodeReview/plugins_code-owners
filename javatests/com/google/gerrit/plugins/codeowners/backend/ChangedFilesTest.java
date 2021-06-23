@@ -579,10 +579,13 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getCommit();
     assertThat(commit.getParents()).isEmpty();
 
-    IllegalStateException exception =
-        assertThrows(
-            IllegalStateException.class, () -> changedFiles.getFromDiffCache(project, commit));
-    assertThat(exception).hasMessageThat().isEqualTo("diff cache doesn't support initial commits");
+    ImmutableList<ChangedFile> changedFilesSet = changedFiles.getFromDiffCache(project, commit);
+    assertThat(changedFilesSet).hasSize(1);
+    ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().isEmpty();
+    assertThat(changedFile).isNoRename();
+    assertThat(changedFile).isNoDeletion();
   }
 
   @Test
