@@ -653,6 +653,17 @@ The code owner statuses are returned as a
             "reviewer <GERRIT_ACCOUNT_1000096> is a code owner"
           ]
         }
+      },
+      {
+        "change_type": "RENAMED",
+        "old_path_status" {
+          "path": "user-introduction.txt",
+          "status": "INSUFFICIENT_REVIEWERS"
+        },
+        "new_path_status" {
+          "path": "docs/user-intro.md",
+          "status": "APPROVED"
+        }
       }
     ],
     "accounts": {
@@ -1006,7 +1017,7 @@ file in a change.
 
 | Field Name    |          | Description |
 | ------------- | -------- | ----------- |
-| `change_type` | optional | The type of the file modification. Can be `ADDED`, `MODIFIED`, `DELETED`, `RENAMED` or `COPIED`. Not set if `MODIFIED`. Renamed files might appear as separate addition and deletion or with type=RENAMED. Copied files might appear as addition or with type=COPIED.
+| `change_type` | optional | The type of the file modification. Can be `ADDED`, `MODIFIED`, `DELETED`, `RENAMED` or `COPIED`. Not set if `MODIFIED`.
 | `old_path_status` | optional | The code owner status for the old path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Only set if `change_type` is `DELETED` or `RENAMED`.
 | `new_path_status` | optional | The code owner status for the new path as [PathCodeOwnerStatusInfo](#path-code-owner-status-info) entity. Not set if `change_type` is `DELETED`.
 
