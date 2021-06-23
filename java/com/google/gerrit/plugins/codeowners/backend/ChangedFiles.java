@@ -69,10 +69,7 @@ import org.eclipse.jgit.util.io.DisabledOutputStream;
  * <p>In contrast to this, for the {@code compute} methods the file diff is newly computed on each
  * access and rename detection is disabled (as it's too expensive to do it on each access).
  *
- * <p>If possible, using {@link #getFromDiffCache(Project.NameKey, ObjectId)} is preferred, however
- * {@link #getFromDiffCache(Project.NameKey, ObjectId)} cannot be used for newly created commits
- * that are only available from a specific {@link RevWalk} instance since the {@link RevWalk}
- * instance cannot be passed in.
+ * <p>If possible, using {@link #getFromDiffCache(Project.NameKey, ObjectId)} is preferred.
  *
  * <p>The {@link com.google.gerrit.server.patch.PatchListCache} is deprecated, and hence it not
  * being used here.
@@ -169,48 +166,34 @@ public class ChangedFiles {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
 
-    try (Repository repository = repoManager.openRepository(project);
-        RevWalk revWalk = new RevWalk(repository)) {
-      RevCommit revCommit = revWalk.parseCommit(revision);
-      return compute(project, repository.getConfig(), revWalk, revCommit);
-    }
-  }
-
-  public ImmutableList<ChangedFile> compute(
-      Project.NameKey project, Config repoConfig, RevWalk revWalk, RevCommit revCommit)
-      throws IOException {
     return compute(
         project,
-        repoConfig,
-        revWalk,
-        revCommit,
+        revision,
         codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy());
   }
 
   public ImmutableList<ChangedFile> compute(
-      Project.NameKey project,
-      Config repoConfig,
-      RevWalk revWalk,
-      RevCommit revCommit,
-      MergeCommitStrategy mergeCommitStrategy)
+      Project.NameKey project, ObjectId revision, MergeCommitStrategy mergeCommitStrategy)
       throws IOException {
     requireNonNull(project, "project");
-    requireNonNull(repoConfig, "repoConfig");
-    requireNonNull(revWalk, "revWalk");
-    requireNonNull(revCommit, "revCommit");
+    requireNonNull(revision, "revision");
     requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
 
     logger.atFine().log(
-        "computing changed files for revision %s in project %s", revCommit.name(), project);
+        "computing changed files for revision %s in project %s", revision.name(), project);
 
-    if (revCommit.getParentCount() > 1
-        && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
-      RevCommit autoMergeCommit = getAutoMergeCommit(project, revCommit);
-      return compute(repoConfig, revWalk, revCommit, autoMergeCommit);
+    try (Repository repo = repoManager.openRepository(project);
+        RevWalk revWalk = new RevWalk(repo)) {
+      RevCommit revCommit = revWalk.parseCommit(revision);
+      if (revCommit.getParentCount() > 1
+          && MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION.equals(mergeCommitStrategy)) {
+        RevCommit autoMergeCommit = getAutoMergeCommit(project, revCommit);
+        return compute(repo.getConfig(), revWalk, revCommit, autoMergeCommit);
+      }
+
+      RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
+      return compute(repo.getConfig(), revWalk, revCommit, baseCommit);
     }
-
-    RevCommit baseCommit = revCommit.getParentCount() > 0 ? revCommit.getParent(0) : null;
-    return compute(repoConfig, revWalk, revCommit, baseCommit);
   }
 
   private RevCommit getAutoMergeCommit(Project.NameKey project, RevCommit mergeCommit)

@@ -122,7 +122,6 @@ public class CheckCodeOwnerConfigFilesInRevision
                                   codeOwnerBackend,
                                   revisionResource.getChange().getDest(),
                                   changedFile,
-                                  rw,
                                   commit)
                               .map(
                                   commitValidationMessage ->

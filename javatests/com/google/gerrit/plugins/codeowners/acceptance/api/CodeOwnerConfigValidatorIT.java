@@ -2079,9 +2079,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .create();
 
     // Create a change that merges the other branch into master. The code owner config files in the
-    // created merge commit will be validated. This only works if CodeOwnerConfigValidator uses the
-    // same RevWalk instance that inserted the new merge commit. If it doesn't, the create change
-    // call below would fail with a MissingObjectException.
+    // created merge commit will be validated.
     ChangeInput changeInput = new ChangeInput();
     changeInput.project = project.get();
     changeInput.branch = "master";

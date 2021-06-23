@@ -24,7 +24,9 @@ import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.server.events.CommitReceivedEvent;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import org.eclipse.jgit.errors.ConfigInvalidException;
+import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,29 +54,33 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
         /* subsection= */ null,
         GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
         FallbackCodeOwners.ALL_USERS);
-    RevCommit commit =
-        testRepo
-            .commit()
-            .add("code-owners.config", cfg.toText())
-            .add("project.config", "INVALID")
-            .create();
-    CommitReceivedEvent receiveEvent = new CommitReceivedEvent();
-    receiveEvent.project =
-        projectCache.get(project).orElseThrow(illegalState(project)).getProject();
-    receiveEvent.refName = RefNames.REFS_CONFIG;
-    receiveEvent.commit = commit;
-    receiveEvent.revWalk = testRepo.getRevWalk();
-    receiveEvent.repoConfig = new Config();
-    CommitValidationException exception =
-        assertThrows(
-            CommitValidationException.class,
-            () -> codeOwnersPluginConfigValidator.onCommitReceived(receiveEvent));
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "failed to validate file code-owners.config for revision %s in ref %s of project %s",
-                commit.getName(), RefNames.REFS_CONFIG, project));
-    assertThat(exception).hasCauseThat().isInstanceOf(ConfigInvalidException.class);
+    try (TestRepository<Repository> testRepo =
+        new TestRepository<>(repoManager.openRepository(project))) {
+      RevCommit commit =
+          testRepo
+              .commit()
+              .add("code-owners.config", cfg.toText())
+              .add("project.config", "INVALID")
+              .create();
+
+      CommitReceivedEvent receiveEvent = new CommitReceivedEvent();
+      receiveEvent.project =
+          projectCache.get(project).orElseThrow(illegalState(project)).getProject();
+      receiveEvent.refName = RefNames.REFS_CONFIG;
+      receiveEvent.commit = commit;
+      receiveEvent.revWalk = testRepo.getRevWalk();
+      receiveEvent.repoConfig = new Config();
+      CommitValidationException exception =
+          assertThrows(
+              CommitValidationException.class,
+              () -> codeOwnersPluginConfigValidator.onCommitReceived(receiveEvent));
+      assertThat(exception)
+          .hasMessageThat()
+          .isEqualTo(
+              String.format(
+                  "failed to validate file code-owners.config for revision %s in ref %s of project %s",
+                  commit.getName(), RefNames.REFS_CONFIG, project));
+      assertThat(exception).hasCauseThat().isInstanceOf(ConfigInvalidException.class);
+    }
   }
 }

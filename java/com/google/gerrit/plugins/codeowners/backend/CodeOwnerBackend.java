@@ -22,7 +22,6 @@ import com.google.gerrit.server.IdentifiedUser;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * Interface for code owner backends.
@@ -52,25 +51,8 @@ public interface CodeOwnerBackend {
    *     {@code null} the code owner config is loaded from the current revision of the branch
    * @return code owner config for the given key if it exists, otherwise {@link Optional#empty()}
    */
-  default Optional<CodeOwnerConfig> getCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
-    return getCodeOwnerConfig(codeOwnerConfigKey, /* revWalk= */ null, revision);
-  }
-
-  /**
-   * Gets the code owner config for the given key if it exists.
-   *
-   * @param codeOwnerConfigKey the code owner config key for which the code owner config should be
-   *     returned
-   * @param revWalk optional rev walk, if given this rev walk is used to load the given revision
-   * @param revision the branch revision from which the code owner config should be loaded, if
-   *     {@code null} the code owner config is loaded from the current revision of the branch
-   * @return code owner config for the given key if it exists, otherwise {@link Optional#empty()}
-   */
   Optional<CodeOwnerConfig> getCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey,
-      @Nullable RevWalk revWalk,
-      @Nullable ObjectId revision);
+      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision);
 
   /**
    * Returns the absolute file path of the specified code owner config.
