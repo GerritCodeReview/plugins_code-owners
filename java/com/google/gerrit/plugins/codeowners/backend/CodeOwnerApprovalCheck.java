@@ -381,7 +381,8 @@ public class CodeOwnerApprovalCheck {
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
 
       return changedFiles
-          .getOrCompute(changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
+          .getFromDiffCache(
+              changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
           .stream()
           .map(
               changedFile ->
@@ -447,7 +448,8 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
       CodeOwnerResolver codeOwnerResolver =
           codeOwnerResolverProvider.get().enforceVisibility(false);
-      return changedFiles.getOrCompute(changeNotes.getProjectName(), patchSet.commitId()).stream()
+      return changedFiles.getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId())
+          .stream()
           .map(
               changedFile ->
                   getFileStatus(
@@ -487,7 +489,7 @@ public class CodeOwnerApprovalCheck {
       ChangeNotes changeNotes, PatchSet patchSet, String reason)
       throws IOException, DiffNotAvailableException {
     logger.atFine().log("all paths are approved (reason = %s)", reason);
-    return changedFiles.getOrCompute(changeNotes.getProjectName(), patchSet.commitId()).stream()
+    return changedFiles.getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId()).stream()
         .map(
             changedFile ->
                 FileCodeOwnerStatus.create(
