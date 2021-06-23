@@ -66,6 +66,7 @@ import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
 import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
@@ -409,7 +410,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
       ImmutableList<ChangedFile> modifiedCodeOwnerConfigFiles =
           changedFiles
-              .compute(branchNameKey.project(), revCommit, MergeCommitStrategy.ALL_CHANGED_FILES)
+              .getOrCompute(
+                  branchNameKey.project(), revCommit, MergeCommitStrategy.ALL_CHANGED_FILES)
               .stream()
               // filter out deletions (files without new path)
               .filter(changedFile -> changedFile.newPath().isPresent())
@@ -455,7 +457,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   "code-owners plugin configuration is invalid,"
                       + " cannot validate code owner config files",
                   ValidationMessage.Type.WARNING)));
-    } catch (IOException e) {
+    } catch (IOException | DiffNotAvailableException e) {
       String errorMessage =
           String.format(
               "failed to validate code owner config files in revision %s"
