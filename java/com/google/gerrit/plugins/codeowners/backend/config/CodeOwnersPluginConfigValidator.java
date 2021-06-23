@@ -127,7 +127,7 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
   private boolean isFileChanged(CommitReceivedEvent receiveEvent, String fileName)
       throws IOException, DiffNotAvailableException {
     return changedFiles
-        .getOrCompute(
+        .getFromDiffCache(
             receiveEvent.project.getNameKey(),
             receiveEvent.commit,
             MergeCommitStrategy.ALL_CHANGED_FILES)
