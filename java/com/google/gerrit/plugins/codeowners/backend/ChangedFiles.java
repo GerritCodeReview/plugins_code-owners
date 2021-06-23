@@ -256,16 +256,12 @@ public class ChangedFiles {
    * Gets the changed files from the diff cache.
    *
    * <p>Rename detection is enabled.
-   *
-   * @throws IllegalStateException thrown if invoked for an initial revision
    */
   @VisibleForTesting
   ImmutableList<ChangedFile> getFromDiffCache(Project.NameKey project, ObjectId revision)
       throws IOException, DiffNotAvailableException {
     requireNonNull(project, "project");
     requireNonNull(revision, "revision");
-
-    checkState(!isInitialCommit(project, revision), "diff cache doesn't support initial commits");
 
     MergeCommitStrategy mergeCommitStrategy =
         codeOwnersPluginConfiguration.getProjectConfig(project).getMergeCommitStrategy();
