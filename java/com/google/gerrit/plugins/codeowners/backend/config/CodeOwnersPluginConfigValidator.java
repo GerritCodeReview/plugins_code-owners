@@ -128,8 +128,6 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
     return changedFiles
         .compute(
             receiveEvent.project.getNameKey(),
-            receiveEvent.repoConfig,
-            receiveEvent.revWalk,
             receiveEvent.commit,
             MergeCommitStrategy.ALL_CHANGED_FILES)
         .stream()

@@ -27,7 +27,6 @@ import com.google.gerrit.server.IdentifiedUser;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Test;
 
 /** Tests for {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId}. */
@@ -51,9 +50,7 @@ public class CodeOwnerBackendIdTest extends AbstractCodeOwnersTest {
   private static class TestCodeOwnerBackend implements CodeOwnerBackend {
     @Override
     public Optional<CodeOwnerConfig> getCodeOwnerConfig(
-        CodeOwnerConfig.Key codeOwnerConfigKey,
-        @Nullable RevWalk revWalk,
-        @Nullable ObjectId revision) {
+        CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
       throw new UnsupportedOperationException("not implemented");
     }
 

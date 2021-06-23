@@ -36,7 +36,6 @@ import com.google.inject.util.Providers;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -125,7 +124,7 @@ public class CodeOwnerConfigValidatorErrorHandlingIT extends AbstractCodeOwnersI
 
     @Override
     public Optional<CodeOwnerConfig> getCodeOwnerConfig(
-        CodeOwnerConfig.Key codeOwnerConfigKey, RevWalk revWalk, ObjectId revision) {
+        CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision) {
       return Optional.empty();
     }
 
