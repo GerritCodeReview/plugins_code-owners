@@ -410,7 +410,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
       ImmutableList<ChangedFile> modifiedCodeOwnerConfigFiles =
           changedFiles
-              .getOrCompute(
+              .getFromDiffCache(
                   branchNameKey.project(), revCommit, MergeCommitStrategy.ALL_CHANGED_FILES)
               .stream()
               // filter out deletions (files without new path)
