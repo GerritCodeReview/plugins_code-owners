@@ -268,8 +268,6 @@ public class ChangedFiles {
    * Gets the changed files from the diff cache.
    *
    * <p>Rename detection is enabled.
-   *
-   * @throws IllegalStateException thrown if invoked for an initial revision
    */
   @VisibleForTesting
   ImmutableList<ChangedFile> getFromDiffCache(
