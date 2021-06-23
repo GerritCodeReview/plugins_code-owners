@@ -222,7 +222,6 @@ public class BackendConfig {
   }
 
   /** Gets the default code owner backend. */
-  @VisibleForTesting
   public CodeOwnerBackend getDefaultBackend() {
     return lookupBackend(defaultBackendName)
         .orElseThrow(
