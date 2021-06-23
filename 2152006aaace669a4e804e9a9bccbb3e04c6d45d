@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0214a902_3fef4399",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-23T13:48:47Z",
+      "side": 1,
+      "message": "The test failures are caused by the issue reproduced in https://gerrit-review.googlesource.com/c/gerrit/+/310162",
+      "revId": "2152006aaace669a4e804e9a9bccbb3e04c6d45d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
