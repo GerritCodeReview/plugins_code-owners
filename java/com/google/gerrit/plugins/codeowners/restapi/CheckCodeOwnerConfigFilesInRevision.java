@@ -95,7 +95,7 @@ public class CheckCodeOwnerConfigFilesInRevision
         RevWalk rw = new RevWalk(repository)) {
       RevCommit commit = rw.parseCommit(revisionResource.getPatchSet().commitId());
       return Response.ok(
-          changedFiles.getOrCompute(revisionResource.getProject(), commit).stream()
+          changedFiles.getFromDiffCache(revisionResource.getProject(), commit).stream()
               // filter out deletions (files without new path)
               .filter(changedFile -> changedFile.newPath().isPresent())
               // filter out non code owner config files

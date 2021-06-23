@@ -12,8 +12,6 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
   added as a reviewer.
 ** `post_type':
    Whether the change message was posted synchronously or asynchronously.
-* `compute_changed_files`:
-  Latency for computing changed files.
 * `compute_file_status`:
   Latency for computing the file status for one file.
 * `compute_file_statuses`:
@@ -27,8 +25,6 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
 * `extend_change_message_on_post_review`:
   Latency for extending the change message with the owned path when a code owner
   approval is applied.
-* `get_auto_merge`:
-  Latency for getting the auto merge commit of a merge commit.
 * `get_changed_files`:
   Latency for getting changed files from diff cache.
 * `prepare_file_status_computation`:
