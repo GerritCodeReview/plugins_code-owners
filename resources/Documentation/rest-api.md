@@ -851,6 +851,7 @@ Owner Config Files REST endpoint](#check-code-owner-config-files).
 | `validate_disabled_branches` | optional | Whether code owner config files in branches for which the code owners functionality is disabled should be validated too. By default unset, `false`.
 | `branches`                   | optional | List of branches for which code owner config files should be validated. The `refs/heads/` prefix may be omitted. By default unset, which means that code owner config files in all branches should be validated.
 | `path`                       | optional | Glob that limits the validation to code owner config files that have a path that matches this glob. By default unset, which means that all code owner config files should be validated.
+| `verbosity`                 | optional | Level that controls which code owner config file issues are returned. The following values are supported: `FATAL` - only fatal issues are returned, `ERROR` - only fatal and error issues are returned, `WARNING` - all issues (warning, error and fatal) are returned. If unset, `WARNING` is used.
 
 ---
 
