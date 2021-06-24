@@ -82,6 +82,7 @@ grants the code owner approval. Negative votes from other code owners do not
 block the submission (unless it's a veto vote which is configured independently
 of the `@PLUGIN@` plugin).
 
+### <a id="implicitApprovals">
 It's possible to [configure implicit
 approvals](config.html#codeOwnersEnableImplicitApprovals) for changes/patch-sets
 that are owned and uploaded by a code owner. In this case, if a code owner only

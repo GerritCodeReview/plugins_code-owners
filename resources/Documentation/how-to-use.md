@@ -57,24 +57,24 @@ owners approvals for the change and the status of code owner approvals per file.
 
 1. To add code owners for the files in your change, click on `SUGGEST OWNERS` or
    `ADD OWNERS` next to the `Code Owners` submit requirement.
-
+\
 ![suggest code owners from change page](./suggest-owners-from-change-page.png "Suggest code owners from change page")
 
 2. The Reply dialog opens with the code owners section expanded that shows the
-   code owners suggestions. Code owners are suggested by groups of files which
+   code owner suggestions. Code owners are suggested by groups of files which
    share the same code owners.
-
+\
 ![owner suggestions](./owner-suggestions.png "owner suggestions")
 
 3. Hover over a file group to view the list of files and their full file paths.
-
+\
 ![suggestion file groups](./suggestions-file-groups.png "suggestion file groups")
 
 4. Click on user chips to select a code owner for each file or file group.
    The selected code owner is automatically added to the reviewers section and
    automatically selected on other files / file groups that this code owner owns
    (if applicable).
-
+\
 ![add or modify reviewers from suggestions](./add-owner-to-reviewer.png "add owner to reviewer")
 
 5. Click `SEND` to notify the code owners you selected on your change.
@@ -87,17 +87,17 @@ There are several possible reasons for encountering a "Not found" text:
 
 ![no owners found](./no-owners-found.png "no owners found")
 
-- No code owners were defined for these files.
+- No code owners were defined for these files.\
   Reason: This could be due to missing `OWNERS` files that cover these files.
 
-- None of the code owners of these files are visible.
+- None of the code owners of these files are visible.\
   Reason: The code owners accounts are not visible to you.
 
-- None of the code owners can see the change.
+- None of the code owners can see the change.\
   Reason: The code owners have no read permission on the target branch of the
   change and hence cannot approve the change.
 
-- Code owners defined for these files are invalid.
+- Code owners defined for these files are invalid.\
   Reason: The emails cannot be resolved.
 
 For these cases, we advise you to:
@@ -119,8 +119,8 @@ are approved.
 
 ### <a id="failedToFetch">Failed to fetch file
 
-This status is informing you about a failed API call.
-**Refresh the page** to recover from this error.
+This status is informing you about a failed API call. **Refresh the page** to
+recover from this error. If the error persists, please [report it](#reportBug).
 
 ![failed to fetch](./failed-to-fetch-owners.png "Failed to fetch owners")
 
@@ -148,11 +148,11 @@ In the change page, you can get an overview of the code owner statuses.
 If applicable, the code owner status is displayed:
 
 - Next to the `Code Owners` submit requirement
-
+\
 ![submit requirement](./submit-requirement.png "Submit requirement")
 
 - Next to each file
-
+\
 ![owner status](./owner-status.png "Owner status")
 
 ### <a id="codeOwnersSubmitRequirement">`Code Owners` submit requirement
@@ -160,34 +160,28 @@ If applicable, the code owner status is displayed:
 The `Code Owners` submit requirement is providing an overview about the code
 owner status at a glance.
 
-- Missing a reviewer that can grant the code owner approval
-- Pending code owner approval
-- Approved by a code owner
-
-**Missing code owner approval**
-
-The change is missing a reviewer that can grant the code owner approval.
-
+- **Missing a reviewer that can grant the code owner approval:**\
+  The change is missing a reviewer that can grant the code owner approval.
+\
 ![missing owner](./owner-status-missing.png "Missing code owner")
 
-**Pending code owner approval**
-
-- The change is pending a vote from a reviewer that can grant the code owner
-  approval. Code owners have been added to the change but have not voted yet.
-
+- **Pending code owner approval:**
+    - The change is pending a vote from a reviewer that can grant the code owner
+      approval. Code owners have been added to the change but have not voted
+      yet.
+\
 ![pending owner's approval 1](./owner-status-pending-1.png "Pending owner's approval")
 
-- A code owner has voted -1 on the change. A -1 doesn't block a file from being
-  approved by another code owner. The status is pending because the change needs
-  another round of review.
-
+    - A code owner has voted -1 on the change. A -1 doesn't block a file from
+      being approved by another code owner. The status is pending because the
+      change needs another round of review.
+\
 ![pending owner's approval 2](./owner-status-pending-2.png "Pending owner's approval")
 
-**Approved by code owner**
-
-Each file in your change was approved by at least one code owner. It's not
-required that all code owners approve a change.
-
+- **Approved by a code owner:**\
+  Each file in your change was approved by at least one code owner. It's not
+  required that all code owner approve a change.
+\
 ![owner approved](./owner-status-approved.png "Code owner approved")
 
 ### <a id="perFilCodeOwnerStatuses">Per file code owner statuses
@@ -196,40 +190,39 @@ The `@PLUGIN@` plugin also shows the code owner statuses per file in the file
 list.
 
 For each file the code owner status is shown as an icon. You can **hover over
-the icon** to get additional information displayed a tooltip.
+the icon** to get additional information displayed as a tooltip.
 
-**Missing code owner approval**
-
-A code owner for this file is missing as a reviewer.
-
+- **Missing code owner approval:**\
+  A code owner for this file is missing as a reviewer.
+\
 ![missing owner tooltip](./tooltip-missing-owner.png "Tooltip for missing status")
 
-**Pending code owner approval**
-
-A code owner for this file has been added to the change but has not voted yet.
-
+- **Pending code owner approval:**\
+  A code owner for this file has been added to the change but has not voted yet.
+\
 ![pending owner tooltip](./tooltip-pending-owner.png "Tooltip for pending status")
 
-**Approved by code owner**
-
-A code owner of this file has approved the change. You can also see this icon if
-you are a code owner of the file as in this case the file is implicitly approved
-by you, or if the change has been
-[exempted](user-guide.html#codeOwnerExemptions) from requiring code owner
-approvals.
-
+- **Approved by code owner:**\
+  A code owner of this file has approved the change. You can also see this icon
+  if you are a code owner of the file and [implicit code owner
+  approvals](user-guide.html#implicitApprovals) are
+  enabled, as in this case the file is implicitly approved by you, or if the
+  change has been [exempted](user-guide.html#codeOwnerExemptions) from requiring
+  code owner approvals.
+\
 ![approved owner tooltip](./tooltip-approved-owner.png "Tooltip for approved status")
 
-**Failed to fetch status icon**
-
-This status is informing you about a failed API call.
-**Refresh the page** to recover from this error.
-
+- **Failed to fetch status icon:**\
+  This status is informing you about a failed API call. **Refresh the page** to
+  recover from this error. If the error persists, please [report it](#reportBug).
+\
 ![failed owner tooltip](./tooltip-failed-owner.png "Tooltip for failed status")
 
 ### <a id="noStatus">No label and no status
 
-When you own all the files in your change, the `@PLUGIN@` plugin will:
+When you own all the files in your change and [implicit code owner
+approvals](user-guide.html#implicitApprovals) are enabled, the `@PLUGIN@` plugin
+will:
 
 - Not show the `Code-Owners` submit requirement
 - Not show the file status
@@ -249,7 +242,7 @@ this label.
 ![code owner override label in reply dialog](./code-owner-override-label-in-reply.png "Vote on owners-override label")
 
 If a code owner override approval has been applied, the `Code Owners` submit
-requirement returns the status `Approved (Owners-Override)`.
+requirement shows the status `Approved (Owners-Override)`.
 
 ![code owner override label in change page](./code-owner-override-label-in-change.png "Owners-override label")
 
