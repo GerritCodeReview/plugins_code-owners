@@ -44,9 +44,9 @@ Code owner config files are stored in the source tree of the repository and
 define the [code owners](#codeOwners) for a path.
 
 In which files code owners are defined and which syntax is used depends on the
-configured [code owner backend](backends.html). Example: if the
-[find-owners](backend-find-owners.html) backend is used, code owners are defined
-in [OWNERS](backend-find-owners.html#syntax) files.
+configured [code owner backend](backends.html#codeOwnerConfigFiles). Example: if
+the [find-owners](backend-find-owners.html) backend is used, code owners are
+defined in [OWNERS](backend-find-owners.html#syntax) files.
 
 To create/edit code owner config files, clone the repository, edit the code
 owner config files locally and then push the new commit to the remote repository

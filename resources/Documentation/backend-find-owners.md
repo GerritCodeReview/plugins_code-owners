@@ -9,12 +9,18 @@ for a project or branch.
 ## <a id="codeOwnerConfiguration">Code owner configuration
 
 Code owners are defined in `OWNERS` files which are stored in the source tree.
+
 The code owners that are defined in an `OWNERS` file apply to the directory that
 contains the `OWNERS` file, and all its subdirectories (except if a subdirectory
 contains an `OWNERS` file that disables the inheritance of code owners from the
 parent directories via the [set noparent](#setNoparent) keyword).
 
-### <a id="defaultCodeOwnerConfiguration">
+**NOTE:** It is also possible to define code owners in `<prefix>_OWNERS` or
+`OWNERS_<extension>` files that can be imported into `OWNERS` files (further
+details about code owner config files are described
+[here](backends.html#codeOwnerConfigFiles)).
+
+### <a id="defaultCodeOwnerConfiguration">Default code owners
 Default code owners that apply to all branches can be defined in an `OWNERS`
 file in the root directory of the `refs/meta/config` branch. This `OWNERS` file
 is the parent of the root `OWNERS` files in all branches. This means if a root
@@ -25,11 +31,12 @@ from parent projects. If code owners should be defined for child projects this
 can be done by setting [global code
 owners](config.html#codeOwnersGlobalCodeOwner).
 
-### <a id="codeOwnerConfigFileExtension">
-**NOTE:** It's possible that projects have a [file extension for code owner
-config files](config.html#codeOwnersFileExtension) configured. In this case the
-code owners are defined in `OWNERS.<file-extension>` files and `OWNERS` files
-are ignored.
+### <a id="codeOwnerConfigFileExtension">Using a file extension for OWNERS files
+It's possible that projects have a [file
+extension](config.html#codeOwnersFileExtension) for code owner config files
+configured. In this case the code owners are defined in
+`OWNERS.<file-extension>` files and `OWNERS` files are ignored. Further details
+about this are described [here](backends.html#codeOwnerConfigFiles).
 
 ## <a id="cookbook">Cookbook
 
@@ -150,26 +157,9 @@ Many projects prefer to use the relative form for nearby `OWNERS` files.
 Absolute paths are recommended for distant paths, but also to make it easier to
 copy or integrate the line between multiple `OWNERS` files.
 
-The file that is referenced by the `file` keyword must be a code owner config
-file.
-
-By default, only `OWNERS` files and `OWNERS` files with an arbitratry prefix or
-extension (`<prefix>_OWNERS`, e.g. `BUILD_OWNERS` and `OWNERS_<extension>`, e.g.
-`OWNERS_BUILD`) are considered as code owner config files.
-
-If a [file extension](#codeOwnerConfigFileExtension) is configured, only
-`OWNERS.<file-extension>`, `<prefix>_OWNERS.<file-extension>` and
-`OWNERS_<extension>.<file-extension>` files where `<file-extension>` matches the
-configured file extension are considered as code owner config files. These files
-are used instead of the `OWNERS`, `<prefix>_OWNERS` and `OWNERS_<extension>`
-files, which are ignored if a file extension is configured.
-
-If arbitrary file extensions for code owner config files are
-[enabled](config.html#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
-`OWNERS.<file-extension>` files with any file extension are considered as code
-owner config files in addition to `OWNERS`, `<prefix>_OWNERS` and
-`OWNERS_<extension>` files (using this configuration option is not compatible
-with configuring a [file extension](#codeOwnerConfigFileExtension)).
+The file that is referenced by the `file` keyword must be a [code owner config
+file](backends.html#codeOwnerConfigFiles). It's not possible to import arbitrary
+files.
 
 It's also possible to reference code owner config files from other projects or
 branches (only within the same host):
