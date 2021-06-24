@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3bcd644d_b837fb2e",
+        "filename": "resources/Documentation/alternative-plugins.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1031452
+      },
+      "writtenOn": "2021-06-24T23:02:30Z",
+      "side": 1,
+      "message": "I am not about this path. Advice?",
+      "range": {
+        "startLine": 115,
+        "startChar": 29,
+        "endLine": 115,
+        "endChar": 38
+      },
+      "revId": "30a6378e5bc01b047f815e8f2fffaa89d195afe2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
