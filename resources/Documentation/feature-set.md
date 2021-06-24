@@ -1,6 +1,6 @@
 # Feature Set
 
-The @PLUGIN@ plugin supports the following features:
+The `@PLUGIN@` plugin supports the following features:
 
 * Support for defining code owners:
     * Code owners can be specified in `OWNERS` files that can appear in any

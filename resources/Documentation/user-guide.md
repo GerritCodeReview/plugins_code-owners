@@ -79,8 +79,9 @@ appropriate for the system and is done correctly.
 
 The code owner check for a file is satisfied as soon as one of its code owners
 grants the code owner approval. Negative votes from other code owners do not
-block the submission (unless it's a veto vote which is configured independently
-of the `@PLUGIN@` plugin).
+block the submission (unless it's a veto vote which is
+[configured](/Documentation/config-labels.html#label_function) independently of
+the `@PLUGIN@` plugin).
 
 ### <a id="implicitApprovals">
 It's possible to [configure implicit
@@ -95,7 +96,7 @@ change has implicit approvals from the code owner, since the code owner is the
 change owner and uploader).
 
 **NOTE:** Implicit approvals are applied on changes that are owned by a code
-owner, but only if the current patch set was uploader by the change owner
+owner, but only if the current patch set was uploaded by the change owner
 (change owner == last patch set uploader).
 
 For files that are [renamed/moved](#renames) Gerrit requires a code owner
@@ -189,15 +190,20 @@ setting),
   [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
 * do not have read access to the destination branch of the change
 * are service users (members of the `Service Users` group)
+* code owners that are annotated with
+  [LAST_RESORT_SUGGESTION](backend-find-owners.html#lastResortSuggestion),
+  except if dropping these code owners would make the suggestion result empty
 
 The suggested code owners are sorted by score, so that the best suitable code
-owners appear first. The following criteria are taken into account for computing
-the score:
+owners appear first. To compute the score multiple [scoring
+factors](rest-api.html#scoringFactors) are taken into account, e.g. the distance
+of the [code owner config file](#codeOwnerConfigFiles) that defines the code
+owner to the path for which code owners are listed (the lower the distance the
+better the code owner).
 
-* The distance of the [code owner config file](#codeOwnerConfigFiles) that
-  defines the code owner from the owned path.\
-  The smaller the distance the better we consider the code owner as
-  reviewer/approver for the path.
+**NOTE:** Fallback code owners, if
+[configured](config.html#pluginCodeOwnersFallbackCodeOwners), are not included
+in the suggestion.
 
 ## <a id="noCodeOwnersDefined">How to submit changes with files that have no code owners?
 
@@ -263,7 +269,7 @@ multiple times, but for different branches.
 The logic that checks whether a change has sufficient [code owner
 approvals](#codeOwnerApproval) to be submitted is implemented in the code owners
 submit rule. If the code owners submit rule finds that code owner approvals are
-missing the submission of the change is blocked. In this case it's possible to
+missing, the submission of the change is blocked. In this case it's possible to
 use a [code owner override](#codeOwnerOverride) to unblock the change
 submission.
 
