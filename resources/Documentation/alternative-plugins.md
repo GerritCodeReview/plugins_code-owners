@@ -13,13 +13,13 @@ Similar functionality is provided by the following plugins:
 
 ### <a id="findOwnersCompatibility">Compatibility with the code-owners plugin
 
-The [find-owners](backend-find-owners.html) backend in the`code-owners` plugin
+The [find-owners](backend-find-owners.md) backend in the`code-owners` plugin
 supports the same syntax for `OWNERS` files as the `find-owners` plugin.  This
 means that existing `OWNERS` files continue to work with the `code-owners`
 plugin and no migration for the `OWNERS` files is required.
 
 **IMPORTANT:** When migrating to the `code-owners` plugin, make sure that it is
-correctly configured (see [setup guide](setup-guide.html)).
+correctly configured (see [setup guide](setup-guide.md)).
 
 **NOTE:** The REST API of the `code-owners` plugin is completely different than
 the REST API of the `find-owners` plugin. This means callers of the REST API
@@ -77,7 +77,7 @@ with the `code-owners` plugin. This means any migration from the `owners` plugin
 to the `code-owners` plugin (and vice versa) requires migrating all existing
 `OWNERS` files.
 
-**NOTE:** It would be feasible to implement a new [backend](backends.html) in
+**NOTE:** It would be feasible to implement a new [backend](backends.md) in
 the `code-owners` plugin that supports the syntax of the `owners` plugin
 (contributions are welcome).
 
@@ -110,6 +110,6 @@ supported by the `code-owners` plugin.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)

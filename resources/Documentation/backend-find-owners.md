@@ -3,7 +3,7 @@
 The `find-owners` backend supports the syntax of the
 [find-owners](https://gerrit-review.googlesource.com/admin/repos/plugins/find-owners)
 plugin (with some minor extensions). It is the backend that is used by default
-if no other backend is explicitly [configured](config.html#codeOwnersBackend)
+if no other backend is explicitly [configured](config.md#codeOwnersBackend)
 for a project or branch.
 
 ## <a id="codeOwnerConfiguration">Code owner configuration
@@ -23,18 +23,18 @@ directories via the [set noparent](#setNoparent) keyword the `OWNERS` file in
 the `refs/meta/config` branch is ignored. Default code owners are not inherited
 from parent projects. If code owners should be defined for child projects this
 can be done by setting [global code
-owners](config.html#codeOwnersGlobalCodeOwner).
+owners](config.md#codeOwnersGlobalCodeOwner).
 
 ### <a id="codeOwnerConfigFileExtension">
 **NOTE:** It's possible that projects have a [file extension for code owner
-config files](config.html#codeOwnersFileExtension) configured. In this case the
+config files](config.md#codeOwnersFileExtension) configured. In this case the
 code owners are defined in `OWNERS.<file-extension>` files and `OWNERS` files
 are ignored.
 
 ## <a id="cookbook">Cookbook
 
 A cookbook with examples of `OWNERS` files for various use cases can be found
-[here](backend-find-owners-cookbook.html).
+[here](backend-find-owners-cookbook.md).
 
 ## <a id="syntax">Syntax
 
@@ -96,14 +96,14 @@ means:
 * the email is not ambiguous (the email belongs to exactly one active Gerrit
   account)
 * the email has an allowed email domain (see [allowed email domain
-  configuration](config.html#pluginCodeOwnersAllowedEmailDomain)).
+  configuration](config.md#pluginCodeOwnersAllowedEmailDomain)).
 
 ##### <a id="nonResolvableCodeOwnersAreIgnored">
 **NOTE:** Non-resolvable code owners in submitted code owner configuration files
 are ignored.
 
 **NOTE:** In Gerrit the visibility of users is controlled via the
-[accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
+[accounts.visibility](../../../Documentation/config-gerrit.md#accounts.visibility)
 configuration. This means not every user may be able to see every other user.
 For code owners this means:
 
@@ -116,12 +116,12 @@ For code owners this means:
 * code owners which are referenced by secondary email cannot be resolved for
   most users, this is because secondary emails of users are only visible to
   users that have the
-  [Modify Account](../../../Documentation/access-control.html#capability_modifyAccount)
+  [Modify Account](../../../Documentation/access-control.md#capability_modifyAccount)
   global capability assigned in Gerrit, which is normally only granted to
   administrators
 
 **NOTE:** Via configuration it is possible to
-[limit the email domains](config.html#pluginCodeOwnersAllowedEmailDomain) that
+[limit the email domains](config.md#pluginCodeOwnersAllowedEmailDomain) that
 are allowed for code owners. User emails that have an email domain that is not
 allowed cannot be added as code owner, and are ignored if they exist.
 
@@ -165,7 +165,7 @@ are used instead of the `OWNERS`, `<prefix>_OWNERS` and `OWNERS_<extension>`
 files, which are ignored if a file extension is configured.
 
 If arbitrary file extensions for code owner config files are
-[enabled](config.html#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+[enabled](config.md#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
 `OWNERS.<file-extension>` files with any file extension are considered as code
 owner config files in addition to `OWNERS`, `<prefix>_OWNERS` and
 `OWNERS_<extension>` files (using this configuration option is not compatible
@@ -241,7 +241,7 @@ files in the directory:
 ```
 \
 The access grant applies only to the files that are matched by the given path
-expressions. The path expressions are [globs](path-expressions.html#globs) and
+expressions. The path expressions are [globs](path-expressions.md#globs) and
 can match absolute paths or paths relative to the directory of the `OWNERS`
 file, but they can only match files in the directory of the `OWNERS` file and
 its subdirectories. Multiple path expressions can be specified as a
@@ -327,7 +327,7 @@ The following annotations are supported:
 #### <a id="lastResortSuggestion">
 * `LAST_RESORT_SUGGESTION`:
   Code owners with this annotation are omitted when [suggesting code
-  owners](rest-api.html#list-code-owners-for-path-in-change), except if dropping
+  owners](rest-api.md#list-code-owners-for-path-in-change), except if dropping
   these code owners would make the suggestion result empty. If code ownership is
   assigned to the same code owner through multiple relevant access grants in the
   same code owner config file or in other relevant code owner config files the
@@ -354,6 +354,6 @@ tooling that uses comments to store additional information in `OWNERS` files.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)

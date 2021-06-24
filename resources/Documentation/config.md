@@ -9,11 +9,11 @@ The @PLUGIN@ plugin can be configured on host and on project-level:
   of the projects
 
 This page describes all available configuration parameters. For configuration
-recommendations please consult the [config guide](config-guide.html).
+recommendations please consult the [config guide](config-guide.md).
 
 **NOTE**: This is the configuration that controls the behavior of the @PLUGIN@
 plugin. Code owners (except global code owners) are not defined here, but in
-[code owner config files](user-guide.html#codeOwnerConfigFiles) (e.g. `OWNERS`
+[code owner config files](user-guide.md#codeOwnerConfigFiles) (e.g. `OWNERS`
 files) that are stored in the source tree of the repository.
 
 ## <a id="inheritance">Inheritance</a>
@@ -102,7 +102,7 @@ result of this you may not observe the effects of the config change on all
 changes immediately, but only when they have been reindexed (which happens on
 any modification of the changes). If needed, you may force the reindexing of a
 change by calling the [Index
-Changes](../../../Documentation/rest-api-changes.html#index-change) REST
+Changes](../../../Documentation/rest-api-changes.md#index-change) REST
 endpoint or by touching the change (e.g. by adding a comment).
 
 # <a id="globalConfiguration">Global configuration in gerrit.config</a>
@@ -138,11 +138,11 @@ endpoint or by touching the change (e.g. by adding a comment).
         [codeOwners.backend](#codeOwnersBackend) in
         `@PLUGIN@.config`.\
         The supported code owner backends are listed at the
-        [Backends](backends.html) page.\
+        [Backends](backends.md) page.\
         By default `find-owners`.\
         \
         **NOTE:** Be careful with changing this parameter as it invalidates all
-        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        existing [code owner config files](user-guide.md#codeOwnerConfigFiles).
         E.g. by changing the backend code owner configurations may now be read
         from different files, or even worse from the same files but with another
         syntax so that the existing code owner config files can no longer be
@@ -221,7 +221,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         Implicit code-owner approvals of change owners are enabled, but only if
         the configured [required label](#pluginCodeOwnersRequiredApproval) is
         not configured to [ignore self
-        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        approvals](../../../Documentation/config-labels.md#label_ignoreSelfApproval)
         from the uploader.\
         \
         `FORCED`:\
@@ -277,7 +277,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 :       Whether pure revert changes are exempted from needing code owner
         approvals for submit.\
         Only works for pure reverts which have been created through the Gerrit
-        [REST API](../../../Documentation/rest-api-change.html#revert-change)
+        [REST API](../../../Documentation/rest-api-change.md#revert-change)
         (but not for pure reverts which were done locally and then pushed to
         Gerrit).\
         Can be overridden per project by setting
@@ -417,11 +417,11 @@ endpoint or by touching the change (e.g. by adding a comment).
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
         If the definition of the configured label has [copy
-        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        rules](../../../Documentation/config-labels.md#label_copyAnyScore)
         enabled so that votes are sticky across patch sets, also the code owner
         approvals will be sticky.\
         If the definition of the configured label [ignores self
-        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        approvals](../../../Documentation/config-labels.md#label_ignoreSelfApproval)
         from the uploader, any vote from the uploader is ignored for the code
         owners check.\
         Can be overridden per project by setting
@@ -442,11 +442,11 @@ endpoint or by touching the change (e.g. by adding a comment).
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
         If the definition of the configured labels has [copy
-        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        rules](../../../Documentation/config-labels.md#label_copyAnyScore)
         enabled so that votes are sticky across patch sets, also the code owner
         overrides will be sticky.\
         If the definition of a configured label [ignores self
-        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        approvals](../../../Documentation/config-labels.md#label_ignoreSelfApproval)
         from the uploader, any override vote from the uploader on that label is
         ignored for the code owners check.\
         The configured value list can be extended on project-level by setting
@@ -619,13 +619,13 @@ endpoint or by touching the change (e.g. by adding a comment).
         Can be overridden per branch by setting
         [codeOwners.\<branch\>.backend](#codeOwnersBranchBackend).\
         The supported code owner backends are listed at the
-        [Backends](backends.html) page.\
+        [Backends](backends.md) page.\
         If not set, the global setting
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`\
         is used.\
         \
         **NOTE:** Be careful with changing this parameter as it invalidates all
-        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        existing [code owner config files](user-guide.md#codeOwnerConfigFiles).
         E.g. by changing the backend code owner configurations may now be read
         from different files, or even worse from the same files but with another
         syntax so that the existing code owner config files can no longer be
@@ -639,12 +639,12 @@ endpoint or by touching the change (e.g. by adding a comment).
         [codeOwners.backend](#codeOwnersBackend) and the
         `codeOwners.<branch>.backend` setting from parent projects.\
         The supported code owner backends are listed at the
-        [Backends](backends.html) page.\
+        [Backends](backends.md) page.\
         If not set, the project level configuration
         [codeOwners.backend](#codeOwnersBackend) is used.\
         \
         **NOTE:** Be careful with changing this parameter as it invalidates all
-        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        existing [code owner config files](user-guide.md#codeOwnerConfigFiles).
         E.g. by changing the backend code owner configurations may now be read
         from different files, or even worse from the same files but with another
         syntax so that the existing code owner config files can no longer be
@@ -789,7 +789,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 :       Whether pure revert changes are exempted from needing code owner
         approvals for submit.\
         Only works for pure reverts which have been created through the Gerrit
-        [REST API](../../../Documentation/rest-api-change.html#revert-change)
+        [REST API](../../../Documentation/rest-api-change.md#revert-change)
         (but not for pure reverts which were done locally and then pushed to
         Gerrit).\
         Overrides the global setting
@@ -945,11 +945,11 @@ endpoint or by touching the change (e.g. by adding a comment).
         applies (all child projects that have code owners enabled and for which
         this setting is not overridden).\
         If the definition of the configured label has [copy
-        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        rules](../../../Documentation/config-labels.md#label_copyAnyScore)
         enabled so that votes are sticky across patch sets, also the code owner
         approvals will be sticky.\
         If the definition of the configured label [ignores self
-        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        approvals](../../../Documentation/config-labels.md#label_ignoreSelfApproval)
         from the uploader, any vote from the uploader is ignored for the code
         owners check.\
         Overrides the global setting
@@ -973,11 +973,11 @@ endpoint or by touching the change (e.g. by adding a comment).
         applies (all projects that have code owners enabled and for which this
         setting is not overridden).\
         If the definition of the configured labels has [copy
-        rules](../../../Documentation/config-labels.html#label_copyAnyScore)
+        rules](../../../Documentation/config-labels.md#label_copyAnyScore)
         enabled so that votes are sticky across patch sets, also the code owner
         overrides will be sticky.\
         If the definition of a configured label [ignores self
-        approvals](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+        approvals](../../../Documentation/config-labels.md#label_ignoreSelfApproval)
         from the uploader, any override vote from the uploader on that label is
         ignored for the code owners check.\
         Extends the global setting
@@ -1045,7 +1045,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)
 

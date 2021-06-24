@@ -1,26 +1,26 @@
 ### User Guides
 
-* [Intro](how-to-use.html)
-* [Feature Set](feature-set.html)
-* [User Guide](user-guide.html)
-* [Syntax for OWNERS files](backend-find-owners.html#syntax)
-* [Cookbook for OWNERS files](backend-find-owners-cookbook.html)
-* [Path Expressions](path-expressions.html)
-* [REST API](rest-api.html)
-* [Validation](validation.html)
+* [Intro](how-to-use.md)
+* [Feature Set](feature-set.md)
+* [User Guide](user-guide.md)
+* [Syntax for OWNERS files](backend-find-owners.md#syntax)
+* [Cookbook for OWNERS files](backend-find-owners-cookbook.md)
+* [Path Expressions](path-expressions.md)
+* [REST API](rest-api.md)
+* [Validation](validation.md)
 
 ### Admin Guides
 
-* [Setup Guide](setup-guide.html)
-* [Config Guide](config-guide.html)
-* [Config FAQs](config-faqs.html)
-* [Configuration](config.html)
-* [Backends](backends.html)
-* [Metrics](metrics.html)
-* [Disclaimer](disclaimer.html)
-* [Alternative Plugins](alternative-plugins.html)
+* [Setup Guide](setup-guide.md)
+* [Config Guide](config-guide.md)
+* [Config FAQs](config-faqs.md)
+* [Configuration](config.md)
+* [Backends](backends.md)
+* [Metrics](metrics.md)
+* [Disclaimer](disclaimer.md)
+* [Alternative Plugins](alternative-plugins.md)
 
 ### Contributor Guides
 
-* [Build](build.html)
+* [Build](build.md)
 

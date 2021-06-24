@@ -2,21 +2,21 @@
 
 The `@PLUGIN@` plugin has many configuration parameters that can be used to
 customize its behavior. These configuration parameters are described in the
-[config](config.html) documentation. This guide gives some additional
+[config](config.md) documentation. This guide gives some additional
 recommendations for the configuration, but doesn't cover all configuration
 parameters.
 
-Please also check out the [config FAQs](config-faqs.html).
+Please also check out the [config FAQs](config-faqs.md).
 
 ## <a id="requiredConfiguration">Required Configuration
 
 **Before** installing/enabling the plugin, or enabling the code owners
 functionality for further projects, it is important to do some basic
-configuration. This includes choosing a [code owner backend](backends.html),
+configuration. This includes choosing a [code owner backend](backends.md),
 defining the approvals that count as code owner approval and as code owner
 override, opting-out projects or branches and configuring the allowed email
 domain. All this configuration is covered in detail by the [setup
-guide](setup-guide.html).
+guide](setup-guide.md).
 
 ## <a id="workflow">Workflow Configuration
 
@@ -25,14 +25,14 @@ Some of the configuration parameters have an effect on the user workflow.
 ### <a id="stickyApprovals">Make code owner approvals / overrides sticky
 
 Code owner approvals and code owner overrides can be made sticky by enabling
-[copy rules](../../../Documentation/config-labels.html#label_copyAnyScore) in
+[copy rules](../../../Documentation/config-labels.md#label_copyAnyScore) in
 the definitions of the labels that are configured as [required
-approval](config.html#pluginCodeOwnersRequiredApproval) and [override
-approval](config.html#pluginCodeOwnersOverrideApproval).
+approval](config.md#pluginCodeOwnersRequiredApproval) and [override
+approval](config.md#pluginCodeOwnersOverrideApproval).
 
 ### <a id="implicitApprovals">Implicit code owner approvals
 
-It's possible to [enable implicit approvals](config.html#pluginCodeOwnersEnableImplicitApprovals)
+It's possible to [enable implicit approvals](config.md#pluginCodeOwnersEnableImplicitApprovals)
 of code owners on their own changes. If enabled, changes of code owners are
 automatically code owner approved, but only if the last patch set was uploaded
 by the change owner (change owner == last patch set uploader). This implict code
@@ -42,7 +42,7 @@ approval from other code owners is required for submitting the change.
 
 If implicit approvals are enabled, paths can be exempted from requiring code
 owner approvals by assigning the code ownership to [all
-users](backend-find-owners.html#allUsers), as then any modification to the path
+users](backend-find-owners.md#allUsers), as then any modification to the path
 is always implicitly approved by the change owner.
 
 **NOTE:** If implicit approvals are disabled, users can still self-approve their
@@ -68,7 +68,7 @@ the merge commit is compared:
 Which files a users sees on the change screen depends on their base selection.
 
 For the `@PLUGIN@` plugin it can be configured [which files of a merge commit
-require code owner approvals](config.html#pluginCodeOwnersMergeCommitStrategy),
+require code owner approvals](config.md#pluginCodeOwnersMergeCommitStrategy),
 all files that differ with the destination branch (case 1) or only files that
 differ with the Auto-Merge (case 2). If case 1 is configured, all file diffs
 that have been approved in one branch must be re-approved when they are merged
@@ -87,10 +87,10 @@ be used.
 
 1. Folder and file code owners:
    These are the code owners that are defined in the [code owner config
-   files](user-guide.html#codeOwnerConfigFiles) that are stored in the source
+   files](user-guide.md#codeOwnerConfigFiles) that are stored in the source
    tree of the repository. They can either apply to a whole
-   [folder](backend-find-owners.html#userEmails) (folder code owners) or to
-   [matched files](backend-find-owners.html#perFile) (file code owners).\
+   [folder](backend-find-owners.md#userEmails) (folder code owners) or to
+   [matched files](backend-find-owners.md#perFile) (file code owners).\
    This is the normal way to define code owners. This code owner definition is
    discoverable since it is stored in human-readable code owner config file in
    the source tree of the repository.\
@@ -106,7 +106,7 @@ be used.
    approve changes if no other, more specific, code owner is available.\
    Root code owners can differ from branch to branch.
 3. Default code owners:
-   [Default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration)
+   [Default code owners](backend-find-owners.md#defaultCodeOwnerConfiguration)
    are stored in the code owner config file (e.g. the `OWNERS` file) in the
    `refs/meta/config` branch and apply for all branches (unless inheritance is
    ignored).\
@@ -119,21 +119,21 @@ be used.
    discoverable since it is stored in the `refs/meta/config` branch, but default
    code owners are suggested to users the same way as other code owners.
 4. Global code owners:
-   [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner) are defined
+   [Global code owners](config.md#pluginCodeOwnersGlobalCodeOwner) are defined
    in the plugin configuration and apply to all projects or all child projects.\
    They are intended to configure bots as code owners that need to operate on
    all or multiple projects. Alternatively bots may be configured as exempted
    users (see further below).\
    Global code owners still apply if parent code owners are ignored.
 5. Fallback code owners:
-   [Fallback code owners](config.html#pluginCodeOwnersFallbackCodeOwners) is a
+   [Fallback code owners](config.md#pluginCodeOwnersFallbackCodeOwners) is a
    policy configuration that controls who should own paths that have no code
    owners defined.\
    Fallback code owners are not included in the code owner suggestion.\
    Configuring all users as fallback code owners may allow bypassing the code
    owners check (see [security pitfalls](#securityFallbackCodeOwners) below).
 6. Exempted users:
-   [Exempted users](config.html#pluginCodeOwnersExemptedUser) are exempted from
+   [Exempted users](config.md#pluginCodeOwnersExemptedUser) are exempted from
    requiring code owner approvals.\
    If a user is exempted from requiring code owner approvals changes that are
    uploaded by this user are automatically code-owner approved.\
@@ -141,7 +141,7 @@ be used.
    on all or multiple projects that should not require code owner approvals.
 
 In addition users can be allowed to [override the code owner submit
-check](user-guide.html#codeOwnerOverride). This permission is normally granted
+check](user-guide.md#codeOwnerOverride). This permission is normally granted
 to users that that need to react to emergencies and need to submit changes
 quickly (e.g sheriffs) or users that need to make large-scale changes across
 many repositories.
@@ -149,7 +149,7 @@ many repositories.
 ## <a id="externalValidationOfCodeOwnerConfigs">External validation of code owner config files
 
 By default, when code owner config files are modified they are
-[validated](validation.html) on push. If any issues in the modified code owner
+[validated](validation.md) on push. If any issues in the modified code owner
 config files are found, the push is rejected. This is important since
 non-parsable code owner config files make submissions fail which likely blocks
 the development teams, and hence needs to be prevented.
@@ -160,10 +160,10 @@ succeeds and that issues with modified code owner config files are then detected
 and reported by a CI bot. The CI bot would then post its findings as checks on
 the open change which prevent the change submission. To enable this the
 validation of code owner config files on push can be
-[disabled](config.html#pluginCodeOwnersEnableValidationOnCommitReceived), but
+[disabled](config.md#pluginCodeOwnersEnableValidationOnCommitReceived), but
 then the host admins should setup a bot to do the validation of modified code
 owner config files externally. For this the bot could use the [Check Code Owner
-Config Files In Revision](rest-api.html#check-code-owner-config-files-in-revision)
+Config Files In Revision](rest-api.md#check-code-owner-config-files-in-revision)
 REST endpoint.
 
 ## <a id="differentCodeOwnerConfigurations">Use different code owner configurations in a fork
@@ -173,7 +173,7 @@ the code owner configuration of the original repository shouldn't apply for the
 fork (the fork should have different code owners, and if the fork is stored on
 another Gerrit host it's also likely that the original code owners cannot be
 resolved on that host). In this case it is possible to [configure a file
-extension](config.html#pluginCodeOwnersFileExtension) for code owner config
+extension](config.md#pluginCodeOwnersFileExtension) for code owner config
 files in the fork so that its code owner config files do not clash with the
 original code owner config files.
 
@@ -243,7 +243,7 @@ any code owners defined, submitting changes to the path is only possible with
 2. an approval from a fallback code owners (only if enabled)
 
 [Configuring all users as fallback code
-owners](config.html#pluginCodeOwnersFallbackCodeOwners) is problematic, as it
+owners](config.md#pluginCodeOwnersFallbackCodeOwners) is problematic, as it
 can happen easily that code owner config files are misconfigured so that some
 paths are accidentally not covered by code owners. In this case, the affected
 paths would suddenly be open to all users, which may not be wanted. This is why
@@ -251,6 +251,6 @@ configuring all users as fallback code owners is not recommended.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)

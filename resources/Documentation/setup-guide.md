@@ -24,28 +24,28 @@ The following configuration steps are recommended:
 11. [Disable/uninstall the find-owners plugin](#disableFindOwnersPlugin)
 
 Recommendations about further configuration parameters can be found in the
-[config guide](config-guide.html).
+[config guide](config-guide.md).
 
-Please also heck out the [config FAQs](config-faqs.html).
+Please also heck out the [config FAQs](config-faqs.md).
 
 ### <a id="configureCodeOwnersBackend">1. Configure the code owners backend that should be used
 
-The `code-owners` plugin supports multiple [code owner backends](backends.html)
+The `code-owners` plugin supports multiple [code owner backends](backends.md)
 and it must be configured which one should be used. The backend controls which
 files represent code owner configs and which syntax they use. The backends may
 also differ in the feature-set that they support.
 
-By default, the [find-owners](backend-find-owners.html) backend is used, which
+By default, the [find-owners](backend-find-owners.md) backend is used, which
 reads code owner configs from `OWNERS` files and uses the same
-[syntax](backend-find-owners.html#syntax) that was previously supported by the
+[syntax](backend-find-owners.md#syntax) that was previously supported by the
 deprecated `find-owners` plugin.
 
 To configure a different backend globally, set
-[plugin.code-owners.backend](config.html#pluginCodeOwnersBackend) in
+[plugin.code-owners.backend](config.md#pluginCodeOwnersBackend) in
 `gerrit.config` (requires to be a host admin).
 
 Example global configuration in `gerrit.config` that configures the
-[proto](backend-proto.html) backend:
+[proto](backend-proto.md) backend:
 
 ```
   [plugin "code-owners"]
@@ -53,12 +53,12 @@ Example global configuration in `gerrit.config` that configures the
 ```
 \
 To configure a backend on project-level
-[codeOwners.backend](config.html#codeOwnersBackend) in the
-[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+[codeOwners.backend](config.md#codeOwnersBackend) in the
+[code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch can be set (requires to be a project owner).
 
 Example per-project configuration in `code-owners.config` that configures the
-[proto](backend-proto.html) backend:
+[proto](backend-proto.md) backend:
 
 ```
   [codeOwners]
@@ -66,12 +66,12 @@ Example per-project configuration in `code-owners.config` that configures the
 ```
 \
 It's also possible to configure backends per branch by setting
-[codeOwners.\<branch\>.backend](config.html#codeOwnersBranchBackend) in the
-[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+[codeOwners.\<branch\>.backend](config.md#codeOwnersBranchBackend) in the
+[code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch (requires to be a project owner).
 
 Example per-branch configuration in `code-owners.config` that configures the
-[proto](backend-proto.html) backend:
+[proto](backend-proto.md) backend:
 
 ```
   [codeOwners "refs/heads/experimental"]
@@ -94,7 +94,7 @@ projects/repositories, it's best to:
 ###### a) Disable the code owner functionality globally
 
 To disable the code owners functionality globally, set
-[plugin.code-owners.disabled](config.html#pluginCodeOwnersDisabled) in
+[plugin.code-owners.disabled](config.md#pluginCodeOwnersDisabled) in
 `gerrit.config` to `true` (requires to be a host admin).
 
 `gerrit.config`:
@@ -103,8 +103,8 @@ To disable the code owners functionality globally, set
     disabled = true
 ```
 \
-Alternatively you may set [codeOwners.disabled](config.html#codeOwnersDisabled)
-in the [code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+Alternatively you may set [codeOwners.disabled](config.md#codeOwnersDisabled)
+in the [code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch of the `All-Projects` project to `true` (requires to
 be a host admin).
 
@@ -117,8 +117,8 @@ be a host admin).
 ###### b) Enable the code owners functionality for the projects/repositories that should use code owners
 
 Enable the code owners functionality on project-level by setting
-[codeOwners.disabled](config.html#codeOwnersDisabled) in the
-[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+[codeOwners.disabled](config.md#codeOwnersDisabled) in the
+[code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch to `false` (requires to be a project owner).
 
 `code-owners.config`:
@@ -137,16 +137,16 @@ projects/repositories it's best to:
 This is the default.
 
 If needed, unset
-[plugin.code-owners.disabled](config.html#pluginCodeOwnersDisabled) in
-`gerrit.config` and [codeOwners.disabled](config.html#codeOwnersDisabled) in the
-[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+[plugin.code-owners.disabled](config.md#pluginCodeOwnersDisabled) in
+`gerrit.config` and [codeOwners.disabled](config.md#codeOwnersDisabled) in the
+[code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch of the `All-Projects` project).
 
 ###### b) Disable the code owners functionality in the projects/repositories that should not use code owners
 
 Disable the code owners functionality on project-level by setting
-[codeOwners.disabled](config.html#codeOwnersDisabled) in the
-[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+[codeOwners.disabled](config.md#codeOwnersDisabled) in the
+[code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch to `true` (requires to be a project owner).
 
 `code-owners.config`:
@@ -164,8 +164,8 @@ You can skip this section, if the code owners functionality should be enabled
 for all branches (which is the default configuration).
 
 To opt-out branches from using code owners set
-[codeOwners.disabledBranch](config.html#codeOwnersDisabledBranch) in the
-[code-owners.config](config.faqs.html#updateCodeOwnersConfig) file in the
+[codeOwners.disabledBranch](config.md#codeOwnersDisabledBranch) in the
+[code-owners.config](config.faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch to a regular expression that matches the branches that
 should be opted-out (requires to be a project owner).
 
@@ -181,10 +181,10 @@ By default `Code-Review+1` votes from code owners count as code owner approval.
 If this is what you want, you can skip this step.
 
 Otherwise you can configure the required code owner approval globally by setting
-[plugin.code-owners.requiredApproval](config.html#pluginCodeOwnersRequiredApproval)
+[plugin.code-owners.requiredApproval](config.md#pluginCodeOwnersRequiredApproval)
 in `gerrit.config` (requires to be a host admin) or per project by setting
-[codeOwners.requiredApproval](config.html#codeOwnersRequiredApproval) in the
-[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+[codeOwners.requiredApproval](config.md#codeOwnersRequiredApproval) in the
+[code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch (requires to be a project owner).
 
 Example global configuration in `gerrit.config` that requires `Code-Review+2` as
@@ -206,9 +206,9 @@ Example per-project configuration in `code-owners.config` that requires
 **IMPORTANT:** The specified label must exist for the project. Make sure that
 the project configuration contains or inherits the definition of the specified
 label. How to configure a label in `project.config` is described
-[here](../../../Documentation/config-labels.html#label_custom). You may also use
+[here](../../../Documentation/config-labels.md#label_custom). You may also use
 the Gerrit REST API to
-[create new label definitions](../../../Documentation/rest-api-projects.html#create-label).
+[create new label definitions](../../../Documentation/rest-api-projects.md#create-label).
 
 **IMPORTANT:** Code owners need to be granted permissions to vote on the
 specified label so that they can grant the code owner approval on changes (see
@@ -222,7 +222,7 @@ vote for change submission.
 
 **NOTE:** Whether code owner approvals are sticky across patch sets depends on
 the definition of the required label. If the label definition has [copy
-rules](../../../Documentation/config-labels.html#label_copyAnyScore) enabled so
+rules](../../../Documentation/config-labels.md#label_copyAnyScore) enabled so
 that votes are sticky across patch sets, then also the code owner approvals
 which are based on these votes will be sticky.
 
@@ -233,7 +233,7 @@ owner approval (see [previous step](#configureCodeOwnerApproval) in order to be
 able grant the code owner approval on changes so that they can be submitted.
 
 As for any other permission, the
-[permission to vote on labels](../../../Documentation/access-control.html#category_review_labels)
+[permission to vote on labels](../../../Documentation/access-control.md#category_review_labels)
 needs to be granted via the access screen of the project or a parent project (at
 `https://<host>/admin/repos/<project-name>,access`).
 
@@ -256,10 +256,10 @@ Configuring code owner overrides is optional, but recommended.
 
 To enable code owner overrides, you must define which label vote is required for
 an override. This can be done globally by setting
-[plugin.code-owners.overrideApproval](config.html#pluginCodeOwnersOverrideApproval)
+[plugin.code-owners.overrideApproval](config.md#pluginCodeOwnersOverrideApproval)
 in `gerrit.config` (requires to be a host admin) or per project by setting
-[codeOwners.overrideApproval](config.html#codeOwnersOverrideApproval) in the
-[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
+[codeOwners.overrideApproval](config.md#codeOwnersOverrideApproval) in the
+[code-owners.config](config-faqs.md#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch (requires to be a project owner).
 
 Example global configuration in `gerrit.config` that requires
@@ -299,7 +299,7 @@ fixed).
 #### <a id="configureFallbackCodeOwners">Configure fallback code owners
 
 It is possible to configure a policy for [fallback code
-owners](config.html#pluginCodeOwnersFallbackCodeOwners) that controls who should
+owners](config.md#pluginCodeOwnersFallbackCodeOwners) that controls who should
 own files for which no code owners have been defined, e.g. project owners, all
 users or no one (default).
 
@@ -318,7 +318,7 @@ the email is reassigned automatically takes over the code ownerships that are
 assigned to this email, which is a security issue).
 
 To limit the allowed email domains, set
-[plugin.code-owners.allowedEmailDomain](config.html#pluginCodeOwnersAllowedEmailDomain)
+[plugin.code-owners.allowedEmailDomain](config.md#pluginCodeOwnersAllowedEmailDomain)
 in `gerrit.config` (requires to be a host admin).
 
 Example `gerrit.config` configuration with restricted email domains:
@@ -331,17 +331,17 @@ Example `gerrit.config` configuration with restricted email domains:
 ### <a id="optionalConfiguration">8. Optional Configuration
 
 Other optional configuration parameters are described in the [config
-documentation](config.html).
+documentation](config.md).
 
 Examples (not an exhaustive list):
 
-* [Global code owners](config.html#pluginCodeOwnersGlobalCodeOwner)
+* [Global code owners](config.md#pluginCodeOwnersGlobalCodeOwner)
 * Whether [an implicit code owner approval from the change owner is
-  assumed](config.html#codeOwnersEnableImplicitApprovals) (only for patch sets
+  assumed](config.md#codeOwnersEnableImplicitApprovals) (only for patch sets
   that are uploaded by the change owner)
-* [Merge commit strategy](config.html#codeOwnersMergeCommitStrategy) that
+* [Merge commit strategy](config.md#codeOwnersMergeCommitStrategy) that
   decides which files of merge commits require code owner approvals
-* [File extension](config.html#codeOwnersFileExtension) that should be used for
+* [File extension](config.md#codeOwnersFileExtension) that should be used for
   code owner config files.
 
 ### <a id="stopUsingFindOwners">9.Stop using the find-owners Prolog submit rule
@@ -373,7 +373,7 @@ defines the code owners for the project/branch explicitly.
 
 **NOTE:** It's recommended to add the initial code owner configuration only
 after enabling the code owners functionality so that the code owner
-configuration is [validated](validation.html) on upload, which prevents
+configuration is [validated](validation.md) on upload, which prevents
 submitting an invalid code owner config that may block the submission of all
 changes (e.g. if it is not parseable). Submitting the initial code owner
 configuration requires an override or an approval from a fallback code owner
@@ -381,7 +381,7 @@ configuration requires an override or an approval from a fallback code owner
 
 **NOTE** If the repository contains pre-existing code owner config files, it is
 recommended to validate them via the [Check code owners files REST
-endpoint](rest-api.html#check-code-owner-config-files) and fix the reported
+endpoint](rest-api.md#check-code-owner-config-files) and fix the reported
 issues.
 
 **NOTE:** If neither code owner overrides nor fallback code owners are
@@ -404,6 +404,6 @@ to be sure that the find-owners Prolog predicates are no longer used.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)

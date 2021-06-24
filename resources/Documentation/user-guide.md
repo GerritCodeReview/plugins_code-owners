@@ -5,7 +5,7 @@ directories and files and requires their [approval](#codeOwnerApproval) for
 changes that touch these files.
 
 This user guide explains the functionality of the `@PLUGIN@` plugin. For a
-walkthrough of the UI please refer to the [intro](how-to-use.html) page.
+walkthrough of the UI please refer to the [intro](how-to-use.md) page.
 
 **TIP:** You may also want to check out the [presentation about code
 owners](https://docs.google.com/presentation/d/1DupBnGr3apIx-jzxi9cHzSgkI-2c1ouGu1teQ4khSfc)
@@ -13,7 +13,7 @@ from the [Gerrit Contributor Summit
 2020](https://docs.google.com/document/d/1WauJfNxracjBK3PxuVnwNIppESGMBtZwxMYjxxeDN6M).
 
 **NOTE:** How to setup the code owners functionality is explained in the
-[setup guide](setup-guide.html).
+[setup guide](setup-guide.md).
 
 ## <a id="codeOwners">What are code owners?
 
@@ -44,17 +44,17 @@ Code owner config files are stored in the source tree of the repository and
 define the [code owners](#codeOwners) for a path.
 
 In which files code owners are defined and which syntax is used depends on the
-configured [code owner backend](backends.html). Example: if the
-[find-owners](backend-find-owners.html) backend is used, code owners are defined
-in [OWNERS](backend-find-owners.html#syntax) files.
+configured [code owner backend](backends.md). Example: if the
+[find-owners](backend-find-owners.md) backend is used, code owners are defined
+in [OWNERS](backend-find-owners.md#syntax) files.
 
 To create/edit code owner config files, clone the repository, edit the code
 owner config files locally and then push the new commit to the remote repository
 in Gerrit. This the same as creating/editing any other source files.
 
-On push, Gerrit [validates](validation.html) any code owner config file that is
+On push, Gerrit [validates](validation.md) any code owner config file that is
 touched by the new commits, unless [the validation for received commits is
-disabled](config.html#codeOwnersEnableValidationOnCommitReceived).
+disabled](config.md#codeOwnersEnableValidationOnCommitReceived).
 If the validation is enabled, commits that make code owner config files invalid
 are rejected.
 
@@ -72,7 +72,7 @@ in the change are approved by a code owner.
 Code owners apply their approval by voting on the change. By default, voting
 with `Code-Review+1` counts as code owner approval, but it's possible that the
 host administrators or the project owners have [configured a different label/vote
-that is required as code owner approval](setup-guide.html#configureCodeOwnerApproval).
+that is required as code owner approval](setup-guide.md#configureCodeOwnerApproval).
 
 By granting a code owner approvel the code owner confirms that the change is
 appropriate for the system and is done correctly.
@@ -83,7 +83,7 @@ block the submission (unless it's a veto vote which is configured independently
 of the `@PLUGIN@` plugin).
 
 It's possible to [configure implicit
-approvals](config.html#codeOwnersEnableImplicitApprovals) for changes/patch-sets
+approvals](config.md#codeOwnersEnableImplicitApprovals) for changes/patch-sets
 that are owned and uploaded by a code owner. In this case, if a code owner only
 touches files that they own, no approval from other code owners is required. If
 this is configured, it is important that code owners are aware of their implicit
@@ -107,7 +107,7 @@ exceptional cases.
 **NOTE:** It is possible that users are code owners, but miss permissions to
 vote on the required label. This is a configuration issue that should be
 reported to the project owners (who should either
-[grant the permission](setup-guide.html#grantCodeOwnerPermissions) or remove
+[grant the permission](setup-guide.md#grantCodeOwnerPermissions) or remove
 the code owner).
 
 **NOTE:** It's possible that the change submission is still blocked after all
@@ -117,13 +117,13 @@ submit requirements are not fulfilled yet.
 
 **NOTE:** Whether code owner approvals are sticky across patch sets depends on
 the definition of the required label. If the label definition has [copy
-rules](../../../Documentation/config-labels.html#label_copyAnyScore) enabled so
+rules](../../../Documentation/config-labels.md#label_copyAnyScore) enabled so
 that votes are sticky across patch sets, then also the code owner approvals
 which are based on these votes will be sticky.
 
 **NOTE:** Whether code owners can approve their own changes depends of the
 definition of the required label. If the label definition has
-[ignoreSelfApproval](../../../Documentation/config-labels.html#label_ignoreSelfApproval)
+[ignoreSelfApproval](../../../Documentation/config-labels.md#label_ignoreSelfApproval)
 enabled, code owner approvals of the patch set uploader are ignored.
 
 **NOTE:** Code owner approvals are always applied on the whole change / patch
@@ -147,7 +147,7 @@ time to await all required code owner approvals.
 
 A code owner override is applied by voting on the change. Which label/vote
 counts as code owner override depends on the
-[configuration](setup-guide.html#configureCodeOwnerOverrides).
+[configuration](setup-guide.md#configureCodeOwnerOverrides).
 
 **NOTE:** It's possible that overrides are disabled for a project.
 
@@ -156,14 +156,14 @@ counts as code owner override depends on the
 Some changes may be exempted from requiring [code owner
 approvals](#codeOwnerApproval):
 
-* changes of [projects](config.html#pluginCodeOwnersDisabled) /
-  [branches](config.html#pluginCodeOwnersDisabledBranch) for which the code
+* changes of [projects](config.md#pluginCodeOwnersDisabled) /
+  [branches](config.md#pluginCodeOwnersDisabledBranch) for which the code
   owners functionality has been disabled
 * changes that were uploaded by users that are
-  [exempted](config.html#pluginCodeOwnersExemptedUser) from requiring code owner
+  [exempted](config.md#pluginCodeOwnersExemptedUser) from requiring code owner
   approvals
 * changes that are pure revert, if
-  [configured](config.html#pluginCodeOwnersExemptPureReverts)
+  [configured](config.md#pluginCodeOwnersExemptPureReverts)
 
 ## <a id="codeOwnerSuggestion">Code owner Suggestion
 
@@ -173,19 +173,19 @@ done by selecting a code owner for each of the files and adding them as reviewer
 to the change. To help you with this task, Gerrit suggests you suitable code
 owners for the files in the change and lets you pick which of them should be
 added as reviewers (how this looks in the UI is shown in the
-[intro](how-to-use.html#addCodeOwnersAsReviewers) page).
+[intro](how-to-use.md#addCodeOwnersAsReviewers) page).
 
 When suggesting code owners for a file, Gerrit filters out code owners that:
 
 * are inactive
 * are not visible to you (according to
-[accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
+[accounts.visibility](../../../Documentation/config-gerrit.md#accounts.visibility)
 setting),
 * are referenced by non-visible secondary emails
 * are not resolvable (emails for which no Gerrit account exists)
 * are ambiguous (the same email is assigned to multiple accounts)
 * are referenced by an email with a disallowed domain (see
-  [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
+  [allowedEmailDomain configuration](config.md#pluginCodeOwnersAllowedEmailDomain))
 * do not have read access to the destination branch of the change
 * are service users (members of the `Service Users` group)
 
@@ -203,7 +203,7 @@ the score:
 If the code owners functionality is enabled, all touched files require an
 approval from a code owner. If files are touched for which no code owners are
 defined, the change can only be submitted with an approval of a fallback code
-owner (if [configured](config.html#pluginCodeOwnersFallbackCodeOwners)) or with
+owner (if [configured](config.md#pluginCodeOwnersFallbackCodeOwners)) or with
 a [code owner override](#codeOwnerOverride). Please note that fallback code
 owners are not included in the [code owner suggestion](#codeOwnerSuggestion).
 
@@ -225,7 +225,7 @@ This means, if a folder gets renamed, the code owner config files in it still
 apply.
 
 However if a file/folder is renamed for which specific code owners are defined
-via [path expressions](path-expressions.html), it is possible that the code
+via [path expressions](path-expressions.md), it is possible that the code
 ownership changes. For example, this can happen if the old name is matched by
 a path expression that makes user A a code owner, but the new name is only
 matched by another path expression that makes user B a code owner. E.g. '*.md'
@@ -234,7 +234,7 @@ is owned by user A, '*.txt' is owned by user B and 'config.md' is renamed to
 rename and the current code owners to ensure that the file/folder has the proper
 code owners at the new path. This is also the reason why [matching subfolders
 via path expressions is
-discouraged](backend-find-owners.html#doNotUsePathExpressionsForSubdirectories).
+discouraged](backend-find-owners.md#doNotUsePathExpressionsForSubdirectories).
 
 ## <a id="mergeCommits">Merge commits
 
@@ -247,7 +247,7 @@ whether the auto-merge succeeded without conflicts). To see these files in the
 change screen, `Parent 1` needs to be selected as base for the comparison
 (instead of the `Auto Merge` that is selected as base by default).
 
-By [configuration](config.html#codeOwnersMergeCommitStrategy) it is possible,
+By [configuration](config.md#codeOwnersMergeCommitStrategy) it is possible,
 that changes for merge commits only require code owner approvals for files that
 differ between the merge commit that is being reviewed and the `Auto Merge`. In
 this case, code owners only need to approve the files for which a conflict
@@ -269,7 +269,7 @@ submission.
 **NOTE:** Besides the code owners submit rule there may be further submit rules
 that block the change submission for other reasons that are not related to code
 owners. E.g. configured [label
-functions](../../../Documentation/config-labels.html#label_function) are
+functions](../../../Documentation/config-labels.md#label_function) are
 completely orthogonal to code owner approvals. If, for example, `Code-Review+1`
 votes are required as code owner approval, but the `Code-Review` label has the
 function `MaxWithBlock` the change submission is still blocked if a max approval
@@ -287,11 +287,11 @@ the index can become stale for 2 reasons: 1. [code owner config
 files](#codeOwnerConfigFiles) are changed after the change has been indexed
 (e.g. new code owners are added), 2. [if the code owners plugin configuration
 was changed in a way that affected the result of the code owners submit
-rule](config.html#staleIndexOnConfigChanges). Callers of change queries should
+rule](config.md#staleIndexOnConfigChanges). Callers of change queries should
 be aware of this.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)

@@ -1,11 +1,11 @@
 # find-owners: Cookbook for OWNERS files
 
-For the [find-owners](backend-find-owners.html) backend code owners are defined
+For the [find-owners](backend-find-owners.md) backend code owners are defined
 in `OWNERS` files. This cookbook provides examples of `OWNERS` files for various
 use cases.
 
 **NOTE:** The syntax of `OWNERS` files is described
-[here](backend-find-owners.html#syntax).
+[here](backend-find-owners.md#syntax).
 
 ### <a id="defineUsersAsCodeOwners">Define users as code owners
 
@@ -26,22 +26,22 @@ this `OWNERS` file, except:
 
 * files in subdirectories that have an `OWNERS` file that disables inheriting
   code owners from parent directories via the
-  [set noparent](backend-find-owners.html#setNoparent) file-level rule
+  [set noparent](backend-find-owners.md#setNoparent) file-level rule
   ([example](#ignoreParentCodeOwners))
 * files that are matched by a path expression in a
-  [per-file](backend-find-owners.html#perFile) line that uses
-  [set noparent](backend-find-owners.html#setNoparent) (in this `OWNERS` file or
+  [per-file](backend-find-owners.md#perFile) line that uses
+  [set noparent](backend-find-owners.md#setNoparent) (in this `OWNERS` file or
   in any `OWNERS` file in a subdirectory, [example](#perFileWithSetNoparent))
 
 In addition to the specified owners the files are also owned by the code owners
 that are inherited from the parent directories. To prevent this the
-[set noparent](backend-find-owners.html#setNoparent) file-level rule can be used
+[set noparent](backend-find-owners.md#setNoparent) file-level rule can be used
 (see [next example](#ignoreParentCodeOwners)).
 
 ### <a id="ignoreParentCodeOwners">Ignore parent code owners
 
 To ignore code owners that are defined in the `OWNERS` files of the parent
-directories the [set noparent](backend-find-owners.html#setNoparent) file-level
+directories the [set noparent](backend-find-owners.md#setNoparent) file-level
 rule can be used:
 
 ```
@@ -58,26 +58,26 @@ For example, if code owners for the file '/foo/bar/baz.txt' are computed the
 2. `/foo/OWNERS`
 3. `/OWNERS`
 4. `/OWNERS` in `refs/meta/config`
-   (contains [default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration))
+   (contains [default code owners](backend-find-owners.md#defaultCodeOwnerConfiguration))
 
 If any `set noparent` file-level rule is seen the evaluation is stopped and
 further `OWNERS` files are ignored. E.g. if `/foo/OWNERS` contains
 `set noparent` the `OWNERS` files mentioned at 3. and 4. are ignored.
 
-**NOTE:** When the [set noparent](backend-find-owners.html#setNoparent)
+**NOTE:** When the [set noparent](backend-find-owners.md#setNoparent)
 file-level rule is used you should always define code owners which should be
 used instead of the code owners from the parent directories. Otherwise the files
 in the directory stay [without code owners](#noCodeOwners) and nobody can grant
 code owner approval on them. To [exempt a directory from requiring code owner
 approvals](#exemptFiles), assign the code ownership to [all
-users](backend-find-owners.html#allUsers) instead ([example](#exemptFiles)).
+users](backend-find-owners.md#allUsers) instead ([example](#exemptFiles)).
 
 **NOTE:** The usage of `set noparent` has no effect on `OWNERS` files in
 subfolders.
 
 ### <a id="defineCodeOwnersForAFile">Define code owners for a certain file
 
-By using the [per-file](backend-find-owners.html#perFile) restriction prefix it
+By using the [per-file](backend-find-owners.md#perFile) restriction prefix it
 is possible to define code owners for a certain file (in the current directory
 and all its subdirectories), e.g. for the `BUILD` file:
 
@@ -99,8 +99,8 @@ Alternatively it's also possible to repeat the per-file line multiple times:
 ```
 \
 If a file is matched by the path expressions of multiple
-[per-file](backend-find-owners.html#perFile) lines, the file is owned by all
-users that are mentioned in these [per-file](backend-find-owners.html#perFile)
+[per-file](backend-find-owners.md#perFile) lines, the file is owned by all
+users that are mentioned in these [per-file](backend-find-owners.md#perFile)
 lines.
 
 If folder code owners are present, the file is also owned by any folder code
@@ -118,8 +118,8 @@ parent directories.
 
 #### <a id="perFileWithSetNoparent">
 Ignoring folder code owners and inherited parent code owners for a file is
-possible by using a matching [per-file](backend-find-owners.html#perFile) line
-with [set noparent](backend-find-owners.html#setNoparent).
+possible by using a matching [per-file](backend-find-owners.md#perFile) line
+with [set noparent](backend-find-owners.md#setNoparent).
 
 ```
   jane.roe@example.com
@@ -139,31 +139,31 @@ code owners in the `OWNERS` files are evaluated in this order:
 5. matching per-file code owners in `/OWNERS`
 6. folder code owners in `/OWNERS`
 7. matching per-file code owners in `/OWNERS` in `refs/meta/config`
-   (contains [default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration))
+   (contains [default code owners](backend-find-owners.md#defaultCodeOwnerConfiguration))
 8. folder code owners in `/OWNERS` in `refs/meta/config`
-   (contains [default code owners](backend-find-owners.html#defaultCodeOwnerConfiguration))
+   (contains [default code owners](backend-find-owners.md#defaultCodeOwnerConfiguration))
 
 If any `set noparent` file-level rule is seen the evaluation is stopped and
 code owners on further levels are ignored. E.g. if `/foo/OWNERS` contains a
 matching per-file rule with `set noparent` the code owners mentioned at 4. to 8.
 are ignored.
 
-**NOTE:** When the [set noparent](backend-find-owners.html#setNoparent) rule is
+**NOTE:** When the [set noparent](backend-find-owners.md#setNoparent) rule is
 used on a per-file rule you should always define code owners which should be
 used instead of the folder code owners and the code owners from the parent
 directories.  Otherwise the matched files stay [without code
 owners](#noCodeOwners) and nobody can grant code owner approval on them. To
 [exempt matched files from requiring code owner approvals](#exemptFiles), assign
-the code ownership to [all users](backend-find-owners.html#allUsers) instead
+the code ownership to [all users](backend-find-owners.md#allUsers) instead
 ([example](#exemptFiles)).
 
 **NOTE:** The syntax for path expressions / globs is explained
-[here](path-expressions.html#globs).
+[here](path-expressions.md#globs).
 
 ### <a id="defineCodeOwnersForAFileType">Define code owners for a certain file type
 
 This is the same as [defining code owners for a file](#defineCodeOwnersForAFile)
-only that the [per-file](backend-find-owners.html#perFile) line must have a path
+only that the [per-file](backend-find-owners.md#perFile) line must have a path
 expression that matches all files of the wanted type, e.g. all '*.md' files:
 
 ```
@@ -176,7 +176,7 @@ This matches all '*.md' in the current directory and all its subdirectories.
 files in the current directory and in all subdirectories).
 
 **NOTE:** The syntax for path expressions / globs is explained
-[here](path-expressions.html#globs).
+[here](path-expressions.md#globs).
 
 ### <a id="defineCodeOwnersForAllFileInASubdirectory">Define code owners for all files in a subdirectory
 
@@ -187,7 +187,7 @@ so that the code owners for the subdirectory stay intact when the subdirectory
 gets renamed/moved.
 
 Nontheless, it's possible to define code owners for all files in a subdirectory
-using a [per-file](backend-find-owners.html#perFile) line. This is the same as
+using a [per-file](backend-find-owners.md#perFile) line. This is the same as
 [defining code owners for a file](#defineCodeOwnersForAFile) only that the path
 expression matches all files in the subdirectory:
 
@@ -203,7 +203,7 @@ is not possible.
 Instead of using a group you may define a set of users in an `OWNERS` file with
 a prefix (`<prefix>_OWNERS`) or an extension (`OWNERS_<extension>`) and then
 [import](#importOtherOwnersFile) it into other `OWNERS` files via the
-[file](backend-find-owners.html#fileKeyword) keyword.
+[file](backend-find-owners.md#fileKeyword) keyword.
 
 `/OWNERS_BUILD`:
 ```
@@ -225,16 +225,16 @@ This is equivalent to having:
 ```
 \
 **NOTE:** The `per-file` line from `/OWNERS_BUILD` is not imported, since the
-[file](backend-find-owners.html#fileKeyword) keyword only imports folder code
-owners. Using the [include](backend-find-owners.html#includeKeyword) keyword,
+[file](backend-find-owners.md#fileKeyword) keyword only imports folder code
+owners. Using the [include](backend-find-owners.md#includeKeyword) keyword,
 that would also consider per-file code owners, is not supported for `per-file`
 lines.
 
 ### <a id="importOtherOwnersFile">Import code owners from other OWNERS file
 
 To import code owners from another `OWNERS` file the
-[file](backend-find-owners.html#fileKeyword) or
-[include](backend-find-owners.html#includeKeyword) keyword can be used:
+[file](backend-find-owners.md#fileKeyword) or
+[include](backend-find-owners.md#includeKeyword) keyword can be used:
 
 `java/com/example/foo/OWNERS`:
 ```
@@ -258,9 +258,9 @@ This is equivalent to having:
 ```
 \
 **NOTE:** The `per-file` line from `java/com/example/foo/OWNERS` is not
-imported, since the [file](backend-find-owners.html#fileKeyword) keyword only
+imported, since the [file](backend-find-owners.md#fileKeyword) keyword only
 imports folder code owners. If also `per-line` lines should be imported the
-[include](backend-find-owners.html#includeKeyword) keyword can be used instead:
+[include](backend-find-owners.md#includeKeyword) keyword can be used instead:
 
 `javatests/com/example/foo/OWNERS`:
 ```
@@ -279,8 +279,8 @@ This is equivalent to having:
 ### <a id="importFromOtherRepository">Import code owners from other repository
 
 To import code owners from an `OWNERS` file in another repository the
-[file](backend-find-owners.html#fileKeyword) or
-[include](backend-find-owners.html#includeKeyword) keyword can be used:
+[file](backend-find-owners.md#fileKeyword) or
+[include](backend-find-owners.md#includeKeyword) keyword can be used:
 
 `/OWNERS` in the `master` branch of respository `my-project`:
 ```
@@ -307,8 +307,8 @@ contained in an `OWNERS` file in the `stable-3.5` branch,
 ### <a id="importFromOtherBranch">Import code owners from other branch
 
 To import code owners from an `OWNERS` file in another branch the
-[file](backend-find-owners.html#fileKeyword) or
-[include](backend-find-owners.html#includeKeyword) keyword can be used:
+[file](backend-find-owners.md#fileKeyword) or
+[include](backend-find-owners.md#includeKeyword) keyword can be used:
 
 `/OWNERS` in the `master` branch of respository `my-project`:
 ```
@@ -332,10 +332,10 @@ the repository, even if it is the same repository that contains the importing
 ### <a id="exemptFiles">Exempt files from requiring code owner approval
 
 To exempt files from requiring code owner approval the code ownership can be
-assigned to [all users](backend-find-owners.html#allUsers) by using '*' as
-[user email](backend-find-owners.html#userEmails). Assigning the code ownership
+assigned to [all users](backend-find-owners.md#allUsers) by using '*' as
+[user email](backend-find-owners.md#userEmails). Assigning the code ownership
 to all users effectively exempts the directory (or the matches files if used in
-combination with a [per-file](backend-find-owners.html#perFile) rule) from
+combination with a [per-file](backend-find-owners.md#perFile) rule) from
 requiring code owner approvals on submit. This is because a code owner approval
 from the uploader is always implicit if the uploader is a code owner.
 
@@ -375,6 +375,6 @@ files without code owners, e.g. the following configurations should be avoided:
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)

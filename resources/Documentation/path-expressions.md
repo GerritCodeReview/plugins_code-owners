@@ -2,17 +2,17 @@
 
 Path expressions are used to restrict access grants in code owner config files
 to only apply to a subset of files in a directory (e.g. see
-[per-file](backend-find-owners.html#perFile) rule for the
-[find-owners](backend-find-owners.html) backend).
+[per-file](backend-find-owners.md#perFile) rule for the
+[find-owners](backend-find-owners.md) backend).
 
 Which syntax is used depends on the used code owner backend:
 
-* [find-owners](backend-find-owners.html) backend:
+* [find-owners](backend-find-owners.md) backend:
   uses [globs](#globs), but each glob is automatically prefixed with `{**/,}`
   so that subfolders are always matched, e.g. `*.md` matches all md files in all
   subfolders, rather then only md files in the current folder (also see the
   [caveat](#findOwnersCaveat) section below)
-* [proto](backend-proto.html) backend:
+* [proto](backend-proto.md) backend:
   uses [simple path expressions](#simplePathExpressions)
 
 ## <a id="globs">Globs
@@ -53,7 +53,7 @@ See [below](#examples) for examples.
 
 To be compatible with the `find-owners` plugin find-owners path expressions
 are prefixes with `{**/,}` which matches any folder (see
-[above](path-expressions.html)). This means if path expressions like  `BUILD`,
+[above](path-expressions.md)). This means if path expressions like  `BUILD`,
 `*.md` or `my-folder/**` are used in `OWNERS` files the effective path
 expression are `{**/,}BUILD`, `{**/,}*.md` and `{**/,}my-folder/**`. These path
 expression do not only match `BUILD`, `*.md` and `my-folder/**` directly in the
@@ -98,6 +98,6 @@ any `my-folder/` subfolder, e.g. all files in `/foo/bar/baz/my-folder/`.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)
