@@ -24,8 +24,12 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
+import com.google.gerrit.plugins.codeowners.api.OwnedChangedFileInfo;
+import com.google.gerrit.plugins.codeowners.api.OwnedPathInfo;
 import com.google.gerrit.plugins.codeowners.api.OwnedPathsInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalCheck;
+import com.google.gerrit.plugins.codeowners.backend.OwnedChangedFile;
+import com.google.gerrit.plugins.codeowners.backend.OwnedPath;
 import com.google.gerrit.server.account.AccountResolver;
 import com.google.gerrit.server.account.AccountResolver.UnresolvableAccountException;
 import com.google.gerrit.server.change.RevisionResource;
@@ -89,7 +93,7 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
 
     Account.Id accountId = resolveAccount();
 
-    ImmutableList<Path> ownedPaths =
+    ImmutableList<OwnedChangedFile> ownedChangedFiles =
         codeOwnerApprovalCheck.getOwnedPaths(
             revisionResource.getNotes(),
             revisionResource.getPatchSet(),
@@ -98,9 +102,16 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
             limit + 1);
 
     OwnedPathsInfo ownedPathsInfo = new OwnedPathsInfo();
-    ownedPathsInfo.more = ownedPaths.size() > limit ? true : null;
+    ownedPathsInfo.more = ownedChangedFiles.size() > limit ? true : null;
+    ownedPathsInfo.ownedChangedFiles =
+        ownedChangedFiles.stream()
+            .limit(limit)
+            .map(GetOwnedPaths::toOwnedChangedFileInfo)
+            .collect(toImmutableList());
     ownedPathsInfo.ownedPaths =
-        ownedPaths.stream().limit(limit).map(Path::toString).collect(toImmutableList());
+        OwnedChangedFile.asPathStream(ownedChangedFiles.stream().limit(limit))
+            .map(Path::toString)
+            .collect(toImmutableList());
     return Response.ok(ownedPathsInfo);
   }
 
@@ -121,5 +132,23 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
     if (limit <= 0) {
       throw new BadRequestException("limit must be positive");
     }
+  }
+
+  private static OwnedChangedFileInfo toOwnedChangedFileInfo(OwnedChangedFile ownedChangedFile) {
+    OwnedChangedFileInfo info = new OwnedChangedFileInfo();
+    if (ownedChangedFile.newPath().isPresent()) {
+      info.newPath = toOwnedChangedFileInfo(ownedChangedFile.newPath().get());
+    }
+    if (ownedChangedFile.oldPath().isPresent()) {
+      info.oldPath = toOwnedChangedFileInfo(ownedChangedFile.oldPath().get());
+    }
+    return info;
+  }
+
+  private static OwnedPathInfo toOwnedChangedFileInfo(OwnedPath ownedPath) {
+    OwnedPathInfo info = new OwnedPathInfo();
+    info.path = ownedPath.path().toString();
+    info.owned = !ownedPath.owned() ? false : null;
+    return info;
   }
 }
