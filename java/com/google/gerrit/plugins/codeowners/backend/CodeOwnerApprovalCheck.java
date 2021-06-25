@@ -129,7 +129,7 @@ public class CodeOwnerApprovalCheck {
    * @return the paths of the files in the given patch set that are owned by the specified account
    * @throws ResourceConflictException if the destination branch of the change no longer exists
    */
-  public ImmutableList<Path> getOwnedPaths(
+  public ImmutableList<OwnedChangedFile> getOwnedPaths(
       ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId, int start, int limit)
       throws ResourceConflictException {
     try (Timer0.Context ctx = codeOwnerMetrics.computeOwnedPaths.start()) {
@@ -142,25 +142,45 @@ public class CodeOwnerApprovalCheck {
           patchSet.id().get(),
           start,
           limit);
-      Stream<Path> ownedPaths =
+
+      Stream<FileCodeOwnerStatus> fileStatuses =
           getFileStatusesForAccount(changeNotes, patchSet, accountId)
-              .flatMap(
-                  fileCodeOwnerStatus ->
-                      Stream.of(
-                              fileCodeOwnerStatus.newPathStatus(),
-                              fileCodeOwnerStatus.oldPathStatus())
-                          .filter(Optional::isPresent)
-                          .map(Optional::get))
               .filter(
-                  pathCodeOwnerStatus -> pathCodeOwnerStatus.status() == CodeOwnerStatus.APPROVED)
-              .map(PathCodeOwnerStatus::path);
+                  fileStatus ->
+                      (fileStatus.newPathStatus().isPresent()
+                              && fileStatus.newPathStatus().get().status()
+                                  == CodeOwnerStatus.APPROVED)
+                          || (fileStatus.oldPathStatus().isPresent()
+                              && fileStatus.oldPathStatus().get().status()
+                                  == CodeOwnerStatus.APPROVED));
       if (start > 0) {
-        ownedPaths = ownedPaths.skip(start);
+        fileStatuses = fileStatuses.skip(start);
       }
       if (limit > 0) {
-        ownedPaths = ownedPaths.limit(limit);
+        fileStatuses = fileStatuses.limit(limit);
       }
-      return ownedPaths.collect(toImmutableList());
+
+      return fileStatuses
+          .map(
+              fileStatus ->
+                  OwnedChangedFile.create(
+                      fileStatus
+                          .newPathStatus()
+                          .map(
+                              newPathStatus ->
+                                  OwnedPath.create(
+                                      newPathStatus.path(),
+                                      newPathStatus.status() == CodeOwnerStatus.APPROVED))
+                          .orElse(null),
+                      fileStatus
+                          .oldPathStatus()
+                          .map(
+                              oldPathStatus ->
+                                  OwnedPath.create(
+                                      oldPathStatus.path(),
+                                      oldPathStatus.status() == CodeOwnerStatus.APPROVED))
+                          .orElse(null)))
+          .collect(toImmutableList());
     } catch (IOException | DiffNotAvailableException e) {
       throw new CodeOwnersInternalServerErrorException(
           String.format(

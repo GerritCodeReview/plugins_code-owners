@@ -717,7 +717,7 @@ The following request parameters can be specified:
 | Field Name   |           | Description |
 | ------------ | --------- | ----------- |
 | `start`\|`S` | optional  | Number of owned paths to skip. Allows to page over the owned files. By default 0.
-| `limit`\|`n` | optional  | Limit defining how many owned files should be returned at most. By default 50.
+| `limit`\|`n` | optional  | Limit defining how many [OwnedChangedFileInfo](#owned-changed-file-info) entities should be returned at most. By default 50.
 | `user`       | mandatory | user for which the owned paths should be returned
 
 #### Request
@@ -737,9 +737,41 @@ As a response a [OwnedPathsInfo](#owned-paths-info) entity is returned.
 
   )]}'
   {
+    "owned_changed_files": [
+      {
+        "new_path": {
+          "path": "/foo/bar/baz.md"
+        }
+      },
+      {
+        "old_path": {
+          "path": "/foo/baz/bar.md"
+        }
+      },
+      {
+        "new_path": {
+          "path": "/foo/new-name.md"
+        },
+        "old_path": {
+          "path": "/foo/old-name.md"
+        }
+      },
+      {
+        "new_path": {
+          "path": "/xyz/new-name.md",
+          "owned": false
+        },
+        "old_path": {
+          "path": "/abc/old-name.md"
+        }
+      }
+    ],
     "owned_paths": [
+      "/abc/old-name.md",
       "/foo/bar/baz.md",
       "/foo/baz/bar.md",
+      "/foo/new-name.md",
+      "/foo/old-name.md"
     ]
   }
 ```
@@ -1023,13 +1055,33 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | `invalid_code_owner_config_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to deal with invalid code owner config files.
 |`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `PROJECT_OWNERS`: Paths for which no code owners are defined are owned by the project owners. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
 
+### <a id="owned-changed-file-info"> OwnedChangedFileInfo
+The `OwnedChangedFileInfo` entity contains information about a file that was
+changed in a change for which the user owns the new path, the old path or both
+paths.
+
+| Field Name |          | Description |
+| ---------- | -------- | ----------- |
+| `new_path` | optional | Owner information for the new path as a [OwnedPathInfo](#owned-path-info) entity. Not set for deletions.
+| `old_path` | optional | Owner information for the old path as a [OwnedPathInfo](#owned-path-info) entity. Only set for deletions and renames.
+
+### <a id="owned-path-info"> OwnedPathInfo
+The `OwnedPathInfo` entity contains information about a file path the may be
+owned by the user.
+
+| Field Name |          | Description |
+| ---------- | -------- | ----------- |
+| `path`     |          | The absolute file path.
+| `owned`    | optional | `false` is the path is not owned by the user. Otherwise unset.
+
 ### <a id="owned-paths-info"> OwnedPathsInfo
 The `OwnedPathsInfo` entity contains paths that are owned by a user.
 
 
 | Field Name    |          | Description |
 | ------------- | -------- | ----------- |
-| `owned_paths` |          |The owned paths as absolute paths, sorted alphabetically.
+| `owned_changed_files`   || List of files that were changed in the revision for which the user owns the new path, the old path or both paths. The entries are sorted alphabetically by new path, and by old path if new path is not present. Contains at most as many entries as the limit that was specified on the request.
+| `owned_paths` |          | The list of the owned new and old paths that are contained in the `owned_changed_files` field. The paths are returned as absolute paths and are sorted alphabetically. May contain more entries than the limit that was specified on the request (if the users owns new and old path of renamed files).
 | `more`        | optional | Whether the request would deliver more results if not limited. Not set if `false`.
 
 ### <a id="path-code-owner-status-info"> PathCodeOwnerStatusInfo
