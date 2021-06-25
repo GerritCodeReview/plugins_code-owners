@@ -140,7 +140,7 @@ If needed, unset
 [plugin.code-owners.disabled](config.html#pluginCodeOwnersDisabled) in
 `gerrit.config` and [codeOwners.disabled](config.html#codeOwnersDisabled) in the
 [code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
-`refs/meta/config` branch of the `All-Projects` project).
+`refs/meta/config` branch of the `All-Projects` project.
 
 ###### b) Disable the code owners functionality in the projects/repositories that should not use code owners
 
@@ -165,7 +165,7 @@ for all branches (which is the default configuration).
 
 To opt-out branches from using code owners set
 [codeOwners.disabledBranch](config.html#codeOwnersDisabledBranch) in the
-[code-owners.config](config.faqs.html#updateCodeOwnersConfig) file in the
+[code-owners.config](config-faqs.html#updateCodeOwnersConfig) file in the
 `refs/meta/config` branch to a regular expression that matches the branches that
 should be opted-out (requires to be a project owner).
 
@@ -177,8 +177,9 @@ should be opted-out (requires to be a project owner).
 
 ### <a id="configureCodeOwnerApproval">4. Configure the label vote that should count as code owner approval
 
-By default `Code-Review+1` votes from code owners count as code owner approval.
-If this is what you want, you can skip this step.
+By default `Code-Review+1` votes from [code owners](user-guide.html#codeOwners)
+count as [code owner approval](user-guide.html#codeOwnerApproval). If this is
+what you want, you can skip this step.
 
 Otherwise you can configure the required code owner approval globally by setting
 [plugin.code-owners.requiredApproval](config.html#pluginCodeOwnersRequiredApproval)
@@ -218,7 +219,7 @@ specified label so that they can grant the code owner approval on changes (see
 to labels that are otherwise required for submission. If you want to rely solely
 on code owner approvals, you may need to reconfigure existing label definitions
 (e.g. change the `Code-Review` label definition to not require a `Code-Review+2`
-vote for change submission.
+vote for change submission).
 
 **NOTE:** Whether code owner approvals are sticky across patch sets depends on
 the definition of the required label. If the label definition has [copy
@@ -229,7 +230,7 @@ which are based on these votes will be sticky.
 ### <a id="grantCodeOwnerPermissions">5. Grant code owners permission to vote on the label that counts as code owner approval
 
 Code owners must be granted permissions to vote on the label that counts as code
-owner approval (see [previous step](#configureCodeOwnerApproval) in order to be
+owner approval (see [previous step](#configureCodeOwnerApproval)) in order to be
 able grant the code owner approval on changes so that they can be submitted.
 
 As for any other permission, the
@@ -243,12 +244,13 @@ It's possible that some files have no code owners defined (e.g. missing root
 code owner config file). In this case changes for these files cannot be code
 owner approved and hence cannot be submitted.
 
-To avoid that this leads to unsubmittable changes it is recommended to configure
-code owner overrides and/or fallback code owners.
+To avoid that this leads to unsubmittable changes, it is recommended to
+configure code owner overrides and/or fallback code owners.
 
 #### <a id="configureCodeOwnerOverrides">Configure code owner overrides
 
-It's possible to configure code owner overrides that allow privileged users to
+It's possible to configure [code owner
+overrides](user-guide.html#codeOwnerOverride) that allow privileged users to
 override code owner approvals. This means they can approve changes without being
 a code owner.
 
@@ -290,11 +292,6 @@ Example for the definition of the `Owners-Override` label in `project.config`:
     value = +1 Override
     defaultValue = 0
 ```
-\
-**NOTE:** Defining the label and configuring it as override approval must be
-done by 2 separate commits that are pushed one after another (not being able to
-add both configurations in one commit is a known issue that still needs to be
-fixed).
 
 #### <a id="configureFallbackCodeOwners">Configure fallback code owners
 
@@ -312,7 +309,7 @@ disrupted.
 
 By default, the emails in code owner config files that make users code owners
 can have any email domain. It is strongly recommended to limit the allowed email
-domains to trusted email providers (e.g. email providers that gurantee that an
+domains to trusted email providers (e.g. email providers that guarantee that an
 email is never reassigned to a different user, since otherwise the user to which
 the email is reassigned automatically takes over the code ownerships that are
 assigned to this email, which is a security issue).
@@ -327,6 +324,8 @@ Example `gerrit.config` configuration with restricted email domains:
     allowedEmailDomain = google.com
     allowedEmailDomain = chromium.org
 ```
+
+**NOTE:** Allowed email domains cannot be configured on project level.
 
 ### <a id="optionalConfiguration">8. Optional Configuration
 
@@ -343,17 +342,31 @@ Examples (not an exhaustive list):
   decides which files of merge commits require code owner approvals
 * [File extension](config.html#codeOwnersFileExtension) that should be used for
   code owner config files.
+* Whether [pure reverts should be exempted from requiring code owner
+  approvals](config.html#pluginCodeOwnersExemptPureReverts).
+* [Users that are exempted from requiring code owner
+  approvals](config.html#pluginCodeOwnersExemptedUser)
 
 ### <a id="stopUsingFindOwners">9.Stop using the find-owners Prolog submit rule
 
 This section can be skipped if you haven't used the `find-owners` plugin so far.
 
-The `find-owners` plugin comes with a Prolog submit rules that prevents the
+The `find-owners` plugin comes with a Prolog submit rule that prevents the
 submission of changes that have insufficient code owner approvals. With the
 `code-owners` plugin this is now being checked by a submit rule that is
 implemented in Java. Hence the Prolog submit rule from the `find-owners` plugin
 is no longer needed and you should stop using it before you start using the
 `code-owners` plugin.
+
+**NOTE:** It's possible to use the submit rules from the `code-owners` plugin
+and `find-owners` plugin at the same time, but then certains things like [code
+owner overrides](user-guide.html#codeOwnerOverride) and
+[exemptions](user-guide.html#codeOwnerExemptions) are not working (as they are
+not supported by the `find-owners` plugin).
+
+**NOTE:** Do not yet disable/uninstall the `find-owners` plugin yet, see
+[below](#disableFindOwnersPlugin) which preconditions needs to be fulfilled for
+this.
 
 ### <a id="configureCodeOwners">10. Add an initial code owner configuration at root level
 
@@ -371,13 +384,14 @@ Right after the code owners functionality got enabled for a project/branch, it
 is recommended to add an initial code owner configuration at the root level that
 defines the code owners for the project/branch explicitly.
 
+**NOTE:** Submitting the initial code owner configuration requires an override
+or an approval from a fallback code owner (see above).
+
 **NOTE:** It's recommended to add the initial code owner configuration only
 after enabling the code owners functionality so that the code owner
 configuration is [validated](validation.html) on upload, which prevents
 submitting an invalid code owner config that may block the submission of all
-changes (e.g. if it is not parseable). Submitting the initial code owner
-configuration requires an override or an approval from a fallback code owner
-(see above).
+changes (e.g. if it is not parseable).
 
 **NOTE** If the repository contains pre-existing code owner config files, it is
 recommended to validate them via the [Check code owners files REST
@@ -388,6 +402,10 @@ issues.
 configured an initial code owner configuration must be added before enabling the
 code owners functionality as otherwise changes can become unsubmittable (they
 require code-owner approvals, but noone can provide nor override them).
+
+**NOTE:** Instead of defining root code owners in all branches, you may also
+define default code owners in the `refs/meta/config` branch, that then apply to
+all branches (also see [config guide](config-guide.html#codeOwners)).
 
 ### <a id="disableFindOwnersPlugin">11. Disable/uninstall the find-owners plugin
 
