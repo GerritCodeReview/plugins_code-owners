@@ -49,6 +49,10 @@ public class OwnedPathsInfoSubject extends Subject {
     return check("ownedPaths()").that(ownedPathsInfo().ownedPaths);
   }
 
+  public IterableSubject hasOwnedChangedFilesThat() {
+    return check("ownedChangedFiles()").that(ownedPathsInfo().ownedChangedFiles);
+  }
+
   public BooleanSubject hasMoreThat() {
     return check("more()").that(ownedPathsInfo().more);
   }
