@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7267daa0_af63e742",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-25T06:31:44Z",
+      "side": 1,
+      "message": "Thanks for your contribution, but it\u0027s correct that we are linking to the html files here.\n\nWhen the plugin is installed in Gerrit, Gerrit automatically generates the html files out of the md files (it also does some other things like replacing macros).\n\nThe problem was that so far Gerrit servers at Google didn\u0027t support the generation of plugin documentation and this is why the links looked broken.\n\nHowever last week I\u0027ve finished the implementation of hosting plugin documentation at Google and this is working now. This still needs to be rolled out to prd, but you can already see the hosted plugin documentation in canary [1] where the links are working now.\n\n[1] https://canary-android-review.googlesource.com/plugins/code-owners/Documentation/index.html\n",
+      "revId": "30a6378e5bc01b047f815e8f2fffaa89d195afe2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3bcd644d_b837fb2e",
