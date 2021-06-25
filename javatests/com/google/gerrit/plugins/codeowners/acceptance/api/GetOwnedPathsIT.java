@@ -15,13 +15,18 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.gerrit.plugins.codeowners.testing.OwnedChangedFileInfoSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.OwnedPathsInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.gerrit.acceptance.PushOneCommit;
+import com.google.gerrit.acceptance.PushOneCommit.Result;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.extensions.api.changes.PublishChangeEditInput;
+import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.UnprocessableEntityException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -29,6 +34,9 @@ import com.google.gerrit.plugins.codeowners.api.OwnedPathsInfo;
 import com.google.gerrit.plugins.codeowners.restapi.GetOwnedPaths;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import org.junit.Test;
 
 /**
@@ -130,7 +138,151 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .getOwnedPaths()
             .forUser(user.email())
             .get();
+
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasEmptyOldPath();
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasEmptyOldPath();
+
     assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isNull();
+  }
+
+  @Test
+  public void getOwnedPathsForDeletedFiles() throws Exception {
+    setAsCodeOwners("/foo/", user);
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+
+    createChange(
+            "Change Adding Files",
+            ImmutableMap.of(
+                JgitPath.of(path1).get(),
+                "file content 1",
+                JgitPath.of(path2).get(),
+                "file content 2",
+                JgitPath.of(path3).get(),
+                "file content 3"))
+        .getChangeId();
+
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Change Deleting Files",
+            ImmutableMap.of(
+                JgitPath.of(path1).get(),
+                "file content 1",
+                JgitPath.of(path2).get(),
+                "file content 2",
+                JgitPath.of(path3).get(),
+                "file content 3"));
+    Result r = push.rm("refs/for/master");
+    r.assertOkStatus();
+    String changeId = r.getChangeId();
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .get();
+
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasEmptyNewPath();
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedOldPath(path1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasEmptyNewPath();
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedOldPath(path2);
+
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isNull();
+  }
+
+  @Test
+  public void getOwnedPathsForRenamedFiles() throws Exception {
+    setAsCodeOwners("/foo/", user);
+
+    // Rename 1: user owns old and new path
+    String newPath1 = "/foo/test1.md";
+    String oldPath1 = "/foo/bar/test1.md";
+
+    // Rename 2: user owns only new path
+    String newPath2 = "/foo/test2.md";
+    String oldPath2 = "/other/test2.md";
+
+    // Rename 3: user owns only old path
+    String newPath3 = "/other/test3.md";
+    String oldPath3 = "/foo/test3.md";
+
+    // Rename 4: user owns neither old nor new path
+    String newPath4 = "/other/test4.md";
+    String oldPath4 = "/other/foo/test4.md";
+
+    String changeId1 =
+        createChange(
+                "Change Adding Files",
+                ImmutableMap.of(
+                    JgitPath.of(oldPath1).get(),
+                    "file content 1",
+                    JgitPath.of(oldPath2).get(),
+                    "file content 2",
+                    JgitPath.of(oldPath3).get(),
+                    "file content 3",
+                    JgitPath.of(oldPath4).get(),
+                    "file content 4"))
+            .getChangeId();
+
+    // The PushOneCommit test API doesn't support renaming files in a change. Use the change edit
+    // Java API instead.
+    ChangeInput changeInput = new ChangeInput();
+    changeInput.project = project.get();
+    changeInput.branch = "master";
+    changeInput.subject = "Change Renaming Files";
+    changeInput.baseChange = changeId1;
+    String changeId2 = gApi.changes().create(changeInput).get().changeId;
+    gApi.changes().id(changeId2).edit().create();
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath1).get(), JgitPath.of(newPath1).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath2).get(), JgitPath.of(newPath2).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath3).get(), JgitPath.of(newPath3).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath4).get(), JgitPath.of(newPath4).get());
+    gApi.changes().id(changeId2).edit().publish(new PublishChangeEditInput());
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId2)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .get();
+
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(newPath1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedOldPath(oldPath1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(newPath2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNonOwnedOldPath(oldPath2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasNonOwnedNewPath(newPath3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedOldPath(oldPath3);
+
+    List<String> ownedPaths = Arrays.asList(newPath1, oldPath1, newPath2, oldPath3);
+    Collections.sort(ownedPaths);
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths).inOrder();
+
     assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
@@ -368,6 +520,203 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .get();
     assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path2, path3).inOrder();
     assertThat(ownedPathsInfo).hasMoreThat().isTrue();
+  }
+
+  @Test
+  public void getOwnedPathsForRenamedFilesWithLimit() throws Exception {
+    setAsCodeOwners("/foo/", user);
+
+    // Rename 1: user owns old and new path
+    String newPath1 = "/foo/test1.md";
+    String oldPath1 = "/foo/bar/test1.md";
+
+    // Rename 2: user owns only new path
+    String newPath2 = "/foo/test2.md";
+    String oldPath2 = "/other/test2.md";
+
+    // Rename 3: user owns only old path
+    String newPath3 = "/other/test3.md";
+    String oldPath3 = "/foo/test3.md";
+
+    // Rename 4: user owns neither old nor new path
+    String newPath4 = "/other/test4.md";
+    String oldPath4 = "/other/foo/test4.md";
+
+    String changeId1 =
+        createChange(
+                "Change Adding Files",
+                ImmutableMap.of(
+                    JgitPath.of(oldPath1).get(),
+                    "file content 1",
+                    JgitPath.of(oldPath2).get(),
+                    "file content 2",
+                    JgitPath.of(oldPath3).get(),
+                    "file content 3",
+                    JgitPath.of(oldPath4).get(),
+                    "file content 4"))
+            .getChangeId();
+
+    // The PushOneCommit test API doesn't support renaming files in a change. Use the change edit
+    // Java API instead.
+    ChangeInput changeInput = new ChangeInput();
+    changeInput.project = project.get();
+    changeInput.branch = "master";
+    changeInput.subject = "Change Renaming Files";
+    changeInput.baseChange = changeId1;
+    String changeId2 = gApi.changes().create(changeInput).get().changeId;
+    gApi.changes().id(changeId2).edit().create();
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath1).get(), JgitPath.of(newPath1).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath2).get(), JgitPath.of(newPath2).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath3).get(), JgitPath.of(newPath3).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath4).get(), JgitPath.of(newPath4).get());
+    gApi.changes().id(changeId2).edit().publish(new PublishChangeEditInput());
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId2)
+            .current()
+            .getOwnedPaths()
+            .withLimit(1)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(newPath1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedOldPath(oldPath1);
+    List<String> ownedPaths = Arrays.asList(newPath1, oldPath1);
+    Collections.sort(ownedPaths);
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths);
+    assertThat(ownedPathsInfo).hasMoreThat().isTrue();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId2)
+            .current()
+            .getOwnedPaths()
+            .withLimit(2)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(newPath1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedOldPath(oldPath1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(newPath2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNonOwnedOldPath(oldPath2);
+    ownedPaths = Arrays.asList(newPath1, oldPath1, newPath2);
+    Collections.sort(ownedPaths);
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isTrue();
+
+    ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId2)
+            .current()
+            .getOwnedPaths()
+            .withLimit(3)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(newPath1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedOldPath(oldPath1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(newPath2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNonOwnedOldPath(oldPath2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasNonOwnedNewPath(newPath3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedOldPath(oldPath3);
+    ownedPaths = Arrays.asList(newPath1, oldPath1, newPath2, oldPath3);
+    Collections.sort(ownedPaths);
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths).inOrder();
+    assertThat(ownedPathsInfo).hasMoreThat().isNull();
+  }
+
+  @Test
+  public void getOwnedPathsForRenamedFilesWithStartAndLimit() throws Exception {
+    setAsCodeOwners("/foo/", user);
+
+    // Rename 1: user owns old and new path
+    String newPath1 = "/foo/test1.md";
+    String oldPath1 = "/foo/bar/test1.md";
+
+    // Rename 2: user owns only new path
+    String newPath2 = "/foo/test2.md";
+    String oldPath2 = "/other/test2.md";
+
+    // Rename 3: user owns only old path
+    String newPath3 = "/other/test3.md";
+    String oldPath3 = "/foo/test3.md";
+
+    // Rename 4: user owns neither old nor new path
+    String newPath4 = "/other/test4.md";
+    String oldPath4 = "/other/foo/test4.md";
+
+    String changeId1 =
+        createChange(
+                "Change Adding Files",
+                ImmutableMap.of(
+                    JgitPath.of(oldPath1).get(),
+                    "file content 1",
+                    JgitPath.of(oldPath2).get(),
+                    "file content 2",
+                    JgitPath.of(oldPath3).get(),
+                    "file content 3",
+                    JgitPath.of(oldPath4).get(),
+                    "file content 4"))
+            .getChangeId();
+
+    // The PushOneCommit test API doesn't support renaming files in a change. Use the change edit
+    // Java API instead.
+    ChangeInput changeInput = new ChangeInput();
+    changeInput.project = project.get();
+    changeInput.branch = "master";
+    changeInput.subject = "Change Renaming Files";
+    changeInput.baseChange = changeId1;
+    String changeId2 = gApi.changes().create(changeInput).get().changeId;
+    gApi.changes().id(changeId2).edit().create();
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath1).get(), JgitPath.of(newPath1).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath2).get(), JgitPath.of(newPath2).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath3).get(), JgitPath.of(newPath3).get());
+    gApi.changes()
+        .id(changeId2)
+        .edit()
+        .renameFile(JgitPath.of(oldPath4).get(), JgitPath.of(newPath4).get());
+    gApi.changes().id(changeId2).edit().publish(new PublishChangeEditInput());
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId2)
+            .current()
+            .getOwnedPaths()
+            .withStart(1)
+            .withLimit(2)
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(newPath2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasNonOwnedOldPath(oldPath2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNonOwnedNewPath(newPath3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedOldPath(oldPath3);
+    List<String> ownedPaths = Arrays.asList(newPath2, oldPath3);
+    Collections.sort(ownedPaths);
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths);
+    assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
   @Test
