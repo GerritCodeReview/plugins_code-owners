@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "f4467a4f_3ca68b0c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-25T06:38:24Z",
+      "side": 1,
+      "message": "Actually it\u0027s seems that the rollout to prd was already done, so you can also the browse the documentation there:\nhttps://android-review.googlesource.com/plugins/code-owners/Documentation/index.html",
+      "parentUuid": "7267daa0_af63e742",
+      "revId": "30a6378e5bc01b047f815e8f2fffaa89d195afe2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3bcd644d_b837fb2e",
