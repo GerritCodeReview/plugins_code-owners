@@ -24,11 +24,25 @@ import java.util.List;
  */
 public class OwnedPathsInfo {
   /**
-   * List of the owned paths.
+   * List of files that were changed in a change for which the user owns the new path, the old path
+   * or both paths.
+   *
+   * <p>The entries are sorted alphabetically by new path, and by old path if new path is not
+   * present.
+   *
+   * <p>Contains at most as many entries as the limit that was specified on the request.
+   */
+  public List<OwnedChangedFileInfo> ownedChangedFiles;
+
+  /**
+   * The list of the owned new and old paths that are contained in {@link #ownedChangedFiles}.
    *
    * <p>The paths are returned as absolute paths.
    *
    * <p>The paths are sorted alphabetically.
+   *
+   * <p>May contain more entries than the limit that was specified on the request (if the users owns
+   * new and old path of renamed files).
    */
   public List<String> ownedPaths;
 
