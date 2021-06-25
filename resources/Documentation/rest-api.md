@@ -521,7 +521,7 @@ code owners are returned in this order:
 1\. + 2. [score=0] User A and User B (random order since they have the same score)\
 3\. [score=1] User C\
 4\. + 5. [score=1] 2 Random Users (because `*` is resolved to random users since `resolve-all-users` is `true`)\
-* `owned_by_all_users` in the response is `true`
+- `owned_by_all_users` in the response is `true`
 
 If the request is done with `resolve-all-users=false` and `limit=5` the following
 code owners are returned in this order:
@@ -530,7 +530,7 @@ code owners are returned in this order:
 3\. [score=1] User C\
 4\. [score=2] User D\
 5\. [score=3] User E\
-* `owned_by_all_users` in the response is `true`
+- `owned_by_all_users` in the response is `true`
 
 #### <a id="rootOwnersFaq">Why are root code owners not suggested first?
 
