@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "98dafe9e_816c8058",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/AbstractFileBasedCodeOwnerBackend.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T10:52:37Z",
+      "side": 1,
+      "message": "this is a lot of code just to log, maybe doing readable pathExpression#toString and branchNameKey#toString methods could help?\n\nThis makes the logs a bit less readable but it makes the code more readable imo:\nlog(\"path expression syntax %s configured (or not) for branch/project %s\", pathExpressions, branchNameKey);\n\ntbh I should have given this comment 200 changes ago, my bad, optional (especially since this makes the logs a bit less readable) :-)",
+      "range": {
+        "startLine": 239,
+        "startChar": 0,
+        "endLine": 251,
+        "endChar": 0
+      },
+      "revId": "bd3dd8822ef2e80d502b3a42043439414af1141d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "268b56fa_34a5b291",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathExpressions.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T10:52:37Z",
+      "side": 1,
+      "message": "which exceptions could be thrown here other than IllegalArgument?",
+      "range": {
+        "startLine": 51,
+        "startChar": 42,
+        "endLine": 51,
+        "endChar": 50
+      },
+      "revId": "bd3dd8822ef2e80d502b3a42043439414af1141d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5664c40b_c38038ed",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/BackendConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 290,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T10:52:37Z",
+      "side": 1,
+      "message": "do we really want to throw an exception here? maybe just log without throwing?\nOtherwise bad path expressions can break the plugin by mistake.\n\nSame below",
+      "range": {
+        "startLine": 290,
+        "startChar": 26,
+        "endLine": 290,
+        "endChar": 61
+      },
+      "revId": "bd3dd8822ef2e80d502b3a42043439414af1141d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e87c31be_6c1fdb58",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/BackendConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 354,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T10:52:37Z",
+      "side": 1,
+      "message": "we should throw this exception during validation on push/submit, though. Can we do that?",
+      "range": {
+        "startLine": 354,
+        "startChar": 26,
+        "endLine": 354,
+        "endChar": 61
+      },
+      "revId": "bd3dd8822ef2e80d502b3a42043439414af1141d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7cbed986_e04d36eb",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 691,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T10:52:37Z",
+      "side": 1,
+      "message": "I think the previous one is worse (at least from security perceptive).",
+      "range": {
+        "startLine": 691,
+        "startChar": 51,
+        "endLine": 691,
+        "endChar": 64
+      },
+      "revId": "bd3dd8822ef2e80d502b3a42043439414af1141d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8e2e9a54_ddd5b1ae",
+        "filename": "resources/Documentation/path-expressions.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T10:52:37Z",
+      "side": 1,
+      "message": "or it can be overridden per project or branch by ..",
+      "range": {
+        "startLine": 28,
+        "startChar": 72,
+        "endLine": 28,
+        "endChar": 74
+      },
+      "revId": "bd3dd8822ef2e80d502b3a42043439414af1141d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
