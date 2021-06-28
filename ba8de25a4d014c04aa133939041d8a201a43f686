@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f7359b28_e4c0c0ae",
+        "filename": "resources/Documentation/how-to-use.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T11:06:27Z",
+      "side": 1,
+      "message": "it/here",
+      "range": {
+        "startLine": 124,
+        "startChar": 0,
+        "endLine": 124,
+        "endChar": 4
+      },
+      "revId": "ba8de25a4d014c04aa133939041d8a201a43f686",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "769d69db_745592a3",
+        "filename": "resources/Documentation/how-to-use.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 219,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T11:06:27Z",
+      "side": 1,
+      "message": "it/here",
+      "range": {
+        "startLine": 219,
+        "startChar": 2,
+        "endLine": 219,
+        "endChar": 6
+      },
+      "revId": "ba8de25a4d014c04aa133939041d8a201a43f686",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
