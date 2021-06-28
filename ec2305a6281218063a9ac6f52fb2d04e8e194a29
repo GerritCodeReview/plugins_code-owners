@@ -46,6 +46,30 @@
       },
       "revId": "ec2305a6281218063a9ac6f52fb2d04e8e194a29",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "578d59a3_01b18aa7",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-06-28T11:32:04Z",
+      "side": 1,
+      "message": "Maybe start with \"/\"? aka /Documentation/config-labels.html#label_function\nAn absolute path starts with \u0027/\u0027 in general, and relative path starts without \u0027/\u0027: \nhttps://docs.oracle.com/javase/tutorial/essential/io/path.html#:~:text\u003dA%20path%20is%20either%20relative,required%20to%20locate%20the%20file.\u0026text\u003dA%20relative%20path%20needs%20to,foo%20is%20a%20relative%20path.",
+      "parentUuid": "05a1bcab_9277f067",
+      "range": {
+        "startLine": 83,
+        "startChar": 13,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "ec2305a6281218063a9ac6f52fb2d04e8e194a29",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
