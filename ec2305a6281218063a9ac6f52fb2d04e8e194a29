@@ -22,6 +22,30 @@
       },
       "revId": "ec2305a6281218063a9ac6f52fb2d04e8e194a29",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "05a1bcab_9277f067",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-28T11:29:09Z",
+      "side": 1,
+      "message": "Not sure how.\n\nThis page is hosted under\n\n  /plugins/code-owners/Documentation/user-guide.html\n  \nwhile the Gerrit core documentation is hosted under\n\n  /Documentation/",
+      "parentUuid": "e8565c6f_71804d40",
+      "range": {
+        "startLine": 83,
+        "startChar": 13,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "ec2305a6281218063a9ac6f52fb2d04e8e194a29",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
