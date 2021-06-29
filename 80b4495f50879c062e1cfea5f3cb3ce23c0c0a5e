@@ -22,6 +22,30 @@
       },
       "revId": "80b4495f50879c062e1cfea5f3cb3ce23c0c0a5e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0785011f_ee7ac18f",
+        "filename": "resources/Documentation/setup-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 367,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-29T14:59:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d3d8bd08_33a23f8c",
+      "range": {
+        "startLine": 367,
+        "startChar": 64,
+        "endLine": 367,
+        "endChar": 67
+      },
+      "revId": "80b4495f50879c062e1cfea5f3cb3ce23c0c0a5e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
