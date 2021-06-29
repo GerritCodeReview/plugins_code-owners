@@ -70,6 +70,30 @@
       },
       "revId": "ec2305a6281218063a9ac6f52fb2d04e8e194a29",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "af6c42b5_cbcbb9e8",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-06-29T14:58:00Z",
+      "side": 1,
+      "message": "Good idea. It seems to work with upstream Gerrit. \nLet\u0027s change it here to test if this also works with our doc hosting. If yes, we can update all the other links to Gerrit core documentation as well.",
+      "parentUuid": "578d59a3_01b18aa7",
+      "range": {
+        "startLine": 83,
+        "startChar": 13,
+        "endLine": 83,
+        "endChar": 22
+      },
+      "revId": "ec2305a6281218063a9ac6f52fb2d04e8e194a29",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
