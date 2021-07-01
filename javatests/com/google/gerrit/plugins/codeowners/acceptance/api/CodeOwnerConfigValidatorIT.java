@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
@@ -1768,6 +1769,43 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
           throws Exception {
     testForMergeCommitsThatNonResolvableImportsFromOtherProjectsAreReportedAsWarningsIfImportsDontSpecifyBranch(
         CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportWithImportModeAll() throws Exception {
+    assume().that(backendConfig.getDefaultBackend()).isInstanceOf(FindOwnersBackend.class);
+
+    // create a code owner config that can be imported
+    CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .folderPath("/")
+            .addCodeOwnerEmail(user.email())
+            .create();
+    GitUtil.fetch(testRepo, "refs/*:refs/*");
+
+    // codeOwnerConfigOperations cannot create a code owner config that has a per file import with
+    // import mode ALL, hence we just hard-code the contents of the OWNERS file here.
+    String codeOwnerConfig =
+        "per-file foo=include "
+            + codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).getFilePath();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            codeOwnerConfig);
+    assertFatalWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            project,
+            "keyword 'include' is not supported for per file imports: " + codeOwnerConfig));
   }
 
   @Test

@@ -709,18 +709,17 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
     // The 'include' keyword is used to for imports with import mode ALL, but it is not supported
     // for per-file imports. Trying to use it anyway should result in a proper error message.
     String line = "per-file foo=include /foo/bar/OWNERS";
-    IllegalStateException exception =
+    CodeOwnerConfigParseException exception =
         assertThrows(
-            IllegalStateException.class,
+            CodeOwnerConfigParseException.class,
             () ->
                 codeOwnerConfigParser.parse(
                     TEST_REVISION, CodeOwnerConfig.Key.create(project, "master", "/"), line));
-    assertThat(exception)
-        .hasMessageThat()
-        .isEqualTo(
-            String.format(
-                "import mode %s is unsupported for per file import: %s",
-                CodeOwnerConfigImportMode.ALL.name(), line));
+    assertThat(exception).hasMessageThat().isEqualTo("invalid code owner config file");
+    exception
+        .getFullMessage("OWNERS")
+        .contains(
+            String.format("keyword 'include' is not supported for per file import: %s", line));
   }
 
   @Test

@@ -239,7 +239,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       }
     }
 
-    private static CodeOwnerSet parsePerFileLine(String line) {
+    private CodeOwnerSet parsePerFileLine(String line) {
       Matcher perFileMatcher = PAT_PER_FILE.matcher(line);
       if (!perFileMatcher.matches() || !isGlobs(perFileMatcher.group(1).trim())) {
         return null;
@@ -247,11 +247,16 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
       String matchedGroup2 = perFileMatcher.group(2).trim();
       if (!PAT_PER_FILE_OWNERS.matcher(matchedGroup2).matches()) {
-        checkState(
-            !PAT_PER_FILE_INCLUDE.matcher(matchedGroup2).matches(),
-            "import mode %s is unsupported for per file import: %s",
-            CodeOwnerConfigImportMode.ALL.name(),
-            line);
+        if (PAT_PER_FILE_INCLUDE.matcher(matchedGroup2).matches()) {
+          error(
+              ValidationError.create(
+                  String.format(
+                      "keyword 'include' is not supported for per file imports: %s", line)));
+
+          // return an empty code owner set to avoid that the line will be reported as invalid once
+          // more
+          return CodeOwnerSet.builder().build();
+        }
         return null;
       }
 
