@@ -346,6 +346,9 @@ Examples (not an exhaustive list):
   approvals](config.html#pluginCodeOwnersExemptPureReverts).
 * [Users that are exempted from requiring code owner
   approvals](config.html#pluginCodeOwnersExemptedUser)
+* [configure](config.html#pluginCodeOwnersPathExpressions) a different syntax
+  for [path expressions](path-expressions.html) in code owner config files (e.g.
+  use plain globs)
 
 ### <a id="stopUsingFindOwners">9.Stop using the find-owners Prolog submit rule
 
