@@ -19,6 +19,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
@@ -35,7 +36,6 @@ import com.google.inject.util.Providers;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -200,7 +200,7 @@ public class TestPathExpressionsTest extends AbstractCodeOwnersTest {
 
     @Override
     public Optional<CodeOwnerConfig> getCodeOwnerConfig(
-        CodeOwnerConfig.Key codeOwnerConfigKey, RevWalk revWalk, ObjectId revision) {
+        CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision) {
       throw new UnsupportedOperationException();
     }
 
@@ -218,7 +218,7 @@ public class TestPathExpressionsTest extends AbstractCodeOwnersTest {
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.ofNullable(pathExpressionMatcher);
     }
   }

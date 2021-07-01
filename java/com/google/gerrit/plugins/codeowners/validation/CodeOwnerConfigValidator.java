@@ -66,6 +66,7 @@ import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
 import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
@@ -82,7 +83,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
-import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
@@ -204,8 +204,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           validationResult =
               validateCodeOwnerConfig(
                   receiveEvent.getBranchNameKey(),
-                  receiveEvent.repoConfig,
-                  receiveEvent.revWalk,
                   receiveEvent.commit,
                   receiveEvent.user,
                   codeOwnerConfigValidationPolicy.isForced(),
@@ -294,8 +292,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           validationResult =
               validateCodeOwnerConfig(
                   branchNameKey,
-                  repository.getConfig(),
-                  revWalk,
                   commit,
                   patchSetUploader,
                   codeOwnerConfigValidationPolicy.isForced(),
@@ -337,7 +333,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *
    * @param branchNameKey the project and branch that contains the provided commit or for which the
    *     commit is being pushed
-   * @param revWalk the rev walk that should be used to load revCommit
    * @param revCommit the commit for which newly added and modified code owner configs should be
    *     validated
    * @param user user for which the code owner visibility checks should be performed
@@ -348,8 +343,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    */
   private Optional<ValidationResult> validateCodeOwnerConfig(
       BranchNameKey branchNameKey,
-      Config repoConfig,
-      RevWalk revWalk,
       RevCommit revCommit,
       IdentifiedUser user,
       boolean force,
@@ -417,12 +410,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
       ImmutableList<ChangedFile> modifiedCodeOwnerConfigFiles =
           changedFiles
-              .compute(
-                  branchNameKey.project(),
-                  repoConfig,
-                  revWalk,
-                  revCommit,
-                  MergeCommitStrategy.ALL_CHANGED_FILES)
+              .getOrCompute(
+                  branchNameKey.project(), revCommit, MergeCommitStrategy.ALL_CHANGED_FILES)
               .stream()
               // filter out deletions (files without new path)
               .filter(changedFile -> changedFile.newPath().isPresent())
@@ -448,12 +437,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   .flatMap(
                       changedFile ->
                           validateCodeOwnerConfig(
-                              user,
-                              codeOwnerBackend,
-                              branchNameKey,
-                              changedFile,
-                              revWalk,
-                              revCommit))));
+                              user, codeOwnerBackend, branchNameKey, changedFile, revCommit))));
     } catch (InvalidPluginConfigurationException e) {
       // If the code-owners plugin configuration is invalid we cannot get the code owners backend
       // and hence we are not able to detect and validate code owner config files. Instead of
@@ -473,7 +457,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   "code-owners plugin configuration is invalid,"
                       + " cannot validate code owner config files",
                   ValidationMessage.Type.WARNING)));
-    } catch (IOException e) {
+    } catch (IOException | DiffNotAvailableException e) {
       String errorMessage =
           String.format(
               "failed to validate code owner config files in revision %s"
@@ -491,7 +475,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param codeOwnerBackend the code owner backend from which the code owner config can be loaded
    * @param branchNameKey the project and branch of the code owner config
    * @param changedFile the changed file that represents the code owner config
-   * @param revWalk the rev walk that should be used to load revCommit
    * @param revCommit the commit from which the code owner config should be loaded
    * @return a stream of validation messages that describe issues with the code owner config, an
    *     empty stream if there are no issues
@@ -501,13 +484,11 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       ChangedFile changedFile,
-      RevWalk revWalk,
       RevCommit revCommit) {
     requireNonNull(user, "user");
     requireNonNull(codeOwnerBackend, "codeOwnerBackend");
     requireNonNull(branchNameKey, "branchNameKey");
     requireNonNull(changedFile, "changedFile");
-    requireNonNull(revWalk, "revWalk");
     requireNonNull(revCommit, "revCommit");
 
     if (!changedFile.newPath().isPresent()) {
@@ -524,7 +505,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           createCodeOwnerConfigKey(branchNameKey, changedFile.newPath().get());
       codeOwnerConfig =
           codeOwnerBackend
-              .getCodeOwnerConfig(codeOwnerConfigKey, revWalk, revCommit)
+              .getCodeOwnerConfig(codeOwnerConfigKey, revCommit)
               // We already know that the path exists, so either the code owner config is
               // successfully loaded (this case) or the loading fails with an exception because the
               // code owner config is not parseable (catch block below), but it cannot happen that
@@ -553,7 +534,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           new CommitValidationMessage(
               invalidCodeOwnerConfigException.get().getMessage(),
               getValidationMessageTypeForParsingError(
-                  codeOwnerBackend, branchNameKey, changedFile, revWalk, revCommit)));
+                  codeOwnerBackend, branchNameKey, changedFile, revCommit)));
     }
 
     // The code owner config was successfully loaded and parsed.
@@ -564,15 +545,14 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     Optional<CodeOwnerConfig> baseCodeOwnerConfig;
     try {
       baseCodeOwnerConfig =
-          getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revWalk, revCommit);
+          getBaseCodeOwnerConfig(codeOwnerBackend, branchNameKey, changedFile, revCommit);
     } catch (CodeOwnersInternalServerErrorException codeOwnersInternalServerErrorException) {
       if (getInvalidCodeOwnerConfigCause(codeOwnersInternalServerErrorException).isPresent()) {
         // The base code owner config is non-parseable. Since the update makes the code owner
         // config parseable, it is a good update even if the code owner config still contains
         // issues. Hence in this case we downgrade all validation errors in the new version to
         // warnings so that the update is not blocked.
-        return validateCodeOwnerConfig(
-                branchNameKey, revWalk, user, codeOwnerBackend, codeOwnerConfig)
+        return validateCodeOwnerConfig(branchNameKey, user, codeOwnerBackend, codeOwnerConfig)
             .map(CodeOwnerConfigValidator::downgradeErrorToWarning);
       }
 
@@ -583,14 +563,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     // Validate the parsed code owner config.
     if (baseCodeOwnerConfig.isPresent()) {
       return validateCodeOwnerConfig(
-          branchNameKey,
-          revWalk,
-          user,
-          codeOwnerBackend,
-          codeOwnerConfig,
-          baseCodeOwnerConfig.get());
+          branchNameKey, user, codeOwnerBackend, codeOwnerConfig, baseCodeOwnerConfig.get());
     }
-    return validateCodeOwnerConfig(branchNameKey, revWalk, user, codeOwnerBackend, codeOwnerConfig);
+    return validateCodeOwnerConfig(branchNameKey, user, codeOwnerBackend, codeOwnerConfig);
   }
 
   /**
@@ -621,7 +596,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param branchNameKey the project and branch of the base code owner config
    * @param changedFile the changed file of the code owner config that contains the path of the base
    *     code owner config as old path
-   * @param revWalk rev walk that should be used to load the base code owner config
    * @param revCommit the commit of the code owner config for which the base code owner config
    *     should be loaded
    * @return the loaded base code owner config, {@link Optional#empty()} if no base code owner
@@ -631,15 +605,13 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       ChangedFile changedFile,
-      RevWalk revWalk,
       RevCommit revCommit) {
     if (changedFile.oldPath().isPresent()) {
       Optional<ObjectId> parentRevision = getParentRevision(branchNameKey.project(), revCommit);
       if (parentRevision.isPresent()) {
         CodeOwnerConfig.Key baseCodeOwnerConfigKey =
             createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
-        return codeOwnerBackend.getCodeOwnerConfig(
-            baseCodeOwnerConfigKey, revWalk, parentRevision.get());
+        return codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision.get());
       }
     }
     return Optional.empty();
@@ -665,7 +637,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param codeOwnerBackend the code owner backend from which the code owner config can be loaded
    * @param branchNameKey the project and branch of the code owner config
    * @param changedFile the changed file that represents the code owner config
-   * @param revWalk rev walk that should be used to load the code owner config
    * @param revCommit the commit from which the code owner config should be loaded
    * @return the {@link com.google.gerrit.server.git.validators.ValidationMessage.Type} (ERROR or
    *     WARNING) that should be used for parsing error of a code owner config file
@@ -674,7 +645,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerBackend codeOwnerBackend,
       BranchNameKey branchNameKey,
       ChangedFile changedFile,
-      RevWalk revWalk,
       RevCommit revCommit) {
     //
     if (changedFile.oldPath().isPresent()) {
@@ -693,7 +663,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
         // there.
         CodeOwnerConfig.Key baseCodeOwnerConfigKey =
             createCodeOwnerConfigKey(branchNameKey, changedFile.oldPath().get());
-        codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, revWalk, parentRevision);
+        codeOwnerBackend.getCodeOwnerConfig(baseCodeOwnerConfigKey, parentRevision);
         // The code owner config at the parent revision is parseable. This means the parsing error
         // is introduced by the new commit and we should block uploading it, which we achieve by
         // setting the validation message type to fatal.
@@ -757,7 +727,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * they are not newly introduced by the given code owner config).
    *
    * @param branchNameKey the branch and the project
-   * @param revWalk rev walk that should be used to load the code owner configs
    * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerBackend the code owner backend from which the code owner configs were loaded
    * @param codeOwnerConfig the code owner config that should be validated
@@ -767,7 +736,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    */
   private Stream<CommitValidationMessage> validateCodeOwnerConfig(
       BranchNameKey branchNameKey,
-      RevWalk revWalk,
       IdentifiedUser user,
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig codeOwnerConfig,
@@ -776,9 +744,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     requireNonNull(baseCodeOwnerConfig, "baseCodeOwnerConfig");
 
     ImmutableSet<CommitValidationMessage> issuesInBaseVersion =
-        validateCodeOwnerConfig(branchNameKey, revWalk, user, codeOwnerBackend, baseCodeOwnerConfig)
+        validateCodeOwnerConfig(branchNameKey, user, codeOwnerBackend, baseCodeOwnerConfig)
             .collect(toImmutableSet());
-    return validateCodeOwnerConfig(branchNameKey, revWalk, user, codeOwnerBackend, codeOwnerConfig)
+    return validateCodeOwnerConfig(branchNameKey, user, codeOwnerBackend, codeOwnerConfig)
         .map(
             commitValidationMessage ->
                 issuesInBaseVersion.contains(commitValidationMessage)
@@ -790,7 +758,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * Validates the given code owner config and returns validation issues as stream.
    *
    * @param branchNameKey the branch and the project
-   * @param revWalk rev walk that should be used to load the code owner configs from {@code project}
    * @param user user for which the code owner visibility checks should be performed
    * @param codeOwnerBackend the code owner backend from which the code owner config was loaded
    * @param codeOwnerConfig the code owner config that should be validated
@@ -799,7 +766,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    */
   public Stream<CommitValidationMessage> validateCodeOwnerConfig(
       BranchNameKey branchNameKey,
-      RevWalk revWalk,
       IdentifiedUser user,
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig codeOwnerConfig) {
@@ -811,10 +777,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
             codeOwnerBackend.getFilePath(codeOwnerConfig.key()),
             codeOwnerConfig),
         validateImports(
-            branchNameKey,
-            revWalk,
-            codeOwnerBackend.getFilePath(codeOwnerConfig.key()),
-            codeOwnerConfig));
+            branchNameKey, codeOwnerBackend.getFilePath(codeOwnerConfig.key()), codeOwnerConfig));
   }
 
   /**
@@ -891,7 +854,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * Validates the imports of the given code owner config.
    *
    * @param branchNameKey the branch and the project
-   * @param revWalk rev walk that should be used to load the code owner configs from {@code project}
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config
    * @param codeOwnerConfig the code owner config for which the imports should be validated
@@ -899,19 +861,19 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    *     if there are no issues
    */
   private Stream<CommitValidationMessage> validateImports(
-      BranchNameKey branchNameKey,
-      RevWalk revWalk,
-      Path codeOwnerConfigFilePath,
-      CodeOwnerConfig codeOwnerConfig) {
+      BranchNameKey branchNameKey, Path codeOwnerConfigFilePath, CodeOwnerConfig codeOwnerConfig) {
     try {
-      RevCommit codeOwnerConfigRevision = revWalk.parseCommit(codeOwnerConfig.revision());
+      RevCommit codeOwnerConfigRevision;
+      try (Repository repo = repoManager.openRepository(branchNameKey.project());
+          RevWalk revWalk = new RevWalk(repo)) {
+        codeOwnerConfigRevision = revWalk.parseCommit(codeOwnerConfig.revision());
+      }
       return Streams.concat(
               codeOwnerConfig.imports().stream()
                   .map(
                       codeOwnerConfigReference ->
                           validateCodeOwnerConfigReference(
                               branchNameKey,
-                              revWalk,
                               codeOwnerConfigFilePath,
                               codeOwnerConfig.key(),
                               codeOwnerConfigRevision,
@@ -923,7 +885,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                       codeOwnerConfigReference ->
                           validateCodeOwnerConfigReference(
                               branchNameKey,
-                              revWalk,
                               codeOwnerConfigFilePath,
                               codeOwnerConfig.key(),
                               codeOwnerConfigRevision,
@@ -941,7 +902,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * Validates a code owner config reference.
    *
    * @param branchNameKey the branch and the project
-   * @param revWalk rev walk that should be used to load the code owner configs from {@code project}
    * @param codeOwnerConfigFilePath the path of the code owner config file which contains the code
    *     owner config reference
    * @param keyOfImportingCodeOwnerConfig key of the importing code owner config
@@ -954,7 +914,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    */
   private Optional<CommitValidationMessage> validateCodeOwnerConfigReference(
       BranchNameKey branchNameKey,
-      RevWalk revWalk,
       Path codeOwnerConfigFilePath,
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       RevCommit codeOwnerConfigRevision,
@@ -1040,8 +999,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // from it could fail with MissingObjectException.
       Optional<CodeOwnerConfig> importedCodeOwnerConfig =
           keyOfImportedCodeOwnerConfig.project().equals(branchNameKey.project())
-              ? codeOwnerBackend.getCodeOwnerConfig(
-                  keyOfImportedCodeOwnerConfig, revWalk, revision.get())
+              ? codeOwnerBackend.getCodeOwnerConfig(keyOfImportedCodeOwnerConfig, revision.get())
               : codeOwnerBackend.getCodeOwnerConfig(keyOfImportedCodeOwnerConfig, revision.get());
       if (!importedCodeOwnerConfig.isPresent()) {
         return nonResolvableImport(

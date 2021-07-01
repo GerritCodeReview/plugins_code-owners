@@ -26,6 +26,7 @@ import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.project.ProjectConfig;
 import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
@@ -97,7 +98,7 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
             exceptionMessage(fileName, cfg.getRevision()), validationMessages);
       }
       return ImmutableList.of();
-    } catch (IOException | ConfigInvalidException e) {
+    } catch (IOException | DiffNotAvailableException | ConfigInvalidException e) {
       String errorMessage =
           String.format(
               "failed to validate file %s for revision %s in ref %s of project %s",
@@ -124,12 +125,10 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
    * @param fileName the name of the file
    */
   private boolean isFileChanged(CommitReceivedEvent receiveEvent, String fileName)
-      throws IOException {
+      throws IOException, DiffNotAvailableException {
     return changedFiles
-        .compute(
+        .getOrCompute(
             receiveEvent.project.getNameKey(),
-            receiveEvent.repoConfig,
-            receiveEvent.revWalk,
             receiveEvent.commit,
             MergeCommitStrategy.ALL_CHANGED_FILES)
         .stream()

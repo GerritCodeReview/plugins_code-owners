@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
@@ -26,7 +27,6 @@ import com.google.gerrit.server.IdentifiedUser;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Test;
 
 /** Tests for {@link com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId}. */
@@ -50,9 +50,7 @@ public class CodeOwnerBackendIdTest extends AbstractCodeOwnersTest {
   private static class TestCodeOwnerBackend implements CodeOwnerBackend {
     @Override
     public Optional<CodeOwnerConfig> getCodeOwnerConfig(
-        CodeOwnerConfig.Key codeOwnerConfigKey,
-        @Nullable RevWalk revWalk,
-        @Nullable ObjectId revision) {
+        CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
       throw new UnsupportedOperationException("not implemented");
     }
 
@@ -75,7 +73,7 @@ public class CodeOwnerBackendIdTest extends AbstractCodeOwnersTest {
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.empty();
     }
   }

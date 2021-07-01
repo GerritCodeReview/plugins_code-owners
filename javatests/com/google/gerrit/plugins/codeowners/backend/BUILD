@@ -36,6 +36,7 @@ java_library(
         "//java/com/google/gerrit/exceptions",
         "//java/com/google/gerrit/server",
         "//java/com/google/gerrit/testing:gerrit-test-util",
+        "//java/com/google/gerrit/truth",
         "//lib:guava",
         "//lib:jgit",
         "//lib:jgit-junit",

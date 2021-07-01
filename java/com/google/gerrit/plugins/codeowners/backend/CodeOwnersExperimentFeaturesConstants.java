@@ -24,7 +24,8 @@ public final class CodeOwnersExperimentFeaturesConstants {
    * be used to get changed files, instead of computing the changed files on our own.
    *
    * @see ChangedFiles#getOrCompute(com.google.gerrit.entities.Project.NameKey,
-   *     org.eclipse.jgit.lib.ObjectId)
+   *     org.eclipse.jgit.lib.ObjectId,
+   *     com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy)
    */
   public static final String USE_DIFF_CACHE =
       "GerritBackendRequestFeature__code_owners_use_diff_cache";

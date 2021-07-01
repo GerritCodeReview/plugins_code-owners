@@ -15,13 +15,13 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.server.IdentifiedUser;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
 
 /**
  * Interface for code owner backends.
@@ -51,25 +51,8 @@ public interface CodeOwnerBackend {
    *     {@code null} the code owner config is loaded from the current revision of the branch
    * @return code owner config for the given key if it exists, otherwise {@link Optional#empty()}
    */
-  default Optional<CodeOwnerConfig> getCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision) {
-    return getCodeOwnerConfig(codeOwnerConfigKey, /* revWalk= */ null, revision);
-  }
-
-  /**
-   * Gets the code owner config for the given key if it exists.
-   *
-   * @param codeOwnerConfigKey the code owner config key for which the code owner config should be
-   *     returned
-   * @param revWalk optional rev walk, if given this rev walk is used to load the given revision
-   * @param revision the branch revision from which the code owner config should be loaded, if
-   *     {@code null} the code owner config is loaded from the current revision of the branch
-   * @return code owner config for the given key if it exists, otherwise {@link Optional#empty()}
-   */
   Optional<CodeOwnerConfig> getCodeOwnerConfig(
-      CodeOwnerConfig.Key codeOwnerConfigKey,
-      @Nullable RevWalk revWalk,
-      @Nullable ObjectId revision);
+      CodeOwnerConfig.Key codeOwnerConfigKey, @Nullable ObjectId revision);
 
   /**
    * Returns the absolute file path of the specified code owner config.
@@ -111,8 +94,11 @@ public interface CodeOwnerBackend {
    * <p>May return {@link Optional#empty()} if path expressions are not supported by the code owner
    * backend. It this case all {@link CodeOwnerSet}s that have path expressions are ignored and will
    * not have any effect.
+   *
+   * @param branchNameKey project and branch for which the path expression matcher should be
+   *     returned
    */
-  Optional<PathExpressionMatcher> getPathExpressionMatcher();
+  Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey);
 
   /**
    * Replaces the old email in the given code owner config file content with the new email.

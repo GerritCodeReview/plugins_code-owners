@@ -19,6 +19,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project.NameKey;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.registration.DynamicMap;
@@ -35,7 +36,6 @@ import com.google.inject.util.Providers;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
-import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -124,7 +124,7 @@ public class CodeOwnerConfigValidatorErrorHandlingIT extends AbstractCodeOwnersI
 
     @Override
     public Optional<CodeOwnerConfig> getCodeOwnerConfig(
-        CodeOwnerConfig.Key codeOwnerConfigKey, RevWalk revWalk, ObjectId revision) {
+        CodeOwnerConfig.Key codeOwnerConfigKey, ObjectId revision) {
       return Optional.empty();
     }
 
@@ -142,7 +142,7 @@ public class CodeOwnerConfigValidatorErrorHandlingIT extends AbstractCodeOwnersI
     }
 
     @Override
-    public Optional<PathExpressionMatcher> getPathExpressionMatcher() {
+    public Optional<PathExpressionMatcher> getPathExpressionMatcher(BranchNameKey branchNameKey) {
       return Optional.empty();
     }
   }

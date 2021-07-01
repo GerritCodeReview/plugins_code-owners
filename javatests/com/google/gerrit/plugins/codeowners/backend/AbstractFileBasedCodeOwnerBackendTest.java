@@ -21,6 +21,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -486,5 +487,14 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
     assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
         .isEqualTo(
             Paths.get(codeOwnerConfigKey.folderPath() + codeOwnerConfigKey.fileName().get()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
+  public void getConfiguredPathExpressionMatcher() throws Exception {
+    com.google.gerrit.truth.OptionalSubject.assertThat(
+            codeOwnerBackend.getPathExpressionMatcher(BranchNameKey.create(project, "master")))
+        .value()
+        .isInstanceOf(GlobMatcher.class);
   }
 }
