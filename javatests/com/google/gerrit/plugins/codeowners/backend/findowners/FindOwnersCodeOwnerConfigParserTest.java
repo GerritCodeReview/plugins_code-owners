@@ -716,10 +716,9 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                 codeOwnerConfigParser.parse(
                     TEST_REVISION, CodeOwnerConfig.Key.create(project, "master", "/"), line));
     assertThat(exception).hasMessageThat().isEqualTo("invalid code owner config file");
-    exception
-        .getFullMessage("OWNERS")
+    assertThat(exception.getFullMessage("OWNERS"))
         .contains(
-            String.format("keyword 'include' is not supported for per file import: %s", line));
+            String.format("keyword 'include' is not supported for per file imports: %s", line));
   }
 
   @Test
