@@ -39,6 +39,30 @@
       },
       "revId": "28b3a348a410830cd919e998264be87289e3eddd",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "de2727c3_ed4e7ed6",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 7
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2021-07-07T14:30:12Z",
+      "side": 1,
+      "message": "The parameter types would actually be like this, but are not used because it\u0027s a js file:\npath?: string,\noldPath?: string | null\n\nnull possibility for oldPath is due to this: https://gerrit.googlesource.com/gerrit/+/refs/heads/master/polygerrit-ui/app/elements/change/gr-file-list/gr-file-list.ts#1826\n\nThere\u0027s no harm in adding it to #211 though, just not necessary for path parameter. WDYT? I can add it for completeness/safety",
+      "parentUuid": "7e4b7168_c1273f83",
+      "range": {
+        "startLine": 214,
+        "startChar": 52,
+        "endLine": 214,
+        "endChar": 61
+      },
+      "revId": "28b3a348a410830cd919e998264be87289e3eddd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
