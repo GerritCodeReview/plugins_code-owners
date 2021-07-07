@@ -28,6 +28,15 @@ const STATUS_CODE = {
   ERROR: 'error',
   ERROR_OLD_PATH: 'error-old-path',
 };
+const STATUS_PRIORITY_ORDER = [
+  STATUS_CODE.ERROR,
+  STATUS_CODE.ERROR_OLD_PATH,
+  STATUS_CODE.MISSING,
+  STATUS_CODE.PENDING,
+  STATUS_CODE.MISSING_OLD_PATH,
+  STATUS_CODE.PENDING_OLD_PATH,
+  STATUS_CODE.APPROVED,
+];
 const STATUS_ICON = {
   [STATUS_CODE.PENDING]: 'gr-icons:schedule',
   [STATUS_CODE.MISSING]: 'gr-icons:close',
@@ -35,16 +44,18 @@ const STATUS_ICON = {
   [STATUS_CODE.MISSING_OLD_PATH]: 'gr-icons:close',
   [STATUS_CODE.APPROVED]: 'gr-icons:check',
   [STATUS_CODE.ERROR]: 'gr-icons:info-outline',
+  [STATUS_CODE.ERROR]: 'gr-icons:info-outline',
 };
 const STATUS_TOOLTIP = {
   [STATUS_CODE.PENDING]: 'Pending code owner approval',
   [STATUS_CODE.MISSING]: 'Missing code owner approval',
   [STATUS_CODE.PENDING_OLD_PATH]:
-      'Pending code owner approval on pre-renamed file',
+    'Pending code owner approval on pre-renamed file',
   [STATUS_CODE.MISSING_OLD_PATH]:
-      'Missing code owner approval on pre-renamed file',
+    'Missing code owner approval on pre-renamed file',
   [STATUS_CODE.APPROVED]: 'Approved by code owner',
   [STATUS_CODE.ERROR]: 'Failed to fetch code owner status',
+  [STATUS_CODE.ERROR_OLD_PATH]: 'Failed to fetch code owner status',
 };
 
 class BaseEl extends CodeOwnersModelMixin(Polymer.Element) {
@@ -74,8 +85,8 @@ class BaseEl extends CodeOwnersModelMixin(Polymer.Element) {
     if (newerPatchsetUploaded) return true;
 
     const latestPatchset = change.revisions[change.current_revision];
-    // Note: in some special cases, patchNum is undefined on latest patchset like
-    // after publishing the edit, still show for them
+    // Note: in some special cases, patchNum is undefined on latest patchset
+    // like after publishing the edit, still show for them
     // TODO: this should be fixed in Gerrit
     if (patchRange.patchNum === undefined) return false;
     // only show if its latest patchset
@@ -120,6 +131,8 @@ export class OwnerStatusColumnContent extends BaseEl {
     return {
       path: String,
       oldPath: String,
+      cleanlyMergedPaths: Array,
+      cleanlyMergedOldPaths: Array,
       ownerService: Object,
       statusIcon: {
         type: String,
@@ -167,7 +180,8 @@ export class OwnerStatusColumnContent extends BaseEl {
 
   static get observers() {
     return [
-      'computeStatusIcon(model.status, path, oldPath)',
+      'computeStatusIcon(model.status,path, oldPath, cleanlyMergedPaths, ' +
+        'cleanlyMergedOldPaths)',
     ];
   }
 
@@ -176,36 +190,40 @@ export class OwnerStatusColumnContent extends BaseEl {
     this.modelLoader.loadStatus();
   }
 
-  computeStatusIcon(modelStatus, path, oldPath) {
-    if ([modelStatus, path, oldPath].includes(undefined)) return;
-    if (MAGIC_FILES.includes(path)) return;
-
-    const codeOwnerStatusMap = modelStatus.codeOwnerStatusMap;
-    const statusItem = codeOwnerStatusMap.get(path);
-    if (!statusItem) {
-      this.status = STATUS_CODE.ERROR;
+  computeStatusIcon(
+      modelStatus,
+      path,
+      oldPath,
+      cleanlyMergedPaths,
+      cleanlyMergedOldPaths
+  ) {
+    if (
+      modelStatus === undefined ||
+      ([path, oldPath].includes(undefined) && cleanlyMergedPaths === undefined)
+    ) {
       return;
     }
+    const codeOwnerStatusMap = modelStatus.codeOwnerStatusMap;
+    const paths = path === undefined ? cleanlyMergedPaths : [path];
+    const oldPaths = oldPath === undefined ? cleanlyMergedOldPaths : [oldPath];
 
-    const status = statusItem.status;
-    let oldPathStatus = null;
-    if (oldPath !== path) {
-      const oldStatusItem = codeOwnerStatusMap.get(oldPath);
-      if (!oldStatusItem) {
-        this.status = STATUS_CODE.ERROR;
-      } else {
-        oldPathStatus = oldStatusItem.status;
-      }
+    const statuses = paths
+        .filter(path => !MAGIC_FILES.includes(path))
+        .map(path => this._computeStatus(codeOwnerStatusMap.get(path)));
+    // oldPath may contain null, so filter that as well.
+    const oldStatuses = oldPaths
+        .filter(path => !MAGIC_FILES.includes(path) && !!path)
+        .map(path => this._computeStatus(codeOwnerStatusMap.get(path), true));
+    const allStatuses = statuses.concat(oldStatuses);
+    if (allStatuses.length === 0) {
+      return;
     }
-
-    const newPathStatus = this._computeStatus(status);
-    if (!oldPathStatus) {
-      this.status = newPathStatus;
-    } else {
-      this.status = newPathStatus === STATUS_CODE.APPROVED ?
-        this._computeStatus(oldPathStatus, /* oldPath= */ true) :
-        newPathStatus;
-    }
+    this.status = allStatuses.reduce((a, b) => {
+      return STATUS_PRIORITY_ORDER.indexOf(a) <
+        STATUS_PRIORITY_ORDER.indexOf(b)
+        ? a
+        : b;
+    });
   }
 
   _computeIcon(status) {
@@ -216,10 +234,12 @@ export class OwnerStatusColumnContent extends BaseEl {
     return STATUS_TOOLTIP[status];
   }
 
-  _computeStatus(status, oldPath = false) {
-    if (status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
+  _computeStatus(statusItem, oldPath = false) {
+    if (statusItem === undefined) {
+      return oldPath ? STATUS_CODE.ERROR_OLD_PATH : STATUS_CODE.ERROR;
+    } else if (statusItem.status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
       return oldPath ? STATUS_CODE.MISSING_OLD_PATH : STATUS_CODE.MISSING;
-    } else if (status === OwnerStatus.PENDING) {
+    } else if (statusItem.status === OwnerStatus.PENDING) {
       return oldPath ? STATUS_CODE.PENDING_OLD_PATH : STATUS_CODE.PENDING;
     } else {
       return STATUS_CODE.APPROVED;
