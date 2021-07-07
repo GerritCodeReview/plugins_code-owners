@@ -63,6 +63,30 @@
       },
       "revId": "28b3a348a410830cd919e998264be87289e3eddd",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "42bb8eed_3358f034",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 7
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2021-07-07T14:35:31Z",
+      "side": 1,
+      "message": "I guess just comment that oldPath can be null, that is what I missed.",
+      "parentUuid": "de2727c3_ed4e7ed6",
+      "range": {
+        "startLine": 214,
+        "startChar": 52,
+        "endLine": 214,
+        "endChar": 61
+      },
+      "revId": "28b3a348a410830cd919e998264be87289e3eddd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
