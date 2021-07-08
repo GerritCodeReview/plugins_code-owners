@@ -87,6 +87,30 @@
       },
       "revId": "28b3a348a410830cd919e998264be87289e3eddd",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a0ac1f64_151888ef",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 7
+      },
+      "lineNbr": 214,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2021-07-08T10:22:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "42bb8eed_3358f034",
+      "range": {
+        "startLine": 214,
+        "startChar": 52,
+        "endLine": 214,
+        "endChar": 61
+      },
+      "revId": "28b3a348a410830cd919e998264be87289e3eddd",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
