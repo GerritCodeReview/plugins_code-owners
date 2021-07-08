@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4a60b547_c5849dd9",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 8
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2021-07-08T11:39:37Z",
+      "side": 1,
+      "message": "Could this be tested with a unit test?",
+      "revId": "3be32afa504de120292dfe730dbd1944fdf4d942",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
