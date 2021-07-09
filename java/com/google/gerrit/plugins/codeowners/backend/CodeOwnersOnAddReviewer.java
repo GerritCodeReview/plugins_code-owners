@@ -31,7 +31,6 @@ import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.CurrentUser;
-import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.update.BatchUpdate;
 import com.google.gerrit.server.update.BatchUpdateOp;
@@ -64,7 +63,6 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
   private final Provider<CurrentUser> userProvider;
   private final RetryHelper retryHelper;
   private final ChangeNotes.Factory changeNotesFactory;
-  private final AccountCache accountCache;
   private final ChangeMessagesUtil changeMessageUtil;
   private final CodeOwnerMetrics codeOwnerMetrics;
 
@@ -75,7 +73,6 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       Provider<CurrentUser> userProvider,
       RetryHelper retryHelper,
       ChangeNotes.Factory changeNotesFactory,
-      AccountCache accountCache,
       ChangeMessagesUtil changeMessageUtil,
       CodeOwnerMetrics codeOwnerMetrics) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -83,7 +80,6 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
     this.userProvider = userProvider;
     this.retryHelper = retryHelper;
     this.changeNotesFactory = changeNotesFactory;
-    this.accountCache = accountCache;
     this.changeMessageUtil = changeMessageUtil;
     this.codeOwnerMetrics = codeOwnerMetrics;
   }
