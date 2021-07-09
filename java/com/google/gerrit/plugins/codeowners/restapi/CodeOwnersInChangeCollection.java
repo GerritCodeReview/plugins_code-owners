@@ -102,8 +102,7 @@ public class CodeOwnersInChangeCollection
 
   private void checkThatFileExists(
       RevisionResource revisionResource, PathResource pathResource, IdString id)
-      throws RestApiException, IOException, PatchListNotAvailableException,
-          DiffNotAvailableException {
+      throws RestApiException, IOException, DiffNotAvailableException {
     if (!changedFiles.getOrCompute(revisionResource).stream()
         .anyMatch(
             changedFile ->
