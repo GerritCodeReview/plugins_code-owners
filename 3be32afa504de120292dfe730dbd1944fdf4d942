@@ -16,6 +16,24 @@
       "message": "Could this be tested with a unit test?",
       "revId": "3be32afa504de120292dfe730dbd1944fdf4d942",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6b372571_8785d03d",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 8
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2021-07-12T10:48:52Z",
+      "side": 1,
+      "message": "The UI test infra of this plugin has been broken from a long time according to Dmitrii, but somehow not affecting the Zuul Check Pipeline. It uses older tools I\u0027m not familiar with (bower, polymer test CLI) and this file didn\u0027t have any tests to begin with (only service.js has a test file). I\u0027ll see if there is a small fix to get it working so I can introduce a test file.",
+      "parentUuid": "4a60b547_c5849dd9",
+      "revId": "3be32afa504de120292dfe730dbd1944fdf4d942",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
