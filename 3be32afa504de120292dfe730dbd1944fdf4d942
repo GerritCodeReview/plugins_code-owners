@@ -34,6 +34,24 @@
       "parentUuid": "4a60b547_c5849dd9",
       "revId": "3be32afa504de120292dfe730dbd1944fdf4d942",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fca6ce65_52560fed",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 8
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2021-07-12T11:04:02Z",
+      "side": 1,
+      "message": "I was not aware of the test infra being completely broken. :-(\n\nPlease submit as is, if you don\u0027t see a quick fix.",
+      "parentUuid": "6b372571_8785d03d",
+      "revId": "3be32afa504de120292dfe730dbd1944fdf4d942",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
