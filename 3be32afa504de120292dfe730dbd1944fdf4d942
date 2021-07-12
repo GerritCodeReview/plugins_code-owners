@@ -52,6 +52,24 @@
       "parentUuid": "6b372571_8785d03d",
       "revId": "3be32afa504de120292dfe730dbd1944fdf4d942",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cdac04a4_58d55eb1",
+        "filename": "ui/owner-status-column.js",
+        "patchSetId": 8
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2021-07-12T11:38:09Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "fca6ce65_52560fed",
+      "revId": "3be32afa504de120292dfe730dbd1944fdf4d942",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
