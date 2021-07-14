@@ -25,6 +25,7 @@ import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
@@ -118,12 +119,19 @@ class CodeOwnerSubmitRule implements SubmitRule {
       }
       Optional<InvalidPathException> invalidPathException =
           CodeOwnersExceptionHook.getInvalidPathException(t);
+      Optional<InvalidPluginConfigurationException> invalidPluginConfigurationException =
+          CodeOwnersExceptionHook.getInvalidPluginConfigurationCause(t);
       Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
           CodeOwners.getInvalidCodeOwnerConfigCause(t);
       if (invalidPathException.isPresent()) {
         isRuleError = true;
         cause = "invalid_path";
         errorMessage += String.format(" (cause: %s)", invalidPathException.get().getMessage());
+      } else if (invalidPluginConfigurationException.isPresent()) {
+        isRuleError = true;
+        cause = "invalid_plugin_configuration";
+        errorMessage +=
+            String.format(" (cause: %s)", invalidPluginConfigurationException.get().getMessage());
       } else if (invalidCodeOwnerConfigException.isPresent()) {
         isRuleError = true;
         codeOwnerMetrics.countInvalidCodeOwnerConfigFiles.increment(
