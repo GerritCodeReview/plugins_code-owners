@@ -278,10 +278,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
         metaDataUpdate.getCommitBuilder().setAuthor(serverIdent);
       }
       return metaDataUpdate;
-    } catch (Throwable t) {
+    } catch (Exception e) {
+      throw new CodeOwnersInternalServerErrorException("Failed to create MetaDataUpdate", e);
+    } finally {
       metaDataUpdate.close();
-      Throwables.throwIfUnchecked(t);
-      throw new CodeOwnersInternalServerErrorException("Failed to create MetaDataUpdate", t);
     }
   }
 }

@@ -103,13 +103,13 @@ class CodeOwnerSubmitRule implements SubmitRule {
               "Couldn't evaluate code owner statuses for patch set %d of change %d.",
               changeData.currentPatchSet().id().get(), changeData.change().getId().get()));
       return Optional.of(notReady());
-    } catch (Throwable t) {
+    } catch (Exception e) {
       // Whether the exception should be treated as RULE_ERROR.
       // RULE_ERROR must only be returned if the exception is caused by user misconfiguration (e.g.
       // an invalid OWNERS file), but not for internal server errors.
       boolean isRuleError = false;
 
-      String cause = t.getClass().getSimpleName();
+      String cause = e.getClass().getSimpleName();
       String errorMessage = "Failed to evaluate code owner statuses";
       if (changeData != null) {
         errorMessage +=
@@ -118,11 +118,11 @@ class CodeOwnerSubmitRule implements SubmitRule {
                 changeData.currentPatchSet().id().get(), changeData.change().getId().get());
       }
       Optional<InvalidPathException> invalidPathException =
-          CodeOwnersExceptionHook.getInvalidPathException(t);
+          CodeOwnersExceptionHook.getInvalidPathException(e);
       Optional<InvalidPluginConfigurationException> invalidPluginConfigurationException =
-          CodeOwnersExceptionHook.getInvalidPluginConfigurationCause(t);
+          CodeOwnersExceptionHook.getInvalidPluginConfigurationCause(e);
       Optional<InvalidCodeOwnerConfigException> invalidCodeOwnerConfigException =
-          CodeOwners.getInvalidCodeOwnerConfigCause(t);
+          CodeOwners.getInvalidCodeOwnerConfigCause(e);
       if (invalidPathException.isPresent()) {
         isRuleError = true;
         cause = "invalid_path";
@@ -160,7 +160,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
         logger.atWarning().log(errorMessage);
         return Optional.of(ruleError(errorMessage));
       }
-      throw new CodeOwnersInternalServerErrorException(errorMessage, t);
+      throw new CodeOwnersInternalServerErrorException(errorMessage, e);
     }
   }
 
