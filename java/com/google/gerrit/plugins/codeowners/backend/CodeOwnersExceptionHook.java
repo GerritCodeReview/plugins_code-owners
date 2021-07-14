@@ -119,7 +119,7 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
     return getInvalidPluginConfigurationCause(throwable).isPresent();
   }
 
-  private static Optional<InvalidPluginConfigurationException> getInvalidPluginConfigurationCause(
+  public static Optional<InvalidPluginConfigurationException> getInvalidPluginConfigurationCause(
       Throwable throwable) {
     return getCause(InvalidPluginConfigurationException.class, throwable);
   }
