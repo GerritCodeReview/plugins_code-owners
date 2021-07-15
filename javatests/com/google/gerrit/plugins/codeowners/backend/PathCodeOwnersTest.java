@@ -2198,6 +2198,120 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         .isFalse();
   }
 
+  @Test
+  public void transitiveImportsAcrossProjects() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    Project.NameKey otherProject = projectOperations.newProject().create();
+
+    // create importing config
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(
+                        CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "/bar/OWNERS")
+                    .setProject(otherProject)
+                    .build())
+            .create();
+
+    // create imported config in other project
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addImport(CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/baz/OWNERS"))
+        .create();
+
+    // create transitively imported config in other project
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/baz/")
+        .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(user2.email()).build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing code owner config and from the
+    // directly and transitively imported code owner configs in the other project
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email(), user2.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().hasUnresolvedImports())
+        .isFalse();
+  }
+
+  @Test
+  public void transitiveImportsWithRelativePaths() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    Project.NameKey otherProject = projectOperations.newProject().create();
+
+    // create importing config
+    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addImport(
+                CodeOwnerConfigReference.builder(
+                        CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, "bar/OWNERS")
+                    .setProject(otherProject)
+                    .build())
+            .create();
+
+    // create imported config
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/bar/")
+        .addCodeOwnerEmail(user.email())
+        .addImport(CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "baz/OWNERS"))
+        .create();
+
+    // create transitively imported config
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(otherProject)
+        .branch("master")
+        .folderPath("/bar/baz/")
+        .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(user2.email()).build())
+        .create();
+
+    Optional<PathCodeOwners> pathCodeOwners =
+        pathCodeOwnersFactory.create(
+            transientCodeOwnerConfigCacheProvider.get(),
+            importingCodeOwnerConfigKey,
+            projectOperations.project(project).getHead("master"),
+            Paths.get("/foo.md"));
+    assertThat(pathCodeOwners).isPresent();
+
+    // Expectation: we get the global owners from the importing code owner config and from the
+    // directly and transitively imported code owner configs
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().getPathCodeOwners())
+        .comparingElementsUsing(hasEmail())
+        .containsExactly(admin.email(), user.email(), user2.email());
+    assertThat(pathCodeOwners.get().resolveCodeOwnerConfig().get().hasUnresolvedImports())
+        .isFalse();
+  }
+
   private CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
         CodeOwnerConfig.Key.create(BranchNameKey.create(project, "master"), Paths.get("/")),
