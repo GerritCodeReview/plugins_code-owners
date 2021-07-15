@@ -875,7 +875,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
 
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReference =
         CodeOwnerConfigReference.create(
-            CodeOwnerConfigImportMode.ALL, "non-existing/" + getCodeOwnerConfigFileName());
+            CodeOwnerConfigImportMode.ALL, "/non-existing/" + getCodeOwnerConfigFileName());
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
         .project(project)
