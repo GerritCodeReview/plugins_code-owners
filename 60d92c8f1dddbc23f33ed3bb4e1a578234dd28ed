@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8fe33bf4_d6426303",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-07-15T09:58:41Z",
+      "side": 1,
+      "message": "Could this break users that got used to the behavior with the bug?\nAny good way to check this?",
+      "revId": "60d92c8f1dddbc23f33ed3bb4e1a578234dd28ed",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
