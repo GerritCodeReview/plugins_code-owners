@@ -377,7 +377,7 @@ public class PathCodeOwners {
             codeOwnerConfigImport.referenceToImportedCodeOwnerConfig();
         CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
             createKeyForImportedCodeOwnerConfig(
-                keyOfImportingCodeOwnerConfig, codeOwnerConfigReference);
+                codeOwnerConfigImport.importingCodeOwnerConfig(), codeOwnerConfigReference);
 
         try (Timer0.Context ctx2 = codeOwnerMetrics.resolveCodeOwnerConfigImport.start()) {
           logger.atFine().log(
