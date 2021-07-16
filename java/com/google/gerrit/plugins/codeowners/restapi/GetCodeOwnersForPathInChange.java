@@ -21,6 +21,7 @@ import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NO_REV
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.hash.Hashing;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.extensions.common.AccountVisibility;
 import com.google.gerrit.extensions.restapi.Response;
@@ -95,8 +96,13 @@ public class GetCodeOwnersForPathInChange
 
   @Override
   protected Optional<Long> getDefaultSeed(CodeOwnersInChangeCollection.PathResource rsrc) {
-    // use the change number as seed so that the sort order for a change is always stable
-    return Optional.of(Long.valueOf(rsrc.getRevisionResource().getChange().getId().get()));
+    // We are using a hash of the change number as a seed so that the sort order for a change is
+    // always stable.
+    // Using a hash of the change number instead of the change number itself ensures that the seeds
+    // for changes in a change series are very distant. This is important because java.util.Random
+    // is prone to produce the same random numbers for seeds that are nearby.
+    return Optional.of(
+        Hashing.sha256().hashInt(rsrc.getRevisionResource().getChange().getId().get()).asLong());
   }
 
   /**

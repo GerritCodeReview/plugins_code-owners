@@ -1590,4 +1590,57 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             "resolve global code owners",
             String.format("resolved email %s to account %d", admin.email(), admin.id().get()));
   }
+
+  @Test
+  public void getCodeOwnersOrderDiffersIfDifferentSeedsAreUsed() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    // create some code owner configs
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    Random random = new Random();
+
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().withSeed(random.nextLong()), "/foo/bar/baz.md");
+    // all code owners have the same score, hence their order is random
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id(), user2.id());
+
+    // Check that the order for further requests that use a different seed is different (at least
+    // once).
+    List<Account.Id> accountIdsOrder1 =
+        codeOwnersInfo.codeOwners.stream()
+            .map(info -> Account.id(info.account._accountId))
+            .collect(toList());
+    boolean foundDifferentOrder = false;
+    for (int i = 0; i < 50; i++) {
+      codeOwnersInfo =
+          queryCodeOwners(
+              getCodeOwnersApi().query().withSeed(random.nextLong()), "/foo/bar/baz.md");
+      assertThat(codeOwnersInfo)
+          .hasCodeOwnersThat()
+          .comparingElementsUsing(hasAccountId())
+          .containsExactlyElementsIn(accountIdsOrder1);
+
+      List<Account.Id> accountIdsOrder2 =
+          codeOwnersInfo.codeOwners.stream()
+              .map(info -> Account.id(info.account._accountId))
+              .collect(toList());
+      if (!accountIdsOrder2.equals(accountIdsOrder1)) {
+        foundDifferentOrder = true;
+        break;
+      }
+    }
+    assertThat(foundDifferentOrder).isTrue();
+  }
 }
