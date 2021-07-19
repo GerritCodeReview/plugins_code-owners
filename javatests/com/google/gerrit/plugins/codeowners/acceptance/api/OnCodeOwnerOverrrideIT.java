@@ -32,9 +32,11 @@ import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.server.ChangeMessagesUtil;
+import com.google.gerrit.testing.FakeEmailSender.Message;
 import com.google.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Pattern;
 import org.junit.Test;
 
@@ -641,5 +643,31 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
 
     assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Owners-Override-2");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void extendedChangeMessageIsIncludedInEmailNotification() throws Exception {
+    createOwnersOverrideLabel();
+
+    String changeId = createChange().getChangeId();
+
+    // Do the voting as a different user to trigger an email notification (if the only recipient is
+    // also the sender the email is omitted).
+    requestScopeOperations.setApiUser(user.id());
+
+    sender.clear();
+
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    List<Message> messages = sender.getMessages();
+    assertThat(messages).hasSize(1);
+    Message m = messages.get(0);
+    assertThat(m.body())
+        .contains(
+            String.format(
+                "Patch Set 1: Owners-Override+1\n\n"
+                    + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s <%s>\n",
+                user.fullName(), user.email()));
   }
 }

@@ -32,9 +32,11 @@ import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.server.ChangeMessagesUtil;
+import com.google.gerrit.testing.FakeEmailSender.Message;
 import com.google.inject.Inject;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerApproval}. */
@@ -1093,5 +1095,39 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
 
     assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review-2");
+  }
+
+  @Test
+  public void extendedChangeMessageIsIncludedInEmailNotification() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    // Do the voting as a different user to trigger an email notification (if the only recipient is
+    // also the sender the email is omitted).
+    requestScopeOperations.setApiUser(user.id());
+
+    sender.clear();
+
+    recommend(changeId);
+
+    List<Message> messages = sender.getMessages();
+    assertThat(messages).hasSize(1);
+    Message m = messages.get(0);
+    assertThat(m.body())
+        .contains(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s <%s>:\n"
+                    + "* %s\n",
+                user.fullName(), user.email(), path));
   }
 }
