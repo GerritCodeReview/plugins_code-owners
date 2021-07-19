@@ -45,6 +45,30 @@
       },
       "revId": "fd62fcdf9626bf86c1b152a83e969152c3b47554",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ee7170dd_0f4d5ce4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-07-19T11:16:02Z",
+      "side": 1,
+      "message": "I agree it may be a feature, but currently this is not wanted and users complained about this unwanted behaviour.",
+      "parentUuid": "fae7fd35_f0fd3d8c",
+      "range": {
+        "startLine": 14,
+        "startChar": 16,
+        "endLine": 16,
+        "endChar": 55
+      },
+      "revId": "fd62fcdf9626bf86c1b152a83e969152c3b47554",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
