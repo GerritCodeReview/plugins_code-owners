@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f1b69e3d_b76306a2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-07-19T11:13:59Z",
+      "side": 1,
+      "message": "nice idea.",
+      "range": {
+        "startLine": 10,
+        "startChar": 8,
+        "endLine": 11,
+        "endChar": 38
+      },
+      "revId": "fd62fcdf9626bf86c1b152a83e969152c3b47554",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fae7fd35_f0fd3d8c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-07-19T11:13:59Z",
+      "side": 1,
+      "message": "This sounds like a feature to me, I usually want the same reviewers for the entire series.\n\nIf you\u0027d want to guarantee that, you could base the seed on the change group ID which is the same for the entire series.\n\nAnyway, this feels like quite advanced fine-tuning already :-)",
+      "range": {
+        "startLine": 14,
+        "startChar": 16,
+        "endLine": 16,
+        "endChar": 55
+      },
+      "revId": "fd62fcdf9626bf86c1b152a83e969152c3b47554",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
