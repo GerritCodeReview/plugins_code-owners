@@ -246,6 +246,14 @@ requirement shows the status `Approved (Owners-Override)`.
 
 ![code owner override label in change page](./code-owner-override-label-in-change.png "Owners-override label")
 
+## <a id="mergeCommit">Merge commits
+
+When viewing the `Auto Merge` results on a merge commit, a file list row is
+added showing the number of cleanly merged files. The code owner status for
+this row indicates the overall approval status of the cleanly merged files.
+
+![merge commit UI](./owner-status-merge-commit.png "Merge Commit UI")
+
 ## <a id="definingCodeOwners">Defining code owners
 
 Code owners are defined in [code owner config
