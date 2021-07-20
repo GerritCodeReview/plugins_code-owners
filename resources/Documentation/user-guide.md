@@ -250,9 +250,11 @@ that differ between the merge commit that is being reviewed and the tip of the
 destination branch (the first parent commit). This includes all files that have
 been touched in other branches and that are now being integrated into the
 destination branch (regardless of whether there was a conflict resolution or
-whether the auto-merge succeeded without conflicts). To see these files in the
-change screen, `Parent 1` needs to be selected as base for the comparison
-(instead of the `Auto Merge` that is selected as base by default).
+whether the auto-merge succeeded without conflicts). The overall approval value
+for the automatically merged files is shown on the `Auto Merge` base along with
+a button to switch to the `Parent 1` base which shows the files individually.
+
+![merge commit UI](./owner-status-merge-commit.png "Merge Commit UI")
 
 By [configuration](config.html#codeOwnersMergeCommitStrategy) it is possible,
 that changes for merge commits only require code owner approvals for files that
