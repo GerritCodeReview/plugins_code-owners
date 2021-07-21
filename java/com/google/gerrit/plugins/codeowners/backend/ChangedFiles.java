@@ -287,7 +287,7 @@ public class ChangedFiles {
         // For merge commits the default base is the auto-merge commit which should be used as base
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
         fileDiffOutputs =
-            diffOperations.listModifiedFilesAgainstParent(project, revision, /* parentNum=*/ null);
+            diffOperations.listModifiedFilesAgainstParent(project, revision, /* parentNum=*/ 0);
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.
