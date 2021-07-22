@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bf920fff_e530ae91",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 459,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-07-22T13:01:20Z",
+      "side": 1,
+      "message": "This was produced by a google java format run.",
+      "range": {
+        "startLine": 459,
+        "startChar": 86,
+        "endLine": 459,
+        "endChar": 100
+      },
+      "revId": "c9bd017e7ce59ec3131a556938695b6835d4211e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
