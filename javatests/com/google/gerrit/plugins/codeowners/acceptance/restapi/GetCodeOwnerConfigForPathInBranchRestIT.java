@@ -59,7 +59,7 @@ public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersT
                 IdString.fromDecoded("master"),
                 IdString.fromDecoded("\0")));
     r.assertBadRequest();
-    assertThat(r.getEntityContent()).contains("Nul character not allowed");
+    assertThat(r.getEntityContent()).contains("Bad Message 400");
   }
 
   @Test
