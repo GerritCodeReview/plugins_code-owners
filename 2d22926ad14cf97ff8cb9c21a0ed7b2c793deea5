@@ -46,6 +46,30 @@
       },
       "revId": "2d22926ad14cf97ff8cb9c21a0ed7b2c793deea5",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e121d117_22c570b0",
+        "filename": "resources/Documentation/user-guide.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2021-07-22T12:37:32Z",
+      "side": 1,
+      "message": "Added to how-to-use.md",
+      "parentUuid": "394d3bf8_2477bd26",
+      "range": {
+        "startLine": 254,
+        "startChar": 8,
+        "endLine": 254,
+        "endChar": 21
+      },
+      "revId": "2d22926ad14cf97ff8cb9c21a0ed7b2c793deea5",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
