@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5b9ef87e_02b70895",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-07-22T14:03:32Z",
+      "side": 1,
+      "message": "Verified the error is caused by index out of bounds in DiffOperations, which is fixed by the change in Gerrit core.",
+      "revId": "b7838714efea84f8323eb3ced6086049d7b282b7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
