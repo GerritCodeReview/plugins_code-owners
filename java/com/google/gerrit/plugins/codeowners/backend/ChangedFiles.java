@@ -281,13 +281,13 @@ public class ChangedFiles {
       Map<String, FileDiffOutput> fileDiffOutputs;
       if (mergeCommitStrategy.equals(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION)
           || isInitialCommit(project, revision)) {
-        // Use parentNum=null to do the comparison against the default base.
+        // Use parentNum=0 to do the comparison against the default base.
         // For non-merge commits the default base is the only parent (aka parent 1, initial commits
         // are not supported).
         // For merge commits the default base is the auto-merge commit which should be used as base
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
         fileDiffOutputs =
-            diffOperations.listModifiedFilesAgainstParent(project, revision, /* parentNum=*/ null);
+            diffOperations.listModifiedFilesAgainstParent(project, revision, /* parentNum=*/ 0);
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.
