@@ -456,8 +456,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void resolvePathCodeOwnersWithAnnotations_annotationOnAllUsersWildcard()
-      throws Exception {
+  public void resolvePathCodeOwnersWithAnnotations_annotationOnAllUsersWildcard() throws Exception {
     CodeOwnerConfig codeOwnerConfig =
         CodeOwnerConfig.builder(CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
             .addCodeOwnerSet(

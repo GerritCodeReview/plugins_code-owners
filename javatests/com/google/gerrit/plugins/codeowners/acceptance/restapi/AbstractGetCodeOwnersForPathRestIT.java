@@ -65,13 +65,6 @@ public abstract class AbstractGetCodeOwnersForPathRestIT extends AbstractCodeOwn
   protected abstract String getUrl(String path);
 
   @Test
-  public void getCodeOwnerConfigForInvalidPath() throws Exception {
-    RestResponse r = adminRestSession.get(getUrl("\0"));
-    r.assertBadRequest();
-    assertThat(r.getEntityContent()).contains("Nul character not allowed");
-  }
-
-  @Test
   public void getCodeOwnersWithAccountOptions() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
