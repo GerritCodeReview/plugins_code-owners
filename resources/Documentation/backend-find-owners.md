@@ -52,6 +52,12 @@ An `OWNERS` file is a set of lines which are order-independent. Each line can be
   [restriction prefix](#restrictionPrefixes)
 * a [comment](#comments)
 
+**NOTE:** By default the `find-owners` backend uses
+[FIND_OWNERS_GLOB's](path-expressions.html) as path expressions, but it's
+possible that a different path expression syntax is
+[configured](config.html#pluginCodeOwnersPathExpressions). All examples on this
+page assume that `FIND_OWNERS_GLOB`'s are used as path expressions.
+
 ### <a id="fileLevelRules">File-level rules
 
 File-level rules apply to the entire `OWNERS` file and should not be repeated.

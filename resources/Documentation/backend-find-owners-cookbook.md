@@ -7,6 +7,12 @@ use cases.
 **NOTE:** The syntax of `OWNERS` files is described
 [here](backend-find-owners.html#syntax).
 
+**NOTE:** By default the `find-owners` backend uses
+[FIND_OWNERS_GLOB's](path-expressions.html) as path expressions, but it's
+possible that a different path expression syntax is
+[configured](config.html#pluginCodeOwnersPathExpressions). All examples on this
+page assume that `FIND_OWNERS_GLOB`'s are used as path expressions.
+
 ### <a id="defineUsersAsCodeOwners">Define users as code owners
 
 To define a set of users as code owners, each user email must be placed in a
