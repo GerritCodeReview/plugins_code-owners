@@ -401,6 +401,51 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
+  public void
+      codeOwnersWithLastResortSuggestionAnnotation_annotationIgnoredIfCodeOwnerIsAlreadyAReviewer()
+          throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addCodeOwnerEmail(admin.email())
+                .addCodeOwnerEmail(user.email())
+                .addAnnotation(user.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
+                .addCodeOwnerEmail(user2.email())
+                .addAnnotation(
+                    user2.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
+                .build())
+        .create();
+
+    // Expectation: admin is suggested, user and user2 get filtered out due to the
+    // LAST_RESORT_SUGGESTION annotation
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+
+    // Add user as a reviewer.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Expectation: user is being suggested now despite of the LAST_RESORT_SUGGESTION annotation
+    // because user is a reviewer, admin is still suggested and user2 is still filtered out due to
+    // the LAST_RESORT_SUGGESTION annotation
+    codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
+  }
+
+  @Test
   public void codeOwnersWithLastResortSuggestionAnnotation_annotationSetForAllUsersWildcard()
       throws Exception {
     skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
@@ -500,6 +545,52 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
     // suggested despite of the LAST_RESORT_SUGGESTION annotation since ignoring them would make
     // the result empty.
     CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id());
+  }
+
+  @Test
+  public void
+      perFileCodeOwnersWithLastResortSuggestionAnnotation_annotationIgnoredIfCodeOwnerIsAlreadyAReviewer()
+          throws Exception {
+    skipTestIfAnnotationsNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerSet(
+            CodeOwnerSet.builder()
+                .addPathExpression(testPathExpressions.matchFileType("md"))
+                .addCodeOwnerEmail(admin.email())
+                .addCodeOwnerEmail(user.email())
+                .addAnnotation(user.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
+                .addCodeOwnerEmail(user2.email())
+                .addAnnotation(
+                    user2.email(), CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION)
+                .build())
+        .create();
+
+    // Expectation: admin is suggested, user and user2 get filtered out due to the
+    // LAST_RESORT_SUGGESTION annotation
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+
+    // Add user as a reviewer.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Expectation: user is being suggested now despite of the LAST_RESORT_SUGGESTION annotation
+    // because user is a reviewer, admin is still suggested and user2 is still filtered out due to
+    // the LAST_RESORT_SUGGESTION annotation
+    codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
     assertThat(codeOwnersInfo)
         .hasCodeOwnersThat()
         .comparingElementsUsing(hasAccountId())

@@ -152,7 +152,7 @@ public class GetCodeOwnersForPathInChange
             filteredCodeOwners.stream()
                 .filter(
                     filterOutCodeOwnersThatAreAnnotatedWithLastResortSuggestion(
-                        annotations, debugLogs))
+                        rsrc, annotations, debugLogs))
                 .collect(toImmutableList());
     if (filteredCodeOwnersWithoutCodeOwnersThatAreAnnotatedWithLastResortSuggestion.isEmpty()) {
       // The result would be empty, hence return code owners that are annotated with
@@ -177,12 +177,27 @@ public class GetCodeOwnersForPathInChange
   }
 
   private Predicate<CodeOwner> filterOutCodeOwnersThatAreAnnotatedWithLastResortSuggestion(
+      CodeOwnersInChangeCollection.PathResource rsrc,
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       ImmutableList.Builder<String> debugLogs) {
     return codeOwner -> {
       boolean lastResortSuggestion =
           annotations.containsEntry(
               codeOwner, CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION);
+
+      // If the code owner is already a reviewer, the code owner should always be suggested, even
+      // if annotated with LAST_RESORT_SUGGESTION_ANNOTATION.
+      if (isReviewer(rsrc, codeOwner)) {
+        if (lastResortSuggestion) {
+          debugLogs.add(
+              String.format(
+                  "ignoring %s annotation for %s because this code owner is a reviewer",
+                  CodeOwnerAnnotations.LAST_RESORT_SUGGESTION_ANNOTATION.key(), codeOwner));
+        }
+
+        // Returning true from the Predicate here means that the code owner should be kept.
+        return true;
+      }
       if (!lastResortSuggestion) {
         // Returning true from the Predicate here means that the code owner should be kept.
         return true;
@@ -194,6 +209,14 @@ public class GetCodeOwnersForPathInChange
       // Returning false from the Predicate here means that the code owner should be filtered out.
       return false;
     };
+  }
+
+  private boolean isReviewer(CodeOwnersInChangeCollection.PathResource rsrc, CodeOwner codeOwner) {
+    return rsrc.getRevisionResource()
+        .getNotes()
+        .getReviewers()
+        .byState(ReviewerStateInternal.REVIEWER)
+        .contains(codeOwner.accountId());
   }
 
   private Predicate<CodeOwner> filterOutServiceUsers(ImmutableList.Builder<String> debugLogs) {
