@@ -700,7 +700,8 @@ The following code owners are filtered out additionally:
 * the change owner (since the change owner cannot be added as reviewer)
 * code owners that are annotated with
   [LAST_RESORT_SUGGESTION](backend-find-owners.html#lastResortSuggestion),
-  except if dropping these code owners would make the suggestion result empty
+  except if dropping these code owners would make the suggestion result empty or
+  if these code owners are already reviewers of the change
 
 In addition, by default the change number is used as seed if none was specified.
 This way the sort order on a change is always the same for files that have the
