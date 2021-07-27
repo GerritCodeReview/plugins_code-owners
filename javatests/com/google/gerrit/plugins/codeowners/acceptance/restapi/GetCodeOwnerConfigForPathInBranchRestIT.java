@@ -49,20 +49,6 @@ public class GetCodeOwnerConfigForPathInBranchRestIT extends AbstractCodeOwnersT
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
-  public void getCodeOwnerConfigsForInvalidPath() throws Exception {
-    RestResponse r =
-        adminRestSession.get(
-            String.format(
-                "/projects/%s/branches/%s/code_owners.config/%s",
-                IdString.fromDecoded(project.get()),
-                IdString.fromDecoded("master"),
-                IdString.fromDecoded("\0")));
-    r.assertBadRequest();
-    assertThat(r.getEntityContent()).contains("Nul character not allowed");
-  }
-
-  @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void cannotGetCodeOwnerConfigIfPluginConfigurationIsInvalid() throws Exception {
