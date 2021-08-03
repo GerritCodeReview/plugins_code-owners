@@ -89,7 +89,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "%s who was added as reviewer owns the following files:\n* %s\n",
+                "%s, who was added as reviewer owns the following files:\n* %s\n",
                 ChangeMessagesUtil.getAccountTemplate(user.id()), path));
   }
 
@@ -125,7 +125,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "%s who was added as reviewer owns the following files:\n* %s\n* %s\n",
+                "%s, who was added as reviewer owns the following files:\n* %s\n* %s\n",
                 ChangeMessagesUtil.getAccountTemplate(user.id()), path1, path2));
   }
 
@@ -188,7 +188,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "%s who was added as reviewer owns the following files:\n"
+                "%s, who was added as reviewer owns the following files:\n"
                     + "* %s\n"
                     + "* %s\n"
                     + "* %s\n"
@@ -234,7 +234,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "%s who was added as reviewer owns the following files:\n"
+                "%s, who was added as reviewer owns the following files:\n"
                     + "* %s\n"
                     + "* %s\n"
                     + "* %s\n"
@@ -321,7 +321,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "%s who was added as reviewer owns the following files:\n* %s\n",
+                "%s, who was added as reviewer owns the following files:\n* %s\n",
                 ChangeMessagesUtil.getAccountTemplate(user.id()), path));
   }
 
@@ -357,7 +357,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "%s who was added as reviewer owns the following files:\n* %s\n",
+                "%s, who was added as reviewer owns the following files:\n* %s\n",
                 ChangeMessagesUtil.getAccountTemplate(user.id()), path));
   }
 }

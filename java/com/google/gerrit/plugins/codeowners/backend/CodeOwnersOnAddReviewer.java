@@ -177,7 +177,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       StringBuilder message = new StringBuilder();
       message.append(
           String.format(
-              "%s who was added as reviewer owns the following files:\n",
+              "%s, who was added as reviewer owns the following files:\n",
               ChangeMessagesUtil.getAccountTemplate(reviewerAccountId)));
 
       if (ownedPaths.size() <= limit) {
