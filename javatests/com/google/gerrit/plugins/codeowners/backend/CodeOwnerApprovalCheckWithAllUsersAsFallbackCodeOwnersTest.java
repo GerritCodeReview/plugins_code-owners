@@ -26,8 +26,8 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfig
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
-import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -212,7 +212,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a fallback code owner (all users are fallback code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
 
     // Add a Code-Review+1 (= code owner approval) from a fallback code owner.
     requestScopeOperations.setApiUser(user.id());
@@ -228,7 +228,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 String.format(
                     "approved by %s who is a fallback code owner"
                         + " (all users are fallback code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -249,7 +249,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 String.format(
                     "implicitly approved by the patch set uploader %s who is a fallback code"
                         + " owner (all users are fallback code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test

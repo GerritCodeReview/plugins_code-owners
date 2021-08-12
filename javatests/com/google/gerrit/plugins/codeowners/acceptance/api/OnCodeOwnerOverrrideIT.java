@@ -31,7 +31,7 @@ import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.server.ChangeMessagesUtil;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.FakeEmailSender.Message;
 import com.google.inject.Inject;
 import java.util.Collection;
@@ -74,7 +74,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
                     + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -111,7 +111,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
                     + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
 
     // Apply the Owners-Override+1 approval by another user
     requestScopeOperations.setApiUser(user.id());
@@ -123,7 +123,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
                     + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(user.id())));
+                AccountTemplateUtil.getAccountTemplate(user.id())));
   }
 
   @Test
@@ -159,7 +159,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                 "Patch Set 1: Owners-Override+2\n\n"
                     + "By voting Owners-Override+2 the code-owners submit requirement is still"
                     + " overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -195,7 +195,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                 "Patch Set 1: Owners-Override+1\n\n"
                     + "By voting Owners-Override+1 the code-owners submit requirement is still"
                     + " overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -217,7 +217,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                 "Patch Set 1: -Owners-Override\n\n"
                     + "By removing the Owners-Override vote the code-owners submit requirement is"
                     + " no longer overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -253,7 +253,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                 "Patch Set 1: Owners-Override-1\n\n"
                     + "By voting Owners-Override-1 the code-owners submit requirement is no longer"
                     + " overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -311,7 +311,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                     + "(1 comment)\n\n"
                     + "By voting Owners-Override+1 the code-owners submit requirement is"
                     + " overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -354,7 +354,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
                     + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -389,8 +389,8 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                             + " overridden by %s\n\n"
                             + "By voting Owners-Override+1 the code-owners submit requirement is"
                             + " overridden by %s\n",
-                        ChangeMessagesUtil.getAccountTemplate(admin.id()),
-                        ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                        AccountTemplateUtil.getAccountTemplate(admin.id()),
+                        AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -424,14 +424,14 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
             String.format(
                 "By voting Owners-Override+1 the code-owners submit requirement is"
                     + " overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
     assertThat(Iterables.getLast(messages).message)
         .contains(
             String.format(
                 "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -601,7 +601,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
             String.format(
                 "Patch Set 1: Owners-Override+1\n\n"
                     + "By voting Owners-Override+1 the code-owners submit requirement is overridden by %s\n",
-                ChangeMessagesUtil.getAccountTemplate(user.id())));
+                AccountTemplateUtil.getAccountTemplate(user.id())));
   }
 
   @Test

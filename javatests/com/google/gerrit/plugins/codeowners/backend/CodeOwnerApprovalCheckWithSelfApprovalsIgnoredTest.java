@@ -27,8 +27,8 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.OverrideApprovalConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
-import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -134,7 +134,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id()))));
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id()))));
   }
 
   @Test
@@ -253,7 +253,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "implicitly approved by the patch set uploader %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(codeOwner.id()))));
+                    AccountTemplateUtil.getAccountTemplate(codeOwner.id()))));
   }
 
   @Test
@@ -346,7 +346,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id()))));
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id()))));
   }
 
   @Test

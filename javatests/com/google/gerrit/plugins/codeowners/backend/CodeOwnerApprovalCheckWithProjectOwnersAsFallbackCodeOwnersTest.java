@@ -30,8 +30,8 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
-import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -106,7 +106,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a global code owner",
-                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
+                    AccountTemplateUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -158,7 +158,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
               String.format(
                   "implicitly approved by the patch set uploader %s who is a global code"
                       + " owner",
-                  ChangeMessagesUtil.getAccountTemplate(bot.id())));
+                  AccountTemplateUtil.getAccountTemplate(bot.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -200,7 +200,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a global code owner",
-                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
+                    AccountTemplateUtil.getAccountTemplate(bot.id()))));
 
     // Let the bot approve the change.
     projectOperations
@@ -221,7 +221,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a global code owner",
-                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
+                    AccountTemplateUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -254,7 +254,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 String.format(
                     "approved by %s who is a global code owner"
                         + " (all users are global code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -306,7 +306,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
               String.format(
                   "implicitly approved by the patch set uploader %s who is a global code owner"
                       + " (all users are global code owners)",
-                  ChangeMessagesUtil.getAccountTemplate(projectOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(projectOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -343,7 +343,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a global code owner (all users are global code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -397,7 +397,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 String.format(
                     "reviewer %s is a fallback code owner"
                         + " (all project owners are fallback code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -421,7 +421,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 String.format(
                     "approved by %s who is a fallback code owner"
                         + " (all project owners are fallback code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -468,7 +468,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
               String.format(
                   "implicitly approved by the patch set uploader %s who is a fallback code"
                       + " owner (all project owners are fallback code owners)",
-                  ChangeMessagesUtil.getAccountTemplate(projectOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(projectOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -538,13 +538,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -591,13 +591,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                    AccountTemplateUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
 
     // Delete the override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
@@ -621,13 +621,13 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Another-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                    AccountTemplateUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Another-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -677,7 +677,7 @@ public class CodeOwnerApprovalCheckWithProjectOwnersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a default code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)

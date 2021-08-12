@@ -31,7 +31,7 @@ import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
-import com.google.gerrit.server.ChangeMessagesUtil;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.FakeEmailSender.Message;
 import com.google.inject.Inject;
 import java.util.Collection;
@@ -87,7 +87,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -121,7 +121,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -163,7 +163,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
 
     // Apply the Code-Review+1 approval again and add an unrelated vote (Code-Review+1 is ignored).
     ReviewInput reviewInput = ReviewInput.recommend();
@@ -213,7 +213,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
 
     // Apply the Code-Review+1 approval again and add a comment (Code-Review +1 is ignored)
     ReviewInput.CommentInput commentInput = new ReviewInput.CommentInput();
@@ -254,7 +254,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
 
     // Apply the Code-Review+1 by another code owner
     requestScopeOperations.setApiUser(user.id());
@@ -268,7 +268,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(user.id()), path));
+                AccountTemplateUtil.getAccountTemplate(user.id()), path));
   }
 
   @Test
@@ -297,7 +297,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+2 the following files are still code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -329,7 +329,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are still explicitly code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -361,7 +361,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+2 the following files are still explicitly code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -390,7 +390,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are still code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -419,7 +419,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By removing the Code-Review vote the following files are no longer"
                     + " code-owner approved by %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -449,7 +449,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review-1 the following files are no longer code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -489,7 +489,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + " %s:\n"
                     + "* %s\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path1, path2));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path1, path2));
   }
 
   @Test
@@ -517,7 +517,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), oldPath));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), oldPath));
   }
 
   @Test
@@ -590,7 +590,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now explicitly code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -623,9 +623,9 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "\n"
                     + "The listed files are still implicitly approved by %s.\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()),
+                AccountTemplateUtil.getAccountTemplate(admin.id()),
                 path,
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -658,9 +658,9 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "\n"
                     + "The listed files are still implicitly approved by %s.\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()),
+                AccountTemplateUtil.getAccountTemplate(admin.id()),
                 path,
-                ChangeMessagesUtil.getAccountTemplate(admin.id())));
+                AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
   @Test
@@ -688,7 +688,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -720,7 +720,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By removing the Code-Review vote the following files are no longer"
                     + " code-owner approved by %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -752,7 +752,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review-1 the following files are no longer code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -797,7 +797,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path4, path3, path1, path2));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path4, path3, path1, path2));
   }
 
   @Test
@@ -845,7 +845,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "(more files)\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path4, path3, path5));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path4, path3, path5));
   }
 
   @Test
@@ -911,7 +911,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
   }
 
   @Test
@@ -1070,7 +1070,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                ChangeMessagesUtil.getAccountTemplate(user.id()), path));
+                AccountTemplateUtil.getAccountTemplate(user.id()), path));
   }
 
   @Test

@@ -31,7 +31,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnersExperimentFeatures
 import com.google.gerrit.plugins.codeowners.backend.FileCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
-import com.google.gerrit.server.ChangeMessagesUtil;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -80,7 +80,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
     assertThat(codeOwnerStatus).hasMoreThat().isNull();
     assertThat(codeOwnerStatus).hasAccounts(user);
   }
@@ -139,13 +139,13 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                    AccountTemplateUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
+                    AccountTemplateUtil.getAccountTemplate(user.id()))))
         .inOrder();
     assertThat(codeOwnerStatus).hasAccounts(user);
 
@@ -164,13 +164,13 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                    AccountTemplateUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
+                    AccountTemplateUtil.getAccountTemplate(user.id()))))
         .inOrder();
     assertThat(codeOwnerStatus).hasAccounts(user);
 
@@ -188,13 +188,13 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                    AccountTemplateUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
+                    AccountTemplateUtil.getAccountTemplate(user.id()))))
         .inOrder();
     assertThat(codeOwnerStatus).hasAccounts(user);
 
@@ -212,7 +212,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
     assertThat(codeOwnerStatus).hasAccounts(user);
 
     codeOwnerStatus =
@@ -306,7 +306,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
+                    AccountTemplateUtil.getAccountTemplate(user.id()))))
         .inOrder();
     assertThat(codeOwnerStatus).hasAccounts(user);
     assertThat(codeOwnerStatus).hasMoreThat().isTrue();
@@ -327,13 +327,13 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                    AccountTemplateUtil.getAccountTemplate(user.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
+                    AccountTemplateUtil.getAccountTemplate(user.id()))))
         .inOrder();
     assertThat(codeOwnerStatus).hasAccounts(user);
     assertThat(codeOwnerStatus).hasMoreThat().isNull();
@@ -380,7 +380,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id())),
+                      AccountTemplateUtil.getAccountTemplate(user.id())),
                   newPath,
                   CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                   /* reasonNewPath= */ null));
@@ -404,7 +404,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                      AccountTemplateUtil.getAccountTemplate(user.id()))));
     }
     assertThat(codeOwnerStatus).hasMoreThat().isNull();
     assertThat(codeOwnerStatus).hasAccounts(user);
@@ -468,7 +468,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))))
+                    AccountTemplateUtil.getAccountTemplate(user.id()))))
         .inOrder();
     assertThat(codeOwnerStatus).hasAccounts(user);
     assertThat(codeOwnerStatus).hasMoreThat().isTrue();
@@ -571,7 +571,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id())),
+                      AccountTemplateUtil.getAccountTemplate(user.id())),
                   newPath,
                   CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                   /* reasonNewPath= */ null));
@@ -585,7 +585,7 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                      AccountTemplateUtil.getAccountTemplate(user.id()))),
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
     }
     assertThat(codeOwnerStatus).hasAccounts(user);
@@ -604,12 +604,12 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id())),
+                      AccountTemplateUtil.getAccountTemplate(user.id())),
                   newPath,
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user2.id()))));
+                      AccountTemplateUtil.getAccountTemplate(user2.id()))));
     } else {
       assertThat(codeOwnerStatus)
           .hasFileCodeOwnerStatusesThat()
@@ -620,13 +620,13 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                      AccountTemplateUtil.getAccountTemplate(user.id()))),
               FileCodeOwnerStatus.addition(
                   newPath,
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user2.id()))));
+                      AccountTemplateUtil.getAccountTemplate(user2.id()))));
     }
     assertThat(codeOwnerStatus).hasAccounts(user, user2);
   }

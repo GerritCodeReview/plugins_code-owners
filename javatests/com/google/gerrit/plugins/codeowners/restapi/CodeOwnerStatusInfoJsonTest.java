@@ -36,7 +36,7 @@ import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject;
-import com.google.gerrit.server.ChangeMessagesUtil;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.truth.ListSubject;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -301,13 +301,14 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
   public void formatCodeOwnerStatusInfoWithReasonsThatReferenceAccounts() throws Exception {
     TestAccount user2 = accountCreator.user2();
     String reason1 =
-        String.format("because %s did something", ChangeMessagesUtil.getAccountTemplate(user.id()));
+        String.format(
+            "because %s did something", AccountTemplateUtil.getAccountTemplate(user.id()));
     String reason2 =
         String.format(
             "because %s, %s and %s did something else",
-            ChangeMessagesUtil.getAccountTemplate(admin.id()),
-            ChangeMessagesUtil.getAccountTemplate(user.id()),
-            ChangeMessagesUtil.getAccountTemplate(user2.id()));
+            AccountTemplateUtil.getAccountTemplate(admin.id()),
+            AccountTemplateUtil.getAccountTemplate(user.id()),
+            AccountTemplateUtil.getAccountTemplate(user2.id()));
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
     PathCodeOwnerStatus pathCodeOwnerStatus =

@@ -41,7 +41,6 @@ import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
-import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.approval.ApprovalsUtil;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.PureRevertCache;
@@ -51,6 +50,7 @@ import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -299,7 +299,7 @@ public class CodeOwnerApprovalCheck {
             changeNotes.getCurrentPatchSet(),
             String.format(
                 "patch set uploader %s is exempted from requiring code owner approvals",
-                ChangeMessagesUtil.getAccountTemplate(patchSetUploader)));
+                AccountTemplateUtil.getAccountTemplate(patchSetUploader)));
       }
 
       boolean arePureRevertsExempted = codeOwnersConfig.arePureRevertsExempted();
@@ -577,7 +577,7 @@ public class CodeOwnerApprovalCheck {
           String.format(
               "override approval %s by %s is present",
               override.get().label() + LabelValue.formatValue(override.get().value()),
-              ChangeMessagesUtil.getAccountTemplate(override.get().accountId())));
+              AccountTemplateUtil.getAccountTemplate(override.get().accountId())));
     }
 
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
@@ -745,7 +745,7 @@ public class CodeOwnerApprovalCheck {
           String.format(
               "implicitly approved by the patch set uploader %s who is a %s"
                   + " (all project owners are %ss)",
-              ChangeMessagesUtil.getAccountTemplate(implicitApprover),
+              AccountTemplateUtil.getAccountTemplate(implicitApprover),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return true;
@@ -766,7 +766,7 @@ public class CodeOwnerApprovalCheck {
       reason.set(
           String.format(
               "approved by %s who is a %s (all project owners are %ss)",
-              ChangeMessagesUtil.getAccountTemplate(approver.get()),
+              AccountTemplateUtil.getAccountTemplate(approver.get()),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return true;
@@ -787,7 +787,7 @@ public class CodeOwnerApprovalCheck {
       reason.set(
           String.format(
               "reviewer %s is a %s (all project owners are %ss)",
-              ChangeMessagesUtil.getAccountTemplate(reviewer.get()),
+              AccountTemplateUtil.getAccountTemplate(reviewer.get()),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return true;
@@ -842,7 +842,7 @@ public class CodeOwnerApprovalCheck {
           String.format(
               "implicitly approved by the patch set uploader %s who is a %s"
                   + " (all users are %ss)",
-              ChangeMessagesUtil.getAccountTemplate(implicitApprover),
+              AccountTemplateUtil.getAccountTemplate(implicitApprover),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return CodeOwnerStatus.APPROVED;
@@ -854,7 +854,7 @@ public class CodeOwnerApprovalCheck {
       reason.set(
           String.format(
               "approved by %s who is a %s (all users are %ss)",
-              ChangeMessagesUtil.getAccountTemplate(approver.get()),
+              AccountTemplateUtil.getAccountTemplate(approver.get()),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return CodeOwnerStatus.APPROVED;
@@ -864,7 +864,7 @@ public class CodeOwnerApprovalCheck {
       reason.set(
           String.format(
               "reviewer %s is a %s (all users are %ss)",
-              ChangeMessagesUtil.getAccountTemplate(reviewer.get()),
+              AccountTemplateUtil.getAccountTemplate(reviewer.get()),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
               CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
       return CodeOwnerStatus.PENDING;
@@ -899,7 +899,7 @@ public class CodeOwnerApprovalCheck {
         reason.set(
             String.format(
                 "implicitly approved by the patch set uploader %s who is a %s%s",
-                ChangeMessagesUtil.getAccountTemplate(implicitApprover),
+                AccountTemplateUtil.getAccountTemplate(implicitApprover),
                 codeOwnerKind.getDisplayName(),
                 codeOwners.ownedByAllUsers()
                     ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())
@@ -921,7 +921,7 @@ public class CodeOwnerApprovalCheck {
       reason.set(
           String.format(
               "approved by %s who is a %s%s",
-              ChangeMessagesUtil.getAccountTemplate(approver.get()),
+              AccountTemplateUtil.getAccountTemplate(approver.get()),
               codeOwnerKind.getDisplayName(),
               codeOwners.ownedByAllUsers()
                   ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())
@@ -959,7 +959,7 @@ public class CodeOwnerApprovalCheck {
       reason.set(
           String.format(
               "reviewer %s is a %s%s",
-              ChangeMessagesUtil.getAccountTemplate(reviewer.get()),
+              AccountTemplateUtil.getAccountTemplate(reviewer.get()),
               codeOwnerKind.getDisplayName(),
               codeOwners.ownedByAllUsers()
                   ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())

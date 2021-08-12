@@ -47,8 +47,8 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
-import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -224,7 +224,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -254,7 +254,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -281,7 +281,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -322,7 +322,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id())),
+                      AccountTemplateUtil.getAccountTemplate(user.id())),
                   newPath,
                   CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                   /* reasonNewPath= */ null));
@@ -334,7 +334,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                      AccountTemplateUtil.getAccountTemplate(user.id()))),
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
     }
   }
@@ -380,7 +380,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                      AccountTemplateUtil.getAccountTemplate(user.id()))));
     } else {
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
@@ -390,7 +390,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.PENDING,
                   String.format(
                       "reviewer %s is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                      AccountTemplateUtil.getAccountTemplate(user.id()))));
     }
   }
 
@@ -414,7 +414,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -439,7 +439,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -461,7 +461,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -498,7 +498,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.APPROVED,
                   String.format(
                       "approved by %s who is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id())),
+                      AccountTemplateUtil.getAccountTemplate(user.id())),
                   newPath,
                   CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                   /* reasonNewPath= */ null));
@@ -510,7 +510,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.APPROVED,
                   String.format(
                       "approved by %s who is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))),
+                      AccountTemplateUtil.getAccountTemplate(user.id()))),
               FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
     }
   }
@@ -552,7 +552,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.APPROVED,
                   String.format(
                       "approved by %s who is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                      AccountTemplateUtil.getAccountTemplate(user.id()))));
     } else {
       assertThatCollection(fileCodeOwnerStatuses)
           .containsExactly(
@@ -562,7 +562,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                   CodeOwnerStatus.APPROVED,
                   String.format(
                       "approved by %s who is a code owner",
-                      ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                      AccountTemplateUtil.getAccountTemplate(user.id()))));
     }
   }
 
@@ -614,7 +614,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               CodeOwnerStatus.APPROVED,
               String.format(
                   "implicitly approved by the patch set uploader %s who is a code owner",
-                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -674,7 +674,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               CodeOwnerStatus.APPROVED,
               String.format(
                   "implicitly approved by the patch set uploader %s who is a code owner",
-                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.modification(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -731,7 +731,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               CodeOwnerStatus.APPROVED,
               String.format(
                   "implicitly approved by the patch set uploader %s who is a code owner",
-                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.deletion(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -835,7 +835,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "implicitly approved by the patch set uploader %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())),
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id())),
                 newPath,
                 CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                 /* reasonNewPath= */ null);
@@ -858,7 +858,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "implicitly approved by the patch set uploader %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
       } else {
         expectedFileDeletionCodeOwnerStatus =
             FileCodeOwnerStatus.deletion(oldPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -969,7 +969,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "implicitly approved by the patch set uploader %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
       } else {
         expectedFileCodeOwnerStatus =
             FileCodeOwnerStatus.rename(
@@ -989,7 +989,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "implicitly approved by the patch set uploader %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
       } else {
         expectedAddtitionFileCodeOwnerStatus =
             FileCodeOwnerStatus.addition(newPath, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -1057,7 +1057,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner (all users are code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1115,7 +1115,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               String.format(
                   "implicitly approved by the patch set uploader %s who is a code owner"
                       + " (all users are code owners)",
-                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -1160,7 +1160,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner (all users are code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1201,7 +1201,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a global code owner",
-                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
+                    AccountTemplateUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -1261,7 +1261,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               String.format(
                   "implicitly approved by the patch set uploader %s who is a global code"
                       + " owner",
-                  ChangeMessagesUtil.getAccountTemplate(bot.id())));
+                  AccountTemplateUtil.getAccountTemplate(bot.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -1303,7 +1303,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a global code owner",
-                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
+                    AccountTemplateUtil.getAccountTemplate(bot.id()))));
 
     // Let the bot approve the change.
     projectOperations
@@ -1324,7 +1324,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a global code owner",
-                    ChangeMessagesUtil.getAccountTemplate(bot.id()))));
+                    AccountTemplateUtil.getAccountTemplate(bot.id()))));
   }
 
   @Test
@@ -1357,7 +1357,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 String.format(
                     "approved by %s who is a global code owner"
                         + " (all users are global code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1408,7 +1408,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               String.format(
                   "implicitly approved by the patch set uploader %s who is a global code owner"
                       + " (all users are global code owners)",
-                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -1445,7 +1445,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a global code owner (all users are global code owners)",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1480,7 +1480,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1523,13 +1523,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1575,13 +1575,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
 
     // Delete the override approval.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
@@ -1605,13 +1605,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Another-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))),
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))),
             FileCodeOwnerStatus.addition(
                 path2,
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Another-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1782,7 +1782,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
 
     // Change some other file ('user' who uploads the change is a code owner and hence owner
     // approvals are implicit for this change)
@@ -1808,7 +1808,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1846,7 +1846,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
 
     // Change some other file and submit the change with an override.
     String changeId2 =
@@ -1871,7 +1871,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+1 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
@@ -1912,7 +1912,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -1964,7 +1964,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "override approval Owners-Override+2 by %s is present",
-                    ChangeMessagesUtil.getAccountTemplate(user2.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user2.id()))));
   }
 
   @Test
@@ -2004,7 +2004,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a default code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -2055,7 +2055,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
               CodeOwnerStatus.APPROVED,
               String.format(
                   "implicitly approved by the patch set uploader %s who is a default code owner",
-                  ChangeMessagesUtil.getAccountTemplate(changeOwner.id())));
+                  AccountTemplateUtil.getAccountTemplate(changeOwner.id())));
     } else {
       expectedFileCodeOwnerStatus =
           FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
@@ -2096,7 +2096,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a default code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
 
     // Let the default code owner approve the change.
     projectOperations
@@ -2117,7 +2117,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a default code owner",
-                    ChangeMessagesUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   @Test
@@ -2225,7 +2225,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "patch set uploader %s is exempted from requiring code owner approvals",
-                    ChangeMessagesUtil.getAccountTemplate(exemptedUser.id()))));
+                    AccountTemplateUtil.getAccountTemplate(exemptedUser.id()))));
 
     // Amend the change by another user, so that the other non-exempted user becomes the last
     // uploader.
@@ -2259,7 +2259,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "implicitly approved by the patch set uploader %s who is a code owner",
-                    ChangeMessagesUtil.getAccountTemplate(changeOwner.id()))));
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id()))));
 
     // Allow all users to approve and submit changes.
     projectOperations

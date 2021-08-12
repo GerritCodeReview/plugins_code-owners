@@ -36,6 +36,7 @@ import com.google.gerrit.server.update.BatchUpdate;
 import com.google.gerrit.server.update.BatchUpdateOp;
 import com.google.gerrit.server.update.ChangeContext;
 import com.google.gerrit.server.update.RetryHelper;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.server.util.time.TimeUtil;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -178,7 +179,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       message.append(
           String.format(
               "%s, who was added as reviewer owns the following files:\n",
-              ChangeMessagesUtil.getAccountTemplate(reviewerAccountId)));
+              AccountTemplateUtil.getAccountTemplate(reviewerAccountId)));
 
       if (ownedPaths.size() <= limit) {
         appendPaths(message, ownedPaths.stream());

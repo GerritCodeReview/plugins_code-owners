@@ -26,7 +26,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
-import com.google.gerrit.entities.ChangeMessage;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.extensions.common.ChangeType;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
@@ -37,6 +36,7 @@ import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.account.AccountLoader;
 import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.util.Comparator;
@@ -136,7 +136,7 @@ public class CodeOwnerStatusInfoJson {
                         : Stream.empty()))
         .forEach(
             reason -> {
-              Matcher matcher = ChangeMessage.ACCOUNT_TEMPLATE_PATTERN.matcher(reason);
+              Matcher matcher = AccountTemplateUtil.ACCOUNT_TEMPLATE_PATTERN.matcher(reason);
               while (matcher.find()) {
                 String accountIdString = matcher.group(1);
                 Optional<Account.Id> accountId = Account.Id.tryParse(accountIdString);

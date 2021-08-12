@@ -26,10 +26,10 @@ import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProje
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
-import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.restapi.change.OnPostReview;
+import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -167,12 +167,12 @@ class OnCodeOwnerApproval implements OnPostReview {
         message.append(
             String.format(
                 "By voting %s the following files are now explicitly code-owner approved by %s:\n",
-                newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                newVote, AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
       } else {
         message.append(
             String.format(
                 "By voting %s the following files are now code-owner approved by %s:\n",
-                newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                newVote, AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
       }
     } else if (isCodeOwnerApprovalRemoved(requiredApproval, oldApprovals, newVote)) {
       if (newVote.value() == 0) {
@@ -182,13 +182,13 @@ class OnCodeOwnerApproval implements OnPostReview {
               String.format(
                   "By removing the %s vote the following files are no longer explicitly code-owner"
                       + " approved by %s:\n",
-                  newVote.label(), ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                  newVote.label(), AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
         } else {
           message.append(
               String.format(
                   "By removing the %s vote the following files are no longer code-owner approved"
                       + " by %s:\n",
-                  newVote.label(), ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                  newVote.label(), AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
         }
       } else {
         if (hasImplicitApprovalByUser) {
@@ -197,12 +197,12 @@ class OnCodeOwnerApproval implements OnPostReview {
               String.format(
                   "By voting %s the following files are no longer explicitly code-owner approved by"
                       + " %s:\n",
-                  newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                  newVote, AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
         } else {
           message.append(
               String.format(
                   "By voting %s the following files are no longer code-owner approved by %s:\n",
-                  newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                  newVote, AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
         }
       }
     } else if (isCodeOwnerApprovalUpOrDowngraded(requiredApproval, oldApprovals, newVote)) {
@@ -211,12 +211,12 @@ class OnCodeOwnerApproval implements OnPostReview {
             String.format(
                 "By voting %s the following files are still explicitly code-owner approved by"
                     + " %s:\n",
-                newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                newVote, AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
       } else {
         message.append(
             String.format(
                 "By voting %s the following files are still code-owner approved by %s:\n",
-                newVote, ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+                newVote, AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
       }
     } else {
       // non-approval was downgraded (e.g. -1 to -2)
@@ -234,7 +234,7 @@ class OnCodeOwnerApproval implements OnPostReview {
       message.append(
           String.format(
               "\nThe listed files are still implicitly approved by %s.\n",
-              ChangeMessagesUtil.getAccountTemplate(user.getAccountId())));
+              AccountTemplateUtil.getAccountTemplate(user.getAccountId())));
     }
 
     return Optional.of(message.toString());
