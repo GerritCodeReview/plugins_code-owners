@@ -185,7 +185,13 @@ branches (only within the same host):
 
 If referenced `OWNERS` files do not exists, they are silently ignored when code
 owners are resolved, but trying to add references to non-existing `OWNERS` file
-will be rejected on upload/submit.
+will be rejected on upload/submit. Being ignored means that the `@PLUGIN@`
+doesn't bail out with an error when code owners are resolved, but the import of
+non-resolvable `OWNERS` files [prevents fallback code owners from being
+applied](config.html#pluginCodeOwnersFallbackCodeOwners). The reason for this is
+that if there is an unresolved import, it is assumed that it was intended to
+define code owners, e.g. stricter code owners than the fallback code owners, and
+hence the fallback code owners should not be applied.
 
 When referencing an external `OWNERS` file via the `file`  keyword, only
 non-restricted [access grants](#accessGrants) are imported. This means
