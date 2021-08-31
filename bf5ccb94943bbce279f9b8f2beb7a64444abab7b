@@ -22,6 +22,30 @@
       },
       "revId": "bf5ccb94943bbce279f9b8f2beb7a64444abab7b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d640590c_fd95deb6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-08-31T13:56:36Z",
+      "side": 1,
+      "message": "Seems possible. For this particular case, I don\u0027t mind much, as there will be enough callers that have a proper context set so that we can judge whether this feature works when rolling out. When the rollout is done all the experiment flag checking logic here will anyway be dropped, so I\u0027m fine with having this workaround for now. But yeah, if more code needs to do this, I agree that we should find a better solution. Do you want to add such a method? If yes, we can hold off this change until it\u0027s availble.",
+      "parentUuid": "de077931_e54c9194",
+      "range": {
+        "startLine": 150,
+        "startChar": 6,
+        "endLine": 150,
+        "endChar": 55
+      },
+      "revId": "bf5ccb94943bbce279f9b8f2beb7a64444abab7b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
