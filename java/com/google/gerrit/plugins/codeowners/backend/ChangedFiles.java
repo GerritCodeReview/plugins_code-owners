@@ -40,7 +40,9 @@ import com.google.gerrit.server.patch.AutoMerger;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.DiffOperations;
 import com.google.gerrit.server.patch.filediff.FileDiffOutput;
+import com.google.gerrit.server.util.ThreadLocalRequestContext;
 import com.google.inject.Inject;
+import com.google.inject.OutOfScopeException;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -88,6 +90,7 @@ public class ChangedFiles {
   private final Provider<AutoMerger> autoMergerProvider;
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final ThreeWayMergeStrategy mergeStrategy;
+  private final ThreadLocalRequestContext threadLocalRequestContext;
   private final ExperimentFeatures experimentFeatures;
 
   @Inject
@@ -98,12 +101,14 @@ public class ChangedFiles {
       DiffOperations diffOperations,
       Provider<AutoMerger> autoMergerProvider,
       CodeOwnerMetrics codeOwnerMetrics,
+      ThreadLocalRequestContext threadLocalRequestContext,
       ExperimentFeatures experimentFeatures) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.diffOperations = diffOperations;
     this.autoMergerProvider = autoMergerProvider;
     this.codeOwnerMetrics = codeOwnerMetrics;
+    this.threadLocalRequestContext = threadLocalRequestContext;
     this.experimentFeatures = experimentFeatures;
     this.mergeStrategy = MergeUtil.getMergeStrategy(cfg);
   }
@@ -129,10 +134,25 @@ public class ChangedFiles {
     requireNonNull(revision, "revision");
     requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
 
-    if (experimentFeatures.isFeatureEnabled(CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE)) {
+    if (useDiffCache()) {
       return getFromDiffCache(project, revision, mergeCommitStrategy);
     }
     return compute(project, revision, mergeCommitStrategy);
+  }
+
+  /** Checks whether the experiment flag to use the diff cache is set. */
+  private boolean useDiffCache() {
+    // Checking whether the experiment flag is set requires a current user, but since this code
+    // may be called from a background thread (e.g. when indexing a change) a current user may not
+    // be available. Hence check for the experiment flag only when a current user is available,
+    // otherwise return false to not use the diff cache in this case.
+    try {
+      threadLocalRequestContext.getContext().getUser();
+    } catch (OutOfScopeException e) {
+      return false;
+    }
+    return experimentFeatures.isFeatureEnabled(
+        CodeOwnersExperimentFeaturesConstants.USE_DIFF_CACHE);
   }
 
   /**
