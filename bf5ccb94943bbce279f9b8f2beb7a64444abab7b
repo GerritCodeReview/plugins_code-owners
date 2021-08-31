@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "de077931_e54c9194",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ChangedFiles.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 150,
+      "author": {
+        "id": 1118500
+      },
+      "writtenOn": "2021-08-31T13:40:33Z",
+      "side": 1,
+      "message": "We could also add ExperimentFeatures#canEvaluateInContext(flagName) since is is likely we will see more of such cases. The external implementation could just always return \u0027true\u0027, the internal check if all required info can be extracted from the context.",
+      "range": {
+        "startLine": 150,
+        "startChar": 6,
+        "endLine": 150,
+        "endChar": 55
+      },
+      "revId": "bf5ccb94943bbce279f9b8f2beb7a64444abab7b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
