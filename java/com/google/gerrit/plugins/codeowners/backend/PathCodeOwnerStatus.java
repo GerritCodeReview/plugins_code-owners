@@ -40,7 +40,7 @@ public abstract class PathCodeOwnerStatus {
    * Message explaining the reason for {@link #status()}.
    *
    * <p>A reason may contain one or several placeholders for accounts (see {@link
-   * com.google.gerrit.server.ChangeMessagesUtil#getAccountTemplate(com.google.gerrit.entities.Account.Id)}).
+   * com.google.gerrit.server.util.AccountTemplateUtil#ACCOUNT_TEMPLATE}).
    */
   public abstract ImmutableList<String> reasons();
 
