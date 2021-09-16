@@ -29,7 +29,7 @@ import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
-import com.google.gerrit.server.account.externalids.ExternalId;
+import com.google.gerrit.server.account.externalids.ExternalIdFactory;
 import com.google.gerrit.server.account.externalids.ExternalIdNotes;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
@@ -53,6 +53,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
   @Inject private AccountOperations accountOperations;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
   @Inject private TestMetricMaker testMetricMaker;
+  @Inject private ExternalIdFactory externalIdFactory;
 
   private Provider<CodeOwnerResolver> codeOwnerResolverProvider;
 
@@ -137,7 +138,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             user.id(),
             (a, u) ->
                 u.addExternalId(
-                    ExternalId.create(
+                    externalIdFactory.create(
                         "foo", "bar", user.id(), admin.email(), /* hashedPassword= */ null)));
 
     // Deactivate the 'user' account.
@@ -160,7 +161,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             user.id(),
             (a, u) ->
                 u.addExternalId(
-                    ExternalId.create(
+                    externalIdFactory.create(
                         "foo", "bar", user.id(), admin.email(), /* hashedPassword= */ null)));
 
     OptionalResultWithMessages<CodeOwner> result =
@@ -182,7 +183,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     try (Repository allUsersRepo = repoManager.openRepository(allUsers);
         MetaDataUpdate md = metaDataUpdateFactory.create(allUsers)) {
       ExternalIdNotes extIdNotes = externalIdNotesFactory.load(allUsersRepo);
-      extIdNotes.upsert(ExternalId.createEmail(accountId, email));
+      extIdNotes.upsert(externalIdFactory.createEmail(accountId, email));
       extIdNotes.commit(md);
     }
 

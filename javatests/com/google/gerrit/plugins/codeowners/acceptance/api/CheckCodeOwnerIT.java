@@ -56,7 +56,7 @@ import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
-import com.google.gerrit.server.account.externalids.ExternalId;
+import com.google.gerrit.server.account.externalids.ExternalIdFactory;
 import com.google.gerrit.server.account.externalids.ExternalIdNotes;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
@@ -78,6 +78,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   @Inject private ProjectOperations projectOperations;
   @Inject @ServerInitiated private Provider<AccountsUpdate> accountsUpdate;
   @Inject private ExternalIdNotes.Factory externalIdNotesFactory;
+  @Inject private ExternalIdFactory externalIdFactory;
 
   private TestPathExpressions testPathExpressions;
 
@@ -398,7 +399,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     try (Repository allUsersRepo = repoManager.openRepository(allUsers);
         MetaDataUpdate md = metaDataUpdateFactory.create(allUsers)) {
       ExternalIdNotes extIdNotes = externalIdNotesFactory.load(allUsersRepo);
-      extIdNotes.upsert(ExternalId.createEmail(accountId, orphanedEmail));
+      extIdNotes.upsert(externalIdFactory.createEmail(accountId, orphanedEmail));
       extIdNotes.commit(md);
     }
 
@@ -1619,7 +1620,7 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
             accountId,
             (a, u) ->
                 u.addExternalId(
-                    ExternalId.create(
+                    externalIdFactory.create(
                         "foo",
                         "bar" + accountId.get(),
                         accountId,
