@@ -315,7 +315,6 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
 
     // Add reviewer via PostReview.
     gApi.changes().id(changeId).current().review(ReviewInput.create().reviewer(user.email()));
-    gApi.changes().id(changeId).addReviewer(user.email());
 
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
     assertThat(Iterables.getLast(messages).message)
