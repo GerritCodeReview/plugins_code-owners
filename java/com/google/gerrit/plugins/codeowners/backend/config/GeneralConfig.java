@@ -65,6 +65,8 @@ public class GeneralConfig {
   public static final String SECTION_VALIDATION = "validation";
 
   public static final String KEY_FILE_EXTENSION = "fileExtension";
+  public static final String KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER =
+      "enableAsyncMessageOnAddReviewer";
   public static final String KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS =
       "enableCodeOwnerConfigFilesWithFileExtensions";
   public static final String KEY_READ_ONLY = "readOnly";
@@ -454,6 +456,21 @@ public class GeneralConfig {
           DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
       return DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
     }
+  }
+
+  /**
+   * Gets whether code owner change messages that are added when a code owner is added as a reviewer
+   * should be posted asynchronously.
+   *
+   * @param project the project for which the enable async message on add reviewer configuration
+   *     should be read
+   * @param pluginConfig the plugin config from which the enable async message on add reviewer
+   *     configuration should be read
+   * @return the maximum number of paths in change messages
+   */
+  boolean enableAsyncMessageOnAddReviewer(Project.NameKey project, Config pluginConfig) {
+    return getBooleanConfig(
+        project, pluginConfig, KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER, /* defaultValue= */ true);
   }
 
   /**

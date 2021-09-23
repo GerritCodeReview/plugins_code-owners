@@ -583,6 +583,19 @@ endpoint or by touching the change (e.g. by adding a comment).
         in `@PLUGIN@.config`.\
         By default `50`.
 
+<a id="pluginCodeOwnersEnableAsyncMessageOnAddReviewer">plugin.@PLUGIN@.enableAsyncMessageOnAddReviewer</a>
+:       When a code owner is added as a reviewer the @PLUGIN@ plugin posts a
+        change message that lists owned paths of the code owner. This setting
+        controls whether this change message should be posted asynchronously.\
+        Posting these change messages asynchronously improves the latency for
+        post review and post reviewers calls, since they do not need to wait
+        until the owned paths are computed for all newly added reviewers
+        (computing the owned path for a user is rather expensive).\
+        Can be overridden per project by setting
+        [codeOwners.enableAsyncMessageOnAddReviewer](#codeOwnersEnableAsyncMessageOnAddReviewer)
+        in `@PLUGIN@.config`.\
+        By default `true`.
+
 <a id="pluginCodeOwnersMaxCodeOwnerConfigCacheSize">plugin.@PLUGIN@.maxCodeOwnerConfigCacheSize</a>
 :       When computing code owner file statuses for a change (e.g. to compute
         the results for the code owners submit rule) parsed code owner config
@@ -1105,6 +1118,22 @@ endpoint or by touching the change (e.g. by adding a comment).
         from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.maxPathsInChangeMessages](#pluginCodeOwnersMaxPathsInChangeMessages)
+        in `gerrit.config` is used.
+
+<a id="codeOwnersEnableAsyncMessageOnAddReviewer">codeOwners.enableAsyncMessageOnAddReviewer</a>
+:       When a code owner is added as a reviewer the @PLUGIN@ plugin posts a
+        change message that lists owned paths of the code owner. This setting
+        controls whether this change message should be posted asynchronously.\
+        Posting these change messages asynchronously improves the latency for
+        post review and post reviewers calls, since they do not need to wait
+        until the owned paths are computed for all newly added reviewers
+        (computing the owned path for a user is rather expensive).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableAsyncMessageOnAddReviewer](#pluginCodeOwnersEnableAsyncMessageOnAddReviewer)
+        in `gerrit.config` and the `codeOwners.enableAsyncMessageOnAddReviewer`
+        setting from parent projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableAsyncMessageOnAddReviewer](#pluginCodeOwnersEnableAsyncMessageOnAddReviewer)
         in `gerrit.config` is used.
 
 ---

@@ -10,6 +10,8 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
 * `add_change_message_on_add_reviewer`:
   Latency for adding a change message with the owned path when a code owner is
   added as a reviewer.
+** `post_type':
+   Whether the change message was posted synchronously or asynchronously.
 * `compute_changed_files`:
   Latency for computing changed files.
 * `compute_file_status`:

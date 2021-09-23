@@ -80,6 +80,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   @Nullable private MergeCommitStrategy mergeCommitStrategy;
   @Nullable private FallbackCodeOwners fallbackCodeOwners;
   @Nullable private Integer maxPathsInChangeMessages;
+  @Nullable private Boolean enableAsyncMessageOnAddReviewer;
   @Nullable private ImmutableSet<CodeOwnerReference> globalCodeOwners;
   @Nullable private ImmutableSet<Account.Id> exemptedAccounts;
   @Nullable private Optional<String> overrideInfoUrl;
@@ -284,6 +285,18 @@ public class CodeOwnersPluginProjectConfigSnapshot {
           generalConfig.getMaxPathsInChangeMessages(projectName, pluginConfig);
     }
     return maxPathsInChangeMessages;
+  }
+
+  /**
+   * Gets whether code owner change messages that are added when a code owner is added as a reviewer
+   * should be posted asynchronously.
+   */
+  public boolean enableAsyncMessageOnAddReviewer() {
+    if (enableAsyncMessageOnAddReviewer == null) {
+      enableAsyncMessageOnAddReviewer =
+          generalConfig.enableAsyncMessageOnAddReviewer(projectName, pluginConfig);
+    }
+    return enableAsyncMessageOnAddReviewer;
   }
 
   /** Gets the global code owners. */
