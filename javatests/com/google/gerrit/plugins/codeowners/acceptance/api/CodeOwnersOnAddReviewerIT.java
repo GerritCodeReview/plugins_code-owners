@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
@@ -322,6 +323,44 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
             String.format(
                 "%s, who was added as reviewer owns the following files:\n* %s\n",
                 AccountTemplateUtil.getAccountTemplate(user.id()), path));
+  }
+
+  @Test
+  public void multipleCodeOwnerAddedAsReviewersAtTheSameTime() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    // Add code owners 'user' and 'user2' as reviewers.
+    gApi.changes()
+        .id(changeId)
+        .current()
+        .review(ReviewInput.create().reviewer(user.email()).reviewer(user2.email()));
+
+    // We expect that 2 change messages are added:
+    // 1. change message listing the paths owned by the new reviewer 'user'
+    // 2. change message listing the paths owned by the new reviewer 'user2'
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.get(messages, messages.size() - 2).message)
+        .isEqualTo(
+            String.format(
+                "%s, who was added as reviewer owns the following files:\n* %s\n",
+                AccountTemplateUtil.getAccountTemplate(user.id()), path));
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "%s, who was added as reviewer owns the following files:\n* %s\n",
+                AccountTemplateUtil.getAccountTemplate(user2.id()), path));
   }
 
   @Test
