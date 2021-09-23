@@ -15,7 +15,10 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -27,11 +30,19 @@ import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.common.ChangeMessageInfo;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.server.util.AccountTemplateUtil;
+import java.time.Duration;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import org.junit.Test;
 
 /**
  * Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnersOnAddReviewer}.
+ *
+ * <p>For tests the change message that is posted when a code owner is added as a reviewer, is added
+ * synchronously by default (see {@link AbstractCodeOwnersIT #defaultConfig()}). Tests that want to
+ * verify the asynchronous posting of this change message need to set {@code
+ * plugin.code-owners.enableAsyncMessageOnAddReviewer=true} in {@code gerrit.config} explicitly (by
+ * using the {@link GerritConfig} annotation).
  */
 public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
   @Test
@@ -395,5 +406,47 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
             String.format(
                 "%s, who was added as reviewer owns the following files:\n* %s\n",
                 AccountTemplateUtil.getAccountTemplate(user.id()), path));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnAddReviewer", value = "true")
+  public void asyncChangeMessageThatListsOwnedPaths() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    assertAsyncChangeMessage(
+        changeId,
+        String.format(
+            "%s, who was added as reviewer owns the following files:\n* %s\n",
+            AccountTemplateUtil.getAccountTemplate(user.id()), path));
+  }
+
+  private void assertAsyncChangeMessage(String changeId, String expectedChangeMessage)
+      throws Exception {
+    assertAsync(
+        () -> {
+          Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+          assertThat(Iterables.getLast(messages).message).isEqualTo(expectedChangeMessage);
+          return null;
+        });
+  }
+
+  private <T> T assertAsync(Callable<T> assertion) throws Exception {
+    return RetryerBuilder.<T>newBuilder()
+        .retryIfException(t -> true)
+        .withStopStrategy(
+            StopStrategies.stopAfterDelay(Duration.ofSeconds(1).toMillis(), MILLISECONDS))
+        .build()
+        .call(() -> assertion.call());
   }
 }
