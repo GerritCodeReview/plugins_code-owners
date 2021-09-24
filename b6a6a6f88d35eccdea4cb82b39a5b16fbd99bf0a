@@ -1,6 +1,29 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "90aea5e7_8f7d128a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-09-24T12:44:20Z",
+      "side": 1,
+      "message": "I think you can do better here:\nTake the code that is heavy (computes owned paths etc) and make that code be async. It can compute all the things you need and give that as input to BatchUpdateOp. I think it translates to just taking the computing of \"String message \u003d \" and doing that part async.\n\nThen, the batchUpdate.execute() call should be in a single thread to avoid the errors.\n\nDoes it make sense?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 0
+      },
+      "revId": "b6a6a6f88d35eccdea4cb82b39a5b16fbd99bf0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "f009e3fc_9c7bbccf",
