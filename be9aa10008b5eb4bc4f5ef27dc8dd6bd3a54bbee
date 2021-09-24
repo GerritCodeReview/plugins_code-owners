@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f7c8758_e554c383",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-09-24T11:38:02Z",
+      "side": 1,
+      "message": "Verifying this manually since it only works with the Gerrit core change that is part of the same topic.",
+      "revId": "be9aa10008b5eb4bc4f5ef27dc8dd6bd3a54bbee",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
