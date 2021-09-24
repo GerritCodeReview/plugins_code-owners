@@ -347,20 +347,18 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .current()
         .review(ReviewInput.create().reviewer(user.email()).reviewer(user2.email()));
 
-    // We expect that 2 change messages are added:
-    // 1. change message listing the paths owned by the new reviewer 'user'
-    // 2. change message listing the paths owned by the new reviewer 'user2'
+    // We expect that 1 change message is added that lists the path owned for each of the new
+    // reviewers ('user' and 'user2').
     Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
-    assertThat(Iterables.get(messages, messages.size() - 2).message)
-        .isEqualTo(
-            String.format(
-                "%s, who was added as reviewer owns the following files:\n* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path));
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
-                "%s, who was added as reviewer owns the following files:\n* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user2.id()), path));
+                "%s, who was added as reviewer owns the following files:\n* %s\n\n"
+                    + "%s, who was added as reviewer owns the following files:\n* %s\n",
+                AccountTemplateUtil.getAccountTemplate(user.id()),
+                path,
+                AccountTemplateUtil.getAccountTemplate(user2.id()),
+                path));
   }
 
   @Test
