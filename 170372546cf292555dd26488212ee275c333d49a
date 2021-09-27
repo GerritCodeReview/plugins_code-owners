@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e026edb8_e02175f2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1141254
+      },
+      "writtenOn": "2021-09-27T08:03:19Z",
+      "side": 1,
+      "message": "Does it make sense to refer to bug 15089?",
+      "revId": "170372546cf292555dd26488212ee275c333d49a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
