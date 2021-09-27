@@ -194,13 +194,17 @@ define code owners, e.g. stricter code owners than the fallback code owners, and
 hence the fallback code owners should not be applied.
 
 When referencing an external `OWNERS` file via the `file`  keyword, only
-non-restricted [access grants](#accessGrants) are imported. This means
-`per-file` rules from the referenced `OWNERS` file are not pulled in and also
-any [set noparent](#setNoparent) line in the referenced `OWNERS` file is
-ignored, but recursive imports are being resolved.
+non-restricted [access grants](#accessGrants) are imported. If they contain
+imports (via the `file` or [include](#includeKeyword) keyword) they are
+recursively resolved. This means for the referenced `OWNERS` files the following
+things are ignored and not pulled in:
 
-To also import `per-file` rules and any [set noparent](#setNoparent) line use
-the [include](#includeKeyword) keyword instead.
+1. `per-file` rules
+2. any [set noparent](#setNoparent) line
+3. `OWNERS` files in parent directories
+
+To also import `per-file` rules and any [set noparent](#setNoparent) line (1. +
+2.) use the [include](#includeKeyword) keyword instead.
 
 #### <a id="includeKeyword">include keyword
 
