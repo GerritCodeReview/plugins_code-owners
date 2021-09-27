@@ -103,6 +103,30 @@
       },
       "revId": "b6a6a6f88d35eccdea4cb82b39a5b16fbd99bf0a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "120865b6_f4207bd5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnAddReviewer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-09-27T14:00:11Z",
+      "side": 1,
+      "message": "Good catch!! You are right that IndexExecutor should only be used for indexing. I\u0027ll rewrite this to use WorkQueue instead.",
+      "parentUuid": "4b817761_86650a3d",
+      "range": {
+        "startLine": 77,
+        "startChar": 7,
+        "endLine": 77,
+        "endChar": 20
+      },
+      "revId": "b6a6a6f88d35eccdea4cb82b39a5b16fbd99bf0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
