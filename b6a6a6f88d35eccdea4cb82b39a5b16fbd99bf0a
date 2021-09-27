@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "890b32a8_fe891667",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-09-27T07:03:11Z",
+      "side": 1,
+      "message": "I\u0027m afraid I\u0027m not following. \n\n\u003e Take the code that is heavy (computes owned paths etc) and make that code be\n\u003e async. It can compute all the things you need and give that as input to\n\u003e BatchUpdateOp. \n\nThe BatchUpdateOp can only post the message, once the async operation that computes the owned path is finished. So it would need to wait for it to complete. So latency-wise that\u0027s the same as computing it synchronously, isn\u0027t it?",
+      "parentUuid": "90aea5e7_8f7d128a",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 0
+      },
+      "revId": "b6a6a6f88d35eccdea4cb82b39a5b16fbd99bf0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "f009e3fc_9c7bbccf",
