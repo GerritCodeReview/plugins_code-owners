@@ -50,6 +50,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "122e6a73_11a1ffc1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-09-28T07:44:38Z",
+      "side": 1,
+      "message": "Marking as revolved.",
+      "parentUuid": "890b32a8_fe891667",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 0
+      },
+      "revId": "b6a6a6f88d35eccdea4cb82b39a5b16fbd99bf0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "f009e3fc_9c7bbccf",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 1
@@ -119,6 +143,30 @@
       "side": 1,
       "message": "Good catch!! You are right that IndexExecutor should only be used for indexing. I\u0027ll rewrite this to use WorkQueue instead.",
       "parentUuid": "4b817761_86650a3d",
+      "range": {
+        "startLine": 77,
+        "startChar": 7,
+        "endLine": 77,
+        "endChar": 20
+      },
+      "revId": "b6a6a6f88d35eccdea4cb82b39a5b16fbd99bf0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "53d07c9e_7f92ef73",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnAddReviewer.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-09-28T07:44:38Z",
+      "side": 1,
+      "message": "Done with the new patch set.\n\nWhen switching to use WorkQueue I realised that the async posting of the change message did actually not work since I forgot to open a request context in the background thread. This is fixed now too, and covered by a test.",
+      "parentUuid": "120865b6_f4207bd5",
       "range": {
         "startLine": 77,
         "startChar": 7,
