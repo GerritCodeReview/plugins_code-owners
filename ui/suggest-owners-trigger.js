@@ -43,7 +43,7 @@ export class SuggestOwnersTrigger extends
             text-decoration: none;
           }
           gr-button {
-            --padding: var(--spacing-xs) var(--spacing-s);
+            --gr-button-padding: var(--spacing-xs) var(--spacing-s);
           }
         </style>
         <gr-button
