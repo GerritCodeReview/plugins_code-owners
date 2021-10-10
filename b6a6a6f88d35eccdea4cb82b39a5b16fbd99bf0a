@@ -74,6 +74,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "278f2b18_17d40e31",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-10-10T08:12:31Z",
+      "side": 1,
+      "message": "you\u0027re right, my logic is applicable if you had to post multiple change messages :-)",
+      "parentUuid": "122e6a73_11a1ffc1",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 21,
+        "endChar": 0
+      },
+      "revId": "b6a6a6f88d35eccdea4cb82b39a5b16fbd99bf0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "f009e3fc_9c7bbccf",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 1
