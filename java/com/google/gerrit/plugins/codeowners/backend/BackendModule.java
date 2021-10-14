@@ -51,6 +51,8 @@ public class BackendModule extends FactoryModule {
     }
 
     install(new CodeOwnerSubmitRule.Module());
+    install(new CodeOwnerApprovalHasOperand.Module());
+    install(new CodeOwnerEnabledHasOperand.Module());
 
     DynamicSet.bind(binder(), ExceptionHook.class).to(CodeOwnersExceptionHook.class);
     DynamicSet.bind(binder(), OnPostReview.class).to(OnCodeOwnerApproval.class);
