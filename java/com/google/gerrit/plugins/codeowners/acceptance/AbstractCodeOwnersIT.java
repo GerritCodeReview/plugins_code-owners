@@ -25,6 +25,7 @@ import com.google.gerrit.plugins.codeowners.api.impl.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.api.impl.ProjectCodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
+import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
@@ -49,7 +50,18 @@ public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
    */
   @ConfigSuite.Default
   public static Config defaultConfig() {
-    return new Config();
+    Config cfg = new Config();
+
+    // Disable asynchronous posting of change messages during tests to avoid parallel updates to
+    // NoteDb and hence risking LOCK_FAILURES (especially needed since the test API does not retry
+    // on LOCK_FAILURES).
+    cfg.setBoolean(
+        "plugin",
+        "code-owners",
+        GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER,
+        /* value= */ false);
+
+    return cfg;
   }
 
   /**

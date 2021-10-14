@@ -32,7 +32,7 @@ import com.google.inject.Singleton;
 @Singleton
 public class CodeOwnerMetrics {
   // latency metrics
-  public final Timer0 addChangeMessageOnAddReviewer;
+  public final Timer1<String> addChangeMessageOnAddReviewer;
   public final Timer0 computeChangedFiles;
   public final Timer0 computeFileStatus;
   public final Timer0 computeFileStatuses;
@@ -79,65 +79,64 @@ public class CodeOwnerMetrics {
 
     // latency metrics
     this.addChangeMessageOnAddReviewer =
-        createLatencyTimer(
+        createTimer(
             "add_change_message_on_add_reviewer",
             "Latency for adding a change message with the owned path when a code owner is added as"
-                + " a reviewer");
+                + " a reviewer",
+            Field.ofString("post_type", (metadataBuilder, fieldValue) -> {})
+                .description(
+                    "Whether the change message was posted synchronously or asynchronously.")
+                .build());
     this.computeChangedFiles =
-        createLatencyTimer("compute_changed_files", "Latency for computing changed files");
+        createTimer("compute_changed_files", "Latency for computing changed files");
     this.computeFileStatus =
-        createLatencyTimer(
-            "compute_file_status", "Latency for computing the file status of one file");
+        createTimer("compute_file_status", "Latency for computing the file status of one file");
     this.computeFileStatuses =
-        createLatencyTimer(
+        createTimer(
             "compute_file_statuses",
             "Latency for computing file statuses for all files in a change");
     this.computeOwnedPaths =
-        createLatencyTimer(
+        createTimer(
             "compute_owned_paths",
             "Latency for computing the files in a change that are owned by a user");
     this.computePatchSetApprovals =
-        createLatencyTimer(
+        createTimer(
             "compute_patch_set_approvals",
             "Latency for computing the approvals of the current patch set");
     this.extendChangeMessageOnPostReview =
-        createLatencyTimer(
+        createTimer(
             "extend_change_message_on_post_review",
             "Latency for extending the change message with the owned path when a code owner"
                 + " approval is applied");
     this.getAutoMerge =
-        createLatencyTimer(
+        createTimer(
             "get_auto_merge", "Latency for getting the auto merge commit of a merge commit");
     this.getChangedFiles =
-        createLatencyTimer(
-            "get_changed_files", "Latency for getting changed files from diff cache");
+        createTimer("get_changed_files", "Latency for getting changed files from diff cache");
     this.prepareFileStatusComputation =
-        createLatencyTimer(
+        createTimer(
             "prepare_file_status_computation", "Latency for preparing the file status computation");
     this.prepareFileStatusComputationForAccount =
-        createLatencyTimer(
+        createTimer(
             "compute_file_statuses_for_account",
             "Latency for computing file statuses for an account");
     this.resolveCodeOwnerConfig =
-        createLatencyTimer(
-            "resolve_code_owner_config", "Latency for resolving a code owner config file");
+        createTimer("resolve_code_owner_config", "Latency for resolving a code owner config file");
     this.resolveCodeOwnerConfigImport =
-        createLatencyTimer(
+        createTimer(
             "resolve_code_owner_config_import",
             "Latency for resolving an import of a code owner config file");
     this.resolveCodeOwnerConfigImports =
-        createLatencyTimer(
+        createTimer(
             "resolve_code_owner_config_imports",
             "Latency for resolving all imports of a code owner config file");
     this.resolveCodeOwnerReferences =
-        createLatencyTimer(
+        createTimer(
             "resolve_code_owner_references", "Latency for resolving the code owner references");
     this.resolvePathCodeOwners =
-        createLatencyTimer(
-            "resolve_path_code_owners", "Latency for resolving the code owners of a path");
+        createTimer("resolve_path_code_owners", "Latency for resolving the code owners of a path");
     this.runCodeOwnerSubmitRule =
-        createLatencyTimer(
-            "run_code_owner_submit_rule", "Latency for running the code owner submit rule");
+        createTimer("run_code_owner_submit_rule", "Latency for running the code owner submit rule");
 
     // code owner config metrics
     this.codeOwnerCacheReadsPerChange =
@@ -163,8 +162,7 @@ public class CodeOwnerMetrics {
         createTimerWithClassField(
             "parse_code_owner_config", "Latency for parsing a code owner config file", "parser");
     this.readCodeOwnerConfig =
-        createLatencyTimer(
-            "read_code_owner_config", "Latency for reading a code owner config file");
+        createTimer("read_code_owner_config", "Latency for reading a code owner config file");
 
     // counter metrics
     this.countCodeOwnerCacheReads =
@@ -231,9 +229,16 @@ public class CodeOwnerMetrics {
                 .build());
   }
 
-  private Timer0 createLatencyTimer(String name, String description) {
+  private Timer0 createTimer(String name, String description) {
     return metricMaker.newTimer(
         name, new Description(description).setCumulative().setUnit(Units.MILLISECONDS));
+  }
+
+  private <F1> Timer1<F1> createTimer(String name, String description, Field<F1> field) {
+    return metricMaker.newTimer(
+        name,
+        new Description(description).setCumulative().setUnit(Description.Units.MILLISECONDS),
+        field);
   }
 
   private Timer1<String> createTimerWithClassField(
@@ -242,11 +247,7 @@ public class CodeOwnerMetrics {
         Field.ofString(
                 fieldName, (metadataBuilder, fieldValue) -> metadataBuilder.className(fieldValue))
             .build();
-
-    return metricMaker.newTimer(
-        name,
-        new Description(description).setCumulative().setUnit(Description.Units.MILLISECONDS),
-        CODE_OWNER_BACKEND_FIELD);
+    return createTimer(name, description, CODE_OWNER_BACKEND_FIELD);
   }
 
   private Counter0 createCounter(String name, String description) {

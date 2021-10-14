@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
@@ -1742,5 +1743,70 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void defaultValueUsedIfInvalidMaxPathsInChangeMessagesConfigured() throws Exception {
     assertThat(generalConfig.getMaxPathsInChangeMessages(project, new Config()))
         .isEqualTo(DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES);
+  }
+
+  @Test
+  public void cannotGetEnableAsyncMessageOnAddReviewerForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.enableAsyncMessageOnAddReviewer(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetEnableAsyncMessageOnAddReviewerForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.enableAsyncMessageOnAddReviewer(project, /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noEnableAsyncMessageOnAddReviewer() throws Exception {
+    assertThat(generalConfig.enableAsyncMessageOnAddReviewer(project, new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnAddReviewer", value = "false")
+  public void
+      enableAsyncMessageOnAddReviewerConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.enableAsyncMessageOnAddReviewer(project, new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnAddReviewer", value = "false")
+  public void
+      enableAsyncMessageOnAddReviewerConfigurationInPluginConfigOverridesEnableAsyncMessageOnAddReviewerConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER,
+        "true");
+    assertThat(generalConfig.enableAsyncMessageOnAddReviewer(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnAddReviewer", value = "false")
+  public void invalidEnableAsyncMessageOnAddReviewerConfigurationInPluginConfigIsIgnored()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER,
+        "INVALID");
+    assertThat(generalConfig.enableAsyncMessageOnAddReviewer(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnAddReviewer", value = "INVALID")
+  public void invalidEnableAsyncMessageOnAddReviewerConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(generalConfig.enableAsyncMessageOnAddReviewer(project, new Config())).isTrue();
   }
 }
