@@ -3,6 +3,172 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "5a86d3dc_f00c3594",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "Will these operators be exposed for normal change queries (I think yes)?\nIf yes, I\u0027m concerned about the performance impact of this. Running the code owners submit rule is rather expensive and if you make a change query that triggers this for 100s of matching changes this will likely explode. Can we limit this so that you can only use these operators in definitions of submit requirements, but not in normal change queries?",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1bd37a86_e8833773",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "These should be documented somewhere.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 28
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0e4b7bc8_cf5517c6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalHasOperand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "I think this class could be a singleton, couldn\u0027t it?",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7d16c4a8_f059678f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "... or a code owner override.\n\nAt least this is what is currently implemented here (as the existing CodeOwnerSubmitRule also checks for overrides).\n\nThis behaviour is fine for a first implementation, but maybe add a TODO that this should be changed so that this predicate only matches if the change has all necessary code owner approvals, but not if it has overrides.",
+      "range": {
+        "startLine": 24,
+        "startChar": 74,
+        "endLine": 24,
+        "endChar": 83
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "40c1b6cb_6e03660d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "Please do not hard-code the plugin name, but rather instantiate this class via Guice and get the plugin name injected by using the @PluginName annotation.\n\nI wonder if the value that is provided here is actually used? I would expect that it\u0027s only using the name that you specified in CodeOwnerApprovalHasOperand.Module when binding the implementation for ChangeHasOperandFactory. Maybe this could be an empty string too?",
+      "range": {
+        "startLine": 32,
+        "startChar": 20,
+        "endLine": 32,
+        "endChar": 31
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "864bab80_91140f8e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "Running the code owners submit rule is very expensive compared to what other predicates do, maybe make this at least 5 (e.g. as we do in ConflictsPredicate). TBH I do not know when the cost is actually used and whether this really matters.",
+      "range": {
+        "startLine": 44,
+        "startChar": 11,
+        "endLine": 44,
+        "endChar": 12
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "043a6ba7_ea0235d7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "Make this a singleton?",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "44b2697f_c363627b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "Also here, please do not hard-code the plugin name.",
+      "range": {
+        "startLine": 28,
+        "startChar": 19,
+        "endLine": 28,
+        "endChar": 30
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "03824f5e_5eca9f61",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
         "patchSetId": 3
@@ -14,6 +180,24 @@
       "writtenOn": "2021-10-15T12:42:53Z",
       "side": 1,
       "message": "Should this class reside in a different package?",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "58772148_a62a2792",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-15T13:19:29Z",
+      "side": 1,
+      "message": "I\u0027m fine with keeping it here in this package.",
+      "parentUuid": "03824f5e_5eca9f61",
       "revId": "295736c273885e4c868f610137b3663b0aba4077",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
