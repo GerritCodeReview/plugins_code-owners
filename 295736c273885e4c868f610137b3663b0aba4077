@@ -56,6 +56,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "8c5bd2da_fb947445",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-10-18T12:56:27Z",
+      "side": 1,
+      "message": "I share Edwin\u0027s concern and actually Youssef and I discussed a few days ago that there is a need for some queries that are supported in SRs but not as query operands (in the context of a new label predicate that was difficult to support on top of the index).\n\n\u003e In the meantime we cannot separate SR predicates from search predicates\n\nWhy not? Can the interface just get a \"supportAsIndexOperand()\" or \"supportAsSr()\" method (interface design needs bike shedding). Or we invent a new plugin interface just for SRs.\n\n\u003e I can look into ways and come up with a design to make this separation between SRs/search predicates.\n\nSGTM. I would rather solve this problem now before we migrate more plugins.",
+      "parentUuid": "63231c3e_8d8b7009",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "1bd37a86_e8833773",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
