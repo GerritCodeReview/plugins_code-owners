@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d85da043_fd9a023a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "Yes. At least with the current design, implementing the ChangeHasOperandFactory interface makes these predicates available for search.\n\nIn the meantime we cannot separate SR predicates from search predicates, and also we cannot disabled them for search. If that was a core predicate, we could\u0027ve disabled it similarly to what we do for, e.g., the file:^regex predicate in google hosted Gerrit sites.\n\nI can look into ways and come up with a design to make this separation between SRs/search predicates.\n\nShould we add a sentence about the expected performance of these new predicates in docs?",
+      "parentUuid": "5a86d3dc_f00c3594",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1bd37a86_e8833773",
@@ -31,6 +49,30 @@
       "writtenOn": "2021-10-15T13:19:29Z",
       "side": 1,
       "message": "These should be documented somewhere.",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 11,
+        "endChar": 28
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "92da95b4_8c504998",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "Done. Added a search-operators.md.",
+      "parentUuid": "1bd37a86_e8833773",
       "range": {
         "startLine": 9,
         "startChar": 0,
@@ -58,6 +100,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6167a007_71eea280",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalHasOperand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0e4b7bc8_cf5517c6",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7d16c4a8_f059678f",
@@ -71,6 +131,30 @@
       "writtenOn": "2021-10-15T13:19:29Z",
       "side": 1,
       "message": "... or a code owner override.\n\nAt least this is what is currently implemented here (as the existing CodeOwnerSubmitRule also checks for overrides).\n\nThis behaviour is fine for a first implementation, but maybe add a TODO that this should be changed so that this predicate only matches if the change has all necessary code owner approvals, but not if it has overrides.",
+      "range": {
+        "startLine": 24,
+        "startChar": 74,
+        "endLine": 24,
+        "endChar": 83
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "942191c9_b488b5b6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7d16c4a8_f059678f",
       "range": {
         "startLine": 24,
         "startChar": 74,
@@ -104,6 +188,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "39386dd8_45bf6637",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "Done for @pluginName.\n\nYes, the value is unused because this predicate needs no args. However the name (i.e. approval_code-owners) is important since it\u0027s used to match against index documents.\n\nUpdate: I\u0027m not sure if the index implementation will go through the name/value here since we are implementing the OperatorPredicate interface and not the ChangeIndexPredicate.",
+      "parentUuid": "40c1b6cb_6e03660d",
+      "range": {
+        "startLine": 32,
+        "startChar": 20,
+        "endLine": 32,
+        "endChar": 31
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "864bab80_91140f8e",
@@ -117,6 +225,30 @@
       "writtenOn": "2021-10-15T13:19:29Z",
       "side": 1,
       "message": "Running the code owners submit rule is very expensive compared to what other predicates do, maybe make this at least 5 (e.g. as we do in ConflictsPredicate). TBH I do not know when the cost is actually used and whether this really matters.",
+      "range": {
+        "startLine": 44,
+        "startChar": 11,
+        "endLine": 44,
+        "endChar": 12
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1866bf60_c237d6fb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "OK, thanks for highlighting.\n\nI updated the cost to 10 and added a comment.",
+      "parentUuid": "864bab80_91140f8e",
       "range": {
         "startLine": 44,
         "startChar": 11,
@@ -144,6 +276,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "777f8f69_7ebdf487",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "043a6ba7_ea0235d7",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "44b2697f_c363627b",
@@ -157,6 +307,30 @@
       "writtenOn": "2021-10-15T13:19:29Z",
       "side": 1,
       "message": "Also here, please do not hard-code the plugin name.",
+      "range": {
+        "startLine": 28,
+        "startChar": 19,
+        "endLine": 28,
+        "endChar": 30
+      },
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2805c1cb_ff8aa499",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-18T11:39:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "44b2697f_c363627b",
       "range": {
         "startLine": 28,
         "startChar": 19,
