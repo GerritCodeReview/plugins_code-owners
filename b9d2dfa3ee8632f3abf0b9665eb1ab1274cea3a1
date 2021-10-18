@@ -1,0 +1,135 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2cfeb1ae_464a2a4e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "Now this could be singleton too.",
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "bab5e1a6_3f1d3ea8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 40,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "I think this should be just @Inject, see [1].\n\n[1] https://gerrit-review.googlesource.com/c/gerrit/+/100892",
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c70dc8c8_0c7a7f5d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "Now this could be singleton too.",
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "17369047_d2822429",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "I think this should be just @Inject, see [1].\n\n[1] https://gerrit-review.googlesource.com/c/gerrit/+/100892",
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1255aee8_369841f5",
+        "filename": "resources/Documentation/search-operators.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "Please link this documentation page from the index.md file so that users have a chance to find it.",
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8e845cab_61a48409",
+        "filename": "resources/Documentation/search-operators.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "description?",
+      "range": {
+        "startLine": 3,
+        "startChar": 72,
+        "endLine": 3,
+        "endChar": 79
+      },
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b49bb91d_6b6fcb67",
+        "filename": "resources/Documentation/search-operators.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "Use the place holder @PLUGIN@ for the plugin name to avoid misspelling (the actual plugin name is \u0027code-owners\u0027).",
+      "range": {
+        "startLine": 7,
+        "startChar": 4,
+        "endLine": 7,
+        "endChar": 15
+      },
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}

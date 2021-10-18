@@ -38,6 +38,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "63231c3e_8d8b7009",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-18T12:31:28Z",
+      "side": 1,
+      "message": "I wonder whether this should be a blocker for this change? It seems quite dangerous to expose these operators if there is a risk to bring our service down if people used them. Maybe let\u0027s asked Patrick for a third opinion here.",
+      "parentUuid": "d85da043_fd9a023a",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "1bd37a86_e8833773",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
