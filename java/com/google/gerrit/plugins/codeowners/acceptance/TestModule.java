@@ -17,7 +17,7 @@ package com.google.gerrit.plugins.codeowners.acceptance;
 import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperationsImpl;
-import com.google.gerrit.plugins.codeowners.module.Module;
+import com.google.gerrit.plugins.codeowners.module.PluginModule;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 
 /**
@@ -27,7 +27,7 @@ import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigS
 class TestModule extends FactoryModule {
   @Override
   public void configure() {
-    install(new Module());
+    install(new PluginModule());
 
     // Only add bindings here that are specifically required for tests, in order to keep the Guice
     // setup in tests as realistic as possible by delegating to the original module.

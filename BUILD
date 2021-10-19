@@ -15,7 +15,7 @@ gerrit_plugin(
     srcs = glob(["java/com/google/gerrit/plugins/codeowners/module/*.java"]),
     manifest_entries = [
         "Gerrit-PluginName: code-owners",
-        "Gerrit-Module: com.google.gerrit.plugins.codeowners.module.Module",
+        "Gerrit-Module: com.google.gerrit.plugins.codeowners.module.PluginModule",
         "Gerrit-HttpModule: com.google.gerrit.plugins.codeowners.module.HttpModule",
         "Gerrit-BatchModule: com.google.gerrit.plugins.codeowners.module.BatchModule",
     ],

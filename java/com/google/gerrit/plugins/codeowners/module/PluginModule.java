@@ -22,7 +22,7 @@ import com.google.gerrit.plugins.codeowners.restapi.RestApiModule;
 import com.google.gerrit.plugins.codeowners.validation.ValidationModule;
 
 /** Guice module that registers the extensions of the code-owners plugin. */
-public class Module extends FactoryModule {
+public class PluginModule extends FactoryModule {
   @Override
   protected void configure() {
     install(new ApiModule());

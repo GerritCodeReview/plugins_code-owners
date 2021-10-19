@@ -43,7 +43,7 @@ import java.util.Optional;
 class CodeOwnerSubmitRule implements SubmitRule {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  public static class Module extends AbstractModule {
+  public static class CodeOwnerSubmitRuleModule extends AbstractModule {
     @Override
     public void configure() {
       bind(SubmitRule.class)
