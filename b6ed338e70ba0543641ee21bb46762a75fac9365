@@ -16,6 +16,121 @@
       "message": "Ping. This is now ready for review :)",
       "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae1a5851_c3014a95",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-10-20T10:40:36Z",
+      "side": 1,
+      "message": "That\u0027s a bit unusual, should the default be false?",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 32
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b4863848_3d9a4bcd",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathsInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-10-20T10:40:36Z",
+      "side": 1,
+      "message": "since you\u0027re specifying OwnedChangedFileInfo here, and ownership of files below, maybe OwnedChangedFileInfo should already include the ownership flag? (or two flags, one for new path and one for old path).",
+      "range": {
+        "startLine": 35,
+        "startChar": 14,
+        "endLine": 35,
+        "endChar": 34
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "69cf46cc_325af4fe",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedChangedFile.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-10-20T10:40:36Z",
+      "side": 1,
+      "message": "new",
+      "range": {
+        "startLine": 34,
+        "startChar": 31,
+        "endLine": 34,
+        "endChar": 34
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7890c8a4_4313ef22",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-10-20T10:40:36Z",
+      "side": 1,
+      "message": "better: this",
+      "range": {
+        "startLine": 109,
+        "startChar": 17,
+        "endLine": 109,
+        "endChar": 30
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "137261a8_7760a701",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1085183
+      },
+      "writtenOn": "2021-10-20T10:40:36Z",
+      "side": 1,
+      "message": "toOwnedPathInfo (in first glance I don\u0027t see where it\u0027s used)",
+      "range": {
+        "startLine": 148,
+        "startChar": 31,
+        "endLine": 148,
+        "endChar": 53
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
