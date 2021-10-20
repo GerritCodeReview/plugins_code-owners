@@ -41,6 +41,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "94e8322e_e2a8bd3f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-20T14:35:51Z",
+      "side": 1,
+      "message": "Yes, makes sense to change this.\n\nDone.",
+      "parentUuid": "ae1a5851_c3014a95",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 25,
+        "endChar": 32
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b4863848_3d9a4bcd",
@@ -54,6 +78,30 @@
       "writtenOn": "2021-10-20T10:40:36Z",
       "side": 1,
       "message": "since you\u0027re specifying OwnedChangedFileInfo here, and ownership of files below, maybe OwnedChangedFileInfo should already include the ownership flag? (or two flags, one for new path and one for old path).",
+      "range": {
+        "startLine": 35,
+        "startChar": 14,
+        "endLine": 35,
+        "endChar": 34
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "40f36f22_17f63433",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathsInfo.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-20T14:35:51Z",
+      "side": 1,
+      "message": "It would be possible.\nIIUC this would mean to change OwnedChangedFileInfo from\n\n  {                                                                          \n    \"new_path\": {                                                            \n      \"path\": \"/foo/new-name.md\",                                            \n      \"owned\": true                                                          \n    },                                                                       \n    \"old_path\": {                                                            \n      \"path\": \"/foo/old-name.md\",                                            \n      \"owned\": true                                                          \n    }                                                                        \n  }\n  \nto\n\n  {                                                                          \n    \"new_path\": \"/foo/new-name.md\",                                            \n    \"new_owned\": true,                                                                                               \n    \"old_path\": \"/foo/old-name.md\",                                            \n    \"old_owned\": true                                                                                                                              \n  }\n  \nI think I prefer the first variant since it\u0027s better extensible. E.g. if we need another property per path, with the second variant we would always need to add two fields (one new_* and one old_*). I think it\u0027s better to have the properties per path represented by an own entity (OwnedPathInfo).\n\nIt would also be possible to omit the \u0027owned\u0027 flag and tell users to check for each path if it is contained in the ownedPaths list to figure out if the user owns it. I considered this, but didn\u0027t like it for 2 reasons: 1) it makes it more difficult for callers 2) I see the ownedPaths field as something that we might want to remove in the future and hence I wouldn\u0027t like to add a dependency on it.",
+      "parentUuid": "b4863848_3d9a4bcd",
       "range": {
         "startLine": 35,
         "startChar": 14,
@@ -87,6 +135,54 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2fae51a_b530dcff",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedChangedFile.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-20T14:35:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69cf46cc_325af4fe",
+      "range": {
+        "startLine": 34,
+        "startChar": 31,
+        "endLine": 34,
+        "endChar": 34
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6e0efac7_84f14809",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedChangedFile.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-20T14:35:51Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "69cf46cc_325af4fe",
+      "range": {
+        "startLine": 34,
+        "startChar": 31,
+        "endLine": 34,
+        "endChar": 34
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7890c8a4_4313ef22",
@@ -110,6 +206,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5e72cdd7_ff607979",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 109,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-20T14:35:51Z",
+      "side": 1,
+      "message": "Doesn\u0027t work since this is a static method that must be accessed in a static way.",
+      "parentUuid": "7890c8a4_4313ef22",
+      "range": {
+        "startLine": 109,
+        "startChar": 17,
+        "endLine": 109,
+        "endChar": 30
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "137261a8_7760a701",
@@ -123,6 +243,30 @@
       "writtenOn": "2021-10-20T10:40:36Z",
       "side": 1,
       "message": "toOwnedPathInfo (in first glance I don\u0027t see where it\u0027s used)",
+      "range": {
+        "startLine": 148,
+        "startChar": 31,
+        "endLine": 148,
+        "endChar": 53
+      },
+      "revId": "b6ed338e70ba0543641ee21bb46762a75fac9365",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c63b17d5_794601d2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-20T14:35:51Z",
+      "side": 1,
+      "message": "\u003e toOwnedPathInfo\n\nDone.\n\n\u003e (in first glance I don\u0027t see where it\u0027s used)\n\nRight above in line 140 and 143.",
+      "parentUuid": "137261a8_7760a701",
       "range": {
         "startLine": 148,
         "startChar": 31,
