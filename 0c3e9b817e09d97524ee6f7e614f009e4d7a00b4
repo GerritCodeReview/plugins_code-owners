@@ -1,6 +1,115 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "18fad414_58b7f6b3",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-10-21T11:47:39Z",
+      "side": 1,
+      "message": "Would appreciate Edwin\u0027s review as well",
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1d710221_751edd95",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-10-21T11:47:39Z",
+      "side": 1,
+      "message": "Why is the factory needed here? It seems you don\u0027t have any assisted parameters?\n\nAlso, classes with a factory aren\u0027t usually singletons. I would remove the singleton annotation in any case because it gives us no improvements in this case.\n\nIf you want a new instance in the places where you currently call \"create\" just inject a Provider\u003cCodeOwnerApprovalPredicate\u003e instead of the factory and call #get",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 3
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "94a9eb64_c18b81bb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-10-21T11:47:39Z",
+      "side": 1,
+      "message": "That cost function has no meaning and is not used :-)\n\nI think we should remove it from the core interfaces in the future.",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 3
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4f7edaaf_8f03ac3a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-10-21T11:47:39Z",
+      "side": 1,
+      "message": "I think the new error prone checks will flag this because inner classes should not clash with default names (so we\u0027d need to rename to CodeOwnerEnabledHasOperandModule). But we\u0027ll see.",
+      "range": {
+        "startLine": 32,
+        "startChar": 22,
+        "endLine": 32,
+        "endChar": 28
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8239708c_4fab3a7f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-10-21T11:47:39Z",
+      "side": 1,
+      "message": "return ...\n\nno need for an if",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 8
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ca37c8af_103a6de1",
