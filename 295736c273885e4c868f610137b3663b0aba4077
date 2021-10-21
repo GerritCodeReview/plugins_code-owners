@@ -110,6 +110,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "886a1042_5a729267",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-21T08:46:08Z",
+      "side": 1,
+      "message": "Thanks, SGTM.",
+      "parentUuid": "0a620e48_63ff5b1a",
+      "revId": "295736c273885e4c868f610137b3663b0aba4077",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "1bd37a86_e8833773",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
