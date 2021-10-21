@@ -130,6 +130,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "03f58c63_3ecda3d6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2021-10-21T13:39:31Z",
+      "side": 1,
+      "message": "Ah sorry, my comment was unclear. Yes, but this method makes no sense in the *interface* :-)\n\nSo at some point we need to remove it from the interface and all implementations.",
+      "parentUuid": "ac3b0c1d_116ebfdc",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 3
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4f7edaaf_8f03ac3a",
