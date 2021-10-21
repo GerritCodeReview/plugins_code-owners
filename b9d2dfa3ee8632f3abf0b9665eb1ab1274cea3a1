@@ -158,6 +158,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "80aee738_723b982a",
+        "filename": "resources/Documentation/search-operators.md",
+        "patchSetId": 5
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-21T13:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1255aee8_369841f5",
+      "revId": "b9d2dfa3ee8632f3abf0b9665eb1ab1274cea3a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8e845cab_61a48409",

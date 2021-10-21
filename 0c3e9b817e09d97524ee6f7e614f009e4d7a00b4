@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2d884d62_4463cba0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-21T13:35:13Z",
+      "side": 1,
+      "message": "Thanks Patrick for reviewing!",
+      "parentUuid": "18fad414_58b7f6b3",
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1d710221_751edd95",
@@ -31,6 +49,30 @@
       "writtenOn": "2021-10-21T11:47:39Z",
       "side": 1,
       "message": "Why is the factory needed here? It seems you don\u0027t have any assisted parameters?\n\nAlso, classes with a factory aren\u0027t usually singletons. I would remove the singleton annotation in any case because it gives us no improvements in this case.\n\nIf you want a new instance in the places where you currently call \"create\" just inject a Provider\u003cCodeOwnerApprovalPredicate\u003e instead of the factory and call #get",
+      "range": {
+        "startLine": 36,
+        "startChar": 0,
+        "endLine": 38,
+        "endChar": 3
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e35efcf7_4bb4913c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 38,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-21T13:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1d710221_751edd95",
       "range": {
         "startLine": 36,
         "startChar": 0,
@@ -64,6 +106,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ac3b0c1d_116ebfdc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 57,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-21T13:35:13Z",
+      "side": 1,
+      "message": "We get a compile error. The getCost should be overridden since we implement Matchable.\n\nI left it as is.",
+      "parentUuid": "94a9eb64_c18b81bb",
+      "range": {
+        "startLine": 53,
+        "startChar": 0,
+        "endLine": 57,
+        "endChar": 3
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4f7edaaf_8f03ac3a",
@@ -77,6 +143,30 @@
       "writtenOn": "2021-10-21T11:47:39Z",
       "side": 1,
       "message": "I think the new error prone checks will flag this because inner classes should not clash with default names (so we\u0027d need to rename to CodeOwnerEnabledHasOperandModule). But we\u0027ll see.",
+      "range": {
+        "startLine": 32,
+        "startChar": 22,
+        "endLine": 32,
+        "endChar": 28
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9eb10d63_39ec9b8d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-21T13:35:13Z",
+      "side": 1,
+      "message": "Thanks for the note. Marking resolved.",
+      "parentUuid": "4f7edaaf_8f03ac3a",
       "range": {
         "startLine": 32,
         "startChar": 22,
@@ -110,6 +200,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "16474f24_15f3f8e7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-21T13:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8239708c_4fab3a7f",
+      "range": {
+        "startLine": 42,
+        "startChar": 4,
+        "endLine": 42,
+        "endChar": 8
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ca37c8af_103a6de1",
@@ -123,6 +237,30 @@
       "writtenOn": "2021-10-21T11:36:13Z",
       "side": 1,
       "message": "Experiment name should be changed after https://gerrit-review.googlesource.com/c/gerrit/+/321530 is merged.\n\nPlease do not submit this change until after we rename this config.",
+      "range": {
+        "startLine": 110,
+        "startChar": 42,
+        "endLine": 110,
+        "endChar": 99
+      },
+      "revId": "0c3e9b817e09d97524ee6f7e614f009e4d7a00b4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fb283e50_72be4ecc",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 6
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-21T13:35:13Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ca37c8af_103a6de1",
       "range": {
         "startLine": 110,
         "startChar": 42,
