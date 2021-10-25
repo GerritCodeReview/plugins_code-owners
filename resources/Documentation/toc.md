@@ -8,6 +8,7 @@
 * [Path Expressions](path-expressions.html)
 * [REST API](rest-api.html)
 * [Validation](validation.html)
+* [Submit Requirement Operators](submit-requirement-operators.html)
 
 ### Admin Guides
 

@@ -19,6 +19,8 @@ import com.google.gerrit.extensions.config.FactoryModule;
 import com.google.gerrit.extensions.events.ReviewerAddedListener;
 import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.DynamicSet;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalHasOperand.CodeOwnerApprovalHasOperandModule;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerEnabledHasOperand.CodeOwnerEnabledHasOperandModule;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule.CodeOwnerSubmitRuleModule;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginGlobalConfigSnapshot;
@@ -52,6 +54,8 @@ public class BackendModule extends FactoryModule {
     }
 
     install(new CodeOwnerSubmitRuleModule());
+    install(new CodeOwnerApprovalHasOperandModule());
+    install(new CodeOwnerEnabledHasOperandModule());
 
     DynamicSet.bind(binder(), ExceptionHook.class).to(CodeOwnersExceptionHook.class);
     DynamicSet.bind(binder(), OnPostReview.class).to(OnCodeOwnerApproval.class);
