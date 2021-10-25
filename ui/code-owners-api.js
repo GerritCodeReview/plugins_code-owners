@@ -82,7 +82,7 @@ export class CodeOwnersApi {
    * @param {string} changeId
    */
   listOwnerStatus(changeId) {
-    return this._get(`/changes/${changeId}/code_owners.status`);
+    return this._get(`/changes/${changeId}/code_owners.status?limit=100000`);
   }
 
   /**
