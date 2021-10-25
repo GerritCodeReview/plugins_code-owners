@@ -20,6 +20,24 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "7517f14b_6ae7f792",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d3badde3_34de3838",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "e9dc23a1_81fd1b45",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 7
@@ -81,6 +99,54 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3ed46f64_a023c0b6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done, here and in CodeOwnerEnabledHasOperand.",
+      "parentUuid": "42993218_d3c0a673",
+      "range": {
+        "startLine": 33,
+        "startChar": 22,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "397f8e8d_39e8f844",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "15804bf2_e4c936f2",
+      "range": {
+        "startLine": 33,
+        "startChar": 37,
+        "endLine": 33,
+        "endChar": 50
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ce01e726_705bcc37",
@@ -104,6 +170,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9f88a2d4_62ce07de",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ce01e726_705bcc37",
+      "range": {
+        "startLine": 42,
+        "startChar": 16,
+        "endLine": 42,
+        "endChar": 24
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f917d0c8_a76dae11",
@@ -117,6 +207,24 @@
       "writtenOn": "2021-10-25T10:52:15Z",
       "side": 1,
       "message": "Please mention that by implementing SubmitRequirementPredicate this predicate isn\u0027t exposed for normal search queries and why this is important.",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "52c05e35_093fb907",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done, here and in CodeOwnerEnabledPredicate.",
+      "parentUuid": "f917d0c8_a76dae11",
       "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -167,6 +275,54 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7d1404d4_2bd77836",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e13482bc_b9c6c0ef",
+      "range": {
+        "startLine": 33,
+        "startChar": 22,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2e7148e2_a1c24a52",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a9a2c456_d8db1756",
+      "range": {
+        "startLine": 33,
+        "startChar": 37,
+        "endLine": 33,
+        "endChar": 50
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6911864e_827ce896",
@@ -180,6 +336,30 @@
       "writtenOn": "2021-10-25T10:52:15Z",
       "side": 1,
       "message": "Since CodeOwnerEnabledPredicate is a singleton this doesn\u0027t need to be a Provider.",
+      "range": {
+        "startLine": 42,
+        "startChar": 16,
+        "endLine": 42,
+        "endChar": 24
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a01b6da7_e90e9d5d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6911864e_827ce896",
       "range": {
         "startLine": 42,
         "startChar": 16,
@@ -207,6 +387,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0c3f2f38_20ccef57",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7f9aef99_6a492d1f",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "fbaf16b4_ba83ce8b",
@@ -220,6 +418,30 @@
       "writtenOn": "2021-10-25T10:52:15Z",
       "side": 1,
       "message": "Why not just have one submit requirement with \"has:approval_code-owners\" as submittability expression and \u0027has:enabled_code-owners\u0027 as applicability expression? This way we we test it like it will be used in practise.",
+      "range": {
+        "startLine": 69,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 22
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b3a091d0_a3d4be62",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Nice idea! I adapted the tests in hasEnabled_*",
+      "parentUuid": "fbaf16b4_ba83ce8b",
       "range": {
         "startLine": 69,
         "startChar": 4,
@@ -247,6 +469,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0b8352b6_df927c85",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Yes you\u0027re right. However we disabled writing to NoteDb on merge temporarily.\n\nI added a TODO to update this check again.",
+      "parentUuid": "13647bdd_500355a1",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "ace419de_8d9cd3bd",
@@ -260,6 +500,30 @@
       "writtenOn": "2021-10-25T10:52:15Z",
       "side": 1,
       "message": "Not quite correct. I think this is tested by the test above which verifies that a CodeOwnersInternalServerErrorException is thrown. Did you intend to say if a code owner config file is not parsable?",
+      "range": {
+        "startLine": 205,
+        "startChar": 40,
+        "endLine": 205,
+        "endChar": 55
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d74a5597_1d71ae80",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "mmm I borrowed this test from the CodeOwnerSubmitRuleIT. My intention was that if anything went wrong with the evaluation of the predicate, we shall consider it as \"UNSATISFIED\" to the predicate.\n\nRight now, since my predicate wrap the existing CodeOwnerSubmitRule, I can\u0027t fine tune the result and distinguish ERROR from UNSATISFIED, but this should be enhanced.\n\nDoes this test make sense right now? Should it be adapted or removed?",
+      "parentUuid": "ace419de_8d9cd3bd",
       "range": {
         "startLine": 205,
         "startChar": 40,
@@ -293,6 +557,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7949c4fd_35636cca",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c0f282d1_751b2854",
+      "range": {
+        "startLine": 244,
+        "startChar": 2,
+        "endLine": 244,
+        "endChar": 11
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1193f3f8_47953770",
@@ -306,6 +594,30 @@
       "writtenOn": "2021-10-25T10:52:15Z",
       "side": 1,
       "message": "Can these methods be merged into a single method?",
+      "range": {
+        "startLine": 244,
+        "startChar": 1,
+        "endLine": 262,
+        "endChar": 3
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0f09cc47_04a39e5a",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1193f3f8_47953770",
       "range": {
         "startLine": 244,
         "startChar": 1,
@@ -333,6 +645,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "89e4dff2_6490bc2c",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "eb059e47_2e5c9c98",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "43f71d69_80327573",
@@ -356,6 +686,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8e6a9a76_3b7f6c87",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "43f71d69_80327573",
+      "range": {
+        "startLine": 312,
+        "startChar": 1,
+        "endLine": 316,
+        "endChar": 80
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b4347ed6_a95faf5c",
@@ -369,6 +723,24 @@
       "writtenOn": "2021-10-25T10:52:15Z",
       "side": 1,
       "message": "This documentation page still needs to be referenced from toc.md so that it gets included into index.html and users will be able to discover it.",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "40bb7ab9_0260d169",
+        "filename": "resources/Documentation/submit-requirement-operators.md",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T11:56:37Z",
+      "side": 1,
+      "message": "Oh, my bad. I added it but forgot to commit.\n\nDone.",
+      "parentUuid": "b4347ed6_a95faf5c",
       "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
