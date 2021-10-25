@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "d3badde3_34de3838",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Please mention that these query predicates are not supported for search queries and why they are not supported there.",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "e9dc23a1_81fd1b45",
@@ -43,6 +60,69 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "42993218_d3c0a673",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Please rename, as this name clashes with the Module class in java.lang.\nSince [1] we treat clashes with java.lang as errors, hence this causes a build failure when being build in gerrit tree.\n\n[1] https://gerrit-review.googlesource.com/c/gerrit/+/321419",
+      "range": {
+        "startLine": 33,
+        "startChar": 22,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ce01e726_705bcc37",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Since CodeOwnerApprovalPredicate is a singleton this doesn\u0027t need to be a Provider.",
+      "range": {
+        "startLine": 42,
+        "startChar": 16,
+        "endLine": 42,
+        "endChar": 24
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f917d0c8_a76dae11",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalPredicate.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Please mention that by implementing SubmitRequirementPredicate this predicate isn\u0027t exposed for normal search queries and why this is important.",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a9a2c456_d8db1756",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
         "patchSetId": 7
@@ -60,6 +140,235 @@
         "endLine": 33,
         "endChar": 50
       },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e13482bc_b9c6c0ef",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Please rename, as this name clashes with the Module class in java.lang.\nSince [1] we treat clashes with java.lang as errors, hence this causes a build failure when being build in gerrit tree.\n\n[1] https://gerrit-review.googlesource.com/c/gerrit/+/321419",
+      "range": {
+        "startLine": 33,
+        "startChar": 22,
+        "endLine": 33,
+        "endChar": 28
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6911864e_827ce896",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledHasOperand.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Since CodeOwnerEnabledPredicate is a singleton this doesn\u0027t need to be a Provider.",
+      "range": {
+        "startLine": 42,
+        "startChar": 16,
+        "endLine": 42,
+        "endChar": 24
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7f9aef99_6a492d1f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerEnabledPredicate.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Please mention that by implementing SubmitRequirementPredicate this predicate isn\u0027t exposed for normal search queries and why this is important.",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fbaf16b4_ba83ce8b",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 85,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Why not just have one submit requirement with \"has:approval_code-owners\" as submittability expression and \u0027has:enabled_code-owners\u0027 as applicability expression? This way we we test it like it will be used in practise.",
+      "range": {
+        "startLine": 69,
+        "startChar": 4,
+        "endLine": 85,
+        "endChar": 22
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "13647bdd_500355a1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 160,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Maybe add a comment why a code-owners submit requirement is not returned for closed changes. IIUC this is because storing submit requirements on merge and reading back is not fully implemented yet? Or is it just because the predicate doesn\u0027t do the read from NoteDb for closed changes? Could it just do this?",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ace419de_8d9cd3bd",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Not quite correct. I think this is tested by the test above which verifies that a CodeOwnersInternalServerErrorException is thrown. Did you intend to say if a code owner config file is not parsable?",
+      "range": {
+        "startLine": 205,
+        "startChar": 40,
+        "endLine": 205,
+        "endChar": 55
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c0f282d1_751b2854",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 244,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "I think all these methods should be private?",
+      "range": {
+        "startLine": 244,
+        "startChar": 2,
+        "endLine": 244,
+        "endChar": 11
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1193f3f8_47953770",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 262,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Can these methods be merged into a single method?",
+      "range": {
+        "startLine": 244,
+        "startChar": 1,
+        "endLine": 262,
+        "endChar": 3
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eb059e47_2e5c9c98",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 264,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Unused?",
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "43f71d69_80327573",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 316,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "Can these 2 methods be merged?",
+      "range": {
+        "startLine": 312,
+        "startChar": 1,
+        "endLine": 316,
+        "endChar": 80
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b4347ed6_a95faf5c",
+        "filename": "resources/Documentation/submit-requirement-operators.md",
+        "patchSetId": 7
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-10-25T10:52:15Z",
+      "side": 1,
+      "message": "This documentation page still needs to be referenced from toc.md so that it gets included into index.html and users will be able to discover it.",
       "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
