@@ -558,6 +558,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "174ace07_d128a428",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerHasOperandsIT.java",
+        "patchSetId": 7
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-10-25T12:27:12Z",
+      "side": 1,
+      "message": "Ah, OK. Thanks for the clarification.\n\nDone.",
+      "parentUuid": "dc4eb963_d710ca29",
+      "range": {
+        "startLine": 205,
+        "startChar": 40,
+        "endLine": 205,
+        "endChar": 55
+      },
+      "revId": "fd087d95492f72f1281d1f204785b2253cff11c6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c0f282d1_751b2854",
