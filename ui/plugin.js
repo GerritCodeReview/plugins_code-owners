@@ -72,10 +72,20 @@ Gerrit.install(plugin => {
         view.reporting = reporting;
       });
 
-  // submit requirement value for owner's requirement
+  // old submit requirement value for owner's requirement
   plugin.registerCustomComponent(
       'submit-requirement-item-code-owners',
       OwnerRequirementValue.is, {slot: 'value'}
+  )
+      .onAttached(view => {
+        view.restApi = restApi;
+        view.reporting = reporting;
+      });
+
+  // new submit requirement value for owner's requirement
+  plugin.registerCustomComponent(
+      'submit-requirement-CodeReview',
+      OwnerRequirementValue.is, {replace: true}
   )
       .onAttached(view => {
         view.restApi = restApi;
