@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d0c99ec0_c6c5f633",
+        "filename": "ui/plugin.js",
+        "patchSetId": 1
+      },
+      "lineNbr": 87,
+      "author": {
+        "id": 1085182
+      },
+      "writtenOn": "2021-10-27T12:37:12Z",
+      "side": 1,
+      "message": "this is temporary for demo purposes",
+      "range": {
+        "startLine": 87,
+        "startChar": 26,
+        "endLine": 87,
+        "endChar": 55
+      },
+      "revId": "8d2cf3caab5658118000427389e50471b22b7405",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
