@@ -184,7 +184,7 @@ export class CodeOwnersPluginStatusNotifier extends
     banner.pluginStatus = status;
   }
 
-  _loadDataAfterStateChanged() {
+  loadPropertiesAfterModelChanged() {
     this.modelLoader.loadPluginStatus();
     this.modelLoader.loadBranchConfig();
   }
