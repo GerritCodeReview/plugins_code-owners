@@ -84,7 +84,7 @@ Gerrit.install(plugin => {
 
   // new submit requirement value for owner's requirement
   plugin.registerCustomComponent(
-      'submit-requirement-CodeReview',
+      'submit-requirement-codeowners',
       OwnerRequirementValue.is, {replace: true}
   )
       .onAttached(view => {
