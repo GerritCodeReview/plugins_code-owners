@@ -31,6 +31,7 @@ import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.DiffOperations;
+import com.google.gerrit.server.patch.DiffOptions;
 import com.google.gerrit.server.patch.filediff.FileDiffOutput;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -97,7 +98,8 @@ public class ChangedFiles {
         // For merge commits the default base is the auto-merge commit which should be used as base
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
         fileDiffOutputs =
-            diffOperations.listModifiedFilesAgainstParent(project, revision, /* parentNum=*/ 0);
+            diffOperations.listModifiedFilesAgainstParent(
+                project, revision, /* parentNum=*/ 0, DiffOptions.DEFAULTS);
       } else {
         checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
         // Always use parent 1 to do the comparison.
@@ -105,7 +107,9 @@ public class ChangedFiles {
         // handled above).
         // For merge commits also the first parent should be used if the merge commit strategy is
         // ALL_CHANGED_FILES.
-        fileDiffOutputs = diffOperations.listModifiedFilesAgainstParent(project, revision, 1);
+        fileDiffOutputs =
+            diffOperations.listModifiedFilesAgainstParent(
+                project, revision, 1, DiffOptions.DEFAULTS);
       }
 
       return toChangedFiles(filterOutMagicFilesAndSort(fileDiffOutputs)).collect(toImmutableList());
