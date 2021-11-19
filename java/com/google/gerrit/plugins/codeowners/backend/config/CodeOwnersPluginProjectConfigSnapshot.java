@@ -662,7 +662,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
           filterOutDuplicateRequiredApprovals(
               getConfiguredRequiredApproval(overrideApprovalConfig)));
     } catch (InvalidPluginConfigurationException e) {
-      logger.atWarning().withCause(e).log(
+      logger.atInfo().log(
           "Ignoring invalid override approval configuration for project %s."
               + " Overrides are disabled.",
           projectName.get());
