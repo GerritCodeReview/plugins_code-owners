@@ -530,17 +530,12 @@ endpoint or by touching the change (e.g. by adding a comment).
         owners hasn't been explicity disabled in a relevant code owner config
         file and if there are no unresolved imports.\
         \
-        Can be `NONE`, `PROJECT_OWNERS` or `ALL_USERS`.\
+        Can be `NONE` or `ALL_USERS`.\
         \
         `NONE`:\
         Paths for which no code owners are defined are owned by no one. This
         means changes that touch these files can only be submitted with a code
         owner override.\
-        \
-        `PROJECT_OWNERS`:\
-        Paths for which no code owners are defined are owned by the project
-        owners. This means changes to these paths can be approved by the project
-        owners.\
         \
         `ALL_USERS`:\
         Paths for which no code owners are defined are owned by all users. This
@@ -1084,7 +1079,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         defined. This policy only applies if the inheritance of parent code
         owners hasn't been explicity disabled in a relevant code owner config
         file and if there are no unresolved imports.\
-        Can be `NONE`, `PROJECT_OWNERS` or `ALL_USERS` (see
+        Can be `NONE` or `ALL_USERS` (see
         [plugin.@PLUGIN@.fallbackCodeOwners](#pluginCodeOwnersFallbackCodeOwners)
         for an explanation of these values).\
         Overrides the global setting

@@ -1687,6 +1687,14 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  public void defaultValueUsedIfRemovedProjectOwnersOptionIsSetForFallbackCodeOwners()
+      throws Exception {
+    assertThat(generalConfig.getFallbackCodeOwners(project, new Config()))
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
   public void cannotGetMaxPathsInChangeMessagesForNullProject() throws Exception {
     NullPointerException npe =
         assertThrows(

@@ -8,15 +8,16 @@ import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS
 import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestPlugin;
-import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject;
 import com.google.inject.Inject;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
+import org.junit.Before;
 import org.junit.Test;
 
 /**
@@ -26,14 +27,29 @@ import org.junit.Test;
  */
 @TestPlugin(
     name = "code-owners",
-    sysModule = "com.google.gerrit.plugins.codeowners.module.BatchModule")
+    sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestBatchModule")
 public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
   @Inject private ProjectOperations projectOperations;
   @Inject private RequestScopeOperations requestScopeOperations;
 
+  private CodeOwnerConfigOperations codeOwnerConfigOperations;
+
+  @Before
+  public void testSetup() throws Exception {
+    codeOwnerConfigOperations =
+        plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
+  }
+
   @Test
-  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
   public void invokeCodeOwnerSubmitRule() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
     // Upload a change as a non-code owner.
     TestRepository<InMemoryRepository> testRepo = cloneProject(project, user);
     PushOneCommit push =
@@ -60,8 +76,7 @@ public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
     submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
-    // Approve by a project owner who is code owner since project owners are configured as fallback
-    // code owners.
+    // Approve by a code owner.
     requestScopeOperations.setApiUser(admin.id());
     approve(changeId);
 

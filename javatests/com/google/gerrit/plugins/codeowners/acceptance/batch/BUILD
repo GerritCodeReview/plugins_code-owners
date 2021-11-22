@@ -12,6 +12,8 @@ acceptance_tests(
     group = "acceptance_batch",
     deps = [
         "//plugins/code-owners:code-owners__plugin",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance",
+        "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/acceptance/testsuite",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/testing",
     ],
 )

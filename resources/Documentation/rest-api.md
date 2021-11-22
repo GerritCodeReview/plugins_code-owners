@@ -986,7 +986,7 @@ If a field in this input is not set, the corresponding parameter in the
 | `file_extension` | optional | The file extension that should be used for code owner config files in this project.
 | `required_approval` | optional | The approval that is required from code owners. Must be specified in the format "\<label-name\>+\<label-value\>". If an empty string is provided the required approval configuration is unset. Unsetting the required approval means that the inherited required approval configuration or the default required approval (`Code-Review+1`) will apply. In contrast to providing an empty string, providing `null` (or not setting the value) means that the required approval configuration is not updated.
 | `override_approvals` | optional | The approvals that count as override for the code owners submit check. Must be specified in the format "\<label-name\>+\<label-value\>".
-| `fallback_code_owners` | optional | Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `PROJECT_OWNERS`: Paths for which no code owners are defined are owned by the project owners. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
+| `fallback_code_owners` | optional | Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
 | `global_code_owners` | optional | List of emails of users that should be code owners globally across all branches.
 | `exempted_users` | optional | List of emails of users that should be exempted from requiring code owners approvals.
 | `merge_commit_strategy` | optional | Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
@@ -1069,7 +1069,7 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.html#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
 | `override_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to request a code owner override.
 | `invalid_code_owner_config_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to deal with invalid code owner config files.
-|`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `PROJECT_OWNERS`: Paths for which no code owners are defined are owned by the project owners. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
+|`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
 
 ### <a id="owned-changed-file-info"> OwnedChangedFileInfo
 The `OwnedChangedFileInfo` entity contains information about a file that was

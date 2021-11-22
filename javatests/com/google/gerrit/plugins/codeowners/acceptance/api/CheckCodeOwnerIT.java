@@ -1216,47 +1216,6 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
-  public void checkFallbackCodeOwner_ProjectOwners() throws Exception {
-    TestAccount codeOwner =
-        accountCreator.create(
-            "codeOwner", "codeOwner@example.com", "Code Owner", /* displayName= */ null);
-    setAsCodeOwners("/foo/", codeOwner);
-
-    // 1. Check for a file to which fallback code owners do not apply because code owners are
-    // defined
-    String path = "/foo/bar/baz.md";
-
-    // 1a. by a code owner
-    CodeOwnerCheckInfo checkCodeOwnerInfo = checkCodeOwner(path, codeOwner.email());
-    assertThat(checkCodeOwnerInfo).isCodeOwner();
-    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
-
-    // 1b. by a project owner
-    checkCodeOwnerInfo = checkCodeOwner(path, admin.email());
-    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
-    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
-
-    // 1c. by a non code owner
-    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
-    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
-    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
-
-    // 2. Check for a file to which fallback code owners apply because no code owners are defined
-    path = "/other/bar/baz.md";
-
-    // 2b. by a project owner
-    checkCodeOwnerInfo = checkCodeOwner(path, admin.email());
-    assertThat(checkCodeOwnerInfo).isCodeOwner();
-    assertThat(checkCodeOwnerInfo).isFallbackCodeOwner();
-
-    // 2b. by a non project owner
-    checkCodeOwnerInfo = checkCodeOwner(path, user.email());
-    assertThat(checkCodeOwnerInfo).isNotCodeOwner();
-    assertThat(checkCodeOwnerInfo).isNotFallbackCodeOwner();
-  }
-
-  @Test
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
   public void noFallbackCodeOwnerIfParentCodeOwnersIgnored() throws Exception {
     codeOwnerConfigOperations

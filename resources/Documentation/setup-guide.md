@@ -297,8 +297,8 @@ Example for the definition of the `Owners-Override` label in `project.config`:
 
 It is possible to configure a policy for [fallback code
 owners](config.html#pluginCodeOwnersFallbackCodeOwners) that controls who should
-own files for which no code owners have been defined, e.g. project owners, all
-users or no one (default).
+own files for which no code owners have been defined, e.g. all users or no one
+(default).
 
 Configuring fallback code owners is optional. For the initial rollout of the
 code-owners plugin it is highly recommended to allow fallback code owners so

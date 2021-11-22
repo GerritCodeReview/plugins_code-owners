@@ -73,7 +73,7 @@ public class CodeOwnerConfigValidatorErrorHandlingIT extends AbstractCodeOwnersI
 
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
-  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
   @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "true")
   public void submitFailsOnInternalError() throws Exception {
     try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
@@ -93,7 +93,7 @@ public class CodeOwnerConfigValidatorErrorHandlingIT extends AbstractCodeOwnersI
   @Test
   @GerritConfig(name = "plugin.code-owners.backend", value = FailingCodeOwnerBackend.ID)
   @GerritConfig(name = "plugin.code-owners.enableValidationOnSubmit", value = "DRY_RUN")
-  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "PROJECT_OWNERS")
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
   public void submitSucceedsOnInternalErrorIfValidationIsDoneAsDryRun() throws Exception {
     try (AutoCloseable registration = registerTestBackend(new FailingCodeOwnerBackend())) {
       disableCodeOwnersForProject(project);

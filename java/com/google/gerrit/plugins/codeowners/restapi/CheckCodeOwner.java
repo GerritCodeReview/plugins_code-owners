@@ -36,7 +36,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigHierarchy;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.OptionalResultWithMessages;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwners;
@@ -46,14 +45,12 @@ import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfi
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
-import com.google.gerrit.server.account.AccountResource;
 import com.google.gerrit.server.change.ChangeFinder;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.permissions.ChangePermission;
 import com.google.gerrit.server.permissions.LabelPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
-import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.gerrit.server.permissions.RefPermission;
 import com.google.gerrit.server.project.BranchResource;
 import com.google.gerrit.server.restapi.account.AccountsCollection;
@@ -399,8 +396,6 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     switch (fallbackCodeOwners) {
       case NONE:
         return false;
-      case PROJECT_OWNERS:
-        return isProjectOwner(projectName);
       case ALL_USERS:
         return true;
     }
@@ -408,26 +403,6 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
         String.format(
             "unknown value %s for fallbackCodeOwners in project %s",
             fallbackCodeOwners.name(), projectName));
-  }
-
-  private boolean isProjectOwner(Project.NameKey projectName) {
-    try {
-      AccountResource accountResource =
-          accountsCollection.parse(TopLevelResource.INSTANCE, IdString.fromDecoded(email));
-      // There is no dedicated project owner permission, but project owners are detected by checking
-      // the permission to write the project config. Only project owners can do this.
-      return permissionBackend
-          .absentUser(accountResource.getUser().getAccountId())
-          .project(projectName)
-          .test(ProjectPermission.WRITE_CONFIG);
-    } catch (PermissionBackendException
-        | ResourceNotFoundException
-        | AuthException
-        | IOException
-        | ConfigInvalidException e) {
-      throw new CodeOwnersInternalServerErrorException(
-          String.format("failed if email %s is owner of project %s", email, projectName.get()), e);
-    }
   }
 
   private OptionalResultWithMessages<CodeOwner> isResolvable() {

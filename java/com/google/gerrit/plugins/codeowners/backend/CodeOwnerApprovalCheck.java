@@ -30,7 +30,6 @@ import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.LabelValue;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
-import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
@@ -47,9 +46,6 @@ import com.google.gerrit.server.git.PureRevertCache;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
-import com.google.gerrit.server.permissions.PermissionBackend;
-import com.google.gerrit.server.permissions.PermissionBackendException;
-import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
@@ -86,7 +82,6 @@ import org.eclipse.jgit.revwalk.RevWalk;
 public class CodeOwnerApprovalCheck {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-  private final PermissionBackend permissionBackend;
   private final GitRepositoryManager repoManager;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ChangedFiles changedFiles;
@@ -98,7 +93,6 @@ public class CodeOwnerApprovalCheck {
 
   @Inject
   CodeOwnerApprovalCheck(
-      PermissionBackend permissionBackend,
       GitRepositoryManager repoManager,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       ChangedFiles changedFiles,
@@ -107,7 +101,6 @@ public class CodeOwnerApprovalCheck {
       Provider<CodeOwnerResolver> codeOwnerResolverProvider,
       ApprovalsUtil approvalsUtil,
       CodeOwnerMetrics codeOwnerMetrics) {
-    this.permissionBackend = permissionBackend;
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.changedFiles = changedFiles;
@@ -440,10 +433,8 @@ public class CodeOwnerApprovalCheck {
       ObjectId revision = getDestBranchRevision(changeNotes.getChange());
       logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
 
-      boolean isProjectOwner = isProjectOwner(changeNotes.getProjectName(), accountId);
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
-      logger.atFine().log(
-          "fallbackCodeOwner = %s, isProjectOwner = %s", fallbackCodeOwners, isProjectOwner);
+      logger.atFine().log("fallbackCodeOwner = %s", fallbackCodeOwners);
 
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
       CodeOwnerResolver codeOwnerResolver =
@@ -680,7 +671,6 @@ public class CodeOwnerApprovalCheck {
         CodeOwnerStatus codeOwnerStatusForFallbackCodeOwners =
             getCodeOwnerStatusForFallbackCodeOwners(
                 codeOwnerStatus.get(),
-                branch,
                 implicitApprover,
                 reviewerAccountIds,
                 approverAccountIds,
@@ -722,108 +712,10 @@ public class CodeOwnerApprovalCheck {
   }
 
   /**
-   * Gets the code owner status for the given path when project owners are configured as fallback
-   * code owners.
-   */
-  private CodeOwnerStatus getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
-      BranchNameKey branch,
-      @Nullable Account.Id implicitApprover,
-      ImmutableSet<Account.Id> reviewerAccountIds,
-      ImmutableSet<Account.Id> approverAccountIds,
-      Path absolutePath,
-      AtomicReference<String> reason) {
-    logger.atFine().log(
-        "computing code owner status for %s with project owners as fallback code owners",
-        absolutePath);
-
-    CodeOwnerStatus codeOwnerStatus = CodeOwnerStatus.INSUFFICIENT_REVIEWERS;
-    if (isApprovedByProjectOwner(branch.project(), approverAccountIds, implicitApprover, reason)) {
-      codeOwnerStatus = CodeOwnerStatus.APPROVED;
-    } else if (isPendingByProjectOwner(branch.project(), reviewerAccountIds, reason)) {
-      codeOwnerStatus = CodeOwnerStatus.PENDING;
-    }
-
-    return codeOwnerStatus;
-  }
-
-  private boolean isApprovedByProjectOwner(
-      Project.NameKey projectName,
-      ImmutableSet<Account.Id> approverAccountIds,
-      @Nullable Account.Id implicitApprover,
-      AtomicReference<String> reason) {
-    return (implicitApprover != null
-            && isImplicitlyApprovedByProjectOwner(projectName, implicitApprover, reason))
-        || isExplicitlyApprovedByProjectOwner(projectName, approverAccountIds, reason);
-  }
-
-  private boolean isImplicitlyApprovedByProjectOwner(
-      Project.NameKey projectName, Account.Id implicitApprover, AtomicReference<String> reason) {
-    requireNonNull(implicitApprover, "implicitApprover");
-    if (isProjectOwner(projectName, implicitApprover)) {
-      // The uploader of the patch set is a project owner and thus a code owner. This means there
-      // is an implicit code owner approval from the patch set uploader so that the path is
-      // automatically approved.
-      reason.set(
-          String.format(
-              "implicitly approved by the patch set uploader %s who is a %s"
-                  + " (all project owners are %ss)",
-              AccountTemplateUtil.getAccountTemplate(implicitApprover),
-              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
-              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
-      return true;
-    }
-    return false;
-  }
-
-  private boolean isExplicitlyApprovedByProjectOwner(
-      Project.NameKey projectName,
-      ImmutableSet<Account.Id> approverAccountIds,
-      AtomicReference<String> reason) {
-    Optional<Account.Id> approver =
-        approverAccountIds.stream()
-            .filter(approverAccountId -> isProjectOwner(projectName, approverAccountId))
-            .findAny();
-    if (approver.isPresent()) {
-      // At least one of the approvers is a project owner and thus a code owner.
-      reason.set(
-          String.format(
-              "approved by %s who is a %s (all project owners are %ss)",
-              AccountTemplateUtil.getAccountTemplate(approver.get()),
-              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
-              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
-      return true;
-    }
-    return false;
-  }
-
-  private boolean isPendingByProjectOwner(
-      Project.NameKey projectName,
-      ImmutableSet<Account.Id> reviewerAccountIds,
-      AtomicReference<String> reason) {
-    Optional<Account.Id> reviewer =
-        reviewerAccountIds.stream()
-            .filter(reviewerAccountId -> isProjectOwner(projectName, reviewerAccountId))
-            .findAny();
-    if (reviewer.isPresent()) {
-      // At least one of the reviewers is a project owner and thus a code owner.
-      reason.set(
-          String.format(
-              "reviewer %s is a %s (all project owners are %ss)",
-              AccountTemplateUtil.getAccountTemplate(reviewer.get()),
-              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName(),
-              CodeOwnerKind.FALLBACK_CODE_OWNER.getDisplayName()));
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
    * Computes the code owner status for the given path based on the configured fallback code owners.
    */
   private CodeOwnerStatus getCodeOwnerStatusForFallbackCodeOwners(
       CodeOwnerStatus codeOwnerStatus,
-      BranchNameKey branch,
       @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
       ImmutableSet<Account.Id> approverAccountIds,
@@ -837,9 +729,6 @@ public class CodeOwnerApprovalCheck {
       case NONE:
         logger.atFine().log("no fallback code owners");
         return codeOwnerStatus;
-      case PROJECT_OWNERS:
-        return getCodeOwnerStatusForProjectOwnersAsFallbackCodeOwners(
-            branch, implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath, reason);
       case ALL_USERS:
         return getCodeOwnerStatusIfAllUsersAreCodeOwners(
             implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath, reason);
@@ -990,27 +879,6 @@ public class CodeOwnerApprovalCheck {
     }
 
     return false;
-  }
-
-  /** Whether the given account is a project owner of the given project. */
-  private boolean isProjectOwner(Project.NameKey project, Account.Id accountId) {
-    try {
-      boolean isProjectOwner =
-          permissionBackend
-              .absentUser(accountId)
-              .project(project)
-              .test(ProjectPermission.WRITE_CONFIG);
-      if (isProjectOwner) {
-        logger.atFine().log("Account %d is a project owner", accountId.get());
-      }
-      return isProjectOwner;
-    } catch (PermissionBackendException e) {
-      throw new CodeOwnersInternalServerErrorException(
-          String.format(
-              "failed to check owner permission of project %s for account %d",
-              project.get(), accountId.get()),
-          e);
-    }
   }
 
   /**
