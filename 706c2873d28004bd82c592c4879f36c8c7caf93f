@@ -16,6 +16,23 @@
       "message": "Do not submit until we double-checked that this options is no longer used.",
       "revId": "706c2873d28004bd82c592c4879f36c8c7caf93f",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a3662316_6117aa9b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-11-23T10:58:03Z",
+      "side": 1,
+      "message": "We are fine with submitting this now. The few projects that used this option have been adapted.",
+      "revId": "706c2873d28004bd82c592c4879f36c8c7caf93f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
