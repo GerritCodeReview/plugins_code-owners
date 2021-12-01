@@ -945,13 +945,7 @@ public class CodeOwnerApprovalCheck {
   private ImmutableList<PatchSetApproval> getCurrentPatchSetApprovals(ChangeNotes changeNotes) {
     try (Timer0.Context ctx = codeOwnerMetrics.computePatchSetApprovals.start()) {
       return ImmutableList.copyOf(
-          approvalsUtil.byPatchSet(
-              changeNotes,
-              changeNotes.getCurrentPatchSet().id(),
-              /** revWalk */
-              null,
-              /** repoConfig */
-              null));
+          approvalsUtil.byPatchSet(changeNotes, changeNotes.getCurrentPatchSet().id()));
     }
   }
 
