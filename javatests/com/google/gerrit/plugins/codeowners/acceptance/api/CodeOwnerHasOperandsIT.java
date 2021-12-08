@@ -44,7 +44,6 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalHasOperand;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
-import com.google.gerrit.server.experiments.ExperimentFeaturesConstants;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.query.change.ChangeQueryBuilder;
 import com.google.inject.Inject;
@@ -97,9 +96,6 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = ExperimentFeaturesConstants.GERRIT_BACKEND_REQUEST_FEATURE_ENABLE_SUBMIT_REQUIREMENTS)
   public void hasApproval_satisfied() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -123,9 +119,6 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = ExperimentFeaturesConstants.GERRIT_BACKEND_REQUEST_FEATURE_ENABLE_SUBMIT_REQUIREMENTS)
   public void hasApproval_unsatisfiedIfChangeIsClosed() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -157,9 +150,6 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = ExperimentFeaturesConstants.GERRIT_BACKEND_REQUEST_FEATURE_ENABLE_SUBMIT_REQUIREMENTS)
   public void hasApproval_internalServerError() throws Exception {
     ChangeData changeData = createChange().getChange();
 
@@ -186,9 +176,6 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = ExperimentFeaturesConstants.GERRIT_BACKEND_REQUEST_FEATURE_ENABLE_SUBMIT_REQUIREMENTS)
   public void hasApproval_ruleErrorForNonParsableCodeOwnerConfig() throws Exception {
     String nameOfInvalidCodeOwnerConfigFile = getCodeOwnerConfigFileName();
     createNonParseableCodeOwnerConfig(nameOfInvalidCodeOwnerConfigFile);
@@ -205,9 +192,6 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
 
   @Test
   @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
-  @GerritConfig(
-      name = "experiments.enabled",
-      value = ExperimentFeaturesConstants.GERRIT_BACKEND_REQUEST_FEATURE_ENABLE_SUBMIT_REQUIREMENTS)
   public void hasEnabled_notMatchingWhenCodeOwnersIsDisabledForTheChange() throws Exception {
     Change change =
         createChange("Change Adding A File", "foo/bar.baz", "file content").getChange().change();
