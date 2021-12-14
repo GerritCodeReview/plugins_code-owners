@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5a2de1c2_5f417f46",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2021-12-14T11:24:32Z",
+      "side": 1,
+      "message": "Tests are passing with gerrit core change https://gerrit-review.googlesource.com/c/gerrit/+/326381.",
+      "revId": "7ccbeca538b5a67367436039e795def6408e866b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
