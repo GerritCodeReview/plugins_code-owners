@@ -137,7 +137,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: Submit requirement not fulfilled: Code Owners",
+                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is unsatisfied.",
                 changeInfo._number));
   }
 
@@ -190,7 +190,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: Submit requirement not fulfilled: Code Owners",
+                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is unsatisfied.",
                 changeInfo._number));
   }
 
@@ -404,7 +404,9 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit rule error: Failed to evaluate code owner statuses for"
+                    + "Change %s: submit requirement 'code-owners~CodeOwnerSubmitRule' has an"
+                    + " error: Submittability expression result has an error:"
+                    + " Failed to evaluate code owner statuses for"
                     + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
                     + " (project = %s, branch = master):\n  %s).%s",
                 changeInfo._number,
@@ -456,7 +458,9 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit rule error: Failed to evaluate code owner statuses for"
+                    + "Change %s: submit requirement 'code-owners~CodeOwnerSubmitRule' has an"
+                    + " error: Submittability expression result has an error:"
+                    + " Failed to evaluate code owner statuses for"
                     + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
                     + " (project = %s, branch = master):\n  %s).",
                 changeInfo._number,
