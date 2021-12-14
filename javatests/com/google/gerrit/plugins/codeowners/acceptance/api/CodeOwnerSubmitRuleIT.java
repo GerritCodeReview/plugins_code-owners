@@ -43,7 +43,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject;
-import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.RefUpdate;
@@ -137,7 +136,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: Submit requirement not fulfilled: Code Owners",
+                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is unsatisfied.",
                 changeInfo._number));
   }
 
@@ -190,7 +189,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: Submit requirement not fulfilled: Code Owners",
+                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is unsatisfied.",
                 changeInfo._number));
   }
 
@@ -404,17 +403,8 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit rule error: Failed to evaluate code owner statuses for"
-                    + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
-                    + " (project = %s, branch = master):\n  %s).%s",
-                changeInfo._number,
-                changeInfo._number,
-                JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath(),
-                project,
-                getParsingErrorMessageForNonParseableCodeOwnerConfig(),
-                invalidCodeOwnerConfigInfoUrl != null
-                    ? String.format("\nFor help check %s.", invalidCodeOwnerConfigInfoUrl)
-                    : ""));
+                    + "Change %s: submit requirement 'code-owners~CodeOwnerSubmitRule' has an error.",
+                changeInfo._number));
   }
 
   @Test
@@ -456,14 +446,8 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit rule error: Failed to evaluate code owner statuses for"
-                    + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
-                    + " (project = %s, branch = master):\n  %s).",
-                changeInfo._number,
-                changeInfo._number,
-                JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath(),
-                project,
-                getParsingErrorMessageForNonParseableCodeOwnerConfig()));
+                    + "Change %s: submit requirement 'code-owners~CodeOwnerSubmitRule' has an error.",
+                changeInfo._number));
 
     // Apply an override.
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
