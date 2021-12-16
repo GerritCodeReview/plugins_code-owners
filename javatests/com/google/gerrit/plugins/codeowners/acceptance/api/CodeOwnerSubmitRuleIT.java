@@ -137,7 +137,8 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is unsatisfied.",
+                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is"
+                    + " unsatisfied.",
                 changeInfo._number));
   }
 
@@ -190,7 +191,8 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is unsatisfied.",
+                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is"
+                    + " unsatisfied.",
                 changeInfo._number));
   }
 
