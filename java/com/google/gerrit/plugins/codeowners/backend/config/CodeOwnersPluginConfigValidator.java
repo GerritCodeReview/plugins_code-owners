@@ -106,7 +106,7 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
               receiveEvent.commit.getName(),
               RefNames.REFS_CONFIG,
               receiveEvent.project.getNameKey());
-      logger.atSevere().withCause(e).log(errorMessage);
+      logger.atSevere().withCause(e).log("%s", errorMessage);
       throw new CommitValidationException(errorMessage, e);
     }
   }

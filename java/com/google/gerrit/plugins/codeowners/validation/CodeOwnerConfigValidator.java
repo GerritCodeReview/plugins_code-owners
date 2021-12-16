@@ -380,7 +380,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               "skipping code owner config validation not allowed",
               new CommitValidationMessage(e.getMessage(), ValidationMessage.Type.ERROR)));
     } catch (SkipCodeOwnerConfigValidationPushOption.InvalidValueException e) {
-      logger.atFine().log(e.getMessage());
+      logger.atFine().log("%s", e.getMessage());
       return Optional.of(
           ValidationResult.create(
               pluginName,
@@ -445,10 +445,9 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       // accept that it's possible to add invalid code owner configs while the plugin configuration
       // is invalid.
       logger.atWarning().log(
-          String.format(
-              "cannot validate code owner config files due to invalid code-owners plugin"
-                  + " configuration: %s",
-              e.getMessage()));
+          "cannot validate code owner config files due to invalid code-owners plugin"
+              + " configuration: %s",
+          e.getMessage());
       return Optional.of(
           ValidationResult.create(
               pluginName,
@@ -463,7 +462,6 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               "failed to validate code owner config files in revision %s"
                   + " (project = %s, branch = %s)",
               revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
-      logger.atSevere().withCause(e).log(errorMessage);
       throw new CodeOwnersInternalServerErrorException(errorMessage, e);
     }
   }

@@ -167,9 +167,8 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
           .call();
     } catch (Exception e) {
       logger.atSevere().withCause(e).log(
-          String.format(
-              "Failed to post code-owners change message for reviewer on change %s in project %s.",
-              changeId, projectName));
+          "Failed to post code-owners change message for reviewer on change %s in project %s.",
+          changeId, projectName);
     }
   }
 
