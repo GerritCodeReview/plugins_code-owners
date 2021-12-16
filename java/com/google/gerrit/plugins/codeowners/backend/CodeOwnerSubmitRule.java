@@ -99,9 +99,8 @@ class CodeOwnerSubmitRule implements SubmitRule {
       }
     } catch (RestApiException e) {
       logger.atFine().withCause(e).log(
-          String.format(
-              "Couldn't evaluate code owner statuses for patch set %d of change %d.",
-              changeData.currentPatchSet().id().get(), changeData.change().getId().get()));
+          "Couldn't evaluate code owner statuses for patch set %d of change %d.",
+          changeData.currentPatchSet().id().get(), changeData.change().getId().get());
       return Optional.of(notReady());
     } catch (Exception e) {
       // Whether the exception should be treated as RULE_ERROR.
@@ -157,7 +156,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
       if (isRuleError) {
         codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
 
-        logger.atWarning().log(errorMessage);
+        logger.atWarning().log("%s", errorMessage);
         return Optional.of(ruleError(errorMessage));
       }
       throw new CodeOwnersInternalServerErrorException(errorMessage, e);

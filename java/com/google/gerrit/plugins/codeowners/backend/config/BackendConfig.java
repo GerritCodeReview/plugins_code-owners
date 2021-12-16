@@ -220,7 +220,7 @@ public class BackendConfig {
                               SECTION_CODE_OWNERS,
                               branch,
                               KEY_BACKEND));
-                  logger.atSevere().log(e.getMessage());
+                  logger.atSevere().log("%s", e.getMessage());
                   return e;
                 }));
   }
@@ -252,7 +252,7 @@ public class BackendConfig {
                               "Code owner backend '%s' that is configured for project %s in"
                                   + " %s.config (parameter %s.%s) not found.",
                               backendName, project, pluginName, SECTION_CODE_OWNERS, KEY_BACKEND));
-                  logger.atSevere().log(e.getMessage());
+                  logger.atSevere().log("%s", e.getMessage());
                   return e;
                 }));
   }
@@ -269,7 +269,7 @@ public class BackendConfig {
                           "Code owner backend '%s' that is configured in gerrit.config"
                               + " (parameter plugin.%s.%s) not found.",
                           defaultBackendName, pluginName, KEY_BACKEND));
-              logger.atSevere().log(e.getMessage());
+              logger.atSevere().log("%s", e.getMessage());
               return e;
             });
   }
