@@ -26,7 +26,7 @@ import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.project.ProjectState;
-import com.google.gerrit.server.util.time.TimeUtil;
+import java.time.Instant;
 import java.util.Arrays;
 import org.junit.Test;
 
@@ -211,7 +211,7 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
     return PatchSetApproval.builder()
         .key(PatchSetApproval.key(PatchSet.id(Change.id(1), 1), admin.id(), labelType.getLabelId()))
         .value(value)
-        .granted(TimeUtil.nowTs())
+        .granted(Instant.now())
         .build();
   }
 }
