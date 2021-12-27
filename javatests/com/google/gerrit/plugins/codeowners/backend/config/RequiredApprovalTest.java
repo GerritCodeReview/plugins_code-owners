@@ -211,7 +211,7 @@ public class RequiredApprovalTest extends AbstractCodeOwnersTest {
     return PatchSetApproval.builder()
         .key(PatchSetApproval.key(PatchSet.id(Change.id(1), 1), admin.id(), labelType.getLabelId()))
         .value(value)
-        .granted(TimeUtil.nowTs())
+        .granted(TimeUtil.now())
         .build();
   }
 }
