@@ -158,7 +158,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               "addCodeOwnersMessageOnAddReviewer",
               updateFactory -> {
                 try (BatchUpdate batchUpdate =
-                    updateFactory.create(projectName, currentUser, when)) {
+                    updateFactory.create(projectName, currentUser, when.toInstant())) {
                   batchUpdate.addOp(changeId, new Op(reviewers, maxPathsInChangeMessages));
                   batchUpdate.execute();
                 }
