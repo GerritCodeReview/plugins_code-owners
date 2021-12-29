@@ -183,8 +183,7 @@ public class CodeOwnerConfigFileUpdateScanner {
     cb.setParentId(parentCommit);
     cb.setTreeId(treeId);
     cb.setCommitter(serverIdent);
-    cb.setAuthor(
-        identifiedUser.get().newCommitterIdent(serverIdent.getWhen(), serverIdent.getTimeZone()));
+    cb.setAuthor(identifiedUser.get().newCommitterIdent(serverIdent));
     cb.setMessage(commitMessage);
     ObjectId id = objectInserter.insert(cb);
     objectInserter.flush();
