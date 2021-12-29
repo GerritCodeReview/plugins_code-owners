@@ -16,6 +16,23 @@
       "message": "Requires change in Gerrit core. Verifying manually.",
       "revId": "bcab854ccceddbb7a9c09fbaa4c79eba2c70a2f4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "34cbde6b_a04a0bff",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2021-12-29T10:00:59Z",
+      "side": 1,
+      "message": "ping :)",
+      "revId": "bcab854ccceddbb7a9c09fbaa4c79eba2c70a2f4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
