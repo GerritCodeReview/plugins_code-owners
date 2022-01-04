@@ -44,7 +44,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
-import java.sql.Timestamp;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -147,7 +147,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       Project.NameKey projectName,
       Change.Id changeId,
       List<AccountInfo> reviewers,
-      Timestamp when,
+      Instant when,
       int maxPathsInChangeMessages,
       boolean asynchronous) {
     try (Timer1.Context<String> ctx =
@@ -158,7 +158,7 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               "addCodeOwnersMessageOnAddReviewer",
               updateFactory -> {
                 try (BatchUpdate batchUpdate =
-                    updateFactory.create(projectName, currentUser, when.toInstant())) {
+                    updateFactory.create(projectName, currentUser, when)) {
                   batchUpdate.addOp(changeId, new Op(reviewers, maxPathsInChangeMessages));
                   batchUpdate.execute();
                 }
