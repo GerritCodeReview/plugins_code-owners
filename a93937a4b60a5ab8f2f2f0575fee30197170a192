@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "48e24a61_351cd57e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1118500
+      },
+      "writtenOn": "2022-01-13T12:29:41Z",
+      "side": 1,
+      "message": "The build error in pipeline is unrelated\n\n\u0027Analyzing: target //plugins/code-owners:code-owners (1 packages loaded, 0 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (11 packages loaded, 7 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (11 packages loaded, 7 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (11 packages loaded, 7 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (11 packages loaded, 7 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (17 packages loaded, 103 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (17 packages loaded, 103 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (17 packages loaded, 103 targets configured)\nAnalyzing: target //plugins/code-owners:code-owners (17 packages loaded, 103 targets configured)\nERROR: /home/zuul/.cache/bazel/_bazel_zuul/f72647b18debaa5c8de805aa145c53cf/external/bazel_tools/tools/jdk/BUILD:72:28: every rule of type java_toolchain_alias implicitly depends upon the target \u0027//tools:error_prone_warnings_toolchain\u0027, but this target could not be found because of: no such target \u0027//tools:error_prone_warnings_toolchain\u0027: target \u0027error_prone_warnings_toolchain\u0027 not declared in package \u0027tools\u0027 defined by /home/zuul/src/gerrit.googlesource.com/gerrit/tools/BUILD\nERROR: Analysis of target \u0027//plugins/code-owners:code-owners\u0027 failed; build aborted: Analysis failed\nINFO: Elapsed time: 30.085s\nINFO: 0 processes.\nFAILED: Build did NOT complete successfully (29 packages loaded, 152 targets configured)\nFAILED: Build did NOT complete successfully (29 packages loaded, 152 targets configured)\u0027",
+      "revId": "a93937a4b60a5ab8f2f2f0575fee30197170a192",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
