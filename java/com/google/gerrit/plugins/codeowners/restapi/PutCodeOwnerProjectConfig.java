@@ -264,7 +264,7 @@ public class PutCodeOwnerProjectConfig
       validateConfig(projectResource.getProjectState(), codeOwnersConfig);
 
       codeOwnersProjectConfigFile.commit(metaDataUpdate);
-      projectCache.evict(projectResource.getNameKey());
+      projectCache.evictAndReindex(projectResource.getNameKey());
     }
 
     CodeOwnerProjectConfigInfo updatedCodeOwnerProjectConfigInfo =

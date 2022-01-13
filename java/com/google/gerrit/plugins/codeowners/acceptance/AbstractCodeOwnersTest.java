@@ -191,7 +191,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
               .message("Configure code owner backend")
               .add("code-owners.config", codeOwnersConfig.toText()));
     }
-    projectCache.evict(project);
+    projectCache.evictAndReindex(project);
   }
 
   protected void createOwnersOverrideLabel() throws RestApiException {
