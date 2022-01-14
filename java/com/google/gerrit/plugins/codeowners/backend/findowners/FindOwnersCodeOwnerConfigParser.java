@@ -191,7 +191,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final Pattern PAT_PER_FILE =
         Pattern.compile(BOL + "per-file[\\s]+([^=#]+)=[\\s]*([^#]+)" + EOL);
 
-    private List<ValidationError> validationErrors;
+    private ImmutableList.Builder<ValidationError> validationErrors;
 
     CodeOwnerConfig parse(
         ObjectId revision, CodeOwnerConfig.Key codeOwnerConfigKey, String codeOwnerConfigAsString) {
@@ -264,12 +264,12 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
           new String[] {
             removeExtraSpaces(perFileMatcher.group(1)), removeExtraSpaces(perFileMatcher.group(2))
           };
-      String[] dirGlobs = splitGlobs(globsAndOwners[0]);
+      ImmutableSet<String> dirGlobs = splitGlobs(globsAndOwners[0]);
       String directive = globsAndOwners[1];
       if (directive.equals(TOK_SET_NOPARENT)) {
         return CodeOwnerSet.builder()
             .setIgnoreGlobalAndParentCodeOwners()
-            .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
+            .setPathExpressions(dirGlobs)
             .build();
       }
 
@@ -277,7 +277,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       if ((codeOwnerConfigReference = parseInclude(directive)) != null) {
         return CodeOwnerSet.builder()
             .addImport(codeOwnerConfigReference)
-            .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
+            .setPathExpressions(dirGlobs)
             .build();
       }
 
@@ -296,7 +296,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
       CodeOwnerSet.Builder codeOwnerSet =
           CodeOwnerSet.builder()
-              .setPathExpressions(ImmutableSet.copyOf(dirGlobs))
+              .setPathExpressions(dirGlobs)
               .setCodeOwners(
                   ownerEmails.stream().map(CodeOwnerReference::create).collect(toImmutableSet()));
       ownerEmails.stream()
@@ -320,8 +320,8 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
      * @return the globs as array
      */
     @VisibleForTesting
-    static String[] splitGlobs(String commaSeparatedGlobs) {
-      ArrayList<String> globList = new ArrayList<>();
+    static ImmutableSet<String> splitGlobs(String commaSeparatedGlobs) {
+      ImmutableSet.Builder<String> globList = ImmutableSet.builder();
       StringBuilder nextGlob = new StringBuilder();
       int curlyBracesIndentionLevel = 0;
       int squareBracesIndentionLevel = 0;
@@ -354,7 +354,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
       if (nextGlob.length() > 0) {
         globList.add(nextGlob.toString());
       }
-      return globList.toArray(new String[globList.size()]);
+      return globList.build();
     }
 
     private static boolean isComment(String line) {
@@ -433,7 +433,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
      */
     public ImmutableList<ValidationError> getValidationErrors() {
       if (validationErrors != null) {
-        return ImmutableList.copyOf(validationErrors);
+        return validationErrors.build();
       }
       return ImmutableList.of();
     }
@@ -441,7 +441,7 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     @Override
     public void error(ValidationError error) {
       if (validationErrors == null) {
-        validationErrors = new ArrayList<>(4);
+        validationErrors = ImmutableList.builder();
       }
       validationErrors.add(error);
     }

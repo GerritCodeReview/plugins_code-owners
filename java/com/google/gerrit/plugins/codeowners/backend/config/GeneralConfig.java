@@ -38,9 +38,7 @@ import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.RefPatternMatcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.PatternSyntaxException;
@@ -113,7 +111,7 @@ public class GeneralConfig {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
-    List<CommitValidationMessage> validationMessages = new ArrayList<>();
+    ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
 
     try {
       projectLevelConfig.getEnum(
@@ -175,7 +173,7 @@ public class GeneralConfig {
               ValidationMessage.Type.ERROR));
     }
 
-    return ImmutableList.copyOf(validationMessages);
+    return validationMessages.build();
   }
 
   /**

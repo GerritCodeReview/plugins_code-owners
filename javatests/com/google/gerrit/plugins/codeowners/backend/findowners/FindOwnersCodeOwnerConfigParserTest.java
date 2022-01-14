@@ -924,7 +924,6 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
   private static void assertSplitGlobs(String commaSeparatedGlobs, String... expectedGlobs) {
     assertThat(FindOwnersCodeOwnerConfigParser.Parser.splitGlobs(commaSeparatedGlobs))
-        .asList()
         .containsExactlyElementsIn(expectedGlobs);
   }
 }

@@ -31,8 +31,6 @@ import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.project.RefPatternMatcher;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.PatternSyntaxException;
 import org.eclipse.jgit.lib.Config;
 
@@ -81,7 +79,7 @@ public class StatusConfig {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
-    List<CommitValidationMessage> validationMessages = new ArrayList<>();
+    ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
 
     try {
       projectLevelConfig.getBoolean(SECTION_CODE_OWNERS, null, KEY_DISABLED, false);
@@ -117,7 +115,7 @@ public class StatusConfig {
       }
     }
 
-    return ImmutableList.copyOf(validationMessages);
+    return validationMessages.build();
   }
 
   /**

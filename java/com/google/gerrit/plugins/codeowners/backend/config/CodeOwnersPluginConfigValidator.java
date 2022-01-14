@@ -33,8 +33,6 @@ import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.lib.ObjectId;
@@ -166,7 +164,7 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
    */
   public ImmutableList<CommitValidationMessage> validateConfig(
       ProjectState projectState, String fileName, Config cfg) {
-    List<CommitValidationMessage> validationMessages = new ArrayList<>();
+    ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
     validationMessages.addAll(backendConfig.validateProjectLevelConfig(fileName, cfg));
     validationMessages.addAll(generalConfig.validateProjectLevelConfig(fileName, cfg));
     validationMessages.addAll(statusConfig.validateProjectLevelConfig(fileName, cfg));
@@ -174,7 +172,7 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
         requiredApprovalConfig.validateProjectLevelConfig(projectState, fileName, cfg));
     validationMessages.addAll(
         overrideApprovalConfig.validateProjectLevelConfig(projectState, fileName, cfg));
-    return ImmutableList.copyOf(validationMessages);
+    return validationMessages.build();
   }
 
   /**

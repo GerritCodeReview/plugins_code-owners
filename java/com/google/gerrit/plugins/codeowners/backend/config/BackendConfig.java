@@ -33,8 +33,6 @@ import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.eclipse.jgit.lib.Config;
 
@@ -110,7 +108,7 @@ public class BackendConfig {
     requireNonNull(fileName, "fileName");
     requireNonNull(projectLevelConfig, "projectLevelConfig");
 
-    List<CommitValidationMessage> validationMessages = new ArrayList<>();
+    ImmutableList.Builder<CommitValidationMessage> validationMessages = ImmutableList.builder();
 
     String backendName = projectLevelConfig.getString(SECTION_CODE_OWNERS, null, KEY_BACKEND);
     if (backendName != null) {
@@ -166,7 +164,7 @@ public class BackendConfig {
       }
     }
 
-    return ImmutableList.copyOf(validationMessages);
+    return validationMessages.build();
   }
 
   /**
