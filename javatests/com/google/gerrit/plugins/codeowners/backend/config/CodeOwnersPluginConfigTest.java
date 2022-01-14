@@ -471,6 +471,6 @@ public class CodeOwnersPluginConfigTest extends AbstractCodeOwnersTest {
               .message("Configure code owner backend")
               .add("code-owners.config", String.format("[%s \"%s\"]", SECTION, subsection)));
     }
-    projectCache.evict(project);
+    projectCache.evictAndReindex(project);
   }
 }
