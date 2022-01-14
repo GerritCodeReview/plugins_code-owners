@@ -135,8 +135,7 @@ public class CodeOwnersInChangeCollection
     /**
      * The resource kind of the members in the {@link CodeOwnersInChangeCollection} REST collection.
      */
-    static final TypeLiteral<RestView<PathResource>> PATH_KIND =
-        new TypeLiteral<RestView<PathResource>>() {};
+    static final TypeLiteral<RestView<PathResource>> PATH_KIND = new TypeLiteral<>() {};
 
     static PathResource parse(
         RevisionResource revisionResource, ObjectId branchRevision, IdString pathId)

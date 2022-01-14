@@ -69,8 +69,7 @@ public class CodeOwnerConfigsInBranchCollection
      * The resource kind of the members in the {@link CodeOwnerConfigsInBranchCollection} REST
      * collection.
      */
-    static final TypeLiteral<RestView<PathResource>> PATH_KIND =
-        new TypeLiteral<RestView<PathResource>>() {};
+    static final TypeLiteral<RestView<PathResource>> PATH_KIND = new TypeLiteral<>() {};
 
     static PathResource parse(BranchResource branchResource, IdString pathId)
         throws BadRequestException {

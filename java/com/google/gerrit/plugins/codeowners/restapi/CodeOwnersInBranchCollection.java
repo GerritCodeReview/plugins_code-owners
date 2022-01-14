@@ -67,8 +67,7 @@ public class CodeOwnersInBranchCollection implements ChildCollection<BranchResou
     /**
      * The resource kind of the members in the {@link CodeOwnersInBranchCollection} REST collection.
      */
-    static final TypeLiteral<RestView<PathResource>> PATH_KIND =
-        new TypeLiteral<RestView<PathResource>>() {};
+    static final TypeLiteral<RestView<PathResource>> PATH_KIND = new TypeLiteral<>() {};
 
     static PathResource parse(BranchResource branchResource, IdString pathId)
         throws BadRequestException {
