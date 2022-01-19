@@ -125,7 +125,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Try to submit the change.
@@ -137,7 +137,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is"
+                    + "Change %d: submit requirement 'Code-Owners' is"
                     + " unsatisfied.",
                 changeInfo._number));
   }
@@ -179,7 +179,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Try to submit the change.
@@ -191,7 +191,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: submit requirement 'code-owners~CodeOwnerSubmitRule' is"
+                    + "Change %d: submit requirement 'Code-Owners' is"
                     + " unsatisfied.",
                 changeInfo._number));
   }
@@ -230,7 +230,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
@@ -270,7 +270,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(gApi.changes().id(changeId).get().requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
@@ -307,7 +307,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Try to submit the change.
@@ -350,7 +350,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
@@ -406,7 +406,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit requirement 'code-owners~CodeOwnerSubmitRule' has an"
+                    + "Change %s: submit requirement 'Code-Owners' has an"
                     + " error: Submittability expression result has an error:"
                     + " Failed to evaluate code owner statuses for"
                     + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
@@ -460,7 +460,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit requirement 'code-owners~CodeOwnerSubmitRule' has an"
+                    + "Change %s: submit requirement 'Code-Owners' has an"
                     + " error: Submittability expression result has an error:"
                     + " Failed to evaluate code owner statuses for"
                     + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
@@ -488,7 +488,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
@@ -532,7 +532,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
@@ -616,7 +616,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Submit the change.
