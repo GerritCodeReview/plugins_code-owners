@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
@@ -25,6 +26,8 @@ import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.util.Optional;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 import org.junit.Test;
 
 /**
@@ -37,6 +40,28 @@ import org.junit.Test;
  * com.google.gerrit.plugins.codeowners.acceptance.restapi.GetCodeOwnerConfigForPathInBranchRestIT}.
  */
 public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
+  public void getCodeOwnerConfigForNonExistingBranch() throws Exception {
+    RestResponse response =
+        adminRestSession.get(
+            String.format(
+                "/projects/%s/branches/non-existing/code_owners.config/path", project.get()));
+    response.assertNotFound();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
+  public void getCodeOwnerConfigFromSymbolicRefPointingToAnUnbornBranch() throws Exception {
+    try (Repository repo = repoManager.openRepository(project)) {
+      repo.updateRef(Constants.HEAD, true).link("refs/heads/non-existing");
+    }
+    RestResponse response =
+        adminRestSession.get(
+            String.format("/projects/%s/branches/HEAD/code_owners.config/path", project.get()));
+    response.assertNotFound();
+  }
+
   @Test
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getNonExistingCodeOwnerConfig() throws Exception {

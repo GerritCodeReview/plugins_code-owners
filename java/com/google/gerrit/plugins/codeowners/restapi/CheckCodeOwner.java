@@ -148,7 +148,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
   @Override
   public Response<CodeOwnerCheckInfo> apply(BranchResource branchResource)
       throws BadRequestException, AuthException, IOException, ConfigInvalidException,
-          PermissionBackendException {
+          PermissionBackendException, ResourceNotFoundException {
     permissionBackend.currentUser().check(checkCodeOwnerCapability.getPermission());
 
     validateInput(branchResource);
@@ -164,7 +164,7 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
     Set<String> annotations = new HashSet<>();
     codeOwnerConfigHierarchy.visit(
         branchResource.getBranchKey(),
-        ObjectId.fromString(branchResource.getRevision()),
+        ObjectId.fromString(branchResource.getRevision().get()),
         absolutePath,
         codeOwnerConfig -> {
           messages.add(
@@ -348,7 +348,11 @@ public class CheckCodeOwner implements RestReadView<BranchResource> {
 
   private void validateInput(BranchResource branchResource)
       throws BadRequestException, AuthException, IOException, ConfigInvalidException,
-          PermissionBackendException {
+          PermissionBackendException, ResourceNotFoundException {
+    if (branchResource.getRevision().isEmpty()) {
+      throw new ResourceNotFoundException(IdString.fromDecoded(branchResource.getName()));
+    }
+
     if (email == null) {
       throw new BadRequestException("email required");
     }

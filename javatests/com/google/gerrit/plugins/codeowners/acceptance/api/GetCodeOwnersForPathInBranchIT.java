@@ -21,6 +21,7 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.fail;
 
+import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.group.GroupOperations;
@@ -38,6 +39,8 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.inject.Inject;
 import java.util.List;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Test;
 
@@ -57,6 +60,25 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
   @Override
   protected CodeOwners getCodeOwnersApi() throws RestApiException {
     return codeOwnersApiFactory.branch(project, "master");
+  }
+
+  @Test
+  public void getCodeOwnersForNonExistingBranch() throws Exception {
+    RestResponse response =
+        adminRestSession.get(
+            String.format("/projects/%s/branches/non-existing/code_owners/path", project.get()));
+    response.assertNotFound();
+  }
+
+  @Test
+  public void getCodeOwnersFromSymbolicRefPointingToAnUnbornBranch() throws Exception {
+    try (Repository repo = repoManager.openRepository(project)) {
+      repo.updateRef(Constants.HEAD, true).link("refs/heads/non-existing");
+    }
+    RestResponse response =
+        adminRestSession.get(
+            String.format("/projects/%s/branches/HEAD/code_owners/path", project.get()));
+    response.assertNotFound();
   }
 
   @Test
