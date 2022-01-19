@@ -41,6 +41,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f4cc452_d82f71e0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSubmitRule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-19T14:38:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6bf39eec_3c4f92a4",
+      "range": {
+        "startLine": 58,
+        "startChar": 27,
+        "endLine": 58,
+        "endChar": 40
+      },
+      "revId": "af4f436f858b7063ceb0134c3fa6395469aea3ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f3d56deb_63485125",
@@ -54,6 +78,30 @@
       "writtenOn": "2022-01-19T14:22:32Z",
       "side": 1,
       "message": "There are the methods the construct the SubmitRecord instance. Would it be better to set ruleName here?",
+      "range": {
+        "startLine": 177,
+        "startChar": 2,
+        "endLine": 196,
+        "endChar": 3
+      },
+      "revId": "af4f436f858b7063ceb0134c3fa6395469aea3ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b1fadebd_b23641d9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSubmitRule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-19T14:38:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f3d56deb_63485125",
       "range": {
         "startLine": 177,
         "startChar": 2,
