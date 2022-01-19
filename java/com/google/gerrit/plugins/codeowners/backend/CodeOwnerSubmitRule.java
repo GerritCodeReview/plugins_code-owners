@@ -42,6 +42,7 @@ import java.util.Optional;
 @Singleton
 class CodeOwnerSubmitRule implements SubmitRule {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  public static final String RULE_NAME = "Code-Owners";
 
   public static class CodeOwnerSubmitRuleModule extends AbstractModule {
     @Override
@@ -53,10 +54,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
   }
 
   private static final LegacySubmitRequirement SUBMIT_REQUIREMENT =
-      LegacySubmitRequirement.builder()
-          .setFallbackText("Code Owners")
-          .setType("code-owners")
-          .build();
+      LegacySubmitRequirement.builder().setFallbackText(RULE_NAME).setType("code-owners").build();
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
@@ -173,6 +171,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
     SubmitRecord submitRecord = new SubmitRecord();
     submitRecord.status = SubmitRecord.Status.OK;
     submitRecord.requirements = ImmutableList.of(SUBMIT_REQUIREMENT);
+    submitRecord.ruleName = RULE_NAME;
     return submitRecord;
   }
 
@@ -180,6 +179,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
     SubmitRecord submitRecord = new SubmitRecord();
     submitRecord.status = SubmitRecord.Status.NOT_READY;
     submitRecord.requirements = ImmutableList.of(SUBMIT_REQUIREMENT);
+    submitRecord.ruleName = RULE_NAME;
     return submitRecord;
   }
 
@@ -187,6 +187,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
     SubmitRecord submitRecord = new SubmitRecord();
     submitRecord.errorMessage = reason;
     submitRecord.status = SubmitRecord.Status.RULE_ERROR;
+    submitRecord.ruleName = RULE_NAME;
     return submitRecord;
   }
 }

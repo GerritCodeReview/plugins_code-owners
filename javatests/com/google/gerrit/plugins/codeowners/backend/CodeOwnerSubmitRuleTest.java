@@ -93,7 +93,7 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     LegacySubmitRequirementSubject submitRequirementSubject =
         submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
     submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
-    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
   }
 
   @Test
@@ -119,7 +119,7 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     LegacySubmitRequirementSubject submitRequirementSubject =
         submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
     submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
-    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
   }
 
   @Test
@@ -228,6 +228,6 @@ public class CodeOwnerSubmitRuleTest extends AbstractCodeOwnersTest {
     LegacySubmitRequirementSubject submitRequirementSubject =
         submitRecordSubject.hasSubmitRequirementsThat().onlyElement();
     submitRequirementSubject.hasTypeThat().isEqualTo("code-owners");
-    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
   }
 }
