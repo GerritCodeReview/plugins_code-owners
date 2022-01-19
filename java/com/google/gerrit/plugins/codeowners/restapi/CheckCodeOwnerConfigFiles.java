@@ -135,7 +135,7 @@ public class CheckCodeOwnerConfigFiles
                 resultsByBranchBuilder.put(
                     branchNameKey.branch(),
                     checkBranch(input.path, branchNameKey, input.verbosity)));
-    return Response.ok(resultsByBranchBuilder.build());
+    return Response.ok(resultsByBranchBuilder.buildOrThrow());
   }
 
   private ImmutableSet<BranchNameKey> branches(ProjectResource projectResource)
