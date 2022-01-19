@@ -42,6 +42,7 @@ import java.util.Optional;
 @Singleton
 class CodeOwnerSubmitRule implements SubmitRule {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+  public static final String RULE_NAME = "Code-Owners";
 
   public static class CodeOwnerSubmitRuleModule extends AbstractModule {
     @Override
@@ -157,7 +158,9 @@ class CodeOwnerSubmitRule implements SubmitRule {
         codeOwnerMetrics.countCodeOwnerSubmitRuleErrors.increment(cause);
 
         logger.atWarning().log("%s", errorMessage);
-        return Optional.of(ruleError(errorMessage));
+        SubmitRecord record = ruleError(errorMessage);
+        record.ruleName = RULE_NAME;
+        return Optional.of(record);
       }
       throw new CodeOwnersInternalServerErrorException(errorMessage, e);
     }
@@ -166,7 +169,9 @@ class CodeOwnerSubmitRule implements SubmitRule {
   private SubmitRecord getSubmitRecord(ChangeNotes changeNotes)
       throws ResourceConflictException, IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
-    return codeOwnerApprovalCheck.isSubmittable(changeNotes) ? ok() : notReady();
+    SubmitRecord record = codeOwnerApprovalCheck.isSubmittable(changeNotes) ? ok() : notReady();
+    record.ruleName = RULE_NAME;
+    return record;
   }
 
   private static SubmitRecord ok() {
