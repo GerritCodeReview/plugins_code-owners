@@ -16,6 +16,52 @@
       "message": "I think zuul is broken, https://gerrit-review.googlesource.com/c/plugins/code-owners/+/328464/comments/6e552487_1e129baf",
       "revId": "af4f436f858b7063ceb0134c3fa6395469aea3ec",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6bf39eec_3c4f92a4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSubmitRule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 58,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-19T14:22:32Z",
+      "side": 1,
+      "message": "Maybe use RULE_NAME here too. This is the text that is currently shown in the UI for the submit requirement.",
+      "range": {
+        "startLine": 58,
+        "startChar": 27,
+        "endLine": 58,
+        "endChar": 40
+      },
+      "revId": "af4f436f858b7063ceb0134c3fa6395469aea3ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f3d56deb_63485125",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerSubmitRule.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-19T14:22:32Z",
+      "side": 1,
+      "message": "There are the methods the construct the SubmitRecord instance. Would it be better to set ruleName here?",
+      "range": {
+        "startLine": 177,
+        "startChar": 2,
+        "endLine": 196,
+        "endChar": 3
+      },
+      "revId": "af4f436f858b7063ceb0134c3fa6395469aea3ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
