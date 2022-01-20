@@ -32,7 +32,6 @@ import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
-import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
@@ -120,11 +119,9 @@ public class CodeOwnerApprovalCheck {
    * @param start number of owned paths to skip
    * @param limit the max number of owned paths that should be returned (0 = unlimited)
    * @return the paths of the files in the given patch set that are owned by the specified account
-   * @throws ResourceConflictException if the destination branch of the change no longer exists
    */
   public ImmutableList<OwnedChangedFile> getOwnedPaths(
-      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId, int start, int limit)
-      throws ResourceConflictException {
+      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId, int start, int limit) {
     try (Timer0.Context ctx = codeOwnerMetrics.computeOwnedPaths.start()) {
       logger.atFine().log(
           "compute owned paths for account %d (project = %s, change = %d, patch set = %d,"
@@ -190,7 +187,7 @@ public class CodeOwnerApprovalCheck {
    * @return whether the given change has sufficient code owner approvals to be submittable
    */
   public boolean isSubmittable(ChangeNotes changeNotes)
-      throws ResourceConflictException, IOException, DiffNotAvailableException {
+      throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     logger.atFine().log(
         "checking if change %d in project %s is submittable",
@@ -235,8 +232,7 @@ public class CodeOwnerApprovalCheck {
    * @see #getFileStatuses(CodeOwnerConfigHierarchy, CodeOwnerResolver, ChangeNotes)
    */
   public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(
-      ChangeNotes changeNotes, int start, int limit)
-      throws ResourceConflictException, IOException, DiffNotAvailableException {
+      ChangeNotes changeNotes, int start, int limit) throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
       logger.atFine().log(
@@ -289,7 +285,7 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
       ChangeNotes changeNotes)
-      throws ResourceConflictException, IOException, DiffNotAvailableException {
+      throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     try (Timer0.Context ctx = codeOwnerMetrics.prepareFileStatusComputation.start()) {
       logger.atFine().log(
@@ -358,8 +354,13 @@ public class CodeOwnerApprovalCheck {
           overrides);
 
       BranchNameKey branch = changeNotes.getChange().getDest();
-      ObjectId revision = getDestBranchRevision(changeNotes.getChange());
-      logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
+      Optional<ObjectId> revision = getDestBranchRevision(changeNotes.getChange());
+      if (revision.isPresent()) {
+        logger.atFine().log(
+            "dest branch %s has revision %s", branch.branch(), revision.get().name());
+      } else {
+        logger.atFine().log("dest branch %s does not exist", branch.branch());
+      }
 
       CodeOwnerResolverResult globalCodeOwners =
           codeOwnerResolver.resolveGlobalCodeOwners(changeNotes.getProjectName());
@@ -383,7 +384,7 @@ public class CodeOwnerApprovalCheck {
                       codeOwnerConfigHierarchy,
                       codeOwnerResolver,
                       branch,
-                      revision,
+                      revision.orElse(null),
                       globalCodeOwners,
                       enableImplicitApproval ? changeOwner : null,
                       reviewerAccountIds,
@@ -410,7 +411,7 @@ public class CodeOwnerApprovalCheck {
   @VisibleForTesting
   public Stream<FileCodeOwnerStatus> getFileStatusesForAccount(
       ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId)
-      throws ResourceConflictException, IOException, DiffNotAvailableException {
+      throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     requireNonNull(patchSet, "patchSet");
     requireNonNull(accountId, "accountId");
@@ -430,8 +431,13 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log("requiredApproval = %s", requiredApproval);
 
       BranchNameKey branch = changeNotes.getChange().getDest();
-      ObjectId revision = getDestBranchRevision(changeNotes.getChange());
-      logger.atFine().log("dest branch %s has revision %s", branch.branch(), revision.name());
+      Optional<ObjectId> revision = getDestBranchRevision(changeNotes.getChange());
+      if (revision.isPresent()) {
+        logger.atFine().log(
+            "dest branch %s has revision %s", branch.branch(), revision.get().name());
+      } else {
+        logger.atFine().log("dest branch %s does not exist", branch.branch());
+      }
 
       FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
       logger.atFine().log("fallbackCodeOwner = %s", fallbackCodeOwners);
@@ -447,7 +453,7 @@ public class CodeOwnerApprovalCheck {
                       codeOwnerConfigHierarchy,
                       codeOwnerResolver,
                       branch,
-                      revision,
+                      revision.orElse(null),
                       /* globalCodeOwners= */ CodeOwnerResolverResult.createEmpty(),
                       // Do not check for implicit approvals since implicit approvals of other users
                       // should be ignored. For the given account we do not need to check for
@@ -503,7 +509,7 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
       BranchNameKey branch,
-      ObjectId revision,
+      @Nullable ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,
       @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
@@ -568,7 +574,7 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
       BranchNameKey branch,
-      ObjectId revision,
+      @Nullable ObjectId revision,
       CodeOwnerResolverResult globalCodeOwners,
       @Nullable Account.Id implicitApprover,
       ImmutableSet<Account.Id> reviewerAccountIds,
@@ -1004,18 +1010,18 @@ public class CodeOwnerApprovalCheck {
    * <p>This is the revision from which the code owner configs should be read when computing code
    * owners for the files that are touched in the change.
    *
-   * @throws ResourceConflictException thrown if the destination branch is not found, e.g. when the
-   *     branch got deleted after the change was created
+   * @return the current revision of the destination branch of the given change, {@link
+   *     Optional#empty()} if the destination branch is not found (e.g. when the initial change is
+   *     uploaded to an unborn branch or when the branch got deleted after the change was created)
    */
-  private ObjectId getDestBranchRevision(Change change)
-      throws IOException, ResourceConflictException {
+  private Optional<ObjectId> getDestBranchRevision(Change change) throws IOException {
     try (Repository repository = repoManager.openRepository(change.getProject());
         RevWalk rw = new RevWalk(repository)) {
       Ref ref = repository.exactRef(change.getDest().branch());
       if (ref == null) {
-        throw new ResourceConflictException("destination branch not found");
+        return Optional.empty();
       }
-      return rw.parseCommit(ref.getObjectId());
+      return Optional.of(rw.parseCommit(ref.getObjectId()));
     }
   }
 }
