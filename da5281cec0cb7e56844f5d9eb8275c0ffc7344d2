@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2343ddf8_911b4bc2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-20T16:49:18Z",
+      "side": 1,
+      "message": "Zuul build is broken, verifying manually.",
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
