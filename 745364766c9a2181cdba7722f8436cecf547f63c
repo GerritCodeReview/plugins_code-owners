@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "eb9b8cd4_02b3bf27",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-20T11:26:41Z",
+      "side": 1,
+      "message": "Zuul pipeline is broken.\n\nI verified locally but had other broken tests. I fixed the tests and verified locally: all tests are now passing.",
+      "revId": "745364766c9a2181cdba7722f8436cecf547f63c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
