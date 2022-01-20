@@ -1764,6 +1764,50 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void cannotUploadConfigWithGlobalImportOfRootFolder() throws Exception {
+    testUploadConfigWithImportOfRootFolder(CodeOwnerConfigImportType.GLOBAL);
+  }
+
+  @Test
+  public void cannotUploadConfigWithPerFileImportOfRootFolder() throws Exception {
+    testUploadConfigWithImportOfRootFolder(CodeOwnerConfigImportType.PER_FILE);
+  }
+
+  private void testUploadConfigWithImportOfRootFolder(CodeOwnerConfigImportType importType)
+      throws Exception {
+    skipTestIfImportsNotSupportedByCodeOwnersBackend();
+
+    // Create a code owner config that wrongly imports the root folder instead of the '/OWNERS'
+    // file.
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig = createCodeOwnerConfigKey("/foo/");
+    CodeOwnerConfigReference codeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, /* filePath= */ "/")
+            .build();
+    CodeOwnerConfig codeOwnerConfig =
+        createCodeOwnerConfigWithImport(
+            keyOfImportingCodeOwnerConfig, importType, codeOwnerConfigReference);
+
+    PushOneCommit.Result r =
+        createChange(
+            user,
+            "Add code owners",
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getJGitFilePath(),
+            format(codeOwnerConfig));
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "invalid %s import in '%s': '/' is not a code owner config file",
+            importType.getType(),
+            codeOwnerConfigOperations
+                .codeOwnerConfig(keyOfImportingCodeOwnerConfig)
+                .getFilePath()));
+  }
+
+  @Test
   public void
       forMergeCommitsNonResolvableGlobalImportsFromOtherProjectsAreReportedAsWarningsIfImportsDontSpecifyBranch()
           throws Exception {

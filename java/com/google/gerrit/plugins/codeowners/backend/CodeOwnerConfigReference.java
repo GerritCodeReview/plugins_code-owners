@@ -72,7 +72,7 @@ public abstract class CodeOwnerConfigReference {
 
   /** The name of the code owner config file. */
   public String fileName() {
-    return filePath().getFileName().toString();
+    return Optional.ofNullable(filePath().getFileName()).map(Path::toString).orElse("");
   }
 
   /** User-readable string representing this code owner config reference. */
