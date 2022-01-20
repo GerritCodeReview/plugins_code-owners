@@ -23,7 +23,6 @@ import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.events.ReviewerAddedListener;
-import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.metrics.Timer1;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
@@ -206,23 +205,15 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
         Project.NameKey projectName, Change.Id changeId, Account.Id reviewerAccountId) {
       ChangeNotes changeNotes = changeNotesFactory.create(projectName, changeId);
 
-      ImmutableList<Path> ownedPaths;
-      try {
-        // limit + 1, so that we can show an indicator if there are more than <limit> files.
-        ownedPaths =
-            OwnedChangedFile.getOwnedPaths(
-                codeOwnerApprovalCheck.getOwnedPaths(
-                    changeNotes,
-                    changeNotes.getCurrentPatchSet(),
-                    reviewerAccountId,
-                    /* start= */ 0,
-                    limit + 1));
-      } catch (RestApiException e) {
-        logger.atFine().withCause(e).log(
-            "Couldn't compute owned paths of change %s for account %s",
-            changeNotes.getChangeId(), reviewerAccountId.get());
-        return Optional.empty();
-      }
+      // limit + 1, so that we can show an indicator if there are more than <limit> files.
+      ImmutableList<Path> ownedPaths =
+          OwnedChangedFile.getOwnedPaths(
+              codeOwnerApprovalCheck.getOwnedPaths(
+                  changeNotes,
+                  changeNotes.getCurrentPatchSet(),
+                  reviewerAccountId,
+                  /* start= */ 0,
+                  limit + 1));
 
       if (ownedPaths.isEmpty()) {
         // this reviewer doesn't own any of the modified paths

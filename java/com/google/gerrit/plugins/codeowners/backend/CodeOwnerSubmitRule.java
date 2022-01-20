@@ -21,8 +21,6 @@ import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.LegacySubmitRequirement;
 import com.google.gerrit.entities.SubmitRecord;
 import com.google.gerrit.extensions.annotations.Exports;
-import com.google.gerrit.extensions.restapi.ResourceConflictException;
-import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
@@ -95,11 +93,6 @@ class CodeOwnerSubmitRule implements SubmitRule {
 
         return Optional.of(getSubmitRecord(changeData.notes()));
       }
-    } catch (RestApiException e) {
-      logger.atFine().withCause(e).log(
-          "Couldn't evaluate code owner statuses for patch set %d of change %d.",
-          changeData.currentPatchSet().id().get(), changeData.change().getId().get());
-      return Optional.of(notReady());
     } catch (Exception e) {
       // Whether the exception should be treated as RULE_ERROR.
       // RULE_ERROR must only be returned if the exception is caused by user misconfiguration (e.g.
@@ -162,7 +155,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
   }
 
   private SubmitRecord getSubmitRecord(ChangeNotes changeNotes)
-      throws ResourceConflictException, IOException, DiffNotAvailableException {
+      throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     return codeOwnerApprovalCheck.isSubmittable(changeNotes) ? ok() : notReady();
   }

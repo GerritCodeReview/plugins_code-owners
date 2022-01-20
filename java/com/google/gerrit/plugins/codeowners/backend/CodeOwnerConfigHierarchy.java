@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
@@ -42,6 +43,10 @@ import org.eclipse.jgit.revwalk.RevWalk;
  * config in the root folder of the branch. The same as any other parent it can be ignored (e.g. by
  * using {@code set noparent} in the root code owner config if the {@code find-owners} backend is
  * used).
+ *
+ * <p>Visiting the code owner configs also works for non-existing branches (provided branch revision
+ * is {@code null}). In this case only the default code owner config in {@code refs/meta/config} is
+ * visited (if it exists).
  */
 public class CodeOwnerConfigHierarchy {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -65,7 +70,8 @@ public class CodeOwnerConfigHierarchy {
    * the path hierarchy from the given path up to the root folder.
    *
    * @param branchNameKey project and branch from which the code owner configs should be visited
-   * @param revision the branch revision from which the code owner configs should be loaded
+   * @param revision the branch revision from which the code owner configs should be loaded, {@code
+   *     null} if the branch doesn't exist
    * @param absolutePath the path for which the code owner configs should be visited; the path must
    *     be absolute; can be the path of a file or folder; the path may or may not exist
    * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
@@ -73,7 +79,7 @@ public class CodeOwnerConfigHierarchy {
    */
   public void visit(
       BranchNameKey branchNameKey,
-      ObjectId revision,
+      @Nullable ObjectId revision,
       Path absolutePath,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor) {
     visit(
@@ -89,7 +95,8 @@ public class CodeOwnerConfigHierarchy {
    * the path hierarchy from the given path up to the root folder.
    *
    * @param branchNameKey project and branch from which the code owner configs should be visited
-   * @param revision the branch revision from which the code owner configs should be loaded
+   * @param revision the branch revision from which the code owner configs should be loaded, {@code
+   *     null} if the branch doesn't exist
    * @param absolutePath the path for which the code owner configs should be visited; the path must
    *     be absolute; can be the path of a file or folder; the path may or may not exist
    * @param codeOwnerConfigVisitor visitor that should be invoked for the applying code owner
@@ -99,7 +106,7 @@ public class CodeOwnerConfigHierarchy {
    */
   public void visit(
       BranchNameKey branchNameKey,
-      ObjectId revision,
+      @Nullable ObjectId revision,
       Path absolutePath,
       CodeOwnerConfigVisitor codeOwnerConfigVisitor,
       Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
@@ -119,7 +126,8 @@ public class CodeOwnerConfigHierarchy {
    * path hierarchy from the given path up to the root folder.
    *
    * @param branchNameKey project and branch from which the code owner configs should be visited
-   * @param revision the branch revision from which the code owner configs should be loaded
+   * @param revision the branch revision from which the code owner configs should be loaded, {@code
+   *     null} if the branch doesn't exist
    * @param absolutePath the path for which the code owner configs should be visited; the path must
    *     be absolute; can be the path of a file or folder; the path may or may not exist
    * @param pathCodeOwnersVisitor visitor that should be invoked for the applying path code owners
@@ -128,7 +136,7 @@ public class CodeOwnerConfigHierarchy {
    */
   public void visit(
       BranchNameKey branchNameKey,
-      ObjectId revision,
+      @Nullable ObjectId revision,
       Path absolutePath,
       PathCodeOwnersVisitor pathCodeOwnersVisitor,
       Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
@@ -153,7 +161,8 @@ public class CodeOwnerConfigHierarchy {
    * (e.g. for large changes).
    *
    * @param branchNameKey project and branch from which the code owner configs should be visited
-   * @param revision the branch revision from which the code owner configs should be loaded
+   * @param revision the branch revision from which the code owner configs should be loaded, {@code
+   *     null} if the branch doesn't exist
    * @param absoluteFilePath the path for which the code owner configs should be visited; the path
    *     must be absolute; must be the path of a file; the path may or may not exist
    * @param pathCodeOwnersVisitor visitor that should be invoked for the applying path code owners
@@ -162,7 +171,7 @@ public class CodeOwnerConfigHierarchy {
    */
   public void visitForFile(
       BranchNameKey branchNameKey,
-      ObjectId revision,
+      @Nullable ObjectId revision,
       Path absoluteFilePath,
       PathCodeOwnersVisitor pathCodeOwnersVisitor,
       Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
@@ -177,13 +186,12 @@ public class CodeOwnerConfigHierarchy {
 
   private void visit(
       BranchNameKey branchNameKey,
-      ObjectId revision,
+      @Nullable ObjectId revision,
       Path absolutePath,
       Path startFolder,
       PathCodeOwnersVisitor pathCodeOwnersVisitor,
       Consumer<CodeOwnerConfig.Key> parentCodeOwnersIgnoredCallback) {
     requireNonNull(branchNameKey, "branch");
-    requireNonNull(revision, "revision");
     requireNonNull(absolutePath, "absolutePath");
     requireNonNull(pathCodeOwnersVisitor, "pathCodeOwnersVisitor");
     requireNonNull(parentCodeOwnersIgnoredCallback, "parentCodeOwnersIgnoredCallback");
@@ -191,47 +199,52 @@ public class CodeOwnerConfigHierarchy {
 
     logger.atFine().log(
         "visiting code owner configs for '%s' in branch '%s' in project '%s' (revision = '%s')",
-        absolutePath, branchNameKey.shortName(), branchNameKey.project(), revision.name());
+        absolutePath,
+        branchNameKey.shortName(),
+        branchNameKey.project(),
+        revision != null ? revision.name() : "n/a");
 
-    // Next path in which we look for a code owner configuration. We start at the given folder and
-    // then go up the parent hierarchy.
-    Path ownerConfigFolder = startFolder;
+    if (revision != null) {
+      // Next path in which we look for a code owner configuration. We start at the given folder and
+      // then go up the parent hierarchy.
+      Path ownerConfigFolder = startFolder;
 
-    // Iterate over the parent code owner configurations.
-    while (ownerConfigFolder != null) {
-      // Read code owner config and invoke the codeOwnerConfigVisitor if the code owner config
-      // exists.
-      logger.atFine().log("inspecting code owner config for %s", ownerConfigFolder);
-      CodeOwnerConfig.Key codeOwnerConfigKey =
-          CodeOwnerConfig.Key.create(branchNameKey, ownerConfigFolder);
-      Optional<PathCodeOwners> pathCodeOwners =
-          pathCodeOwnersFactory.create(
-              transientCodeOwnerConfigCache, codeOwnerConfigKey, revision, absolutePath);
-      if (pathCodeOwners.isPresent()) {
-        logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
-        boolean visitFurtherCodeOwnerConfigs = pathCodeOwnersVisitor.visit(pathCodeOwners.get());
-        boolean ignoreParentCodeOwners =
-            pathCodeOwners.get().resolveCodeOwnerConfig().get().ignoreParentCodeOwners();
-        if (ignoreParentCodeOwners) {
-          parentCodeOwnersIgnoredCallback.accept(codeOwnerConfigKey);
+      // Iterate over the parent code owner configurations.
+      while (ownerConfigFolder != null) {
+        // Read code owner config and invoke the codeOwnerConfigVisitor if the code owner config
+        // exists.
+        logger.atFine().log("inspecting code owner config for %s", ownerConfigFolder);
+        CodeOwnerConfig.Key codeOwnerConfigKey =
+            CodeOwnerConfig.Key.create(branchNameKey, ownerConfigFolder);
+        Optional<PathCodeOwners> pathCodeOwners =
+            pathCodeOwnersFactory.create(
+                transientCodeOwnerConfigCache, codeOwnerConfigKey, revision, absolutePath);
+        if (pathCodeOwners.isPresent()) {
+          logger.atFine().log("visit code owner config for %s", ownerConfigFolder);
+          boolean visitFurtherCodeOwnerConfigs = pathCodeOwnersVisitor.visit(pathCodeOwners.get());
+          boolean ignoreParentCodeOwners =
+              pathCodeOwners.get().resolveCodeOwnerConfig().get().ignoreParentCodeOwners();
+          if (ignoreParentCodeOwners) {
+            parentCodeOwnersIgnoredCallback.accept(codeOwnerConfigKey);
+          }
+          logger.atFine().log(
+              "visitFurtherCodeOwnerConfigs = %s, ignoreParentCodeOwners = %s",
+              visitFurtherCodeOwnerConfigs, ignoreParentCodeOwners);
+          if (!visitFurtherCodeOwnerConfigs || ignoreParentCodeOwners) {
+            // If no further code owner configs should be visited or if all parent code owner
+            // configs are ignored, we are done.
+            // No need to check further parent code owner configs (including the default code owner
+            // config in refs/meta/config which is the parent of the root code owner config), hence
+            // we can return here.
+            return;
+          }
+        } else {
+          logger.atFine().log("no code owner config found in %s", ownerConfigFolder);
         }
-        logger.atFine().log(
-            "visitFurtherCodeOwnerConfigs = %s, ignoreParentCodeOwners = %s",
-            visitFurtherCodeOwnerConfigs, ignoreParentCodeOwners);
-        if (!visitFurtherCodeOwnerConfigs || ignoreParentCodeOwners) {
-          // If no further code owner configs should be visited or if all parent code owner configs
-          // are ignored, we are done.
-          // No need to check further parent code owner configs (including the default code owner
-          // config in refs/meta/config which is the parent of the root code owner config), hence we
-          // can return here.
-          return;
-        }
-      } else {
-        logger.atFine().log("no code owner config found in %s", ownerConfigFolder);
+
+        // Continue the loop with the next parent folder.
+        ownerConfigFolder = ownerConfigFolder.getParent();
       }
-
-      // Continue the loop with the next parent folder.
-      ownerConfigFolder = ownerConfigFolder.getParent();
     }
 
     if (!RefNames.REFS_CONFIG.equals(branchNameKey.branch())) {

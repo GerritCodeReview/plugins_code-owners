@@ -42,7 +42,6 @@ import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.SubmitType;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.LabelDefinitionInput;
-import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
@@ -1482,19 +1481,204 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getStatus_branchDeleted() throws Exception {
+  public void getStatus_branchDeleted_defaultCodeOwner() throws Exception {
     String branchName = "tempBranch";
     createBranch(BranchNameKey.create(project, branchName));
 
-    String changeId = createChange("refs/for/" + branchName).getChangeId();
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
 
     DeleteBranchesInput input = new DeleteBranchesInput();
     input.branches = ImmutableList.of(branchName);
     gApi.projects().name(project.get()).deleteBranches(input);
 
-    ResourceConflictException exception =
-        assertThrows(ResourceConflictException.class, () -> getFileCodeOwnerStatuses(changeId));
-    assertThat(exception).hasMessageThat().isEqualTo("destination branch not found");
+    testGetStatusBranchDoesNotExistWithDefaultCodeOwner(changeId, path);
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  public void getStatus_initialChange_defaultCodeOwner() throws Exception {
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    testGetStatusBranchDoesNotExistWithDefaultCodeOwner(changeId, path);
+  }
+
+  private void testGetStatusBranchDoesNotExistWithDefaultCodeOwner(String changeId, Path path)
+      throws Exception {
+    setAsDefaultCodeOwners(admin);
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+
+    // Add default code owner as a reviewer.
+    gApi.changes().id(changeId).addReviewer(admin.email());
+
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a default code owner",
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
+
+    // Approve as default code owner.
+    approve(changeId);
+
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a default code owner",
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void getStatus_branchDeleted_globalCodeOwner() throws Exception {
+    // Create a bot user that is a global code owner.
+    TestAccount bot =
+        accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
+
+    String branchName = "tempBranch";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    DeleteBranchesInput input = new DeleteBranchesInput();
+    input.branches = ImmutableList.of(branchName);
+    gApi.projects().name(project.get()).deleteBranches(input);
+
+    testGetStatusBranchDoesNotExistWithGlobalCodeOwner(changeId, path, bot);
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "bot@example.com")
+  public void getStatus_initialChange_globalCodeOwner() throws Exception {
+    // Create a bot user that is a global code owner.
+    TestAccount bot =
+        accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    testGetStatusBranchDoesNotExistWithGlobalCodeOwner(changeId, path, bot);
+  }
+
+  private void testGetStatusBranchDoesNotExistWithGlobalCodeOwner(
+      String changeId, Path path, TestAccount globalCodeOwner) throws Exception {
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+
+    // Add global code owner as a reviewer.
+    gApi.changes().id(changeId).addReviewer(globalCodeOwner.email());
+
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a global code owner",
+                    AccountTemplateUtil.getAccountTemplate(globalCodeOwner.id()))));
+
+    // Approve as default code owner.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allowLabel("Code-Review").ref("refs/heads/*").group(REGISTERED_USERS).range(-2, +2))
+        .update();
+    requestScopeOperations.setApiUser(globalCodeOwner.id());
+    approve(changeId);
+
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a global code owner",
+                    AccountTemplateUtil.getAccountTemplate(globalCodeOwner.id()))));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void getStatus_branchDeleted_override() throws Exception {
+    String branchName = "tempBranch";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    DeleteBranchesInput input = new DeleteBranchesInput();
+    input.branches = ImmutableList.of(branchName);
+    gApi.projects().name(project.get()).deleteBranches(input);
+
+    testGetStatusBranchDoesNotExistWithOverride(changeId, path);
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void getStatus_initialChange_override() throws Exception {
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    testGetStatusBranchDoesNotExistWithOverride(changeId, path);
+  }
+
+  private void testGetStatusBranchDoesNotExistWithOverride(String changeId, Path path)
+      throws Exception {
+    createOwnersOverrideLabel();
+
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+
+    // Apply an override
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "override approval Owners-Override+1 by %s is present",
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   @Test
