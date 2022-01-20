@@ -73,7 +73,7 @@ public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
     LegacySubmitRequirementInfoSubject submitRequirementInfoSubject =
         assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("NOT_READY");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
 
     // Approve by a code owner.
@@ -87,7 +87,7 @@ public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
     // Check the submit requirement.
     submitRequirementInfoSubject = assertThatCollection(changeInfo.requirements).onlyElement();
     submitRequirementInfoSubject.hasStatusThat().isEqualTo("OK");
-    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code Owners");
+    submitRequirementInfoSubject.hasFallbackTextThat().isEqualTo("Code-Owners");
     submitRequirementInfoSubject.hasTypeThat().isEqualTo("code-owners");
   }
 }
