@@ -16,11 +16,15 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThatCollection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
@@ -457,6 +461,70 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+  }
+
+  @Test
+  public void getStatus_branchDeleted() throws Exception {
+    String branchName = "tempBranch";
+    createBranch(BranchNameKey.create(project, branchName));
+
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    DeleteBranchesInput input = new DeleteBranchesInput();
+    input.branches = ImmutableList.of(branchName);
+    gApi.projects().name(project.get()).deleteBranches(input);
+
+    testGetStatusBranchDoesNotExist(changeId, path);
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  public void getStatus_initialChange() throws Exception {
+    // Create a change as a user that is not a code owner.
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
+            .getChangeId();
+
+    testGetStatusBranchDoesNotExist(changeId, path);
+  }
+
+  private void testGetStatusBranchDoesNotExist(String changeId, Path path) throws Exception {
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+
+    // Add code owner as a reviewer (all users are fallback code owners).
+    gApi.changes().id(changeId).addReviewer(admin.email());
+
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a fallback code owner (all users are fallback code owners)",
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
+
+    // Approve as a code owner (all users are fallback code owners).
+    approve(changeId);
+
+    fileCodeOwnerStatuses = getFileCodeOwnerStatuses(changeId);
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path,
+                CodeOwnerStatus.APPROVED,
+                String.format(
+                    "approved by %s who is a fallback code owner"
+                        + " (all users are fallback code owners)",
+                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
   }
 
   private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)

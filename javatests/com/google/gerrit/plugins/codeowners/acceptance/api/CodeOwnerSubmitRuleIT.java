@@ -16,8 +16,10 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowLabel;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject.assertThatCollection;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -25,8 +27,10 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestMetricMaker;
+import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.RefNames;
@@ -53,6 +57,7 @@ import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.CodeOwnerSubmitRule}. */
 public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
+  @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
   @Inject private TestMetricMaker testMetricMaker;
 
@@ -101,6 +106,16 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
 
   @Test
   public void changeWithInsufficentReviewersIsNotSubmittable() throws Exception {
+    testChangeWithInsufficentReviewersIsNotSubmittable();
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  public void initialChangeWithInsufficentReviewersIsNotSubmittable() throws Exception {
+    testChangeWithInsufficentReviewersIsNotSubmittable();
+  }
+
+  private void testChangeWithInsufficentReviewersIsNotSubmittable() throws Exception {
     String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
 
     // Approve by a non-code-owner.
@@ -151,10 +166,23 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
+    testChangeWithPendingCodeOwnerApprovalsIsNotSubmittable(user);
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  public void initialChangeWithPendingCodeOwnerApprovalsIsNotSubmittable() throws Exception {
+    setAsDefaultCodeOwners(user);
+
+    testChangeWithPendingCodeOwnerApprovalsIsNotSubmittable(user);
+  }
+
+  private void testChangeWithPendingCodeOwnerApprovalsIsNotSubmittable(TestAccount codeOwner)
+      throws Exception {
     String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
 
     // Add a reviewer that is a code owner.
-    gApi.changes().id(changeId).addReviewer(user.email());
+    gApi.changes().id(changeId).addReviewer(codeOwner.email());
 
     // Approve by a non-code-owner.
     approve(changeId);
@@ -201,13 +229,33 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .project(project)
         .branch("master")
         .folderPath("/foo/")
-        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(user.email())
         .create();
 
+    testChangeWithCodeOwnerApprovalsIsSubmittable(user);
+  }
+
+  @Test
+  @TestProjectInput(createEmptyCommit = false)
+  public void initialChangeWithCodeOwnerApprovalsIsSubmittable() throws Exception {
+    setAsDefaultCodeOwners(user);
+
+    testChangeWithCodeOwnerApprovalsIsSubmittable(user);
+  }
+
+  private void testChangeWithCodeOwnerApprovalsIsSubmittable(TestAccount codeOwner)
+      throws Exception {
     String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
 
     // Approve by a code-owner.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allowLabel("Code-Review").ref("refs/heads/*").group(REGISTERED_USERS).range(-2, +2))
+        .update();
+    requestScopeOperations.setApiUser(codeOwner.id());
     approve(changeId);
+    requestScopeOperations.setApiUser(admin.id());
 
     // Verify that the code owner status for the changed file is APPROVED.
     CodeOwnerStatusInfo codeOwnerStatus =
@@ -239,6 +287,17 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void changeWithOverrideApprovalIsSubmittable() throws Exception {
+    testChangeWithOverrideApprovalIsSubmittable();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  @TestProjectInput(createEmptyCommit = false)
+  public void initialChangeWithOverrideApprovalIsSubmittable() throws Exception {
+    testChangeWithOverrideApprovalIsSubmittable();
+  }
+
+  private void testChangeWithOverrideApprovalIsSubmittable() throws Exception {
     createOwnersOverrideLabel();
 
     String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
