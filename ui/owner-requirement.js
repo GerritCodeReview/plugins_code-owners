@@ -18,7 +18,7 @@
 import {OwnerStatus} from './code-owners-fetcher.js';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin.js';
 import {showPluginFailedMessage} from './code-owners-banner.js';
-import {isPluginErrorState} from './code-owners-model.js';
+import {isPluginErrorState, UserRole} from './code-owners-model.js';
 
 /**
  * Owner requirement control for `submit-requirement-item-code-owners` endpoint.
@@ -75,9 +75,11 @@ export class OwnerRequirementValue extends
                       title="Documentation for overriding code owners"></iron-icon>
                   </a>
                 </template>
-                <gr-button link on-click="_openReplyDialog">
-                  [[_getSuggestOwnersText(_statusCount)]]
-                </gr-button>
+                <template is="dom-if" if="[[_isSignedInUser]]">
+                  <gr-button link on-click="_openReplyDialog">
+                    [[_getSuggestOwnersText(_statusCount)]]
+                  </gr-button>
+                </template>
               </template>
               <template is="dom-if" if="[[_newerPatchsetUploaded]]">
                 <span>A newer patch set has been uploaded.</span>
@@ -118,6 +120,10 @@ export class OwnerRequirementValue extends
         type: String,
         computed: '_computeOverrideInfoUrl(model.branchConfig)',
       },
+      _isSignedInUser: {
+        type: Boolean,
+        computed: '_computeIsSignedInUser(model.userRole)'
+      }
     };
   }
 
@@ -140,6 +146,10 @@ export class OwnerRequirementValue extends
       return false;
     }
     return !branchConfig || !status || !userRole;
+  }
+
+  _computeIsSignedInUser(userRole) {
+    return userRole && userRole !== UserRole.ANONYMOUS;
   }
 
   _pluginFailed(pluginStatus) {

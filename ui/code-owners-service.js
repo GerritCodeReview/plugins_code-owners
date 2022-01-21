@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import {SuggestionsType, BestSuggestionsLimit, AllSuggestionsLimit} from './code-owners-model.js';
+import {SuggestionsType, BestSuggestionsLimit, AllSuggestionsLimit, UserRole} from './code-owners-model.js';
 import {OwnersProvider, OwnerStatus, FetchStatus} from './code-owners-fetcher.js';
 import {CodeOwnersApi, CodeOwnersCacheApi} from './code-owners-api.js';
 
@@ -28,19 +28,6 @@ const ChangeStatus = {
   ABANDONED: 'ABANDONED',
   MERGED: 'MERGED',
   NEW: 'NEW',
-};
-
-/**
- * @enum
- */
-const UserRole = {
-  ANONYMOUS: 'ANONYMOUS',
-  AUTHOR: 'AUTHOR',
-  CHANGE_OWNER: 'CHANGE_OWNER',
-  REVIEWER: 'REVIEWER',
-  CC: 'CC',
-  REMOVED_REVIEWER: 'REMOVED_REVIEWER',
-  OTHER: 'OTHER',
 };
 
 /**

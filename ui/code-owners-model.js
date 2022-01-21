@@ -39,6 +39,19 @@ export const SuggestionsType = {
   ALL_SUGGESTIONS: 'ALL_SUGGESTIONS',
 };
 
+/**
+ * @enum
+ */
+export const UserRole = {
+  ANONYMOUS: 'ANONYMOUS',
+  AUTHOR: 'AUTHOR',
+  CHANGE_OWNER: 'CHANGE_OWNER',
+  REVIEWER: 'REVIEWER',
+  CC: 'CC',
+  REMOVED_REVIEWER: 'REMOVED_REVIEWER',
+  OTHER: 'OTHER',
+};
+
 export const BestSuggestionsLimit = 5;
 export const AllSuggestionsLimit = 1000;
 
