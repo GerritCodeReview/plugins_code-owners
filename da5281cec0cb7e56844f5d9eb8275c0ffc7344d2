@@ -197,6 +197,24 @@
       "parentUuid": "15e89a2c_24833ea3",
       "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9d5678b4_1b581b6e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1589,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-21T10:28:08Z",
+      "side": 1,
+      "message": "Agree. Thanks for explaining.\n\nSGTM.",
+      "parentUuid": "4e9520a7_9f5a397e",
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
