@@ -16,6 +16,23 @@
       "message": "Zuul is broken, verified manually",
       "revId": "f5c7c722a27a031823c7618505e287c77999bdb6",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5d8c8d8b_20d68dfa",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-21T07:54:14Z",
+      "side": 1,
+      "message": "The Zuul build is currently broken, hence removing the Verified-1 that came from it.",
+      "revId": "f5c7c722a27a031823c7618505e287c77999bdb6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
