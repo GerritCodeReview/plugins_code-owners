@@ -82,6 +82,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1456e9fc_9cbaf2b7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-21T10:35:15Z",
+      "side": 1,
+      "message": "Removing this made some catch blocks unreachable, which I forgot to remove and that\u0027s why the build for patch set 2 failed. Fixed with patch set 3 (CI build still fails, but now only because the Zuul build is broken). PTAL (requires new approvals since new files are touched).",
+      "parentUuid": "ced89b2e_075d3ba1",
+      "range": {
+        "startLine": 127,
+        "startChar": 13,
+        "endLine": 127,
+        "endChar": 38
+      },
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e825ca6e_80cd51b7",
