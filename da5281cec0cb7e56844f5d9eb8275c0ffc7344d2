@@ -3,6 +3,23 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "1f8820d7_d78453bb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-21T09:42:54Z",
+      "side": 1,
+      "message": "Thanks for the well written commit message.",
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "2343ddf8_911b4bc2",
         "filename": "/PATCHSET_LEVEL",
         "patchSetId": 1
@@ -14,6 +31,63 @@
       "writtenOn": "2022-01-20T16:49:18Z",
       "side": 1,
       "message": "Zuul build is broken, verifying manually.",
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e825ca6e_80cd51b7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-21T09:42:54Z",
+      "side": 1,
+      "message": "Comment needs formatting.",
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aa3726ab_c806d9b1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-21T09:42:54Z",
+      "side": 1,
+      "message": "nit: Insufficient",
+      "range": {
+        "startLine": 114,
+        "startChar": 31,
+        "endLine": 114,
+        "endChar": 42
+      },
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "15e89a2c_24833ea3",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1589,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-01-21T09:42:54Z",
+      "side": 1,
+      "message": "Optional (don\u0027t want to be nit-picky): This method is very similar to testGetStatusBranchDoesNotExistWithDefaultCodeOwner except for the first few lines (setting a default vs. global code owner).\n\nCan we extract the duplicate lines into a separate method?",
       "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
