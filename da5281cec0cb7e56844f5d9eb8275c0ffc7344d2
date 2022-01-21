@@ -58,6 +58,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ced89b2e_075d3ba1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-21T10:20:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e7f81dcb_18f9ee46",
+      "range": {
+        "startLine": 127,
+        "startChar": 13,
+        "endLine": 127,
+        "endChar": 38
+      },
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e825ca6e_80cd51b7",
@@ -71,6 +95,24 @@
       "writtenOn": "2022-01-21T09:42:54Z",
       "side": 1,
       "message": "Comment needs formatting.",
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c9699449_0f59fba0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigHierarchy.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 234,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-21T10:20:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e825ca6e_80cd51b7",
       "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -100,6 +142,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "aaf93234_c916a119",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerSubmitRuleIT.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 114,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-21T10:20:46Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aa3726ab_c806d9b1",
+      "range": {
+        "startLine": 114,
+        "startChar": 31,
+        "endLine": 114,
+        "endChar": 42
+      },
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "15e89a2c_24833ea3",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
         "patchSetId": 1
@@ -111,6 +177,24 @@
       "writtenOn": "2022-01-21T09:42:54Z",
       "side": 1,
       "message": "Optional (don\u0027t want to be nit-picky): This method is very similar to testGetStatusBranchDoesNotExistWithDefaultCodeOwner except for the first few lines (setting a default vs. global code owner).\n\nCan we extract the duplicate lines into a separate method?",
+      "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4e9520a7_9f5a397e",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 1589,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-01-21T10:20:46Z",
+      "side": 1,
+      "message": "I actually already tried to have one common method for this and then found that it\u0027s not only the first lines that differ, but also that the returned reasons for the code owner status that are asserted below (line 1606 and 1625) differ. So in the end I found it more readable to have two separate methods with some code duplication instead of one method with some weird args. I think for tests this is fine. But thanks for suggesting :)",
+      "parentUuid": "15e89a2c_24833ea3",
       "revId": "da5281cec0cb7e56844f5d9eb8275c0ffc7344d2",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
