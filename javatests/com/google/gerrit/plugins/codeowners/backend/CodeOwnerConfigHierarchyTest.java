@@ -89,17 +89,13 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void cannotVisitCodeOwnerConfigsForNullRevision() throws Exception {
-    NullPointerException npe =
-        assertThrows(
-            NullPointerException.class,
-            () ->
-                codeOwnerConfigHierarchy.visit(
-                    BranchNameKey.create(project, "master"),
-                    /* revision= */ null,
-                    Paths.get("/foo/bar/baz.md"),
-                    visitor));
-    assertThat(npe).hasMessageThat().isEqualTo("revision");
+  public void visitorNotInvokedForNullRevision() throws Exception {
+    codeOwnerConfigHierarchy.visit(
+        BranchNameKey.create(project, "master"),
+        /* revision= */ null,
+        Paths.get("/foo/bar/baz.md"),
+        visitor);
+    verifyNoInteractions(visitor);
   }
 
   @Test
@@ -578,6 +574,27 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
 
     when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
     visit("master", "/foo/bar/baz.md");
+    verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
+    verifyNoMoreInteractions(visitor);
+  }
+
+  @Test
+  public void visitorInvokedForCodeOwnerConfigInRefsMetaConfig_nullRevision() throws Exception {
+    CodeOwnerConfig.Key metaCodeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch(RefNames.REFS_CONFIG)
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
+    codeOwnerConfigHierarchy.visit(
+        BranchNameKey.create(project, "master"),
+        /* revision= */ null,
+        Paths.get("/foo/bar/baz.md"),
+        visitor);
     verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
   }

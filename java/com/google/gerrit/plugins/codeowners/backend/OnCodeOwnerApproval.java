@@ -17,9 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.PatchSet;
-import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
@@ -53,8 +51,6 @@ import java.util.stream.Stream;
  */
 @Singleton
 class OnCodeOwnerApproval implements OnPostReview {
-  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
-
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private final CodeOwnerMetrics codeOwnerMetrics;
@@ -120,23 +116,15 @@ class OnCodeOwnerApproval implements OnPostReview {
       int limit) {
     LabelVote newVote = getNewVote(requiredApproval, approvals);
 
-    ImmutableList<Path> ownedPaths;
-    try {
-      // limit + 1, so that we can show an indicator if there are more than <limit> files.
-      ownedPaths =
-          OwnedChangedFile.getOwnedPaths(
-              codeOwnerApprovalCheck.getOwnedPaths(
-                  changeNotes,
-                  changeNotes.getCurrentPatchSet(),
-                  user.getAccountId(),
-                  /* start= */ 0,
-                  limit + 1));
-    } catch (RestApiException e) {
-      logger.atFine().withCause(e).log(
-          "Couldn't compute owned paths of change %s for account %s",
-          changeNotes.getChangeId(), user.getAccountId().get());
-      return Optional.empty();
-    }
+    // limit + 1, so that we can show an indicator if there are more than <limit> files.
+    ImmutableList<Path> ownedPaths =
+        OwnedChangedFile.getOwnedPaths(
+            codeOwnerApprovalCheck.getOwnedPaths(
+                changeNotes,
+                changeNotes.getCurrentPatchSet(),
+                user.getAccountId(),
+                /* start= */ 0,
+                limit + 1));
 
     if (ownedPaths.isEmpty()) {
       // the user doesn't own any of the modified paths
