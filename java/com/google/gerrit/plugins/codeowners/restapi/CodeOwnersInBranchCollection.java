@@ -48,7 +48,8 @@ public class CodeOwnersInBranchCollection implements ChildCollection<BranchResou
   }
 
   @Override
-  public PathResource parse(BranchResource branchResource, IdString id) throws BadRequestException {
+  public PathResource parse(BranchResource branchResource, IdString id)
+      throws BadRequestException, ResourceNotFoundException {
     return PathResource.parse(branchResource, id);
   }
 
@@ -70,7 +71,7 @@ public class CodeOwnersInBranchCollection implements ChildCollection<BranchResou
     static final TypeLiteral<RestView<PathResource>> PATH_KIND = new TypeLiteral<>() {};
 
     static PathResource parse(BranchResource branchResource, IdString pathId)
-        throws BadRequestException {
+        throws BadRequestException, ResourceNotFoundException {
       return new PathResource(branchResource, parsePath(pathId));
     }
 
@@ -78,7 +79,8 @@ public class CodeOwnersInBranchCollection implements ChildCollection<BranchResou
       return new PathResource(getBranch(), revision, getPath());
     }
 
-    private PathResource(BranchResource branchResource, Path path) {
+    private PathResource(BranchResource branchResource, Path path)
+        throws ResourceNotFoundException {
       super(branchResource, path);
     }
 

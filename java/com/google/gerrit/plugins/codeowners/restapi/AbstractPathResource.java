@@ -14,11 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.IdString;
+import com.google.gerrit.extensions.restapi.ResourceNotFoundException;
 import com.google.gerrit.extensions.restapi.RestResource;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.project.BranchResource;
@@ -58,16 +57,14 @@ abstract class AbstractPathResource implements RestResource {
   private final ObjectId revision;
   private final Path path;
 
-  protected AbstractPathResource(BranchResource branchResource, Path path) {
+  protected AbstractPathResource(BranchResource branchResource, Path path)
+      throws ResourceNotFoundException {
+    if (branchResource.getRevision().isEmpty()) {
+      throw new ResourceNotFoundException(IdString.fromDecoded(branchResource.getName()));
+    }
+
     this.branchNameKey = branchResource.getBranchKey();
-
-    checkState(
-        branchResource.getRevision() != null,
-        "branch %s in project %s wasn't created yet",
-        branchResource.getBranchKey().branch(),
-        branchResource.getBranchKey().project().get());
-    this.revision = ObjectId.fromString(branchResource.getRevision());
-
+    this.revision = ObjectId.fromString(branchResource.getRevision().get());
     this.path = path;
   }
 
