@@ -728,7 +728,7 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
       files.put(String.format("foo-%d.txt", i), "file content");
     }
 
-    String changeId = createChange("test change", files.buildOrThrow()).getChangeId();
+    String changeId = createChange("test change", files.build()).getChangeId();
 
     OwnedPathsInfo ownedPathsInfo =
         changeCodeOwnersApiFactory
