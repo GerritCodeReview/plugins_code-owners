@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0ee8f653_37eb9a22",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002666
+      },
+      "writtenOn": "2022-02-02T00:36:36Z",
+      "side": 1,
+      "message": "Built and ran tests with 67811fa7b85f433433fc250cec8846a95072f6dc checked out.\n\n $ bazel test //plugins/code-owners/...\n Executed 61 out of 61 tests: 61 tests pass.",
+      "revId": "1897989462dd8ce8724914abfdb842825fd04d09",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
