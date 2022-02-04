@@ -52,9 +52,7 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
 
   @Override
   public boolean skipRetryWithTrace(String actionType, String actionName, Throwable throwable) {
-    return isInvalidPluginConfigurationException(throwable)
-        || isInvalidCodeOwnerConfigException(throwable)
-        || isInvalidPathException(throwable);
+    return isCausedByConfigurationError(throwable);
   }
 
   @Override
@@ -102,9 +100,7 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
 
   @Override
   public Optional<Status> getStatus(Throwable throwable) {
-    if (isInvalidPluginConfigurationException(throwable)
-        || isInvalidCodeOwnerConfigException(throwable)
-        || isInvalidPathException(throwable)) {
+    if (isCausedByConfigurationError(throwable)) {
       return Optional.of(Status.create(409, "Conflict"));
     }
     return Optional.empty();
@@ -113,6 +109,28 @@ public class CodeOwnersExceptionHook implements ExceptionHook {
   private static Optional<CodeOwnersInternalServerErrorException>
       getCodeOwnersInternalServerErrorException(Throwable throwable) {
     return getCause(CodeOwnersInternalServerErrorException.class, throwable);
+  }
+
+  public static boolean isCausedByConfigurationError(Throwable throwable) {
+    return isInvalidPluginConfigurationException(throwable)
+        || isInvalidCodeOwnerConfigException(throwable)
+        || isInvalidPathException(throwable);
+  }
+
+  public static Optional<? extends Exception> getCauseOfConfigurationError(Throwable throwable) {
+    Optional<InvalidPathException> invalidPathException =
+        CodeOwnersExceptionHook.getInvalidPathException(throwable);
+    if (invalidPathException.isPresent()) {
+      return invalidPathException;
+    }
+
+    Optional<InvalidPluginConfigurationException> invalidPluginConfigurationException =
+        CodeOwnersExceptionHook.getInvalidPluginConfigurationCause(throwable);
+    if (invalidPluginConfigurationException.isPresent()) {
+      return invalidPluginConfigurationException;
+    }
+
+    return CodeOwners.getInvalidCodeOwnerConfigCause(throwable);
   }
 
   private static boolean isInvalidPluginConfigurationException(Throwable throwable) {

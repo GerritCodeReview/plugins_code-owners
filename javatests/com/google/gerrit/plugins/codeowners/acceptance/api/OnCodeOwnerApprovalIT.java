@@ -65,6 +65,19 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void changeMessageNotExtendedIfInvalidCodeOwnerConfigFilesExist() throws Exception {
+    createNonParseableCodeOwnerConfig(getCodeOwnerConfigFileName());
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Patch Set 1: Code-Review+1");
+  }
+
+  @Test
   public void changeMessageListsNewlyApprovedPaths() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()

@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
@@ -51,6 +52,8 @@ import java.util.stream.Stream;
  */
 @Singleton
 class OnCodeOwnerApproval implements OnPostReview {
+  private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private final CodeOwnerMetrics codeOwnerMetrics;
@@ -103,6 +106,23 @@ class OnCodeOwnerApproval implements OnPostReview {
           approvals,
           requiredApproval,
           maxPathsInChangeMessage);
+    } catch (Exception e) {
+      Optional<? extends Exception> configurationError =
+          CodeOwnersExceptionHook.getCauseOfConfigurationError(e);
+      if (configurationError.isPresent()) {
+        logger.atWarning().log(
+            "Failed to post code-owners change message for code owner approval on change %s"
+                + " in project %s: %s",
+            changeNotes.getChangeId(),
+            changeNotes.getProjectName(),
+            configurationError.get().getMessage());
+      } else {
+        logger.atSevere().withCause(e).log(
+            "Failed to post code-owners change message for code owner approval on change %s"
+                + " in project %s.",
+            changeNotes.getChangeId(), changeNotes.getProjectName());
+      }
+      return Optional.empty();
     }
   }
 

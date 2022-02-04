@@ -83,6 +83,18 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void noChangeMessageAddedIfInvalidCodeOwnerConfigFilesExist() throws Exception {
+    createNonParseableCodeOwnerConfig(getCodeOwnerConfigFileName());
+
+    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message).isEqualTo("Uploaded patch set 1.");
+  }
+
+  @Test
   public void changeMessageListsOwnedPaths() throws Exception {
     codeOwnerConfigOperations
         .newCodeOwnerConfig()

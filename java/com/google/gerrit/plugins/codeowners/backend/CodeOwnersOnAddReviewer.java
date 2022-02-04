@@ -165,9 +165,17 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               })
           .call();
     } catch (Exception e) {
-      logger.atSevere().withCause(e).log(
-          "Failed to post code-owners change message for reviewer on change %s in project %s.",
-          changeId, projectName);
+      Optional<? extends Exception> configurationError =
+          CodeOwnersExceptionHook.getCauseOfConfigurationError(e);
+      if (configurationError.isPresent()) {
+        logger.atWarning().log(
+            "Failed to post code-owners change message for reviewer on change %s in project %s: %s",
+            changeId, projectName, configurationError.get().getMessage());
+      } else {
+        logger.atSevere().withCause(e).log(
+            "Failed to post code-owners change message for reviewer on change %s in project %s.",
+            changeId, projectName);
+      }
     }
   }
 
