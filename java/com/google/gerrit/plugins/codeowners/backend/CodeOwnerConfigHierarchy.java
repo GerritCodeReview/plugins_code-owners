@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
@@ -293,8 +294,7 @@ public class CodeOwnerConfigHierarchy {
         logger.atFine().log("code owner config %s not found", metaCodeOwnerConfigKey);
       }
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
-          String.format("failed to read %s", metaCodeOwnerConfigKey), e);
+      throw newInternalServerError(String.format("failed to read %s", metaCodeOwnerConfigKey), e);
     }
   }
 

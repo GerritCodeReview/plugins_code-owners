@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -172,7 +173,7 @@ public class CodeOwnerApprovalCheck {
                           .orElse(null)))
           .collect(toImmutableList());
     } catch (IOException | DiffNotAvailableException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "failed to compute owned paths of patch set %s for account %d",
               patchSet.id(), accountId.get()),
@@ -474,7 +475,7 @@ public class CodeOwnerApprovalCheck {
       return changeNotes.getChange().getRevertOf() != null
           && pureRevertCache.isPureRevert(changeNotes);
     } catch (BadRequestException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "failed to check if change %s in project %s is a pure revert",
               changeNotes.getChangeId(), changeNotes.getProjectName()),
@@ -740,7 +741,7 @@ public class CodeOwnerApprovalCheck {
             implicitApprover, reviewerAccountIds, approverAccountIds, absolutePath, reason);
     }
 
-    throw new CodeOwnersInternalServerErrorException(
+    throw newInternalServerError(
         String.format("unknown fallback code owners configured: %s", fallbackCodeOwners));
   }
 

@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -595,7 +596,7 @@ public class CodeOwnerResolver {
               });
       return extIdsByEmail;
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format("cannot resolve code owner emails: %s", emails), e);
     }
   }
@@ -868,7 +869,7 @@ public class CodeOwnerResolver {
           return true;
         }
       } catch (PermissionBackendException ex) {
-        throw new CodeOwnersInternalServerErrorException(
+        throw newInternalServerError(
             String.format(
                 "failed to test the %s global capability", GlobalPermission.MODIFY_ACCOUNT),
             ex);

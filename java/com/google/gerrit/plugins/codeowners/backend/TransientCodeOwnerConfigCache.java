@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
+
 import com.google.auto.value.AutoValue;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
@@ -124,7 +126,7 @@ public class TransientCodeOwnerConfigCache implements CodeOwnerConfigLoader {
       }
       return Optional.of(ref.getObjectId());
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "failed to get revision of branch %s in project %s",
               branchNameKey.shortName(), branchNameKey.project()),
