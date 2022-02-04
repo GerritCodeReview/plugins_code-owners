@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidCodeOwnerConfigCause;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.flogger.FluentLogger;
@@ -162,7 +163,7 @@ public class CodeOwnerConfigScanner {
         }
       }
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "Failed to scan for code owner configs in branch %s of project %s",
               branchNameKey.branch(), branchNameKey.project()),

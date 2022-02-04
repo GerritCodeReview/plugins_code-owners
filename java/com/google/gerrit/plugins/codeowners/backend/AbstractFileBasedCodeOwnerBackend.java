@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -113,10 +114,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
             fileName, codeOwnerConfigParser, revWalk, revision, codeOwnerConfigKey);
       }
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format("failed to load code owner config %s", codeOwnerConfigKey), e);
     } catch (ConfigInvalidException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "invalid code owner config file %s (project = %s, branch = %s)",
               codeOwnerConfigKey.filePath(defaultFileName),
@@ -209,7 +210,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
           .call();
     } catch (Exception e) {
       Throwables.throwIfUnchecked(e);
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
     }
   }
@@ -257,7 +258,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
       return codeOwnerConfigFile.getLoadedCodeOwnerConfig();
     } catch (IOException | ConfigInvalidException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format("failed to upsert code owner config %s", codeOwnerConfigKey), e);
     }
   }
@@ -279,7 +280,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       }
       return metaDataUpdate;
     } catch (Exception e) {
-      throw new CodeOwnersInternalServerErrorException("Failed to create MetaDataUpdate", e);
+      throw newInternalServerError("Failed to create MetaDataUpdate", e);
     } finally {
       metaDataUpdate.close();
     }

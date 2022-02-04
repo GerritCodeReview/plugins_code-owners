@@ -14,11 +14,12 @@
 
 package com.google.gerrit.plugins.codeowners.validation;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.gerrit.extensions.annotations.PluginName;
 import com.google.gerrit.extensions.restapi.AuthException;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.server.git.receive.PluginPushOption;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -103,7 +104,7 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
           .currentUser()
           .check(skipCodeOwnerConfigValidationCapability.getPermission());
     } catch (PermissionBackendException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "Failed to check %s capability", SkipCodeOwnerConfigValidationCapability.ID),
           e);

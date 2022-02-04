@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend.config;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static java.util.Objects.requireNonNull;
 
@@ -30,7 +31,6 @@ import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.EnableImplicitApprovals;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.PathExpressions;
@@ -332,7 +332,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
 
       return ImmutableSet.copyOf(exemptedAccounts.values());
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "Failed to resolve exempted users %s on project %s", exemptedUsers, projectName),
           e);

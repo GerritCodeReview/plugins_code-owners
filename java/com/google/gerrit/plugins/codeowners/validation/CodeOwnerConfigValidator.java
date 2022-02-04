@@ -18,6 +18,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwners.getInvalidCodeOwnerConfigCause;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
@@ -462,7 +463,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               "failed to validate code owner config files in revision %s"
                   + " (project = %s, branch = %s)",
               revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
-      throw new CodeOwnersInternalServerErrorException(errorMessage, e);
+      throw newInternalServerError(errorMessage, e);
     }
   }
 
@@ -891,7 +892,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           .filter(Optional::isPresent)
           .map(Optional::get);
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format("Failed to validate imports for %s in ", codeOwnerConfig.key()), e);
     }
   }
@@ -1061,7 +1062,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           .project(keyOfImportedCodeOwnerConfig.project())
           .test(ProjectPermission.ACCESS);
     } catch (PermissionBackendException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           "failed to check read permission for project of imported code owner config", e);
     }
   }
@@ -1074,7 +1075,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
           .ref(keyOfImportedCodeOwnerConfig.ref())
           .test(RefPermission.READ);
     } catch (PermissionBackendException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           "failed to check read permission for branch of imported code owner config", e);
     }
   }
@@ -1095,8 +1096,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       return Optional.ofNullable(repo.exactRef(keyOfImportedCodeOwnerConfig.ref()))
           .map(Ref::getObjectId);
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
-          "failed to read revision of import code owner config", e);
+      throw newInternalServerError("failed to read revision of import code owner config", e);
     }
   }
 
