@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -140,7 +141,7 @@ public class CodeOwnerConfigFileUpdateScanner {
       updateBranch(branchNameKey.branch(), repository, revision, commitId);
       return Optional.of(rw.parseCommit(commitId));
     } catch (IOException e) {
-      throw new CodeOwnersInternalServerErrorException(
+      throw newInternalServerError(
           String.format(
               "Failed to scan for code owner configs in branch %s of project %s",
               branchNameKey.branch(), branchNameKey.project()),

@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
@@ -150,7 +151,7 @@ class CodeOwnerSubmitRule implements SubmitRule {
         logger.atWarning().log("%s", errorMessage);
         return Optional.of(ruleError(errorMessage));
       }
-      throw new CodeOwnersInternalServerErrorException(errorMessage, e);
+      throw newInternalServerError(errorMessage, e);
     }
   }
 

@@ -18,6 +18,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_EXPLICITLY_MENTIONED_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NOT_EXPLICITLY_MENTIONED_SCORING_VALUE;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
@@ -46,7 +47,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolverResult;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
-import com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
@@ -580,7 +580,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
       throw new IllegalStateException("unknown account visibility setting: " + accountVisibility);
     } catch (IOException | PermissionBackendException e) {
-      throw new CodeOwnersInternalServerErrorException("failed to get visible users", e);
+      throw newInternalServerError("failed to get visible users", e);
     }
   }
 
