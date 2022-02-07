@@ -16,6 +16,29 @@
       "message": "Zuul build is wrongly failing. Verifying manually.",
       "revId": "5c2130ae87b125dc65d7a301d6b62e7219003904",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3808ed71_e4ab1ee8",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnersInternalServerErrorExceptionTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-02-07T10:36:23Z",
+      "side": 1,
+      "message": "nit: created",
+      "range": {
+        "startLine": 37,
+        "startChar": 32,
+        "endLine": 37,
+        "endChar": 38
+      },
+      "revId": "5c2130ae87b125dc65d7a301d6b62e7219003904",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
