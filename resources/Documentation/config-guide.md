@@ -249,6 +249,39 @@ paths are accidentally not covered by code owners. In this case, the affected
 paths would suddenly be open to all users, which may not be wanted. This is why
 configuring all users as fallback code owners is not recommended.
 
+## <a id="configureCodeOwnersByPermissions">How to configure code owners without the @PLUGIN@ plugin when all files / folders are owned by the same users
+
+If all files / folders in a repository / branch are owned by the same users, using the
+`@PLUGIN@` plugin is not needed and not recommended. Instead you should use
+plain [Gerrit permissions](../../../Documentation/access-control.html) to
+control who can approve changes:
+
+* Configure the `Code-Review` label with a voting range from `-2` to `+2` (see
+  [label configuration](../../../Documentation/config-labels.html#label_Code-Review).
+* For the code owners assign permissions to allow voting from `Code-Review-2` to
+  `Code-Review+2` and allow other users only to vote from `Code-Review-1` to
+  `Code-Review+1` (see [label
+  permissions](../../../Documentation/access-control.html#category_review_labels)
+* Setup a submit requirement that requires a `Code-Review+2` approval for making
+  the change submittable, optionally with disallowing self approvals (see
+  [submit
+  requirements](../../../Documentation/config-submit-requirements.html)).
+
+With this configuration a `Code-Review+2` approval from a code owner is required
+for changes to become submittable.
+
+Advantages of this approach over using the `@PLUGIN@` plugin:
+* it requires less configuration as you do not need to maintain code owner
+  config files (aka `OWNERS` files)
+* groups are supported (permissions can be assigned to groups, but code
+  ownerwhip in code owner config files [cannot be assigned to
+  groups](backend-find-owners-cookbook.html#defineAGroupAsCodeOwner))
+* it's more performant since code owners do not need to be computed in order to
+  detect if a change is submittable
+
+Disadvantages:
+* there are no code owner suggestions and no code owner specific UI controls
+
 ---
 
 Back to [@PLUGIN@ documentation index](index.html)

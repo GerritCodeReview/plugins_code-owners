@@ -3,6 +3,13 @@
 The `@PLUGIN@` plugin provides support for
 [code owners](user-guide.html#codeOwners) in Gerrit.
 
+**NOTE:** You would want to use the `@PLUGIN@` plugin if you have a repository /
+branch that contains files / folders that are owned by different users. If this
+is not the case, and all files / folders in the repository / branch are owned by
+the same users, using the `@PLUGIN@` plugin is not recommended, and [using plain
+Gerrit permissions should be preferred
+instead](config-guide.html#configureCodeOwnersByPermissions).
+
 If the `@PLUGIN@` plugin is enabled, changes can only be submitted if all
 touched files are covered by [approvals](user-guide.html#codeOwnerApproval) from
 code owners.
