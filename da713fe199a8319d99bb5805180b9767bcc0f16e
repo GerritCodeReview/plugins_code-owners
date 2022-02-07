@@ -16,58 +16,24 @@
       "message": "Zuul build is broken. Verifying Manually.",
       "revId": "da713fe199a8319d99bb5805180b9767bcc0f16e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
-    }
-  ],
-  "submitRequirementResults": [
-    {
-      "submitRequirement": {
-        "name": "Code-Review",
-        "description": {
-          "value": "At least one maximum vote for label \u0027Code-Review\u0027 is required"
-        },
-        "applicabilityExpression": {},
-        "submittabilityExpression": {
-          "expressionString": "label:Code-Review\u003dMAX,user\u003dnon_uploader AND -label:Code-Review\u003dMIN"
-        },
-        "overrideExpression": {},
-        "allowOverrideInChildProjects": true
-      },
-      "applicabilityExpressionResult": {},
-      "submittabilityExpressionResult": {"expression":{"expressionString":"label:Code-Review=MAX,user=non_uploader AND -label:Code-Review=MIN"},"status":"PASS","errorMessage":{"value":null},"passingAtoms":["label:Code-Review=MAX,user=non_uploader"],"failingAtoms":["label:Code-Review=MIN"]},
-      "overrideExpressionResult": {},
-      "patchSetCommitId": "da713fe199a8319d99bb5805180b9767bcc0f16e",
-      "legacy": {
-        "value": false
-      },
-      "forced": {}
     },
     {
-      "submitRequirement": {
-        "name": "Verified",
-        "description": {
-          "value": "CI result status for build and tests is passing"
-        },
-        "applicabilityExpression": {
-          "value": {
-            "expressionString": "-branch:refs/meta/config"
-          }
-        },
-        "submittabilityExpression": {
-          "expressionString": "label:Verified\u003dMAX AND -label:Verified\u003dMIN"
-        },
-        "overrideExpression": {},
-        "allowOverrideInChildProjects": true
+      "unresolved": false,
+      "key": {
+        "uuid": "49d2cffa_781ca2f9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 3
       },
-      "applicabilityExpressionResult": {
-        "value": {"expression":{"expressionString":"-branch:refs/meta/config"},"status":"PASS","errorMessage":{"value":null},"passingAtoms":[],"failingAtoms":["branch:refs/meta/config"]}
+      "lineNbr": 0,
+      "author": {
+        "id": 1011323
       },
-      "submittabilityExpressionResult": {"expression":{"expressionString":"label:Verified=MAX AND -label:Verified=MIN"},"status":"PASS","errorMessage":{"value":null},"passingAtoms":["label:Verified=MAX"],"failingAtoms":["label:Verified=MIN"]},
-      "overrideExpressionResult": {},
-      "patchSetCommitId": "da713fe199a8319d99bb5805180b9767bcc0f16e",
-      "legacy": {
-        "value": false
-      },
-      "forced": {}
+      "writtenOn": "2022-02-07T13:18:00Z",
+      "side": 1,
+      "message": "I filed issue 15669 for that.",
+      "parentUuid": "1d2077a8_cefc54c3",
+      "revId": "da713fe199a8319d99bb5805180b9767bcc0f16e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
