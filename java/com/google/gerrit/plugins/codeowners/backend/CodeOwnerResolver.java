@@ -259,7 +259,7 @@ public class CodeOwnerResolver {
   public CodeOwnerResolverResult resolve(Set<CodeOwnerReference> codeOwnerReferences) {
     return resolve(
         codeOwnerReferences,
-        /* annotations= */ ImmutableMultimap.of(),
+        /* annotationsByCodeOwnerReference= */ ImmutableMultimap.of(),
         /* unresolvedImports= */ ImmutableList.of(),
         /* pathCodeOwnersMessages= */ ImmutableList.of());
   }
