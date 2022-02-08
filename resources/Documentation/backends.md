@@ -2,23 +2,23 @@
 
 The following code owner backends are supported:
 
-* [find-owners](backend-find-owners.html):
+* [find-owners](backend-find-owners.md):
   Code owner backend that supports the syntax of the
   [find-owners](https://gerrit-review.googlesource.com/admin/repos/plugins/find-owners)
   plugin.
-* [proto](backend-proto.html):
+* [proto](backend-proto.md):
   Code owner backend that supports a proto-based syntax. The proto syntax is not
   final yet and backwards incompatible changes are likely to happen. This is why
   this backend is experimental for now and should not be used in production.
 
 Which backend is used can be
-[configured](setup-guide.html#configureCodeOwnersBackend) globally, per
+[configured](setup-guide.md#configureCodeOwnersBackend) globally, per
 repository or per branch.
 
 ## <a id="codeOwnerConfigFiles">Code owner config files
 
 Code owner config files are stored in the source tree of the repository and
-define the [code owners](user-guide.html#codeOwners) for a path.
+define the [code owners](user-guide.md#codeOwners) for a path.
 
 The code owners that are defined in a code owner config file apply to the
 directory that contains the code owner config file, and all its subdirectories
@@ -43,11 +43,11 @@ owner config file.
 | `find-owners` | `<prefix>_OWNERS`, `OWNERS_<extension>`                   |
 | `proto`       | `<prefix>_OWNERS_METADATA`, `OWNERS_METADATA_<extension>` |
 
-Primary and secondary code owner config files are [validated](validation.html)
+Primary and secondary code owner config files are [validated](validation.md)
 by the `@PLUGIN@` plugin when they are changed to ensure that they are always
 parsable and valid.
 
-By configuring a [file extension](config.html#codeOwnersFileExtension) for code
+By configuring a [file extension](config.md#codeOwnersFileExtension) for code
 owner config files it is possible to use **a different set of code owner config
 files**:
 
@@ -70,7 +70,7 @@ hence would always be detected as invalid.
 
 As some projects want to allow arbitrary file extensions for code owner config
 files, it is possible to enable arbitrary file extensions for code owner config
-files by [configuration](config.html#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions).
+files by [configuration](config.md#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions).
 If arbitrary file extensions are enabled, the following files are consideres as
 secondary code owner config files **in addition** to the once described above:
 
@@ -99,6 +99,6 @@ arbitrary files is disallow so that this cannot happen.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)
