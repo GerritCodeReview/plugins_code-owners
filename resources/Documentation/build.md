@@ -33,6 +33,6 @@ and then open the generated `index.html` in a browser.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)

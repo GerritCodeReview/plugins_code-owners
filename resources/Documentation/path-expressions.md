@@ -2,8 +2,8 @@
 
 Path expressions are used to restrict access grants in code owner config files
 to only apply to a subset of files in a directory (e.g. see
-[per-file](backend-find-owners.html#perFile) rule for the
-[find-owners](backend-find-owners.html) backend).
+[per-file](backend-find-owners.md#perFile) rule for the
+[find-owners](backend-find-owners.md) backend).
 
 The following path expression syntaxes are supported:
 
@@ -19,15 +19,15 @@ The following path expression syntaxes are supported:
 
 Which syntax is used by default depends on the used code owner backend:
 
-* [find-owners](backend-find-owners.html) backend:
+* [find-owners](backend-find-owners.md) backend:
   Uses `FIND_OWNERS_GLOB` as path expression syntax.
-* [proto](backend-proto.html) backend:
+* [proto](backend-proto.md) backend:
   Uses `SIMPLE` as path expression syntax.
 
 The default path expression syntax that is derived from the backend can be
-overriden by [global configuration](config.html#pluginCodeOwnersPathExpressions),
-on [project-level](config.html#codeOwnersPathExpressions) or on
-[branch-level](config.html#codeOwnersBranchPathExpressions).
+overriden by [global configuration](config.md#pluginCodeOwnersPathExpressions),
+on [project-level](config.md#codeOwnersPathExpressions) or on
+[branch-level](config.md#codeOwnersBranchPathExpressions).
 
 ## <a id="globs">Globs
 
@@ -67,7 +67,7 @@ See [below](#examples) for examples.
 
 To be compatible with the `find-owners` plugin find-owners path expressions
 are prefixes with `{**/,}` which matches any folder (see
-[above](path-expressions.html)). This means if path expressions like  `BUILD`,
+[above](path-expressions.md)). This means if path expressions like  `BUILD`,
 `*.md` or `my-folder/**` are used in `OWNERS` files the effective path
 expression are `{**/,}BUILD`, `{**/,}*.md` and `{**/,}my-folder/**`. These path
 expression do not only match `BUILD`, `*.md` and `my-folder/**` directly in the
@@ -112,6 +112,6 @@ any `my-folder/` subfolder, e.g. all files in `/foo/bar/baz/my-folder/`.
 
 ---
 
-Back to [@PLUGIN@ documentation index](index.html)
+Back to [@PLUGIN@ documentation index](index.md)
 
-Part of [Gerrit Code Review](../../../Documentation/index.html)
+Part of [Gerrit Code Review](../../../Documentation/index.md)
