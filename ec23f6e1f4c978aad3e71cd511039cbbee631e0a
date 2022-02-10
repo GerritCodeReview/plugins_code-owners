@@ -16,6 +16,23 @@
       "message": "Verifying manually since Zuul doesn\u0027t know that this depends on the Gerrit core change which makes the build fail.",
       "revId": "ec23f6e1f4c978aad3e71cd511039cbbee631e0a",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "19589444_eb39b33a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-02-10T11:17:31Z",
+      "side": 1,
+      "message": "Is there a way I can view the documentation in the browser, similar to contrib/show_new_gerrit_doc_in_chrome.sh for gerrit core?",
+      "revId": "ec23f6e1f4c978aad3e71cd511039cbbee631e0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
