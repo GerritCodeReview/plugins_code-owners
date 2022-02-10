@@ -16,6 +16,24 @@
       "message": "Q: wouldn\u0027t this silently allow to merge a malformed OWNERS file in the target branch? Isn\u0027t this something that it\u0027s better to avoid?",
       "revId": "6cb023a67dfb840c13fa3f7aadfc0063144e6674",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1fd2c477_80f9972e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-02-10T11:39:42Z",
+      "side": 0,
+      "message": "By default the submit would fail, since the OWNERS files are once again validated on submit (with this option only the OWNERS file validation on upload is skipped).\nBut you are right that it\u0027s a potential risk since the OWNERS file validation on submit may be switched off by configuration, but doing that is not recommended.",
+      "parentUuid": "a3f010e6_f746060b",
+      "revId": "6cb023a67dfb840c13fa3f7aadfc0063144e6674",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
