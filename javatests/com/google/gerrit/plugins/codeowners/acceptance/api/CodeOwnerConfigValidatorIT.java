@@ -33,6 +33,7 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.api.changes.CherryPickInput;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
@@ -59,7 +60,9 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigPa
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationCapability;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationPushOption;
+import com.google.gerrit.server.submit.IntegrationConflictException;
 import com.google.inject.Inject;
+import java.nio.file.Path;
 import org.eclipse.jgit.internal.storage.dfs.InMemoryRepository;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
@@ -2250,6 +2253,112 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
     ResourceConflictException resourceConflictException =
         assertThrows(ResourceConflictException.class, () -> gApi.changes().create(changeInput));
+    assertThat(resourceConflictException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "[code-owners] %s for plugin code-owners not permitted",
+                SkipCodeOwnerConfigValidationCapability.ID));
+  }
+
+  @Test
+  public void skipValidationForMergeCommitCreatedViaTheCherryPickRevisionRestApi()
+      throws Exception {
+    // Create a conflicting code owner config file in the target branch.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    // Create another branch.
+    BranchNameKey branchNameKey = BranchNameKey.create(project, "stable");
+    createBranch(branchNameKey);
+
+    // Create a change with a conflicting code owner config file in the other branch.
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(branchNameKey, Path.of("/"));
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owner config",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
+                    .build()));
+    r.assertOkStatus();
+
+    // Try creating a change that cherry picks the change on the other branch onto master.
+    // The change creation fails because the code owner config file in the other branch
+    // conflicts with the code owner config file in the master branch.
+    CherryPickInput cherryPickInput = new CherryPickInput();
+    cherryPickInput.destination = "master";
+    cherryPickInput.message = "A cherry pick";
+    IntegrationConflictException mergeConflictException =
+        assertThrows(
+            IntegrationConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().cherryPickAsInfo(cherryPickInput));
+    assertThat(mergeConflictException)
+        .hasMessageThat()
+        .contains("Cherry pick failed: merge conflict while merging commits");
+
+    // Try creating the cherry pick change with conflicts. Fails because the code owner config file
+    // contains conflict markers which fails the code owner config file validation.
+    cherryPickInput.allowConflicts = true;
+    ResourceConflictException resourceConflictException =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().cherryPickAsInfo(cherryPickInput));
+    assertThat(resourceConflictException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "[code-owners] invalid code owner config file '/%s'",
+                getCodeOwnerConfigFileName()));
+
+    // Create the cherry pick change with skipping code owners validation.
+    cherryPickInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    gApi.changes().id(r.getChangeId()).current().cherryPickAsInfo(cherryPickInput);
+  }
+
+  @Test
+  public void userWithoutCapabilitySkipValidationCannotSkipValidationWithCherryPickRevisionRestApi()
+      throws Exception {
+    // Create another branch.
+    BranchNameKey branchNameKey = BranchNameKey.create(project, "stable");
+    createBranch(branchNameKey);
+
+    // Create a change with a code owner config file in the other branch.
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        CodeOwnerConfig.Key.create(branchNameKey, Path.of("/"));
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owner config",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
+                    .build()));
+    r.assertOkStatus();
+
+    requestScopeOperations.setApiUser(user.id());
+
+    CherryPickInput cherryPickInput = new CherryPickInput();
+    cherryPickInput.destination = "master";
+    cherryPickInput.message = "A cherry pick";
+    cherryPickInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    ResourceConflictException resourceConflictException =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().cherryPickAsInfo(cherryPickInput));
     assertThat(resourceConflictException)
         .hasMessageThat()
         .contains(
