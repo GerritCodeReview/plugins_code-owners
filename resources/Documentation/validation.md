@@ -107,6 +107,13 @@ REST endpoint skipping the code owner config validation is possible by setting
 the [ChangeInput](../../../Documentation/rest-api-changes.html#change-input)
 (see field `validation_options`).
 
+Similarly, for the [Cherry Pick
+Revision](../../../Documentation/rest-api-changes.html#cherry-pick) REST endpoint
+skipping the code owner config validation is possible by setting
+`code-owners~skip-validation` with the value `true` as a validation option in
+the [CherryPickInput](../../../Documentation/rest-api-changes.html#cherrypick-input)
+(see field `validation_options`).
+
 Using the push option or the validation option requires the calling user to
 have the `Can Skip Code Owner Config Validation` global capability. Host
 administrators have this capability implicitly assigned via the `Administrate
