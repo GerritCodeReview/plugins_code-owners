@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a3f010e6_f746060b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-02-10T11:16:07Z",
+      "side": 0,
+      "message": "Q: wouldn\u0027t this silently allow to merge a malformed OWNERS file in the target branch? Isn\u0027t this something that it\u0027s better to avoid?",
+      "revId": "6cb023a67dfb840c13fa3f7aadfc0063144e6674",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
