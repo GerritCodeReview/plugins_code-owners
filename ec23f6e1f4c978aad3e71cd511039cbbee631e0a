@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "276b2dba_8cd9f081",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-02-10T09:17:49Z",
+      "side": 1,
+      "message": "Verifying manually since Zuul doesn\u0027t know that this depends on the Gerrit core change which makes the build fail.",
+      "revId": "ec23f6e1f4c978aad3e71cd511039cbbee631e0a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
