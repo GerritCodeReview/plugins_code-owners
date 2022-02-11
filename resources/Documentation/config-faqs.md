@@ -5,6 +5,8 @@
 * [How to avoid issues with code owner config files](#avoidIssuesWithCodeOwnerConfigs)
 * [How to investigate issues with code owner config files](#investigateIssuesWithCodeOwnerConfigs)
 * [How to investigate issues with the code owner suggestion](#investigateIssuesWithCodeOwnerSuggestion)
+* [What should be done when creating a branch fails due to invalid code owner
+  config files?](#branchCreationFailsDueInvalidCodeOwnerConfigFiles)
 * [How to define default code owners](#defineDefaultCodeOwners)
 * [How to setup code owner overrides](#setupOverrides)
 * [What's the best place to keep the global plugin
@@ -135,6 +137,31 @@ only after other causes have been excluded.
 
 Also see [above](#avoidIssuesWithCodeOwnerConfigs) how to avoid issues with code
 owner config files in the first place.
+
+## <a id="branchCreationFailsDueInvalidCodeOwnerConfigFiles">What should be done when creating a branch fails due to invalid code owner config files?
+
+When creating a new branch, all code owner config files that are contained in
+the initial commit are newly [validated](validation.html#codeOwnerConfigValidationOnBranchCreation), even if the branch is created for a
+commit that already exists in the repository.
+
+If creating a branch fails due to this validation, it is recommended to:
+
+1. Use the [code-owners~skip-validation
+   validation](validation.html#skipCodeOwnerConfigValidationOnDemand) option to
+   skip the validation of code owner config files when creating the branch.
+2. Use the
+   [Check Code Owner Config Files](rest-api.html#check-code-owner-config-files)
+   REST endpoint to validate the code owner files in the new branch (specify
+   the branch in the `branches` field in the
+   [CheckCodeOwnerConfigFilesInput](rest-api.html#check-code-owner-config-files-input))
+   to see which code owner config files have issues.
+3. Fix the reported issues and push them as a change for code review. If
+   needed, get the change submitted with a [code owner
+   override](user-guide.html#codeOwnerOverride).
+4. Repeat step 2. to verify that all issues have been fixed.
+
+It's also possible to switch of the code owner config validation on branch
+creation by [configuration](config.html#pluginCodeOwnersEnableValidationOnBranchCreation).
 
 ## <a id="defineDefaultCodeOwners">How to define default code owners
 

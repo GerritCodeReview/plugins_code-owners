@@ -16,6 +16,9 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
+import static com.google.gerrit.acceptance.GitUtil.assertPushOk;
+import static com.google.gerrit.acceptance.GitUtil.assertPushRejected;
+import static com.google.gerrit.acceptance.GitUtil.pushHead;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
@@ -72,6 +75,7 @@ import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.AnyObjectId;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.transport.PushResult;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -2458,6 +2462,347 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             String.format(
                 "[code-owners] %s for plugin code-owners not permitted",
                 SkipCodeOwnerConfigValidationCapability.ID));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "true")
+  public void cannotCreateBranchWithInvalidCodeOwnerConfigFileViaRestApi() throws Exception {
+    // Add a non code owner config file to verify that it is not validated as code owner config file
+    PushOneCommit.Result r = pushFactory.create(admin.newIdent(), testRepo).to("refs/heads/master");
+    r.assertOkStatus();
+
+    // Create code owner configs with a non-existing user as code owner.
+    // We create 2 code owner configs with different commits so that it's tested that the validator
+    // checks all code owner config files and not only those added in the last commit.
+    String unknownEmail = "non-existing@example.com";
+    CodeOwnerConfig.Key codeOwnerConfigKey1 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(unknownEmail)
+            .create();
+    CodeOwnerConfig.Key codeOwnerConfigKey2 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(unknownEmail)
+            .create();
+
+    BranchInput input = new BranchInput();
+    input.ref = "new";
+    input.revision = projectOperations.project(project).getHead("master").name();
+
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.projects().name(project.get()).branch(input.ref).create(input));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
+                    + "[code-owners] invalid code owner config files:\n"
+                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s\n"
+                    + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
+                project,
+                unknownEmail,
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
+                identifiedUserFactory.create(admin.id()).getLoggableName(),
+                unknownEmail,
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
+                identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "true")
+  public void skipValidationForBranchCreationViaRestApi() throws Exception {
+    // Create code owner config with a non-existing user as code owner.
+    String unknownEmail = "non-existing@example.com";
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(unknownEmail)
+        .create();
+
+    BranchInput input = new BranchInput();
+    input.ref = "new";
+    input.revision = projectOperations.project(project).getHead("master").name();
+
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.projects().name(project.get()).branch(input.ref).create(input));
+    assertThat(exception)
+        .hasMessageThat()
+        .contains("[code-owners] invalid code owner config files:");
+
+    input.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    gApi.projects().name(project.get()).branch(input.ref).create(input);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "true")
+  public void userWithoutCapabilitySkipValidationCannotSkipValidationForBranchCreationViaRestApi()
+      throws Exception {
+    // Create code owner config with a non-existing user as code owner.
+    String unknownEmail = "non-existing@example.com";
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(unknownEmail)
+        .create();
+
+    requestScopeOperations.setApiUser(user.id());
+
+    BranchInput input = new BranchInput();
+    input.ref = "new";
+    input.revision = projectOperations.project(project).getHead("master").name();
+    input.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.CREATE).ref(RefNames.REFS_HEADS + "*").group(REGISTERED_USERS))
+        .update();
+
+    ResourceConflictException resourceConflictException =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.projects().name(project.get()).branch(input.ref).create(input));
+    assertThat(resourceConflictException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
+                    + "[code-owners] skipping code owner config validation not allowed:\n"
+                    + "  ERROR: %s for plugin code-owners not permitted",
+                project, SkipCodeOwnerConfigValidationCapability.ID));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "true")
+  public void cannotCreateBranchWithInvalidCodeOwnerConfigFileViaPush() throws Exception {
+    // Add a non code owner config file to verify that it is not validated as code owner config file
+    PushOneCommit.Result r = pushFactory.create(admin.newIdent(), testRepo).to("refs/heads/master");
+    r.assertOkStatus();
+
+    // Create code owner configs with a non-existing user as code owner.
+    // We create 2 code owner configs with different commits so that it's tested that the validator
+    // checks all code owner config files and not only those added in the last commit.
+    String unknownEmail = "non-existing@example.com";
+    CodeOwnerConfig.Key codeOwnerConfigKey1 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(unknownEmail)
+            .create();
+    CodeOwnerConfig.Key codeOwnerConfigKey2 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(unknownEmail)
+            .create();
+
+    RevCommit head = projectOperations.project(project).getHead("master");
+    testRepo.git().fetch().call();
+    testRepo.reset(head.name());
+
+    PushResult r2 =
+        pushHead(
+            testRepo,
+            "refs/heads/new",
+            /* pushTags= */ false,
+            /* force= */ false,
+            /* pushOptions= */ ImmutableList.of());
+    assertPushRejected(
+        r2,
+        "refs/heads/new",
+        String.format(
+            "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
+                + "[code-owners] invalid code owner config files:\n"
+                + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s\n"
+                + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
+            project,
+            unknownEmail,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName(),
+            unknownEmail,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "true")
+  public void skipValidationForBranchCreationViaPush() throws Exception {
+    // Create code owner config with a non-existing user as code owner.
+    String unknownEmail = "non-existing@example.com";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(unknownEmail)
+            .create();
+
+    RevCommit head = projectOperations.project(project).getHead("master");
+    testRepo.git().fetch().call();
+    testRepo.reset(head.name());
+
+    PushResult r =
+        pushHead(
+            testRepo,
+            "refs/heads/new",
+            /* pushTags= */ false,
+            /* force= */ false,
+            /* pushOptions= */ ImmutableList.of());
+    assertPushRejected(
+        r,
+        "refs/heads/new",
+        String.format(
+            "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
+                + "[code-owners] invalid code owner config files:\n"
+                + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
+            project,
+            unknownEmail,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+
+    r =
+        pushHead(
+            testRepo,
+            "refs/heads/new",
+            /* pushTags= */ false,
+            /* force= */ false,
+            /* pushOptions= */ ImmutableList.of(
+                String.format(
+                    "code-owners~%s=true", SkipCodeOwnerConfigValidationPushOption.NAME)));
+    assertPushOk(r, "refs/heads/new");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "true")
+  public void userWithoutCapabilitySkipValidationCannotSkipValidationForBranchCreationViaPush()
+      throws Exception {
+    // Create code owner config with a non-existing user as code owner.
+    String unknownEmail = "non-existing@example.com";
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(unknownEmail)
+        .create();
+
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.CREATE).ref(RefNames.REFS_HEADS + "*").group(REGISTERED_USERS))
+        .update();
+
+    requestScopeOperations.setApiUser(user.id());
+    TestRepository<InMemoryRepository> userRepo = cloneProject(project, user);
+    PushResult r =
+        pushHead(
+            userRepo,
+            "refs/heads/new",
+            /* pushTags= */ false,
+            /* force= */ false,
+            /* pushOptions= */ ImmutableList.of(
+                String.format(
+                    "code-owners~%s=true", SkipCodeOwnerConfigValidationPushOption.NAME)));
+    assertPushRejected(
+        r,
+        "refs/heads/new",
+        String.format(
+            "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
+                + "[code-owners] skipping code owner config validation not allowed:\n"
+                + "  ERROR: %s for plugin code-owners not permitted",
+            project, SkipCodeOwnerConfigValidationCapability.ID));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "false")
+  public void onBranchCreationValidationDisabled() throws Exception {
+    // Create a code owner config with a non-existing user as code owner.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("non-existing@example.com")
+        .create();
+
+    RevCommit head = projectOperations.project(project).getHead("master");
+    testRepo.git().fetch().call();
+    testRepo.reset(head.name());
+
+    PushResult r =
+        pushHead(
+            testRepo,
+            "refs/heads/new",
+            /* pushTags= */ false,
+            /* force= */ false,
+            /* pushOptions= */ ImmutableList.of());
+    assertPushOk(r, "refs/heads/new");
+    assertThat(r.getMessages())
+        .contains(
+            "hint: [code-owners] skipping validation of code owner config files\n"
+                + "hint: [code-owners] code owners config validation is disabled");
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "dry_run")
+  public void canCreateBranchWithInvalidCodeOwnerConfigIfValidationIsDoneAsDryRun()
+      throws Exception {
+    // Create a code owner config with a non-existing user as code owner.
+    String unknownEmail = "non-existing@example.com";
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(unknownEmail)
+            .create();
+
+    RevCommit head = projectOperations.project(project).getHead("master");
+    testRepo.git().fetch().call();
+    testRepo.reset(head.name());
+
+    PushResult r =
+        pushHead(
+            testRepo,
+            "refs/heads/new",
+            /* pushTags= */ false,
+            /* force= */ false,
+            /* pushOptions= */ ImmutableList.of());
+    assertPushOk(r, "refs/heads/new");
+    assertThat(r.getMessages())
+        .contains(
+            String.format(
+                "ERROR: [code-owners] invalid code owner config files\n"
+                    + "ERROR: [code-owners] code owner email '%s' in '%s' cannot be resolved for"
+                    + " %s",
+                unknownEmail,
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+                identifiedUserFactory.create(admin.id()).getLoggableName()));
   }
 
   @Test

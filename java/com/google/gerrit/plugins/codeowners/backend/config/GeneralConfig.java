@@ -70,6 +70,8 @@ public class GeneralConfig {
   public static final String KEY_READ_ONLY = "readOnly";
   public static final String KEY_EXEMPT_PURE_REVERTS = "exemptPureReverts";
   public static final String KEY_FALLBACK_CODE_OWNERS = "fallbackCodeOwners";
+  public static final String KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION =
+      "enableValidationOnBranchCreation";
   public static final String KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED =
       "enableValidationOnCommitReceived";
   public static final String KEY_ENABLE_VALIDATION_ON_SUBMIT = "enableValidationOnSubmit";
@@ -470,6 +472,52 @@ public class GeneralConfig {
   boolean enableAsyncMessageOnAddReviewer(Project.NameKey project, Config pluginConfig) {
     return getBooleanConfig(
         project, pluginConfig, KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER, /* defaultValue= */ true);
+  }
+
+  /**
+   * Gets the enable validation on branch creation configuration from the given plugin config for
+   * the specified project with fallback to {@code gerrit.config} and default to {@code true}.
+   *
+   * <p>The enable validation on branch creation controls whether code owner config files should be
+   * validated when a branch is created.
+   *
+   * @param project the project for which the enable validation on branch creation configuration
+   *     should be read
+   * @param pluginConfig the plugin config from which the enable validation on branch creation
+   *     configuration should be read
+   * @return whether code owner config files should be validated when a branch is created
+   */
+  CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForBranchCreation(
+      Project.NameKey project, Config pluginConfig) {
+    return getCodeOwnerConfigValidationPolicy(
+        KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
+        project,
+        pluginConfig,
+        CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  /**
+   * Gets the enable validation on branch creation configuration from the given plugin config for
+   * the specified branch.
+   *
+   * <p>If multiple branch-specific configurations match the specified branch, it is undefined which
+   * of the matching branch configurations takes precedence.
+   *
+   * <p>The enable validation on branch creation controls whether code owner config files should be
+   * validated when a branch is created.
+   *
+   * @param branchNameKey the branch and project for which the enable validation on branch creation
+   *     configuration should be read
+   * @param pluginConfig the plugin config from which the enable validation on branch creation
+   *     configuration should be read
+   * @return the enable validation on branch creation configuration that is configured for the
+   *     branch, {@link Optional#empty()} if no branch specific configuration exists
+   */
+  Optional<CodeOwnerConfigValidationPolicy>
+      getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+          BranchNameKey branchNameKey, Config pluginConfig) {
+    return getCodeOwnerConfigValidationPolicyForBranch(
+        KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, branchNameKey, pluginConfig);
   }
 
   /**
