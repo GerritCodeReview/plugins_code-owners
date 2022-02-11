@@ -98,6 +98,9 @@ public class CodeOwnerProjectConfigInput {
   /** Whether pure revert changes are exempted from needing code owner approvals for submit. */
   public Boolean exemptPureReverts;
 
+  /** Policy for validating code owner config files when a branch is created. */
+  public CodeOwnerConfigValidationPolicy enableValidationOnBranchCreation;
+
   /** Policy for validating code owner config files when a commit is received. */
   public CodeOwnerConfigValidationPolicy enableValidationOnCommitReceived;
 

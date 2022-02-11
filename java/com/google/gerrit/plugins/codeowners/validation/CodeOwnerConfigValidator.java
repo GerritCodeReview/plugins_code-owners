@@ -58,6 +58,7 @@ import com.google.gerrit.server.FanOutExecutor;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.PatchSetUtil;
 import com.google.gerrit.server.events.CommitReceivedEvent;
+import com.google.gerrit.server.events.RefReceivedEvent;
 import com.google.gerrit.server.git.CodeReviewCommit;
 import com.google.gerrit.server.git.CodeReviewCommit.CodeReviewRevWalk;
 import com.google.gerrit.server.git.GitRepositoryManager;
@@ -66,6 +67,7 @@ import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.MergeValidationException;
 import com.google.gerrit.server.git.validators.MergeValidationListener;
+import com.google.gerrit.server.git.validators.RefOperationValidationListener;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.logging.Metadata;
 import com.google.gerrit.server.logging.TraceContext;
@@ -78,6 +80,7 @@ import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.gerrit.server.permissions.RefPermission;
 import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectState;
+import com.google.gerrit.server.validators.ValidationException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -91,10 +94,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.transport.ReceiveCommand;
+import org.eclipse.jgit.treewalk.TreeWalk;
 
 /**
  * Validates modifications to the code owner config files.
@@ -135,7 +141,8 @@ import org.eclipse.jgit.revwalk.RevWalk;
  * </ul>
  */
 @Singleton
-public class CodeOwnerConfigValidator implements CommitValidationListener, MergeValidationListener {
+public class CodeOwnerConfigValidator
+    implements CommitValidationListener, MergeValidationListener, RefOperationValidationListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final String pluginName;
@@ -217,6 +224,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   receiveEvent.commit,
                   receiveEvent.user,
                   codeOwnerConfigValidationPolicy.isForced(),
+                  /* isBranchCreation= */ false,
                   receiveEvent.pushOptions);
         } catch (RuntimeException e) {
           codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
@@ -305,6 +313,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   commit,
                   patchSetUploader,
                   codeOwnerConfigValidationPolicy.isForced(),
+                  /* isBranchCreation= */ false,
                   /* pushOptions= */ ImmutableListMultimap.of());
         } catch (RuntimeException e) {
           codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
@@ -338,6 +347,101 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     }
   }
 
+  @Override
+  public List<ValidationMessage> onRefOperation(RefReceivedEvent refReceivedEvent)
+      throws ValidationException {
+    if (!ReceiveCommand.Type.CREATE.equals(refReceivedEvent.command.getType())) {
+      // We are only interested in branch creations. Return early if this is not a branch creation.
+      return ImmutableList.of();
+    }
+
+    try (TraceTimer traceTimer =
+        TraceContext.newTimer(
+            "Validate code owner config files on branch creation",
+            Metadata.builder()
+                .projectName(refReceivedEvent.getProjectNameKey().get())
+                .commit(refReceivedEvent.command.getNewId().name())
+                .branchName(refReceivedEvent.getRefName())
+                .username(refReceivedEvent.user.getLoggableName())
+                .build())) {
+      CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicy =
+          codeOwnersPluginConfiguration
+              .getProjectConfig(refReceivedEvent.getProjectNameKey())
+              .getCodeOwnerConfigValidationPolicyForBranchCreation(refReceivedEvent.getRefName());
+      logger.atFine().log("codeOwnerConfigValidationPolicy = %s", codeOwnerConfigValidationPolicy);
+      boolean metricRecordingDone = false;
+      Optional<ValidationResult> validationResult;
+      if (!codeOwnerConfigValidationPolicy.runValidation()) {
+        validationResult =
+            Optional.of(
+                ValidationResult.create(
+                    pluginName,
+                    "skipping validation of code owner config files",
+                    new CommitValidationMessage(
+                        "code owners config validation is disabled", ValidationMessage.Type.HINT)));
+      } else {
+        try {
+          try (Repository repo = repoManager.openRepository(refReceivedEvent.getProjectNameKey());
+              RevWalk revWalk = new RevWalk(repo)) {
+            validationResult =
+                validateCodeOwnerConfig(
+                    refReceivedEvent.getBranchNameKey(),
+                    revWalk.parseCommit(refReceivedEvent.command.getNewId()),
+                    refReceivedEvent.user,
+                    codeOwnerConfigValidationPolicy.isForced(),
+                    /* isBranchCreation= */ true,
+                    refReceivedEvent.pushOptions);
+          } catch (IOException e) {
+            throw newInternalServerError(
+                String.format(
+                    "failed to validate code owner config files in revision %s"
+                        + " (project = %s, branch = %s)",
+                    refReceivedEvent.command.getNewId().name(),
+                    refReceivedEvent.getProjectNameKey(),
+                    refReceivedEvent.getRefName()),
+                e);
+          }
+        } catch (RuntimeException e) {
+          codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
+              ValidationTrigger.BRANCH_CREATION,
+              com.google.gerrit.plugins.codeowners.metrics.ValidationResult.FAILED,
+              codeOwnerConfigValidationPolicy.isDryRun());
+          metricRecordingDone = true;
+
+          if (!codeOwnerConfigValidationPolicy.isDryRun()) {
+            throw e;
+          }
+
+          // The validation was executed as dry-run and failures during the validation should not
+          // cause an error. Hence we swallow the exception here.
+          logger.atWarning().withCause(e).log(
+              "ignoring failure during validation of code owner config files in revision %s"
+                  + " (project = %s, branch = %s) because the validation was performed as dry-run",
+              refReceivedEvent.command.getNewId().getName(),
+              refReceivedEvent.getProjectNameKey(),
+              refReceivedEvent.getBranchNameKey().branch());
+          validationResult = Optional.empty();
+        }
+      }
+      if (!validationResult.isPresent()) {
+        return ImmutableList.of();
+      }
+
+      logger.atFine().log("validation result = %s", validationResult.get());
+      if (!metricRecordingDone) {
+        codeOwnerMetrics.countCodeOwnerConfigValidations.increment(
+            ValidationTrigger.BRANCH_CREATION,
+            validationResult.get().hasError()
+                ? com.google.gerrit.plugins.codeowners.metrics.ValidationResult.REJECTED
+                : com.google.gerrit.plugins.codeowners.metrics.ValidationResult.PASSED,
+            codeOwnerConfigValidationPolicy.isDryRun());
+      }
+      return validationResult
+          .get()
+          .processForOnRefOperation(codeOwnerConfigValidationPolicy.isDryRun());
+    }
+  }
+
   /**
    * Validates the code owner config files which are newly added or modified in the given commit.
    *
@@ -348,6 +452,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
    * @param user user for which the code owner visibility checks should be performed
    * @param force whether the validation should be done even if the code owners functionality is
    *     disabled for the branch
+   * @param isBranchCreation whether a new branch is being created
    * @return the validation result, {@link Optional#empty()} if no validation is performed because
    *     the given commit doesn't contain newly added or modified code owner configs
    */
@@ -356,6 +461,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       RevCommit revCommit,
       IdentifiedUser user,
       boolean force,
+      boolean isBranchCreation,
       ImmutableListMultimap<String, String> pushOptions) {
     CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
         codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project());
@@ -411,31 +517,13 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
     try {
       CodeOwnerBackend codeOwnerBackend = codeOwnersConfig.getBackend(branchNameKey.branch());
 
-      // For merge commits, always do the comparison against the destination branch
-      // (MergeCommitStrategy.ALL_CHANGED_FILES). Doing the comparison against the auto-merge
-      // (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION) is not possible because loading the
-      // auto-merge cannot reuse the rev walk that can see newly created merge commits and hence
-      // trying to get the auto merge would fail with a missing object exception. This is why we
-      // use MergeCommitStrategy.ALL_CHANGED_FILES here even if
-      // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
-      ImmutableList<ChangedFile> modifiedCodeOwnerConfigFiles =
-          changedFiles
-              .getFromDiffCache(
-                  branchNameKey.project(), revCommit, MergeCommitStrategy.ALL_CHANGED_FILES)
-              .stream()
-              // filter out deletions (files without new path)
-              .filter(changedFile -> changedFile.newPath().isPresent())
-              // filter out non code owner config files
-              .filter(
-                  changedFile ->
-                      codeOwnerBackend.isCodeOwnerConfigFile(
-                          branchNameKey.project(),
-                          Paths.get(changedFile.newPath().get().toString())
-                              .getFileName()
-                              .toString()))
-              .collect(toImmutableList());
+      ImmutableList<ChangedFile> codeOwnerConfigFilesToValidate =
+          isBranchCreation
+              ? getAllCodeOwnerConfigFiles(codeOwnerBackend, branchNameKey.project(), revCommit)
+              : getModifiedCodeOwnerConfigFiles(
+                  codeOwnerBackend, branchNameKey.project(), revCommit);
       return validateCodeOwnerConfigFiles(
-          branchNameKey, revCommit, user, codeOwnerBackend, modifiedCodeOwnerConfigFiles);
+          branchNameKey, revCommit, user, codeOwnerBackend, codeOwnerConfigFilesToValidate);
     } catch (InvalidPluginConfigurationException e) {
       // If the code-owners plugin configuration is invalid we cannot get the code owners backend
       // and hence we are not able to detect and validate code owner config files. Instead of
@@ -464,6 +552,48 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   + " (project = %s, branch = %s)",
               revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
       throw newInternalServerError(errorMessage, e);
+    }
+  }
+
+  public ImmutableList<ChangedFile> getModifiedCodeOwnerConfigFiles(
+      CodeOwnerBackend codeOwnerBackend, Project.NameKey project, ObjectId revCommit)
+      throws IOException, DiffNotAvailableException {
+    // For merge commits, always do the comparison against the destination branch
+    // (MergeCommitStrategy.ALL_CHANGED_FILES). Doing the comparison against the auto-merge
+    // (MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION) is not possible because loading the
+    // auto-merge cannot reuse the rev walk that can see newly created merge commits and hence
+    // trying to get the auto merge would fail with a missing object exception. This is why we
+    // use MergeCommitStrategy.ALL_CHANGED_FILES here even if
+    // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
+    return changedFiles.getFromDiffCache(project, revCommit, MergeCommitStrategy.ALL_CHANGED_FILES)
+        .stream()
+        // filter out deletions (files without new path)
+        .filter(changedFile -> changedFile.newPath().isPresent())
+        // filter out non code owner config files
+        .filter(
+            changedFile ->
+                codeOwnerBackend.isCodeOwnerConfigFile(
+                    project,
+                    Paths.get(changedFile.newPath().get().toString()).getFileName().toString()))
+        .collect(toImmutableList());
+  }
+
+  public ImmutableList<ChangedFile> getAllCodeOwnerConfigFiles(
+      CodeOwnerBackend codeOwnerBackend, Project.NameKey project, RevCommit revCommit)
+      throws IOException {
+    try (Repository git = repoManager.openRepository(project);
+        ObjectReader or = git.newObjectReader();
+        TreeWalk tw = new TreeWalk(or)) {
+      tw.addTree(revCommit.getTree());
+      tw.setRecursive(true);
+      ImmutableList.Builder<ChangedFile> paths = ImmutableList.builder();
+      while (tw.next()) {
+        Path path = Path.of(tw.getPathString());
+        if (codeOwnerBackend.isCodeOwnerConfigFile(project, path.getFileName().toString())) {
+          paths.add(ChangedFile.addition(path));
+        }
+      }
+      return paths.build();
     }
   }
 
@@ -1262,7 +1392,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
             withPluginName(summaryMessage()), withPluginName(validationMessages()));
       }
 
-      return validationMessagesWithIncludedSummaryMessage();
+      return commitValidationMessagesWithIncludedSummaryMessage();
     }
 
     /**
@@ -1281,10 +1411,27 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       if (!validationMessages().isEmpty()) {
         logger.atFine().log(
             "submitting changes to code owner config files with the following messages: %s",
-            validationMessagesWithIncludedSummaryMessage());
+            commitValidationMessagesWithIncludedSummaryMessage());
       } else {
         logger.atFine().log("submitting changes to code owner config files, no issues found");
       }
+    }
+
+    /**
+     * Processes the validation messages for a validation that is done when a ref operation is done
+     * (e.g. on branch creation).
+     *
+     * <p>Throws a {@link ValidationException} if there are errors to make the ref operation fail.
+     *
+     * <p>If there are no errors the validation messages are returned so that they can be sent to
+     * the client without causing the ref operation to fail.
+     */
+    List<ValidationMessage> processForOnRefOperation(boolean dryRun) throws ValidationException {
+      if (!dryRun && hasError()) {
+        throw new ValidationException(getMessage(validationMessages()));
+      }
+
+      return validationMessagesWithIncludedSummaryMessage();
     }
 
     /** Checks whether any of the validation messages is an error. */
@@ -1296,10 +1443,20 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                       || ValidationMessage.Type.ERROR.equals(validationMessage.getType()));
     }
 
-    private ImmutableList<CommitValidationMessage> validationMessagesWithIncludedSummaryMessage() {
+    private ImmutableList<CommitValidationMessage>
+        commitValidationMessagesWithIncludedSummaryMessage() {
       return ImmutableList.<CommitValidationMessage>builder()
           .add(
               new CommitValidationMessage(
+                  withPluginName(summaryMessage()), getValidationMessageTypeForSummaryMessage()))
+          .addAll(withPluginName(validationMessages()))
+          .build();
+    }
+
+    private ImmutableList<ValidationMessage> validationMessagesWithIncludedSummaryMessage() {
+      return ImmutableList.<ValidationMessage>builder()
+          .add(
+              new ValidationMessage(
                   withPluginName(summaryMessage()), getValidationMessageTypeForSummaryMessage()))
           .addAll(withPluginName(validationMessages()))
           .build();
