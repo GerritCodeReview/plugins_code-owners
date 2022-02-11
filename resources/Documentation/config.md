@@ -304,6 +304,50 @@ endpoint or by touching the change (e.g. by adding a comment).
         `@PLUGIN@.config`.\
         By default `false`.
 
+<a id="pluginCodeOwnersEnableValidationOnBranchCreation">plugin.@PLUGIN@.enableValidationOnBranchCreation</a>
+:       Policy for validating code owner config files when a branch is created.
+        If the validation is on all code owner config files that are contained
+        in the commit on which the branch is being created are validated. Doing
+        this is rather expensive and will make branch creations significantly
+        slower (in average a latency increase of 10s to 20s is expected).
+        \
+        Can be `TRUE`, `FALSE`, `DRY_RUN`, `FORCED` or `FORCED_DRY_RUN`.\
+        \
+        `TRUE`:\
+        The code owner config file validation is enabled and the creation of
+        branches that contain invalid code owner config files is rejected.\
+        If the code owners functionality is disabled, no validation is
+        performed.\
+        \
+        `FALSE`:\
+        The code owner config file validation is disabled, the creation of
+        branches that contain invalid code owner config files is not rejected.\
+        \
+        `DRY_RUN`:\
+        Code owner config files are validated on branch creation, but the
+        creation of branches that contain invalid code owner config files is not
+        rejected.\
+        If the code owners functionality is disabled, no dry-run validation is
+        performed.\
+        \
+        `FORCED`:\
+        Code owner config files are validated on branch creation even if the
+        code owners functionality is disabled.\
+        This option is useful when the code owner config validation should be
+        enabled as preparation to enabling the code owners functionality.\
+        \
+        `FORCED_DRY_RUN`:\
+        Code owner config files are validated on branch creation even if the
+        code owners functionality is disabled, but the creation of branches that
+        contain invalid code owner config files is not rejected.\
+        This option is useful when the code owner config validation should be
+        enabled as preparation to enabling the code owners functionality.\
+        \
+        Can be overridden per project by setting
+        [codeOwners.enableValidationOnBranchCreation](#codeOwnersEnableValidationOnBranchCreation)
+        in `@PLUGIN@.config`.\
+        By default `FALSE`.
+
 <a id="pluginCodeOwnersEnableValidationOnCommitReceived">plugin.@PLUGIN@.enableValidationOnCommitReceived</a>
 :       Policy for validating code owner config files when a commit is received.
         \
@@ -871,6 +915,35 @@ endpoint or by touching the change (e.g. by adding a comment).
         If not set, the global setting
         [plugin.@PLUGIN@.exemptPureReverts](#pluginCodeOwnersExemptPureReverts)
         in `gerrit.config` is used.
+
+<a id="codeOwnersEnableValidationOnBranchCreation">codeOwners.enableValidationOnBranchCreation</a>
+:       Policy for validating code owner config files when a branch is created.\
+        Can be `TRUE`, `FALSE`, `DRY_RUN`, `FORCED` or `FORCED_DRY_RUN`. For a
+        description of the values see
+        [plugin.@PLUGIN@.enableValidationOnBranchCreation](#pluginCodeOwnersEnableValidationOnBranchCreation).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableValidationOnBranchCreation](#pluginCodeOwnersEnableValidationOnBranchCreation)
+        in `gerrit.config` and the `codeOwners.enableValidationOnBranchCreation`
+        setting from parent projects.\
+        Can be overriden on branch-level by setting
+        [validation.\<branch\>.enableValidationOnBranchCreation](#validationBranchEnableValidationOnBranchCreation).\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableValidationOnBranchCreation](#pluginCodeOwnersEnableValidationOnBranchCreation)
+        in `gerrit.config` is used.
+
+<a id="validationBranchEnableValidationOnBranchCreation">validation.\<branch\>.enableValidationOnBranchCreation</a>
+:       Branch-level policy for validating code owner config files when a branch
+        is created.\
+        Applies to all branches that are matched by `<branch>`, which can be
+        an exact ref name (e.g. `refs/heads/master`), a ref pattern (e.g.
+        `refs/heads/*`) or a regular expression (e.g. `^refs/heads/stable-.*`).\
+        If a branch matches multiple validation subsections it is undefined
+        which of the subsections takes precedence.\
+        Overrides the project-level configuration for validating code owner
+        config files when a branch is created that is configured by
+        [codeOwners.enableValidationOnBranchCreation](#codeOwnersEnableValidationOnBranchCreation).\
+        For further details see the description of
+        [codeOwners.enableValidationOnBranchCreation](#codeOwnersEnableValidationOnBranchCreation).
 
 <a id="codeOwnersEnableValidationOnCommitReceived">codeOwners.enableValidationOnCommitReceived</a>
 :       Policy for validating code owner config files when a commit is
