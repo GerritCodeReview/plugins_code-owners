@@ -74,6 +74,9 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   @Nullable private Boolean rejectNonResolvableImports;
 
   @Nullable
+  private CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicyForBranchCreation;
+
+  @Nullable
   private CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicyForCommitReceived;
 
   @Nullable private CodeOwnerConfigValidationPolicy codeOwnerConfigValidationPolicyForSubmit;
@@ -201,6 +204,36 @@ public class CodeOwnersPluginProjectConfigSnapshot {
     }
 
     return generalConfig.getRejectNonResolvableImports(projectName, pluginConfig);
+  }
+
+  /**
+   * Whether code owner configs should be validated when a branch is created.
+   *
+   * @param branchName the branch for which it should be checked whether code owner configs should
+   *     be validated on branch creation
+   */
+  public CodeOwnerConfigValidationPolicy getCodeOwnerConfigValidationPolicyForBranchCreation(
+      String branchName) {
+    if (codeOwnerConfigValidationPolicyForBranchCreation == null) {
+      codeOwnerConfigValidationPolicyForBranchCreation =
+          readCodeOwnerConfigValidationPolicyForBranchCreation(branchName);
+    }
+    return codeOwnerConfigValidationPolicyForBranchCreation;
+  }
+
+  private CodeOwnerConfigValidationPolicy readCodeOwnerConfigValidationPolicyForBranchCreation(
+      String branchName) {
+    requireNonNull(branchName, "branchName");
+
+    Optional<CodeOwnerConfigValidationPolicy> branchSpecificPolicy =
+        generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+            BranchNameKey.create(projectName, branchName), pluginConfig);
+    if (branchSpecificPolicy.isPresent()) {
+      return branchSpecificPolicy.get();
+    }
+
+    return generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreation(
+        projectName, pluginConfig);
   }
 
   /**
