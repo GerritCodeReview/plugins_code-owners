@@ -101,18 +101,13 @@ By setting the `code-owners~skip-validation` push option it is possible to skip
 the code owner config validation on push:
 `git push -o code-owners~skip-validation origin HEAD:refs/for/master`
 
-For the [Create Change](../../../Documentation/rest-api-changes.html#create-change)
-REST endpoint skipping the code owner config validation is possible by setting
+For the [Create
+Change](../../../Documentation/rest-api-changes.html#create-change), the [Cherry
+Pick Revision](../../../Documentation/rest-api-changes.html#cherry-pick) and the
+[Rebase](../../../Documentation/rest-api-changes.html#rebase-change) REST
+endpoints skipping the code owner config validation is possible by setting
 `code-owners~skip-validation` with the value `true` as a validation option in
-the [ChangeInput](../../../Documentation/rest-api-changes.html#change-input)
-(see field `validation_options`).
-
-Similarly, for the [Cherry Pick
-Revision](../../../Documentation/rest-api-changes.html#cherry-pick) REST endpoint
-skipping the code owner config validation is possible by setting
-`code-owners~skip-validation` with the value `true` as a validation option in
-the [CherryPickInput](../../../Documentation/rest-api-changes.html#cherrypick-input)
-(see field `validation_options`).
+the input (see field `validation_options`).
 
 Using the push option or the validation option requires the calling user to
 have the `Can Skip Code Owner Config Validation` global capability. Host
