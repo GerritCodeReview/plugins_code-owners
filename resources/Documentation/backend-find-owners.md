@@ -167,6 +167,7 @@ The file that is referenced by the `file` keyword must be a [code owner config
 file](backends.html#codeOwnerConfigFiles). It's not possible to import arbitrary
 files.
 
+##### <a id="referenceCodeOwnerConfigFilesFromOtherProjects">
 It's also possible to reference code owner config files from other projects or
 branches (only within the same host):
 

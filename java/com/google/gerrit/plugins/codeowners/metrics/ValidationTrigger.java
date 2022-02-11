@@ -16,6 +16,9 @@ package com.google.gerrit.plugins.codeowners.metrics;
 
 /** Enum to express which event triggered the validation. */
 public enum ValidationTrigger {
+  /** A new branch is created for which the initial commit should be validated. */
+  BRANCH_CREATION,
+
   /** A new commit was received that should be validated. */
   COMMIT_RECEIVED,
 
