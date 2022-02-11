@@ -95,6 +95,16 @@ time a change is submitted. If enabled, on submit we repeat the exact same
 validation that was done on upload. This means, all visibility checks will be
 done from the perspective of the uploader.
 
+When creating a new branch, all code owner config files that are contained in
+the initial commit are newly validated, even if the branch is created for a
+commit that already exists in the repository. This is necessary since the
+validation configuration of the new branch may differ from the branch that
+already contains the commit. Also, if code owner config files are imported from
+other projects without specifying a branch, these imports may be broken in the
+context of the new branch (because the import assumes the same branch as the
+importing code owner config and that branch may not exist in the other project)
+and hence should be flagged on branch creation.
+
 ## <a id="skipCodeOwnerConfigValidationOnDemand">Skip code owner config validation on demand
 
 By setting the `code-owners~skip-validation` push option it is possible to skip
@@ -102,6 +112,7 @@ the code owner config validation on push:
 `git push -o code-owners~skip-validation origin HEAD:refs/for/master`
 
 For the [Create
+Branch](../../../Documentation/rest-api-projects.html#create-branch), [Create
 Change](../../../Documentation/rest-api-changes.html#create-change), the [Cherry
 Pick Revision](../../../Documentation/rest-api-changes.html#cherry-pick) and the
 [Rebase](../../../Documentation/rest-api-changes.html#rebase-change) REST
