@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
+import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.block;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
@@ -33,11 +34,14 @@ import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.CherryPickInput;
+import com.google.gerrit.extensions.api.changes.RebaseInput;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ProjectState;
+import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.MergeInput;
 import com.google.gerrit.extensions.restapi.MergeConflictException;
@@ -2359,6 +2363,95 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         assertThrows(
             ResourceConflictException.class,
             () -> gApi.changes().id(r.getChangeId()).current().cherryPickAsInfo(cherryPickInput));
+    assertThat(resourceConflictException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "[code-owners] %s for plugin code-owners not permitted",
+                SkipCodeOwnerConfigValidationCapability.ID));
+  }
+
+  @Test
+  public void skipValidationForRebaseWithConflicts() throws Exception {
+    // Create code owner config with 'admin' as code owner.
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    // Create a change with a conflicting code owner config that makes 'user' the code owner.
+    // No need to reset the repo, since the commit that created to code owner config above wasn't
+    // fetched into testRepo.
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Add user as code owner",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(user.email()).build())
+                    .build()));
+    PushOneCommit.Result r = push.to("refs/for/master");
+    r.assertOkStatus();
+
+    RebaseInput rebaseInput = new RebaseInput();
+    rebaseInput.allowConflicts = true;
+    rebaseInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    ChangeInfo changeInfo = gApi.changes().id(r.getChangeId()).current().rebaseAsInfo(rebaseInput);
+    assertThat(changeInfo.containsGitConflicts).isTrue();
+  }
+
+  @Test
+  public void userWithoutCapabilitySkipValidationCannotSkipValidationWithRebase() throws Exception {
+    // Create code owner config with 'admin' as code owner.
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    // Create a change with a conflicting code owner config that makes 'user' the code owner.
+    // No need to reset the repo, since the commit that created to code owner config above wasn't
+    // fetched into testRepo.
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Add user as code owner",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(user.email()).build())
+                    .build()));
+    PushOneCommit.Result r = push.to("refs/for/master");
+    r.assertOkStatus();
+
+    requestScopeOperations.setApiUser(user.id());
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.REBASE).ref(RefNames.REFS_HEADS + "*").group(REGISTERED_USERS))
+        .update();
+
+    RebaseInput rebaseInput = new RebaseInput();
+    rebaseInput.allowConflicts = true;
+    rebaseInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    ResourceConflictException resourceConflictException =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).current().rebaseAsInfo(rebaseInput));
     assertThat(resourceConflictException)
         .hasMessageThat()
         .contains(
