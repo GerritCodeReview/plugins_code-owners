@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "cb1c8846_d6f90a19",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-02-15T13:36:21Z",
+      "side": 1,
+      "message": "Depends on change in Gerrit core, hence verifying manually.",
+      "revId": "5bfab8b36fcdff9a6254ccd620f931bed1bbf60a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
