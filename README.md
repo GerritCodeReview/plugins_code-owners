@@ -5,10 +5,18 @@ This plugin provides support for defining code owners for files in a repository.
 If the code-owners plugin is enabled, changes can only be submitted if all
 touched files are covered by approvals from code owners.
 
-Also see [resources/Documentation/about.md](./resources/Documentation/about.md).
+For a detailed description of the plugin functionality please refer to the
+[plugin documentation](https://android-review.googlesource.com/plugins/code-owners/Documentation/index.html).
 
 IMPORTANT: Before installing/enabling the plugin follow the instructions from
-the setup guide, see [resources/Documentation/setup-guide.md](./resources/Documentation/setup-guide.md).
+the [setup guide](https://android-review.googlesource.com/plugins/code-owners/Documentation/setup-guide.html).
+
+NOTE: The plugin documentation only renders correctly when the plugin is
+installed in Gerrit and the documentation is accessed via
+https://<gerrit-host>/plugins/code-owners/Documentation/index.html. If you want
+to read the documentation before installing the plugin, you can find it properly
+rendered
+[here](https://android-review.googlesource.com/plugins/code-owners/Documentation/index.html).
 
 ## JavaScript Plugin
 
