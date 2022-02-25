@@ -144,9 +144,8 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
     gApi.changes().id(changeId).current().submit();
     changeInfo = gApi.changes().id(changeId).get(ListChangesOption.SUBMIT_REQUIREMENTS);
     // When the change is merged, submit requirement results are persisted in NoteDb. Later lookups
-    // return the persisted snapshot. Currently writing to NoteDb is disabled.
-    // TODO(ghareeb): update this check when we enable writing to NoteDb again.
-    assertNonExistentSubmitRequirement(changeInfo.submitRequirements, "Code-Owner-Approval");
+    // return the persisted snapshot.
+    assertSubmitRequirement(changeInfo.submitRequirements, "Code-Owner-Approval", SATISFIED);
   }
 
   @Test
