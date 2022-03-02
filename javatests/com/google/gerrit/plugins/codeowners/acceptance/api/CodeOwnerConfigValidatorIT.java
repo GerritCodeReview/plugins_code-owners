@@ -62,6 +62,7 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwn
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
+import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationCapability;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationPushOption;
 import com.google.gerrit.server.submit.IntegrationConflictException;
@@ -2729,6 +2730,37 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     approve(r.getChangeId());
     gApi.changes().id(r.getChangeId()).current().submit();
     assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+  }
+
+  @Test
+  public void validateMultipleCodeOwnerConfigFiles() throws Exception {
+    JgitPath codeOwnerConfigFilePath1 = JgitPath.of(getCodeOwnerConfigFileName());
+    JgitPath codeOwnerConfigFilePath2 = JgitPath.of("foo/" + getCodeOwnerConfigFileName());
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Add multiple invalid code owner config fils",
+            ImmutableMap.of(
+                codeOwnerConfigFilePath1.get(),
+                "INVALID",
+                codeOwnerConfigFilePath2.get(),
+                "INVALID"));
+    PushOneCommit.Result r = push.to("refs/for/master");
+    String abbreviatedCommit = abbreviateName(r.getCommit());
+    r.assertErrorStatus(
+        String.format(
+            "commit %s: [code-owners] %s", abbreviatedCommit, "invalid code owner config files"));
+    assertThat(r.getMessage())
+        .contains(
+            String.format(
+                "FATAL: commit %s: [code-owners] invalid code owner config file '%s' (project = %s, branch = master)",
+                abbreviatedCommit, codeOwnerConfigFilePath1.getAsAbsolutePath(), project));
+    assertThat(r.getMessage())
+        .contains(
+            String.format(
+                "FATAL: commit %s: [code-owners] invalid code owner config file '%s' (project = %s, branch = master)",
+                abbreviatedCommit, codeOwnerConfigFilePath2.getAsAbsolutePath(), project));
   }
 
   private CodeOwnerConfig createCodeOwnerConfigWithImport(
