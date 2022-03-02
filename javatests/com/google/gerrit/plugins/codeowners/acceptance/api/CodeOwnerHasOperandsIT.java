@@ -241,15 +241,6 @@ public class CodeOwnerHasOperandsIT extends AbstractCodeOwnersIT {
                 .collect(toImmutableList())));
   }
 
-  private void assertNonExistentSubmitRequirement(
-      Collection<SubmitRequirementResultInfo> requirements, String name) {
-    for (SubmitRequirementResultInfo requirement : requirements) {
-      if (requirement.name.equals(name)) {
-        throw new AssertionError("Found a submit requirement with name " + name);
-      }
-    }
-  }
-
   private String format(String query, Iterable<Change.Id> actualIds, Change.Id... expectedChanges)
       throws RestApiException {
     return "query '"
