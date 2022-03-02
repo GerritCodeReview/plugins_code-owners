@@ -27,6 +27,9 @@ import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListeningExecutorService;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
@@ -51,6 +54,7 @@ import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.metrics.ValidationTrigger;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.FanOutExecutor;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.PatchSetUtil;
 import com.google.gerrit.server.events.CommitReceivedEvent;
@@ -82,6 +86,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.ObjectId;
@@ -134,6 +140,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
 
   private final String pluginName;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
+  private final ListeningExecutorService executor;
   private final GitRepositoryManager repoManager;
   private final ChangedFiles changedFiles;
   private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
@@ -149,6 +156,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
   CodeOwnerConfigValidator(
       @PluginName String pluginName,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
+      @FanOutExecutor ExecutorService executor,
       GitRepositoryManager repoManager,
       ChangedFiles changedFiles,
       Provider<CodeOwnerResolver> codeOwnerResolver,
@@ -161,6 +169,7 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
       CodeOwnerMetrics codeOwnerMetrics) {
     this.pluginName = pluginName;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
+    this.executor = MoreExecutors.listeningDecorator(executor);
     this.repoManager = repoManager;
     this.changedFiles = changedFiles;
     this.codeOwnerResolverProvider = codeOwnerResolver;
@@ -425,20 +434,8 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                               .getFileName()
                               .toString()))
               .collect(toImmutableList());
-
-      if (modifiedCodeOwnerConfigFiles.isEmpty()) {
-        return Optional.empty();
-      }
-
-      // validate the code owner config files
-      return Optional.of(
-          ValidationResult.create(
-              pluginName,
-              modifiedCodeOwnerConfigFiles.stream()
-                  .flatMap(
-                      changedFile ->
-                          validateCodeOwnerConfig(
-                              user, codeOwnerBackend, branchNameKey, changedFile, revCommit))));
+      return validateCodeOwnerConfigFiles(
+          branchNameKey, revCommit, user, codeOwnerBackend, modifiedCodeOwnerConfigFiles);
     } catch (InvalidPluginConfigurationException e) {
       // If the code-owners plugin configuration is invalid we cannot get the code owners backend
       // and hence we are not able to detect and validate code owner config files. Instead of
@@ -457,7 +454,10 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
                   "code-owners plugin configuration is invalid,"
                       + " cannot validate code owner config files",
                   ValidationMessage.Type.WARNING)));
-    } catch (IOException | DiffNotAvailableException e) {
+    } catch (IOException
+        | DiffNotAvailableException
+        | InterruptedException
+        | ExecutionException e) {
       String errorMessage =
           String.format(
               "failed to validate code owner config files in revision %s"
@@ -465,6 +465,47 @@ public class CodeOwnerConfigValidator implements CommitValidationListener, Merge
               revCommit.getName(), branchNameKey.project(), branchNameKey.branch());
       throw newInternalServerError(errorMessage, e);
     }
+  }
+
+  private Optional<ValidationResult> validateCodeOwnerConfigFiles(
+      BranchNameKey branchNameKey,
+      RevCommit revCommit,
+      IdentifiedUser user,
+      CodeOwnerBackend codeOwnerBackend,
+      ImmutableList<ChangedFile> codeOwnerConfigFiles)
+      throws InterruptedException, ExecutionException {
+    if (codeOwnerConfigFiles.isEmpty()) {
+      return Optional.empty();
+    }
+
+    if (codeOwnerConfigFiles.size() == 1) {
+      return Optional.of(
+          ValidationResult.create(
+              pluginName,
+              validateCodeOwnerConfig(
+                  user, codeOwnerBackend, branchNameKey, codeOwnerConfigFiles.get(0), revCommit)));
+    }
+
+    // Do the validation of the code owner config files in parallel.
+    return Optional.of(
+        ValidationResult.create(
+            pluginName,
+            Futures.allAsList(
+                    codeOwnerConfigFiles.stream()
+                        .map(
+                            codeOwnerConfigFile ->
+                                executor.submit(
+                                    () ->
+                                        validateCodeOwnerConfig(
+                                                user,
+                                                codeOwnerBackend,
+                                                branchNameKey,
+                                                codeOwnerConfigFile,
+                                                revCommit)
+                                            .collect(toImmutableList())))
+                        .collect(toImmutableList()))
+                .get().stream()
+                .flatMap(validationMessages -> validationMessages.stream())));
   }
 
   /**
