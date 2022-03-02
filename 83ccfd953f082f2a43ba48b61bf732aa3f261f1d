@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fa990f23_78dfa3eb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2022-03-02T09:53:21Z",
+      "side": 1,
+      "message": "RevCommit (as well as other JGit objects aren\u0027t thread safe, so they should not be passed around to different threads.\n\nMore generally: Are all arguments here thread safe?",
+      "range": {
+        "startLine": 527,
+        "startChar": 0,
+        "endLine": 527,
+        "endChar": 25
+      },
+      "revId": "83ccfd953f082f2a43ba48b61bf732aa3f261f1d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b9e29898_3148f40f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2022-03-02T09:53:21Z",
+      "side": 1,
+      "message": "Are you parallelizing request for the same repo as well? In that case, this might actually be slower: We cache open repos per thread, so loading many files even when you close the repo here means there is an open repo instance in the background that we reuse.\n\nThat does not work cross-thread, so you reopen the repo on each thread.",
+      "range": {
+        "startLine": 548,
+        "startChar": 15,
+        "endLine": 548,
+        "endChar": 33
+      },
+      "revId": "83ccfd953f082f2a43ba48b61bf732aa3f261f1d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
