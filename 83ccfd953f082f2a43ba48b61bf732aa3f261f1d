@@ -26,6 +26,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a1ef9d16_7eb4050b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 527,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-03-02T10:14:35Z",
+      "side": 1,
+      "message": "Thanks for catching this. It might be possible to rework this to pass in ObjectId instead of RevCommit. The other args are thread safe, except IdentifiedUser. For IdentifiedUser we may pass in a Provider instead.",
+      "parentUuid": "fa990f23_78dfa3eb",
+      "range": {
+        "startLine": 527,
+        "startChar": 0,
+        "endLine": 527,
+        "endChar": 25
+      },
+      "revId": "83ccfd953f082f2a43ba48b61bf732aa3f261f1d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "b9e29898_3148f40f",
         "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
         "patchSetId": 2
@@ -37,6 +61,30 @@
       "writtenOn": "2022-03-02T09:53:21Z",
       "side": 1,
       "message": "Are you parallelizing request for the same repo as well? In that case, this might actually be slower: We cache open repos per thread, so loading many files even when you close the repo here means there is an open repo instance in the background that we reuse.\n\nThat does not work cross-thread, so you reopen the repo on each thread.",
+      "range": {
+        "startLine": 548,
+        "startChar": 15,
+        "endLine": 548,
+        "endChar": 33
+      },
+      "revId": "83ccfd953f082f2a43ba48b61bf732aa3f261f1d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b239c7a0_1a47a050",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 548,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-03-02T10:14:35Z",
+      "side": 1,
+      "message": "Thanks for pointing this out. We are only validating files in the same project / branch (it\u0027s never cross repo). In that case, this change makes no sense. I\u0027ll abandon it.",
+      "parentUuid": "b9e29898_3148f40f",
       "range": {
         "startLine": 548,
         "startChar": 15,
