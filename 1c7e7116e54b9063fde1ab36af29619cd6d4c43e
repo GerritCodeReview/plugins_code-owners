@@ -22,6 +22,30 @@
       },
       "revId": "1c7e7116e54b9063fde1ab36af29619cd6d4c43e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3781fcf9_07130ee1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-03-03T13:16:59Z",
+      "side": 1,
+      "message": "\u003e Do we have a way to dry-run test this? For example: Are there API endpoints\n\u003e we could use to validate all OWNERS files in the largest repo and see how\n\u003e long those take if carried out in sequence?\n\nGood idea. Yes, we already have such a REST endpoint and can check how long this takes:\nhttps://android-review.googlesource.com/plugins/code-owners/Documentation/rest-api.html#check-code-owner-config-files\n\n\u003e I am a bit worried that we are creating a bottleneck that affects endpoints\n\u003e that might not anticipate the newly added extra work (e.g. when I create a\n\u003e new branch and point that to an existing commit, I\u0027d expect this to be super\n\u003e fast since I really just add a pointer to an existing commit).\n\nWhether this validation is performed can be controlled by configuration. Maybe it\u0027s better to keep it off by default and require interested parties to turn in on explicitly?\n\n\u003e Would it be an option to separate this behavior into an API endpoint?\n\nWe already have this REST endpoint, see above.\n\n\u003e So we allow interested callers to check config validity of a new\n\u003e branch a-priori and others to proceed as usual?\n\nIt\u0027s not possible to check this a-priori (because OWNERS files that are valid in the context of one branch may be invalid in the context of the new branch), but you could run it after the branch creation. The disadvantage of this approach is that all users that create new branches need to remember doing this and likely it would be forgotten sometimes.",
+      "parentUuid": "7dc09591_0566fd21",
+      "range": {
+        "startLine": 10,
+        "startChar": 57,
+        "endLine": 11,
+        "endChar": 69
+      },
+      "revId": "1c7e7116e54b9063fde1ab36af29619cd6d4c43e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
