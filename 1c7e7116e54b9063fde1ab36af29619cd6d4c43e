@@ -46,6 +46,30 @@
       },
       "revId": "1c7e7116e54b9063fde1ab36af29619cd6d4c43e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "30374796_45d1638c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-03-03T14:00:54Z",
+      "side": 1,
+      "message": "\u003e \u003e Do we have a way to dry-run test this? For example: Are there API endpoints\n\u003e \u003e we could use to validate all OWNERS files in the largest repo and see how\n\u003e \u003e long those take if carried out in sequence?\n\u003e Good idea. Yes, we already have such a REST endpoint and can check how long this \u003e takes:\n\u003e https://android-review.googlesource.com/plugins/code-owners/Documentation/rest-api.html#check-code-owner-config-files\n\nI tried this for the main branch of one of the larger Android repos. There it takes between 9s and 14s. That\u0027s about the additional latency that we should expect for the validation of OWNERS files on branch creation.",
+      "parentUuid": "3781fcf9_07130ee1",
+      "range": {
+        "startLine": 10,
+        "startChar": 57,
+        "endLine": 11,
+        "endChar": 69
+      },
+      "revId": "1c7e7116e54b9063fde1ab36af29619cd6d4c43e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
