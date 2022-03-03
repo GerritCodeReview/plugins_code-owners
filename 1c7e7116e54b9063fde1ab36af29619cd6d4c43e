@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7dc09591_0566fd21",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1026112
+      },
+      "writtenOn": "2022-03-03T07:36:16Z",
+      "side": 1,
+      "message": "Do we have a way to dry-run test this? For example: Are there API endpoints we could use to validate all OWNERS files in the largest repo and see how long those take if carried out in sequence?\n\nI am a bit worried that we are creating a bottleneck that affects endpoints that might not anticipate the newly added extra work (e.g. when I create a new branch and point that to an existing commit, I\u0027d expect this to be super fast since I really just add a pointer to an existing commit).\n\nWould it be an option to separate this behavior into an API endpoint? So we allow interested callers to check config validity of a new branch a-priori and others to proceed as usual?",
+      "range": {
+        "startLine": 10,
+        "startChar": 57,
+        "endLine": 11,
+        "endChar": 69
+      },
+      "revId": "1c7e7116e54b9063fde1ab36af29619cd6d4c43e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
