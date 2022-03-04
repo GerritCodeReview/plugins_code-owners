@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPTED_USER;
@@ -219,6 +220,14 @@ public class PutCodeOwnerProjectConfig
             /* subsection= */ null,
             KEY_EXEMPT_PURE_REVERTS,
             input.exemptPureReverts);
+      }
+
+      if (input.enableValidationOnBranchCreation != null) {
+        codeOwnersConfig.setEnum(
+            SECTION_CODE_OWNERS,
+            /* subsection= */ null,
+            KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
+            input.enableValidationOnBranchCreation);
       }
 
       if (input.enableValidationOnCommitReceived != null) {

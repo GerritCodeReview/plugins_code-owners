@@ -493,6 +493,32 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void setEnableValidationOnBranchCreation() throws Exception {
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForBranchCreation("master"))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+
+    CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
+    input.enableValidationOnBranchCreation = CodeOwnerConfigValidationPolicy.TRUE;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForBranchCreation("master"))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+
+    input.enableValidationOnBranchCreation = CodeOwnerConfigValidationPolicy.FALSE;
+    projectCodeOwnersApiFactory.project(project).updateConfig(input);
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .getCodeOwnerConfigValidationPolicyForBranchCreation("master"))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
   public void setEnableValidationOnCommitReceived() throws Exception {
     assertThat(
             codeOwnersPluginConfiguration

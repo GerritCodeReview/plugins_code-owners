@@ -20,6 +20,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_EXEMPTED_USER;
@@ -783,6 +784,234 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
                 generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceived(
                     /* project= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetEnableValidationOnBranchCreationForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreation(
+                    project, /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noEnableValidationOnBranchCreationConfiguration() throws Exception {
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreation(
+                project, new Config()))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "true")
+  public void
+      enableValidationOnBranchCreationConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreation(
+                project, new Config()))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "false")
+  public void
+      enableValidationOnBranchConfigurationInPluginConfigOverridesEnableValidationOnBranchCreationConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
+        "true");
+    assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreation(project, cfg))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.TRUE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "false")
+  public void invalidEnableValidationOnBranchCreationConfigurationInPluginConfigIsIgnored()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
+        "INVALID");
+    assertThat(generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreation(project, cfg))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableValidationOnBranchCreation", value = "INVALID")
+  public void invalidEnableValidationOnBranchCreationConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreation(
+                project, new Config()))
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void cannotGetEnableValidationOnBranchForBranchForNullBranch() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                    /* branchNameKey= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("branchNameKey");
+  }
+
+  @Test
+  public void cannotGetEnableValidationOnBranchCreationForBranchForNullPluginConfig()
+      throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                    BranchNameKey.create(project, "master"), /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noBranchSpecificEnableValidationOnBranchCreationConfiguration() throws Exception {
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), new Config()))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnBranchCreationConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/foo", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnBranchCreationConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/foo/*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnBranchCreationConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION,
+        "^refs/heads/.*foo.*",
+        KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
+        "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void noMatchingBranchSpecificEnableValidationOnBranchCreationConfiguration_invalidRegEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "^refs/heads/[", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnBranchCreationConfiguration_exact()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnBranchCreationConfiguration_refPattern()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void matchingBranchSpecificEnableValidationOnBranchCreationConfiguration_regEx()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION,
+        "^refs/heads/.*bar.*",
+        KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
+        "false");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "foobarbaz"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
+  }
+
+  @Test
+  public void branchSpecificEnableValidationOnBranchCreationConfigurationIsIgnoredIfValueIsInvalid()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION,
+        "refs/heads/master",
+        KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
+        "INVALID");
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .isEmpty();
+  }
+
+  @Test
+  public void multipleMatchingBranchSpecificEnableValidationOnBranchCreationConfiguration()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
+    cfg.setString(
+        SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
+    cfg.setString(
+        SECTION_VALIDATION, "^refs/heads/.*", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
+
+    // it is non-deterministic which of the branch-specific configurations takes precedence, but
+    // since they all configure the same value it's not important for this assertion
+    assertThat(
+            generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
+                BranchNameKey.create(project, "master"), cfg))
+        .value()
+        .isEqualTo(CodeOwnerConfigValidationPolicy.FALSE);
   }
 
   @Test

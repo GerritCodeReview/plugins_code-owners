@@ -95,6 +95,35 @@ time a change is submitted. If enabled, on submit we repeat the exact same
 validation that was done on upload. This means, all visibility checks will be
 done from the perspective of the uploader.
 
+## <a id="codeOwnerConfigValidationOnBranchCreation">Code owner config validation on branch creation
+
+It's possible to [enable validation of code owner config files on branch
+creation](config.html#pluginCodeOwnersEnableValidationOnBranchCreation) (off by
+default).
+
+If the validation is enabled and a new branch is created, all code owner config
+files that are contained in the initial commit are newly validated, even if the
+branch is created for a commit that already exists in the repository.
+
+Validating code owner config files newly when a branch is created makes sense
+because:
+
+* the validation configuration of the new branch may differ from the validation
+  configuration of the branch that already contains the commit
+* [imports from other projects](backend-find-owners.html#referenceCodeOwnerConfigFilesFromOtherProjects)
+  that do not specify a branch may not be resolvable: If a branch is not
+  specified it's assumed that the code owner config file from the other project
+  should be imported from the same branch that contains the importing code owner
+  config. This means when a new branch `foo` is being created a code owner
+  config file that is referenced by such an import is expected to be found in
+  the branch `foo` of the other project, but this branch may not exist there so
+  that the import is unresolvable. By validating the code owner config files on
+  branch creation such unresolvable imports are detected and flagged.
+
+What should be done if the creation of a branch fails due to invalid code owner
+config files is explained in the
+[config FAQs](config-faqs.html#branchCreationFailsDueInvalidCodeOwnerConfigFiles).
+
 ## <a id="skipCodeOwnerConfigValidationOnDemand">Skip code owner config validation on demand
 
 By setting the `code-owners~skip-validation` push option it is possible to skip
@@ -102,6 +131,7 @@ the code owner config validation on push:
 `git push -o code-owners~skip-validation origin HEAD:refs/for/master`
 
 For the [Create
+Branch](../../../Documentation/rest-api-projects.html#create-branch), [Create
 Change](../../../Documentation/rest-api-changes.html#create-change), the [Cherry
 Pick Revision](../../../Documentation/rest-api-changes.html#cherry-pick) and the
 [Rebase](../../../Documentation/rest-api-changes.html#rebase-change) REST
