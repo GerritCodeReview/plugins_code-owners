@@ -585,7 +585,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
           throws Exception {
     Config cfg = new Config();
     cfg.setString(
-        SECTION_CODE_OWNERS, /* scubsection= */ null, KEY_REJECT_NON_RESOLVABLE_IMPORTS, "true");
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_REJECT_NON_RESOLVABLE_IMPORTS, "true");
     assertThat(generalConfig.getRejectNonResolvableImports(project, cfg)).isTrue();
   }
 
@@ -1525,7 +1525,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
-            () -> generalConfig.validateProjectLevelConfig(/*project= */ null, new Config()));
+            () -> generalConfig.validateProjectLevelConfig(/* fileName= */ null, new Config()));
     assertThat(npe).hasMessageThat().isEqualTo("fileName");
   }
 
@@ -1536,7 +1536,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 generalConfig.validateProjectLevelConfig(
-                    "code-owners.config", /* pluginConfig= */ null));
+                    "code-owners.config", /* projectLevelConfig= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("projectLevelConfig");
   }
 
