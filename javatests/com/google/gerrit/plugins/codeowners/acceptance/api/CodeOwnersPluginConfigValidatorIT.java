@@ -803,6 +803,63 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
             ObjectIds.abbreviateName(r.getCommit(), testRepo.getRevWalk().getObjectReader())));
   }
 
+  @Test
+  public void warnIfCodeOwnersConfigurationIsDoneInProjectConfig_configWithPluginCodeOwnersSection()
+      throws Exception {
+    fetchRefsMetaConfig();
+    Config cfg = new Config();
+    cfg.setEnum(
+        /* section= */ "plugin",
+        /* subsection= */ "code-owners",
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        FallbackCodeOwners.ALL_USERS);
+    PushOneCommit push =
+        pushFactory.create(admin.newIdent(), testRepo, "Change", "project.config", cfg.toText());
+    PushOneCommit.Result r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+    r.assertOkStatus();
+    r.assertMessage(
+        String.format(
+            "hint: commit %s: Section 'plugin.code-owners' in project.config is ignored and has no"
+                + " effect. The configuration for the code-owners plugin must be done in"
+                + " code-owners.config.",
+            ObjectIds.abbreviateName(r.getCommit(), testRepo.getRevWalk().getObjectReader())));
+  }
+
+  @Test
+  public void warnIfCodeOwnersConfigurationIsDoneInProjectConfig_configWithCodeOwnersSection()
+      throws Exception {
+    fetchRefsMetaConfig();
+    Config cfg = new Config();
+    cfg.setEnum(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
+        FallbackCodeOwners.ALL_USERS);
+    PushOneCommit push =
+        pushFactory.create(admin.newIdent(), testRepo, "Change", "project.config", cfg.toText());
+    PushOneCommit.Result r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+    r.assertOkStatus();
+    r.assertMessage(
+        String.format(
+            "hint: commit %s: Section 'codeOwners' in project.config is ignored and has no effect."
+                + " The configuration for the code-owners plugin must be done in code-owners.config.",
+            ObjectIds.abbreviateName(r.getCommit(), testRepo.getRevWalk().getObjectReader())));
+  }
+
+  @Test
+  public void noWarningIfProjectConfigIsUpdatedWithoutCodeOwnerSettings() throws Exception {
+    fetchRefsMetaConfig();
+    Config cfg = new Config();
+    cfg.setString(
+        /* section= */ "foo", /* subsection= */ null, /* name= */ "bar", /* value= */ "baz");
+    PushOneCommit push =
+        pushFactory.create(admin.newIdent(), testRepo, "Change", "project.config", cfg.toText());
+    PushOneCommit.Result r = push.to("refs/for/" + RefNames.REFS_CONFIG);
+    r.assertOkStatus();
+    r.assertNotMessage(
+        "The configuration for the code-owners plugin must be done in code-owners.config.");
+  }
+
   private void fetchRefsMetaConfig() throws Exception {
     fetch(testRepo, RefNames.REFS_CONFIG + ":" + RefNames.REFS_CONFIG);
     testRepo.reset(RefNames.REFS_CONFIG);

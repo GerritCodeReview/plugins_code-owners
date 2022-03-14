@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend.config;
 
+import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.RefNames;
@@ -77,35 +79,92 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
   @Override
   public ImmutableList<CommitValidationMessage> onCommitReceived(CommitReceivedEvent receiveEvent)
       throws CommitValidationException {
-    String fileName = pluginName + ".config";
+    if (!receiveEvent.refName.equals(RefNames.REFS_CONFIG)) {
+      // The code-owners.config file is stored in refs/meta/config, if refs/meta/config was not
+      // modified we do not need to do any validation and can return early.
+      return ImmutableList.of();
+    }
 
+    ImmutableList.Builder<CommitValidationMessage> validationMessageBuilder =
+        ImmutableList.builder();
+    validationMessageBuilder.addAll(
+        getWarningsForIgnoredCodeOwnerConfigurationInProjectConfig(receiveEvent));
+    String codeOwnersConfigFileName = pluginName + ".config";
     try {
-      if (!receiveEvent.refName.equals(RefNames.REFS_CONFIG)
-          || !isFileChanged(receiveEvent, fileName)) {
+      if (!isFileChanged(receiveEvent, codeOwnersConfigFileName)) {
         // the code-owners.config file in refs/meta/config was not modified, hence we do not need to
         // validate it
-        return ImmutableList.of();
+        return validationMessageBuilder.build();
       }
 
       ProjectState projectState = getProjectState(receiveEvent);
-      ProjectLevelConfig.Bare cfg = loadConfig(receiveEvent, fileName);
-      ImmutableList<CommitValidationMessage> validationMessages =
-          validateConfig(projectState, fileName, cfg.getConfig());
+      ProjectLevelConfig.Bare cfg = loadConfig(receiveEvent, codeOwnersConfigFileName);
+      validationMessageBuilder.addAll(
+          validateConfig(projectState, codeOwnersConfigFileName, cfg.getConfig()));
+
+      ImmutableList<CommitValidationMessage> validationMessages = validationMessageBuilder.build();
       if (!validationMessages.isEmpty()) {
         throw new CommitValidationException(
-            exceptionMessage(fileName, cfg.getRevision()), validationMessages);
+            exceptionMessage(codeOwnersConfigFileName, cfg.getRevision()), validationMessages);
       }
       return ImmutableList.of();
     } catch (IOException | DiffNotAvailableException | ConfigInvalidException e) {
       String errorMessage =
           String.format(
               "failed to validate file %s for revision %s in ref %s of project %s",
-              fileName,
+              codeOwnersConfigFileName,
               receiveEvent.commit.getName(),
               RefNames.REFS_CONFIG,
               receiveEvent.project.getNameKey());
       logger.atSevere().withCause(e).log("%s", errorMessage);
       throw new CommitValidationException(errorMessage, e);
+    }
+  }
+
+  private ImmutableList<CommitValidationMessage>
+      getWarningsForIgnoredCodeOwnerConfigurationInProjectConfig(CommitReceivedEvent receiveEvent) {
+    try {
+      if (!isFileChanged(receiveEvent, ProjectConfig.PROJECT_CONFIG)) {
+        return ImmutableList.of();
+      }
+
+      ImmutableList.Builder<CommitValidationMessage> validationMessageBuilder =
+          ImmutableList.builder();
+      ProjectLevelConfig.Bare cfg = loadConfig(receiveEvent, ProjectConfig.PROJECT_CONFIG);
+
+      if (cfg.getConfig().getSubsections("plugin").contains(pluginName)) {
+        // The plugin.code-owners section is only read from gerrit.config, but not from
+        // project.config. Warn that this configuration is ignored and has no effect.
+        validationMessageBuilder.add(
+            new CommitValidationMessage(
+                String.format(
+                    "Section 'plugin.code-owners' in %s is ignored and has no effect."
+                        + " The configuration for the %s plugin must be done in %s.config.",
+                    ProjectConfig.PROJECT_CONFIG, pluginName, pluginName),
+                ValidationMessage.Type.HINT));
+      }
+
+      if (cfg.getConfig().getSections().contains(SECTION_CODE_OWNERS)) {
+        // The codeOwners section is only read from code-owners.config, but not from
+        // project.config. Warn that this configuration is ignored and has no effect.
+        validationMessageBuilder.add(
+            new CommitValidationMessage(
+                String.format(
+                    "Section 'codeOwners' in %s is ignored and has no effect."
+                        + " The configuration for the %s plugin must be done in %s.config.",
+                    ProjectConfig.PROJECT_CONFIG, pluginName, pluginName),
+                ValidationMessage.Type.HINT));
+      }
+
+      return validationMessageBuilder.build();
+    } catch (IOException | DiffNotAvailableException | CommitValidationException e) {
+      logger.atSevere().withCause(e).log(
+          "failed to inspect file %s for revision %s in ref %s of project %s",
+          ProjectConfig.PROJECT_CONFIG,
+          receiveEvent.commit.getName(),
+          RefNames.REFS_CONFIG,
+          receiveEvent.project.getNameKey());
+      return ImmutableList.of();
     }
   }
 
