@@ -313,8 +313,9 @@ directories.
 
 ### <a id="anotations">Annotations
 
-Lines representing [access grants](#accessGrants) can be annotated. Annotations
-have the format `#{ANNOTATION_NAME}` and can appear at the end of the line.
+Lines that assign code ownership to users ([email lines](#userEmails) and
+[per-file lines](#perFile)) can be annotated. Annotations have the format
+`#{ANNOTATION_NAME}` and can appear at the end of the line.
 E.g.:
 
 ```
@@ -344,9 +345,14 @@ The following annotations are supported:
 
 Unknown annotations are silently ignored.
 
-**NOTE:** If an access grant line that assigns code ownership to multiple users
-has an annotation, this annotation applies to all these users. E.g. if an
-annotation is set for the all users wildcard (aka `*`) it applies to all users.
+**NOTE:** If a line that assigns code ownership to multiple users has an
+annotation, this annotation applies to all these users. E.g. if an annotation is
+set for the all users wildcard (aka `*`) it applies to all users.
+
+**NOTE:** Only [email lines](#userEmails) and [per-file lines](#perFile) support
+annotations, for other lines (e.g. [file lines](#fileKeyword) and [include
+lines](#includeKeyword)) annotations are interpreted as [comments](#comments)
+and are silently ignored.
 
 ### <a id="comments">Comments
 
