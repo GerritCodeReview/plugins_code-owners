@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b367c533_3eebe6cb",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-03-16T10:59:40Z",
+      "side": 1,
+      "message": "Yes, since we do not reject unknown sections usually, I wouldn\u0027t like to do this here. So emitting a warning only seems fine.",
+      "parentUuid": "2b1f7693_c6be5b2a",
+      "revId": "c7fcbcf55c7115a87e2423ff9053356e1c4ba5e7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d34954ab_320e906f",
@@ -31,6 +49,30 @@
       "writtenOn": "2022-03-15T10:15:38Z",
       "side": 1,
       "message": "Is this accurate? according to the commit message section plugin.code-owners in project.config is respected.\n\nCode and test are in sync. Should the commit message get updated?",
+      "range": {
+        "startLine": 136,
+        "startChar": 8,
+        "endLine": 137,
+        "endChar": 85
+      },
+      "revId": "c7fcbcf55c7115a87e2423ff9053356e1c4ba5e7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a66c179d_b16e1765",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/config/CodeOwnersPluginConfigValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 137,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-03-16T10:59:40Z",
+      "side": 1,
+      "message": "I think the commit message is correct. It says:\n\n\"The configuration of the code-owners plugin is read from\n* gerrit.config (section \u0027plugin.code-owners\u0027)\n* code-owners.config in refs/meta/config (mostly section \u0027codeOwners\u0027)\"\"\r\n\nSo it says \u0027gerrit.config\u0027, not \u0027project.config\u0027.",
+      "parentUuid": "d34954ab_320e906f",
       "range": {
         "startLine": 136,
         "startChar": 8,
