@@ -3,8 +3,8 @@ The @PLUGIN@ plugin provides support to define
 repository/branch.
 
 If the @PLUGIN@ plugin is enabled, changes can only be submitted if all
-touched files are covered by [approvals](user-guide.html#codeOwnerApproval) from
-code owners.
+touched files are covered by [approvals](user-guide.html#codeOwnerApproval)
+from code owners.
 
 An overview of the supported features can be found [here](feature-set.html).
 
