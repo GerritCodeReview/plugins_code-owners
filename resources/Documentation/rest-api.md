@@ -1160,7 +1160,7 @@ otherwise. Hence this capability should only ge granted to trusted users.
 Administrators have this capability implicitly assigned.
 
 The same as all global capabilities, the `Check Code Owner` global capability is
-assigned on the `All-Project` project in the `Global Capabilities` access
+assigned on the `All-Projects` project in the `Global Capabilities` access
 section.
 
 ---
