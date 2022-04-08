@@ -1755,7 +1755,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     // make the override label sticky
     LabelDefinitionInput input = new LabelDefinitionInput();
-    input.copyAnyScore = true;
+    input.copyCondition = "is:ANY";
     gApi.projects().name(project.get()).label("Owners-Override").update(input);
 
     // Create a change as a user that is not a code owner.
