@@ -40,6 +40,7 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.CherryPickInput;
 import com.google.gerrit.extensions.api.changes.RebaseInput;
+import com.google.gerrit.extensions.api.changes.RevertInput;
 import com.google.gerrit.extensions.api.projects.BranchInput;
 import com.google.gerrit.extensions.api.projects.ConfigInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
@@ -2456,6 +2457,113 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         assertThrows(
             ResourceConflictException.class,
             () -> gApi.changes().id(r.getChangeId()).current().rebaseAsInfo(rebaseInput));
+    assertThat(resourceConflictException)
+        .hasMessageThat()
+        .contains(
+            String.format(
+                "[code-owners] %s for plugin code-owners not permitted",
+                SkipCodeOwnerConfigValidationCapability.ID));
+  }
+
+  @Test
+  public void skipValidationForRevert() throws Exception {
+    // Make admin a code owner so that admin can code-owner approve changes.
+    setAsRootCodeOwners(admin);
+
+    // Create a code owner config file with a non-resolvable code owner.
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/foo/");
+    String unknownEmail = "non-existing-email@example.com";
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Add code owner config file with non-resolvable code owner",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(unknownEmail))
+                    .build()));
+    push.setPushOptions(
+        ImmutableList.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME)));
+    PushOneCommit.Result r = push.to("refs/for/master");
+    assertOkWithHints(
+        r,
+        "skipping validation of code owner config files",
+        String.format(
+            "the validation is skipped due to the --code-owners~%s push option",
+            SkipCodeOwnerConfigValidationPushOption.NAME));
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+
+    // Fix the code owner config file.
+    PushOneCommit.Result r2 =
+        createChange(
+            "Fix code owner config file",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    assertOkWithHints(r2, "code owner config files validated, no issues found");
+    approve(r2.getChangeId());
+    gApi.changes().id(r2.getChangeId()).current().submit();
+    assertThat(gApi.changes().id(r2.getChangeId()).get().status).isEqualTo(ChangeStatus.MERGED);
+
+    // Try reverting the fix, expect failure due to invalid code owner config file.
+    RevertInput revertInput = new RevertInput();
+    ResourceConflictException exception =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r2.getChangeId()).revert(revertInput));
+    assertThat(exception)
+        .hasMessageThat()
+        .isEqualTo(
+            String.format(
+                "[code-owners] invalid code owner config files:\n"
+                    + "  [code-owners] code owner email '%s' in '%s' cannot be resolved for %s",
+                unknownEmail,
+                codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+                admin.username()));
+
+    // Revert the fix and skip the validation
+    revertInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    gApi.changes().id(r.getChangeId()).revert(revertInput);
+  }
+
+  @Test
+  public void userWithoutCapabilitySkipValidationCannotSkipValidationWithRevert() throws Exception {
+    // Make admin a code owner so that admin can code-owner approve changes.
+    setAsRootCodeOwners(admin);
+
+    // Create a code owner config without issues.
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/foo/");
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email()))
+                    .build()));
+    assertOkWithHints(r, "code owner config files validated, no issues found");
+    approve(r.getChangeId());
+    gApi.changes().id(r.getChangeId()).current().submit();
+
+    // Trying to use the skip validation option on revert is rejected because user has no permission
+    // to skip the validation.
+    requestScopeOperations.setApiUser(user.id());
+    RevertInput revertInput = new RevertInput();
+    revertInput.validationOptions =
+        ImmutableMap.of(
+            String.format("code-owners~%s", SkipCodeOwnerConfigValidationPushOption.NAME), "true");
+    ResourceConflictException resourceConflictException =
+        assertThrows(
+            ResourceConflictException.class,
+            () -> gApi.changes().id(r.getChangeId()).revert(revertInput));
     assertThat(resourceConflictException)
         .hasMessageThat()
         .contains(
