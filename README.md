@@ -18,8 +18,8 @@ to read the documentation before installing the plugin, you can find it properly
 rendered
 [here](https://android-review.googlesource.com/plugins/code-owners/Documentation/index.html).
 
-## Tests
 ## JavaScript Plugin
+
 
 For testing the plugin with
 [Gerrit FE Dev Helper](https://gerrit.googlesource.com/gerrit-fe-dev-helper/)
