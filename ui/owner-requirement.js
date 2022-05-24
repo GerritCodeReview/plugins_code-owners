@@ -55,6 +55,9 @@ export class OwnerRequirementValue extends
         gr-button {
           padding-left: var(--spacing-m);
         }
+        gr-button::part(paper-button) {
+          padding: 0 var(--spacing-s);
+        }
         a {
           text-decoration: none;
         }
