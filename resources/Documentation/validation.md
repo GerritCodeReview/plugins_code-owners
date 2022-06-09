@@ -182,6 +182,13 @@ following checks are performed:
     * the project from which the file should be imported doesn't permit reads
       (e.g. has the state `HIDDEN`)
 
+**NOTE:** Non-resolvable code owner emails are rejected with a generic message,
+rather than informing about the exact reason why a code owner email is not
+resolvable. This is intentional and prevents that uploaders can probe the
+existence of emails/accounts (if specific reasons would be returned an uploader
+could create a code owner config file with arbitrary emails and then deduce from
+the messages which emails/accounts exist, which would a privacy issue).
+
 **NOTE:** Whether commits that newly add non-resolvable code owners and
 non-resolvable imports are rejected on commit received and on submit is
 controlled by the
