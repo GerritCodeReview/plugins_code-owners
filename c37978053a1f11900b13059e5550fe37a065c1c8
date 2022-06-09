@@ -3,11 +3,11 @@
     "zuul-check:plugins_code-owners": {
       "state": "FAILED",
       "message": "Change failed",
-      "url": "https://ci.gerritcodereview.com/t/gerrit/buildset/8784d5e5860949abb3ab10160c7d1b3f",
-      "started": "2022-06-09T12:47:45Z",
-      "finished": "2022-06-09T12:47:45Z",
+      "url": "https://ci.gerritcodereview.com/t/gerrit/buildset/48e7f97e9c154d31a75b9fb358cf7fa9",
+      "started": "2022-06-09T12:47:46Z",
+      "finished": "2022-06-09T12:47:46Z",
       "created": "2022-06-09T11:35:38Z",
-      "updated": "2022-06-09T12:47:45Z"
+      "updated": "2022-06-09T12:47:47Z"
     }
   }
 }
