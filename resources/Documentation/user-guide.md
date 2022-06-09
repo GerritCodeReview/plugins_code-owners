@@ -24,6 +24,12 @@ files under that path.
 Who is a code owner of a path is controlled via [code owner config
 files](#codeOwnerConfigFiles) (e.g. `OWNERS` files).
 
+**NOTE:** Being a code owner doesn't grant the user permissions to approve
+changes, but permissions to vote on the label that is required as a
+[code owner approval](#codeOwnerApproval) must be configured separately. This
+means it's possible that a user is a code owner, but misses permissions to apply
+code owner approvals.
+
 ## <a id="whyCodeOwners">Why should code owners be used?
 
 Code owners are gatekeepers before a change is submitted, they enforce standards
