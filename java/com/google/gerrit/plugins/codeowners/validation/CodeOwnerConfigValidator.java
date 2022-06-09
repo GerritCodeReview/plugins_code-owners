@@ -31,6 +31,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
@@ -53,6 +54,7 @@ import com.google.gerrit.plugins.codeowners.metrics.ValidationTrigger;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.PatchSetUtil;
+import com.google.gerrit.server.config.UrlFormatter;
 import com.google.gerrit.server.events.CommitReceivedEvent;
 import com.google.gerrit.server.events.RefReceivedEvent;
 import com.google.gerrit.server.git.CodeReviewCommit;
@@ -151,6 +153,7 @@ public class CodeOwnerConfigValidator
   private final IdentifiedUser.GenericFactory userFactory;
   private final SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption;
   private final CodeOwnerMetrics codeOwnerMetrics;
+  private final DynamicItem<UrlFormatter> urlFormatter;
 
   @Inject
   CodeOwnerConfigValidator(
@@ -165,7 +168,8 @@ public class CodeOwnerConfigValidator
       PatchSetUtil patchSetUtil,
       IdentifiedUser.GenericFactory userFactory,
       SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption,
-      CodeOwnerMetrics codeOwnerMetrics) {
+      CodeOwnerMetrics codeOwnerMetrics,
+      DynamicItem<UrlFormatter> urlFormatter) {
     this.pluginName = pluginName;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
@@ -178,6 +182,7 @@ public class CodeOwnerConfigValidator
     this.userFactory = userFactory;
     this.skipCodeOwnerConfigValidationPushOption = skipCodeOwnerConfigValidationPushOption;
     this.codeOwnerMetrics = codeOwnerMetrics;
+    this.urlFormatter = urlFormatter;
   }
 
   @Override
@@ -521,6 +526,7 @@ public class CodeOwnerConfigValidator
       // validate the code owner config files
       return Optional.of(
           ValidationResult.create(
+              urlFormatter,
               pluginName,
               codeOwnerConfigFilesToValidate.stream()
                   .flatMap(
@@ -1326,12 +1332,23 @@ public class CodeOwnerConfigValidator
     }
 
     static ValidationResult create(
-        String pluginName, Stream<CommitValidationMessage> validationMessagesStream) {
+        DynamicItem<UrlFormatter> urlFormatter,
+        String pluginName,
+        Stream<CommitValidationMessage> validationMessagesStream) {
       ImmutableList<CommitValidationMessage> validationMessages =
           validationMessagesStream.collect(toImmutableList());
+      Optional<String> helpPage =
+          urlFormatter
+              .get()
+              .getPluginDocUrl(
+                  pluginName, "validation.html", "validation-checks-for-code-owner-config-files");
       return new AutoValue_CodeOwnerConfigValidator_ValidationResult(
           pluginName,
-          validationMessages.isEmpty() ? NO_ISSUES_MSG : INVALID_MSG,
+          validationMessages.isEmpty()
+              ? NO_ISSUES_MSG
+              : (helpPage.isPresent()
+                  ? String.format("%s (see %s for help)", INVALID_MSG, helpPage.get())
+                  : INVALID_MSG),
           validationMessages);
     }
 

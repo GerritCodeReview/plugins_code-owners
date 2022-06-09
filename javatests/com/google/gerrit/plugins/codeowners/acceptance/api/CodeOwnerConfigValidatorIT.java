@@ -48,6 +48,7 @@ import com.google.gerrit.extensions.client.ProjectState;
 import com.google.gerrit.extensions.common.ChangeInfo;
 import com.google.gerrit.extensions.common.ChangeInput;
 import com.google.gerrit.extensions.common.MergeInput;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.extensions.restapi.MergeConflictException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.git.ObjectIds;
@@ -68,6 +69,7 @@ import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigPa
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationCapability;
 import com.google.gerrit.plugins.codeowners.validation.SkipCodeOwnerConfigValidationPushOption;
+import com.google.gerrit.server.config.UrlFormatter;
 import com.google.gerrit.server.submit.IntegrationConflictException;
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -92,6 +94,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
+  @Inject private DynamicItem<UrlFormatter> urlFormatter;
 
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
   private ProtoCodeOwnerConfigParser protoCodeOwnerConfigParser;
@@ -731,9 +734,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: [code-owners] invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files"
+                    + " (see %s for help):\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
+                getHelpPage(),
                 unknownEmail,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -2521,8 +2526,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .hasMessageThat()
         .isEqualTo(
             String.format(
-                "[code-owners] invalid code owner config files:\n"
+                "[code-owners] invalid code owner config files (see %s for help):\n"
                     + "  [code-owners] code owner email '%s' in '%s' cannot be resolved for %s",
+                getHelpPage(),
                 unknownEmail,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
                 admin.username()));
@@ -2613,10 +2619,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
-                    + "[code-owners] invalid code owner config files:\n"
+                    + "[code-owners] invalid code owner config files (see %s for help):\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 project,
+                getHelpPage(),
                 unknownEmail,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName(),
@@ -2648,7 +2655,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             () -> gApi.projects().name(project.get()).branch(input.ref).create(input));
     assertThat(exception)
         .hasMessageThat()
-        .contains("[code-owners] invalid code owner config files:");
+        .contains(
+            String.format(
+                "[code-owners] invalid code owner config files (see %s for help):", getHelpPage()));
 
     input.validationOptions =
         ImmutableMap.of(
@@ -2743,10 +2752,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         "refs/heads/new",
         String.format(
             "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
-                + "[code-owners] invalid code owner config files:\n"
+                + "[code-owners] invalid code owner config files (see %s for help):\n"
                 + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s\n"
                 + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
             project,
+            getHelpPage(),
             unknownEmail,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName(),
@@ -2785,9 +2795,10 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         "refs/heads/new",
         String.format(
             "Validation for creation of ref 'refs/heads/new' in project %s failed:\n"
-                + "[code-owners] invalid code owner config files:\n"
+                + "[code-owners] invalid code owner config files (see %s for help):\n"
                 + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
             project,
+            getHelpPage(),
             unknownEmail,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -2905,9 +2916,10 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     assertThat(r.getMessages())
         .contains(
             String.format(
-                "ERROR: [code-owners] invalid code owner config files\n"
+                "ERROR: [code-owners] invalid code owner config files (see %s for help)\n"
                     + "ERROR: [code-owners] code owner email '%s' in '%s' cannot be resolved for"
                     + " %s",
+                getHelpPage(),
                 unknownEmail,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -3315,5 +3327,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
     pushResult.assertNotMessage("error");
     pushResult.assertNotMessage("warning");
     pushResult.assertNotMessage("hint");
+  }
+
+  private String getHelpPage() {
+    return urlFormatter.get().getWebUrl().get()
+        + "plugins/code-owners/Documentation/validation.html"
+        + "#validation-checks-for-code-owner-config-files";
   }
 }

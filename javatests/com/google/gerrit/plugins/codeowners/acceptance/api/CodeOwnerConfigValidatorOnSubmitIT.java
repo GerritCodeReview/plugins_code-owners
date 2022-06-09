@@ -26,6 +26,7 @@ import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.extensions.client.ChangeStatus;
+import com.google.gerrit.extensions.registration.DynamicItem;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -35,6 +36,7 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersCodeOwnerConfigParser;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoCodeOwnerConfigParser;
+import com.google.gerrit.server.config.UrlFormatter;
 import com.google.inject.Inject;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
@@ -50,6 +52,7 @@ public class CodeOwnerConfigValidatorOnSubmitIT extends AbstractCodeOwnersIT {
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
+  @Inject private DynamicItem<UrlFormatter> urlFormatter;
 
   private FindOwnersCodeOwnerConfigParser findOwnersCodeOwnerConfigParser;
   private ProtoCodeOwnerConfigParser protoCodeOwnerConfigParser;
@@ -126,9 +129,11 @@ public class CodeOwnerConfigValidatorOnSubmitIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: [code-owners] invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files"
+                    + " (see %s for help):\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
+                getHelpPage(),
                 unknownEmail,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -181,9 +186,11 @@ public class CodeOwnerConfigValidatorOnSubmitIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: [code-owners] invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files"
+                    + " (see %s for help):\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
+                getHelpPage(),
                 admin.email(),
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
                 identifiedUserFactory.create(user2.id()).getLoggableName()));
@@ -309,9 +316,11 @@ public class CodeOwnerConfigValidatorOnSubmitIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: [code-owners] invalid code owner config files:\n"
+                    + "Change %d: [code-owners] invalid code owner config files"
+                    + " (see %s for help):\n"
                     + "  ERROR: code owner email '%s' in '%s' cannot be resolved for %s",
                 r.getChange().getId().get(),
+                getHelpPage(),
                 unknownEmail,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
                 identifiedUserFactory.create(admin.id()).getLoggableName()));
@@ -374,5 +383,11 @@ public class CodeOwnerConfigValidatorOnSubmitIT extends AbstractCodeOwnersIT {
         String.format(
             "unknown code owner backend: %s",
             backendConfig.getDefaultBackend().getClass().getName()));
+  }
+
+  private String getHelpPage() {
+    return urlFormatter.get().getWebUrl().get()
+        + "plugins/code-owners/Documentation/validation.html"
+        + "#validation-checks-for-code-owner-config-files";
   }
 }
