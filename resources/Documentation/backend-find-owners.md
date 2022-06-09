@@ -266,6 +266,13 @@ directory and the subdirectories.
   per-file docs.config,*.md=richard.roe@example.com
 ```
 
+**NOTE:** It's important to not include additional spaces in `per-file` lines.
+E.g. "per-file docs.config, test.config=richard.roe@example.com" will make
+Richard Roe a code owner of the files "docs.config" and " test.config" (pay
+attention to the leading space), but not for the file "test.config". The correct
+line to make Richard Roe a code owner of the files "docs.config" and
+"test.config" would be "per-file docs.config,test.config=richard.roe@example.com".
+
 ##### <a id="doNotUsePathExpressionsForSubdirectories">
 **NOTE:** It is discouraged to use path expressions that explicitly name
 subdirectories such as `my-subdir/*` as they will break when the subdirectory
