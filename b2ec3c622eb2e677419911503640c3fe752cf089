@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "427b6add_c922663a",
+        "filename": "resources/Documentation/validation.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-06-09T13:44:30Z",
+      "side": 1,
+      "message": "than*",
+      "range": {
+        "startLine": 186,
+        "startChar": 7,
+        "endLine": 186,
+        "endChar": 11
+      },
+      "revId": "b2ec3c622eb2e677419911503640c3fe752cf089",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
