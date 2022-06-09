@@ -16,6 +16,23 @@
       "message": "Verifying manually, since the CI doesn\u0027t take the change in Gerrit core, which is part of the same topic, into account and hence fails.",
       "revId": "c37978053a1f11900b13059e5550fe37a065c1c8",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9fc1dd30_7c794dfb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-06-09T13:37:08Z",
+      "side": 1,
+      "message": "The CI should be able to build this now after the change in Gerrit core has been submitted.",
+      "revId": "c37978053a1f11900b13059e5550fe37a065c1c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
