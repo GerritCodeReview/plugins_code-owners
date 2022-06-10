@@ -93,8 +93,8 @@ public class ChangedFiles {
       if (mergeCommitStrategy.equals(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION)
           || isInitialCommit(project, revision)) {
         // Use parentNum=0 to do the comparison against the default base.
-        // For non-merge commits the default base is the only parent (aka parent 1, initial commits
-        // are not supported).
+        // For non-merge commits the default base is the only parent (aka parent 1).
+        // Initial commits are supported when using parentNum=0.
         // For merge commits the default base is the auto-merge commit which should be used as base
         // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
         fileDiffOutputs =
