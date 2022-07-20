@@ -124,13 +124,15 @@ To do this they can:
 
 * Use the `--debug` option of the [List Code
   Owners](rest-api.html#list-code-owners-for-path-in-branch) REST endpoints to
-  get debug logs included into the response.
+  get debug logs included into the response (requires the caller
+  to be host administrator or have the [Check Code Owner
+  capability](rest-api.html#checkCodeOwner)).
 * Check the code owner config files for issues by calling the [Check Code Owner
-  Config File REST endpoint](rest-api.html#check-code-owner-config-files)
+  Config File REST endpoint](rest-api.html#check-code-owner-config-files).
 * Check the code ownership of a user for a certain path by calling the [Check
   Code Owner REST endpoint](rest-api.html#check-code-owner) (requires the caller
   to be host administrator or have the [Check Code Owner
-  capability](rest-api.html#checkCodeOwner))
+  capability](rest-api.html#checkCodeOwner)).
 
 Bugs with the @PLUGIN@ plugin should be filed as issues for the Gerrit team, but
 only after other causes have been excluded.
