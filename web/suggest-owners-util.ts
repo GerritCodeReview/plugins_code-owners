@@ -15,7 +15,21 @@
  * limitations under the License.
  */
 
-import {BestSuggestionsLimit} from './code-owners-model.js';
+import {AccountId, GroupId} from '@gerritcodereview/typescript-api/rest-api';
+import {CodeOwnerInfo, CodeOwnersInfo, FetchedFile} from './code-owners-api';
+import {BestSuggestionsLimit} from './code-owners-model';
+
+export interface GroupedFiles {
+  groupName: {
+    name: string | undefined;
+    prefix: string;
+  };
+  files: Array<FetchedFile>;
+  owners?: CodeOwnersInfo;
+  error?: Error;
+  hasSelected?: boolean;
+  expanded?: boolean;
+}
 
 /**
  * For each file calculates owners to display and group all files by those
@@ -27,23 +41,36 @@ import {BestSuggestionsLimit} from './code-owners-model.js';
  * one of newly displayed owners and then turns off "Show all owners". Without
  * "fake" groups a user can see inconsistent state in dialog.
  */
-
-export function getDisplayOwnersGroups(files, allOwnersByPathMap,
-    reviewersIdSet, allowAllOwnersSubstition) {
+export function getDisplayOwnersGroups(
+  files: Array<FetchedFile>,
+  allOwnersByPathMap: Map<string, CodeOwnersInfo | undefined>,
+  reviewersIdSet: Set<AccountId | GroupId>,
+  allowAllOwnersSubstition: boolean
+): Array<GroupedFiles> {
   const getDisplayOwnersFunc =
-      !allowAllOwnersSubstition || allOwnersByPathMap.size === 0 ||
-      reviewersIdSet.size === 0 ?
-        file => file.info.owners :
-        file => getDisplayOwners(file, allOwnersByPathMap, reviewersIdSet);
+    !allowAllOwnersSubstition ||
+    allOwnersByPathMap.size === 0 ||
+    reviewersIdSet.size === 0
+      ? (file: FetchedFile) => file.info.owners
+      : (file: FetchedFile) =>
+          getDisplayOwners(file, allOwnersByPathMap, reviewersIdSet);
   return groupFilesByOwners(files, getDisplayOwnersFunc);
 }
 
-function getDisplayOwners(file, allOwnersByPathMap, reviewersIdSet) {
-  const ownerSelected = owner => reviewersIdSet.has(owner.account._account_id);
+function getDisplayOwners(
+  file: FetchedFile,
+  allOwnersByPathMap: Map<String, CodeOwnersInfo | undefined>,
+  reviewersIdSet: Set<AccountId | GroupId>
+) {
+  const ownerSelected = (owner: CodeOwnerInfo) =>
+    owner?.account?._account_id !== undefined &&
+    reviewersIdSet.has(owner.account._account_id);
   const defaultOwners = file.info.owners;
-  if (!defaultOwners ||
-      defaultOwners.owned_by_all_users ||
-      defaultOwners.code_owners.some(ownerSelected)) {
+  if (
+    !defaultOwners ||
+    defaultOwners.owned_by_all_users ||
+    defaultOwners.code_owners.some(ownerSelected)
+  ) {
     return defaultOwners;
   }
   const allOwners = allOwnersByPathMap.get(file.path);
@@ -56,11 +83,14 @@ function getDisplayOwners(file, allOwnersByPathMap, reviewersIdSet) {
   };
 }
 
-function groupFilesByOwners(files, getDisplayOwnersFunc) {
+function groupFilesByOwners(
+  files: Array<FetchedFile>,
+  getDisplayOwnersFunc: (file: FetchedFile) => CodeOwnersInfo | undefined
+): Array<GroupedFiles> {
   // Note: for renamed or moved files, they will have two entries in the map
   // we will treat them as two entries when group as well
   const ownersFilesMap = new Map();
-  const failedToFetchFiles = new Set();
+  const failedToFetchFiles: Set<FetchedFile> = new Set();
   for (const file of files) {
     // for files failed to fetch, add them to the special group
     if (file.info.error) {
@@ -73,11 +103,12 @@ function groupFilesByOwners(files, getDisplayOwnersFunc) {
       continue;
     }
     const displayOwners = getDisplayOwnersFunc(file);
+    if (displayOwners === undefined) continue;
 
     const ownersKey = getOwnersGroupKey(displayOwners);
     ownersFilesMap.set(
-        ownersKey,
-        ownersFilesMap.get(ownersKey) || {files: [], owners: displayOwners}
+      ownersKey,
+      ownersFilesMap.get(ownersKey) || {files: [], owners: displayOwners}
     );
     ownersFilesMap.get(ownersKey).files.push(file);
   }
@@ -97,24 +128,25 @@ function groupFilesByOwners(files, getDisplayOwnersFunc) {
       groupName: getGroupName(failedFiles),
       files: failedFiles,
       error: new Error(
-          'Failed to fetch code owner info. Try to refresh the page.'),
+        'Failed to fetch code owner info. Try to refresh the page.'
+      ),
     });
   }
   return groupedItems;
 }
 
-function getOwnersGroupKey(owners) {
+function getOwnersGroupKey(owners: CodeOwnersInfo) {
   if (owners.owned_by_all_users) {
     return '__owned_by_all_users__';
   }
   const code_owners = owners.code_owners;
   return code_owners
-      .map(owner => owner.account._account_id)
-      .sort()
-      .join(',');
+    .map(owner => owner.account?._account_id)
+    .sort()
+    .join(',');
 }
 
-function getGroupName(files) {
+function getGroupName(files: Array<FetchedFile>) {
   const fileName = files[0].path.split('/').pop();
   return {
     name: fileName,
