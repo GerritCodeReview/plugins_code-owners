@@ -19,7 +19,7 @@ gerrit_plugin(
         "Gerrit-HttpModule: com.google.gerrit.plugins.codeowners.module.HttpModule",
         "Gerrit-BatchModule: com.google.gerrit.plugins.codeowners.module.BatchModule",
     ],
-    resource_jars = ["//plugins/code-owners/ui:code-owners"],
+    resource_jars = ["//plugins/code-owners/web:code-owners"],
     resource_strip_prefix = "plugins/code-owners/resources",
     resources = glob(["resources/**/*"]),
     deps = [
