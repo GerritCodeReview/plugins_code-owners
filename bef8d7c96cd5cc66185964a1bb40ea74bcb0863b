@@ -16,6 +16,24 @@
       "message": "Do you know a good way how to review this change?\n\nDuring Lit/TypeScript we had often used patchset 1 as the patchset with just the file renaming. Then you could compare against patchset 1 instead of against base. But I am not sure how to do something similar for this change.",
       "revId": "bef8d7c96cd5cc66185964a1bb40ea74bcb0863b",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eaab68b3_fd07250b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-23T14:15:59Z",
+      "side": 1,
+      "message": "I\u0027m afraid not :|\n\nI guess you could consider this a code-review for a fresh feature and treat it as such.",
+      "parentUuid": "c62a7100_78de7b9b",
+      "revId": "bef8d7c96cd5cc66185964a1bb40ea74bcb0863b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
