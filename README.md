@@ -20,13 +20,22 @@ rendered
 
 ## JavaScript Plugin
 
-For testing the plugin with
-[Gerrit FE Dev Helper](https://gerrit.googlesource.com/gerrit-fe-dev-helper/)
-build the JavaScript bundle and copy it to the `plugins/` folder:
+From the root of the gerrit repository.
 
-    bazel build //plugins/code-owners/ui:code-owners
-    cp -f bazel-bin/plugins/code-owners/ui/code-owners.js plugins/
+```
+bazel test //plugins/code-owners/web:karma_test
+```
+
+For testing the plugin with the 
+[Gerrit FE Dev Helper](https://gerrit.googlesource.com/gerrit-fe-dev-helper/)
+the command below builds 
+
+```
+    bazel build //plugins/code-owners/web:code-owners
+    ln -s bazel-bin/plugins/code-owners/web/code-owners.js polygerrit-ui/app/plugins/
+```
+
 
 and let the Dev Helper redirect from
 `.+/plugins/code-owners/static/code-owners.js` to
-`http://localhost:8081/plugins_/code-owners.js`.
+`http://localhost:8081/plugins/code-owners.js`.
