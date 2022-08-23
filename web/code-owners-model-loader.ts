@@ -1,6 +1,7 @@
 /**
  * @license
- * Copyright (C) 2020 The Android Open Source Project
+ * Copyright (
+ * ) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,8 +16,13 @@
  * limitations under the License.
  */
 
-import {SuggestionsState} from './code-owners-model.js';
+import {
+  CodeOwnersModel,
+  SuggestionsState,
+  SuggestionsType,
+} from './code-owners-model.js';
 import {ServerConfigurationError} from './code-owners-api.js';
+import {CodeOwnerService} from './code-owners-service.js';
 
 /**
  * ModelLoader provides a method for loading data into the model.
@@ -28,12 +34,18 @@ import {ServerConfigurationError} from './code-owners-api.js';
  * in the loadPropertiesAfterModelChanged method
  */
 export class ModelLoader {
-  constructor(ownersService, ownersModel) {
-    this.ownersService = ownersService;
-    this.ownersModel = ownersModel;
-  }
+  private activeLoadSuggestionType?: SuggestionsType;
 
-  async _loadProperty(propertyName, propertyLoader, propertySetter) {
+  constructor(
+    private readonly ownersService: CodeOwnerService,
+    private readonly ownersModel: CodeOwnersModel
+  ) {}
+
+  async _loadProperty<K extends keyof CodeOwnersModel, T>(
+    propertyName: K,
+    propertyLoader: () => Promise<T>,
+    propertySetter: (value: T) => void
+  ) {
     // Load property only if it was not already loaded
     if (this.ownersModel[propertyName] !== undefined) return;
     let newValue;
@@ -45,7 +57,7 @@ export class ModelLoader {
         return;
       }
       console.error(e);
-      this.ownersModel.setPluginFailed(e.message);
+      this.ownersModel.setPluginFailed((e as Error).message);
       return;
     }
     // It is possible, that several requests is made in parallel.
@@ -56,96 +68,124 @@ export class ModelLoader {
   }
 
   async loadBranchConfig() {
-    await this._loadProperty('branchConfig',
-        () => this.ownersService.getBranchConfig(),
-        value => this.ownersModel.setBranchConfig(value)
+    await this._loadProperty(
+      'branchConfig',
+      () => this.ownersService.getBranchConfig(),
+      value => this.ownersModel.setBranchConfig(value)
     );
   }
 
   async loadStatus() {
-    await this._loadProperty('status',
-        () => this.ownersService.getStatus(),
-        value => this.ownersModel.setStatus(value)
+    await this._loadProperty(
+      'status',
+      () => this.ownersService.getStatus(),
+      value => this.ownersModel.setStatus(value)
     );
   }
 
   async loadUserRole() {
-    await this._loadProperty('userRole',
-        () => this.ownersService.getLoggedInUserInitialRole(),
-        value => this.ownersModel.setUserRole(value)
+    await this._loadProperty(
+      'userRole',
+      () => this.ownersService.getLoggedInUserInitialRole(),
+      value => this.ownersModel.setUserRole(value)
     );
   }
 
   async loadPluginStatus() {
-    await this._loadProperty('pluginStatus',
-        () => this.ownersService.isCodeOwnerEnabled(),
-        value => this.ownersModel.setPluginEnabled(value)
+    await this._loadProperty(
+      'pluginStatus',
+      () => this.ownersService.isCodeOwnerEnabled(),
+      value => this.ownersModel.setPluginEnabled(value)
     );
   }
 
   async loadAreAllFilesApproved() {
-    await this._loadProperty('areAllFilesApproved',
-        () => this.ownersService.areAllFilesApproved(),
-        value => this.ownersModel.setAreAllFilesApproved(value)
+    await this._loadProperty(
+      'areAllFilesApproved',
+      () => this.ownersService.areAllFilesApproved(),
+      value => this.ownersModel.setAreAllFilesApproved(value)
     );
   }
 
-  async loadSuggestions(suggestionsType) {
+  async loadSuggestions(suggestionsType: SuggestionsType) {
+    // NOTE: This line is necessary to avoid an infinite loop with
+    // SuggestOwners.onShowSuggestionsTypeChanged
+    if (this.activeLoadSuggestionType === suggestionsType) return;
     this.pauseActiveSuggestedOwnersLoading();
     this.activeLoadSuggestionType = suggestionsType;
-    if (this.ownersModel.suggestionsByTypes[suggestionsType].state ===
-        SuggestionsState.Loading) {
+    if (
+      this.ownersModel.suggestionsByTypes.get(suggestionsType)!.state ===
+      SuggestionsState.Loading
+    ) {
       this.ownersService.resumeSuggestedOwnersLoading(suggestionsType);
       return;
     }
 
     // If a loading has been started already, do nothing
-    if (this.ownersModel.suggestionsByTypes[suggestionsType].state !==
-        SuggestionsState.NotLoaded) return;
+    if (
+      this.ownersModel.suggestionsByTypes.get(suggestionsType)!.state !==
+      SuggestionsState.NotLoaded
+    )
+      return;
 
-    this.ownersModel.setSuggestionsState(suggestionsType,
-        SuggestionsState.Loading);
+    this.ownersModel.setSuggestionsState(
+      suggestionsType,
+      SuggestionsState.Loading
+    );
     let suggestedOwners;
     try {
-      suggestedOwners =
-          await this.ownersService.getSuggestedOwners(suggestionsType);
+      suggestedOwners = await this.ownersService.getSuggestedOwners(
+        suggestionsType
+      );
     } catch (e) {
       console.error(e);
-      this.ownersModel.setSuggestionsState(suggestionsType,
-          SuggestionsState.LoadFailed);
+      this.ownersModel.setSuggestionsState(
+        suggestionsType,
+        SuggestionsState.LoadFailed
+      );
       // The selectedSuggestionsType can be changed while getSuggestedOwners
       // is executed. The plugin should fail only if the selectedSuggestionsType
       // is the same.
       if (this.ownersModel.selectedSuggestionsType === suggestionsType) {
-        this.ownersModel.setPluginFailed(e.message);
+        this.ownersModel.setPluginFailed((e as Error).message);
       }
       return;
     }
-    this.ownersModel.setSuggestionsFiles(suggestionsType,
-        suggestedOwners.files);
-    this.ownersModel.setSuggestionsState(suggestionsType,
-        SuggestionsState.Loaded);
+    this.ownersModel.setSuggestionsFiles(
+      suggestionsType,
+      suggestedOwners.files
+    );
+    this.ownersModel.setSuggestionsState(
+      suggestionsType,
+      SuggestionsState.Loaded
+    );
   }
 
   pauseActiveSuggestedOwnersLoading() {
     if (!this.activeLoadSuggestionType) return;
     this.ownersService.pauseSuggestedOwnersLoading(
-        this.activeLoadSuggestionType);
+      this.activeLoadSuggestionType
+    );
   }
 
   async updateLoadSelectedSuggestionsProgress() {
     const suggestionsType = this.ownersModel.selectedSuggestionsType;
     let suggestedOwners;
     try {
-      suggestedOwners =
-          await this.ownersService.getSuggestedOwnersProgress(suggestionsType);
+      suggestedOwners = await this.ownersService.getSuggestedOwnersProgress(
+        suggestionsType
+      );
     } catch {
       // Ignore any error, keep progress unchanged.
       return;
     }
-    this.ownersModel.setSuggestionsLoadProgress(suggestionsType,
-        suggestedOwners.progress);
-    this.ownersModel.setSuggestionsFiles(suggestionsType,
-        suggestedOwners.files);
+    this.ownersModel.setSuggestionsLoadProgress(
+      suggestionsType,
+      suggestedOwners.progress
+    );
+    this.ownersModel.setSuggestionsFiles(
+      suggestionsType,
+      suggestedOwners.files
+    );
   }
 }
