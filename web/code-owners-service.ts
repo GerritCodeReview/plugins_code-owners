@@ -15,9 +15,29 @@
  * limitations under the License.
  */
 
-import {SuggestionsType, BestSuggestionsLimit, AllSuggestionsLimit, UserRole} from './code-owners-model.js';
-import {OwnersProvider, OwnerStatus, FetchStatus} from './code-owners-fetcher.js';
-import {CodeOwnersApi, CodeOwnersCacheApi} from './code-owners-api.js';
+import {
+  SuggestionsType,
+  BestSuggestionsLimit,
+  AllSuggestionsLimit,
+  UserRole,
+  Status,
+  FileStatus,
+} from './code-owners-model';
+import {OwnersProvider, FetchStatus} from './code-owners-fetcher';
+import {
+  CodeOwnersApi,
+  CodeOwnersCacheApi,
+  FetchedFile,
+  FetchedOwner,
+  FileCodeOwnerStatusInfo,
+  OwnerStatus,
+} from './code-owners-api';
+import {RestPluginApi} from '@gerritcodereview/typescript-api/rest';
+import {
+  AccountDetailInfo,
+  AccountInfo,
+  ChangeInfo,
+} from '@gerritcodereview/typescript-api/rest-api';
 
 /**
  * Specifies status for a change. The same as ChangeStatus enum in gerrit
@@ -30,29 +50,46 @@ const ChangeStatus = {
   NEW: 'NEW',
 };
 
+let ownerService: CodeOwnerService | undefined;
+
+interface CodeOwnerServiceOptions {
+  maxConcurrentRequests?: number;
+}
+
 /**
  * Service for the data layer used in the plugin UI.
  */
 export class CodeOwnerService {
-  constructor(restApi, change, options = {}) {
-    this.restApi = restApi;
-    this.change = change;
+  private codeOwnersCacheApi: CodeOwnersCacheApi;
+
+  private ownersProviders: Map<SuggestionsType, OwnersProvider>;
+
+  constructor(
+    readonly restApi: RestPluginApi,
+    readonly change: ChangeInfo,
+    options: CodeOwnerServiceOptions = {}
+  ) {
     const codeOwnersApi = new CodeOwnersApi(restApi);
     this.codeOwnersCacheApi = new CodeOwnersCacheApi(codeOwnersApi, change);
 
     const providerOptions = {
       maxConcurrentRequests: options.maxConcurrentRequests || 10,
     };
-    this.ownersProviders = {
-      [SuggestionsType.BEST_SUGGESTIONS]: new OwnersProvider(restApi, change, {
+    this.ownersProviders = new Map();
+    this.ownersProviders.set(
+      SuggestionsType.BEST_SUGGESTIONS,
+      new OwnersProvider(restApi, change, {
         ...providerOptions,
         ownersLimit: BestSuggestionsLimit,
-      }),
-      [SuggestionsType.ALL_SUGGESTIONS]: new OwnersProvider(restApi, change, {
+      })
+    );
+    this.ownersProviders.set(
+      SuggestionsType.ALL_SUGGESTIONS,
+      new OwnersProvider(restApi, change, {
         ...providerOptions,
         ownersLimit: AllSuggestionsLimit,
-      }),
-    };
+      })
+    );
   }
 
   /**
@@ -77,7 +114,7 @@ export class CodeOwnerService {
    * For example, if a user removes themselves as a reviewer, the returned
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
-  async getLoggedInUserInitialRole() {
+  async getLoggedInUserInitialRole(): Promise<UserRole> {
     const account = await this.codeOwnersCacheApi.getAccount();
     if (!account) {
       return UserRole.ANONYMOUS;
@@ -113,17 +150,21 @@ export class CodeOwnerService {
     return UserRole.OTHER;
   }
 
-  _accountInReviewers(reviewers, account) {
+  _accountInReviewers(
+    reviewers: AccountInfo[] | undefined,
+    account: AccountDetailInfo
+  ) {
     if (!reviewers) {
       return false;
     }
-    return reviewers.some(reviewer =>
-      reviewer._account_id === account._account_id);
+    return reviewers.some(
+      reviewer => reviewer._account_id === account._account_id
+    );
   }
 
-  async getStatus() {
-    const status = await this._getStatus();
-    if (status.enabled && this._isOnOlderPatchset(status.patchsetNumber)) {
+  async getStatus(): Promise<Status> {
+    const status = await this.getStatusImpl();
+    if (status.enabled && this.isOnOlderPatchset(status.patchsetNumber)) {
       // status is returned for an older patchset. Abort, re-init and refetch
       // new status - it is expected, that after several retry a status
       // for the newest patchset is returned
@@ -134,7 +175,7 @@ export class CodeOwnerService {
     return status;
   }
 
-  async _getStatus() {
+  private async getStatusImpl() {
     const enabled = await this.isCodeOwnerEnabled();
     if (!enabled) {
       return {
@@ -151,12 +192,13 @@ export class CodeOwnerService {
     return {
       enabled: true,
       patchsetNumber: ownerStatus.patch_set_number,
-      codeOwnerStatusMap: this._formatStatuses(
-          ownerStatus.file_code_owner_statuses
+      codeOwnerStatusMap: this.formatStatuses(
+        ownerStatus.file_code_owner_statuses
       ),
       rawStatuses: ownerStatus.file_code_owner_statuses,
-      newerPatchsetUploaded:
-        this._isOnNewerPatchset(ownerStatus.patch_set_number),
+      newerPatchsetUploaded: this.isOnNewerPatchset(
+        ownerStatus.patch_set_number
+      ),
     };
   }
 
@@ -166,66 +208,62 @@ export class CodeOwnerService {
       const oldPathStatus = status.old_path_status;
       const newPathStatus = status.new_path_status;
       // For deleted files, no new_path_status exists
-      return (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED) ||
-        (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED);
+      return (
+        (newPathStatus && newPathStatus.status !== OwnerStatus.APPROVED) ||
+        (oldPathStatus && oldPathStatus.status !== OwnerStatus.APPROVED)
+      );
     });
+  }
+
+  private ownersProvider(suggestionsType: SuggestionsType) {
+    return this.ownersProviders.get(suggestionsType)!;
   }
 
   /**
    * Gets owner suggestions.
-   *
-   * @returns {{
-   *  finished?: boolean,
-   *  progress?: string,
-   *  suggestions: Array<{
-   *    groupName: {
-   *      name: string,
-   *      prefix: string
-   *    },
-   *    error?: Error,
-   *    owners?: Array,
-   *    files: Array,
-   *  }>
-   * }}
    */
-  async getSuggestedOwners(suggestionsType) {
+  async getSuggestedOwners(suggestionsType: SuggestionsType) {
     const {codeOwnerStatusMap} = await this.getStatus();
-    const ownersProvider = this.ownersProviders[suggestionsType];
+    const ownersProvider = this.ownersProvider(suggestionsType);
 
-    await ownersProvider.fetchSuggestedOwners(codeOwnerStatusMap);
+    await ownersProvider!.fetchSuggestedOwners(codeOwnerStatusMap);
 
     return {
       finished: ownersProvider.getStatus() === FetchStatus.FINISHED,
       status: ownersProvider.getStatus(),
       progress: ownersProvider.getProgressString(),
-      files: this._getFilesWithStatuses(codeOwnerStatusMap,
-          ownersProvider.getFiles()),
+      files: this.getFilesWithStatuses(
+        codeOwnerStatusMap,
+        ownersProvider.getFiles()
+      ),
     };
   }
 
-  async getSuggestedOwnersProgress(suggestionsType) {
+  async getSuggestedOwnersProgress(suggestionsType: SuggestionsType) {
     const {codeOwnerStatusMap} = await this.getStatus();
-    const ownersProvider = this.ownersProviders[suggestionsType];
+    const ownersProvider = this.ownersProvider(suggestionsType);
     return {
       finished: ownersProvider.getStatus() === FetchStatus.FINISHED,
       status: ownersProvider.getStatus(),
       progress: ownersProvider.getProgressString(),
-      files: this._getFilesWithStatuses(codeOwnerStatusMap,
-          ownersProvider.getFiles()),
+      files: this.getFilesWithStatuses(
+        codeOwnerStatusMap,
+        ownersProvider.getFiles()
+      ),
     };
   }
 
-  pauseSuggestedOwnersLoading(suggestionsType) {
-    this.ownersProviders[suggestionsType].pause();
+  pauseSuggestedOwnersLoading(suggestionsType: SuggestionsType) {
+    this.ownersProvider(suggestionsType).pause();
   }
 
-  resumeSuggestedOwnersLoading(suggestionsType) {
-    this.ownersProviders[suggestionsType].resume();
+  resumeSuggestedOwnersLoading(suggestionsType: SuggestionsType) {
+    this.ownersProvider(suggestionsType).resume();
   }
 
-  _formatStatuses(statuses) {
+  private formatStatuses(statuses?: Array<FileCodeOwnerStatusInfo>) {
     // convert the array of statuses to map between file path -> status
-    return statuses.reduce((prev, cur) => {
+    return (statuses ?? []).reduce((prev, cur) => {
       const newPathStatus = cur.new_path_status;
       const oldPathStatus = cur.old_path_status;
       if (oldPathStatus) {
@@ -246,33 +284,44 @@ export class CodeOwnerService {
     }, new Map());
   }
 
-  _computeFileStatus(fileStatusMap, path) {
+  private computeFileStatus(
+    fileStatusMap: Map<string, FileStatus>,
+    path: string
+  ) {
     // empty for modified files and old-name files
     // Show `Renamed` for renamed file
     const status = fileStatusMap.get(path);
-    if (status.oldPath) {
+    if (status && status.oldPath) {
       return 'Renamed';
     }
     return;
   }
 
-  _getFilesWithStatuses(codeOwnerStatusMap, files) {
+  private getFilesWithStatuses(
+    codeOwnerStatusMap: Map<string, FileStatus>,
+    files: Array<{
+      path: string;
+      info: FetchedOwner;
+    }>
+  ): Array<FetchedFile> {
     return files.map(file => {
       return {
         path: file.path,
         info: file.info,
-        status: this._computeFileStatus(codeOwnerStatusMap, file.path),
+        status: this.computeFileStatus(codeOwnerStatusMap, file.path),
       };
     });
   }
 
-  _isOnNewerPatchset(patchsetId) {
-    const latestRevision = this.change.revisions[this.change.current_revision];
+  private isOnNewerPatchset(patchsetId: number) {
+    if (this.change.current_revision === undefined) return false;
+    const latestRevision = this.change.revisions![this.change.current_revision];
     return patchsetId > latestRevision._number;
   }
 
-  _isOnOlderPatchset(patchsetId) {
-    const latestRevision = this.change.revisions[this.change.current_revision];
+  private isOnOlderPatchset(patchsetId: number) {
+    if (this.change.current_revision === undefined) return false;
+    const latestRevision = this.change.revisions![this.change.current_revision];
     return patchsetId < latestRevision._number;
   }
 
@@ -281,8 +330,10 @@ export class CodeOwnerService {
       provider.reset();
     }
     const codeOwnersApi = new CodeOwnersApi(this.restApi);
-    this.codeOwnersCacheApi =
-        new CodeOwnersCacheApi(codeOwnersApi, this.change);
+    this.codeOwnersCacheApi = new CodeOwnersCacheApi(
+      codeOwnersApi,
+      this.change
+    );
   }
 
   async getBranchConfig() {
@@ -290,23 +341,31 @@ export class CodeOwnerService {
   }
 
   async isCodeOwnerEnabled() {
-    if (this.change.status === ChangeStatus.ABANDONED ||
-        this.change.status === ChangeStatus.MERGED) {
+    if (
+      this.change.status === ChangeStatus.ABANDONED ||
+      this.change.status === ChangeStatus.MERGED
+    ) {
       return false;
     }
     const config = await this.codeOwnersCacheApi.getBranchConfig();
     return config && !config.disabled;
   }
 
-  static getOwnerService(restApi, change) {
-    if (!this.ownerService || this.ownerService.change !== change) {
-      this.ownerService = new CodeOwnerService(restApi, change, {
+  static getOwnerService(restApi: RestPluginApi, change: ChangeInfo) {
+    if (!ownerService || ownerService.change !== change) {
+      ownerService = new CodeOwnerService(restApi, change, {
         // Chrome has a limit of 6 connections per host name, and a max of 10 connections.
         maxConcurrentRequests: 6,
       });
-      this.ownerService.prefetch();
+      ownerService.prefetch();
     }
-    return this.ownerService;
+    return ownerService;
+  }
+
+  // Only used for tests
+  static reset() {
+    if (!ownerService) return;
+    ownerService.reset();
+    ownerService = undefined;
   }
 }
-
