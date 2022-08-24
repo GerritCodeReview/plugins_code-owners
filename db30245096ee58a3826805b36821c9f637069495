@@ -1,6 +1,23 @@
 {
   "comments": [
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "d7829a3a_daf4a7a4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 17
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Test",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e668095d_f9a25bcc",
@@ -14,6 +31,24 @@
       "writtenOn": "2022-08-24T11:06:51Z",
       "side": 1,
       "message": "remove?",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f869d9a_85f96873",
+        "filename": "README.md",
+        "patchSetId": 17
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e668095d_f9a25bcc",
       "revId": "db30245096ee58a3826805b36821c9f637069495",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -35,6 +70,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "15dfd7cf_8cd0979d",
+        "filename": "web/.eslintrc.js",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6812480c_2eba4d27",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "9fc70dad_8b9c5fc7",
@@ -48,6 +101,30 @@
       "writtenOn": "2022-08-24T11:06:51Z",
       "side": 1,
       "message": "```suggestion\nexport enum MergeCommitStrategy {\n```",
+      "range": {
+        "startLine": 48,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 29
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ef11fe3c_9cf655e5",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9fc70dad_8b9c5fc7",
       "range": {
         "startLine": 48,
         "startChar": 12,
@@ -81,6 +158,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "27df4836_4ed90ae2",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Had to change the code to actually pass in the NumericchangeId instead of the ChangeId.",
+      "parentUuid": "32edafac_2a796dff",
+      "range": {
+        "startLine": 181,
+        "startChar": 14,
+        "endLine": 181,
+        "endChar": 26
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3deb83ba_424d0b14",
@@ -98,6 +199,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "60a84027_ffba9dd5",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3deb83ba_424d0b14",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "98b9a362_74b1c258",
@@ -111,6 +230,30 @@
       "writtenOn": "2022-08-24T11:06:51Z",
       "side": 1,
       "message": "Just drop the entire method? I think the first two lines in the render() method are fine for hiding the widget.",
+      "range": {
+        "startLine": 94,
+        "startChar": 2,
+        "endLine": 100,
+        "endChar": 3
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "98a11fda_a801f92c",
+        "filename": "web/code-owners-banner.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "98b9a362_74b1c258",
       "range": {
         "startLine": 94,
         "startChar": 2,
@@ -140,6 +283,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "30233faf_4df76632",
+        "filename": "web/code-owners-banner.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "The CodeOwnersModelMixin isn\u0027t a model but something that talks to the model. It is a different approach than our usual one and I\u0027m having some challenges with reactivity.",
+      "parentUuid": "66127f38_b85abee4",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "58426e5b_4d5785a3",
         "filename": "web/code-owners-banner.ts",
         "patchSetId": 17
@@ -151,6 +312,30 @@
       "writtenOn": "2022-08-24T11:06:51Z",
       "side": 1,
       "message": "For Lit `observers()` does not have any meaning. Does this work as intended?",
+      "range": {
+        "startLine": 141,
+        "startChar": 13,
+        "endLine": 141,
+        "endChar": 22
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6f46c866_c30a65a3",
+        "filename": "web/code-owners-banner.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Forgotten leftovers.",
+      "parentUuid": "58426e5b_4d5785a3",
       "range": {
         "startLine": 141,
         "startChar": 13,
@@ -180,6 +365,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "a21e6fee_8d800cbb",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Will have to think about this some more.",
+      "parentUuid": "f0994dd5_e56977ad",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "d67511a5_b06b548e",
         "filename": "web/code-owners-model.ts",
         "patchSetId": 17
@@ -191,6 +394,24 @@
       "writtenOn": "2022-08-24T11:06:51Z",
       "side": 1,
       "message": "remove",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e411c965_3d6f7d70",
+        "filename": "web/code-owners-model.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d67511a5_b06b548e",
       "revId": "db30245096ee58a3826805b36821c9f637069495",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -212,6 +433,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c0d80b6_c19cf3c0",
+        "filename": "web/code-owners-model.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6925d8f7_6908c88f",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1aa2412f_5375f06b",
@@ -225,6 +464,30 @@
       "writtenOn": "2022-08-24T11:06:51Z",
       "side": 1,
       "message": "I think I would be fine with just using strings here instead of imported constants. But up to you.",
+      "range": {
+        "startLine": 36,
+        "startChar": 43,
+        "endLine": 36,
+        "endChar": 61
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d77b1f12_75899ab8",
+        "filename": "web/plugin.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-24T11:46:37Z",
+      "side": 1,
+      "message": "I like the extra safety of not having a potential typo between the 2 locations.",
+      "parentUuid": "1aa2412f_5375f06b",
       "range": {
         "startLine": 36,
         "startChar": 43,
