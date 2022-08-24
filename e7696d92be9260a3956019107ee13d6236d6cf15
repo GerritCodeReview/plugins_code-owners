@@ -51,6 +51,24 @@
       "parentUuid": "110be979_ec4ba330",
       "revId": "e7696d92be9260a3956019107ee13d6236d6cf15",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "40af27e4_87eb6532",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1085901
+      },
+      "writtenOn": "2022-08-24T11:23:29Z",
+      "side": 1,
+      "message": "Sorry, I don\u0027t know Lit and Lit elements lifecycle/events/method to fully understand how it works after migration. I went through the code and noticed only minor ts problem (which are already commented by Ben).\n\nI think if you tested it with dev-helper it should be enough.",
+      "parentUuid": "736ee7ca_70287cd9",
+      "revId": "e7696d92be9260a3956019107ee13d6236d6cf15",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
