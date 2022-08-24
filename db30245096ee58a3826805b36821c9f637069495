@@ -1,0 +1,238 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e668095d_f9a25bcc",
+        "filename": "README.md",
+        "patchSetId": 17
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "remove?",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6812480c_2eba4d27",
+        "filename": "web/.eslintrc.js",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "I am not sure, but maybe all js files need a license header.",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9fc70dad_8b9c5fc7",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "```suggestion\nexport enum MergeCommitStrategy {\n```",
+      "range": {
+        "startLine": 48,
+        "startChar": 12,
+        "endLine": 48,
+        "endChar": 29
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "32edafac_2a796dff",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "That is the wrong type. `ChangeInfoId` is for the change id. What you want here is the change number (type `NumericChangeId`).\n\nMaybe also change the parameter name here and elsewhere.",
+      "range": {
+        "startLine": 181,
+        "startChar": 14,
+        "endLine": 181,
+        "endChar": 26
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3deb83ba_424d0b14",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 209,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "Optional: You could use `RepoName` and `BranchName` types here and elsewhere.",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "98b9a362_74b1c258",
+        "filename": "web/code-owners-banner.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "Just drop the entire method? I think the first two lines in the render() method are fine for hiding the widget.",
+      "range": {
+        "startLine": 94,
+        "startChar": 2,
+        "endLine": 100,
+        "endChar": 3
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "66127f38_b85abee4",
+        "filename": "web/code-owners-banner.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "I find it super weird that we are using a LitElement as a model, if we don\u0027t render anything. Maybe we can then just use the model design that we are also using in the main app?",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58426e5b_4d5785a3",
+        "filename": "web/code-owners-banner.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 141,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "For Lit `observers()` does not have any meaning. Does this work as intended?",
+      "range": {
+        "startLine": 141,
+        "startChar": 13,
+        "endLine": 141,
+        "endChar": 22
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f0994dd5_e56977ad",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "See other comment: Can we do this without Lit?",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d67511a5_b06b548e",
+        "filename": "web/code-owners-model.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "remove",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6925d8f7_6908c88f",
+        "filename": "web/code-owners-model.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "move to a util?",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1aa2412f_5375f06b",
+        "filename": "web/plugin.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-24T11:06:51Z",
+      "side": 1,
+      "message": "I think I would be fine with just using strings here instead of imported constants. But up to you.",
+      "range": {
+        "startLine": 36,
+        "startChar": 43,
+        "endLine": 36,
+        "endChar": 61
+      },
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
