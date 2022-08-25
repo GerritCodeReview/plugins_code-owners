@@ -299,6 +299,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "ac3854fe_797d4bc9",
+        "filename": "web/code-owners-banner.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 135,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-25T10:05:46Z",
+      "side": 1,
+      "message": "Moved to reactive approach.\n\nStill kept the mixing as it facilitated sharing the subscription logic.",
+      "parentUuid": "30233faf_4df76632",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "58426e5b_4d5785a3",
@@ -377,6 +395,24 @@
       "side": 1,
       "message": "Will have to think about this some more.",
       "parentUuid": "f0994dd5_e56977ad",
+      "revId": "db30245096ee58a3826805b36821c9f637069495",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c8f67d07_e28a9949",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 17
+      },
+      "lineNbr": 47,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-08-25T10:05:46Z",
+      "side": 1,
+      "message": "Moved to using RXJS.",
+      "parentUuid": "a21e6fee_8d800cbb",
       "revId": "db30245096ee58a3826805b36821c9f637069495",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
