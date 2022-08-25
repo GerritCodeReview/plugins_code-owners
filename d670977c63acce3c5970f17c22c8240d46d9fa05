@@ -1,0 +1,72 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1c8105bb_009ed7e7",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 21
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-25T11:12:03Z",
+      "side": 1,
+      "message": "Remove? Or what is the TODO?",
+      "revId": "d670977c63acce3c5970f17c22c8240d46d9fa05",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "55ebc37d_d1811077",
+        "filename": "web/suggest-owners-trigger.ts",
+        "patchSetId": 21
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-25T11:12:03Z",
+      "side": 1,
+      "message": "Remove? Or what is the TODO?",
+      "revId": "d670977c63acce3c5970f17c22c8240d46d9fa05",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fd0f2541_c8481256",
+        "filename": "web/suggest-owners.ts",
+        "patchSetId": 21
+      },
+      "lineNbr": 42,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-25T11:12:03Z",
+      "side": 1,
+      "message": "Remove? Or what is the TODO?",
+      "revId": "d670977c63acce3c5970f17c22c8240d46d9fa05",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "306bd091_68d4acfa",
+        "filename": "web/suggest-owners.ts",
+        "patchSetId": 21
+      },
+      "lineNbr": 153,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-08-25T11:12:03Z",
+      "side": 1,
+      "message": "Remove? Or what is the TODO?",
+      "revId": "d670977c63acce3c5970f17c22c8240d46d9fa05",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
