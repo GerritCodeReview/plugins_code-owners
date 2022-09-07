@@ -92,7 +92,7 @@ export enum OwnerStatus {
 }
 export interface PathCodeOwnerStatusInfo {
   path: string;
-  status?: OwnerStatus;
+  status: OwnerStatus;
   reasons?: Array<string>;
 }
 
@@ -145,7 +145,7 @@ export class CodeOwnersApi {
    * Send a get request and provides custom response-code handling
    */
   private async get(url: string): Promise<unknown> {
-    const errFn = (response?: Response | null, error?: Error) => {
+    const errFn = (response?: Response|null, error?: Error) => {
       if (error) throw error;
       if (response) throw new ResponseError(response);
       throw new Error('Generic REST API error');
@@ -163,57 +163,57 @@ export class CodeOwnersApi {
   }
 
   /**
-   * Returns a promise fetching the owner statuses for all files within the change.
+   * Returns a promise fetching the owner statuses for all files within the
+   * change.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#change-endpoints
+   * @doc
+   * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#change-endpoints
    */
   listOwnerStatus(changeId: NumericChangeId): Promise<CodeOwnerStatusInfo> {
-    return this.get(
-      `/changes/${changeId}/code_owners.status?limit=100000`
-    ) as Promise<CodeOwnerStatusInfo>;
+    return this.get(`/changes/${changeId}/code_owners.status?limit=100000`) as
+        Promise<CodeOwnerStatusInfo>;
   }
 
   /**
    * Returns a promise fetching the owners for a given path.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
+   * @doc
+   * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
    */
-  listOwnersForPath(
-    changeId: NumericChangeId,
-    path: string,
-    limit: number
-  ): Promise<CodeOwnersInfo> {
+  listOwnersForPath(changeId: NumericChangeId, path: string, limit: number):
+      Promise<CodeOwnersInfo> {
     return this.get(
-      `/changes/${changeId}/revisions/current/code_owners` +
-        `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`
-    ) as Promise<CodeOwnersInfo>;
+               `/changes/${changeId}/revisions/current/code_owners` +
+               `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`) as
+        Promise<CodeOwnersInfo>;
   }
 
   /**
    * Returns a promise fetching the owners config for a given path.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#branch-endpoints
+   * @doc
+   * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#branch-endpoints
    */
   getConfigForPath(project: string, branch: string, path: string) {
     return this.get(
-      `/projects/${encodeURIComponent(project)}/` +
+        `/projects/${encodeURIComponent(project)}/` +
         `branches/${encodeURIComponent(branch)}/` +
-        `code_owners.config/${encodeURIComponent(path)}`
-    );
+        `code_owners.config/${encodeURIComponent(path)}`);
   }
 
   /**
    * Returns a promise fetching the owners config for a given branch.
    *
-   * @doc https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#branch-endpoints
+   * @doc
+   * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#branch-endpoints
    */
   async getBranchConfig(project: RepoName, branch: BranchName) {
     try {
-      const config = (await this.get(
-        `/projects/${encodeURIComponent(project)}/` +
-          `branches/${encodeURIComponent(branch)}/` +
-          `code_owners.branch_config`
-      )) as CodeOwnerBranchConfigInfo;
+      const config =
+          (await this.get(
+              `/projects/${encodeURIComponent(project)}/` +
+              `branches/${encodeURIComponent(branch)}/` +
+              `code_owners.branch_config`)) as CodeOwnerBranchConfigInfo;
       return config;
     } catch (err) {
       if (err instanceof ResponseError) {
@@ -249,14 +249,11 @@ export class CodeOwnersCacheApi {
   private promises = new Map<string, Promise<unknown>>();
 
   constructor(
-    private readonly codeOwnerApi: CodeOwnersApi,
-    private readonly change: ChangeInfo
-  ) {}
+      private readonly codeOwnerApi: CodeOwnersApi,
+      private readonly change: ChangeInfo) {}
 
-  private fetchOnce(
-    cacheKey: string,
-    asyncFn: () => Promise<unknown>
-  ): Promise<unknown> {
+  private fetchOnce(cacheKey: string, asyncFn: () => Promise<unknown>):
+      Promise<unknown> {
     let promise = this.promises.get(cacheKey);
     if (promise) return promise;
     promise = asyncFn();
@@ -264,10 +261,9 @@ export class CodeOwnersCacheApi {
     return promise;
   }
 
-  getAccount(): Promise<AccountDetailInfo | undefined> {
-    return this.fetchOnce('getAccount', () => this.getAccountImpl()) as Promise<
-      AccountDetailInfo | undefined
-    >;
+  getAccount(): Promise<AccountDetailInfo|undefined> {
+    return this.fetchOnce('getAccount', () => this.getAccountImpl()) as
+        Promise<AccountDetailInfo|undefined>;
   }
 
   private async getAccountImpl() {
@@ -277,14 +273,17 @@ export class CodeOwnersCacheApi {
   }
 
   listOwnerStatus(): Promise<CodeOwnerStatusInfo> {
-    return this.fetchOnce('listOwnerStatus', () =>
-      this.codeOwnerApi.listOwnerStatus(this.change._number)
-    ) as Promise<CodeOwnerStatusInfo>;
+    return this.fetchOnce(
+               'listOwnerStatus',
+               () => this.codeOwnerApi.listOwnerStatus(this.change._number)) as
+        Promise<CodeOwnerStatusInfo>;
   }
 
   getBranchConfig(): Promise<CodeOwnerBranchConfigInfo> {
-    return this.fetchOnce('getBranchConfig', () =>
-      this.codeOwnerApi.getBranchConfig(this.change.project, this.change.branch)
-    ) as Promise<CodeOwnerBranchConfigInfo>;
+    return this.fetchOnce(
+               'getBranchConfig',
+               () => this.codeOwnerApi.getBranchConfig(
+                   this.change.project, this.change.branch)) as
+        Promise<CodeOwnerBranchConfigInfo>;
   }
 }
