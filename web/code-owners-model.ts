@@ -48,9 +48,8 @@ export interface PluginStatus {
 
 export function isPluginErrorState(state: PluginState) {
   return (
-    state === PluginState.ServerConfigurationError ||
-    state === PluginState.Failed
-  );
+      state === PluginState.ServerConfigurationError ||
+      state === PluginState.Failed);
 }
 
 export enum SuggestionsType {
@@ -88,14 +87,14 @@ export interface Status {
 export interface FileStatus {
   changeType: ChangeType;
   status: OwnerStatus;
-  newPath?: string | null;
-  oldPath?: string | null;
+  newPath?: string|null;
+  oldPath?: string|null;
 }
 
 export const BestSuggestionsLimit = 5;
 export const AllSuggestionsLimit = 1000;
 
-let codeOwnersModel: CodeOwnersModel | undefined;
+let codeOwnersModel: CodeOwnersModel|undefined;
 
 export interface CodeOwnersState {
   showSuggestions: boolean;
@@ -112,11 +111,11 @@ export interface CodeOwnersState {
  * Maintain the state of code-owners.
  * Raises 'model-property-changed' event when a property is changed.
  * The plugin shares the same model between all UI elements (if it is not,
- * the plugin can't maintain showSuggestions state across different UI elements).
- * UI elements use values from this model to display information
- * and listens for the model-property-changed event. To do so, UI elements
- * add CodeOwnersModelMixin, which is doing the listening and the translation
- * from model-property-changed event to Polymer property-changed-event. The
+ * the plugin can't maintain showSuggestions state across different UI
+ * elements). UI elements use values from this model to display information and
+ * listens for the model-property-changed event. To do so, UI elements add
+ * CodeOwnersModelMixin, which is doing the listening and the translation from
+ * model-property-changed event to Polymer property-changed-event. The
  * translation allows to use model properties in observables, bindings,
  * computed properties, etc...
  * The CodeOwnersModelLoader updates the model.
@@ -136,26 +135,23 @@ export class CodeOwnersModel extends EventTarget {
 
   public showSuggestions$ = select(this.state$, state => state.showSuggestions);
 
-  public selectedSuggestionsType$ = select(
-    this.state$,
-    state => state.selectedSuggestionsType
-  );
+  public selectedSuggestionsType$ =
+      select(this.state$, state => state.selectedSuggestionsType);
 
   public selectedSuggestionsFiles$ = select(
-    this.state$,
-    state => state.suggestionsByTypes.get(state.selectedSuggestionsType)?.files
-  );
+      this.state$,
+      state =>
+          state.suggestionsByTypes.get(state.selectedSuggestionsType)?.files);
 
   public selectedSuggestionsState$ = select(
-    this.state$,
-    state => state.suggestionsByTypes.get(state.selectedSuggestionsType)!.state
-  );
+      this.state$,
+      state =>
+          state.suggestionsByTypes.get(state.selectedSuggestionsType)!.state);
 
   public selectedSuggestionsLoadProgress$ = select(
-    this.state$,
-    state =>
-      state.suggestionsByTypes.get(state.selectedSuggestionsType)!.loadProgress
-  );
+      this.state$,
+      state => state.suggestionsByTypes.get(state.selectedSuggestionsType)!
+                   .loadProgress);
 
   constructor(readonly change: ChangeInfo) {
     super();
@@ -233,9 +229,8 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   private updateSuggestion(
-    suggestionsType: SuggestionsType,
-    suggestionsUpdate: Partial<Suggestion>
-  ) {
+      suggestionsType: SuggestionsType,
+      suggestionsUpdate: Partial<Suggestion>) {
     const current = this.subject$.getValue();
     const nextState = {
       ...current,
@@ -249,9 +244,7 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   setSuggestionsFiles(
-    suggestionsType: SuggestionsType,
-    files: Array<FetchedFile>
-  ) {
+      suggestionsType: SuggestionsType, files: Array<FetchedFile>) {
     const current = this.subject$.getValue();
     const suggestions = current.suggestionsByTypes.get(suggestionsType);
     if (!suggestions) return;
@@ -261,9 +254,7 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   setSuggestionsState(
-    suggestionsType: SuggestionsType,
-    state: SuggestionsState
-  ) {
+      suggestionsType: SuggestionsType, state: SuggestionsState) {
     const current = this.subject$.getValue();
     const suggestions = current.suggestionsByTypes.get(suggestionsType);
     if (!suggestions) return;
@@ -272,9 +263,7 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   setSuggestionsLoadProgress(
-    suggestionsType: SuggestionsType,
-    loadProgress: string
-  ) {
+      suggestionsType: SuggestionsType, loadProgress: string) {
     const current = this.subject$.getValue();
     const suggestions = current.suggestionsByTypes.get(suggestionsType);
     if (!suggestions) return;
@@ -300,16 +289,14 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   _arePluginStatusesEqual(
-    status1: PluginStatus | undefined,
-    status2: PluginStatus | undefined
-  ) {
+      status1: PluginStatus|undefined, status2: PluginStatus|undefined) {
     if (status1 === undefined || status2 === undefined) {
       return status1 === status2;
     }
     if (status1.state !== status2.state) return false;
-    return isPluginErrorState(status1.state)
-      ? status1.failedMessage === status2.failedMessage
-      : true;
+    return isPluginErrorState(status1.state) ?
+        status1.failedMessage === status2.failedMessage :
+        true;
   }
 
   static getModel(change: ChangeInfo) {

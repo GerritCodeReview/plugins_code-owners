@@ -56,6 +56,8 @@ interface CodeOwnerServiceOptions {
   maxConcurrentRequests?: number;
 }
 
+function noAwait(_promise: Promise<unknown>) {}
+
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -169,7 +171,7 @@ export class CodeOwnerService {
       // new status - it is expected, that after several retry a status
       // for the newest patchset is returned
       this.reset();
-      this.prefetch();
+      noAwait(this.prefetch());
       return await this.getStatus();
     }
     return status;
@@ -181,7 +183,7 @@ export class CodeOwnerService {
       return {
         patchsetNumber: 0,
         enabled: false,
-        codeOwnerStatusMap: new Map(),
+        codeOwnerStatusMap: new Map<string, FileStatus>(),
         rawStatuses: [],
         newerPatchsetUploaded: false,
       };
@@ -281,7 +283,7 @@ export class CodeOwnerService {
         });
       }
       return prev;
-    }, new Map());
+    }, new Map<string, FileStatus>());
   }
 
   private computeFileStatus(
