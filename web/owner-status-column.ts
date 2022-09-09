@@ -56,7 +56,7 @@ const STATUS_ICON = {
   [STATUS_CODE.PENDING]: 'schedule',
   [STATUS_CODE.MISSING]: 'close',
   [STATUS_CODE.PENDING_OLD_PATH]: 'schedule',
-  [STATUS_CODE.MISSING_OLD_PATH]: ':close',
+  [STATUS_CODE.MISSING_OLD_PATH]: 'close',
   [STATUS_CODE.APPROVED]: 'check',
   [STATUS_CODE.ERROR]: 'info',
 };
@@ -72,6 +72,17 @@ const STATUS_TOOLTIP = {
   [STATUS_CODE.ERROR]: 'Failed to fetch code owner status',
   [STATUS_CODE.ERROR_OLD_PATH]: 'Failed to fetch code owner status',
 };
+
+export function hasPath(ownedPaths: Set<string>, path: string | undefined) {
+  if (!path) return false;
+  if (path.charAt(0) === '/') {
+    if (ownedPaths.has(path)) return true;
+  } else {
+    // NOTE: The backend returns absolute paths.
+    if (ownedPaths.has('/' + path)) return true;
+  }
+  return false;
+}
 
 const base = CodeOwnersModelMixin(LitElement);
 
@@ -160,7 +171,7 @@ export class OwnerStatusColumnContent extends BaseEl {
     return [
       css`
         :host {
-          display: block;
+          display: flex;
           padding-right: var(--spacing-m);
           width: 3em;
           text-align: center;
@@ -168,14 +179,14 @@ export class OwnerStatusColumnContent extends BaseEl {
         gr-icon {
           padding: var(--spacing-xs) 0px;
         }
-        :host([owner-status='approved']) gr-icon {
+        :host([owner-status='approved']) gr-icon.status {
           color: var(--positive-green-text-color);
         }
-        :host([owner-status='pending']) gr-icon {
+        :host([owner-status='pending']) gr-icon.status {
           color: #ffa62f;
         }
-        :host([owner-status='missing']) gr-icon,
-        :host([owner-status='error']) gr-icon {
+        :host([owner-status='missing']) gr-icon.status,
+        :host([owner-status='error']) gr-icon.status {
           color: var(--negative-red-text-color);
         }
       `,
@@ -189,19 +200,42 @@ export class OwnerStatusColumnContent extends BaseEl {
 
   override render() {
     if (this.computeHidden() || this.status === undefined) return nothing;
+    return html`${this.renderStatus()}${this.renderOwnership()}`;
+  }
 
+  private renderStatus() {
     const statusInfo = this.computeTooltip();
-    const statusIcon = this.computeIcon();
+    const statusIcon = this.computeStatusIcon();
     return html`
       <gr-tooltip-content title=${statusInfo} has-tooltip>
-        <gr-icon icon=${statusIcon}></gr-icon>
+        <gr-icon class="status" icon=${statusIcon}></gr-icon>
       </gr-tooltip-content>
     `;
+  }
+
+  private renderOwnership() {
+    if (!this.isOwned()) return nothing;
+    return html`
+      <gr-tooltip-content title="You own this file" has-tooltip>
+        <gr-icon filled icon="policy"></gr-icon>
+      </gr-tooltip-content>
+    `;
+  }
+
+  private isOwned() {
+    if (!this.ownedPaths) return false;
+    if (
+      hasPath(this.ownedPaths.newPaths, this.path) ||
+      hasPath(this.ownedPaths.oldPaths, this.oldPath)
+    )
+      return true;
+    return false;
   }
 
   override loadPropertiesAfterModelChanged() {
     super.loadPropertiesAfterModelChanged();
     this.modelLoader?.loadStatus();
+    this.modelLoader?.loadOwnedPaths();
   }
 
   private computeStatus() {
@@ -237,7 +271,7 @@ export class OwnerStatusColumnContent extends BaseEl {
     );
   }
 
-  private computeIcon() {
+  private computeStatusIcon() {
     return STATUS_ICON[this.ownerStatus!];
   }
 

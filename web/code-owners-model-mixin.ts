@@ -19,6 +19,7 @@ import {CodeOwnerService} from './code-owners-service';
 import {ModelLoader} from './code-owners-model-loader';
 import {
   CodeOwnersModel,
+  OwnedPathsInfoOpt,
   PluginStatus,
   Status,
   SuggestionsState,
@@ -53,6 +54,7 @@ export interface CodeOwnersModelMixinInterface {
   selectedSuggestionsFiles?: Array<FetchedFile>;
   selectedSuggestionsState?: SuggestionsState;
   selectedSuggestionsLoadProgress?: string;
+  ownedPaths?: OwnedPathsInfoOpt;
 
   loadPropertiesAfterModelChanged(): void;
 }
@@ -112,6 +114,9 @@ export const CodeOwnersModelMixin = <T extends Constructor<LitElement>>(
     @state()
     selectedSuggestionsLoadProgress?: string;
 
+    @state()
+    ownedPaths?: OwnedPathsInfoOpt;
+
     private model_?: CodeOwnersModel;
 
     private subscriptions: Array<Subscription> = [];
@@ -142,12 +147,12 @@ export const CodeOwnersModelMixin = <T extends Constructor<LitElement>>(
       );
       this.subscriptions.push(
         model.state$.subscribe(s => {
-          this.userRole = s.userRole;
+          this.status = s.status;
         })
       );
       this.subscriptions.push(
         model.state$.subscribe(s => {
-          this.status = s.status;
+          this.userRole = s.userRole;
         })
       );
       this.subscriptions.push(
@@ -178,6 +183,11 @@ export const CodeOwnersModelMixin = <T extends Constructor<LitElement>>(
       this.subscriptions.push(
         model.selectedSuggestionsState$.subscribe(s => {
           this.selectedSuggestionsState = s;
+        })
+      );
+      this.subscriptions.push(
+        model.ownedPaths$.subscribe(s => {
+          this.ownedPaths = s;
         })
       );
       this.loadPropertiesAfterModelChanged();

@@ -95,14 +95,18 @@ export class CodeOwnerService {
   }
 
   /**
+   * Fetch the account.
+   */
+  getAccount(): Promise<AccountDetailInfo | undefined> {
+    return this.codeOwnersCacheApi.getAccount();
+  }
+
+  /**
    * Prefetch data
    */
   async prefetch() {
     try {
-      await Promise.all([
-        this.codeOwnersCacheApi.getAccount(),
-        this.getStatus(),
-      ]);
+      await Promise.all([this.getAccount(), this.getStatus()]);
     } catch {
       // Ignore any errors during prefetch.
       // The same call from a different place throws the same exception
@@ -117,7 +121,7 @@ export class CodeOwnerService {
    * role 'REVIEWER' remains unchanged until the change view is reloaded.
    */
   async getLoggedInUserInitialRole(): Promise<UserRole> {
-    const account = await this.codeOwnersCacheApi.getAccount();
+    const account = await this.getAccount();
     if (!account) {
       return UserRole.ANONYMOUS;
     }
@@ -141,18 +145,18 @@ export class CodeOwnerService {
       return UserRole.CHANGE_OWNER;
     }
     if (change.reviewers) {
-      if (this._accountInReviewers(change.reviewers.REVIEWER, account)) {
+      if (this.accountInReviewers(change.reviewers.REVIEWER, account)) {
         return UserRole.REVIEWER;
-      } else if (this._accountInReviewers(change.reviewers.CC, account)) {
+      } else if (this.accountInReviewers(change.reviewers.CC, account)) {
         return UserRole.CC;
-      } else if (this._accountInReviewers(change.reviewers.REMOVED, account)) {
+      } else if (this.accountInReviewers(change.reviewers.REMOVED, account)) {
         return UserRole.REMOVED_REVIEWER;
       }
     }
     return UserRole.OTHER;
   }
 
-  _accountInReviewers(
+  private accountInReviewers(
     reviewers: AccountInfo[] | undefined,
     account: AccountDetailInfo
   ) {
@@ -219,6 +223,13 @@ export class CodeOwnerService {
 
   private ownersProvider(suggestionsType: SuggestionsType) {
     return this.ownersProviders.get(suggestionsType)!;
+  }
+
+  /**
+   * Gets which files are owned by the given user.
+   */
+  async getOwnedPaths() {
+    return this.codeOwnersCacheApi.listOwnedPaths();
   }
 
   /**

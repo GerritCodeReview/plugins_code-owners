@@ -1,4 +1,3 @@
-import './test-setup.js';
 import {CodeOwnerService} from './code-owners-service.js';
 import {
   RequestPayload,
@@ -9,6 +8,7 @@ import {
   HttpMethod,
 } from '@gerritcodereview/typescript-api/rest-api.js';
 import {SuggestionsType} from './code-owners-model.js';
+import {assert} from '@open-wc/testing';
 
 function flush() {
   return new Promise((resolve, _reject) => {
