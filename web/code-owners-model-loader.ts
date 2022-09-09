@@ -83,6 +83,14 @@ export class ModelLoader {
     );
   }
 
+  async loadOwnedPaths() {
+    await this._loadProperty(
+      'ownedPaths',
+      () => this.ownersService.getOwnedPaths(),
+      paths => this.ownersModel.setOwnedPaths(paths)
+    );
+  }
+
   async loadUserRole() {
     await this._loadProperty(
       'userRole',

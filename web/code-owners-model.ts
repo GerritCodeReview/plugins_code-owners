@@ -23,6 +23,7 @@ import {
   FetchedFile,
   FileCodeOwnerStatusInfo,
   OwnerStatus,
+  OwnedPathsInfo,
 } from './code-owners-api';
 import {deepEqual} from './deep-util';
 import {select} from './observable-util';
@@ -48,8 +49,9 @@ export interface PluginStatus {
 
 export function isPluginErrorState(state: PluginState) {
   return (
-      state === PluginState.ServerConfigurationError ||
-      state === PluginState.Failed);
+    state === PluginState.ServerConfigurationError ||
+    state === PluginState.Failed
+  );
 }
 
 export enum SuggestionsType {
@@ -87,14 +89,19 @@ export interface Status {
 export interface FileStatus {
   changeType: ChangeType;
   status: OwnerStatus;
-  newPath?: string|null;
-  oldPath?: string|null;
+  newPath?: string | null;
+  oldPath?: string | null;
 }
 
 export const BestSuggestionsLimit = 5;
 export const AllSuggestionsLimit = 1000;
 
-let codeOwnersModel: CodeOwnersModel|undefined;
+let codeOwnersModel: CodeOwnersModel | undefined;
+
+export interface OwnedPathsInfoOpt {
+  oldPaths: Set<string>;
+  newPaths: Set<string>;
+}
 
 export interface CodeOwnersState {
   showSuggestions: boolean;
@@ -102,6 +109,7 @@ export interface CodeOwnersState {
   suggestionsByTypes: Map<SuggestionsType, Suggestion>;
   pluginStatus?: PluginStatus;
   branchConfig?: CodeOwnerBranchConfigInfo;
+  ownedPaths?: OwnedPathsInfoOpt;
   userRole?: UserRole;
   areAllFilesApproved?: boolean;
   status?: Status;
@@ -135,23 +143,28 @@ export class CodeOwnersModel extends EventTarget {
 
   public showSuggestions$ = select(this.state$, state => state.showSuggestions);
 
-  public selectedSuggestionsType$ =
-      select(this.state$, state => state.selectedSuggestionsType);
+  public selectedSuggestionsType$ = select(
+    this.state$,
+    state => state.selectedSuggestionsType
+  );
 
   public selectedSuggestionsFiles$ = select(
-      this.state$,
-      state =>
-          state.suggestionsByTypes.get(state.selectedSuggestionsType)?.files);
+    this.state$,
+    state => state.suggestionsByTypes.get(state.selectedSuggestionsType)?.files
+  );
 
   public selectedSuggestionsState$ = select(
-      this.state$,
-      state =>
-          state.suggestionsByTypes.get(state.selectedSuggestionsType)!.state);
+    this.state$,
+    state => state.suggestionsByTypes.get(state.selectedSuggestionsType)!.state
+  );
 
   public selectedSuggestionsLoadProgress$ = select(
-      this.state$,
-      state => state.suggestionsByTypes.get(state.selectedSuggestionsType)!
-                   .loadProgress);
+    this.state$,
+    state =>
+      state.suggestionsByTypes.get(state.selectedSuggestionsType)!.loadProgress
+  );
+
+  public ownedPaths$ = select(this.state$, state => state.ownedPaths);
 
   constructor(readonly change: ChangeInfo) {
     super();
@@ -229,8 +242,9 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   private updateSuggestion(
-      suggestionsType: SuggestionsType,
-      suggestionsUpdate: Partial<Suggestion>) {
+    suggestionsType: SuggestionsType,
+    suggestionsUpdate: Partial<Suggestion>
+  ) {
     const current = this.subject$.getValue();
     const nextState = {
       ...current,
@@ -244,7 +258,9 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   setSuggestionsFiles(
-      suggestionsType: SuggestionsType, files: Array<FetchedFile>) {
+    suggestionsType: SuggestionsType,
+    files: Array<FetchedFile>
+  ) {
     const current = this.subject$.getValue();
     const suggestions = current.suggestionsByTypes.get(suggestionsType);
     if (!suggestions) return;
@@ -254,7 +270,9 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   setSuggestionsState(
-      suggestionsType: SuggestionsType, state: SuggestionsState) {
+    suggestionsType: SuggestionsType,
+    state: SuggestionsState
+  ) {
     const current = this.subject$.getValue();
     const suggestions = current.suggestionsByTypes.get(suggestionsType);
     if (!suggestions) return;
@@ -263,12 +281,33 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   setSuggestionsLoadProgress(
-      suggestionsType: SuggestionsType, loadProgress: string) {
+    suggestionsType: SuggestionsType,
+    loadProgress: string
+  ) {
     const current = this.subject$.getValue();
     const suggestions = current.suggestionsByTypes.get(suggestionsType);
     if (!suggestions) return;
     if (suggestions.loadProgress === loadProgress) return;
     this.updateSuggestion(suggestionsType, {loadProgress});
+  }
+
+  setOwnedPaths(ownedPathsInfo: OwnedPathsInfo | undefined) {
+    const current = this.subject$.getValue();
+    const ownedPaths = {
+      oldPaths: new Set<string>(),
+      newPaths: new Set<string>(),
+    };
+    for (const changed_file of ownedPathsInfo?.owned_changed_files ?? []) {
+      if (changed_file.old_path?.owned)
+        ownedPaths.oldPaths.add(changed_file.old_path.path);
+      if (changed_file.new_path?.owned)
+        ownedPaths.newPaths.add(changed_file.new_path.path);
+    }
+    const nextState = {
+      ...current,
+      ownedPaths,
+    };
+    this.setState(nextState);
   }
 
   setPluginEnabled(enabled: boolean) {
@@ -289,14 +328,16 @@ export class CodeOwnersModel extends EventTarget {
   }
 
   _arePluginStatusesEqual(
-      status1: PluginStatus|undefined, status2: PluginStatus|undefined) {
+    status1: PluginStatus | undefined,
+    status2: PluginStatus | undefined
+  ) {
     if (status1 === undefined || status2 === undefined) {
       return status1 === status2;
     }
     if (status1.state !== status2.state) return false;
-    return isPluginErrorState(status1.state) ?
-        status1.failedMessage === status2.failedMessage :
-        true;
+    return isPluginErrorState(status1.state)
+      ? status1.failedMessage === status2.failedMessage
+      : true;
   }
 
   static getModel(change: ChangeInfo) {

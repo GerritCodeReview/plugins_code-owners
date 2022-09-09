@@ -133,6 +133,21 @@ export interface FetchedFile {
   info: FetchedOwner;
   status?: string;
 }
+
+export interface OwnedPathInfo {
+  path: string;
+  owned?: boolean;
+}
+
+export interface OwnedChangedFileInfo {
+  new_path?: OwnedPathInfo;
+  old_path?: OwnedPathInfo;
+}
+
+export interface OwnedPathsInfo {
+  owned_changed_files?: Array<OwnedChangedFileInfo>;
+}
+
 /**
  * Responsible for communicating with the rest-api
  *
@@ -145,7 +160,7 @@ export class CodeOwnersApi {
    * Send a get request and provides custom response-code handling
    */
   private async get(url: string): Promise<unknown> {
-    const errFn = (response?: Response|null, error?: Error) => {
+    const errFn = (response?: Response | null, error?: Error) => {
       if (error) throw error;
       if (response) throw new ResponseError(response);
       throw new Error('Generic REST API error');
@@ -170,8 +185,18 @@ export class CodeOwnersApi {
    * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#change-endpoints
    */
   listOwnerStatus(changeId: NumericChangeId): Promise<CodeOwnerStatusInfo> {
-    return this.get(`/changes/${changeId}/code_owners.status?limit=100000`) as
-        Promise<CodeOwnerStatusInfo>;
+    return this.get(
+      `/changes/${changeId}/code_owners.status?limit=100000`
+    ) as Promise<CodeOwnerStatusInfo>;
+  }
+
+  /**
+   * Returns a promise fetching which files are owned by a given user.
+   */
+  listOwnedPaths(changeId: NumericChangeId, account: AccountInfo) {
+    return this.get(
+      `/changes/${changeId}/revisions/current/owned_paths?user=${account.email}&limit=10000`
+    ) as Promise<OwnedPathsInfo>;
   }
 
   /**
@@ -180,12 +205,15 @@ export class CodeOwnersApi {
    * @doc
    * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
    */
-  listOwnersForPath(changeId: NumericChangeId, path: string, limit: number):
-      Promise<CodeOwnersInfo> {
+  listOwnersForPath(
+    changeId: NumericChangeId,
+    path: string,
+    limit: number
+  ): Promise<CodeOwnersInfo> {
     return this.get(
-               `/changes/${changeId}/revisions/current/code_owners` +
-               `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`) as
-        Promise<CodeOwnersInfo>;
+      `/changes/${changeId}/revisions/current/code_owners` +
+        `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`
+    ) as Promise<CodeOwnersInfo>;
   }
 
   /**
@@ -196,9 +224,10 @@ export class CodeOwnersApi {
    */
   getConfigForPath(project: string, branch: string, path: string) {
     return this.get(
-        `/projects/${encodeURIComponent(project)}/` +
+      `/projects/${encodeURIComponent(project)}/` +
         `branches/${encodeURIComponent(branch)}/` +
-        `code_owners.config/${encodeURIComponent(path)}`);
+        `code_owners.config/${encodeURIComponent(path)}`
+    );
   }
 
   /**
@@ -209,11 +238,11 @@ export class CodeOwnersApi {
    */
   async getBranchConfig(project: RepoName, branch: BranchName) {
     try {
-      const config =
-          (await this.get(
-              `/projects/${encodeURIComponent(project)}/` +
-              `branches/${encodeURIComponent(branch)}/` +
-              `code_owners.branch_config`)) as CodeOwnerBranchConfigInfo;
+      const config = (await this.get(
+        `/projects/${encodeURIComponent(project)}/` +
+          `branches/${encodeURIComponent(branch)}/` +
+          `code_owners.branch_config`
+      )) as CodeOwnerBranchConfigInfo;
       return config;
     } catch (err) {
       if (err instanceof ResponseError) {
@@ -249,11 +278,14 @@ export class CodeOwnersCacheApi {
   private promises = new Map<string, Promise<unknown>>();
 
   constructor(
-      private readonly codeOwnerApi: CodeOwnersApi,
-      private readonly change: ChangeInfo) {}
+    private readonly codeOwnerApi: CodeOwnersApi,
+    private readonly change: ChangeInfo
+  ) {}
 
-  private fetchOnce(cacheKey: string, asyncFn: () => Promise<unknown>):
-      Promise<unknown> {
+  private fetchOnce(
+    cacheKey: string,
+    asyncFn: () => Promise<unknown>
+  ): Promise<unknown> {
     let promise = this.promises.get(cacheKey);
     if (promise) return promise;
     promise = asyncFn();
@@ -261,9 +293,10 @@ export class CodeOwnersCacheApi {
     return promise;
   }
 
-  getAccount(): Promise<AccountDetailInfo|undefined> {
-    return this.fetchOnce('getAccount', () => this.getAccountImpl()) as
-        Promise<AccountDetailInfo|undefined>;
+  getAccount(): Promise<AccountDetailInfo | undefined> {
+    return this.fetchOnce('getAccount', () => this.getAccountImpl()) as Promise<
+      AccountDetailInfo | undefined
+    >;
   }
 
   private async getAccountImpl() {
@@ -273,17 +306,22 @@ export class CodeOwnersCacheApi {
   }
 
   listOwnerStatus(): Promise<CodeOwnerStatusInfo> {
-    return this.fetchOnce(
-               'listOwnerStatus',
-               () => this.codeOwnerApi.listOwnerStatus(this.change._number)) as
-        Promise<CodeOwnerStatusInfo>;
+    return this.fetchOnce('listOwnerStatus', () =>
+      this.codeOwnerApi.listOwnerStatus(this.change._number)
+    ) as Promise<CodeOwnerStatusInfo>;
+  }
+
+  async listOwnedPaths(): Promise<OwnedPathsInfo | undefined> {
+    const account = await this.getAccount();
+    if (!account) return undefined;
+    return this.fetchOnce('listOwnedPaths', () =>
+      this.codeOwnerApi.listOwnedPaths(this.change._number, account)
+    ) as Promise<OwnedPathsInfo>;
   }
 
   getBranchConfig(): Promise<CodeOwnerBranchConfigInfo> {
-    return this.fetchOnce(
-               'getBranchConfig',
-               () => this.codeOwnerApi.getBranchConfig(
-                   this.change.project, this.change.branch)) as
-        Promise<CodeOwnerBranchConfigInfo>;
+    return this.fetchOnce('getBranchConfig', () =>
+      this.codeOwnerApi.getBranchConfig(this.change.project, this.change.branch)
+    ) as Promise<CodeOwnerBranchConfigInfo>;
   }
 }
