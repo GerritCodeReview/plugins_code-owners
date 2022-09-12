@@ -146,7 +146,7 @@ export const CodeOwnersModelMixin = <T extends Constructor<LitElement>>(
       );
       this.subscriptions.push(
         model.state$.subscribe(s => {
-          this.userRole = s.userRole;
+          this.status = s.status;
         })
       );
       this.subscriptions.push(

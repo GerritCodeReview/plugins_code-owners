@@ -165,17 +165,17 @@ export class OwnerStatusColumnContent extends BaseEl {
           width: 3em;
           text-align: center;
         }
-        iron-icon {
+        gr-icon {
           padding: var(--spacing-xs) 0px;
         }
-        :host([owner-status='approved']) iron-icon {
+        :host([owner-status='approved']) gr-icon {
           color: var(--positive-green-text-color);
         }
-        :host([owner-status='pending']) iron-icon {
+        :host([owner-status='pending']) gr-icon {
           color: #ffa62f;
         }
-        :host([owner-status='missing']) iron-icon,
-        :host([owner-status='error']) iron-icon {
+        :host([owner-status='missing']) gr-icon,
+        :host([owner-status='error']) gr-icon {
           color: var(--negative-red-text-color);
         }
       `,
