@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cb238375_7f7cdf1b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-09-14T13:02:51Z",
+      "side": 1,
+      "message": "The mocks by Delphine showed the 2 icons on all lines were relevant.\n\nI\u0027m not overly worried about code-owners creating suboptimal user experiences because noone else seems to touch it.\n\nThough perhaps we should be running Code Owners on the gerrit server with our team as owners",
+      "parentUuid": "6526402a_a6497667",
+      "revId": "2f6032647bc9725178ceb7eb28eca21040813660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d86480f5_24a86df8",
@@ -67,6 +85,24 @@
       "side": 1,
       "message": "The comment seems to be interrupted mid-sentence, and there is also another unresolved comment from me. Is this reply also meant as a reply to that other comment? Can you clarify?\n\nThat said, I am fine with the push back. Just voicing my concerns here. :-)",
       "parentUuid": "15ee5452_45d88c24",
+      "revId": "2f6032647bc9725178ceb7eb28eca21040813660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "47622113_d044c384",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-09-14T13:02:51Z",
+      "side": 1,
+      "message": "Oops. Given that we should focus on the reviewer and the author\u0027s experience usually is more of revieewer role.\n\nOops, didn\u0027t see the top-level comment.",
+      "parentUuid": "bb5fc785_826a36d0",
       "revId": "2f6032647bc9725178ceb7eb28eca21040813660",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
