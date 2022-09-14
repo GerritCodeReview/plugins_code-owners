@@ -55,6 +55,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "bb5fc785_826a36d0",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-09-14T12:40:22Z",
+      "side": 1,
+      "message": "The comment seems to be interrupted mid-sentence, and there is also another unresolved comment from me. Is this reply also meant as a reply to that other comment? Can you clarify?\n\nThat said, I am fine with the push back. Just voicing my concerns here. :-)",
+      "parentUuid": "15ee5452_45d88c24",
+      "revId": "2f6032647bc9725178ceb7eb28eca21040813660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "128acd46_bde0d8f5",
         "filename": "web/owner-status-column.ts",
         "patchSetId": 1
