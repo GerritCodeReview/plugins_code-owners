@@ -37,6 +37,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "15ee5452_45d88c24",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 1
+      },
+      "lineNbr": 193,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-09-14T11:28:47Z",
+      "side": 1,
+      "message": "After having thought about this more I\u0027m going to push back on this idea for several reasons.\n\n1. UX designed it to have 2 icons\n2. While for the author case you only need to show one, for the reviewer case we need to possibly show 2. One whether they own a file, one to see if it\u0027s already been approved. Given that we should focus on the reviewer and assume the authors",
+      "parentUuid": "d86480f5_24a86df8",
+      "revId": "2f6032647bc9725178ceb7eb28eca21040813660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "128acd46_bde0d8f5",
         "filename": "web/owner-status-column.ts",
         "patchSetId": 1
@@ -48,6 +66,24 @@
       "writtenOn": "2022-09-13T13:49:53Z",
       "side": 1,
       "message": "This could be a function. And maybe add a test?",
+      "revId": "2f6032647bc9725178ceb7eb28eca21040813660",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "70cc5a3e_6d29c10c",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 1
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-09-14T11:28:47Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "128acd46_bde0d8f5",
       "revId": "2f6032647bc9725178ceb7eb28eca21040813660",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
