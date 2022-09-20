@@ -99,7 +99,7 @@ export const CodeOwnersModelMixin = <T extends Constructor<LitElement>>(
     @state()
     status?: Status;
 
-    @state()
+    @property({type: Boolean, attribute: 'show-suggestions', reflect: true})
     showSuggestions?: boolean;
 
     @state()
