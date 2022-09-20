@@ -188,6 +188,30 @@
       },
       "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "56588e62_22efd215",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2022-09-20T11:57:05Z",
+      "side": 1,
+      "message": "Why not do `return nothing` in the render method?\nInstead of reflecting to attribute?\n\nI would imagine that is a much cleaner solution?",
+      "parentUuid": "c793fdda_eec5a189",
+      "range": {
+        "startLine": 102,
+        "startChar": 5,
+        "endLine": 102,
+        "endChar": 13
+      },
+      "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
