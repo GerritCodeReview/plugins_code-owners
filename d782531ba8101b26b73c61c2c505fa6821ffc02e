@@ -140,6 +140,30 @@
       },
       "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "09524ab0_62c9c6bf",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2022-09-20T11:39:02Z",
+      "side": 1,
+      "message": "Property is set externally and this used to be a state?\nSo I\u0027m confused why internal state is becoming a property.\n\nIs this a state that we are making a property *just* to reflect to attribute?\nIn that case we can maybe find a better solution?\n\nOr was it being set from the outside and wrongly labeled state() ?",
+      "parentUuid": "457f78ce_0898f9a8",
+      "range": {
+        "startLine": 102,
+        "startChar": 5,
+        "endLine": 102,
+        "endChar": 13
+      },
+      "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
