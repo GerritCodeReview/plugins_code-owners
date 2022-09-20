@@ -212,6 +212,30 @@
       },
       "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "32f2a719_678ca788",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-09-20T11:59:41Z",
+      "side": 1,
+      "message": "The render method does return nothing.\n\nThe styling is on the :host component, not on content inside of :host",
+      "parentUuid": "56588e62_22efd215",
+      "range": {
+        "startLine": 102,
+        "startChar": 5,
+        "endLine": 102,
+        "endChar": 13
+      },
+      "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
