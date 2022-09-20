@@ -164,6 +164,30 @@
       },
       "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c793fdda_eec5a189",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-09-20T11:55:07Z",
+      "side": 1,
+      "message": "Because it now gets reflected in the attribute, one could argue this is now public and thus a property.\n\nSo to answer your question \"Is this a state that we are making a property just to reflect to attribute?\" - yes.\n\nBut I think this is the right approach.",
+      "parentUuid": "09524ab0_62c9c6bf",
+      "range": {
+        "startLine": 102,
+        "startChar": 5,
+        "endLine": 102,
+        "endChar": 13
+      },
+      "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
