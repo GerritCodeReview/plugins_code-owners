@@ -133,7 +133,7 @@ export class SuggestOwners extends base {
   static override get styles() {
     return [
       css`
-        :host {
+        :host[(show-suggestions)] {
           display: block;
           background-color: var(--view-background-color);
           border: 1px solid var(--view-background-color);
