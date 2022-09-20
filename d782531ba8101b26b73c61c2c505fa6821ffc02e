@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "29825e76_3f429744",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2022-09-20T11:27:52Z",
+      "side": 1,
+      "message": "can you describe the solution here?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 11
+      },
+      "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8418df93_7a6e4a74",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2022-09-20T11:27:52Z",
+      "side": 1,
+      "message": "why is this state becoming a property and how is it fixing the issue?",
+      "range": {
+        "startLine": 102,
+        "startChar": 5,
+        "endLine": 102,
+        "endChar": 13
+      },
+      "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9cfda85b_5513001a",
+        "filename": "web/code-owners-model-mixin.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2022-09-20T11:27:52Z",
+      "side": 1,
+      "message": "does this need to be reflected as well?",
+      "range": {
+        "startLine": 102,
+        "startChar": 30,
+        "endLine": 102,
+        "endChar": 61
+      },
+      "revId": "d782531ba8101b26b73c61c2c505fa6821ffc02e",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
