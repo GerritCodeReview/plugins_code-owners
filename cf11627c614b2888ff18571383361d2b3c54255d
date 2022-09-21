@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f9f82b90_e2c75582",
+        "filename": "web/suggest-owners-trigger.ts",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1119195
+      },
+      "writtenOn": "2022-09-21T10:03:48Z",
+      "side": 1,
+      "message": "a single `var(--spacing-s)` should be the same right?",
+      "range": {
+        "startLine": 37,
+        "startChar": 31,
+        "endLine": 37,
+        "endChar": 64
+      },
+      "revId": "cf11627c614b2888ff18571383361d2b3c54255d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
