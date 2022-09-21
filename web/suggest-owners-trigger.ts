@@ -34,7 +34,10 @@ export class SuggestOwnersTrigger extends base {
           text-decoration: none;
         }
         gr-button {
-          --gr-button-padding: var(--spacing-xs) var(--spacing-s);
+          --gr-button-padding: var(--spacing-s) var(--spacing-s);
+        }
+        .extras {
+          padding-top: var(--spacing-s);
         }
       `,
     ];
@@ -50,7 +53,7 @@ export class SuggestOwnersTrigger extends base {
       >
         ${this.computeButtonText()}
       </gr-button>
-      <span>
+      <span class="extras">
         <a
           @click=${this.reportBugClick}
           href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin"
