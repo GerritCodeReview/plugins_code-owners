@@ -229,6 +229,10 @@ export class CodeOwnerService {
    * Gets which files are owned by the given user.
    */
   async getOwnedPaths() {
+    const enabled = await this.isCodeOwnerEnabled();
+    if (!enabled) {
+      return Promise.resolve(undefined);
+    }
     return this.codeOwnersCacheApi.listOwnedPaths();
   }
 
@@ -360,7 +364,7 @@ export class CodeOwnerService {
     ) {
       return false;
     }
-    const config = await this.codeOwnersCacheApi.getBranchConfig();
+    const config = await this.getBranchConfig();
     return config && !config.disabled;
   }
 

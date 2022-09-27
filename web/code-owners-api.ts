@@ -72,6 +72,7 @@ export interface CodeOwnerBranchConfigInfo {
   required_approval?: Array<RequiredApprovalInfo>;
   override_approval?: Array<RequiredApprovalInfo>;
 }
+
 export interface RequiredApprovalInfo {
   label: string;
   value: number;
