@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5c4695d0_d351c9e8",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-09-27T08:11:17Z",
+      "side": 1,
+      "message": "Thanks for the quick fix!\n\nLGTM, but you may want someone from the frontend team to have a look as well.",
+      "revId": "63fec4ceaeb1183411107a831916c9f68d3621a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3d9db355_33e4b60a",
+        "filename": "web/code-owners-service_test.ts",
+        "patchSetId": 2
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-09-27T08:11:17Z",
+      "side": 1,
+      "message": "FYI, the backend API is actually not returning \u0027disabled\u003dfalse\u0027 if the plugin is enabled, but it\u0027s rather not setting the disabled field in the response [1]. Not sure if there should also be a test for this case (disabled field not set).\n\n[1] https://android-review.googlesource.com/plugins/code-owners/Documentation/rest-api.html#code-owner-branch-config-info",
+      "range": {
+        "startLine": 196,
+        "startChar": 30,
+        "endLine": 196,
+        "endChar": 35
+      },
+      "revId": "63fec4ceaeb1183411107a831916c9f68d3621a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
