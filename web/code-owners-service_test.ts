@@ -29,7 +29,10 @@ suite('code owners service tests', () => {
       return Promise.resolve({});
     },
     getLoggedIn() {
-      return Promise.resolve(undefined);
+      return Promise.resolve(true);
+    },
+    getAccount() {
+      return Promise.resolve({email: 'someone@google.com'});
     },
   } as unknown as RestPluginApi;
 
@@ -162,6 +165,45 @@ suite('code owners service tests', () => {
     test('approved status calculation', async () => {
       const approved = await codeOwnersService.areAllFilesApproved();
       assert.equal(approved, false);
+    });
+  });
+
+  suite('getOwnedPaths', () => {
+    async function setupBranchConfig(disabled: boolean | undefined) {
+      getApiStub
+        .withArgs(
+          sinon.match.any,
+          `/projects/${fakeChange.project}/branches/` +
+            `${fakeChange.branch}/code_owners.branch_config`,
+          sinon.match.any,
+          sinon.match.any
+        )
+        .returns(Promise.resolve({disabled}));
+      codeOwnersService = CodeOwnerService.getOwnerService(fakeRestApi, {
+        ...fakeChange,
+      });
+      await flush();
+      getApiStub.resetHistory();
+    }
+    test('should not fetch if disabled', async () => {
+      await setupBranchConfig(true);
+
+      await codeOwnersService.getOwnedPaths();
+      assert.equal(getApiStub.callCount, 0);
+    });
+
+    test('should fetch if enabled', async () => {
+      await setupBranchConfig(false);
+
+      await codeOwnersService.getOwnedPaths();
+      assert.equal(getApiStub.callCount, 1);
+    });
+
+    test('should fetch if enabled by default', async () => {
+      await setupBranchConfig(undefined);
+
+      await codeOwnersService.getOwnedPaths();
+      assert.equal(getApiStub.callCount, 1);
     });
   });
 
