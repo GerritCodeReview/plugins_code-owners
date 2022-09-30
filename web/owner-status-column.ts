@@ -216,7 +216,7 @@ export class OwnerStatusColumnContent extends BaseEl {
   private renderOwnership() {
     if (!this.isOwned()) return nothing;
     return html`
-      <gr-tooltip-content title="You own this file" has-tooltip>
+      <gr-tooltip-content title="You are in OWNERS for this file" has-tooltip>
         <gr-icon filled icon="policy"></gr-icon>
       </gr-tooltip-content>
     `;
