@@ -195,8 +195,11 @@ export class CodeOwnersApi {
    * Returns a promise fetching which files are owned by a given user.
    */
   listOwnedPaths(changeId: NumericChangeId, account: AccountInfo) {
+    if (!account.email && !account._account_id)
+      return Promise.resolve(undefined);
+    const user = account.email ?? account._account_id;
     return this.get(
-      `/changes/${changeId}/revisions/current/owned_paths?user=${account.email}&limit=10000`
+      `/changes/${changeId}/revisions/current/owned_paths?user=${user}&limit=10000`
     ) as Promise<OwnedPathsInfo>;
   }
 
@@ -317,7 +320,7 @@ export class CodeOwnersCacheApi {
     if (!account) return undefined;
     return this.fetchOnce('listOwnedPaths', () =>
       this.codeOwnerApi.listOwnedPaths(this.change._number, account)
-    ) as Promise<OwnedPathsInfo>;
+    ) as Promise<OwnedPathsInfo | undefined>;
   }
 
   getBranchConfig(): Promise<CodeOwnerBranchConfigInfo> {
