@@ -19,6 +19,7 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
@@ -27,6 +28,7 @@ import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.OwnedChangedFileInfo;
 import com.google.gerrit.plugins.codeowners.api.OwnedPathInfo;
 import com.google.gerrit.plugins.codeowners.api.OwnedPathsInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerApprovalCheck;
 import com.google.gerrit.plugins.codeowners.backend.OwnedChangedFile;
 import com.google.gerrit.plugins.codeowners.backend.OwnedPath;
@@ -36,6 +38,7 @@ import com.google.gerrit.server.change.RevisionResource;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.kohsuke.args4j.Option;
 
@@ -47,7 +50,6 @@ import org.kohsuke.args4j.Option;
  */
 public class GetOwnedPaths implements RestReadView<RevisionResource> {
   @VisibleForTesting public static final int DEFAULT_LIMIT = 50;
-
   private final AccountResolver accountResolver;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
 
@@ -149,6 +151,12 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
     OwnedPathInfo info = new OwnedPathInfo();
     info.path = ownedPath.path().toString();
     info.owned = ownedPath.owned() ? true : null;
+    info.owners = Streams.stream(ownedPath.owners()).map(account -> account.get()).collect(toImmutableList());
+
     return info;
+  }
+
+  private static Integer toAccountId(CodeOwner owner) {
+    return owner.accountId().get();
   }
 }

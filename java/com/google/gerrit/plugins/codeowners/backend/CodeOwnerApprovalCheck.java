@@ -23,6 +23,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.Account;
@@ -133,17 +134,18 @@ public class CodeOwnerApprovalCheck {
           patchSet.id().get(),
           start,
           limit);
-
+      ImmutableSet<Account.Id> reviewerAccountIds =
+          changeNotes.getReviewers().byState(ReviewerStateInternal.REVIEWER);
       Stream<FileCodeOwnerStatus> fileStatuses =
-          getFileStatusesForAccount(changeNotes, patchSet, accountId)
+          getFileStatusesForAccount(changeNotes, patchSet, accountId, reviewerAccountIds)
               .filter(
                   fileStatus ->
                       (fileStatus.newPathStatus().isPresent()
-                              && fileStatus.newPathStatus().get().status()
-                                  == CodeOwnerStatus.APPROVED)
-                          || (fileStatus.oldPathStatus().isPresent()
-                              && fileStatus.oldPathStatus().get().status()
-                                  == CodeOwnerStatus.APPROVED));
+                      && (fileStatus.newPathStatus().get().status() == CodeOwnerStatus.APPROVED
+                          || !fileStatus.newPathStatus().get().owners().isEmpty()))
+                      || (fileStatus.oldPathStatus().isPresent()
+                      && (fileStatus.oldPathStatus().get().status() == CodeOwnerStatus.APPROVED
+                          || !fileStatus.oldPathStatus().get().owners().isEmpty())));
       if (start > 0) {
         fileStatuses = fileStatuses.skip(start);
       }
@@ -161,7 +163,8 @@ public class CodeOwnerApprovalCheck {
                               newPathStatus ->
                                   OwnedPath.create(
                                       newPathStatus.path(),
-                                      newPathStatus.status() == CodeOwnerStatus.APPROVED))
+                                      newPathStatus.status() == CodeOwnerStatus.APPROVED,
+                                      newPathStatus.owners()))
                           .orElse(null),
                       fileStatus
                           .oldPathStatus()
@@ -169,7 +172,8 @@ public class CodeOwnerApprovalCheck {
                               oldPathStatus ->
                                   OwnedPath.create(
                                       oldPathStatus.path(),
-                                      oldPathStatus.status() == CodeOwnerStatus.APPROVED))
+                                      oldPathStatus.status() == CodeOwnerStatus.APPROVED,
+                                      oldPathStatus.owners()))
                           .orElse(null)))
           .collect(toImmutableList());
     } catch (IOException | DiffNotAvailableException e) {
@@ -405,13 +409,18 @@ public class CodeOwnerApprovalCheck {
    * <p>The purpose of this method is to find the files/paths in a change that are owned by the
    * given account.
    *
+   * <p> As a side-effect, it also computes, for each file, who the approvers are if the
+   * file is not approved.
+   *
    * @param changeNotes the notes of the change for which the code owner statuses should be returned
    * @param patchSet the patch set for which the code owner statuses should be returned
    * @param accountId the ID of the account for which an approval should be assumed
+   * @param reviewerAccountIdsd The reviewers for the given patchset.
    */
   @VisibleForTesting
   public Stream<FileCodeOwnerStatus> getFileStatusesForAccount(
-      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId)
+      ChangeNotes changeNotes, PatchSet patchSet, Account.Id accountId,
+      ImmutableSet<Account.Id> reviewerAccountIds)
       throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
     requireNonNull(patchSet, "patchSet");
@@ -461,7 +470,7 @@ public class CodeOwnerApprovalCheck {
                       // implicit approvals since all owned files are already covered by the
                       // explicit approval.
                       /* implicitApprover= */ null,
-                      /* reviewerAccountIds= */ ImmutableSet.of(),
+                      reviewerAccountIds,
                       // Assume an explicit approval of the given account.
                       /* approverAccountIds= */ ImmutableSet.of(accountId),
                       fallbackCodeOwners,
@@ -603,6 +612,8 @@ public class CodeOwnerApprovalCheck {
     AtomicReference<CodeOwnerStatus> codeOwnerStatus =
         new AtomicReference<>(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
     AtomicReference<String> reason = new AtomicReference<>(/* initialValue= */ null);
+    ImmutableSet.Builder reviewerOwners = ImmutableSet.builder();
+
 
     if (isApproved(
         globalCodeOwners,
@@ -634,6 +645,9 @@ public class CodeOwnerApprovalCheck {
 
                 CodeOwnerResolverResult codeOwners =
                     resolveCodeOwners(codeOwnerResolver, pathCodeOwners);
+
+                reviewerOwners.addAll(
+                  Sets.intersection(codeOwners.codeOwnersAccountIds(), reviewerAccountIds));
                 logger.atFine().log(
                     "code owners = %s (code owner kind = %s, code owner config folder path = %s,"
                         + " file name = %s)",
@@ -713,7 +727,7 @@ public class CodeOwnerApprovalCheck {
         "%s has code owner status %s (reason = %s)",
         absolutePath, codeOwnerStatus.get(), reason.get() != null ? reason.get() : "n/a");
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get(), reason.get());
+        PathCodeOwnerStatus.create(absolutePath, codeOwnerStatus.get(), reason.get(), reviewerOwners.build());
     logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
     return pathCodeOwnerStatus;
   }

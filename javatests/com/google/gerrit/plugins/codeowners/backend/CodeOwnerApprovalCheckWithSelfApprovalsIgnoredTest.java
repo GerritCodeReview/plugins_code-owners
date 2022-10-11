@@ -134,7 +134,8 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(changeOwner.id()))));
+                    AccountTemplateUtil.getAccountTemplate(changeOwner.id())),
+                ImmutableSet.of(changeOwner.id())));
   }
 
   @Test

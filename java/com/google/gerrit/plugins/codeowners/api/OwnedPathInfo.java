@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import java.util.List;
+
 /** JSON representation of a file path the may be owned by the user. */
 public class OwnedPathInfo {
   /** The path of the file that may be owned by the user. */
@@ -25,4 +27,11 @@ public class OwnedPathInfo {
    * <p>Not set if {@code false}.
    */
   public Boolean owned;
+
+  /**
+   * The owners for the given file as Account IDs.
+   *
+   * <p>May not be set if the list is empty.
+   */
+  public List<Integer> owners;
 }

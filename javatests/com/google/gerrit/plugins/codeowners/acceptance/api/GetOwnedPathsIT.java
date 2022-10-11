@@ -339,6 +339,36 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void getOwnedPathsForNonCodeOwnerWithCodeOwnerAsReviewer() throws Exception {
+    setAsCodeOwners("/foo/", admin);
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content"))
+            .getChangeId();
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().isEmpty();
+  }
+
+  @Test
   public void getOwnedPathsWithStart() throws Exception {
     setAsRootCodeOwners(user);
 
