@@ -16,10 +16,14 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.PathSubject.paths;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.PathSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.acceptance.TestAccount;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 
@@ -44,12 +48,25 @@ public class PathCodeOwnerStatusSubject extends Subject {
 
   /** Returns a {@link ComparableSubject} for the path. */
   public PathSubject hasPathThat() {
-    return check("path()").about(paths()).that(pathCodeOwnerStatus().path());
+    return check("path").about(paths()).that(pathCodeOwnerStatus().path());
   }
 
   /** Returns a {@link ComparableSubject} for the code owner status. */
   public ComparableSubject<CodeOwnerStatus> hasStatusThat() {
-    return check("status()").that(pathCodeOwnerStatus().status());
+    return check("status").that(pathCodeOwnerStatus().status());
+  }
+
+  /** Returns a {@link ComparableSubject} for the code owner owners. */
+  public IterableSubject hasOwnersThat() {
+    return check("owners").that(pathCodeOwnerStatus.owners());
+  }
+
+  public void hasOwners(TestAccount... testAccounts) {
+    ImmutableSet.Builder<Account.Id> accounts = ImmutableSet.builder();
+    for (TestAccount testAccount : testAccounts) {
+      accounts.add(testAccount.id());
+    }
+    hasOwnersThat().containsExactlyElementsIn(accounts.build());
   }
 
   private PathCodeOwnerStatus pathCodeOwnerStatus() {

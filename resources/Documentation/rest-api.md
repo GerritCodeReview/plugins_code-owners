@@ -726,11 +726,12 @@ request parameter below).
 
 The following request parameters can be specified:
 
-| Field Name   |           | Description |
-| ------------ | --------- | ----------- |
-| `start`\|`S` | optional  | Number of owned paths to skip. Allows to page over the owned files. By default 0.
-| `limit`\|`n` | optional  | Limit defining how many [OwnedChangedFileInfo](#owned-changed-file-info) entities should be returned at most. By default 50.
-| `user`       | mandatory | user for which the owned paths should be returned
+| Field Name              |           | Description |
+| ----------------------- | --------- | ----------- |
+| `start`\|`S`            | optional  | Number of owned paths to skip. Allows to page over the owned files. By default 0.
+| `limit`\|`n`            | optional  | Limit defining how many [OwnedChangedFileInfo](#owned-changed-file-info) entities should be returned at most. By default 50.
+| `check_reviewers`\|`c'` | optional  | Whether it should be checked which reviewers are owners. When set, [OwnedPathInfo](#owned-path-info) will contain the `owners` field
+| `user`                  | mandatory | user for which the owned paths should be returned
 
 #### Request
 
@@ -781,13 +782,6 @@ As a response a [OwnedPathsInfo](#owned-paths-info) entity is returned.
           "owned": true
         }
       }
-    ],
-    "owned_paths": [
-      "/abc/old-name.md",
-      "/foo/bar/baz.md",
-      "/foo/baz/bar.md",
-      "/foo/new-name.md",
-      "/foo/old-name.md"
     ]
   }
 ```
@@ -1090,6 +1084,7 @@ owned by the user.
 | ---------- | -------- | ----------- |
 | `path`     |          | The absolute file path.
 | `owned`    | optional | `true` is the path is owned by the user. Otherwise unset.
+| `owners`   | optional | List of owners for this file that are either the specified user or the reviewers if `check_reviewers` is passed to the request.
 
 ### <a id="owned-paths-info"> OwnedPathsInfo
 The `OwnedPathsInfo` entity contains paths that are owned by a user.
