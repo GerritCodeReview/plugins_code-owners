@@ -184,12 +184,11 @@ export class SuggestOwners extends base {
         .suggestion-row-indicator[visible] {
           visibility: visible;
         }
-        .suggestion-row-indicator[visible] iron-icon {
+        .suggestion-row-indicator[visible] gr-icon {
           color: var(--link-color);
           vertical-align: top;
           position: relative;
-          --iron-icon-height: 18px;
-          --iron-icon-width: 18px;
+          font-size: 18px;
           top: 4px; /* (26-18)/2 - 26px line-height and 18px icon */
         }
         .suggestion-group-name {
@@ -228,9 +227,8 @@ export class SuggestOwners extends base {
           padding-left: var(--spacing-m);
         }
 
-        .owned-by-all-users-content iron-icon {
-          width: 16px;
-          height: 16px;
+        .owned-by-all-users-content gr-icon {
+          font-size: 16px;
           padding-top: 5px;
         }
 
@@ -240,9 +238,8 @@ export class SuggestOwners extends base {
         .no-owners-content a {
           padding-left: var(--spacing-s);
         }
-        .no-owners-content a iron-icon {
-          width: 16px;
-          height: 16px;
+        .no-owners-content a gr-icon {
+          font-size: 16px;
           padding-top: 5px;
         }
         gr-account-label {
@@ -470,7 +467,7 @@ export class SuggestOwners extends base {
     if (suggestion.owners?.owned_by_all_users) {
       return html`
         <div class="owned-by-all-users-content">
-          <iron-icon icon="gr-icons:info"></iron-icon>
+          <gr-icon icon="info" filled></gr-icon>
           <span>${this.getOwnedByAllUsersContent()}</span>
         </div>
       `;
