@@ -77,6 +77,7 @@ public class RevisionCodeOwnersImpl implements RevisionCodeOwners {
           GetOwnedPaths getOwnedPaths = getOwnedPathsProvider.get();
           getStart().ifPresent(getOwnedPaths::setStart);
           getLimit().ifPresent(getOwnedPaths::setLimit);
+          getOwnedPaths.setCheckReviewers(getCheckReviewers());
           getOwnedPaths.setUser(getUser());
           return getOwnedPaths.apply(revisionResource).value();
         } catch (Exception e) {
