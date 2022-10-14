@@ -15,18 +15,23 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableSet;
+import com.google.gerrit.entities.Account;
 import java.nio.file.Path;
 
-/** Representation of a file path the may be owned by the user. */
+/** Representation of a file path and its code owners. */
 @AutoValue
 public abstract class OwnedPath {
-  /** The path of the file that may be owned by the user. */
+  /** The path of the file that may be owned. */
   public abstract Path path();
 
-  /** Whether the user owns this path. */
+  /** Whether the specified user owns this path. */
   public abstract boolean owned();
 
-  public static OwnedPath create(Path path, boolean owned) {
-    return new AutoValue_OwnedPath(path, owned);
+  /** The owners for this path. */
+  public abstract ImmutableSet<Account.Id> owners();
+
+  public static OwnedPath create(Path path, boolean owned, ImmutableSet<Account.Id> owners) {
+    return new AutoValue_OwnedPath(path, owned, owners);
   }
 }
