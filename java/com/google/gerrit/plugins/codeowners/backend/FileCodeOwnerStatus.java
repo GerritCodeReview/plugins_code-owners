@@ -17,7 +17,9 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
@@ -71,21 +73,33 @@ public abstract class FileCodeOwnerStatus {
       String path, CodeOwnerStatus codeOwnerStatus, @Nullable String reason) {
     requireNonNull(path, "path");
 
-    return addition(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus, reason);
+    return addition(
+        JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus, reason, Optional.empty());
   }
 
   public static FileCodeOwnerStatus addition(Path path, CodeOwnerStatus codeOwnerStatus) {
-    return addition(path, codeOwnerStatus, /* reason= */ null);
+    return addition(path, codeOwnerStatus, /* reason= */ null, Optional.empty());
   }
 
   public static FileCodeOwnerStatus addition(
       Path path, CodeOwnerStatus codeOwnerStatus, @Nullable String reason) {
     requireNonNull(path, "path");
+
+    return addition(path, codeOwnerStatus, reason, Optional.empty());
+  }
+
+  public static FileCodeOwnerStatus addition(
+      Path path,
+      CodeOwnerStatus codeOwnerStatus,
+      @Nullable String reason,
+      Optional<ImmutableSet<Account.Id>> owners) {
+    requireNonNull(path, "path");
     requireNonNull(codeOwnerStatus, "codeOwnerStatus");
+    requireNonNull(owners, "owners");
 
     return create(
         ChangedFile.addition(path),
-        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason)),
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason, owners)),
         Optional.empty());
   }
 
@@ -101,6 +115,21 @@ public abstract class FileCodeOwnerStatus {
     return create(
         ChangedFile.modification(path),
         Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason)),
+        Optional.empty());
+  }
+
+  public static FileCodeOwnerStatus modification(
+      Path path,
+      CodeOwnerStatus codeOwnerStatus,
+      @Nullable String reason,
+      ImmutableSet<Account.Id> owners) {
+    requireNonNull(path, "path");
+    requireNonNull(codeOwnerStatus, "codeOwnerStatus");
+    requireNonNull(owners, "owners");
+
+    return create(
+        ChangedFile.modification(path),
+        Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason, Optional.of(owners))),
         Optional.empty());
   }
 
@@ -128,6 +157,22 @@ public abstract class FileCodeOwnerStatus {
         ChangedFile.deletion(path),
         Optional.empty(),
         Optional.of(PathCodeOwnerStatus.create(path, codeOwnerStatus, reason)));
+  }
+
+  public static FileCodeOwnerStatus deletion(
+      Path path,
+      CodeOwnerStatus codeOwnerStatus,
+      @Nullable String reason,
+      ImmutableSet<Account.Id> owners) {
+    requireNonNull(path, "path");
+    requireNonNull(codeOwnerStatus, "codeOwnerStatus");
+    requireNonNull(owners, "owners");
+
+    return create(
+        ChangedFile.deletion(path),
+        Optional.empty(),
+        Optional.of(
+            PathCodeOwnerStatus.create(path, codeOwnerStatus, reason, Optional.of(owners))));
   }
 
   public static FileCodeOwnerStatus rename(
@@ -193,5 +238,35 @@ public abstract class FileCodeOwnerStatus {
         ChangedFile.rename(newPath, oldPath),
         Optional.of(PathCodeOwnerStatus.create(newPath, newPathCodeOwnerStatus, reasonNewPath)),
         Optional.of(PathCodeOwnerStatus.create(oldPath, oldPathCodeOwnerStatus, reasonOldPath)));
+  }
+
+  public static FileCodeOwnerStatus rename(
+      Path oldPath,
+      CodeOwnerStatus oldPathCodeOwnerStatus,
+      @Nullable String reasonOldPath,
+      ImmutableSet<Account.Id> oldPathOwnerReviewers,
+      Path newPath,
+      CodeOwnerStatus newPathCodeOwnerStatus,
+      @Nullable String reasonNewPath,
+      ImmutableSet<Account.Id> newPathOwnerReviewers) {
+    requireNonNull(oldPath, "oldPath");
+    requireNonNull(oldPathCodeOwnerStatus, "oldPathCodeOwnerStatus");
+    requireNonNull(newPath, "newPath");
+    requireNonNull(newPathCodeOwnerStatus, "newPathCodeOwnerStatus");
+
+    return create(
+        ChangedFile.rename(newPath, oldPath),
+        Optional.of(
+            PathCodeOwnerStatus.create(
+                newPath,
+                newPathCodeOwnerStatus,
+                reasonNewPath,
+                Optional.of(newPathOwnerReviewers))),
+        Optional.of(
+            PathCodeOwnerStatus.create(
+                oldPath,
+                oldPathCodeOwnerStatus,
+                reasonOldPath,
+                Optional.of(oldPathOwnerReviewers))));
   }
 }
