@@ -18,7 +18,9 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.common.Nullable;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.nio.file.Path;
@@ -43,6 +45,9 @@ public abstract class PathCodeOwnerStatus {
    * com.google.gerrit.server.util.AccountTemplateUtil#ACCOUNT_TEMPLATE}).
    */
   public abstract ImmutableList<String> reasons();
+
+  /** List of code owners for this {@link #path()}. */
+  public abstract ImmutableSet<Account.Id> owners();
 
   /** Creates a builder for a {@link PathCodeOwnerStatus}. */
   public static PathCodeOwnerStatus.Builder builder(Path path, CodeOwnerStatus codeOwnerStatus) {
@@ -87,13 +92,35 @@ public abstract class PathCodeOwnerStatus {
    *
    * @param path the path to which the code owner status belongs
    * @param codeOwnerStatus the code owner status
+   * @param reason for the status
+   * @param owners owners for this path.
+   * @return the created {@link PathCodeOwnerStatus} instance
+   */
+  public static PathCodeOwnerStatus create(
+      Path path,
+      CodeOwnerStatus codeOwnerStatus,
+      @Nullable String reason,
+      ImmutableSet<Account.Id> owners) {
+    Builder builder = builder(path, codeOwnerStatus);
+    if (reason != null) {
+      builder.addReason(reason);
+    }
+    builder.addOwners(owners);
+    return builder.build();
+  }
+
+  /**
+   * Creates a {@link PathCodeOwnerStatus} instance.
+   *
+   * @param path the path to which the code owner status belongs
+   * @param codeOwnerStatus the code owner status
    * @return the created {@link PathCodeOwnerStatus} instance
    */
   public static PathCodeOwnerStatus create(String path, CodeOwnerStatus codeOwnerStatus) {
     requireNonNull(path, "path");
     requireNonNull(codeOwnerStatus, "codeOwnerStatus");
 
-    return create(JgitPath.of(path).getAsAbsolutePath(), codeOwnerStatus);
+    return builder(path, codeOwnerStatus).build();
   }
 
   /** Builder for a {@link PathCodeOwnerStatus}. */
@@ -112,9 +139,18 @@ public abstract class PathCodeOwnerStatus {
     /** Gets a builder for adding reasons for this status. */
     abstract ImmutableList.Builder<String> reasonsBuilder();
 
+    /** Gets a builder for adding owners for this status. */
+    abstract ImmutableSet.Builder<Account.Id> ownersBuilder();
+
     /** Adds a reason for this status. */
     public Builder addReason(String reason) {
       reasonsBuilder().add(reason);
+      return this;
+    }
+
+    /** Adds owners for this status */
+    public Builder addOwners(ImmutableSet<Account.Id> owners) {
+      ownersBuilder().addAll(owners);
       return this;
     }
 

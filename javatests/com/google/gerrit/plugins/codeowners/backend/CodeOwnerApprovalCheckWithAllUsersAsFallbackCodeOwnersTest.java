@@ -216,7 +216,8 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a fallback code owner (all users are fallback code owners)",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
 
     // Add a Code-Review+1 (= code owner approval) from a fallback code owner.
     requestScopeOperations.setApiUser(user.id());
@@ -232,7 +233,8 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 String.format(
                     "approved by %s who is a fallback code owner"
                         + " (all users are fallback code owners)",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -510,7 +512,8 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a fallback code owner (all users are fallback code owners)",
-                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id())),
+                ImmutableSet.of(admin.id())));
 
     // Approve as a code owner (all users are fallback code owners).
     approve(changeId);
@@ -524,7 +527,8 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 String.format(
                     "approved by %s who is a fallback code owner"
                         + " (all users are fallback code owners)",
-                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id())),
+                ImmutableSet.of(admin.id())));
   }
 
   private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)

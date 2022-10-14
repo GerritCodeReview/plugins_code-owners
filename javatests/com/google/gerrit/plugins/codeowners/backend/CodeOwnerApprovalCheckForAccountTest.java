@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusSubject.assertThatStream;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -39,7 +40,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Tests for {@link CodeOwnerApprovalCheck#getFileStatusesForAccount(ChangeNotes, PatchSet,
+ * Tests for {@link CodeOwnerApprovalCheck#getFileStatusesForAccounts(ChangeNotes, PatchSet,
  * Account.Id)}.
  */
 public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest {
@@ -65,8 +66,8 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
 
     // Verify that the file would not be approved by the user.
     Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
-            changeNotes, changeNotes.getCurrentPatchSet(), user.id());
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
+            changeNotes, changeNotes.getCurrentPatchSet(), ImmutableSet.of(user.id()));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -75,6 +76,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwnersThat().isEmpty();
   }
 
   @Test
@@ -102,8 +104,8 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
 
     // Verify that the file would not be approved by the user.
     Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
-            changeNotes, changeNotes.getCurrentPatchSet(), user.id());
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
+            changeNotes, changeNotes.getCurrentPatchSet(), ImmutableSet.of(user.id()));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -112,6 +114,46 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+  }
+
+  @Test
+  public void approvalFromOtherCodeOwnerAsReviewerIsReturned() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(codeOwner.email())
+        .create();
+
+    Path path = Paths.get("/foo/bar.baz");
+    String changeId =
+        createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
+    ChangeNotes changeNotes = getChangeNotes(changeId);
+
+    // Add a Code-Review+1 (= code owner approval) from the code owner.
+    requestScopeOperations.setApiUser(codeOwner.id());
+    recommend(changeId);
+
+    // Verify that the file would not be approved by the user.
+    Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
+            changeNotes,
+            changeNotes.getCurrentPatchSet(),
+            ImmutableSet.of(codeOwner.id(), user.id()));
+    FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
+        assertThatStream(fileCodeOwnerStatuses).onlyElement();
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
+    fileCodeOwnerStatusSubject
+        .hasNewPathStatus()
+        .value()
+        .hasStatusThat()
+        .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwners(codeOwner);
   }
 
   @Test
@@ -131,8 +173,8 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
 
     // Verify that the file would be approved by the user.
     Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
-            changeNotes, changeNotes.getCurrentPatchSet(), user.id());
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
+            changeNotes, changeNotes.getCurrentPatchSet(), ImmutableSet.of(user.id()));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -141,6 +183,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwners(user);
   }
 
   @Test
@@ -174,10 +217,10 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
 
     // Verify that the file in patch set 1 would be approved by the user.
     Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
             changeNotes,
             changeNotes.getPatchSets().get(PatchSet.id(changeNotes.getChangeId(), 1)),
-            user.id());
+            ImmutableSet.of(user.id()));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path1);
@@ -186,13 +229,13 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
-
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwners(user);
     // Verify that both files in patch set 2 would be approved by the user.
     fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
             changeNotes,
             changeNotes.getPatchSets().get(PatchSet.id(changeNotes.getChangeId(), 2)),
-            user.id());
+            ImmutableSet.of(user.id()));
     ListSubject<FileCodeOwnerStatusSubject, FileCodeOwnerStatus> fileCodeOwnerStatusListSubject =
         assertThatStream(fileCodeOwnerStatuses);
     fileCodeOwnerStatusListSubject.hasSize(2);
@@ -203,6 +246,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwners(user);
     fileCodeOwnerStatusSubject = fileCodeOwnerStatusListSubject.element(1);
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path2);
     fileCodeOwnerStatusSubject
@@ -210,6 +254,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwners(user);
   }
 
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
@@ -222,8 +267,8 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
 
     // Verify that the file would be approved by the user since the user is a fallback code owner.
     Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
-            changeNotes, changeNotes.getCurrentPatchSet(), user.id());
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
+            changeNotes, changeNotes.getCurrentPatchSet(), ImmutableSet.of(user.id()));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -232,6 +277,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.APPROVED);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwners(user);
   }
 
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
@@ -257,8 +303,8 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
     // Verify that the file would not be approved by the user since fallback code owners do not
     // apply.
     Stream<FileCodeOwnerStatus> fileCodeOwnerStatuses =
-        codeOwnerApprovalCheck.getFileStatusesForAccount(
-            changeNotes, changeNotes.getCurrentPatchSet(), user.id());
+        codeOwnerApprovalCheck.getFileStatusesForAccounts(
+            changeNotes, changeNotes.getCurrentPatchSet(), ImmutableSet.of(user.id()));
     FileCodeOwnerStatusSubject fileCodeOwnerStatusSubject =
         assertThatStream(fileCodeOwnerStatuses).onlyElement();
     fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasPathThat().isEqualTo(path);
@@ -267,6 +313,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .value()
         .hasStatusThat()
         .isEqualTo(CodeOwnerStatus.INSUFFICIENT_REVIEWERS);
+    fileCodeOwnerStatusSubject.hasNewPathStatus().value().hasOwnersThat().isEmpty();
   }
 
   private ChangeNotes getChangeNotes(String changeId) throws Exception {
