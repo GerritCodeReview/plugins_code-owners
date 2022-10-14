@@ -19,7 +19,9 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import com.google.gerrit.entities.Account;
+import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.extensions.restapi.Response;
@@ -46,13 +48,20 @@ import org.kohsuke.args4j.Option;
  */
 public class GetOwnedPaths implements RestReadView<RevisionResource> {
   @VisibleForTesting public static final int DEFAULT_LIMIT = 50;
-
   private final AccountResolver accountResolver;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
 
   private int start;
   private int limit = DEFAULT_LIMIT;
   private String user;
+  private boolean checkReviewers;
+
+  @Option(
+      name = "--check_reviewers",
+      usage = "whether or not to also compute which reviewers are owners")
+  public void setCheckReviewers(boolean checkReviewers) {
+    this.checkReviewers = checkReviewers;
+  }
 
   @Option(
       name = "--limit",
@@ -98,7 +107,8 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
             revisionResource.getPatchSet(),
             accountId,
             start,
-            limit + 1);
+            limit + 1,
+            checkReviewers);
 
     OwnedPathsInfo ownedPathsInfo = new OwnedPathsInfo();
     ownedPathsInfo.more = ownedChangedFiles.size() > limit ? true : null;
@@ -144,6 +154,15 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
     OwnedPathInfo info = new OwnedPathInfo();
     info.path = ownedPath.path().toString();
     info.owned = ownedPath.owned() ? true : null;
+    info.owners =
+        Streams.stream(ownedPath.owners())
+            .map(GetOwnedPaths::toAccountInfo)
+            .collect(toImmutableList());
+
     return info;
+  }
+
+  private static AccountInfo toAccountInfo(Account.Id accountId) {
+    return new AccountInfo(accountId.get());
   }
 }

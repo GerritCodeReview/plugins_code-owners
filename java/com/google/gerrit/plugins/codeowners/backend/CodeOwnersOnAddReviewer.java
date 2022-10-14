@@ -221,7 +221,8 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
                   changeNotes.getCurrentPatchSet(),
                   reviewerAccountId,
                   /* start= */ 0,
-                  limit + 1));
+                  limit + 1,
+                  /* checkReviewers= */ false));
 
       if (ownedPaths.isEmpty()) {
         // this reviewer doesn't own any of the modified paths
