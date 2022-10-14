@@ -32,7 +32,7 @@ public class OwnedPathsInfo {
    *
    * <p>Contains at most as many entries as the limit that was specified on the request.
    */
-  public List<OwnedChangedFileInfo> ownedChangedFiles;
+public List<OwnedChangedFileInfo> ownedChangedFiles;
 
   /**
    * The list of the owned new and old paths that are contained in {@link #ownedChangedFiles}.

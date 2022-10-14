@@ -15,7 +15,11 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
+import com.google.gerrit.entities.Account;
+import java.lang.Iterable;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 
 /** Representation of a file path the may be owned by the user. */
 @AutoValue
@@ -26,7 +30,10 @@ public abstract class OwnedPath {
   /** Whether the user owns this path. */
   public abstract boolean owned();
 
-  public static OwnedPath create(Path path, boolean owned) {
-    return new AutoValue_OwnedPath(path, owned);
+  /** The reviewers that are owners of this path.  */
+  public abstract Iterable<Account.Id> owners();
+
+  public static OwnedPath create(Path path, boolean owned, Iterable<Account.Id> owners) {
+    return new AutoValue_OwnedPath(path, owned, owners);
   }
 }

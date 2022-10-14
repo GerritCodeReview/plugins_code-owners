@@ -339,6 +339,80 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void getOwnedPathsForNonCodeOwnerWithCodeOwnerAsReviewer() throws Exception {
+    setAsCodeOwners("/foo/", admin);
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content"))
+            .getChangeId();
+
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedPathsThat().isEmpty();
+  }
+
+
+  @Test
+  public void getOwnedPathsForNonCodeOwnerWithCodeOwnerAsReviewerCheckReviewers() throws Exception {
+    TestAccount codeOwner = accountCreator.create(
+        "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content"))
+            .getChangeId();
+
+    // Add a Code-Re[view+1 (= code owner approval) from the code owner.
+    requestScopeOperations.setApiUser(codeOwner.id());
+    recommend(changeId);
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .withCheckReviewers(true)
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasNewPathThat(path1)
+        .hasOwnersThat().containsExactly(codeOwner.id().get());
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNewPathThat(path2)
+        .hasOwnersThat().containsExactly(codeOwner.id().get());
+  }
+
+
+  @Test
   public void getOwnedPathsWithStart() throws Exception {
     setAsRootCodeOwners(user);
 

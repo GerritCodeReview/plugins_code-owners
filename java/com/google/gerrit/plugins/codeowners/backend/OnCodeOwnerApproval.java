@@ -144,7 +144,8 @@ class OnCodeOwnerApproval implements OnPostReview {
                 changeNotes.getCurrentPatchSet(),
                 user.getAccountId(),
                 /* start= */ 0,
-                limit + 1));
+                limit + 1,
+                false));
 
     if (ownedPaths.isEmpty()) {
       // the user doesn't own any of the modified paths
