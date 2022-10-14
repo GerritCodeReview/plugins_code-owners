@@ -331,6 +331,134 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void getOwnedPathsForNonCodeOwnerWithCodeOwnerAsReviewer() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content"))
+            .getChangeId();
+
+    // Add a Code-Review+1 (= code owner approval) from the code owner.
+    requestScopeOperations.setApiUser(codeOwner.id());
+    recommend(changeId);
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().isEmpty();
+  }
+
+  @Test
+  public void getOwnedPathsForNonCodeOwnerWithCodeOwnerAsReviewerCheckReviewers() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner);
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content"))
+            .getChangeId();
+
+    // Add a Code-Review+1 (= code owner approval) from the code owner.
+    requestScopeOperations.setApiUser(codeOwner.id());
+    recommend(changeId);
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .withCheckReviewers(true)
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasNewPathThat(path1).hasOwners(codeOwner);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNewPathThat(path2).hasOwners(codeOwner);
+  }
+
+  @Test
+  public void getOwnedPathsForCodeOwnerWithCodeOwnerAsReviewerCheckReviewers() throws Exception {
+    TestAccount codeOwner =
+        accountCreator.create(
+            "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
+    setAsCodeOwners("/foo/bar/", codeOwner);
+    TestAccount codeOwner2 =
+        accountCreator.create(
+            "codeOwner2", "codeOwner2@example.com", "CodeOwner2", /* displayName= */ null);
+    setAsCodeOwners("/foo/", codeOwner2);
+    setAsCodeOwners("/bar/", user);
+
+    String path1 = "/foo/bar/baz.md";
+    String path2 = "/foo/baz/bar.md";
+    String path3 = "/bar/foo.md";
+
+    String changeId =
+        createChange(
+                "test change",
+                ImmutableMap.of(
+                    JgitPath.of(path1).get(),
+                    "file content",
+                    JgitPath.of(path2).get(),
+                    "file content",
+                    JgitPath.of(path3).get(),
+                    "file content"))
+            .getChangeId();
+
+    // Add a Code-Review+1 (= code owner approval) from the code owner.
+    requestScopeOperations.setApiUser(codeOwner.id());
+    recommend(changeId);
+    // Add a Code-Review+1 (= code owner approval) from the code owner.
+    requestScopeOperations.setApiUser(codeOwner2.id());
+    recommend(changeId);
+
+    OwnedPathsInfo ownedPathsInfo =
+        changeCodeOwnersApiFactory
+            .change(changeId)
+            .current()
+            .getOwnedPaths()
+            .forUser(user.email())
+            .withCheckReviewers(true)
+            .get();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasNewPathThat(path3).hasOwners(user);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1))
+        .hasNewPathThat(path1)
+        .hasOwners(codeOwner, codeOwner2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasNewPathThat(path2).hasOwners(codeOwner2);
+  }
+
+  @Test
   public void getOwnedPathsWithStart() throws Exception {
     setAsRootCodeOwners(user);
 
