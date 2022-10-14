@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
+import static com.google.gerrit.plugins.codeowners.testing.OwnedPathInfoSubject.ownedPathInfos;
 
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.Subject;
@@ -45,21 +46,29 @@ public class OwnedChangedFileInfoSubject extends Subject {
     this.ownedChangedFileInfo = ownedChangedFileInfo;
   }
 
+  public OwnedPathInfoSubject hasNewPathThat(String expectedNewPath) {
+    check("newPath").that(ownedChangedFileInfo().newPath).isNotNull();
+    check("newPath").that(ownedChangedFileInfo().newPath.path).isEqualTo(expectedNewPath);
+    return check("newPath").about(ownedPathInfos()).that(ownedChangedFileInfo().newPath);
+  }
+
   public void hasEmptyNewPath() {
-    check("ownedNewPath").that(ownedChangedFileInfo().newPath).isNull();
+    check("newPath").that(ownedChangedFileInfo().newPath).isNull();
+  }
+
+  public OwnedPathInfoSubject hasOldPathThat(String expectedOldPath) {
+    check("oldPath").that(ownedChangedFileInfo().oldPath).isNotNull();
+    check("oldPath").that(ownedChangedFileInfo().oldPath.path).isEqualTo(expectedOldPath);
+    return check("oldPath").about(ownedPathInfos()).that(ownedChangedFileInfo().newPath);
   }
 
   public void hasOwnedNewPath(String expectedOwnedNewPath) {
-    check("ownedNewPath").that(ownedChangedFileInfo().newPath).isNotNull();
-    check("ownedNewPath").that(ownedChangedFileInfo().newPath.path).isEqualTo(expectedOwnedNewPath);
+    hasNewPathThat(expectedOwnedNewPath);
     check("ownedNewPath").that(ownedChangedFileInfo().newPath.owned).isTrue();
   }
 
   public void hasNonOwnedNewPath(String expectedNonOwnedNewPath) {
-    check("ownedNewPath").that(ownedChangedFileInfo().newPath).isNotNull();
-    check("ownedNewPath")
-        .that(ownedChangedFileInfo().newPath.path)
-        .isEqualTo(expectedNonOwnedNewPath);
+    hasNewPathThat(expectedNonOwnedNewPath);
     check("ownedNewPath").that(ownedChangedFileInfo().newPath.owned).isNull();
   }
 
@@ -68,16 +77,12 @@ public class OwnedChangedFileInfoSubject extends Subject {
   }
 
   public void hasOwnedOldPath(String expectedOwnedOldPath) {
-    check("ownedOldPath").that(ownedChangedFileInfo().oldPath).isNotNull();
-    check("ownedOldPath").that(ownedChangedFileInfo().oldPath.path).isEqualTo(expectedOwnedOldPath);
+    hasOldPathThat(expectedOwnedOldPath);
     check("ownedOldPath").that(ownedChangedFileInfo().oldPath.owned).isTrue();
   }
 
   public void hasNonOwnedOldPath(String expectedNonOwnedOldPath) {
-    check("ownedOldPath").that(ownedChangedFileInfo().oldPath).isNotNull();
-    check("ownedOldPath")
-        .that(ownedChangedFileInfo().oldPath.path)
-        .isEqualTo(expectedNonOwnedOldPath);
+    hasOldPathThat(expectedNonOwnedOldPath);
     check("ownedOldPath").that(ownedChangedFileInfo().oldPath.owned).isNull();
   }
 
