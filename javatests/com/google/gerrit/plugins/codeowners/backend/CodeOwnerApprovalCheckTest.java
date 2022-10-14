@@ -31,6 +31,7 @@ import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
@@ -203,7 +204,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -233,7 +235,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -260,7 +263,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -289,9 +293,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 String.format(
                     "reviewer %s is a code owner",
                     AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id()),
                 newPath,
                 CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                /* reasonNewPath= */ null));
+                /* reasonNewPath= */ null,
+                ImmutableSet.of()));
   }
 
   @Test
@@ -318,11 +324,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 oldPath,
                 CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                 /* reasonOldPath= */ null,
+                ImmutableSet.of(),
                 newPath,
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -345,7 +353,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -370,7 +379,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -392,7 +402,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                    ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -417,9 +428,11 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 String.format(
                     "approved by %s who is a code owner",
                     AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id()),
                 newPath,
                 CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
-                /* reasonNewPath= */ null));
+                /* reasonNewPath= */ null,
+                ImmutableSet.of()));
   }
 
   @Test
@@ -442,11 +455,13 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 oldPath,
                 CodeOwnerStatus.INSUFFICIENT_REVIEWERS,
                 /* reasonOldPath= */ null,
+                ImmutableSet.of(),
                 newPath,
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -1232,7 +1247,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id(), user2.id())));
   }
 
   @Test
@@ -1530,7 +1546,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a default code owner",
-                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id())),
+                ImmutableSet.of(admin.id())));
 
     // Approve as default code owner.
     approve(changeId);
@@ -1543,7 +1560,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a default code owner",
-                    AccountTemplateUtil.getAccountTemplate(admin.id()))));
+                    AccountTemplateUtil.getAccountTemplate(admin.id())),
+                ImmutableSet.of(admin.id())));
   }
 
   @Test
@@ -1719,7 +1737,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
 
     // Change some other file ('user' who uploads the change is a code owner and hence owner
     // approvals are implicit for this change)
@@ -1745,7 +1764,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -1849,7 +1869,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -1941,7 +1962,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a default code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test
@@ -2033,7 +2055,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.PENDING,
                 String.format(
                     "reviewer %s is a default code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
 
     // Let the default code owner approve the change.
     projectOperations
@@ -2054,7 +2077,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
                 CodeOwnerStatus.APPROVED,
                 String.format(
                     "approved by %s who is a default code owner",
-                    AccountTemplateUtil.getAccountTemplate(user.id()))));
+                    AccountTemplateUtil.getAccountTemplate(user.id())),
+                ImmutableSet.of(user.id())));
   }
 
   @Test

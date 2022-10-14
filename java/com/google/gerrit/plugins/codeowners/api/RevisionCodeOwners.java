@@ -94,11 +94,12 @@ public interface RevisionCodeOwners {
     public abstract Map<String, List<ConsistencyProblemInfo>> check() throws RestApiException;
   }
 
-  /** Request to check code owner config files. */
+  /** Request to check code owner owned_paths. */
   abstract class OwnedPathsRequest {
     private Integer start;
     private Integer limit;
     private String user;
+    private boolean checkReviewers = false;
 
     /**
      * Sets a limit on the number of owned paths that should be returned.
@@ -140,6 +141,18 @@ public interface RevisionCodeOwners {
     public String getUser() {
       return user;
     }
+
+    /** Sets that check_owners is enabled */
+    public OwnedPathsRequest withCheckReviewers(boolean checkReviewers) {
+      this.checkReviewers = checkReviewers;
+      return this;
+    }
+
+    /** Returns whether checkReviewers is set */
+    public boolean getCheckReviewers() {
+      return this.checkReviewers;
+    }
+
 
     /** Executes the request and retrieves the paths that are owned by the user. */
     public abstract OwnedPathsInfo get() throws RestApiException;
