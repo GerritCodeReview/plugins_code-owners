@@ -16,10 +16,13 @@ package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.PathSubject.paths;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.truth.ComparableSubject;
 import com.google.common.truth.FailureMetadata;
+import com.google.common.truth.IterableSubject;
 import com.google.common.truth.PathSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.backend.PathCodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 
@@ -50,6 +53,11 @@ public class PathCodeOwnerStatusSubject extends Subject {
   /** Returns a {@link ComparableSubject} for the code owner status. */
   public ComparableSubject<CodeOwnerStatus> hasStatusThat() {
     return check("status()").that(pathCodeOwnerStatus().status());
+  }
+
+  /** Returns a {@link ComparableSubject} for the code owner owners. */
+  public IterableSubject hasOwnersThat() {
+    return check("owners()").that(pathCodeOwnerStatus.owners());
   }
 
   private PathCodeOwnerStatus pathCodeOwnerStatus() {

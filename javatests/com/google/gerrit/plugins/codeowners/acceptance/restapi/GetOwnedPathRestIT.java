@@ -54,6 +54,13 @@ public class GetOwnedPathRestIT extends AbstractCodeOwnersIT {
     assertThat(r.getEntityContent()).contains("\"invalid\" is not a valid value for \"--limit\"");
   }
 
+  @Test
+  public void canGetOwnedPathsWithCheckReviewers() throws Exception {
+    RestResponse r = adminRestSession.get(getUrl("user=" + user.email(), "check_reviewers"));
+    r.assertOK();
+    assertThat(r.getEntityContent()).contains("{\"owned_changed_files\":[],\"owned_paths\":[]}");
+  }
+
   private String getUrl(String... parameters) {
     StringBuilder b = new StringBuilder();
     b.append(getUrl());
