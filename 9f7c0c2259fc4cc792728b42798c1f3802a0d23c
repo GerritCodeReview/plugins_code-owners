@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "113968ba_881828c4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1016342
+      },
+      "writtenOn": "2022-10-17T06:04:03Z",
+      "side": 1,
+      "message": "doesn\u0027t this change *introduce* gr-icon usage (replacing iron-icon)?",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 24
+      },
+      "revId": "9f7c0c2259fc4cc792728b42798c1f3802a0d23c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
