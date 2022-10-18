@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a6ac584_36b4d932",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 6
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "This looks already pretty good.\n\nMost of my comments are about nit and style. Please forgive, but in the backend we do pay attention to these kind of things.",
+      "revId": "6edf3638e17525555bc380f65eddfb3512d8ba7b",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}

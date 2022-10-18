@@ -1,0 +1,772 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "944ef5db_5dbf5a68",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "When I initially looked at the changes in this class I was confused how this field and the new \u0027owners\u0027 field work together if owned paths are computed for multiple users (\u0027user\u0027 input parameter set and checkReviewers\u003dtrue).\n\nAfter studying the code I understand that:\n\n- the \u0027owned\u0027 field is true if the user that is specified by the \u0027user\u0027 input parameter owns the path\n- the new \u0027owners\u0027 field is only populated if checkReviewers\u003dtrue and only contains reviewers that own the path (but not the user that is specified by the \u0027user\u0027 input parameter if they are not a reviewer, but do own the path)\n\nThe latter is rather unexpected to me.\n\nMy expectation was:\n1. callers can use multiple options to specify for which users they want owned paths be computed (user parameter, checkReviewers parameter, maybe more in the future)\n2. the \u0027owners\u0027 field would contain all of the users for which we requested the owned paths in 1., if they own the path (no matter by which option was used).\n\nI think doing this would make the semantics of these fields more clear. In addition, it would probably make things simpler for callers, since they would only need to inspect the new \u0027owners\u0027 field (and the old \u0027owned\u0027 field would become obsolete and is only kept for backwards compatibility).\n\nIn any case I think the javadoc description and the documentation of the \u0027owned\u0027 field should be updated to say clearly what its value is if owned paths are requested to be computed for multiple users (\u0027user\u0027 input parameter is set and checkReviewers\u003dtrue).\n\nI see two possibilities:\n1. The \u0027owned\u0027 field always reflects whether the user specified by the \u0027user\u0027 input owns the file.\n2. The \u0027owned\u0027 field is only populated if owned paths are requested for a single user (\u0027user\u0027 input is given, but checkReviewers is false). Just for to stay backwards compatible.",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a018ef5b_8dd3cbb7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "I think there is something inconsistent here. The description of the \u0027owners\u0027 field here says \"The owners for the given file as Account IDs.\" which sounds like it should include the specified user and the reviewers (if they own the path), but in GetOwnedPaths this field is populated with ownedPath.owners() that only returns the reviewers that own the path. \n\nI think the \u0027owners\u0027 field should include all owners, not only the reviewers. This would make things easier if we extend the API later to consider more users (e.g. if we make the existing \u0027user\u0027 parameter a list, or if we add a checkCcs option).",
+      "range": {
+        "startLine": 36,
+        "startChar": 23,
+        "endLine": 36,
+        "endChar": 29
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f0de23d4_7a52a532",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Accounts in the REST API are always represented as AccoountInfo\u0027s. It\u0027s OK to only populate the _account_id field in AccountInfo and leave the other fields unset. Using AccountInfo allows us to return further account properties in future, and doesn\u0027t make it impossible for us to return account UUIDs instead of numeric account IDs one day.",
+      "range": {
+        "startLine": 36,
+        "startChar": 14,
+        "endLine": 36,
+        "endChar": 21
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0992aac_379a7bb7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathsInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: Unintended change? Please revert.",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2adb23c1_f2ee81ac",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RevisionCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "maybe just /s/code owner owned_paths/owned path ?",
+      "range": {
+        "startLine": 97,
+        "startChar": 23,
+        "endLine": 97,
+        "endChar": 45
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4a1dae0c_af2d145f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RevisionCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "boolean variables are false by default, and hence do not need to be initialised with false. For being consistent with the rest of the code base I would drop this here.",
+      "range": {
+        "startLine": 102,
+        "startChar": 34,
+        "endLine": 102,
+        "endChar": 42
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3c09e00d_ea3c40b8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RevisionCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Maybe better something a little more verbose like \"Sets whether code ownership is checked for the reviewers of the change\"?",
+      "range": {
+        "startLine": 145,
+        "startChar": 8,
+        "endLine": 145,
+        "endChar": 41
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "af329803_51bde2c4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: long line, please wrap, we use max 100 chars per line",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c7346b3a_2477ade0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Here and in other places, this code looks wrongly formatted. We use google-java-format-1.7 for formatting the backend code [1]. Please run it once on this change.\n\n[1] https://gerrit-review.googlesource.com/Documentation/dev-crafting-changes.html#style",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 85
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "35f35a86_9150066d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: s/reviewerAccountIdsd/reviewerAccountIds",
+      "range": {
+        "startLine": 421,
+        "startChar": 12,
+        "endLine": 421,
+        "endChar": 31
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7a3e0cb3_52957716",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Maybe rename this to getFileStatusesForAccounts?",
+      "range": {
+        "startLine": 424,
+        "startChar": 37,
+        "endLine": 424,
+        "endChar": 62
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "85080783_94d56608",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Can this just be one \u0027accountIds\u0027 set? I think it should be fine to pass them all as approverAccountIds into the getFileStatus call.",
+      "range": {
+        "startLine": 425,
+        "startChar": 50,
+        "endLine": 426,
+        "endChar": 49
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2e244501_b9ec317c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "I think we expect that reviewerAccountIds is never null? In this case I would add an requireNonNull check for it here, same as for the other parameters.",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "14467db7_ef401ceb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Please include the reviewerAccountIds into this debug log entry.",
+      "range": {
+        "startLine": 432,
+        "startChar": 5,
+        "endLine": 434,
+        "endChar": 35
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "86378bbd_a0e4cfaa",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "This causes a raw type warning, please specify the type:\n\n```\nImmutableSet.Builder\u003cAccount.Id\u003e\n```",
+      "range": {
+        "startLine": 618,
+        "startChar": 4,
+        "endLine": 618,
+        "endChar": 24
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f7ec6a9c_bc1f00b5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: one blank line should be enough",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "daa1b5c5_65713aa7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "This code branch is a short-cut if the path is approved that won\u0027t work if checkReviewers\u003dtrue is requested.\n\nI think the case that is currently not working yet is this one:\n\n* have a change that has 2 code owners as reviewers (codeOwner1, codeOwners2)\n* codeOwner1 has approved the change\n* invoke the get owned path REST endpoint with user\u003dcodeOwner1 and checkReviewers\u003dtrue\n\nNow isApproved in line 621 would return true, reviewerOwners is not set and hence codeOwner2 would not be returned as owning the path.\n\nMaybe we also need a test for this case.",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "28228474_5feab26b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 733,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "I wonder if it would be easier to just pass all code owners in here. This way the semantics of the new owners field in PathCodeOwnersStatus would be become much clearer and you would not need to pass through the reviewerAccountIds getOwnedPaths. Then of course the intersection of reviewerAcccountIds and codeOwnerAccountIds would need to be done in the callers. I haven\u0027t fully thought this through yet, but it may be worth to give it a try.",
+      "range": {
+        "startLine": 733,
+        "startChar": 86,
+        "endLine": 733,
+        "endChar": 108
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3d7afbaf_5e96b45c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnAddReviewer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: for boolean flags we usually include a comment with the flag name for better readability (at least within the code-owners plugin):\n\n```\n  /* checkReviewers\u003d */ false\n```",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3f9726b9_6ba4c171",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OnCodeOwnerApproval.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: for boolean flags we usually include a comment with the flag name for better readability (at least within the code-owners plugin):\n\n```\n  /* checkReviewers\u003d */ false\n```",
+      "range": {
+        "startLine": 148,
+        "startChar": 16,
+        "endLine": 148,
+        "endChar": 21
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "58a56f9f_5958c18d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedPath.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "please update",
+      "range": {
+        "startLine": 24,
+        "startChar": 34,
+        "endLine": 24,
+        "endChar": 62
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b47009e1_1106368c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedPath.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Here and below. I think it would improve code readability if this name would reflect that this only returns reviewers that own this path.\n\nOr as commented at [1] we may consider changing the semantics of this field so that it contains all owners (and not only reviewers that are code owners).\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/348257/5/java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java#733",
+      "range": {
+        "startLine": 34,
+        "startChar": 39,
+        "endLine": 34,
+        "endChar": 45
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "68a83e19_114b19c5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Same as in OwnedPaths. I think it would improve code readability if this name would reflect that this only returns reviewers that own this path. Or we should change the semantics so that it contains all code owners.",
+      "range": {
+        "startLine": 52,
+        "startChar": 43,
+        "endLine": 52,
+        "endChar": 49
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8186d0fe_9a282bee",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: unneeded addition of blank line",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a2fa339e_874ac3fa",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: Initialising booleans variables with false is not needed.",
+      "range": {
+        "startLine": 59,
+        "startChar": 32,
+        "endLine": 59,
+        "endChar": 40
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "869363cd_31c4e0b5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Not sure if this is a good alias and whether we actually need an alias for this option. Maybe just drop the alias?",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c447209e_44b5e4df",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "[optional] As already commented on OwnedPathInfo we should return accounts as AccountInfo. If we only populate the ID field in AccountInfo we can instantiate them manually, but the usual way is to use AccountLoader. If we use AccountLoader we can easily allow callers to request further account properties in future (similar to the -o/-O flags in AbstractGetCodeOwnersForPath).",
+      "range": {
+        "startLine": 169,
+        "startChar": 2,
+        "endLine": 171,
+        "endChar": 3
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a21a6630_78894265",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedChangedFileInfoSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Here and below. Should this be \"newPath\"?",
+      "range": {
+        "startLine": 51,
+        "startChar": 11,
+        "endLine": 51,
+        "endChar": 23
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "054a9fb2_195692e3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedChangedFileInfoSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Here and below. Should this be \"oldPath\"?",
+      "range": {
+        "startLine": 61,
+        "startChar": 11,
+        "endLine": 61,
+        "endChar": 23
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "89e63252_bfcb601c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedPathInfoSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "I think this should say \"owners\". \n\nE.g. if this assertion\n\n```\nassertThat(ownedPathsInfo.ownedChangedFiles.get(0))\n        .hasNewPathThat(path1)\n        .hasOwnersThat()\n        .containsExactly(admin.id().get());\n```\n\nfails the error message currently says:\n\n```\nvalue of                : ownedChangedFileInfo.ownedNewPath.ownedPathInfo().onlyElement()\nexpected                : 1000000\nbut was                 : 1000002\n```\n\nbut if you change this to \"owners\" you can see that it\u0027s the \u0027owners\u0027 field that contains the unexpected value:\n\n```\nvalue of                : ownedChangedFileInfo.ownedNewPath.owners.onlyElement()\nexpected                : 1000000\nbut was                 : 1000002\n```",
+      "range": {
+        "startLine": 50,
+        "startChar": 18,
+        "endLine": 50,
+        "endChar": 33
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "28a68402_159e98c1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/PathCodeOwnerStatusSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: For consistency with the other subjects in the code-owners plugin please drop the parenthesises here.",
+      "range": {
+        "startLine": 60,
+        "startChar": 24,
+        "endLine": 60,
+        "endChar": 26
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "34774f06_5ddc661f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "This test doesn\u0027t seem to add a code owner as a reviewer to the created change, should it?",
+      "range": {
+        "startLine": 342,
+        "startChar": 42,
+        "endLine": 342,
+        "endChar": 65
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d093a73d_1d202a11",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: s/Code-Re[view/Code-Review",
+      "range": {
+        "startLine": 395,
+        "startChar": 13,
+        "endLine": 395,
+        "endChar": 25
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "eaa5b011_bd61dab1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "Should there maybe also be a test where a code owner is a reviewer, but doesn\u0027t own all the files in the change?",
+      "range": {
+        "startLine": 407,
+        "startChar": 1,
+        "endLine": 411,
+        "endChar": 63
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e5a8a034_293b47a2",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "nit: please use just one blank line to separate tests",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "691c06bf_06591881",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetOwnedPathRestIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-18T13:28:49Z",
+      "side": 1,
+      "message": "I think this test is not needed here. This class only covers cases that cannot be tested via the gApi java API, but which require making an actual REST call. Getting owned paths with check reviewers can be tested via gApi and hence should be tested in GetOwnedPathsIT. Since you have tests already there, I think this test here can be dropped.",
+      "range": {
+        "startLine": 57,
+        "startChar": 2,
+        "endLine": 62,
+        "endChar": 3
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
