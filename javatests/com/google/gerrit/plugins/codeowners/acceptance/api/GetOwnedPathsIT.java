@@ -144,8 +144,6 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasEmptyOldPath();
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path2);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasEmptyOldPath();
-
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
     assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
@@ -198,7 +196,6 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasEmptyNewPath();
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedOldPath(path2);
 
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
     assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
@@ -279,10 +276,6 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasNonOwnedNewPath(newPath3);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedOldPath(oldPath3);
 
-    List<String> ownedPaths = Arrays.asList(newPath1, oldPath1, newPath2, oldPath3);
-    Collections.sort(ownedPaths);
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths).inOrder();
-
     assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
@@ -305,7 +298,9 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
 
     OwnedPathsInfo ownedPathsInfo =
         changeCodeOwnersApiFactory.change(changeId).current().getOwnedPaths().forUser("self").get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path2);
   }
 
   @Test
@@ -335,7 +330,7 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .getOwnedPaths()
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().isEmpty();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().isEmpty();
   }
 
   @Test
@@ -369,10 +364,11 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withStart(0)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo)
-        .hasOwnedPathsThat()
-        .containsExactly(path1, path2, path3, path4)
-        .inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(4);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedNewPath(path3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(3)).hasOwnedNewPath(path4);
 
     ownedPathsInfo =
         changeCodeOwnersApiFactory
@@ -382,7 +378,10 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withStart(1)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path2, path3, path4).inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedNewPath(path4);
 
     ownedPathsInfo =
         changeCodeOwnersApiFactory
@@ -392,7 +391,9 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withStart(2)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path3, path4).inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path4);
 
     ownedPathsInfo =
         changeCodeOwnersApiFactory
@@ -402,7 +403,8 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withStart(3)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path4);
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path4);
 
     ownedPathsInfo =
         changeCodeOwnersApiFactory
@@ -412,7 +414,7 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withStart(4)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().isEmpty();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().isEmpty();
   }
 
   @Test
@@ -446,7 +448,8 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withLimit(1)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1);
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path1);
     assertThat(ownedPathsInfo).hasMoreThat().isTrue();
 
     ownedPathsInfo =
@@ -457,7 +460,9 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withLimit(2)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2).inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path2);
     assertThat(ownedPathsInfo).hasMoreThat().isTrue();
 
     ownedPathsInfo =
@@ -468,7 +473,10 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withLimit(3)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path1, path2, path3).inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedNewPath(path3);
     assertThat(ownedPathsInfo).hasMoreThat().isTrue();
 
     ownedPathsInfo =
@@ -479,10 +487,11 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withLimit(4)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo)
-        .hasOwnedPathsThat()
-        .containsExactly(path1, path2, path3, path4)
-        .inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(4);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path1);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedNewPath(path3);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(3)).hasOwnedNewPath(path4);
     assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
@@ -518,7 +527,9 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .withLimit(2)
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactly(path2, path3).inOrder();
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(path2);
+    assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(path3);
     assertThat(ownedPathsInfo).hasMoreThat().isTrue();
   }
 
@@ -594,9 +605,6 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(1);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedNewPath(newPath1);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedOldPath(oldPath1);
-    List<String> ownedPaths = Arrays.asList(newPath1, oldPath1);
-    Collections.sort(ownedPaths);
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths);
     assertThat(ownedPathsInfo).hasMoreThat().isTrue();
 
     ownedPathsInfo =
@@ -612,9 +620,6 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasOwnedOldPath(oldPath1);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedNewPath(newPath2);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNonOwnedOldPath(oldPath2);
-    ownedPaths = Arrays.asList(newPath1, oldPath1, newPath2);
-    Collections.sort(ownedPaths);
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths).inOrder();
     assertThat(ownedPathsInfo).hasMoreThat().isTrue();
 
     ownedPathsInfo =
@@ -632,9 +637,6 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNonOwnedOldPath(oldPath2);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasNonOwnedNewPath(newPath3);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(2)).hasOwnedOldPath(oldPath3);
-    ownedPaths = Arrays.asList(newPath1, oldPath1, newPath2, oldPath3);
-    Collections.sort(ownedPaths);
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths).inOrder();
     assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
@@ -713,9 +715,6 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
     assertThat(ownedPathsInfo.ownedChangedFiles.get(0)).hasNonOwnedOldPath(oldPath2);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasNonOwnedNewPath(newPath3);
     assertThat(ownedPathsInfo.ownedChangedFiles.get(1)).hasOwnedOldPath(oldPath3);
-    List<String> ownedPaths = Arrays.asList(newPath2, oldPath3);
-    Collections.sort(ownedPaths);
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().containsExactlyElementsIn(ownedPaths);
     assertThat(ownedPathsInfo).hasMoreThat().isNull();
   }
 
@@ -737,7 +736,7 @@ public class GetOwnedPathsIT extends AbstractCodeOwnersIT {
             .getOwnedPaths()
             .forUser(user.email())
             .get();
-    assertThat(ownedPathsInfo).hasOwnedPathsThat().hasSize(GetOwnedPaths.DEFAULT_LIMIT);
+    assertThat(ownedPathsInfo).hasOwnedChangedFilesThat().hasSize(GetOwnedPaths.DEFAULT_LIMIT);
   }
 
   @Test

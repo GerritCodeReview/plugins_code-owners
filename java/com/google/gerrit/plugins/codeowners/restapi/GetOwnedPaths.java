@@ -108,10 +108,6 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
             .limit(limit)
             .map(GetOwnedPaths::toOwnedChangedFileInfo)
             .collect(toImmutableList());
-    ownedPathsInfo.ownedPaths =
-        OwnedChangedFile.asPathStream(ownedChangedFiles.stream().limit(limit))
-            .map(Path::toString)
-            .collect(toImmutableList());
     return Response.ok(ownedPathsInfo);
   }
 
