@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "96a4c77f_90114a20",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/FileCodeOwnerStatus.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 93,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-19T14:56:13Z",
+      "side": 0,
+      "message": "nit: please do not drop this comment",
+      "range": {
+        "startLine": 93,
+        "startChar": 47,
+        "endLine": 93,
+        "endChar": 60
+      },
+      "revId": "edc3dc61719e88d5c12ed74aff8d0a7aa7b19a1d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1c8893d7_d92708b0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/FileCodeOwnerStatus.java",
+        "patchSetId": 11
+      },
+      "lineNbr": 112,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-19T14:56:13Z",
+      "side": 0,
+      "message": "nit: please do not drop this comment",
+      "range": {
+        "startLine": 112,
+        "startChar": 43,
+        "endLine": 112,
+        "endChar": 56
+      },
+      "revId": "edc3dc61719e88d5c12ed74aff8d0a7aa7b19a1d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
