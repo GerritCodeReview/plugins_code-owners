@@ -35,7 +35,6 @@ import com.google.gerrit.server.account.AccountResolver.UnresolvableAccountExcep
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.inject.Inject;
 import java.io.IOException;
-import java.nio.file.Path;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.kohsuke.args4j.Option;
 
@@ -107,10 +106,6 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
         ownedChangedFiles.stream()
             .limit(limit)
             .map(GetOwnedPaths::toOwnedChangedFileInfo)
-            .collect(toImmutableList());
-    ownedPathsInfo.ownedPaths =
-        OwnedChangedFile.asPathStream(ownedChangedFiles.stream().limit(limit))
-            .map(Path::toString)
             .collect(toImmutableList());
     return Response.ok(ownedPathsInfo);
   }
