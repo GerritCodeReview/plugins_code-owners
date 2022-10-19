@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6ed5faa_b63f5922",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 29,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "944ef5db_5dbf5a68",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a018ef5b_8dd3cbb7",
@@ -64,6 +82,78 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "507f31d2_147d7815",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0de23d4_7a52a532",
+      "range": {
+        "startLine": 36,
+        "startChar": 14,
+        "endLine": 36,
+        "endChar": 21
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f7b93fc_b27e330c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f0de23d4_7a52a532",
+      "range": {
+        "startLine": 36,
+        "startChar": 14,
+        "endLine": 36,
+        "endChar": 21
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a4b7bc32_ddf8340c",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 36,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Agreed!",
+      "parentUuid": "a018ef5b_8dd3cbb7",
+      "range": {
+        "startLine": 36,
+        "startChar": 23,
+        "endLine": 36,
+        "endChar": 29
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d0992aac_379a7bb7",
@@ -81,6 +171,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "86ee5dfe_bffcaf42",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/OwnedPathsInfo.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0992aac_379a7bb7",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2adb23c1_f2ee81ac",
@@ -94,6 +202,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "maybe just /s/code owner owned_paths/owned path ?",
+      "range": {
+        "startLine": 97,
+        "startChar": 23,
+        "endLine": 97,
+        "endChar": 45
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fc9abb09_d476a818",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RevisionCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 97,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2adb23c1_f2ee81ac",
       "range": {
         "startLine": 97,
         "startChar": 23,
@@ -127,6 +259,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "43cab5eb_b58fda27",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RevisionCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 102,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4a1dae0c_af2d145f",
+      "range": {
+        "startLine": 102,
+        "startChar": 34,
+        "endLine": 102,
+        "endChar": 42
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3c09e00d_ea3c40b8",
@@ -140,6 +296,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "Maybe better something a little more verbose like \"Sets whether code ownership is checked for the reviewers of the change\"?",
+      "range": {
+        "startLine": 145,
+        "startChar": 8,
+        "endLine": 145,
+        "endChar": 41
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5fec264f_f101bf5d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/RevisionCodeOwners.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 145,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3c09e00d_ea3c40b8",
       "range": {
         "startLine": 145,
         "startChar": 8,
@@ -167,6 +347,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7a991943_5f64bc74",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "af329803_51bde2c4",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c7346b3a_2477ade0",
@@ -180,6 +378,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "Here and in other places, this code looks wrongly formatted. We use google-java-format-1.7 for formatting the backend code [1]. Please run it once on this change.\n\n[1] https://gerrit-review.googlesource.com/Documentation/dev-crafting-changes.html#style",
+      "range": {
+        "startLine": 147,
+        "startChar": 0,
+        "endLine": 151,
+        "endChar": 85
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d8bfdf3a_f385d1b6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 151,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c7346b3a_2477ade0",
       "range": {
         "startLine": 147,
         "startChar": 0,
@@ -213,6 +435,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2156df1d_f8af1ef2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 421,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "35f35a86_9150066d",
+      "range": {
+        "startLine": 421,
+        "startChar": 12,
+        "endLine": 421,
+        "endChar": 31
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7a3e0cb3_52957716",
@@ -226,6 +472,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "Maybe rename this to getFileStatusesForAccounts?",
+      "range": {
+        "startLine": 424,
+        "startChar": 37,
+        "endLine": 424,
+        "endChar": 62
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "984e6cfe_1f2a8f4e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 424,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "7a3e0cb3_52957716",
       "range": {
         "startLine": 424,
         "startChar": 37,
@@ -259,6 +529,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c0382bc4_6c1544ae",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 426,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "I can\u0027t pass them into approverAccountIds because then it will think the file is approved.",
+      "parentUuid": "85080783_94d56608",
+      "range": {
+        "startLine": 425,
+        "startChar": 50,
+        "endLine": 426,
+        "endChar": 49
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2e244501_b9ec317c",
@@ -276,6 +570,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "89ea9f77_5fe22909",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 430,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2e244501_b9ec317c",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "14467db7_ef401ceb",
@@ -289,6 +601,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "Please include the reviewerAccountIds into this debug log entry.",
+      "range": {
+        "startLine": 432,
+        "startChar": 5,
+        "endLine": 434,
+        "endChar": 35
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2bf0b39b_135fcae9",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 434,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "14467db7_ef401ceb",
       "range": {
         "startLine": 432,
         "startChar": 5,
@@ -322,6 +658,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "07eb8553_0a5928c7",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 618,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "86378bbd_a0e4cfaa",
+      "range": {
+        "startLine": 618,
+        "startChar": 4,
+        "endLine": 618,
+        "endChar": 24
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f7ec6a9c_bc1f00b5",
@@ -339,6 +699,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "e04b14bc_b52b803f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 620,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f7ec6a9c_bc1f00b5",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "daa1b5c5_65713aa7",
@@ -352,6 +730,24 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "This code branch is a short-cut if the path is approved that won\u0027t work if checkReviewers\u003dtrue is requested.\n\nI think the case that is currently not working yet is this one:\n\n* have a change that has 2 code owners as reviewers (codeOwner1, codeOwners2)\n* codeOwner1 has approved the change\n* invoke the get owned path REST endpoint with user\u003dcodeOwner1 and checkReviewers\u003dtrue\n\nNow isApproved in line 621 would return true, reviewerOwners is not set and hence codeOwner2 would not be returned as owning the path.\n\nMaybe we also need a test for this case.",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6eb197d_a781b934",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 627,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "While this branch is not relevant, it did terminate early further down below by not traversing. This has been fixed and added a test.",
+      "parentUuid": "daa1b5c5_65713aa7",
       "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -379,6 +775,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "54d6ae45_74fd3c33",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 733,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28228474_5feab26b",
+      "range": {
+        "startLine": 733,
+        "startChar": 86,
+        "endLine": 733,
+        "endChar": 108
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3d7afbaf_5e96b45c",
@@ -396,6 +816,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "06693913_f6eeba7a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersOnAddReviewer.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 225,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3d7afbaf_5e96b45c",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "3f9726b9_6ba4c171",
@@ -409,6 +847,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "nit: for boolean flags we usually include a comment with the flag name for better readability (at least within the code-owners plugin):\n\n```\n  /* checkReviewers\u003d */ false\n```",
+      "range": {
+        "startLine": 148,
+        "startChar": 16,
+        "endLine": 148,
+        "endChar": 21
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3c4b5b3_a467e311",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OnCodeOwnerApproval.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3f9726b9_6ba4c171",
       "range": {
         "startLine": 148,
         "startChar": 16,
@@ -442,6 +904,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4316e6fd_25243ca3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedPath.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 24,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "58a56f9f_5958c18d",
+      "range": {
+        "startLine": 24,
+        "startChar": 34,
+        "endLine": 24,
+        "endChar": 62
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b47009e1_1106368c",
@@ -455,6 +941,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "Here and below. I think it would improve code readability if this name would reflect that this only returns reviewers that own this path.\n\nOr as commented at [1] we may consider changing the semantics of this field so that it contains all owners (and not only reviewers that are code owners).\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/348257/5/java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java#733",
+      "range": {
+        "startLine": 34,
+        "startChar": 39,
+        "endLine": 34,
+        "endChar": 45
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bea8165a_435688df",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedPath.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 34,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "b47009e1_1106368c",
       "range": {
         "startLine": 34,
         "startChar": 39,
@@ -488,6 +998,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a3a0d1b0_bb0ae550",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 52,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "68a83e19_114b19c5",
+      "range": {
+        "startLine": 52,
+        "startChar": 43,
+        "endLine": 52,
+        "endChar": 49
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8186d0fe_9a282bee",
@@ -501,6 +1035,24 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "nit: unneeded addition of blank line",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b735b8f5_c90424c4",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8186d0fe_9a282bee",
       "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -528,6 +1080,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "41fc1f90_c9dd7f74",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a2fa339e_874ac3fa",
+      "range": {
+        "startLine": 59,
+        "startChar": 32,
+        "endLine": 59,
+        "endChar": 40
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "869363cd_31c4e0b5",
@@ -545,6 +1121,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cb2dad44_74eda953",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "869363cd_31c4e0b5",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "c447209e_44b5e4df",
@@ -558,6 +1152,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "[optional] As already commented on OwnedPathInfo we should return accounts as AccountInfo. If we only populate the ID field in AccountInfo we can instantiate them manually, but the usual way is to use AccountLoader. If we use AccountLoader we can easily allow callers to request further account properties in future (similar to the -o/-O flags in AbstractGetCodeOwnersForPath).",
+      "range": {
+        "startLine": 169,
+        "startChar": 2,
+        "endLine": 171,
+        "endChar": 3
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bcfabe7f_3f29f404",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/GetOwnedPaths.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 171,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c447209e_44b5e4df",
       "range": {
         "startLine": 169,
         "startChar": 2,
@@ -591,6 +1209,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3a76ed23_7a3954b8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedChangedFileInfoSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a21a6630_78894265",
+      "range": {
+        "startLine": 51,
+        "startChar": 11,
+        "endLine": 51,
+        "endChar": 23
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "054a9fb2_195692e3",
@@ -604,6 +1246,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "Here and below. Should this be \"oldPath\"?",
+      "range": {
+        "startLine": 61,
+        "startChar": 11,
+        "endLine": 61,
+        "endChar": 23
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1edf9612_fde5db05",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedChangedFileInfoSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 61,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "054a9fb2_195692e3",
       "range": {
         "startLine": 61,
         "startChar": 11,
@@ -637,6 +1303,54 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "97411ede_a49090cc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedPathInfoSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89e63252_bfcb601c",
+      "range": {
+        "startLine": 50,
+        "startChar": 18,
+        "endLine": 50,
+        "endChar": 33
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ce42e059_bd74420e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedPathInfoSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 50,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "89e63252_bfcb601c",
+      "range": {
+        "startLine": 50,
+        "startChar": 18,
+        "endLine": 50,
+        "endChar": 33
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "28a68402_159e98c1",
@@ -650,6 +1364,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "nit: For consistency with the other subjects in the code-owners plugin please drop the parenthesises here.",
+      "range": {
+        "startLine": 60,
+        "startChar": 24,
+        "endLine": 60,
+        "endChar": 26
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "86973ae9_fdcb871b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/PathCodeOwnerStatusSubject.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "28a68402_159e98c1",
       "range": {
         "startLine": 60,
         "startChar": 24,
@@ -683,6 +1421,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a333f0c9_8e84a5ac",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "34774f06_5ddc661f",
+      "range": {
+        "startLine": 342,
+        "startChar": 42,
+        "endLine": 342,
+        "endChar": 65
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "d093a73d_1d202a11",
@@ -696,6 +1458,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "nit: s/Code-Re[view/Code-Review",
+      "range": {
+        "startLine": 395,
+        "startChar": 13,
+        "endLine": 395,
+        "endChar": 25
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3dbffd44_5c9ec325",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 395,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d093a73d_1d202a11",
       "range": {
         "startLine": 395,
         "startChar": 13,
@@ -729,6 +1515,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "b172aa1f_9ad94782",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 411,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "\u003e Should there maybe also be a test where a code owner is a reviewer, but doesn\u0027t own all the files in the change?\n\nThat\u0027s the case here, path3 is not owned.",
+      "parentUuid": "eaa5b011_bd61dab1",
+      "range": {
+        "startLine": 407,
+        "startChar": 1,
+        "endLine": 411,
+        "endChar": 63
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e5a8a034_293b47a2",
@@ -746,6 +1556,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "beddcc9e_a8cb15a1",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/GetOwnedPathsIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 414,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e5a8a034_293b47a2",
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "691c06bf_06591881",
@@ -759,6 +1587,30 @@
       "writtenOn": "2022-10-18T13:28:49Z",
       "side": 1,
       "message": "I think this test is not needed here. This class only covers cases that cannot be tested via the gApi java API, but which require making an actual REST call. Getting owned paths with check reviewers can be tested via gApi and hence should be tested in GetOwnedPathsIT. Since you have tests already there, I think this test here can be dropped.",
+      "range": {
+        "startLine": 57,
+        "startChar": 2,
+        "endLine": 62,
+        "endChar": 3
+      },
+      "revId": "7c0412ab3b4405ce56957a5a81a87bd56f62ccc4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b290a1b8_74fe6784",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/restapi/GetOwnedPathRestIT.java",
+        "patchSetId": 5
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-19T09:08:10Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "691c06bf_06591881",
       "range": {
         "startLine": 57,
         "startChar": 2,
