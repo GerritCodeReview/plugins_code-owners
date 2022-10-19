@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "745aba3e_c095b197",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-19T10:22:13Z",
+      "side": 1,
+      "message": "Please run google-java-format on this change, there are some unused imports and a whitespace nit that will get fixed by this.",
+      "revId": "336a2f1bb6949f2f2637fe67aada730289a870a1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
