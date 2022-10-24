@@ -16,6 +16,24 @@
       "message": "Thanks for the review.\n\nOne thought is that it doesn\u0027t really make sense to also add reviewers to the owners list because the only time we pass checkOwners \u003d true is when the reviewers list is empty.\n\nTempted to refactor a bit but can delay to a follow-up change to keep this contained.",
       "revId": "3a13e01b4f3472f06a506a6d977d599583f84a62",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6fca570c_0f355d06",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "\u003e One thought is that it doesn\u0027t really make sense to also add reviewers\n\u003e to the owners list because the only time we pass checkOwners \u003d true is\n\u003e when the reviewers list is empty.\n\nYes, I agree.\n\nJust looking at the CodeOwnerApprovalCheck#getPathCodeOwnerStatus method I think we should still handle reviewers correctly if they would be set, since nothing prevents callers from providing reviewers. Alternatively we may add a checkState call in the beginning of CodeOwnerApprovalCheck#getPathCodeOwnerStatus to check that reviewerAccountIds is empty when checkAllOwners is true, so that we fail if this condition is violated. I think I have no preference for either of these options.\n\n\u003e Tempted to refactor a bit but can delay to a follow-up change to keep\n\u003e this contained.\n\nIf you see an opportunity to refactor this is a follow-up change, please do. I agree that this refactoring is not required for this change and it\u0027s better to do this as a follow-up.",
+      "parentUuid": "a2c0041a_97ad878f",
+      "revId": "3a13e01b4f3472f06a506a6d977d599583f84a62",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }

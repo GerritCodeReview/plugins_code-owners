@@ -1,0 +1,141 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f0a2ef8c_c34798ed",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 14
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "Great, I think we are almost there.",
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3be8973c_97b7fad1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 650,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "I think the usage of the \u0027globalOwnedByAllUsers\u0027 variable is a bit confusing. It\u0027s only set to \u0027true\u0027 if global code ownership is assigned to \u0027*\u0027 (globalCodeOwners.ownedByAllUsers() \u003d true) and if the path is approved (isGloballyApproved \u003d true). In other words, this means it\u0027s only \u0027true\u0027 if all users are global code owner and there is at least one approver. This means it\u0027s \u0027false\u0027 if all users are global code owners and the path is not approved because there is no approver, which is confusing given the variable name.\n\nCould we:\n* drop this variable and use globalCodeOwners.ownedByAllUsers() instead (or alternatively set globalOwnedByAllUsers always to globalCodeOwners.ownedByAllUsers())\n* add approverAccountIds/reviewerAccountIds to activeOwners independently of whether the path was globally approved:\n\n```\nif (globalCodeOwners.ownedByAllUsers()) {\n  activeOwners.addAll(approverAccountIds);\n  activeOwners.addAll(reviewerAccountIds);\n} else {\n  activeOwners.addAll(\n    Sets.intersection(\n       globalCodeOwners.codeOwnersAccountIds(),\n       approverAccountIds));\n  activeOwners.addAll(\n    Sets.intersection(\n       globalCodeOwners.codeOwnersAccountIds(),\n       reviewerAccountIds));\n}\n```\n\nThen line 662-664 can be dropped.\n\nI think this would make the code easier to read. WDYT?",
+      "range": {
+        "startLine": 638,
+        "startChar": 4,
+        "endLine": 650,
+        "endChar": 5
+      },
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cc98218d_8e32e2fb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 791,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "nit: line too long (we use max 100 chars), please wrap\n\nDid you maybe forget to run google-java-format? I think there are some more formatting issues in this patch set. Sorry that the CI is not checking Code-Style for plugins.",
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a1b5cffd_f5762d87",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 791,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "nit: Should this be \u0027null\u0027?\n\nThe Javadoc of this field at [1] says that this field is only set if checkOwnerIds\u003dtrue, means otherwise it should be not set (not set \u003d null):\n\n* null (or Optional.empty): owners have not been computed\n* empty list: owners have been computed, but there are none\n* non-empty list: owners have been computed\n\n[1] https://gerrit-review.googlesource.com/c/plugins/code-owners/+/348257/12..14/java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java#51",
+      "range": {
+        "startLine": 791,
+        "startChar": 103,
+        "endLine": 791,
+        "endChar": 120
+      },
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0eef4dff_caf82dd6",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "Does this need to be annotated with @Nullable?",
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "5a469396_3571b865",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "root code owners and global code owners are different things:\n* root code owner:\n  code owner in the /OWNERS file\n* global code owner:\n  code owner that is configured as global code owner in the code-owners.config file (in this repo or in a parent repo) [1]\n\nAlso see [2] which explains the different kinds of code owners.\n\nTo make a user a global code owner in a test, you need to annotate the test with\n\n```\n@GerritConfig(name \u003d \"plugin.code-owners.globalCodeOwner\", value \u003d \"globalCodeOwner@example.com\")\n```\n\n[1] https://android-review.googlesource.com/plugins/code-owners/Documentation/config.html#codeOwnersGlobalCodeOwner\n\n[2] https://android-review.googlesource.com/plugins/code-owners/Documentation/config-guide.html#recommendations-for-defining-code-owners",
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f9482432_e8ec5595",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 186,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-24T13:07:32Z",
+      "side": 1,
+      "message": "nit: Wrong/copy-pasted comment?",
+      "range": {
+        "startLine": 186,
+        "startChar": 28,
+        "endLine": 186,
+        "endChar": 49
+      },
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
