@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a2c0041a_97ad878f",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 13
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Thanks for the review.\n\nOne thought is that it doesn\u0027t really make sense to also add reviewers to the owners list because the only time we pass checkOwners \u003d true is when the reviewers list is empty.\n\nTempted to refactor a bit but can delay to a follow-up change to keep this contained.",
+      "revId": "3a13e01b4f3472f06a506a6d977d599583f84a62",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}

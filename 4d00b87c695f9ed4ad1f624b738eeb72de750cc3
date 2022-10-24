@@ -58,6 +58,48 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a0aae8d4_73a87e22",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c026b9f1_2f6acf8e",
+      "range": {
+        "startLine": 638,
+        "startChar": 45,
+        "endLine": 638,
+        "endChar": 67
+      },
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "77b71a12_cf7b037f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 638,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "6c2001f7_e544ba45",
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "321482aa_1ad1de44",
@@ -71,6 +113,30 @@
       "writtenOn": "2022-10-21T07:56:14Z",
       "side": 1,
       "message": "I think there is a problem with this shortcut. It checks whether the path is approved by global code owners and if yes, it skips the evaluation of the OWNERS files (that is done in line 647 below). This means if you have a change with 2 code owners that are reviewers and have approved the change, and one of them is a global code owner and one of them is a regular code owner, then with this shortcut we will report the global code owner as owner, but not the regular code owner since we do not even look at the OWNERS files.\n\nIf we compute owned paths for multiple users it\u0027s OK to always evaluate all OWNERS files, but we shouldn\u0027t lose this shortcut when we just check whether the path is code owner approved.\n\nIf we keep the shortcut for when we check whether the path is code owner approved, it means that for the \u0027owners\u0027 field in PathCodeOwnerStatus we cannot guarantee that it always contains all owners. This makes me think that it\u0027s probably better to only populate it for the \u0027compute owned paths for multiple users\u0027 case but not for the \u0027check whether the path is code owner approved\u0027 case. In the latter case it\u0027s better to not populate \u0027owners\u0027 at all, rather than having it maybe incompletely populated.\n\nThe alternative would be to drop all shortcuts (this one and the one in line 682 below), but I don\u0027t think we want to do this, as it would mean to increase latency for checking whether a path is code owner approved, which we need to do to know if the change is submittable (which is something we need to evaluate each time there is any update to the change).",
+      "range": {
+        "startLine": 630,
+        "startChar": 4,
+        "endLine": 639,
+        "endChar": 12
+      },
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "042114bf_a77f87ec",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 639,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Fixed the shortcut scenario.",
+      "parentUuid": "321482aa_1ad1de44",
       "range": {
         "startLine": 630,
         "startChar": 4,
@@ -98,6 +164,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0cefc110_92422d9f",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 644,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "9a3754b8_b263e925",
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2390f9a4_6ad124c5",
@@ -111,6 +195,24 @@
       "writtenOn": "2022-10-21T07:56:14Z",
       "side": 1,
       "message": "Here too, the path may be owned by all users (aka code ownership is assigned to \u0027*\u0027). We need to check this by\n\n```\n  if (codeOwners.ownedByAllUsers()) {\n    activeOwners.addAll(approverAccountIds);\n    activeOwners.addAll(reviewerAccountIds);\n  }\n```\n\nI believe in this case we can stop looking at further OWNERS files even if checkAllOwners is true.",
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "37ba7623_3569a871",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 666,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2390f9a4_6ad124c5",
       "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -132,6 +234,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "5f11379c_13b01d88",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 682,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "03dbe676_b732734c",
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "78c6a02c_61f81f4d",
@@ -145,6 +265,30 @@
       "writtenOn": "2022-10-21T07:56:14Z",
       "side": 1,
       "message": "I think this is not fully correct yet.\n\nIIUC we have the following cases:\n\n1) fallbackCodeOwners \u003d\u003d NONE:\nIn this case none of the approvers is code owner (because codeOwnerStatus !\u003d APPROVED and there are no fallback code owners).\n\na) If the codeOwnerStatus was previously found to be PENDING, at least one of the reviewers is a code owner, but maybe not all (so in this case adding all reviewers to activeOwners is wrong). I think in this case activeOwners should already contain the reviewers that are code owners, because we add them above in line 665-666. Except if they are global code owners, then we need to add them in line 644 as commented above.\n\nb) If the codeOwnerStatus was previously found to be INSUFFICIENT_REVIEWERS no reviewer is a code owner.\n\n2) fallbackCodeOwners \u003d\u003d ALL_USERS:\nIn this case all reviewers and approvers are code owners and hence activeOwners should contain approverAccountIds and reviewerAccountIds.\n\na) approverAccountIds non empty:\ncodeOwnerStatusForFallbackCodeOwners \u003d APPROVED\n\nIn this case also reviewerAccountIds should be added to activeOwners (since all users are code owners).\n\nb) approverAccountIds empty and reviewerAccountIds non empty:\ncodeOwnerStatusForFallbackCodeOwners \u003d PENDING\n\nc) approverAccountIds and reviewerAccountIds both empty:\ncodeOwnerStatusForFallbackCodeOwners \u003d INSUFFICIENT_REVIEWERS\n\nTo make this right, I think we could change this code here to (requires that reviewers that are code owners are added to activeOwners in the pending case above, see comment at line 644):\n\n```\n  switch (fallbackCodeOwners) {\n    case NONE:\n      // do nothing, if codeOwnerStatus is PENDING, the reviewers that are code owners have\n      // already been added to activeOwners\n      break;\n    case ALL_USERS:\n      // all users are code owners\n      activeOwners.addAll(approverAccountIds);\n      activeOwners.addAll(reviewerAccountIds);\n      break;\n  }\n```",
+      "range": {
+        "startLine": 718,
+        "startChar": 8,
+        "endLine": 722,
+        "endChar": 9
+      },
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e6a08b97_b43c744e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 722,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "78c6a02c_61f81f4d",
       "range": {
         "startLine": 718,
         "startChar": 8,
@@ -178,6 +322,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2091cfd5_fea239f5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 753,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Decided to just go with a list rather than an optional list",
+      "parentUuid": "d99321c6_27435769",
+      "range": {
+        "startLine": 753,
+        "startChar": 63,
+        "endLine": 753,
+        "endChar": 83
+      },
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e4d15068_47a8d79c",
@@ -191,6 +359,30 @@
       "writtenOn": "2022-10-21T07:56:14Z",
       "side": 1,
       "message": "nit: This javadoc seems wrong, since this method doesn\u0027t return anything.",
+      "range": {
+        "startLine": 54,
+        "startChar": 23,
+        "endLine": 54,
+        "endChar": 40
+      },
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7cbfb3d8_19d5f9c2",
+        "filename": "java/com/google/gerrit/plugins/codeowners/testing/OwnedPathInfoSubject.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "e4d15068_47a8d79c",
       "range": {
         "startLine": 54,
         "startChar": 23,
@@ -224,6 +416,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "092dcb4b_8489d3cf",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 44,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "f71504bf_75d9cb18",
+      "range": {
+        "startLine": 43,
+        "startChar": 3,
+        "endLine": 44,
+        "endChar": 16
+      },
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a41acaa0_e2d01340",
@@ -247,6 +463,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "6a5d2e9d_39b8882f",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 63,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a41acaa0_e2d01340",
+      "range": {
+        "startLine": 62,
+        "startChar": 26,
+        "endLine": 63,
+        "endChar": 94
+      },
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e692be32_126c972c",
@@ -260,6 +500,24 @@
       "writtenOn": "2022-10-21T07:56:14Z",
       "side": 1,
       "message": "I think in this case we would also expect that admin is returned in the owners set.",
+      "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "505521b8_2db2a4d9",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckTest.java",
+        "patchSetId": 12
+      },
+      "lineNbr": 1129,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-24T09:24:20Z",
+      "side": 1,
+      "message": "Actually, given that we don\u0027t return owners unless checkOwners\u003d true, nothing is returned.",
+      "parentUuid": "e692be32_126c972c",
       "revId": "4d00b87c695f9ed4ad1f624b738eeb72de750cc3",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
