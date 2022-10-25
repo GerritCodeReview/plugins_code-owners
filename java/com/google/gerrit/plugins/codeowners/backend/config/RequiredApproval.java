@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
 import com.google.auto.value.AutoValue;
@@ -25,6 +26,7 @@ import com.google.common.primitives.Ints;
 import com.google.gerrit.entities.LabelType;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.server.project.ProjectState;
+import java.util.Collection;
 import java.util.Optional;
 
 /**
@@ -67,6 +69,18 @@ public abstract class RequiredApproval implements Comparable<RequiredApproval> {
   @Override
   public final String toString() {
     return labelType().getName() + "+" + value();
+  }
+
+  public final String formatForLogging() {
+    return String.format(
+        "%s (ignoreSelfApproval = %s)", toString(), labelType().isIgnoreSelfApproval());
+  }
+
+  public static String formatForLogging(Collection<RequiredApproval> requiredApprovals) {
+    return requiredApprovals.stream()
+        .map(RequiredApproval::formatForLogging)
+        .collect(toImmutableList())
+        .toString();
   }
 
   /**

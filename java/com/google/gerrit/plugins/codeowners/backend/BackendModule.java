@@ -36,6 +36,7 @@ import com.google.inject.Provides;
 public class BackendModule extends FactoryModule {
   @Override
   protected void configure() {
+    factory(CodeOwnerApprovalCheckInput.Loader.Factory.class);
     factory(CodeOwnersUpdate.Factory.class);
     factory(CodeOwnerConfigScanner.Factory.class);
     factory(CodeOwnersPluginGlobalConfigSnapshot.Factory.class);
