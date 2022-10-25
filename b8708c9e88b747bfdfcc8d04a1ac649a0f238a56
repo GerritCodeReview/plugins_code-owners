@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "70cf0f38_267afd1b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-25T13:00:16Z",
+      "side": 1,
+      "message": "Here is why global code owners do not work.\n\nWe have to load them like this:\n\n```\nCodeOwnerResolverResult globalCodeOwners \u003d\n          codeOwnerResolver.resolveGlobalCodeOwners(changeNotes.getProjectName());\n```\n\nI guess this means before this change get owned path just didn\u0027t work for global code owners.",
+      "revId": "b8708c9e88b747bfdfcc8d04a1ac649a0f238a56",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b110558d_a327292a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/FileCodeOwnerStatus.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-25T13:00:16Z",
+      "side": 1,
+      "message": "nit: s/oldPathOwnerReviewers/oldPathOwners and s/newPathOwnerReviewers/newPathOwners",
+      "range": {
+        "startLine": 247,
+        "startChar": 6,
+        "endLine": 251,
+        "endChar": 55
+      },
+      "revId": "b8708c9e88b747bfdfcc8d04a1ac649a0f238a56",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a684348d_5aabb3c0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-25T13:00:16Z",
+      "side": 1,
+      "message": "nit: I think this is actually named \u0027checkAllOwners\u0027",
+      "range": {
+        "startLine": 51,
+        "startChar": 78,
+        "endLine": 51,
+        "endChar": 91
+      },
+      "revId": "b8708c9e88b747bfdfcc8d04a1ac649a0f238a56",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}

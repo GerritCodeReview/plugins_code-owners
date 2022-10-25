@@ -217,6 +217,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "65b09d02_0eeaa323",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckForAccountTest.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 168,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-25T13:00:16Z",
+      "side": 1,
+      "message": "I found the reason in CodeOwnerApprovalCheck. I\u0027ve commented there.",
+      "parentUuid": "44a79147_f7e352c1",
+      "revId": "8a781c50005035780776919845a734065fe894c8",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f9482432_e8ec5595",
