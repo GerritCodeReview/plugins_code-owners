@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "50cccba6_954d5cbb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 483,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-25T15:38:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "70cf0f38_267afd1b",
+      "revId": "b8708c9e88b747bfdfcc8d04a1ac649a0f238a56",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "b110558d_a327292a",
@@ -41,6 +59,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0cc4559f_a5b4f136",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/FileCodeOwnerStatus.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 251,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-25T15:38:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "b110558d_a327292a",
+      "range": {
+        "startLine": 247,
+        "startChar": 6,
+        "endLine": 251,
+        "endChar": 55
+      },
+      "revId": "b8708c9e88b747bfdfcc8d04a1ac649a0f238a56",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a684348d_5aabb3c0",
@@ -54,6 +96,30 @@
       "writtenOn": "2022-10-25T13:00:16Z",
       "side": 1,
       "message": "nit: I think this is actually named \u0027checkAllOwners\u0027",
+      "range": {
+        "startLine": 51,
+        "startChar": 78,
+        "endLine": 51,
+        "endChar": 91
+      },
+      "revId": "b8708c9e88b747bfdfcc8d04a1ac649a0f238a56",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3f928d20_178371fb",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwnerStatus.java",
+        "patchSetId": 16
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-25T15:38:42Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a684348d_5aabb3c0",
       "range": {
         "startLine": 51,
         "startChar": 78,

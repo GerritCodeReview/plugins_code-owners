@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fb3c5191_c9e6ea82",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 17
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-25T15:38:42Z",
+      "side": 1,
+      "message": "Thanks, apologies about the many turn-arounds.",
+      "revId": "73b98e993ea8a3d73ceba6232e4631be0e266af7",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
