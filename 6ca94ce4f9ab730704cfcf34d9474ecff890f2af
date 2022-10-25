@@ -16,6 +16,24 @@
       "message": "I don\u0027t think this field should be an Optional here (and in OwnedPathInfo):\n\n* OwnedPath is only instantiated in CodeOwnerApprovalCheck.getOwnedPaths.\n* There this owners field is populated from the owners field in PathCodeOwnerStatus.\n* In this code path PathCodeOwnerStatus always contains an owners list since this code path always sets checkAllOwners \u003d true.\n* Since it can never happen that PathCodeOwnerStatus.owners is Optional.empty in this code path, this field doesn\u0027t need to be an optional.",
       "revId": "6ca94ce4f9ab730704cfcf34d9474ecff890f2af",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "975f3ab3_2d61f25b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/OwnedPath.java",
+        "patchSetId": 15
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-10-25T11:24:32Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "058d3182_d09ac6c4",
+      "revId": "6ca94ce4f9ab730704cfcf34d9474ecff890f2af",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
