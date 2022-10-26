@@ -63,12 +63,12 @@ public class OwnedChangedFileInfoSubject extends Subject {
   }
 
   public void hasOwnedNewPath(String expectedOwnedNewPath) {
-    hasNewPathThat(expectedOwnedNewPath);
+    var unused = hasNewPathThat(expectedOwnedNewPath);
     check("ownedNewPath").that(ownedChangedFileInfo().newPath.owned).isTrue();
   }
 
   public void hasNonOwnedNewPath(String expectedNonOwnedNewPath) {
-    hasNewPathThat(expectedNonOwnedNewPath);
+    var unused = hasNewPathThat(expectedNonOwnedNewPath);
     check("ownedNewPath").that(ownedChangedFileInfo().newPath.owned).isNull();
   }
 
@@ -77,12 +77,12 @@ public class OwnedChangedFileInfoSubject extends Subject {
   }
 
   public void hasOwnedOldPath(String expectedOwnedOldPath) {
-    hasOldPathThat(expectedOwnedOldPath);
+    var unused = hasOldPathThat(expectedOwnedOldPath);
     check("ownedOldPath").that(ownedChangedFileInfo().oldPath.owned).isTrue();
   }
 
   public void hasNonOwnedOldPath(String expectedNonOwnedOldPath) {
-    hasOldPathThat(expectedNonOwnedOldPath);
+    var unused = hasOldPathThat(expectedNonOwnedOldPath);
     check("ownedOldPath").that(ownedChangedFileInfo().oldPath.owned).isNull();
   }
 
