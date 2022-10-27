@@ -47,7 +47,7 @@ public class OwnedPathInfoSubject extends Subject {
     this.ownedPathInfo = ownedPathInfo;
   }
 
-  /** Returns a {@link ComparableSubject} for the code owner owners. */
+  /** Returns a {@link IterableSubject} for the code owner owners. */
   public IterableSubject hasOwnersThat() {
     return check("owners").that(ownedPathInfo().owners);
   }
