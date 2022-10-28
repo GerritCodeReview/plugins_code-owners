@@ -61,6 +61,16 @@ const STATUS_ICON = {
   [STATUS_CODE.ERROR]: 'info',
 };
 
+const STATUS_SUMMARY = {
+  [STATUS_CODE.PENDING]: 'Pending',
+  [STATUS_CODE.MISSING]: 'Missing',
+  [STATUS_CODE.PENDING_OLD_PATH]: 'Pending Old Path',
+  [STATUS_CODE.MISSING_OLD_PATH]: 'Missing Old Path',
+  [STATUS_CODE.APPROVED]: 'Approved',
+  [STATUS_CODE.ERROR]: 'Failed',
+  [STATUS_CODE.ERROR_OLD_PATH]: 'Failed Old Path',
+};
+
 const STATUS_TOOLTIP = {
   [STATUS_CODE.PENDING]: 'Pending code owner approval',
   [STATUS_CODE.MISSING]: 'Missing code owner approval',
@@ -204,11 +214,17 @@ export class OwnerStatusColumnContent extends BaseEl {
   }
 
   private renderStatus() {
-    const statusInfo = this.computeTooltip();
-    const statusIcon = this.computeStatusIcon();
+    const info = STATUS_TOOLTIP[this.ownerStatus!];
+    const summary = STATUS_SUMMARY[this.ownerStatus!];
+    const icon = STATUS_ICON[this.ownerStatus!];
     return html`
-      <gr-tooltip-content title=${statusInfo} has-tooltip>
-        <gr-icon class="status" icon=${statusIcon}></gr-icon>
+      <gr-tooltip-content
+        title=${info}
+        aria-label=${summary}
+        aria-description=${info}
+        has-tooltip
+      >
+        <gr-icon class="status" icon=${icon} aria-hidden="true"></gr-icon>
       </gr-tooltip-content>
     `;
   }
@@ -216,8 +232,13 @@ export class OwnerStatusColumnContent extends BaseEl {
   private renderOwnership() {
     if (!this.isOwned()) return nothing;
     return html`
-      <gr-tooltip-content title="You are in OWNERS for this file" has-tooltip>
-        <gr-icon filled icon="policy"></gr-icon>
+      <gr-tooltip-content
+        title="You are in OWNERS for this file"
+        aria-label="owned"
+        aria-description="You are an owner of this file"
+        has-tooltip
+      >
+        <gr-icon filled icon="policy" aria-hidden="true"></gr-icon>
       </gr-tooltip-content>
     `;
   }
@@ -269,14 +290,6 @@ export class OwnerStatusColumnContent extends BaseEl {
         ? a
         : b
     );
-  }
-
-  private computeStatusIcon() {
-    return STATUS_ICON[this.ownerStatus!];
-  }
-
-  private computeTooltip() {
-    return STATUS_TOOLTIP[this.ownerStatus!];
   }
 
   private extractStatus(statusItem: FileStatus, oldPath: boolean) {
