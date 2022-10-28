@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "cd781cc7_577cdc44",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInputTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-10-28T11:40:49Z",
+      "side": 1,
+      "message": "there\u0027s also the property checkAllOwners(). Should we add a test for it?",
+      "revId": "2be834ed2e31f71c72f04286b6904ab7fbb1b4a4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "e440b74d_a0b1c509",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInputTest.java",
         "patchSetId": 4
