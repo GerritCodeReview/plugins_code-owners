@@ -53,6 +53,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c1ce25a6_dab48a9d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-10-28T09:45:25Z",
+      "side": 1,
+      "message": "I see. Thanks for explaining!",
+      "parentUuid": "44207bd0_d0e43c06",
+      "revId": "9ba82b294d7568e652e3a595aac85c0d1d8ffa6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a90616ff_bad84fab",
@@ -184,6 +202,30 @@
       "side": 1,
       "message": "I think this is correct. CodeOwnerApprovalCheckInput.create has this parameter as \u0027@Nullable Account.Id implicitApprover\u0027 and (re)creates an Optional when calling the CodeOwnerApprovalCheckInput AutoValue constructor (\u0027Optional.ofNullable(implicitApprover)\u0027).\n\nSince CodeOwnerApprovalCheckInput.create is a private method with only one caller that has the implicitApprover available as an Optional, I\u0027ve changed the type of this parameter to Optional\u003cAccount.Id\u003e now so that we avoid the recreation of the Optional. In general Optional is designed to be used as return type, but for parameters using nullable fields is preferred (e.g. see [1]), which is why I had made this a nullable field.\n\n[1] https://stackoverflow.com/questions/23454952/uses-for-optional#answer-23464794",
       "parentUuid": "7c93dd82_decbbf36",
+      "range": {
+        "startLine": 210,
+        "startChar": 31,
+        "endLine": 210,
+        "endChar": 44
+      },
+      "revId": "9ba82b294d7568e652e3a595aac85c0d1d8ffa6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "bb6e88b2_10f21b88",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-10-28T09:45:25Z",
+      "side": 1,
+      "message": "Ah right. I thought the constructor was accepting an optional parameter, but it was correctly accepting the right type so you were doing it right.\n\nBut yes, thanks for simplifying it instead of converting twice (to null and then back to optional).",
+      "parentUuid": "c97a07fb_ceaf4dae",
       "range": {
         "startLine": 210,
         "startChar": 31,
