@@ -35,6 +35,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "44207bd0_d0e43c06",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-28T09:27:14Z",
+      "side": 1,
+      "message": "The former, although it makes also sense just for the sake of code health.\nWhat we want to do is adding an option to make code owner approvals sticky per file. For this we\u0027ll need the approvals on the previous patch sets as additional input. Also see line 31+32 below :)",
+      "parentUuid": "eddbc1da_cc8c19b9",
+      "revId": "9ba82b294d7568e652e3a595aac85c0d1d8ffa6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a90616ff_bad84fab",
@@ -48,6 +66,30 @@
       "writtenOn": "2022-10-28T07:44:14Z",
       "side": 1,
       "message": "nit: of",
+      "range": {
+        "startLine": 49,
+        "startChar": 34,
+        "endLine": 49,
+        "endChar": 38
+      },
+      "revId": "9ba82b294d7568e652e3a595aac85c0d1d8ffa6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8922b958_9c0a5cc1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 49,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-28T09:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a90616ff_bad84fab",
       "range": {
         "startLine": 49,
         "startChar": 34,
@@ -81,6 +123,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c61d0c1_eb0adab8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 67,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-28T09:27:14Z",
+      "side": 1,
+      "message": "Good idea. Done.",
+      "parentUuid": "28ceab0c_4d677ded",
+      "range": {
+        "startLine": 67,
+        "startChar": 27,
+        "endLine": 67,
+        "endChar": 46
+      },
+      "revId": "9ba82b294d7568e652e3a595aac85c0d1d8ffa6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "7c93dd82_decbbf36",
@@ -104,6 +170,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "c97a07fb_ceaf4dae",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 210,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-28T09:27:14Z",
+      "side": 1,
+      "message": "I think this is correct. CodeOwnerApprovalCheckInput.create has this parameter as \u0027@Nullable Account.Id implicitApprover\u0027 and (re)creates an Optional when calling the CodeOwnerApprovalCheckInput AutoValue constructor (\u0027Optional.ofNullable(implicitApprover)\u0027).\n\nSince CodeOwnerApprovalCheckInput.create is a private method with only one caller that has the implicitApprover available as an Optional, I\u0027ve changed the type of this parameter to Optional\u003cAccount.Id\u003e now so that we avoid the recreation of the Optional. In general Optional is designed to be used as return type, but for parameters using nullable fields is preferred (e.g. see [1]), which is why I had made this a nullable field.\n\n[1] https://stackoverflow.com/questions/23454952/uses-for-optional#answer-23464794",
+      "parentUuid": "7c93dd82_decbbf36",
+      "range": {
+        "startLine": 210,
+        "startChar": 31,
+        "endLine": 210,
+        "endChar": 44
+      },
+      "revId": "9ba82b294d7568e652e3a595aac85c0d1d8ffa6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "33d4a6b1_a43ee0e0",
@@ -117,6 +207,30 @@
       "writtenOn": "2022-10-28T07:44:14Z",
       "side": 1,
       "message": "nit: of",
+      "range": {
+        "startLine": 218,
+        "startChar": 36,
+        "endLine": 218,
+        "endChar": 40
+      },
+      "revId": "9ba82b294d7568e652e3a595aac85c0d1d8ffa6c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3514a935_72edb272",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInput.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-10-28T09:27:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "33d4a6b1_a43ee0e0",
       "range": {
         "startLine": 218,
         "startChar": 36,
