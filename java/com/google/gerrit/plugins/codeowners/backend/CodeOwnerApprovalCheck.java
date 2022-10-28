@@ -41,14 +41,12 @@ import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
-import com.google.gerrit.server.approval.ApprovalsUtil;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.PureRevertCache;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.util.AccountTemplateUtil;
-import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -89,7 +87,7 @@ public class CodeOwnerApprovalCheck {
   private final PureRevertCache pureRevertCache;
   private final Provider<CodeOwnerConfigHierarchy> codeOwnerConfigHierarchyProvider;
   private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
-  private final ApprovalsUtil approvalsUtil;
+  private final CodeOwnerApprovalCheckInput.Loader.Factory inputLoaderFactory;
   private final CodeOwnerMetrics codeOwnerMetrics;
 
   @Inject
@@ -100,7 +98,7 @@ public class CodeOwnerApprovalCheck {
       PureRevertCache pureRevertCache,
       Provider<CodeOwnerConfigHierarchy> codeOwnerConfigHierarchyProvider,
       Provider<CodeOwnerResolver> codeOwnerResolverProvider,
-      ApprovalsUtil approvalsUtil,
+      CodeOwnerApprovalCheckInput.Loader.Factory codeOwnerApprovalCheckInputLoaderFactory,
       CodeOwnerMetrics codeOwnerMetrics) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
@@ -108,7 +106,7 @@ public class CodeOwnerApprovalCheck {
     this.pureRevertCache = pureRevertCache;
     this.codeOwnerConfigHierarchyProvider = codeOwnerConfigHierarchyProvider;
     this.codeOwnerResolverProvider = codeOwnerResolverProvider;
-    this.approvalsUtil = approvalsUtil;
+    this.inputLoaderFactory = codeOwnerApprovalCheckInputLoaderFactory;
     this.codeOwnerMetrics = codeOwnerMetrics;
   }
 
@@ -315,7 +313,6 @@ public class CodeOwnerApprovalCheck {
       CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
           codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
 
-      Account.Id changeOwner = changeNotes.getChange().getOwner();
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
       ImmutableSet<Account.Id> exemptedAccounts = codeOwnersConfig.getExemptedAccounts();
       logger.atFine().log("exemptedAccounts = %s", exemptedAccounts);
@@ -342,38 +339,6 @@ public class CodeOwnerApprovalCheck {
             "change is a pure revert and is exempted from requiring code owner approvals");
       }
 
-      boolean implicitApprovalConfig = codeOwnersConfig.areImplicitApprovalsEnabled();
-      boolean enableImplicitApproval =
-          implicitApprovalConfig && changeOwner.equals(patchSetUploader);
-      logger.atFine().log(
-          "changeOwner = %d, patchSetUploader = %d, implict approval config = %s\n"
-              + "=> implicit approval is %s",
-          changeOwner.get(),
-          patchSetUploader.get(),
-          implicitApprovalConfig,
-          enableImplicitApproval ? "enabled" : "disabled");
-
-      ImmutableList<PatchSetApproval> currentPatchSetApprovals =
-          getCurrentPatchSetApprovals(changeNotes);
-
-      RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
-      logger.atFine().log("requiredApproval = %s", requiredApproval);
-
-      ImmutableSet<RequiredApproval> overrideApprovals = codeOwnersConfig.getOverrideApprovals();
-      ImmutableSet<PatchSetApproval> overrides =
-          getOverride(currentPatchSetApprovals, overrideApprovals, patchSetUploader);
-      logger.atFine().log(
-          "hasOverride = %s (overrideApprovals = %s, overrides = %s)",
-          !overrides.isEmpty(),
-          overrideApprovals.stream()
-              .map(
-                  overrideApproval ->
-                      String.format(
-                          "%s (ignoreSelfApproval = %s)",
-                          overrideApproval, overrideApproval.labelType().isIgnoreSelfApproval()))
-              .collect(toImmutableList()),
-          overrides);
-
       BranchNameKey branch = changeNotes.getChange().getDest();
       Optional<ObjectId> revision = getDestBranchRevision(changeNotes.getChange());
       if (revision.isPresent()) {
@@ -383,17 +348,8 @@ public class CodeOwnerApprovalCheck {
         logger.atFine().log("dest branch %s does not exist", branch.branch());
       }
 
-      CodeOwnerResolverResult globalCodeOwners =
-          codeOwnerResolver.resolveGlobalCodeOwners(changeNotes.getProjectName());
-      logger.atFine().log("global code owners = %s", globalCodeOwners);
-
-      ImmutableSet<Account.Id> reviewerAccountIds =
-          getReviewerAccountIds(requiredApproval, changeNotes, patchSetUploader);
-      ImmutableSet<Account.Id> approverAccountIds =
-          getApproverAccountIds(currentPatchSetApprovals, requiredApproval, patchSetUploader);
-      logger.atFine().log("reviewers = %s, approvers = %s", reviewerAccountIds, approverAccountIds);
-
-      FallbackCodeOwners fallbackCodeOwners = codeOwnersConfig.getFallbackCodeOwners();
+      CodeOwnerApprovalCheckInput input =
+          inputLoaderFactory.create(codeOwnersConfig, codeOwnerResolver, changeNotes).load();
 
       return changedFiles
           .getFromDiffCache(
@@ -406,14 +362,8 @@ public class CodeOwnerApprovalCheck {
                       codeOwnerResolver,
                       branch,
                       revision.orElse(null),
-                      globalCodeOwners,
-                      enableImplicitApproval ? changeOwner : null,
-                      reviewerAccountIds,
-                      approverAccountIds,
-                      fallbackCodeOwners,
-                      overrides,
                       changedFile,
-                      /* checkAllOwners= */ false));
+                      input));
     }
   }
 
@@ -470,8 +420,10 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
       CodeOwnerResolver codeOwnerResolver =
           codeOwnerResolverProvider.get().enforceVisibility(false);
-      return changedFiles
-          .getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId())
+      CodeOwnerApprovalCheckInput input =
+          CodeOwnerApprovalCheckInput.createForComputingOwnedPaths(
+              codeOwnersConfig, codeOwnerResolver, changeNotes, accountIds);
+      return changedFiles.getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId())
           .stream()
           .map(
               changedFile ->
@@ -480,20 +432,8 @@ public class CodeOwnerApprovalCheck {
                       codeOwnerResolver,
                       branch,
                       revision.orElse(null),
-                      /* globalCodeOwners= */ codeOwnerResolver.resolveGlobalCodeOwners(
-                          changeNotes.getProjectName()),
-                      // Do not check for implicit approvals since implicit approvals of other users
-                      // should be ignored. For the given account we do not need to check for
-                      // implicit approvals since all owned files are already covered by the
-                      // explicit approval.
-                      /* implicitApprover= */ null,
-                      /* reviewerAccountIds= */ ImmutableSet.of(),
-                      // Assume an explicit approval of the owners we want to check.
-                      /* approverAccountIds= */ accountIds,
-                      fallbackCodeOwners,
-                      /* overrides= */ ImmutableSet.of(),
                       changedFile,
-                      /* checkAllOwners= */ true));
+                      input));
     }
   }
 
@@ -538,14 +478,8 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerResolver codeOwnerResolver,
       BranchNameKey branch,
       @Nullable ObjectId revision,
-      CodeOwnerResolverResult globalCodeOwners,
-      @Nullable Account.Id implicitApprover,
-      ImmutableSet<Account.Id> reviewerAccountIds,
-      ImmutableSet<Account.Id> approverAccountIds,
-      FallbackCodeOwners fallbackCodeOwners,
-      ImmutableSet<PatchSetApproval> overrides,
       ChangedFile changedFile,
-      boolean checkAllOwners) {
+      CodeOwnerApprovalCheckInput input) {
     try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatus.start()) {
       logger.atFine().log("computing file status for %s", changedFile);
 
@@ -560,14 +494,8 @@ public class CodeOwnerApprovalCheck {
                           codeOwnerResolver,
                           branch,
                           revision,
-                          globalCodeOwners,
-                          implicitApprover,
-                          reviewerAccountIds,
-                          approverAccountIds,
-                          fallbackCodeOwners,
-                          overrides,
                           newPath,
-                          checkAllOwners));
+                          input));
 
       // Compute the code owner status for the old path, if the file was deleted or renamed.
       Optional<PathCodeOwnerStatus> oldPathStatus = Optional.empty();
@@ -584,14 +512,8 @@ public class CodeOwnerApprovalCheck {
                     codeOwnerResolver,
                     branch,
                     revision,
-                    globalCodeOwners,
-                    implicitApprover,
-                    reviewerAccountIds,
-                    approverAccountIds,
-                    fallbackCodeOwners,
-                    overrides,
                     changedFile.oldPath().get(),
-                    checkAllOwners));
+                    input));
       }
 
       FileCodeOwnerStatus fileCodeOwnerStatus =
@@ -606,21 +528,15 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerResolver codeOwnerResolver,
       BranchNameKey branch,
       @Nullable ObjectId revision,
-      CodeOwnerResolverResult globalCodeOwners,
-      @Nullable Account.Id implicitApprover,
-      ImmutableSet<Account.Id> reviewerAccountIds,
-      ImmutableSet<Account.Id> approverAccountIds,
-      FallbackCodeOwners fallbackCodeOwners,
-      ImmutableSet<PatchSetApproval> overrides,
       Path absolutePath,
-      boolean checkAllOwners) {
+      CodeOwnerApprovalCheckInput input) {
     logger.atFine().log("computing path status for %s", absolutePath);
 
-    if (!overrides.isEmpty()) {
+    if (!input.overrides().isEmpty()) {
       logger.atFine().log(
           "the status for path %s is %s since an override is present (overrides = %s)",
-          absolutePath, CodeOwnerStatus.APPROVED.name(), overrides);
-      Optional<PatchSetApproval> override = overrides.stream().findAny();
+          absolutePath, CodeOwnerStatus.APPROVED.name(), input.overrides());
+      Optional<PatchSetApproval> override = input.overrides().stream().findAny();
       checkState(override.isPresent(), "no override found");
       return PathCodeOwnerStatus.create(
           absolutePath,
@@ -638,35 +554,36 @@ public class CodeOwnerApprovalCheck {
 
     boolean isGloballyApproved =
         isApproved(
-            globalCodeOwners,
+            input.globalCodeOwners(),
             CodeOwnerKind.GLOBAL_CODE_OWNER,
-            approverAccountIds,
-            implicitApprover,
+            input.approvers(),
+            input.implicitApprover().orElse(null),
             reason);
 
     if (isGloballyApproved) {
       codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
     }
 
-    if (globalCodeOwners.ownedByAllUsers()) {
-      activeOwners.addAll(approverAccountIds);
-      activeOwners.addAll(reviewerAccountIds);
+    if (input.globalCodeOwners().ownedByAllUsers()) {
+      activeOwners.addAll(input.approvers());
+      activeOwners.addAll(input.reviewers());
     } else {
       activeOwners.addAll(
-          Sets.intersection(globalCodeOwners.codeOwnersAccountIds(), approverAccountIds));
+          Sets.intersection(input.globalCodeOwners().codeOwnersAccountIds(), input.approvers()));
       activeOwners.addAll(
-          Sets.intersection(globalCodeOwners.codeOwnersAccountIds(), reviewerAccountIds));
+          Sets.intersection(input.globalCodeOwners().codeOwnersAccountIds(), input.reviewers()));
     }
 
     // Only check recursively for all OWNERs in two scenarios:
     // 1. The path was not globally approved
     // 2. The path was globally approved but is not owned by all users and we
     //    want to calculate all ownerIds.
-    if (!isGloballyApproved || (checkAllOwners && !globalCodeOwners.ownedByAllUsers())) {
+    if (!isGloballyApproved
+        || (input.checkAllOwners() && !input.globalCodeOwners().ownedByAllUsers())) {
       logger.atFine().log("%s was not approved by a global code owner", absolutePath);
 
       if (isPending(
-          globalCodeOwners, CodeOwnerKind.GLOBAL_CODE_OWNER, reviewerAccountIds, reason)) {
+          input.globalCodeOwners(), CodeOwnerKind.GLOBAL_CODE_OWNER, input.reviewers(), reason)) {
         codeOwnerStatus.set(CodeOwnerStatus.PENDING);
       }
 
@@ -688,13 +605,13 @@ public class CodeOwnerApprovalCheck {
 
                 boolean ownedByAllUsers = codeOwners.ownedByAllUsers();
                 if (ownedByAllUsers) {
-                  activeOwners.addAll(approverAccountIds);
-                  activeOwners.addAll(reviewerAccountIds);
+                  activeOwners.addAll(input.approvers());
+                  activeOwners.addAll(input.reviewers());
                 } else {
                   activeOwners.addAll(
-                      Sets.intersection(codeOwners.codeOwnersAccountIds(), approverAccountIds));
+                      Sets.intersection(codeOwners.codeOwnersAccountIds(), input.approvers()));
                   activeOwners.addAll(
-                      Sets.intersection(codeOwners.codeOwnersAccountIds(), reviewerAccountIds));
+                      Sets.intersection(codeOwners.codeOwnersAccountIds(), input.reviewers()));
                 }
                 logger.atFine().log(
                     "code owners = %s (code owner kind = %s, code owner config folder path = %s,"
@@ -709,12 +626,16 @@ public class CodeOwnerApprovalCheck {
                 }
 
                 if (isApproved(
-                    codeOwners, codeOwnerKind, approverAccountIds, implicitApprover, reason)) {
+                    codeOwners,
+                    codeOwnerKind,
+                    input.approvers(),
+                    input.implicitApprover().orElse(null),
+                    reason)) {
                   codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
                   // No need to recurse if we are not checking all owners or all owners are
                   // are already added.
-                  return checkAllOwners && !ownedByAllUsers;
-                } else if (isPending(codeOwners, codeOwnerKind, reviewerAccountIds, reason)) {
+                  return input.checkAllOwners() && !ownedByAllUsers;
+                } else if (isPending(codeOwners, codeOwnerKind, input.reviewers(), reason)) {
                   codeOwnerStatus.set(CodeOwnerStatus.PENDING);
 
                   // We need to continue to check if any of the higher-level code owners approved
@@ -742,25 +663,25 @@ public class CodeOwnerApprovalCheck {
         CodeOwnerStatus codeOwnerStatusForFallbackCodeOwners =
             getCodeOwnerStatusForFallbackCodeOwners(
                 codeOwnerStatus.get(),
-                implicitApprover,
-                reviewerAccountIds,
-                approverAccountIds,
-                fallbackCodeOwners,
+                input.implicitApprover().orElse(null),
+                input.reviewers(),
+                input.approvers(),
+                input.fallbackCodeOwners(),
                 absolutePath,
                 reason);
 
         if (codeOwnerStatusForFallbackCodeOwners.equals(CodeOwnerStatus.APPROVED)) {
-          activeOwners.addAll(approverAccountIds);
+          activeOwners.addAll(input.approvers());
         } else if (codeOwnerStatusForFallbackCodeOwners.equals(CodeOwnerStatus.PENDING)) {
-          switch (fallbackCodeOwners) {
+          switch (input.fallbackCodeOwners()) {
             case NONE:
               // do nothing, if codeOwnerStatus is PENDING, the reviewers that are code owners have
               // already been added to activeOwners
               break;
             case ALL_USERS:
               // all users are code owners
-              activeOwners.addAll(approverAccountIds);
-              activeOwners.addAll(reviewerAccountIds);
+              activeOwners.addAll(input.approvers());
+              activeOwners.addAll(input.reviewers());
               break;
           }
         }
@@ -797,7 +718,7 @@ public class CodeOwnerApprovalCheck {
             absolutePath,
             codeOwnerStatus.get(),
             reason.get(),
-            checkAllOwners ? Optional.of(activeOwners.build()) : Optional.empty());
+            input.checkAllOwners() ? Optional.of(activeOwners.build()) : Optional.empty());
     logger.atFine().log("pathCodeOwnerStatus = %s", pathCodeOwnerStatus);
     return pathCodeOwnerStatus;
   }
@@ -982,111 +903,6 @@ public class CodeOwnerApprovalCheck {
   private CodeOwnerResolverResult resolveCodeOwners(
       CodeOwnerResolver codeOwnerResolver, PathCodeOwners pathCodeOwners) {
     return codeOwnerResolver.resolvePathCodeOwners(pathCodeOwners);
-  }
-
-  /**
-   * Gets the IDs of the accounts that are reviewer on the given change.
-   *
-   * @param changeNotes the change notes
-   */
-  private ImmutableSet<Account.Id> getReviewerAccountIds(
-      RequiredApproval requiredApproval, ChangeNotes changeNotes, Account.Id patchSetUploader) {
-    ImmutableSet<Account.Id> reviewerAccountIds =
-        changeNotes.getReviewers().byState(ReviewerStateInternal.REVIEWER);
-    if (requiredApproval.labelType().isIgnoreSelfApproval()
-        && reviewerAccountIds.contains(patchSetUploader)) {
-      logger.atFine().log(
-          "Removing patch set uploader %s from reviewers since the label of the required"
-              + " approval (%s) is configured to ignore self approvals",
-          patchSetUploader, requiredApproval.labelType());
-      return filterOutAccount(reviewerAccountIds, patchSetUploader);
-    }
-    return reviewerAccountIds;
-  }
-
-  /**
-   * Gets the IDs of the accounts that posted a patch set approval on the given revisions that
-   * counts as code owner approval.
-   *
-   * @param requiredApproval approval that is required from code owners to approve the files in a
-   *     change
-   */
-  private ImmutableSet<Account.Id> getApproverAccountIds(
-      ImmutableList<PatchSetApproval> currentPatchSetApprovals,
-      RequiredApproval requiredApproval,
-      Account.Id patchSetUploader) {
-    ImmutableSet<Account.Id> approverAccountIds =
-        currentPatchSetApprovals.stream()
-            .filter(requiredApproval::isApprovedBy)
-            .map(PatchSetApproval::accountId)
-            .collect(toImmutableSet());
-
-    if (requiredApproval.labelType().isIgnoreSelfApproval()
-        && approverAccountIds.contains(patchSetUploader)) {
-      logger.atFine().log(
-          "Removing patch set uploader %s from approvers since the label of the required"
-              + " approval (%s) is configured to ignore self approvals",
-          patchSetUploader, requiredApproval.labelType());
-      return filterOutAccount(approverAccountIds, patchSetUploader);
-    }
-
-    return approverAccountIds;
-  }
-
-  private ImmutableList<PatchSetApproval> getCurrentPatchSetApprovals(ChangeNotes changeNotes) {
-    try (Timer0.Context ctx = codeOwnerMetrics.computePatchSetApprovals.start()) {
-      return ImmutableList.copyOf(
-          approvalsUtil.byPatchSet(changeNotes, changeNotes.getCurrentPatchSet().id()));
-    }
-  }
-
-  private ImmutableSet<Account.Id> filterOutAccount(
-      ImmutableSet<Account.Id> accountIds, Account.Id accountIdToFilterOut) {
-    return accountIds.stream()
-        .filter(accountId -> !accountId.equals(accountIdToFilterOut))
-        .collect(toImmutableSet());
-  }
-
-  /**
-   * Gets the overrides that were applied on the change.
-   *
-   * @param overrideApprovals approvals that count as override for the code owners submit check.
-   * @param patchSetUploader account ID of the patch set uploader
-   * @return the overrides that were applied on the change
-   */
-  private ImmutableSet<PatchSetApproval> getOverride(
-      ImmutableList<PatchSetApproval> currentPatchSetApprovals,
-      ImmutableSet<RequiredApproval> overrideApprovals,
-      Account.Id patchSetUploader) {
-    ImmutableSet<RequiredApproval> overrideApprovalsThatIgnoreSelfApprovals =
-        overrideApprovals.stream()
-            .filter(overrideApproval -> overrideApproval.labelType().isIgnoreSelfApproval())
-            .collect(toImmutableSet());
-    return currentPatchSetApprovals.stream()
-        .filter(
-            approval -> {
-              // If the approval is from the patch set uploader and if it matches any of the labels
-              // for which self approvals are ignored, filter it out.
-              if (approval.accountId().equals(patchSetUploader)
-                  && overrideApprovalsThatIgnoreSelfApprovals.stream()
-                      .anyMatch(
-                          requiredApproval ->
-                              requiredApproval
-                                  .labelType()
-                                  .getLabelId()
-                                  .equals(approval.key().labelId()))) {
-                logger.atFine().log(
-                    "Filtered out self-override %s of patch set uploader",
-                    LabelVote.create(approval.label(), approval.value()));
-                return false;
-              }
-              return true;
-            })
-        .filter(
-            patchSetApproval ->
-                overrideApprovals.stream()
-                    .anyMatch(overrideApproval -> overrideApproval.isApprovedBy(patchSetApproval)))
-        .collect(toImmutableSet());
   }
 
   /**
