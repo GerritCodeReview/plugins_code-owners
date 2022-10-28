@@ -80,6 +80,7 @@ public class GeneralConfig {
   public static final String KEY_GLOBAL_CODE_OWNER = "globalCodeOwner";
   public static final String KEY_EXEMPTED_USER = "exemptedUser";
   public static final String KEY_ENABLE_IMPLICIT_APPROVALS = "enableImplicitApprovals";
+  public static final String KEY_ENABLE_STICKY_APPROVALS = "enableStickyApprovals";
   public static final String KEY_OVERRIDE_INFO_URL = "overrideInfoUrl";
   public static final String KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL =
       "invalidCodeOwnerConfigInfoUrl";
@@ -872,6 +873,22 @@ public class GeneralConfig {
           EnableImplicitApprovals.FALSE);
       return EnableImplicitApprovals.FALSE;
     }
+  }
+
+  /**
+   * Gets whether sticky code owner approvals are enabled from the given plugin config with fallback
+   * to {@code gerrit.config}.
+   *
+   * <p>If enabled, a code owner approval on a previous patch set is sticky (if the approver didn't
+   * alter or remove it on a later patch set).
+   *
+   * @param project the name of the project for which the configuration should be read
+   * @param pluginConfig the plugin config from which the configuration should be read.
+   * @return whether a sticky code owner approvals are enabled
+   */
+  boolean enableStickyApprovals(Project.NameKey project, Config pluginConfig) {
+    return getBooleanConfig(
+        project, pluginConfig, KEY_ENABLE_STICKY_APPROVALS, /* defaultValue= */ false);
   }
 
   /**

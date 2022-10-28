@@ -16,6 +16,8 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
   Latency for computing the file status for one file.
 * `compute_file_statuses`:
   Latency for computing file statuses for all files in a change.
+    * `sticky_approvals`:
+      Whether sticky approvals on file level are enabled.
 * `compute_owned_paths`:
   Latency for computing file statuses.
 * `compute_owned_paths`:
