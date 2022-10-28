@@ -261,6 +261,49 @@ endpoint or by touching the change (e.g. by adding a comment).
         in `@PLUGIN@.config`.\
         By default `FALSE`.
 
+<a id="pluginCodeOwnersEnableStickyApprovals">plugin.@PLUGIN@.enableStickyApprovals</a>
+:       Whether code owner approvals should be sticky on the files they approve,
+        even if these files are changed in follow-up patch sets.\
+        \
+        With this setting previous code owner approvals on files only get
+        invalidated if the approval is revoked, changed or re-applied, but not
+        by the upload of a new patch set regardless of whether the new patch
+        sets changes these files.\
+        \
+        Code owner approvals are sticky per file but not on change level. This
+        means they do not show up as (copied) approvals on the change screen
+        like regular sticky approvals, but only count for the computation of the
+        code owner file statuses. In contrast to this setting, making code owner
+        approvals sticky on change level (by setting a [copy
+        condition](../../../Documentation/config-labels.html#label_copyCondition)
+        on the label that is used for code owner approvals) would make the
+        sticky approvals count for all files in the current patch set that are
+        owned by the approvers, regardless of whether these files existed in the
+        patch sets that were originally approved.\
+        \
+        Example:\
+        If patch set 1 contains the files A, B and C and a user that owns the
+        files A and B approves the patch set by voting with `Code-Review+1`, A
+        and B are code owner approved for this patch set and all future patch
+        sets unless the approval is revoked, changed or re-applied. This means
+        if a second patch set is uploaded that touches files A and B, A and B
+        are still code owner approved. If a third patch set is uploaded that
+        adds file D that is also owned by the same code owner, file D is not
+        code owner approved since it is not present in patch set 1 on which the
+        user applied the code owner approval. If the user changes their vote on
+        patch set 3 from `Code-Review+1` to `Code-Review-1`, the new vote
+        invalidates the approval on patch set 1, so that in this example the
+        files A and B would no longer be code owner approved by this user. If
+        the user re-applies the `Code-Review+1` approval now all owned files
+        that are present in the current patch set, files A, B and D, are code
+        owner approved.\
+        \
+        Can be overridden per project by setting
+        [codeOwners.enableStickyApprovals](#codeOwnersEnableStickyApprovals)
+        in `@PLUGIN@.config`.\
+        \
+        By default `false`.
+
 <a id="pluginCodeOwnersGlobalCodeOwner">plugin.@PLUGIN@.globalCodeOwner</a>
 :       The email of a user that should be a code owner globally across all
         branches.\
@@ -854,11 +897,24 @@ endpoint or by touching the change (e.g. by adding a comment).
         If implicit code owner approvals are disabled, code owners can still
         self-approve their own changes by voting on the change.\
         Overrides the global setting
-        [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersenableImplicitApprovals)
+        [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersEnableImplicitApprovals)
         in `gerrit.config` and the `codeOwners.enableImplicitApprovals` setting
         from parent projects.\
         If not set, the global setting
-        [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersenableImplicitApprovals)
+        [plugin.@PLUGIN@.enableImplicitApprovals](#pluginCodeOwnersEnableImplicitApprovals)
+        in `gerrit.config` is used.
+
+<a id="codeOwnersEnableStickyApprovals">codeOwners.enableStickyApprovals</a>
+:       Whether code owner approvals should be sticky on the files they approve,
+        even if these files are changed in follow-up patch sets.\
+        For details see
+        [plugin.@PLUGIN@.enableStickyApprovals](#pluginCodeOwnersEnableStickyApprovals).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableStickyApprovals](#pluginCodeOwnersEnableStickyApprovals)
+        in `gerrit.config` and the `codeOwners.enableStickyApprovals` setting
+        from parent projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableStickyApprovals](#pluginCodeOwnersEnableStickyApprovals)
         in `gerrit.config` is used.
 
 <a id="codeOwnersGlobalCodeOwner">codeOwners.globalCodeOwner</a>

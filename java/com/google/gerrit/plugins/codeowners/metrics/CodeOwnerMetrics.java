@@ -34,7 +34,7 @@ public class CodeOwnerMetrics {
   // latency metrics
   public final Timer1<String> addChangeMessageOnAddReviewer;
   public final Timer0 computeFileStatus;
-  public final Timer0 computeFileStatuses;
+  public final Timer1<Boolean> computeFileStatuses;
   public final Timer0 computeOwnedPaths;
   public final Timer0 computePatchSetApprovals;
   public final Timer0 extendChangeMessageOnPostReview;
@@ -90,7 +90,10 @@ public class CodeOwnerMetrics {
     this.computeFileStatuses =
         createTimer(
             "compute_file_statuses",
-            "Latency for computing file statuses for all files in a change");
+            "Latency for computing file statuses for all files in a change",
+            Field.ofBoolean("sticky_approvals", (metadataBuilder, stickyApprovals) -> {})
+                .description("Whether sticky approvals on file level are enabled.")
+                .build());
     this.computeOwnedPaths =
         createTimer(
             "compute_owned_paths",

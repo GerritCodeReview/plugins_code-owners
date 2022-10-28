@@ -30,6 +30,9 @@ the definitions of the labels that are configured as [required
 approval](config.html#pluginCodeOwnersRequiredApproval) and [override
 approval](config.html#pluginCodeOwnersOverrideApproval).
 
+Alternatively code owner approvals can be made sticky per file by [enabling
+sticky approvals in the plugin configuration](config.html#pluginCodeOwnersEnableStickyApprovals).
+
 ### <a id="implicitApprovals">Implicit code owner approvals
 
 It's possible to [enable implicit approvals](config.html#pluginCodeOwnersEnableImplicitApprovals)

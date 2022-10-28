@@ -20,6 +20,7 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_STICKY_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_VALIDATION_ON_SUBMIT;
@@ -1639,6 +1640,63 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     assertThat(generalConfig.getEnableImplicitApprovals(project, cfg))
         .isEqualTo(EnableImplicitApprovals.FALSE);
+  }
+
+  @Test
+  public void cannotGetEnableStickyApprovalsForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.enableStickyApprovals(/* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetEnableStickyApprovalsForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () -> generalConfig.enableStickyApprovals(project, /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noEnableStickyApprovals() throws Exception {
+    assertThat(generalConfig.enableStickyApprovals(project, new Config())).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void
+      enableStickyApprovalsConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.enableStickyApprovals(project, new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void
+      enableStickyApprovalsConfigurationInPluginConfigOverridesEnableStickyApprovalsConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_ENABLE_STICKY_APPROVALS, "false");
+    assertThat(generalConfig.enableStickyApprovals(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void invalidEnableStickyApprovalsConfigurationInPluginConfigIsIgnored() throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS, /* subsection= */ null, KEY_ENABLE_STICKY_APPROVALS, "INVALID");
+    assertThat(generalConfig.enableStickyApprovals(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "INVALID")
+  public void invalidEnableStickyApprovalsConfigurationInGerritConfigIsIgnored() throws Exception {
+    assertThat(generalConfig.enableStickyApprovals(project, new Config())).isFalse();
   }
 
   @Test
