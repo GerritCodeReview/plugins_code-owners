@@ -128,6 +128,30 @@
       },
       "revId": "2be834ed2e31f71c72f04286b6904ab7fbb1b4a4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "fd7d5837_18d53941",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInputTest.java",
+        "patchSetId": 4
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-10-28T12:05:49Z",
+      "side": 1,
+      "message": "I see. Thanks for also changing it to a \"changeOwner\" explicit variable for better readability.",
+      "parentUuid": "82e5a040_80116fc2",
+      "range": {
+        "startLine": 146,
+        "startChar": 56,
+        "endLine": 146,
+        "endChar": 61
+      },
+      "revId": "2be834ed2e31f71c72f04286b6904ab7fbb1b4a4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
