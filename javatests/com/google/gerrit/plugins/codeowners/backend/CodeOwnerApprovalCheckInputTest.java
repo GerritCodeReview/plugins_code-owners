@@ -18,6 +18,7 @@ import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
@@ -254,6 +255,120 @@ public class CodeOwnerApprovalCheckInputTest extends AbstractCodeOwnersTest {
     assertThat(loadInput().checkAllOwners()).isFalse();
   }
 
+  @Test
+  public void createInputForComputingOwnedPaths_noReviewers() throws Exception {
+    changeApi().addReviewer(user.email());
+    changeApi().addReviewer(user2.email());
+
+    // CodeOwnerApprovalCheckInput#createForComputingOwnedPaths never sets reviewers
+    assertThat(createInputForComputingOwnedPaths(ImmutableSet.of()).reviewers()).isEmpty();
+  }
+
+  @Test
+  public void createInputForComputingOwnedPaths_noApprovers() throws Exception {
+    // self approve
+    requestScopeOperations.setApiUser(changeOwner);
+    recommend(changeId.toString());
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // approve as user2
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // CodeOwnerApprovalCheckInput#createForComputingOwnedPaths always sets approvers to the given
+    // accounts
+    assertThat(createInputForComputingOwnedPaths(ImmutableSet.of()).approvers()).isEmpty();
+  }
+
+  @Test
+  public void createInputForComputingOwnedPaths_withApprovers() {
+    // CodeOwnerApprovalCheckInput#createForComputingOwnedPaths always sets approvers to the given
+    // accounts
+    assertThat(
+            createInputForComputingOwnedPaths(ImmutableSet.of(admin.id(), user.id(), user2.id()))
+                .approvers())
+        .containsExactly(admin.id(), user.id(), user2.id());
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
+  public void createInputForComputingOwnedPaths_noImplicitApprover() {
+    // CodeOwnerApprovalCheckInput#createForComputingOwnedPaths never sets an implicit approver
+    assertThat(createInputForComputingOwnedPaths(ImmutableSet.of()).implicitApprover()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void createInputForComputingOwnedPaths_noOverride() throws Exception {
+    createOwnersOverrideLabel();
+
+    ReviewInput reviewInput = new ReviewInput().label("Owners-Override", 1);
+
+    // self override
+    requestScopeOperations.setApiUser(changeOwner);
+    gApi.changes().id(changeId.toString()).current().review(reviewInput);
+
+    // override as user
+    requestScopeOperations.setApiUser(user.id());
+    gApi.changes().id(changeId.toString()).current().review(reviewInput);
+
+    // override as user2
+    requestScopeOperations.setApiUser(user2.id());
+    gApi.changes().id(changeId.toString()).current().review(reviewInput);
+
+    // CodeOwnerApprovalCheckInput#createForComputingOwnedPaths never sets overrides
+    assertThat(createInputForComputingOwnedPaths(ImmutableSet.of()).overrides()).isEmpty();
+  }
+
+  @Test
+  public void createInputForComputingOwnedPaths_noGlobalCodeOwners() {
+    CodeOwnerResolverResult globalCodeOwners =
+        createInputForComputingOwnedPaths(ImmutableSet.of()).globalCodeOwners();
+    assertThat(globalCodeOwners.codeOwnersAccountIds()).isEmpty();
+    assertThat(globalCodeOwners.ownedByAllUsers()).isFalse();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.globalCodeOwner",
+      values = {"user1@example.com", "user2@example.com"})
+  public void createInputForComputingOwnedPaths_withGlobalCodeOwners() {
+    CodeOwnerResolverResult globalCodeOwners =
+        createInputForComputingOwnedPaths(ImmutableSet.of()).globalCodeOwners();
+    assertThat(globalCodeOwners.codeOwnersAccountIds()).containsExactly(user.id(), user2.id());
+    assertThat(globalCodeOwners.ownedByAllUsers()).isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
+  public void createInputForComputingOwnedPaths_withAllUsersAsGlobalCodeOwners() {
+    CodeOwnerResolverResult globalCodeOwners =
+        createInputForComputingOwnedPaths(ImmutableSet.of()).globalCodeOwners();
+    assertThat(globalCodeOwners.codeOwnersAccountIds()).isEmpty();
+    assertThat(globalCodeOwners.ownedByAllUsers()).isTrue();
+  }
+
+  @Test
+  public void createInputForComputingOwnedPaths_withFallbackCodeOwnersNone() {
+    assertThat(createInputForComputingOwnedPaths(ImmutableSet.of()).fallbackCodeOwners())
+        .isEqualTo(FallbackCodeOwners.NONE);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
+  public void createInputForComputingOwnedPaths_withFallbackCodeOwnersAllUsers() {
+    assertThat(createInputForComputingOwnedPaths(ImmutableSet.of()).fallbackCodeOwners())
+        .isEqualTo(FallbackCodeOwners.ALL_USERS);
+  }
+
+  @Test
+  public void createInputForComputingOwnedPaths_checkAllOwnersIsTrue() {
+    assertThat(createInputForComputingOwnedPaths(ImmutableSet.of()).checkAllOwners()).isTrue();
+  }
+
   private void disableSelfCodeReviewApprovals() throws Exception {
     disableSelfApprovals(allProjects, "Code-Review");
   }
@@ -275,5 +390,12 @@ public class CodeOwnerApprovalCheckInputTest extends AbstractCodeOwnersTest {
   private CodeOwnerApprovalCheckInput loadInput() {
     ChangeNotes changeNotes = changeNotesFactory.create(project, changeId);
     return inputLoaderFactory.create(codeOwnersConfig, codeOwnerResolver, changeNotes).load();
+  }
+
+  private CodeOwnerApprovalCheckInput createInputForComputingOwnedPaths(
+      ImmutableSet<Account.Id> accounts) {
+    ChangeNotes changeNotes = changeNotesFactory.create(project, changeId);
+    return CodeOwnerApprovalCheckInput.createForComputingOwnedPaths(
+        codeOwnersConfig, codeOwnerResolver, changeNotes, accounts);
   }
 }
