@@ -20,6 +20,21 @@ parent directories via the [set noparent](#setNoparent) keyword).
 details about code owner config files are described
 [here](backends.html#codeOwnerConfigFiles)).
 
+**NOTE:** Tools should never parse `OWNERS` files on their own, but instead
+always use the [REST API](rest-api.html) to access code owner information.
+
+Parsing `OWNERS` files is highly discouraged because:
+
+* it's hard for tools to implement the parsing of `OWNERS` files in a way that
+  is consistent with how Gerrit parses them
+* reimplementing the parsing logic outside of Gerrit is a lot of effort that can
+  be safed by using the REST API and letting Gerrit do the parsing
+* parsing `OWNERS` files outside of Gerrit is likely less efficient since the
+  parser likely needs to reach out to Gerrit to fetch additional input (e.g. if
+  `OWNERS` files from other branches or repositories are imported)
+* the format of `OWNERS` files may change (e.g. by the addition of new features)
+  which could break parsers outside of Gerrit
+
 ### <a id="defaultCodeOwnerConfiguration">Default code owners
 Default code owners that apply to all branches can be defined in an `OWNERS`
 file in the root directory of the `refs/meta/config` branch. This `OWNERS` file
