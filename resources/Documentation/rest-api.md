@@ -914,7 +914,7 @@ ownership of a user for a path in a branch.
 code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_owned_by_all_users` | Whether the the specified path in the branch is owned by all users (aka `*`).
 | `annotation` | Annotations that were set for the user. Contains only supported annotations (unsupported annotations are reported in the `debugs_logs`). Sorted alphabetically.
-| `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner.
+| `debug_logs` | List of debug logs that may help to understand why the user is or isn't a code owner. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
 
 ---
 
@@ -1042,7 +1042,7 @@ The `CodeOwnersInfo` entity contains information about a list of code owners.
 | ------------- | -------- | ----------- |
 | `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by a score that is computed from mutliple [scoring factors](#scoringFactors).
 | `owned_by_all_users` | optional | Whether the path is owned by all users. Not set if `false`.
-| `debug_logs`  | optional | Debug logs that may help to understand why a user is or isn't suggested as a code owner. Only set if requested via `--debug`.
+| `debug_logs`  | optional | Debug logs that may help to understand why a user is or isn't suggested as a code owner. Only set if requested via `--debug`. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
 
 ### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
 The `FileCodeOwnerStatusInfo` entity describes the code owner statuses for a
