@@ -19,7 +19,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.extensions.common.AccountInfo;
 import com.google.gerrit.extensions.restapi.BadRequestException;
@@ -155,9 +154,7 @@ public class GetOwnedPaths implements RestReadView<RevisionResource> {
     info.path = ownedPath.path().toString();
     info.owned = ownedPath.owned() ? true : null;
     info.owners =
-        Streams.stream(ownedPath.owners())
-            .map(GetOwnedPaths::toAccountInfo)
-            .collect(toImmutableList());
+        ownedPath.owners().stream().map(GetOwnedPaths::toAccountInfo).collect(toImmutableList());
     return info;
   }
 
