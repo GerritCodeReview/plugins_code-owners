@@ -26,6 +26,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "db52f337_584c7e27",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-09T08:15:14Z",
+      "side": 1,
+      "message": "Thanks a lot for asking about more background here. Explaining the motivation for this change is important and I just lost sight of this while thinking about the implementation details. I\u0027ve updated the commit message to include the reasoning now. I\u0027ve also added a few sentences about this to the description of the new config option.\n\n\u003e At first glance, giving code-owner-approval for this,\n\u003e and implicitly a blind approval for all future patchset(s) feels a bit strange.\n\nThe description now also covers why we think that this is OK.",
+      "parentUuid": "e6e1b8ed_05995f58",
+      "range": {
+        "startLine": 10,
+        "startChar": 34,
+        "endLine": 11,
+        "endChar": 20
+      },
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "114affa2_eb6c3093",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -81,6 +105,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "503edc53_92577585",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 842,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-09T08:15:14Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ad366234_ae14ecbe",
+      "range": {
+        "startLine": 842,
+        "startChar": 44,
+        "endLine": 842,
+        "endChar": 60
+      },
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2223cddf_c56e319a",
@@ -94,6 +142,30 @@
       "writtenOn": "2022-11-08T14:42:10Z",
       "side": 1,
       "message": "general: will the UI / API differentiate between copied code-owner-approvals from previous patchsets vs. actual approvals? (users might not know why code-owner-approval exists, without an indication of the reson)",
+      "range": {
+        "startLine": 885,
+        "startChar": 4,
+        "endLine": 887,
+        "endChar": 97
+      },
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4dfb4784_e50137f5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 887,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-09T08:15:14Z",
+      "side": 1,
+      "message": "Thanks for this question.\n\nIn the UI files have a code owner status icon. If the status is that the file is code owner approved, users can\u0027t tell whether it was approved by a current approval or a sticky approval on a previous patch set.\n\nIn the API we expose a reason saying why a file is code owner approved. If it\u0027s approved by a current approval the reason is \"approved by Foo who is a code owner\". If the file is approved by a sticky approval the reason says on which patch set the approval was applied, e.g. \"approved on patch set 1 by Foo who is a code owner\". Reasons are not shown in the UI yet, but there is an open feature request for this. So until this gets implemented in the frontend that\u0027s not ideal, but it\u0027s accepted by the stakeholders that are requesting this feature, because the productivity gain of making code owner approvals sticky outweighs any potential user confusion. \n\nThis is important information that I forgot to mention in the commit message. I\u0027ve added it there now.",
+      "parentUuid": "2223cddf_c56e319a",
       "range": {
         "startLine": 885,
         "startChar": 4,
@@ -134,6 +206,30 @@
       "writtenOn": "2022-11-08T14:42:10Z",
       "side": 1,
       "message": "~Sorry for nitpicking, but maybe this question is for myself:~\n\n~What does a \"changed\" approval mean? Do users understand this and it does not need further explanation?~\n\nUpdate: I think this is explained quite well in the example below. Changed \u003d the vote value is changed from e.g. +1 to -1, the new vote invalidates the old one.",
+      "range": {
+        "startLine": 269,
+        "startChar": 48,
+        "endLine": 269,
+        "endChar": 55
+      },
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "80dd2d96_9de178d1",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-09T08:15:14Z",
+      "side": 1,
+      "message": "\u003e Changed \u003d the vote value is changed from e.g. +1 to -1, the new vote\n\u003e invalidates the old one.\n\nExactly. I\u0027ve added this example here too, to make this clearer.",
+      "parentUuid": "1c0e1c12_ef810c50",
       "range": {
         "startLine": 269,
         "startChar": 48,
