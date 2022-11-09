@@ -50,6 +50,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "fba8b008_7782ea76",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-11-09T10:39:08Z",
+      "side": 1,
+      "message": "Thanks for the detailed explanation! I was about to argue that \"modifying the same file\" might require another inspection from the code owner (?), but maybe the rationale is that: as an owner, I agree that this file should be modified as part of this change, regardless of exactly what modification it is (which is looked at more closely by the code reviewers - a.k.a LGTM - anyway).",
+      "parentUuid": "db52f337_584c7e27",
+      "range": {
+        "startLine": 10,
+        "startChar": 34,
+        "endLine": 11,
+        "endChar": 20
+      },
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "114affa2_eb6c3093",
         "filename": "/COMMIT_MSG",
         "patchSetId": 1
@@ -78,6 +102,24 @@
       "writtenOn": "2022-11-08T14:42:10Z",
       "side": 1,
       "message": "Nice! I\u0027d like to do a second round on the tests then I\u0027ll +2.\n\nI\u0027ll resolve this comment.",
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "692a762b_1a7bc181",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-11-09T10:39:08Z",
+      "side": 1,
+      "message": "marking resolved. Thanks for the thorough testing!",
+      "parentUuid": "e2fcf134_ddb68c76",
       "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -178,6 +220,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "92636a48_0060ca7e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheck.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 887,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-11-09T10:39:08Z",
+      "side": 1,
+      "message": "Nice! sounds good. Thanks for explaining!",
+      "parentUuid": "4dfb4784_e50137f5",
+      "range": {
+        "startLine": 885,
+        "startChar": 4,
+        "endLine": 887,
+        "endChar": 97
+      },
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "7e297c44_056f435f",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/CodeOwnerApprovalCheckInputTest.java",
         "patchSetId": 1
@@ -230,6 +296,30 @@
       "side": 1,
       "message": "\u003e Changed \u003d the vote value is changed from e.g. +1 to -1, the new vote\n\u003e invalidates the old one.\n\nExactly. I\u0027ve added this example here too, to make this clearer.",
       "parentUuid": "1c0e1c12_ef810c50",
+      "range": {
+        "startLine": 269,
+        "startChar": 48,
+        "endLine": 269,
+        "endChar": 55
+      },
+      "revId": "d32164ffcba7311579ed63181624d28e5848c0d9",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ded487d6_f5c9f295",
+        "filename": "resources/Documentation/config.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2022-11-09T10:39:08Z",
+      "side": 1,
+      "message": "Awesome! Thanks.",
+      "parentUuid": "80dd2d96_9de178d1",
       "range": {
         "startLine": 269,
         "startChar": 48,
