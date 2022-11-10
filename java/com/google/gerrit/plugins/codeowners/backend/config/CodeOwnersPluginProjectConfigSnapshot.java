@@ -95,6 +95,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   private Map<String, Optional<PathExpressions>> pathExpressionsByBranch = new HashMap<>();
   @Nullable private Optional<PathExpressions> pathExpressions;
   @Nullable private Boolean implicitApprovalsEnabled;
+  @Nullable private Boolean stickyApprovalsEnabled;
   @Nullable private RequiredApproval requiredApproval;
   @Nullable private ImmutableSortedSet<RequiredApproval> overrideApprovals;
 
@@ -615,6 +616,27 @@ public class CodeOwnersPluginProjectConfigSnapshot {
         String.format(
             "unknown value %s for enableImplicitApprovals configuration in project %s",
             enableImplicitApprovals, projectName));
+  }
+
+  /**
+   * Checks whether sticky code owner approvals are enabled.
+   *
+   * <p>If enabled, a code owner approval on a previous patch set is sticky (if the approver didn't
+   * alter or remove it on a later patch set).
+   */
+  public boolean areStickyApprovalsEnabled() {
+    if (stickyApprovalsEnabled == null) {
+      stickyApprovalsEnabled = readStickyApprovalsEnabled();
+    }
+    return stickyApprovalsEnabled;
+  }
+
+  private boolean readStickyApprovalsEnabled() {
+    boolean enableStickyApprovals = generalConfig.enableStickyApprovals(projectName, pluginConfig);
+    logger.atFine().log(
+        "sticky approvals on project %s are %s",
+        projectName, enableStickyApprovals ? "enabled" : "disabled");
+    return enableStickyApprovals;
   }
 
   /**

@@ -17,13 +17,19 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth8.assertThat;
+import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
+import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
+import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Change;
+import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.extensions.api.changes.ChangeApi;
@@ -34,6 +40,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.server.notedb.ChangeNotes;
+import com.google.gerrit.server.query.change.ChangeData;
 import com.google.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +48,7 @@ import org.junit.Test;
 /** Tests for {@link CodeOwnerApprovalCheckInput}. */
 public class CodeOwnerApprovalCheckInputTest extends AbstractCodeOwnersTest {
   @Inject private ChangeNotes.Factory changeNotesFactory;
+  @Inject private ProjectOperations projectOperations;
   @Inject private RequestScopeOperations requestScopeOperations;
 
   private CodeOwnerApprovalCheckInput.Loader.Factory inputLoaderFactory;
@@ -48,6 +56,7 @@ public class CodeOwnerApprovalCheckInputTest extends AbstractCodeOwnersTest {
   private CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig;
   private TestAccount user2;
   private Change.Id changeId;
+  private Change.Key changeKey;
   private Account.Id changeOwner;
 
   @Before
@@ -63,7 +72,9 @@ public class CodeOwnerApprovalCheckInputTest extends AbstractCodeOwnersTest {
   @Before
   public void setUp() throws Exception {
     user2 = accountCreator.user2();
-    changeId = createChange().getChange().getId();
+    ChangeData changeData = createChange().getChange();
+    changeId = changeData.getId();
+    changeKey = changeData.change().getKey();
     changeOwner = admin.id();
   }
 
@@ -141,6 +152,448 @@ public class CodeOwnerApprovalCheckInputTest extends AbstractCodeOwnersTest {
     recommend(changeId.toString());
 
     assertThat(loadInput().approvers()).containsExactly(user.id(), user2.id());
+  }
+
+  /** Test that current approvals do not count for computing previous approvers. */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void noPreviousApprovers() throws Exception {
+    // self approve current patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    recommend(changeId.toString());
+
+    // approve as user current patch set
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // approve as user2 current patch set
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+  }
+
+  /** Test that previous approvals on other labels do not count for computing previous approvers. */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void noPreviousApproversIfApprovalIsOnUnrelatedLabel() throws Exception {
+    // Create Foo-Review label.
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.values = ImmutableMap.of("+1", "Approved", " 0", "Not Approved");
+    gApi.projects().name(project.get()).label("Foo-Review").create(input).get();
+
+    // Allow to vote on the Foo-Review label.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Foo-Review")
+                .range(0, 1)
+                .ref("refs/heads/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    // approve on Foo-Review label
+    requestScopeOperations.setApiUser(user.id());
+    gApi.changes().id(changeId.get()).current().review(new ReviewInput().label("Foo-Review", 1));
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+  }
+
+  /**
+   * Test that previous votes with insufficient values do not count for computing previous
+   * approvers.
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void noPreviousApproversIfVoteIsNotAnApproval() throws Exception {
+    // vote with Code-Review+1, but only Code-Review+2 counts as a code owner approval
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+  }
+
+  /** Test that previous approvals are ignored if sticky approvals are disabled. */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "false")
+  public void noPreviousApproversIfEnableStickyApprovalsDisabled() throws Exception {
+    // self approve
+    requestScopeOperations.setApiUser(changeOwner);
+    recommend(changeId.toString());
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // approve as user2
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+  }
+
+  /** Test that the approvals on the previous patch set count for computing previous approvers. */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void withPreviousApprovers() throws Exception {
+    // self approve
+    requestScopeOperations.setApiUser(changeOwner);
+    recommend(changeId.toString());
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // approve as user2
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.putAll(
+        PatchSet.id(changeId, 1), ImmutableSet.of(changeOwner, user.id(), user2.id()));
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+  }
+
+  /**
+   * Test that a self-approval on the previous patch set is ignored for computing previous
+   * approvers.
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void withPreviousApprovers_selfApprovalsIgnored() throws Exception {
+    disableSelfCodeReviewApprovals();
+
+    // self approve
+    requestScopeOperations.setApiUser(changeOwner);
+    recommend(changeId.toString());
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // approve as user2
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.putAll(
+        PatchSet.id(changeId, 1), ImmutableSet.of(user.id(), user2.id()));
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+  }
+
+  /**
+   * Test that the approvals on different previous patch sets count for computing previous
+   * approvers.
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void withPreviousApproversOnDifferentPatchSets() throws Exception {
+    // self approve
+    requestScopeOperations.setApiUser(changeOwner);
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a third patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // approve as user2
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // create a 4th patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 1), changeOwner);
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 2), user.id());
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 3), user2.id());
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+  }
+
+  /** Test that a self-approval on an old patch set is ignored for computing previous approvers. */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void withPreviousApproversOnDifferentPatchSets_selfApprovalsIgnored() throws Exception {
+    disableSelfCodeReviewApprovals();
+
+    // self approve
+    requestScopeOperations.setApiUser(changeOwner);
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a third patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // approve as user2
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // create a 4th patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 2), user.id());
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 3), user2.id());
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+  }
+
+  /**
+   * Test that sticky approvals do not count for computing previous approvers (because if the
+   * approval is sticky it's a current approval).
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void noPreviousApproversIfApprovalIsCopied() throws Exception {
+    // Make Code-Review approvals sticky
+    LabelDefinitionInput input = new LabelDefinitionInput();
+    input.copyCondition = "is:ANY";
+    gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+  }
+
+  /**
+   * Test that a previous approval still counts for computing previous approvers if the approver
+   * comments on the current patch set without applying a vote.
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void previousApproversIsPreservedWhenThePreviousApproverCommentsOnTheChange()
+      throws Exception {
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // check that the previous approver on patch set 1 is found
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 1), user.id());
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+
+    // comment on the change
+    requestScopeOperations.setApiUser(user.id());
+    ReviewInput reviewInput = ReviewInput.noScore();
+    reviewInput.message = "a comment";
+    gApi.changes().id(changeId.get()).current().review(reviewInput);
+
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+  }
+
+  /**
+   * Test that a previous approval doesn't count for computing previous approvers if the approver
+   * downgrades the vote.
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  @GerritConfig(name = "plugin.code-owners.requiredApproval", value = "Code-Review+2")
+  public void noPreviousApproversIfApprovalIsDowngraded() throws Exception {
+    // Allow all users to vote with Code-Review+2.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(
+            TestProjectUpdate.allowLabel("Code-Review")
+                .range(0, 2)
+                .ref("refs/heads/*")
+                .group(REGISTERED_USERS)
+                .build())
+        .update();
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    approve(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // check that the previous approver on patch set 1 is found
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 1), user.id());
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+
+    // change vote from Code-Review+2 to Code-Review+1 as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // the Code-Review+1 vote on the current patch set overrode the previous approval
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+
+    // create a third patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // the Code-Review+1 vote on the previous patch set overrode the previous approval
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+  }
+
+  /**
+   * Test that a previous approval doesn't count for computing previous approvers if the approver
+   * re-applies the approval (because now it's a current approval).
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void noPreviousApproversIfApprovalIsReapplied() throws Exception {
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // check that the previous approver on patch set 1 is found
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 1), user.id());
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+
+    // re-apply the approval
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    assertThat(loadInput().approversFromPreviousPatchSets()).isEmpty();
+  }
+
+  /**
+   * Test that only the last previous approval of a user counts for computing previous approvers.
+   */
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void onlyLastPreviousApprovalOfAUserIsConsideredForComputingPreviousApprovers()
+      throws Exception {
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // re-approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a third patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    ArrayListMultimap<PatchSet.Id, Account.Id> expectedPreviousApprovers =
+        ArrayListMultimap.create();
+    expectedPreviousApprovers.put(PatchSet.id(changeId, 2), user.id());
+    assertThat(loadInput().approversFromPreviousPatchSets())
+        .containsExactlyEntriesIn(expectedPreviousApprovers);
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void noPreviouslyApprovedPatchSets() throws Exception {
+    // approve current patch set
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    assertThat(loadInput().previouslyApprovedPatchSetsInReverseOrder()).isEmpty();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableStickyApprovals", value = "true")
+  public void previouslyApprovedPatchSetsAreReturnedInReverseOrder() throws Exception {
+    // create a second patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // approve as user
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId.toString());
+
+    // create a third patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // approve as user2, ignored since overridden on patch set 4
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // create a 4th patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    // re- approve as user2
+    requestScopeOperations.setApiUser(user2.id());
+    recommend(changeId.toString());
+
+    // create a 5th patch set
+    requestScopeOperations.setApiUser(changeOwner);
+    amendChange(changeKey.get()).assertOkStatus();
+
+    assertThat(loadInput().previouslyApprovedPatchSetsInReverseOrder())
+        .containsExactly(PatchSet.id(changeId, 4), PatchSet.id(changeId, 2));
   }
 
   @Test

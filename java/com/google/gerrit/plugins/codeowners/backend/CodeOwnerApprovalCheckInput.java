@@ -14,14 +14,23 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
+import static com.google.common.collect.ImmutableSetMultimap.toImmutableSetMultimap;
+import static java.util.Comparator.comparing;
 
 import com.google.auto.value.AutoValue;
+import com.google.auto.value.extension.memoized.Memoized;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSetMultimap;
 import com.google.common.collect.ImmutableSortedSet;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
+import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
@@ -33,6 +42,8 @@ import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -61,6 +72,23 @@ public abstract class CodeOwnerApprovalCheckInput {
    * approval of the patch set uploader is ignored even if they are a code owner.
    */
   public abstract ImmutableSet<Account.Id> approvers();
+
+  /**
+   * Gets a map of previous patch sets to the IDs of the accounts that have an approval on that
+   * patch set that is sticky and possibly counts as code owner approval (if they are code owners).
+   *
+   * <p>If self approvals are ignored the patch set uploader is filtered out for all patch sets
+   * since in this case the approval of the patch set uploader is ignored even if they are a code
+   * owner.
+   */
+  public abstract ImmutableMultimap<PatchSet.Id, Account.Id> approversFromPreviousPatchSets();
+
+  @Memoized
+  public ImmutableSortedSet<PatchSet.Id> previouslyApprovedPatchSetsInReverseOrder() {
+    return ImmutableSortedSet.orderedBy(comparing(PatchSet.Id::get).reversed())
+        .addAll(approversFromPreviousPatchSets().keySet())
+        .build();
+  }
 
   /**
    * Account from which an implicit code owner approval should be assumed.
@@ -119,6 +147,7 @@ public abstract class CodeOwnerApprovalCheckInput {
     return create(
         /* reviewers= */ ImmutableSet.of(),
         /* approvers= */ accounts,
+        /* approversFromPreviousPatchSets= */ ImmutableMultimap.of(),
         // Do not check for implicit approvals since implicit approvals of other users
         // should be ignored. For the given account we do not need to check for
         // implicit approvals since all owned files are already covered by the
@@ -152,6 +181,7 @@ public abstract class CodeOwnerApprovalCheckInput {
   private static CodeOwnerApprovalCheckInput create(
       ImmutableSet<Account.Id> reviewers,
       ImmutableSet<Account.Id> approvers,
+      ImmutableMultimap<PatchSet.Id, Account.Id> approversFromPreviousPatchSets,
       Optional<Account.Id> implicitApprover,
       ImmutableSet<PatchSetApproval> overrides,
       CodeOwnerResolverResult globalCodeOwners,
@@ -160,6 +190,7 @@ public abstract class CodeOwnerApprovalCheckInput {
     return new AutoValue_CodeOwnerApprovalCheckInput(
         reviewers,
         approvers,
+        approversFromPreviousPatchSets,
         implicitApprover,
         overrides,
         globalCodeOwners,
@@ -207,6 +238,7 @@ public abstract class CodeOwnerApprovalCheckInput {
       return CodeOwnerApprovalCheckInput.create(
           getReviewers(),
           getApprovers(),
+          getApproversFromPreviousPatchSets(),
           getImplicitApprover(),
           getOverrides(),
           getGlobalCodeOwners(),
@@ -281,6 +313,108 @@ public abstract class CodeOwnerApprovalCheckInput {
           implicitApprovalConfig,
           enableImplicitApproval ? "enabled" : "disabled");
       return enableImplicitApproval ? Optional.of(changeOwner) : Optional.empty();
+    }
+
+    /**
+     * Gets a map of previous patch sets to the IDs of the accounts that have an approval on that
+     * patch set that is sticky and possibly counts as code owner approval (if they are code
+     * owners).
+     *
+     * <p>If self approvals are ignored the patch set uploader is filtered out for all patch sets
+     * since in this case the approval of the patch set uploader is ignored even if they are a code
+     * owner.
+     */
+    private ImmutableMultimap<PatchSet.Id, Account.Id> getApproversFromPreviousPatchSets() {
+      if (!codeOwnersConfig.areStickyApprovalsEnabled()) {
+        logger.atFine().log("sticky approvals are disabled");
+        return ImmutableMultimap.of();
+      }
+
+      // Filter out approvals on the current patch set, since here we are only interested in code
+      // owner approvals on previous patch sets that should be considered as sticky.
+      PatchSet.Id currentPatchSetId = changeNotes.getCurrentPatchSet().id();
+      ImmutableSetMultimap<PatchSet.Id, Account.Id> approversFromPreviousPatchSets =
+          getLastCodeOwnerApprovalsByAccount().values().stream()
+              .filter(psa -> psa.patchSetId().get() < currentPatchSetId.get())
+              .collect(
+                  toImmutableSetMultimap(
+                      PatchSetApproval::patchSetId, PatchSetApproval::accountId));
+      logger.atFine().log(
+          "sticky approvals are enabled, approversFromPreviousPatchSets=%s",
+          approversFromPreviousPatchSets);
+      return approversFromPreviousPatchSets;
+    }
+
+    /**
+     * Returns the last code owner approvals by account.
+     *
+     * <p>The returned map contains for each user their last approval on the change that counts as a
+     * code owner approval. Approvals that are invalidated by code owner votes on newer patch sets
+     * are filtered out.
+     */
+    private ImmutableMap<Account.Id, PatchSetApproval> getLastCodeOwnerApprovalsByAccount() {
+      RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
+
+      Map<Account.Id, PatchSetApproval> lastCodeOwnerVotesByAccount = new HashMap<>();
+      ImmutableSetMultimap<PatchSet.Id, PatchSetApproval> allCodeOwnerApprovals =
+          changeNotes.getApprovals().all().entries().stream()
+              // Only look at approvals on the label that is configured for code owner approvals.
+              .filter(e -> e.getValue().label().equals(requiredApproval.labelType().getName()))
+              .collect(toImmutableSetMultimap(Map.Entry::getKey, Map.Entry::getValue));
+      logger.atFine().log("allCodeOwnerApprovals=%s", allCodeOwnerApprovals);
+      // Iterate over the patch sets in reverse order (latest patch set first).
+      for (PatchSet.Id patchSetId : getPatchSetIdsInReverseOrder()) {
+        // Only store the code owner approval if we didn't find a code owner approval for that
+        // account on a newer patch set yet.
+        // If a code owner approval on a newer patch set exist, it invalidated the code owner
+        // approval on the older patch set and we can ignore it.
+        allCodeOwnerApprovals
+            .get(patchSetId)
+            .forEach(psa -> lastCodeOwnerVotesByAccount.putIfAbsent(psa.accountId(), psa));
+      }
+
+      ImmutableMap<Account.Id, PatchSetApproval> lastCodeOwnerApprovalsByAccount =
+          lastCodeOwnerVotesByAccount.entrySet().stream()
+              // Remove all approvals which do not count as a code owner approval because the voting
+              // value is insufficient.
+              .filter(e -> requiredApproval.isApprovedBy(e.getValue()))
+              .filter(filterOutSelfApprovalsIfSelfApprovalsAreIgnored())
+              .collect(toImmutableMap(Map.Entry::getKey, Map.Entry::getValue));
+      logger.atFine().log(
+          "lastCodeOwnerApprovalsByAccount=%s, lastCodeOwnerVotesByAccount=%s",
+          lastCodeOwnerApprovalsByAccount, lastCodeOwnerVotesByAccount);
+      return lastCodeOwnerApprovalsByAccount;
+    }
+
+    /**
+     * Creates a filter that filters out self approvals by the patch set uploader if self approvals
+     * are ignored
+     */
+    private Predicate<Map.Entry<Account.Id, PatchSetApproval>>
+        filterOutSelfApprovalsIfSelfApprovalsAreIgnored() {
+      RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
+      if (!requiredApproval.labelType().isIgnoreSelfApproval()) {
+        logger.atFine().log("s");
+        return e -> true;
+      }
+
+      Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
+      return e -> {
+        if (e.getKey().equals(patchSetUploader)) {
+          logger.atFine().log(
+              "Removing approvals of the patch set uploader %s since the label of the required"
+                  + " approval (%s) is configured to ignore self approvals",
+              patchSetUploader, requiredApproval.labelType());
+          return false;
+        }
+        return true;
+      };
+    }
+
+    private ImmutableSortedSet<PatchSet.Id> getPatchSetIdsInReverseOrder() {
+      return ImmutableSortedSet.orderedBy(comparing(PatchSet.Id::get).reversed())
+          .addAll(changeNotes.getPatchSets().keySet())
+          .build();
     }
 
     /**

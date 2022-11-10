@@ -191,7 +191,7 @@ owner status at a glance.
 \
 ![owner approved](./owner-status-approved.png "Code owner approved")
 
-### <a id="perFilCodeOwnerStatuses">Per file code owner statuses
+### <a id="perFileCodeOwnerStatuses">Per file code owner statuses
 
 The `@PLUGIN@` plugin also shows the code owner statuses per file in the file
 list.

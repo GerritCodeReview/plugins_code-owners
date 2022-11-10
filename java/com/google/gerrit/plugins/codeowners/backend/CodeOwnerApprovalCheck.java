@@ -35,6 +35,7 @@ import com.google.gerrit.entities.PatchSetApproval;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.metrics.Timer0;
+import com.google.gerrit.metrics.Timer1;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
@@ -89,6 +90,7 @@ public class CodeOwnerApprovalCheck {
   private final Provider<CodeOwnerResolver> codeOwnerResolverProvider;
   private final CodeOwnerApprovalCheckInput.Loader.Factory inputLoaderFactory;
   private final CodeOwnerMetrics codeOwnerMetrics;
+  private final ChangedFilesByPatchSetCache.Factory changedFilesByPatchSetCacheFactory;
 
   @Inject
   CodeOwnerApprovalCheck(
@@ -99,7 +101,8 @@ public class CodeOwnerApprovalCheck {
       Provider<CodeOwnerConfigHierarchy> codeOwnerConfigHierarchyProvider,
       Provider<CodeOwnerResolver> codeOwnerResolverProvider,
       CodeOwnerApprovalCheckInput.Loader.Factory codeOwnerApprovalCheckInputLoaderFactory,
-      CodeOwnerMetrics codeOwnerMetrics) {
+      CodeOwnerMetrics codeOwnerMetrics,
+      ChangedFilesByPatchSetCache.Factory changedFilesByPatchSetCacheFactory) {
     this.repoManager = repoManager;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.changedFiles = changedFiles;
@@ -108,6 +111,7 @@ public class CodeOwnerApprovalCheck {
     this.codeOwnerResolverProvider = codeOwnerResolverProvider;
     this.inputLoaderFactory = codeOwnerApprovalCheckInputLoaderFactory;
     this.codeOwnerMetrics = codeOwnerMetrics;
+    this.changedFilesByPatchSetCacheFactory = changedFilesByPatchSetCacheFactory;
   }
 
   /**
@@ -212,9 +216,12 @@ public class CodeOwnerApprovalCheck {
         changeNotes.getChangeId().get(), changeNotes.getProjectName());
     CodeOwnerConfigHierarchy codeOwnerConfigHierarchy = codeOwnerConfigHierarchyProvider.get();
     CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get().enforceVisibility(false);
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
     try {
       boolean isSubmittable =
-          !getFileStatuses(codeOwnerConfigHierarchy, codeOwnerResolver, changeNotes)
+          !getFileStatuses(
+                  codeOwnersConfig, codeOwnerConfigHierarchy, codeOwnerResolver, changeNotes)
               .anyMatch(
                   fileStatus ->
                       (fileStatus.newPathStatus().isPresent()
@@ -247,17 +254,22 @@ public class CodeOwnerApprovalCheck {
    *
    * @param start number of file statuses to skip
    * @param limit the max number of file statuses that should be returned (0 = unlimited)
-   * @see #getFileStatuses(CodeOwnerConfigHierarchy, CodeOwnerResolver, ChangeNotes)
+   * @see #getFileStatuses(CodeOwnersPluginProjectConfigSnapshot, CodeOwnerConfigHierarchy,
+   *     CodeOwnerResolver, ChangeNotes)
    */
   public ImmutableSet<FileCodeOwnerStatus> getFileStatusesAsSet(
       ChangeNotes changeNotes, int start, int limit) throws IOException, DiffNotAvailableException {
     requireNonNull(changeNotes, "changeNotes");
-    try (Timer0.Context ctx = codeOwnerMetrics.computeFileStatuses.start()) {
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
+    try (Timer1.Context<Boolean> ctx =
+        codeOwnerMetrics.computeFileStatuses.start(codeOwnersConfig.areStickyApprovalsEnabled())) {
       logger.atFine().log(
           "compute file statuses (project = %s, change = %d, start = %d, limit = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get(), start, limit);
       Stream<FileCodeOwnerStatus> fileStatuses =
           getFileStatuses(
+              codeOwnersConfig,
               codeOwnerConfigHierarchyProvider.get(),
               codeOwnerResolverProvider.get().enforceVisibility(false),
               changeNotes);
@@ -300,6 +312,7 @@ public class CodeOwnerApprovalCheck {
    *     returned
    */
   private Stream<FileCodeOwnerStatus> getFileStatuses(
+      CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
       ChangeNotes changeNotes)
@@ -309,9 +322,6 @@ public class CodeOwnerApprovalCheck {
       logger.atFine().log(
           "prepare stream to compute file statuses (project = %s, change = %d)",
           changeNotes.getProjectName(), changeNotes.getChangeId().get());
-
-      CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
-          codeOwnersPluginConfiguration.getProjectConfig(changeNotes.getProjectName());
 
       Account.Id patchSetUploader = changeNotes.getCurrentPatchSet().uploader();
       ImmutableSet<Account.Id> exemptedAccounts = codeOwnersConfig.getExemptedAccounts();
@@ -360,6 +370,8 @@ public class CodeOwnerApprovalCheck {
                   getFileStatus(
                       codeOwnerConfigHierarchy,
                       codeOwnerResolver,
+                      codeOwnersConfig,
+                      changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes),
                       branch,
                       revision.orElse(null),
                       changedFile,
@@ -430,6 +442,8 @@ public class CodeOwnerApprovalCheck {
                   getFileStatus(
                       codeOwnerConfigHierarchy,
                       codeOwnerResolver,
+                      codeOwnersConfig,
+                      changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes),
                       branch,
                       revision.orElse(null),
                       changedFile,
@@ -476,6 +490,8 @@ public class CodeOwnerApprovalCheck {
   private FileCodeOwnerStatus getFileStatus(
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
+      CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig,
+      ChangedFilesByPatchSetCache changedFilesByPatchSetCache,
       BranchNameKey branch,
       @Nullable ObjectId revision,
       ChangedFile changedFile,
@@ -492,6 +508,8 @@ public class CodeOwnerApprovalCheck {
                       getPathCodeOwnerStatus(
                           codeOwnerConfigHierarchy,
                           codeOwnerResolver,
+                          codeOwnersConfig,
+                          changedFilesByPatchSetCache,
                           branch,
                           revision,
                           newPath,
@@ -510,6 +528,8 @@ public class CodeOwnerApprovalCheck {
                 getPathCodeOwnerStatus(
                     codeOwnerConfigHierarchy,
                     codeOwnerResolver,
+                    codeOwnersConfig,
+                    changedFilesByPatchSetCache,
                     branch,
                     revision,
                     changedFile.oldPath().get(),
@@ -526,6 +546,8 @@ public class CodeOwnerApprovalCheck {
   private PathCodeOwnerStatus getPathCodeOwnerStatus(
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       CodeOwnerResolver codeOwnerResolver,
+      CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig,
+      ChangedFilesByPatchSetCache changedFilesByPatchSetCache,
       BranchNameKey branch,
       @Nullable ObjectId revision,
       Path absolutePath,
@@ -554,10 +576,12 @@ public class CodeOwnerApprovalCheck {
 
     boolean isGloballyApproved =
         isApproved(
+            absolutePath,
             input.globalCodeOwners(),
             CodeOwnerKind.GLOBAL_CODE_OWNER,
-            input.approvers(),
-            input.implicitApprover().orElse(null),
+            codeOwnersConfig,
+            changedFilesByPatchSetCache,
+            input,
             reason);
 
     if (isGloballyApproved) {
@@ -626,10 +650,12 @@ public class CodeOwnerApprovalCheck {
                 }
 
                 if (isApproved(
+                    absolutePath,
                     codeOwners,
                     codeOwnerKind,
-                    input.approvers(),
-                    input.implicitApprover().orElse(null),
+                    codeOwnersConfig,
+                    changedFilesByPatchSetCache,
+                    input,
                     reason)) {
                   codeOwnerStatus.set(CodeOwnerStatus.APPROVED);
                   // No need to recurse if we are not checking all owners or all owners are
@@ -798,31 +824,36 @@ public class CodeOwnerApprovalCheck {
   }
 
   /**
-   * Checks whether the given path was implicitly or explicitly approved.
+   * Checks whether the given path was approved implicitly, explicitly or by sticky approvals.
    *
+   * @param absolutePath the absolute path for which it should be checked whether it is code owner
+   *     approved
    * @param codeOwners users that own the path
    * @param codeOwnerKind the kind of the given {@code codeOwners}
-   * @param approverAccountIds the IDs of the accounts that have approved the change
-   * @param implicitApprover the ID of the account the could be an implicit approver (aka last patch
-   *     set uploader)
+   * @param codeOwnersConfig the code-owners plugin configuration that applies to the project that
+   *     contains the change for which the code owner statuses are checked
+   * @param changedFilesByPatchSetCache cache that allows to lookup changed files by patch set
+   * @param input input data for checking if a path is code owner approved
    * @param reason {@link AtomicReference} on which the reason is being set if the path is approved
    * @return whether the path was approved
    */
   private boolean isApproved(
+      Path absolutePath,
       CodeOwnerResolverResult codeOwners,
       CodeOwnerKind codeOwnerKind,
-      ImmutableSet<Account.Id> approverAccountIds,
-      @Nullable Account.Id implicitApprover,
+      CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig,
+      ChangedFilesByPatchSetCache changedFilesByPatchSetCache,
+      CodeOwnerApprovalCheckInput input,
       AtomicReference<String> reason) {
-    if (implicitApprover != null) {
-      if (codeOwners.codeOwnersAccountIds().contains(implicitApprover)
+    if (input.implicitApprover().isPresent()) {
+      if (codeOwners.codeOwnersAccountIds().contains(input.implicitApprover().get())
           || codeOwners.ownedByAllUsers()) {
         // If the uploader of the patch set owns the path, there is an implicit code owner
         // approval from the patch set uploader so that the path is automatically approved.
         reason.set(
             String.format(
                 "implicitly approved by the patch set uploader %s who is a %s%s",
-                AccountTemplateUtil.getAccountTemplate(implicitApprover),
+                AccountTemplateUtil.getAccountTemplate(input.implicitApprover().get()),
                 codeOwnerKind.getDisplayName(),
                 codeOwners.ownedByAllUsers()
                     ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())
@@ -831,13 +862,14 @@ public class CodeOwnerApprovalCheck {
       }
     }
 
-    if (!Collections.disjoint(approverAccountIds, codeOwners.codeOwnersAccountIds())
-        || (codeOwners.ownedByAllUsers() && !approverAccountIds.isEmpty())) {
+    ImmutableSet<Account.Id> approvers = input.approvers();
+    if (!Collections.disjoint(approvers, codeOwners.codeOwnersAccountIds())
+        || (codeOwners.ownedByAllUsers() && !approvers.isEmpty())) {
       // At least one of the code owners approved the change.
       Optional<Account.Id> approver =
           codeOwners.ownedByAllUsers()
-              ? approverAccountIds.stream().findAny()
-              : approverAccountIds.stream()
+              ? approvers.stream().findAny()
+              : approvers.stream()
                   .filter(accountId -> codeOwners.codeOwnersAccountIds().contains(accountId))
                   .findAny();
       checkState(approver.isPresent(), "no approver found");
@@ -852,6 +884,58 @@ public class CodeOwnerApprovalCheck {
       return true;
     }
 
+    return codeOwnersConfig.areStickyApprovalsEnabled()
+        && isApprovedByStickyApproval(
+            absolutePath, codeOwners, codeOwnerKind, changedFilesByPatchSetCache, input, reason);
+  }
+
+  /**
+   * Checks whether the given path is code owner approved by a sticky approval on a previous patch
+   * set.
+   */
+  private boolean isApprovedByStickyApproval(
+      Path absolutePath,
+      CodeOwnerResolverResult codeOwners,
+      CodeOwnerKind codeOwnerKind,
+      ChangedFilesByPatchSetCache changedFilesByPatchSetCache,
+      CodeOwnerApprovalCheckInput input,
+      AtomicReference<String> reason) {
+    for (PatchSet.Id patchSetId : input.previouslyApprovedPatchSetsInReverseOrder()) {
+      if (changedFilesByPatchSetCache.get(patchSetId).stream()
+          .anyMatch(
+              changedFile ->
+                  changedFile.hasNewPath(absolutePath) || changedFile.hasOldPath(absolutePath))) {
+        logger.atFine().log(
+            "previously approved patch set %d contains path %s", patchSetId.get(), absolutePath);
+        Optional<Account.Id> approver =
+            input.approversFromPreviousPatchSets().get(patchSetId).stream()
+                .filter(
+                    accountId ->
+                        codeOwners.codeOwnersAccountIds().contains(accountId)
+                            || codeOwners.ownedByAllUsers())
+                .findAny();
+        if (!approver.isPresent()) {
+          logger.atFine().log(
+              "none of the approvals on previous patch set %d is from a user that owns path %s"
+                  + " (approvers=%s)",
+              patchSetId.get(),
+              absolutePath,
+              input.approversFromPreviousPatchSets().get(patchSetId));
+          continue;
+        }
+
+        reason.set(
+            String.format(
+                "approved on patch set %d by %s who is a %s%s",
+                patchSetId.get(),
+                AccountTemplateUtil.getAccountTemplate(approver.get()),
+                codeOwnerKind.getDisplayName(),
+                codeOwners.ownedByAllUsers()
+                    ? String.format(" (all users are %ss)", codeOwnerKind.getDisplayName())
+                    : ""));
+        return true;
+      }
+    }
     return false;
   }
 
