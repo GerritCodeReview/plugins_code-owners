@@ -344,8 +344,13 @@ export class SuggestOwners extends base {
         </li>
       </ul>
       <ul class="suggestion-container">
-        ${(this.suggestedOwners ?? []).map((s, i) =>
-          this.renderSuggestion(s, i)
+        ${when(
+          this.suggestedOwners && this.suggestedOwners.length > 0,
+          () =>
+            (this.suggestedOwners ?? []).map((s, i) =>
+              this.renderSuggestion(s, i)
+            ),
+          () => html`<li class="suggestion-row">No owners found</li>`
         )}
       </ul>
     `;
