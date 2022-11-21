@@ -33,18 +33,16 @@ export interface PatchRange {
 
 const MAGIC_FILES = ['/COMMIT_MSG', '/MERGE_LIST', '/PATCHSET_LEVEL'];
 const STATUS_CODE = {
+  UNKNOWN: 'unknown',
   PENDING: 'pending',
   PENDING_OLD_PATH: 'pending-old-path',
   MISSING: 'missing',
   MISSING_OLD_PATH: 'missing-old-path',
   APPROVED: 'approved',
-  ERROR: 'error',
-  ERROR_OLD_PATH: 'error-old-path',
 };
 
 const STATUS_PRIORITY_ORDER = [
-  STATUS_CODE.ERROR,
-  STATUS_CODE.ERROR_OLD_PATH,
+  STATUS_CODE.UNKNOWN,
   STATUS_CODE.MISSING,
   STATUS_CODE.PENDING,
   STATUS_CODE.MISSING_OLD_PATH,
@@ -58,7 +56,7 @@ const STATUS_ICON = {
   [STATUS_CODE.PENDING_OLD_PATH]: 'schedule',
   [STATUS_CODE.MISSING_OLD_PATH]: 'close',
   [STATUS_CODE.APPROVED]: 'check',
-  [STATUS_CODE.ERROR]: 'info',
+  [STATUS_CODE.UNKNOWN]: 'check_circle',
 };
 
 const STATUS_SUMMARY = {
@@ -67,8 +65,7 @@ const STATUS_SUMMARY = {
   [STATUS_CODE.PENDING_OLD_PATH]: 'Pending Old Path',
   [STATUS_CODE.MISSING_OLD_PATH]: 'Missing Old Path',
   [STATUS_CODE.APPROVED]: 'Approved',
-  [STATUS_CODE.ERROR]: 'Failed',
-  [STATUS_CODE.ERROR_OLD_PATH]: 'Failed Old Path',
+  [STATUS_CODE.UNKNOWN]: 'Does not need approval',
 };
 
 const STATUS_TOOLTIP = {
@@ -79,8 +76,7 @@ const STATUS_TOOLTIP = {
   [STATUS_CODE.MISSING_OLD_PATH]:
     'Missing code owner approval on pre-renamed file',
   [STATUS_CODE.APPROVED]: 'Approved by code owner',
-  [STATUS_CODE.ERROR]: 'Failed to fetch code owner status',
-  [STATUS_CODE.ERROR_OLD_PATH]: 'Failed to fetch code owner status',
+  [STATUS_CODE.UNKNOWN]: 'Does not need approval',
 };
 
 export function hasPath(ownedPaths: Set<string>, path: string | undefined) {
@@ -195,8 +191,7 @@ export class OwnerStatusColumnContent extends BaseEl {
         :host([owner-status='pending']) gr-icon.status {
           color: #ffa62f;
         }
-        :host([owner-status='missing']) gr-icon.status,
-        :host([owner-status='error']) gr-icon.status {
+        :host([owner-status='missing']) gr-icon.status {
           color: var(--negative-red-text-color);
         }
       `,
@@ -294,7 +289,7 @@ export class OwnerStatusColumnContent extends BaseEl {
 
   private extractStatus(statusItem: FileStatus, oldPath: boolean) {
     if (statusItem === undefined) {
-      return oldPath ? STATUS_CODE.ERROR_OLD_PATH : STATUS_CODE.ERROR;
+      return STATUS_CODE.UNKNOWN;
     } else if (statusItem.status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
       return oldPath ? STATUS_CODE.MISSING_OLD_PATH : STATUS_CODE.MISSING;
     } else if (statusItem.status === OwnerStatus.PENDING) {
