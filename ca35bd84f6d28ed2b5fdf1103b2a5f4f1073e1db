@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "10ffc3d5_5b40e57c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-21T12:55:27Z",
+      "side": 1,
+      "message": "LGTM, but I\u0027m not familiar with typescript, so I can\u0027t judge if the code changes make sense. Maybe someone from the frontend team should have another look.",
+      "revId": "ca35bd84f6d28ed2b5fdf1103b2a5f4f1073e1db",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
