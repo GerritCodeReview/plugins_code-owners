@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fee67da8_ff88164e",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-21T10:54:29Z",
+      "side": 1,
+      "message": "It\u0027s not really unknown, is it? It means this file doesn\u0027t require any code owner approval (since it\u0027s a magic file or it\u0027s not touched in the change).",
+      "range": {
+        "startLine": 68,
+        "startChar": 26,
+        "endLine": 68,
+        "endChar": 33
+      },
+      "revId": "ab54a18be003a5ee27a4abf6bf08527541693bec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
