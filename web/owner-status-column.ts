@@ -148,7 +148,7 @@ export class OwnerStatusColumnHeader extends BaseEl {
 
   override render() {
     if (this.computeHidden()) return nothing;
-    return html`<div></div>`;
+    return html`<div>Owners</div>`;
   }
 }
 
