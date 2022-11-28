@@ -16,6 +16,7 @@
  */
 
 import {
+  AccountInfo,
   BasePatchSetNum,
   RevisionPatchSetNum,
 } from '@gerritcodereview/typescript-api/rest-api';
@@ -81,13 +82,17 @@ const STATUS_TOOLTIP = {
 
 export function hasPath(ownedPaths: Set<string>, path: string | undefined) {
   if (!path) return false;
-  if (path.charAt(0) === '/') {
-    if (ownedPaths.has(path)) return true;
-  } else {
-    // NOTE: The backend returns absolute paths.
-    if (ownedPaths.has('/' + path)) return true;
-  }
-  return false;
+  if (path.charAt(0) !== '/') path = '/' + path;
+  return ownedPaths.has(path);
+}
+
+export function getOwners(
+  owners: Map<string, Array<AccountInfo>>,
+  path: string | undefined
+): Array<AccountInfo> {
+  if (!path) return [];
+  if (path.charAt(0) !== '/') path = '/' + path;
+  return owners.get(path) ?? [];
 }
 
 const base = CodeOwnersModelMixin(LitElement);
@@ -140,7 +145,7 @@ export class OwnerStatusColumnHeader extends BaseEl {
         :host() {
           display: block;
           padding-right: var(--spacing-m);
-          width: 3em;
+          width: 5em;
         }
       `,
     ];
@@ -179,7 +184,7 @@ export class OwnerStatusColumnContent extends BaseEl {
         :host {
           display: flex;
           padding-right: var(--spacing-m);
-          width: 3em;
+          width: 5em;
           text-align: center;
         }
         gr-icon {
@@ -194,6 +199,21 @@ export class OwnerStatusColumnContent extends BaseEl {
         :host([owner-status='missing']) gr-icon.status {
           color: var(--negative-red-text-color);
         }
+        gr-avatar-stack {
+          padding: var(--spacing-xs) 0px;
+          display: flex;
+          --avatar-size: 20px;
+        }
+        .ellipsis {
+          /* These are required to get the ... to line up with the bottom of
+             the avatar icons. */
+          margin-bottom: -2px;
+          display: flex;
+          align-items: flex-end;
+        }
+        .error {
+          color: var(--negative-red-text-color);
+        }
       `,
     ];
   }
@@ -204,7 +224,12 @@ export class OwnerStatusColumnContent extends BaseEl {
   }
 
   override render() {
-    if (this.computeHidden() || this.status === undefined) return nothing;
+    if (
+      this.computeHidden() ||
+      this.status === undefined ||
+      this.path === '/COMMIT_MSG'
+    )
+      return nothing;
     return html`${this.renderStatus()}${this.renderOwnership()}`;
   }
 
@@ -225,17 +250,41 @@ export class OwnerStatusColumnContent extends BaseEl {
   }
 
   private renderOwnership() {
-    if (!this.isOwned()) return nothing;
-    return html`
-      <gr-tooltip-content
-        title="You are in OWNERS for this file"
-        aria-label="owned"
-        aria-description="You are an owner of this file"
-        has-tooltip
-      >
-        <gr-icon filled icon="policy" aria-hidden="true"></gr-icon>
-      </gr-tooltip-content>
-    `;
+    if (this.isOwned()) {
+      return html`
+        <gr-tooltip-content
+          title="You are in OWNERS for this file"
+          aria-label="owned"
+          aria-description="You are an owner of this file"
+          has-tooltip
+        >
+          <gr-icon filled icon="policy" aria-hidden="true"></gr-icon>
+        </gr-tooltip-content>
+      `;
+    } else if (this.ownedPaths) {
+      const oldOwners = getOwners(this.ownedPaths.oldPathOwners, this.oldPath);
+      const newOwners = getOwners(this.ownedPaths.newPathOwners, this.path);
+      const allOwners = oldOwners.concat(newOwners);
+
+      return html` <gr-avatar-stack
+          .accounts=${allOwners.slice(0, 3)}
+          .forceFetch=${true}
+        >
+          <gr-tooltip-content
+            slot="fallback"
+            title="No reviewer owns this file"
+            aria-label="missing owner"
+            aria-description="No reviewer owns this file"
+            has-tooltip
+          >
+            <gr-icon icon="help" class="error"></gr-icon>
+          </gr-tooltip-content>
+        </gr-avatar-stack>
+        ${allOwners.length > 3
+          ? html`<div class="ellipsis">…</div>`
+          : nothing}`;
+    }
+    return nothing;
   }
 
   private isOwned() {
