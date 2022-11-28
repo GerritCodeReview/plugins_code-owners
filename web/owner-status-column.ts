@@ -16,6 +16,7 @@
  */
 
 import {
+  AccountInfo,
   BasePatchSetNum,
   RevisionPatchSetNum,
 } from '@gerritcodereview/typescript-api/rest-api';
@@ -90,6 +91,19 @@ export function hasPath(ownedPaths: Set<string>, path: string | undefined) {
   return false;
 }
 
+export function getOwners(
+  owners: Map<string, Array<AccountInfo>>,
+  path: string | undefined
+): Array<AccountInfo> {
+  if (!path) return [];
+  if (path.charAt(0) === '/') {
+    return owners.get(path) ?? [];
+  } else {
+    // NOTE: The backend returns absolute paths.
+    return owners.get('/' + path) ?? [];
+  }
+}
+
 const base = CodeOwnersModelMixin(LitElement);
 
 class BaseEl extends base {
@@ -140,7 +154,7 @@ export class OwnerStatusColumnHeader extends BaseEl {
         :host() {
           display: block;
           padding-right: var(--spacing-m);
-          width: 3em;
+          width: 6em;
         }
       `,
     ];
@@ -179,7 +193,7 @@ export class OwnerStatusColumnContent extends BaseEl {
         :host {
           display: flex;
           padding-right: var(--spacing-m);
-          width: 3em;
+          width: 6em;
           text-align: center;
         }
         gr-icon {
@@ -193,6 +207,16 @@ export class OwnerStatusColumnContent extends BaseEl {
         }
         :host([owner-status='missing']) gr-icon.status {
           color: var(--negative-red-text-color);
+        }
+        gr-avatar-stack {
+          padding: var(--spacing-xs) 0px;
+          display: flex;
+          --avatar-size: 24px;
+        }
+        .ellipsis {
+          margin-bottom: -3px;
+          display: flex;
+          align-items: flex-end;
         }
       `,
     ];
@@ -225,17 +249,32 @@ export class OwnerStatusColumnContent extends BaseEl {
   }
 
   private renderOwnership() {
-    if (!this.isOwned()) return nothing;
-    return html`
-      <gr-tooltip-content
-        title="You are in OWNERS for this file"
-        aria-label="owned"
-        aria-description="You are an owner of this file"
-        has-tooltip
-      >
-        <gr-icon filled icon="policy" aria-hidden="true"></gr-icon>
-      </gr-tooltip-content>
-    `;
+    if (this.isOwned()) {
+      return html`
+        <gr-tooltip-content
+          title="You are in OWNERS for this file"
+          aria-label="owned"
+          aria-description="You are an owner of this file"
+          has-tooltip
+        >
+          <gr-icon filled icon="policy" aria-hidden="true"></gr-icon>
+        </gr-tooltip-content>
+      `;
+    } else if (this.ownedPaths) {
+      const oldOwners = getOwners(this.ownedPaths.oldPathOwners, this.oldPath);
+      const newOwners = getOwners(this.ownedPaths.newPathOwners, this.path);
+      const allOwners = oldOwners.concat(newOwners);
+
+      return html` <gr-avatar-stack
+          .accounts=${allOwners.slice(0, 4)}
+          .forceFetch=${true}
+        >
+        </gr-avatar-stack>
+        ${allOwners.length > 4
+          ? html`<div class="ellipsis">...</div>`
+          : nothing}`;
+    }
+    return nothing;
   }
 
   private isOwned() {
