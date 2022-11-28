@@ -138,6 +138,7 @@ export interface FetchedFile {
 export interface OwnedPathInfo {
   path: string;
   owned?: boolean;
+  owners?: Array<AccountInfo>;
 }
 
 export interface OwnedChangedFileInfo {
@@ -199,7 +200,7 @@ export class CodeOwnersApi {
       return Promise.resolve(undefined);
     const user = account.email ?? account._account_id;
     return this.get(
-      `/changes/${changeId}/revisions/current/owned_paths?user=${user}&limit=10000`
+      `/changes/${changeId}/revisions/current/owned_paths?user=${user}&limit=10000&check_reviewers`
     ) as Promise<OwnedPathsInfo>;
   }
 
