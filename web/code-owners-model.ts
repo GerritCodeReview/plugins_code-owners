@@ -16,7 +16,10 @@
  */
 
 import {BehaviorSubject, Observable} from 'rxjs';
-import {type ChangeInfo} from '@gerritcodereview/typescript-api/rest-api';
+import {
+  AccountInfo,
+  type ChangeInfo,
+} from '@gerritcodereview/typescript-api/rest-api';
 import {
   ChangeType,
   CodeOwnerBranchConfigInfo,
@@ -101,6 +104,8 @@ let codeOwnersModel: CodeOwnersModel | undefined;
 export interface OwnedPathsInfoOpt {
   oldPaths: Set<string>;
   newPaths: Set<string>;
+  oldPathOwners: Map<string, Array<AccountInfo>>;
+  newPathOwners: Map<string, Array<AccountInfo>>;
 }
 
 export interface CodeOwnersState {
@@ -296,12 +301,30 @@ export class CodeOwnersModel extends EventTarget {
     const ownedPaths = {
       oldPaths: new Set<string>(),
       newPaths: new Set<string>(),
+      oldPathOwners: new Map<string, Array<AccountInfo>>(),
+      newPathOwners: new Map<string, Array<AccountInfo>>(),
     };
     for (const changed_file of ownedPathsInfo?.owned_changed_files ?? []) {
       if (changed_file.old_path?.owned)
         ownedPaths.oldPaths.add(changed_file.old_path.path);
       if (changed_file.new_path?.owned)
         ownedPaths.newPaths.add(changed_file.new_path.path);
+      if (changed_file.old_path?.owners) {
+        ownedPaths.oldPathOwners.set(
+          changed_file.old_path.path,
+          (
+            ownedPaths.oldPathOwners.get(changed_file.old_path.path) ?? []
+          ).concat(changed_file.old_path.owners)
+        );
+      }
+      if (changed_file.new_path?.owners) {
+        ownedPaths.newPathOwners.set(
+          changed_file.new_path.path,
+          (
+            ownedPaths.newPathOwners.get(changed_file.new_path.path) ?? []
+          ).concat(changed_file.new_path.owners)
+        );
+      }
     }
     const nextState = {
       ...current,

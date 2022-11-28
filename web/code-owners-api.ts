@@ -138,6 +138,7 @@ export interface FetchedFile {
 export interface OwnedPathInfo {
   path: string;
   owned?: boolean;
+  owners?: Array<AccountInfo>;
 }
 
 export interface OwnedChangedFileInfo {
@@ -192,14 +193,15 @@ export class CodeOwnersApi {
   }
 
   /**
-   * Returns a promise fetching which files are owned by a given user.
+   * Returns a promise fetching which files are owned by a given user as well
+   * as which reviewers own which files.
    */
   listOwnedPaths(changeId: NumericChangeId, account: AccountInfo) {
     if (!account.email && !account._account_id)
       return Promise.resolve(undefined);
     const user = account.email ?? account._account_id;
     return this.get(
-      `/changes/${changeId}/revisions/current/owned_paths?user=${user}&limit=10000`
+      `/changes/${changeId}/revisions/current/owned_paths?user=${user}&limit=10000&check_reviewers`
     ) as Promise<OwnedPathsInfo>;
   }
 
