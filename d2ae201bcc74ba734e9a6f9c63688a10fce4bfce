@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "035f4180_a429745a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Thanks, added a bit more detail.\n\nI think your suggestions are interesting.  #2 risks adding too much clutter, but #1 is interesting.  I see that as an extension of this work, or do you feel this intermediate step is not good?",
+      "parentUuid": "323bc01b_7847674e",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "1d66ddaa_326b5f6a",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
@@ -31,6 +49,24 @@
       "writtenOn": "2022-11-29T08:05:08Z",
       "side": 1,
       "message": "Add screenshots.",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9978f897_cdefa244",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1d66ddaa_326b5f6a",
       "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -48,6 +84,30 @@
       "writtenOn": "2022-11-29T08:32:09Z",
       "side": 1,
       "message": "Looks like this is no longer accurate after adding the parameter below? Does this need to be updated?",
+      "range": {
+        "startLine": 196,
+        "startChar": 23,
+        "endLine": 196,
+        "endChar": 69
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c3e5a41a_4209722d",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "d0064612_1e79af03",
       "range": {
         "startLine": 196,
         "startChar": 23,
@@ -81,6 +141,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0d819ac3_0a547e76",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "ab8758a0_094bd5a0",
+      "range": {
+        "startLine": 203,
+        "startChar": 82,
+        "endLine": 203,
+        "endChar": 98
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "aca95dac_8132d626",
@@ -94,6 +178,30 @@
       "writtenOn": "2022-11-29T08:05:08Z",
       "side": 1,
       "message": "```suggestion\n  if (path.charAt(0) !\u003d\u003d \u0027/\u0027) path \u003d \u0027/\u0027 + path;\n  return owners.get(path) ?? [];\n```",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 3
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b2c9cb17_d05d1465",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "aca95dac_8132d626",
       "range": {
         "startLine": 100,
         "startChar": 0,
@@ -121,6 +229,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1474c1d5_6aa5b0d6",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "0c5d883b_6a58af6f",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2d2712f6_189a66ff",
@@ -144,6 +270,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b227fc1_dc6c7ba1",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "2d2712f6_189a66ff",
+      "range": {
+        "startLine": 219,
+        "startChar": 10,
+        "endLine": 220,
+        "endChar": 32
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "6e276b95_c4954a46",
@@ -157,6 +307,24 @@
       "writtenOn": "2022-11-29T08:05:08Z",
       "side": 1,
       "message": "Not every Gerrit installation uses avatars. \u003cgr-avatar-stack\u003e renders `\u003cslot name\u003d\"fallback\"\u003e\u003c/slot\u003e` in that case, so the user won\u0027t see anything. But we still consume more width than usual for the owners column. Probably just a nit and maybe we don\u0027t really want to support this plugin without avatars. So just FYI.",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a55162f6_635cce51",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Ack",
+      "parentUuid": "6e276b95_c4954a46",
       "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -201,6 +369,48 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3f05fac8_09e120e7",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "I originally did that. But with the difference of imageSizes, it\u0027s hard to get the bottom-alignment correct w.r.t. negative margin-bottom indices.",
+      "parentUuid": "8ccd0d21_4f240b7f",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "93367f90_cc875467",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "82ad9284_a72f38d2",
+      "range": {
+        "startLine": 275,
+        "startChar": 39,
+        "endLine": 275,
+        "endChar": 42
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "4007273d_a0d1ecae",
@@ -214,6 +424,24 @@
       "writtenOn": "2022-11-29T08:05:08Z",
       "side": 1,
       "message": "Remove.",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a69c512f_f6325b08",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-11-29T11:08:56Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "4007273d_a0d1ecae",
       "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
