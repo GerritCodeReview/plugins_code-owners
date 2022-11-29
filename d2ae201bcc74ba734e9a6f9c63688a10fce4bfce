@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "323bc01b_7847674e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-29T08:32:09Z",
+      "side": 1,
+      "message": "Can you please provide some more details here? \n\nIf I read the code correctly this about the file list and it makes it so that if the current users doesn\u0027t own a file, we show all reviewers that own a file as owner avatars now? Maybe also include a sentence to explain why this is useful?\n\nI would be also interested in learning why this approach (show avatar images only when the current user doesn\u0027t own the file) is better than these possible alternatives:\n\n1. Show the policy/shield icons for non-change owners, show the avatars for the change owner.\nReasoning: as a reviewer I\u0027m only interested in the files I own and need to approve (policy/shield icon), but as the change owner I\u0027m interested in who can approve my files (avatar images).\n\n2. Show avatar images in addition to the policy/shield icon if the current users owns the file",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "1d66ddaa_326b5f6a",
         "filename": "/COMMIT_MSG",
         "patchSetId": 3
@@ -14,6 +31,52 @@
       "writtenOn": "2022-11-29T08:05:08Z",
       "side": 1,
       "message": "Add screenshots.",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d0064612_1e79af03",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 196,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-29T08:32:09Z",
+      "side": 1,
+      "message": "Looks like this is no longer accurate after adding the parameter below? Does this need to be updated?",
+      "range": {
+        "startLine": 196,
+        "startChar": 23,
+        "endLine": 196,
+        "endChar": 69
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ab8758a0_094bd5a0",
+        "filename": "web/code-owners-api.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 203,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-29T08:32:09Z",
+      "side": 1,
+      "message": "From the commit message it\u0027s unclear to me why showing avatar images requires adding this parameter? Maybe that could be explained in the commit message?",
+      "range": {
+        "startLine": 203,
+        "startChar": 82,
+        "endLine": 203,
+        "endChar": 98
+      },
       "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
