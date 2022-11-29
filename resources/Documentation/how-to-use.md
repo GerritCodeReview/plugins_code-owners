@@ -225,6 +225,17 @@ the icon** to get additional information displayed as a tooltip.
 \
 ![failed owner tooltip](./tooltip-failed-owner.png "Tooltip for failed status")
 
+### <a id="reviewerOwners">Which reviewers own which file.
+
+Aside from the status of owners, the UI also provides information whether the
+current viewer is an owner (by presenting a shield icon), or showing up to 3
+avatars of reviewers that own the given file.
+![reviewer-owner](./reviewer-owner.png)
+
+If no reviewer is an owner of the given file, a red question mark is shown.
+![missing-owner](./missing-owner.png)
+
+
 ### <a id="noStatus">No label and no status
 
 When you own all the files in your change and [implicit code owner
