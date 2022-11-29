@@ -1,0 +1,158 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1d66ddaa_326b5f6a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "Add screenshots.",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "aca95dac_8132d626",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 105,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "```suggestion\n  if (path.charAt(0) !\u003d\u003d \u0027/\u0027) path \u003d \u0027/\u0027 + path;\n  return owners.get(path) ?? [];\n```",
+      "range": {
+        "startLine": 100,
+        "startChar": 0,
+        "endLine": 105,
+        "endChar": 3
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0c5d883b_6a58af6f",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 158,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "Just FYI: From a UX perspective I am still a bit concerned about the owners columns consuming too much space, especially given that we always show them and do not detect whether the current user journey or the current change benefit from detailed owner information. But I am neither a UX expert nor a code-owners plugin expert, so feel free to just ignore my subjective feelings. :-)",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2d2712f6_189a66ff",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 220,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "The `.ellipsis` div does not have any children. Maybe add a comment why these 3 css statements are needed.",
+      "range": {
+        "startLine": 219,
+        "startChar": 10,
+        "endLine": 220,
+        "endChar": 32
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6e276b95_c4954a46",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 269,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "Not every Gerrit installation uses avatars. \u003cgr-avatar-stack\u003e renders `\u003cslot name\u003d\"fallback\"\u003e\u003c/slot\u003e` in that case, so the user won\u0027t see anything. But we still consume more width than usual for the owners column. Probably just a nit and maybe we don\u0027t really want to support this plugin without avatars. So just FYI.",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8ccd0d21_4f240b7f",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "Optional: Maybe the \"ellipsis feature\" could be moved into the \u003cgr-avatar-stack\u003e component?",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "82ad9284_a72f38d2",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 275,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "Just FYI: There is also a unicode character for ellipsis: https://www.compart.com/en/unicode/U+2026. You can try which one looks better.",
+      "range": {
+        "startLine": 275,
+        "startChar": 39,
+        "endLine": 275,
+        "endChar": 42
+      },
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4007273d_a0d1ecae",
+        "filename": "web/owner-status-column.ts",
+        "patchSetId": 3
+      },
+      "lineNbr": 305,
+      "author": {
+        "id": 1013302
+      },
+      "writtenOn": "2022-11-29T08:05:08Z",
+      "side": 1,
+      "message": "Remove.",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
