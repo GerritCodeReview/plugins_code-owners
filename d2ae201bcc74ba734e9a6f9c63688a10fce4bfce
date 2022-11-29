@@ -36,6 +36,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "af9c91a9_82e197f1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-11-29T12:31:12Z",
+      "side": 1,
+      "message": "Much better, thanks!\n\n\u003e I think your suggestions are interesting. #2 risks adding too much clutter,\n\u003e but #1 is interesting. I see that as an extension of this work, or do you\n\u003e feel this intermediate step is not good?\n\nI agree with the current approach. Just saying this would be interesting information to be added to the commit message as it helps with understanding why the current design was chosen or how it could be evolved later. But not insisting on including it, the new commit message is already much better.",
+      "parentUuid": "035f4180_a429745a",
+      "revId": "d2ae201bcc74ba734e9a6f9c63688a10fce4bfce",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "1d66ddaa_326b5f6a",
