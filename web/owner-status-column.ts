@@ -214,6 +214,10 @@ export class OwnerStatusColumnContent extends BaseEl {
         .error {
           color: var(--negative-red-text-color);
         }
+        .fallback-icon {
+          /* Undo the padding for the gr-avatar-stack in case of fallback */
+          padding: calc(-1 * var(--spacing-xs)) 0px;
+        }
       `,
     ];
   }
@@ -277,7 +281,7 @@ export class OwnerStatusColumnContent extends BaseEl {
             aria-description="No reviewer owns this file"
             has-tooltip
           >
-            <gr-icon icon="help" class="error"></gr-icon>
+            <gr-icon icon="help" class="error fallback-icon"></gr-icon>
           </gr-tooltip-content>
         </gr-avatar-stack>
         ${allOwners.length > 3
