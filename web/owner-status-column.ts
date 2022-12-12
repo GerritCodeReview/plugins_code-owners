@@ -101,6 +101,11 @@ class BaseEl extends base {
   @property({type: Object})
   patchRange?: PatchRange;
 
+  protected override willUpdate(changedProperties: PropertyValues): void {
+    super.willUpdate(changedProperties);
+    this.hidden = this.computeHidden();
+  }
+
   computeHidden() {
     const newerPatchsetUploaded = this.status?.newerPatchsetUploaded;
     if (
@@ -110,6 +115,7 @@ class BaseEl extends base {
     ) {
       return true;
     }
+    if (this.change.status === 'MERGED') return true;
     // if code-owners is not a submit requirement, don't show status column
     if (
       this.change.requirements &&
@@ -146,6 +152,9 @@ export class OwnerStatusColumnHeader extends BaseEl {
           display: block;
           padding-right: var(--spacing-m);
           width: 5em;
+        }
+        :host[hidden] {
+          display: none;
         }
       `,
     ];
@@ -186,6 +195,9 @@ export class OwnerStatusColumnContent extends BaseEl {
           padding-right: var(--spacing-m);
           width: 5em;
           text-align: center;
+        }
+        :host[hidden] {
+          display: none;
         }
         gr-icon {
           padding: var(--spacing-xs) 0px;
