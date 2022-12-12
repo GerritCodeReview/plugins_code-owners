@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "cf9a2e55_ab3132c6",
+        "filename": "web/foo.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-12-12T10:39:48Z",
+      "side": 1,
+      "message": "Yes, thanks",
+      "parentUuid": "47c9ff5a_213fcfd3",
+      "revId": "82741131490098c829e296c4bc81f8b180f26a67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e32153b5_a215c0b6",
@@ -31,6 +49,24 @@
       "writtenOn": "2022-12-12T10:37:51Z",
       "side": 1,
       "message": "What is purpose of this file?",
+      "revId": "82741131490098c829e296c4bc81f8b180f26a67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4cfc5540_ca4d14ab",
+        "filename": "web/foo.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-12-12T10:39:48Z",
+      "side": 1,
+      "message": "This was spam",
+      "parentUuid": "e32153b5_a215c0b6",
       "revId": "82741131490098c829e296c4bc81f8b180f26a67",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
