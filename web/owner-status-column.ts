@@ -95,6 +95,17 @@ export function getOwners(
   return owners.get(path) ?? [];
 }
 
+export function uniqueAccountId(
+  account: AccountInfo,
+  index: number,
+  accountArray: AccountInfo[]
+) {
+  return (
+    index ===
+    accountArray.findIndex(other => account._account_id === other._account_id)
+  );
+}
+
 const base = CodeOwnersModelMixin(LitElement);
 
 class BaseEl extends base {
@@ -278,9 +289,14 @@ export class OwnerStatusColumnContent extends BaseEl {
         </gr-tooltip-content>
       `;
     } else if (this.ownedPaths) {
-      const oldOwners = getOwners(this.ownedPaths.oldPathOwners, this.oldPath);
+      let oldOwners = getOwners(this.ownedPaths.oldPathOwners, this.oldPath);
       const newOwners = getOwners(this.ownedPaths.newPathOwners, this.path);
-      const allOwners = oldOwners.concat(newOwners);
+      if (this.oldPath === undefined) {
+        // In case of a file deletion, the Gerrit FE gives 'path' but not 'oldPath'
+        // but code-owners considers a deleted file an oldpath so check the oldpath owners.
+        oldOwners = getOwners(this.ownedPaths.oldPathOwners, this.path);
+      }
+      const allOwners = oldOwners.concat(newOwners).filter(uniqueAccountId);
 
       return html` <gr-avatar-stack
           .accounts=${allOwners.slice(0, 3)}
@@ -307,7 +323,11 @@ export class OwnerStatusColumnContent extends BaseEl {
     if (!this.ownedPaths) return false;
     if (
       hasPath(this.ownedPaths.newPaths, this.path) ||
-      hasPath(this.ownedPaths.oldPaths, this.oldPath)
+      hasPath(this.ownedPaths.oldPaths, this.oldPath) ||
+      // In case of deletions, the FE gives a path, but code-owners
+      // computes this as being part of the old path.
+      (this.oldPath === undefined &&
+        hasPath(this.ownedPaths.oldPaths, this.path))
     )
       return true;
     return false;
