@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "47c9ff5a_213fcfd3",
+        "filename": "web/foo.json",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-12-12T10:37:59Z",
+      "side": 1,
+      "message": "Was this file added unitentionlly?",
+      "revId": "82741131490098c829e296c4bc81f8b180f26a67",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "e32153b5_a215c0b6",
         "filename": "web/foo.json",
         "patchSetId": 1
