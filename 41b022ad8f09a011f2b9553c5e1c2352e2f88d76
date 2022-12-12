@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "883164cd_577fed5a",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-12-12T10:55:10Z",
+      "side": 1,
+      "message": "Why don\u0027t you take change_type [1] into account? E.g. if it\u0027s DELETED map FE path to oldPath?\n\n[1] https://android-review.googlesource.com/plugins/code-owners/Documentation/rest-api.html#filecodeownerstatusinfo",
+      "range": {
+        "startLine": 11,
+        "startChar": 35,
+        "endLine": 13,
+        "endChar": 18
+      },
+      "revId": "41b022ad8f09a011f2b9553c5e1c2352e2f88d76",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
