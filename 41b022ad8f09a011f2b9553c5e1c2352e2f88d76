@@ -22,6 +22,30 @@
       },
       "revId": "41b022ad8f09a011f2b9553c5e1c2352e2f88d76",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9a990314_47b5bc02",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2022-12-12T11:22:46Z",
+      "side": 1,
+      "message": "Ah, I wasn\u0027t aware of that. That being said, I still think the current calculation is correct.  If you have OWNERS approval for either old and new path and you have a path in those dictionaries, then it should be ok.\n\nAFAIK, owners doesn\u0027t differentiate between deletions and additions. So if some oldPath gives me OWNERS for \"foo\" then a new path of \"foo\" would still fall under that OWNERS.",
+      "parentUuid": "883164cd_577fed5a",
+      "range": {
+        "startLine": 11,
+        "startChar": 35,
+        "endLine": 13,
+        "endChar": 18
+      },
+      "revId": "41b022ad8f09a011f2b9553c5e1c2352e2f88d76",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
