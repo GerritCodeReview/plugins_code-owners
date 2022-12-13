@@ -46,6 +46,30 @@
       },
       "revId": "25a6e411dc8a58ba2b39329c3f772e27ad0ad20d",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "09b8375e_e08c91df",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-12-13T10:22:36Z",
+      "side": 1,
+      "message": "Sorry, yes. This one: https://bugs.chromium.org/p/gerrit/issues/detail?id\u003d16507",
+      "parentUuid": "76b899f3_5eb8e3be",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 55
+      },
+      "revId": "25a6e411dc8a58ba2b39329c3f772e27ad0ad20d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
