@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4e81446a_4daf5087",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/BUILD",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2022-12-28T09:27:33Z",
+      "side": 1,
+      "message": "Should this rather be: \"//lib/errorprone:annotations\"",
+      "revId": "3609f9d0d347530373109f8f5a148a6b2743365a",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
