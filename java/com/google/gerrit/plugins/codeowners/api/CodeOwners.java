@@ -17,6 +17,7 @@ package com.google.gerrit.plugins.codeowners.api;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -78,6 +79,7 @@ public interface CodeOwners {
      *
      * <p>Appends to the options which have been set so far.
      */
+    @CanIgnoreReturnValue
     public QueryRequest withOptions(
         ListAccountsOption option, ListAccountsOption... furtherOptions) {
       this.options.add(requireNonNull(option, "option"));
@@ -90,6 +92,7 @@ public interface CodeOwners {
      *
      * @param limit the limit
      */
+    @CanIgnoreReturnValue
     public QueryRequest withLimit(int limit) {
       this.limit = limit;
       return this;
@@ -100,6 +103,7 @@ public interface CodeOwners {
      *
      * @param seed seed that should be used to shuffle code owners that have the same score
      */
+    @CanIgnoreReturnValue
     public QueryRequest withSeed(long seed) {
       this.seed = seed;
       return this;
@@ -112,6 +116,7 @@ public interface CodeOwners {
      * @param resolveAllUsers whether code ownerships that are assigned to all users should be
      *     resolved to random users
      */
+    @CanIgnoreReturnValue
     public QueryRequest setResolveAllUsers(boolean resolveAllUsers) {
       this.resolveAllUsers = resolveAllUsers;
       return this;
@@ -123,6 +128,7 @@ public interface CodeOwners {
      * @param highestScoreOnly whether only the code owners with the highest score should be
      *     returned
      */
+    @CanIgnoreReturnValue
     public QueryRequest withHighestScoreOnly(boolean highestScoreOnly) {
       this.highestScoreOnly = highestScoreOnly;
       return this;
@@ -135,6 +141,7 @@ public interface CodeOwners {
      *
      * @param debug whether debug logs should be included into the response
      */
+    @CanIgnoreReturnValue
     public QueryRequest withDebug(boolean debug) {
       this.debug = debug;
       return this;
@@ -147,6 +154,7 @@ public interface CodeOwners {
      *
      * @param revision the revision from which the code owner configs should be read
      */
+    @CanIgnoreReturnValue
     public QueryRequest forRevision(String revision) {
       this.revision = revision;
       return this;
