@@ -254,7 +254,8 @@ export class OwnerStatusColumnContent extends BaseEl {
     if (
       this.computeHidden() ||
       this.status === undefined ||
-      this.path === '/COMMIT_MSG'
+      !this.path || 
+      MAGIC_FILES.includes(this.path)
     )
       return nothing;
     return html`${this.renderStatus()}${this.renderOwnership()}`;
