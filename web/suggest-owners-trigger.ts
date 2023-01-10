@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 import {CodeOwnersModelMixin} from './code-owners-model-mixin';
-import {css, html, LitElement} from 'lit';
+import {css, html, LitElement, nothing} from 'lit';
 import {customElement} from 'lit/decorators';
 
 const base = CodeOwnersModelMixin(LitElement);
@@ -44,6 +44,7 @@ export class SuggestOwnersTrigger extends base {
   }
 
   override render() {
+    if (!this.status?.enabled) return nothing;
     return html`
       <gr-button
         link
