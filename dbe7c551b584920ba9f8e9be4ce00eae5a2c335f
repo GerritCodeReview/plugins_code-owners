@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "b53e2284_ada8045a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-02-14T12:48:41Z",
+      "side": 1,
+      "message": "Zuul build is failing. I\u0027ll temporarily remove myself from AS.\nPlease re-add me when this is fixed.",
+      "revId": "dbe7c551b584920ba9f8e9be4ce00eae5a2c335f",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
