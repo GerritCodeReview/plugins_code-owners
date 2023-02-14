@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowLabel;
@@ -716,7 +717,7 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     try (Repository repo = repoManager.openRepository(project)) {
       RefUpdate ru = repo.updateRef(RefNames.refsCacheAutomerge(mergeCommit.name()));
       ru.setForceUpdate(true);
-      assertThat(ru.delete()).isEqualTo(RefUpdate.Result.FORCED);
+      assertThat(testRefAction(() -> ru.delete())).isEqualTo(RefUpdate.Result.FORCED);
       assertThat(repo.exactRef(RefNames.refsCacheAutomerge(mergeCommit.name()))).isNull();
     }
   }

@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
@@ -73,7 +74,7 @@ public class GetCodeOwnersForPathInBranchIT extends AbstractGetCodeOwnersForPath
   @Test
   public void getCodeOwnersFromSymbolicRefPointingToAnUnbornBranch() throws Exception {
     try (Repository repo = repoManager.openRepository(project)) {
-      repo.updateRef(Constants.HEAD, true).link("refs/heads/non-existing");
+      testRefAction(() -> repo.updateRef(Constants.HEAD, true).link("refs/heads/non-existing"));
     }
     RestResponse response =
         adminRestSession.get(

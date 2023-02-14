@@ -14,6 +14,8 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.CHANGE_MODIFICATION;
+import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 import static java.util.stream.Collectors.joining;
 
 import com.google.common.collect.ImmutableList;
@@ -36,6 +38,7 @@ import com.google.gerrit.server.update.BatchUpdate;
 import com.google.gerrit.server.update.BatchUpdateOp;
 import com.google.gerrit.server.update.ChangeContext;
 import com.google.gerrit.server.update.RetryHelper;
+import com.google.gerrit.server.update.context.RefUpdateContext;
 import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.gerrit.server.util.OneOffRequestContext;
@@ -157,7 +160,9 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               "addCodeOwnersMessageOnAddReviewer",
               updateFactory -> {
                 try (BatchUpdate batchUpdate =
-                    updateFactory.create(projectName, currentUser, when)) {
+                    updateFactory.create(projectName, currentUser, when);
+                    RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
+                RefUpdateContext changeCtx = RefUpdateContext.open(CHANGE_MODIFICATION)) {
                   batchUpdate.addOp(changeId, new Op(reviewers, maxPathsInChangeMessages));
                   batchUpdate.execute();
                 }

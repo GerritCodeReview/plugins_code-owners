@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
+import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
@@ -25,6 +26,7 @@ import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfi
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.update.context.RefUpdateContext;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -101,7 +103,9 @@ public class CodeOwnerConfigFileUpdateScanner {
         "updating code owner files in branch %s of project %s",
         branchNameKey.branch(), branchNameKey.project());
 
-    try (Repository repository = repoManager.openRepository(branchNameKey.project());
+    try (
+        RefUpdateContext ctx = RefUpdateContext.open(PLUGIN);
+        Repository repository = repoManager.openRepository(branchNameKey.project());
         RevWalk rw = new RevWalk(repository);
         ObjectInserter oi = repository.newObjectInserter();
         CodeOwnerConfigTreeWalk treeWalk =

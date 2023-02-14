@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
+import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -54,7 +55,7 @@ public class GetCodeOwnerConfigForPathInBranchIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.enableExperimentalRestEndpoints", value = "true")
   public void getCodeOwnerConfigFromSymbolicRefPointingToAnUnbornBranch() throws Exception {
     try (Repository repo = repoManager.openRepository(project)) {
-      repo.updateRef(Constants.HEAD, true).link("refs/heads/non-existing");
+      testRefAction(() -> repo.updateRef(Constants.HEAD, true).link("refs/heads/non-existing"));
     }
     RestResponse response =
         adminRestSession.get(

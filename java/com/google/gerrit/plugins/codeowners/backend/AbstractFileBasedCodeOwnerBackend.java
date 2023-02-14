@@ -15,6 +15,8 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersInternalServerErrorException.newInternalServerError;
+import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
+import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.VERSIONED_META_DATA_CHANGE;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -30,6 +32,7 @@ import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.update.RetryHelper;
+import com.google.gerrit.server.update.context.RefUpdateContext;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
@@ -251,7 +254,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
                   codeOwnerConfigKey)
               .setCodeOwnerConfigUpdate(codeOwnerConfigUpdate);
 
-      try (MetaDataUpdate metaDataUpdate =
+      try (
+          RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
+          RefUpdateContext ctx = RefUpdateContext.open(VERSIONED_META_DATA_CHANGE);
+          MetaDataUpdate metaDataUpdate =
           createMetaDataUpdate(codeOwnerConfigKey.project(), repository, currentUser)) {
         codeOwnerConfigFile.commit(metaDataUpdate);
       }

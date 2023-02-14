@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -25,6 +26,7 @@ import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.gerrit.server.git.meta.VersionedMetaData;
+import com.google.gerrit.server.update.context.RefUpdateContext;
 import com.google.inject.Inject;
 import java.io.IOException;
 import java.util.Optional;
@@ -260,8 +262,11 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
         update.getRepository().exactRef(getRefName()) != null,
         "branch %s does not exist",
         getRefName());
-
-    return super.commit(update);
+    // The commit goes to an ordinary branch (e.g. refs/heads/main). PLUGIN context is enough for
+    // such cases.
+    try(RefUpdateContext ctx = RefUpdateContext.open(PLUGIN)) {
+      return super.commit(update);
+    }
   }
 
   @Override
