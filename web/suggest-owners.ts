@@ -362,7 +362,7 @@ export class SuggestOwners extends base {
     if (!isLoading) return nothing;
     return html`
       <p class="loading">
-        <span class="loadingSpin"></span>
+        <span class="loadingSpin"><gr-icon icon="sync"></gr-icon></span>
         ${this.selectedSuggestionsLoadProgress}
       </p>
     `;
