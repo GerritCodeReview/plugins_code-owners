@@ -22,6 +22,30 @@
       },
       "revId": "6712662f9f207c51986d5ba33184ec56ed32fc65",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2cc0eb96_12c32ca2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2023-03-01T10:14:50Z",
+      "side": 1,
+      "message": "It doesn\u0027t actually spin, it\u0027s just the icon that looks like spinning.",
+      "parentUuid": "c8075ce5_3b91e73e",
+      "range": {
+        "startLine": 7,
+        "startChar": 4,
+        "endLine": 7,
+        "endChar": 12
+      },
+      "revId": "6712662f9f207c51986d5ba33184ec56ed32fc65",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
