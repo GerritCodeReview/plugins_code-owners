@@ -424,7 +424,7 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
               .commit()
               .parent(head)
               .message("Add invalid test code owner config")
-              .add(JgitPath.of(codeOwnerConfigKey.filePath(getFileName())).get(), "INVALID"));
+              .add(JgitPath.of(codeOwnerConfigKey.filePath(getFileName())).get(), "@INVALID"));
     }
 
     // Try to update the code owner config.

@@ -117,7 +117,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
 
     disableCodeOwnersForProject(project);
     String changeId =
-        createChange("Add code owners", JgitPath.of(codeOwnerConfigPath).get(), "INVALID")
+        createChange("Add code owners", JgitPath.of(codeOwnerConfigPath).get(), "@INVALID")
             .getChangeId();
     enableCodeOwnersForProject(project);
 
@@ -133,9 +133,9 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                         getParsingErrorMessage(
                             ImmutableMap.of(
                                 FindOwnersBackend.class,
-                                "invalid line: INVALID",
+                                "invalid line: @INVALID",
                                 ProtoBackend.class,
-                                "1:8: Expected \"{\"."))))));
+                                "1:1: Expected identifier. Found '@'"))))));
   }
 
   @Test
@@ -440,7 +440,7 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                 "Add code owners",
                 ImmutableMap.of(
                     JgitPath.of(pathOfNonParseableCodeOwnerConfig).get(),
-                    "INVALID",
+                    "@INVALID",
                     JgitPath.of(pathOfInvalidCodeOwnerConfig).get(),
                     format(
                         CodeOwnerConfig.builder(keyOfInvalidCodeOwnerConfig, TEST_REVISION)
@@ -463,9 +463,9 @@ public class CheckCodeOwnerConfigFilesInRevisionIT extends AbstractCodeOwnersIT 
                     getParsingErrorMessage(
                         ImmutableMap.of(
                             FindOwnersBackend.class,
-                            "invalid line: INVALID",
+                            "invalid line: @INVALID",
                             ProtoBackend.class,
-                            "1:8: Expected \"{\"."))))));
+                            "1:1: Expected identifier. Found '@'"))))));
     if (verbosity == null
         || ConsistencyProblemInfo.Status.ERROR.equals(verbosity)
         || ConsistencyProblemInfo.Status.WARNING.equals(verbosity)) {

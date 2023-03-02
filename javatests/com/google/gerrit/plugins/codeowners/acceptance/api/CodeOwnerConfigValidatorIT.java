@@ -91,6 +91,9 @@ import org.junit.Test;
 public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   private static final ObjectId TEST_REVISION =
       ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+  private static final String INVALID = "@INVALID";
+  private static final String INVALID_2 = "@INVALID2";
+  private static final String PROTO_SYNTAX_ERROR = "1:1: Expected identifier. Found '@'";
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
@@ -110,7 +113,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
   @Test
   public void nonCodeOwnerConfigFileIsNotValidated() throws Exception {
-    PushOneCommit.Result r = createChange("Add arbitrary file", "arbitrary-file.txt", "INVALID");
+    PushOneCommit.Result r = createChange("Add arbitrary file", "arbitrary-file.txt", INVALID);
     assertOkWithoutMessages(r);
   }
 
@@ -120,7 +123,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owner config with file extension",
             getCodeOwnerConfigFileName() + ".foo",
-            "INVALID");
+            INVALID);
     assertOkWithoutMessages(r);
   }
 
@@ -131,7 +134,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owner config with file extension",
             getCodeOwnerConfigFileName() + ".foo",
-            "INVALID");
+            INVALID);
     String abbreviatedCommit = abbreviateName(r.getCommit());
     r.assertErrorStatus(
         String.format(
@@ -148,7 +151,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owner config with file extension",
             getCodeOwnerConfigFileName() + ".foo",
-            "INVALID");
+            INVALID);
     String abbreviatedCommit = abbreviateName(r.getCommit());
     r.assertErrorStatus(
         String.format(
@@ -431,7 +434,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
   @GerritConfig(name = "plugin.code-owners.backend", value = "non-existing-backend")
   public void canUploadNonParseableConfigIfCodeOwnersPluginConfigurationIsInvalid()
       throws Exception {
-    PushOneCommit.Result r = createChange("Add code owners", "OWNERS", "INVALID");
+    PushOneCommit.Result r = createChange("Add code owners", "OWNERS", INVALID);
     assertOkWithWarnings(
         r,
         "skipping validation of code owner config files",
@@ -448,7 +451,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             codeOwnerConfigOperations
                 .codeOwnerConfig(createCodeOwnerConfigKey("/"))
                 .getJGitFilePath(),
-            "INVALID");
+            INVALID);
     assertOkWithHints(
         r,
         "skipping validation of code owner config files",
@@ -579,7 +582,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             codeOwnerConfigOperations
                 .codeOwnerConfig(createCodeOwnerConfigKey("/"))
                 .getJGitFilePath(),
-            "INVALID");
+            INVALID);
     push.setPushOptions(ImmutableList.copyOf(pushOptions));
     return push.to("refs/for/master");
   }
@@ -608,7 +611,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
+            INVALID);
     assertFatalWithMessages(
         r,
         "invalid code owner config files",
@@ -619,9 +622,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: INVALID",
+                    "invalid line: " + INVALID,
                     ProtoBackend.class,
-                    "1:8: expected \"{\""))));
+                    PROTO_SYNTAX_ERROR))));
   }
 
   @Test
@@ -633,7 +636,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
+            INVALID);
     assertOkWithFatals(
         r,
         "invalid code owner config files",
@@ -644,9 +647,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: INVALID",
+                    "invalid line: " + INVALID,
                     ProtoBackend.class,
-                    "1:8: expected \"{\""))));
+                    PROTO_SYNTAX_ERROR))));
   }
 
   @Test
@@ -664,7 +667,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
+            INVALID);
     assertOkWithFatals(
         r,
         "invalid code owner config files",
@@ -675,9 +678,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: INVALID",
+                    "invalid line: " + INVALID,
                     ProtoBackend.class,
-                    "1:8: expected \"{\""))));
+                    PROTO_SYNTAX_ERROR))));
   }
 
   @Test
@@ -752,7 +755,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
     String path =
         codeOwnerConfigOperations.codeOwnerConfig(createCodeOwnerConfigKey("/")).getJGitFilePath();
-    PushOneCommit.Result r = createChange("Add code owners", path, "INVALID");
+    PushOneCommit.Result r = createChange("Add code owners", path, INVALID);
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
@@ -778,7 +781,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
+            INVALID);
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
@@ -789,7 +792,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Update code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "STILL INVALID");
+            INVALID_2);
     assertOkWithWarnings(
         r,
         "invalid code owner config files",
@@ -800,9 +803,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: STILL INVALID",
+                    "invalid line: " + INVALID_2,
                     ProtoBackend.class,
-                    "1:7: expected \"{\""))));
+                    PROTO_SYNTAX_ERROR))));
   }
 
   @Test
@@ -818,7 +821,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
+            INVALID);
     r.assertOkStatus();
 
     // re-enable the code owners functionality for the project
@@ -904,7 +907,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
+            INVALID);
     assertFatalWithMessages(
         r,
         "invalid code owner config files",
@@ -915,9 +918,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: INVALID",
+                    "invalid line: " + INVALID,
                     ProtoBackend.class,
-                    "1:8: expected \"{\""))));
+                    PROTO_SYNTAX_ERROR))));
   }
 
   @Test
@@ -939,7 +942,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
         createChange(
             "Add code owners",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
-            "INVALID");
+            INVALID);
     assertFatalWithMessages(
         r,
         "invalid code owner config files",
@@ -950,9 +953,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: INVALID",
+                    "invalid line: " + INVALID,
                     ProtoBackend.class,
-                    "1:8: expected \"{\""))));
+                    PROTO_SYNTAX_ERROR))));
   }
 
   @Test
@@ -967,9 +970,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             "Add code owners",
             ImmutableMap.of(
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getJGitFilePath(),
-                "INVALID",
+                INVALID,
                 codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getJGitFilePath(),
-                "ALSO-INVALID"));
+                INVALID_2));
     PushOneCommit.Result r = push.to("refs/for/master");
     assertFatalWithMessages(
         r,
@@ -981,9 +984,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: INVALID",
+                    "invalid line: " + INVALID,
                     ProtoBackend.class,
-                    "1:8: expected \"{\""))),
+                    PROTO_SYNTAX_ERROR))),
         String.format(
             "invalid code owner config file '%s' (project = %s, branch = master):\n  %s",
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath(),
@@ -991,9 +994,9 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             getParsingErrorMessage(
                 ImmutableMap.of(
                     FindOwnersBackend.class,
-                    "invalid line: ALSO-INVALID",
+                    "invalid line: " + INVALID_2,
                     ProtoBackend.class,
-                    "1:1: expected identifier. found 'ALSO-INVALID'"))));
+                    PROTO_SYNTAX_ERROR))));
   }
 
   @Test
@@ -1025,6 +1028,101 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             unknownEmail2,
             codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
             identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithNonResolvablePerFileCodeOwners() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    String unknownEmail1 = "non-existing-email@example.com";
+    String unknownEmail2 = "another-unknown-email@example.com";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder()
+                            .addPathExpression("foo")
+                            .addCodeOwnerEmail(unknownEmail1)
+                            .addCodeOwnerEmail(admin.email())
+                            .addCodeOwnerEmail(unknownEmail2)
+                            .build())
+                    .build()));
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "code owner email '%s' in '%s' cannot be resolved for %s",
+            unknownEmail1,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()),
+        String.format(
+            "code owner email '%s' in '%s' cannot be resolved for %s",
+            unknownEmail2,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath(),
+            identifiedUserFactory.create(admin.id()).getLoggableName()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithNonEmailCodeOwners() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    String username1 = "user1";
+    String username2 = "user2";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.createWithoutPathExpressions(
+                            username1, admin.email(), username2))
+                    .build()));
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "code owner '%s' in '%s' cannot be resolved (must be an email)",
+            username1, codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath()),
+        String.format(
+            "code owner '%s' in '%s' cannot be resolved (must be an email)",
+            username2,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath()));
+  }
+
+  @Test
+  public void cannotUploadConfigWithNonEmailPerFileCodeOwners() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey = createCodeOwnerConfigKey("/");
+
+    String username1 = "user1";
+    String username2 = "user2";
+    String pathExpression = "foo";
+    PushOneCommit.Result r =
+        createChange(
+            "Add code owners",
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getJGitFilePath(),
+            format(
+                CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
+                    .addCodeOwnerSet(
+                        CodeOwnerSet.builder()
+                            .addPathExpression(pathExpression)
+                            .addCodeOwnerEmail(username1)
+                            .addCodeOwnerEmail(username2)
+                            .build())
+                    .build()));
+    assertErrorWithMessages(
+        r,
+        "invalid code owner config files",
+        String.format(
+            "code owner '%s' in '%s' cannot be resolved (must be an email)",
+            username1, codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath()),
+        String.format(
+            "code owner '%s' in '%s' cannot be resolved (must be an email)",
+            username2,
+            codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath()));
   }
 
   @Test
@@ -2091,7 +2189,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             codeOwnerConfigOperations
                 .codeOwnerConfig(keyOfImportedCodeOwnerConfig)
                 .getJGitFilePath(),
-            "INVALID");
+            INVALID);
     r.assertOkStatus();
     approve(r.getChangeId());
     gApi.changes().id(r.getChangeId()).current().submit();
@@ -3091,7 +3189,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
             codeOwnerConfigOperations
                 .codeOwnerConfig(createCodeOwnerConfigKey("/"))
                 .getJGitFilePath(),
-            "INVALID");
+            INVALID);
     assertOkWithHints(
         r,
         "skipping validation of code owner config files",
