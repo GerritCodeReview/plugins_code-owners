@@ -959,6 +959,14 @@ public class CodeOwnerConfigValidator
       Path codeOwnerConfigFilePath,
       CodeOwnerReference codeOwnerReference) {
     CodeOwnerResolver codeOwnerResolver = codeOwnerResolverProvider.get().forUser(user);
+    if (!CodeOwnerResolver.ALL_USERS_WILDCARD.equals(codeOwnerReference.email())
+        && !codeOwnerReference.email().contains("@")) {
+      return nonResolvableCodeOwner(
+          branchNameKey,
+          String.format(
+              "code owner '%s' in '%s' cannot be resolved (must be an email)",
+              codeOwnerReference.email(), codeOwnerConfigFilePath));
+    }
     if (!codeOwnerResolver.isEmailDomainAllowed(codeOwnerReference.email()).get()) {
       return nonResolvableCodeOwner(
           branchNameKey,

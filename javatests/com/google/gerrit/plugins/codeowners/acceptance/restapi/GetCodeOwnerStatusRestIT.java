@@ -70,7 +70,7 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
         codeOwnerConfigOperations.codeOwnerConfig(createCodeOwnerConfigKey("/")).getFilePath();
     disableCodeOwnersForProject(project);
     String changeId =
-        createChange("Add code owners", JgitPath.of(filePath).get(), "INVALID").getChangeId();
+        createChange("Add code owners", JgitPath.of(filePath).get(), "@INVALID").getChangeId();
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
     enableCodeOwnersForProject(project);
@@ -84,7 +84,7 @@ public class GetCodeOwnerStatusRestIT extends AbstractCodeOwnersTest {
         .contains(
             String.format(
                 "* invalid code owner config file '%s' (project = %s, branch = master):\n"
-                    + "  invalid line: INVALID",
+                    + "  invalid line: @INVALID",
                 filePath, project.get()));
   }
 
