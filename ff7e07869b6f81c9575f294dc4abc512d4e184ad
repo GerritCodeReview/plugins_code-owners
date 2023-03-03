@@ -1,0 +1,67 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3c7fdc12_5070b2de",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-03T08:54:40Z",
+      "side": 1,
+      "message": "The last paragraph was unclear to me.\n\nWhy did this change (improving error messages when parsing usernames) made the word \"INVALID\" to no longer cause a parsing error? Could you please add the reason?",
+      "revId": "ff7e07869b6f81c9575f294dc4abc512d4e184ad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e2f396e6_e208f387",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 963,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-03T08:54:40Z",
+      "side": 1,
+      "message": "IIUC that\u0027s the check that \"the code owner string is an email representation\"?\n\nCan we better use an email regex like \u003csomething\u003e@\u003cdomain\u003e.\u003corg\u003e|\u003ccom\u003e|\u003cde\u003e|...?",
+      "range": {
+        "startLine": 963,
+        "startChar": 12,
+        "endLine": 963,
+        "endChar": 52
+      },
+      "revId": "ff7e07869b6f81c9575f294dc4abc512d4e184ad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f35dca6c_4c48a462",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1065,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-03T08:54:40Z",
+      "side": 1,
+      "message": "[Optional] you could extract this part since it\u0027s the same in the three tests and call them like `cannotUpload...(List\u003cString\u003e emails, String error, List\u003cString\u003e detailedErrors)`",
+      "range": {
+        "startLine": 1039,
+        "startChar": 4,
+        "endLine": 1065,
+        "endChar": 73
+      },
+      "revId": "ff7e07869b6f81c9575f294dc4abc512d4e184ad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
