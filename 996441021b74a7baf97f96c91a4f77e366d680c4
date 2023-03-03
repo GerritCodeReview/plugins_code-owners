@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc5a80b0_412fcf0d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 10
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1157765
+      },
+      "writtenOn": "2023-03-03T23:59:31Z",
+      "side": 1,
+      "message": "Comment removed by: Edwin Kempin; Reason: spam\n",
+      "revId": "996441021b74a7baf97f96c91a4f77e366d680c4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
