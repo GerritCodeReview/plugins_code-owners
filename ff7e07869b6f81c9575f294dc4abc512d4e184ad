@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "97a7e1db_1201a7d2",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 28,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-03T11:26:34Z",
+      "side": 1,
+      "message": "Done\n\nshort answer: The parser allows usernames for code owners now, and \"INVALID\" is a valid username, so this doesn\u0027t trigger a parsing error anymore.",
+      "parentUuid": "3c7fdc12_5070b2de",
+      "revId": "ff7e07869b6f81c9575f294dc4abc512d4e184ad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "e2f396e6_e208f387",
@@ -43,6 +61,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "14d60965_0b5122f5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 963,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-03T11:26:34Z",
+      "side": 1,
+      "message": "No, I don\u0027t think this is needed.\n\nMalformed-emails are mostly already rejected by the parser and if a malformed-email didn\u0027t cause a parsing error (e.g. an email without a domain) the default error message for non-resolveable emails, that we return below in l. 992, is better.",
+      "parentUuid": "e2f396e6_e208f387",
+      "range": {
+        "startLine": 963,
+        "startChar": 12,
+        "endLine": 963,
+        "endChar": 52
+      },
+      "revId": "ff7e07869b6f81c9575f294dc4abc512d4e184ad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "f35dca6c_4c48a462",
         "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
         "patchSetId": 2
@@ -54,6 +96,30 @@
       "writtenOn": "2023-03-03T08:54:40Z",
       "side": 1,
       "message": "[Optional] you could extract this part since it\u0027s the same in the three tests and call them like `cannotUpload...(List\u003cString\u003e emails, String error, List\u003cString\u003e detailedErrors)`",
+      "range": {
+        "startLine": 1039,
+        "startChar": 4,
+        "endLine": 1065,
+        "endChar": 73
+      },
+      "revId": "ff7e07869b6f81c9575f294dc4abc512d4e184ad",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "31c2abdf_8eecdc85",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/CodeOwnerConfigValidatorIT.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1065,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-03T11:26:34Z",
+      "side": 1,
+      "message": "I tried this but it doesn\u0027t work out nicely. It doesn\u0027t safe much code and the refactored tests are harder to follow.\n\nNote that the setup of the code owner config file is not the same for all these tests (2 tests configure the code owners on root level, and 2 test configure the code owners on file level).",
+      "parentUuid": "f35dca6c_4c48a462",
       "range": {
         "startLine": 1039,
         "startChar": 4,
