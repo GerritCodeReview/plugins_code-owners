@@ -27,19 +27,27 @@ public class PathCodeOwnersResultTest extends AbstractAutoValueTest {
   @Test
   public void toStringIncludesAllData() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    CodeOwnerConfigReference codeOwnerConfigReference =
+    CodeOwnerConfigReference resolvableCodeOwnerConfigReference =
         CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS");
+    CodeOwnerConfigReference unresolvableCodeOwnerConfigReference =
+        CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/baz/OWNERS");
     PathCodeOwnersResult pathCodeOwnersResult =
         PathCodeOwnersResult.create(
             Paths.get("/foo/bar/baz.md"),
             CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
-                .addImport(codeOwnerConfigReference)
+                .addImport(resolvableCodeOwnerConfigReference)
+                .addImport(unresolvableCodeOwnerConfigReference)
                 .build(),
             ImmutableList.of(
-                UnresolvedImport.create(
+                CodeOwnerConfigImport.createResolvedImport(
                     codeOwnerConfigKey,
                     CodeOwnerConfig.Key.create(project, "master", "/bar/"),
-                    codeOwnerConfigReference,
+                    resolvableCodeOwnerConfigReference)),
+            ImmutableList.of(
+                CodeOwnerConfigImport.createUnresolvedImport(
+                    codeOwnerConfigKey,
+                    CodeOwnerConfig.Key.create(project, "master", "/baz/"),
+                    unresolvableCodeOwnerConfigReference,
                     "test message")));
     assertThatToStringIncludesAllData(pathCodeOwnersResult, PathCodeOwnersResult.class);
   }

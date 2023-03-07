@@ -16,16 +16,26 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import org.junit.Test;
 
-/** Tests for {@link UnresolvedImport}. */
-public class UnresolvedImportTest extends AbstractAutoValueTest {
+/** Tests for {@link CodeOwnerConfigImport}. */
+public class CodeOwnerConfigImportTest extends AbstractAutoValueTest {
   @Test
-  public void toStringIncludesAllData() throws Exception {
-    UnresolvedImport unresolvedImport =
-        UnresolvedImport.create(
+  public void toStringIncludesAllData_resolvedImport() throws Exception {
+    CodeOwnerConfigImport resolvedImport =
+        CodeOwnerConfigImport.createResolvedImport(
+            CodeOwnerConfig.Key.create(project, "master", "/"),
+            CodeOwnerConfig.Key.create(project, "master", "/bar/"),
+            CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"));
+    assertThatToStringIncludesAllData(resolvedImport, CodeOwnerConfigImport.class);
+  }
+
+  @Test
+  public void toStringIncludesAllData_unresolvedImport() throws Exception {
+    CodeOwnerConfigImport unresolvedImport =
+        CodeOwnerConfigImport.createUnresolvedImport(
             CodeOwnerConfig.Key.create(project, "master", "/"),
             CodeOwnerConfig.Key.create(project, "master", "/bar/"),
             CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"),
             "test message");
-    assertThatToStringIncludesAllData(unresolvedImport, UnresolvedImport.class);
+    assertThatToStringIncludesAllData(unresolvedImport, CodeOwnerConfigImport.class);
   }
 }

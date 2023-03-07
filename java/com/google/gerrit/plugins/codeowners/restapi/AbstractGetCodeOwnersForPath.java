@@ -38,6 +38,7 @@ import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
@@ -92,6 +93,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
   private final CodeOwnerConfigHierarchy codeOwnerConfigHierarchy;
   private final Provider<CodeOwnerResolver> codeOwnerResolver;
   private final CodeOwnerJson.Factory codeOwnerJsonFactory;
+  private final CodeOwnerConfigFileJson codeOwnerConfigFileJson;
   private final EnumSet<ListAccountsOption> options;
   private final Set<String> hexOptions;
 
@@ -167,7 +169,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
-      CodeOwnerJson.Factory codeOwnerJsonFactory) {
+      CodeOwnerJson.Factory codeOwnerJsonFactory,
+      CodeOwnerConfigFileJson codeOwnerConfigFileJson) {
     this.accountVisibility = accountVisibility;
     this.accounts = accounts;
     this.accountControlFactory = accountControlFactory;
@@ -178,6 +181,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     this.codeOwnerConfigHierarchy = codeOwnerConfigHierarchy;
     this.codeOwnerResolver = codeOwnerResolver;
     this.codeOwnerJsonFactory = codeOwnerJsonFactory;
+    this.codeOwnerConfigFileJson = codeOwnerConfigFileJson;
     this.options = EnumSet.noneOf(ListAccountsOption.class);
     this.hexOptions = new HashSet<>();
   }
@@ -213,6 +217,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     ListMultimap<CodeOwner, CodeOwnerAnnotation> annotations = LinkedListMultimap.create();
     AtomicBoolean ownedByAllUsers = new AtomicBoolean(false);
     ImmutableList.Builder<String> debugLogsBuilder = ImmutableList.builder();
+    ImmutableList.Builder<CodeOwnerConfigFileInfo> codeOwnerConfigFileInfosBuilder =
+        ImmutableList.builder();
     codeOwnerConfigHierarchy.visit(
         rsrc.getBranch(),
         rsrc.getRevision(),
@@ -220,6 +226,12 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
         codeOwnerConfig -> {
           CodeOwnerResolverResult pathCodeOwners =
               codeOwnerResolver.get().resolvePathCodeOwners(codeOwnerConfig, rsrc.getPath());
+
+          codeOwnerConfigFileInfosBuilder.add(
+              codeOwnerConfigFileJson.format(
+                  codeOwnerConfig.key(),
+                  pathCodeOwners.resolvedImports(),
+                  pathCodeOwners.unresolvedImports()));
 
           debugLogsBuilder.addAll(pathCodeOwners.messages());
           codeOwners.addAll(pathCodeOwners.codeOwners());
@@ -325,7 +337,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
-
+    codeOwnersInfo.codeOwnerConfigs = codeOwnerConfigFileInfosBuilder.build();
     ImmutableList<String> debugLogs = debugLogsBuilder.build();
     codeOwnersInfo.debugLogs = debug ? debugLogs : null;
     logger.atFine().log("debug logs: %s", debugLogs);

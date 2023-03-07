@@ -52,8 +52,16 @@ public abstract class CodeOwnerResolverResult {
   /** Whether there are code owner references which couldn't be resolved. */
   public abstract boolean hasUnresolvedCodeOwners();
 
+  /** Imports which were successfully resolved. */
+  public abstract ImmutableList<CodeOwnerConfigImport> resolvedImports();
+
+  /** Imports which couldn't be resolved. */
+  public abstract ImmutableList<CodeOwnerConfigImport> unresolvedImports();
+
   /** Whether there are imports which couldn't be resolved. */
-  public abstract boolean hasUnresolvedImports();
+  public boolean hasUnresolvedImports() {
+    return !unresolvedImports().isEmpty();
+  }
 
   /** Gets messages that were collected while resolving the code owners. */
   public abstract ImmutableList<String> messages();
@@ -76,7 +84,8 @@ public abstract class CodeOwnerResolverResult {
         .add("annotations", annotations())
         .add("ownedByAllUsers", ownedByAllUsers())
         .add("hasUnresolvedCodeOwners", hasUnresolvedCodeOwners())
-        .add("hasUnresolvedImports", hasUnresolvedImports())
+        .add("resolvedImports", resolvedImports())
+        .add("unresolvedImports", unresolvedImports())
         .add("messages", messages())
         .toString();
   }
@@ -87,25 +96,16 @@ public abstract class CodeOwnerResolverResult {
       ImmutableMultimap<CodeOwner, CodeOwnerAnnotation> annotations,
       boolean ownedByAllUsers,
       boolean hasUnresolvedCodeOwners,
-      boolean hasUnresolvedImports,
+      ImmutableList<CodeOwnerConfigImport> resolvedImports,
+      ImmutableList<CodeOwnerConfigImport> unresolvedImports,
       List<String> messages) {
     return new AutoValue_CodeOwnerResolverResult(
         codeOwners,
         annotations,
         ownedByAllUsers,
         hasUnresolvedCodeOwners,
-        hasUnresolvedImports,
+        resolvedImports,
+        unresolvedImports,
         ImmutableList.copyOf(messages));
-  }
-
-  /** Creates a empty {@link CodeOwnerResolverResult} instance. */
-  public static CodeOwnerResolverResult createEmpty() {
-    return new AutoValue_CodeOwnerResolverResult(
-        /* codeOwners= */ ImmutableSet.of(),
-        /* annotations= */ ImmutableMultimap.of(),
-        /* ownedByAllUsers= */ false,
-        /* hasUnresolvedCodeOwners= */ false,
-        /* hasUnresolvedImports= */ false,
-        /* messages= */ ImmutableList.of());
   }
 }

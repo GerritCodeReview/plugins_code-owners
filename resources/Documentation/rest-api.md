@@ -499,7 +499,42 @@ limit.
       {
         "account": {
           "_account_id": 1001439
-        },
+        }
+      },
+      {
+        "account": {
+          "_account_id": 1007265
+        }
+      },
+      {
+        "account": {
+          "_account_id": 1009877
+        }
+      },
+      {
+        "account": {
+          "_account_id": 1002930
+        }
+      }
+    ],
+    "code_owner_configs": [
+      {
+        "project": "foo/bar",
+        "branch": "master",
+        "path": "/docs/OWNERS"
+      },
+      {
+        "project": "foo/bar",
+        "branch": "master",
+        "path": "/OWNERS",
+        "imports": [
+          {
+            "project": "foo",
+            "branch": "master",
+            "path": "/OWNERS",
+            "import_mode": "ALL",
+          }
+        ]
       }
     ]
   }
@@ -918,6 +953,22 @@ code owner. Note that if the email is configured as global code owner, but the e
 
 ---
 
+### <a id="code-owner-config-file-info"> CodeOwnerConfigFileInfo
+The `CodeOwnerConfigFileInfo` entity contains information about a code owner
+config file and its imports.
+
+| Field Name |          | Description |
+| ---------- | -------- | ----------- |
+| `project`  || The name of the project from which the code owner config was loaded, or for unresolved imports, from which the code owner config was supposed to be loaded.
+| `branch`   || The name of the branch from which the code owner config was loaded, or for unresolved imports, from which the code owner config was supposed to be loaded.
+| `path`     || The absolute path of the code owner config file.
+| `imports`  | optional | Imported code owner config files as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
+| `unresolved_imports` | optional | Imported code owner config files that couldn't be resolved as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
+| `unresolved_error_message` | optional | Message explaining why this code owner config couldn't be resolved. Only set if the `CodeOwnerConfigFileInfo` represents an import code owner config file that couldn't be resolved.
+| `import_mode` | optional | The import mode (`ALL` or `GLOBAL_CODE_OWNER_SETS_ONLY`). Only set if the `CodeOwnerConfigFileInfo` represents an imported code owner config file.
+
+---
+
 ### <a id="code-owner-config-info"> CodeOwnerConfigInfo
 The `CodeOwnerConfigInfo` entity contains information about a code owner config
 for a path.
@@ -1042,6 +1093,7 @@ The `CodeOwnersInfo` entity contains information about a list of code owners.
 | ------------- | -------- | ----------- |
 | `code_owners` |          | List of code owners as [CodeOwnerInfo](#code-owner-info) entities. The code owners are sorted by a score that is computed from mutliple [scoring factors](#scoringFactors).
 | `owned_by_all_users` | optional | Whether the path is owned by all users. Not set if `false`.
+| `code_owner_configs` || The code owner config files that have been inspected to gather the code owners as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
 | `debug_logs`  | optional | Debug logs that may help to understand why a user is or isn't suggested as a code owner. Only set if requested via `--debug`. This information is purely for debugging and the output may be changed at any time. This means bot callers must not parse the debug logs.
 
 ### <a id="file-code-owner-status-info"> FileCodeOwnerStatusInfo
