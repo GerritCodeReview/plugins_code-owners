@@ -82,6 +82,7 @@ public class GetCodeOwnersForPathInBranch
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       CodeOwnerJson.Factory codeOwnerJsonFactory,
+      CodeOwnerConfigFileJson codeOwnerConfigFileJson,
       GitRepositoryManager repoManager) {
     super(
         accountVisibility,
@@ -93,7 +94,8 @@ public class GetCodeOwnersForPathInBranch
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
-        codeOwnerJsonFactory);
+        codeOwnerJsonFactory,
+        codeOwnerConfigFileJson);
     this.repoManager = repoManager;
   }
 

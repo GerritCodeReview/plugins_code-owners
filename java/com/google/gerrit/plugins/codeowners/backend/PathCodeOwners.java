@@ -252,17 +252,18 @@ public class PathCodeOwners {
       }
 
       // Resolve global imports.
-      ImmutableList.Builder<UnresolvedImport> unresolvedImports = ImmutableList.builder();
+      ImmutableList.Builder<ImportedCodeOwnerConfig> resolvedImports = ImmutableList.builder();
+      ImmutableList.Builder<ImportedCodeOwnerConfig> unresolvedImports = ImmutableList.builder();
       ImmutableSet<CodeOwnerConfigImport> globalImports = getGlobalImports(0, codeOwnerConfig);
-      OptionalResultWithMessages<List<UnresolvedImport>> unresolvedGlobalImports;
+      OptionalResultWithMessages<ImportedCodeOwnerConfigs> globalImportedCodeOwnerConfigs;
       if (!globalCodeOwnersIgnored) {
-        unresolvedGlobalImports =
+        globalImportedCodeOwnerConfigs =
             resolveImports(codeOwnerConfig.key(), globalImports, resolvedCodeOwnerConfigBuilder);
       } else {
         // skip global import with mode GLOBAL_CODE_OWNER_SETS_ONLY,
         // since we already know that global code owners will be ignored, we do not need to resolve
         // these imports
-        unresolvedGlobalImports =
+        globalImportedCodeOwnerConfigs =
             resolveImports(
                 codeOwnerConfig.key(),
                 globalImports.stream()
@@ -273,8 +274,9 @@ public class PathCodeOwners {
                     .collect(toImmutableSet()),
                 resolvedCodeOwnerConfigBuilder);
       }
-      messages.addAll(unresolvedGlobalImports.messages());
-      unresolvedImports.addAll(unresolvedGlobalImports.get());
+      messages.addAll(globalImportedCodeOwnerConfigs.messages());
+      resolvedImports.addAll(globalImportedCodeOwnerConfigs.get().resolved());
+      unresolvedImports.addAll(globalImportedCodeOwnerConfigs.get().unresolved());
 
       // Remove all global code owner sets if any per-file code owner set has the
       // ignoreGlobalAndParentCodeOwners flag set to true (as in this case they are ignored and
@@ -320,15 +322,19 @@ public class PathCodeOwners {
       ImmutableSet<CodeOwnerConfigImport> perFileImports =
           getPerFileImports(
               0, codeOwnerConfig.key(), resolvedCodeOwnerConfigBuilder.codeOwnerSets());
-      OptionalResultWithMessages<List<UnresolvedImport>> unresolvedPerFileImports =
+      OptionalResultWithMessages<ImportedCodeOwnerConfigs> perFileImportedCodeOwnerConfigs =
           resolveImports(codeOwnerConfig.key(), perFileImports, resolvedCodeOwnerConfigBuilder);
-      messages.addAll(unresolvedPerFileImports.messages());
-      unresolvedImports.addAll(unresolvedPerFileImports.get());
+      messages.addAll(perFileImportedCodeOwnerConfigs.messages());
+      resolvedImports.addAll(perFileImportedCodeOwnerConfigs.get().resolved());
+      unresolvedImports.addAll(perFileImportedCodeOwnerConfigs.get().unresolved());
 
       this.pathCodeOwnersResult =
           OptionalResultWithMessages.create(
               PathCodeOwnersResult.create(
-                  path, resolvedCodeOwnerConfigBuilder.build(), unresolvedImports.build()),
+                  path,
+                  resolvedCodeOwnerConfigBuilder.build(),
+                  resolvedImports.build(),
+                  unresolvedImports.build()),
               messages);
       logger.atFine().log("path code owners result = %s", pathCodeOwnersResult);
       return this.pathCodeOwnersResult;
@@ -343,11 +349,12 @@ public class PathCodeOwners {
    * @param resolvedCodeOwnerConfigBuilder the builder for the resolved code owner config
    * @return list of unresolved imports, empty list if all imports were successfully resolved
    */
-  private OptionalResultWithMessages<List<UnresolvedImport>> resolveImports(
+  private OptionalResultWithMessages<ImportedCodeOwnerConfigs> resolveImports(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       Set<CodeOwnerConfigImport> codeOwnerConfigImports,
       CodeOwnerConfig.Builder resolvedCodeOwnerConfigBuilder) {
-    ImmutableList.Builder<UnresolvedImport> unresolvedImports = ImmutableList.builder();
+    ImmutableList.Builder<ImportedCodeOwnerConfig> resolvedImports = ImmutableList.builder();
+    ImmutableList.Builder<ImportedCodeOwnerConfig> unresolvedImports = ImmutableList.builder();
     StringBuilder messageBuilder = new StringBuilder();
     try (Timer0.Context ctx = codeOwnerMetrics.resolveCodeOwnerConfigImports.start()) {
       logger.atFine().log("resolve imports of codeOwnerConfig %s", keyOfImportingCodeOwnerConfig);
@@ -387,7 +394,7 @@ public class PathCodeOwners {
               projectCache.get(keyOfImportedCodeOwnerConfig.project());
           if (!projectState.isPresent()) {
             unresolvedImports.add(
-                UnresolvedImport.create(
+                ImportedCodeOwnerConfig.createUnresolvedImport(
                     codeOwnerConfigImport.importingCodeOwnerConfig(),
                     keyOfImportedCodeOwnerConfig,
                     codeOwnerConfigReference,
@@ -399,7 +406,7 @@ public class PathCodeOwners {
           }
           if (!projectState.get().statePermitsRead()) {
             unresolvedImports.add(
-                UnresolvedImport.create(
+                ImportedCodeOwnerConfig.createUnresolvedImport(
                     codeOwnerConfigImport.importingCodeOwnerConfig(),
                     keyOfImportedCodeOwnerConfig,
                     codeOwnerConfigReference,
@@ -425,7 +432,7 @@ public class PathCodeOwners {
 
           if (!mayBeImportedCodeOwnerConfig.isPresent()) {
             unresolvedImports.add(
-                UnresolvedImport.create(
+                ImportedCodeOwnerConfig.createUnresolvedImport(
                     codeOwnerConfigImport.importingCodeOwnerConfig(),
                     keyOfImportedCodeOwnerConfig,
                     codeOwnerConfigReference,
@@ -439,6 +446,13 @@ public class PathCodeOwners {
           }
 
           CodeOwnerConfig importedCodeOwnerConfig = mayBeImportedCodeOwnerConfig.get();
+
+          resolvedImports.add(
+              ImportedCodeOwnerConfig.createResolvedImport(
+                  codeOwnerConfigImport.importingCodeOwnerConfig(),
+                  keyOfImportedCodeOwnerConfig,
+                  codeOwnerConfigReference));
+
           CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
           logger.atFine().log("import mode = %s", importMode.name());
 
@@ -516,7 +530,7 @@ public class PathCodeOwners {
       message = message.substring(0, message.length() - 1);
     }
     return OptionalResultWithMessages.create(
-        unresolvedImports.build(),
+        ImportedCodeOwnerConfigs.create(resolvedImports.build(), unresolvedImports.build()),
         !message.isEmpty() ? ImmutableList.of(message) : ImmutableList.of());
   }
 
@@ -710,6 +724,21 @@ public class PathCodeOwners {
         Optional<CodeOwnerSet> codeOwnerSet) {
       return new AutoValue_PathCodeOwners_CodeOwnerConfigImport(
           importLevel, importingCodeOwnerConfig, codeOwnerConfigReference, codeOwnerSet);
+    }
+  }
+
+  @AutoValue
+  abstract static class ImportedCodeOwnerConfigs {
+    /** Imported code owner configs the could be resolved. */
+    abstract ImmutableList<ImportedCodeOwnerConfig> resolved();
+
+    /** Imported code owner configs the could not be resolved. */
+    abstract ImmutableList<ImportedCodeOwnerConfig> unresolved();
+
+    static ImportedCodeOwnerConfigs create(
+        ImmutableList<ImportedCodeOwnerConfig> resolved,
+        ImmutableList<ImportedCodeOwnerConfig> unresolved) {
+      return new AutoValue_PathCodeOwners_ImportedCodeOwnerConfigs(resolved, unresolved);
     }
   }
 }

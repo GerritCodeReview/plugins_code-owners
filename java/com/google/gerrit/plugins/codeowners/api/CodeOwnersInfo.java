@@ -34,6 +34,9 @@ public class CodeOwnersInfo {
    */
   public Boolean ownedByAllUsers;
 
+  /** The code owner config files that have been inspected to gather the code owners. */
+  public List<CodeOwnerConfigFileInfo> codeOwnerConfigs;
+
   /**
    * Debug logs that may help to understand why a user is or isn't suggested as a code owner.
    *

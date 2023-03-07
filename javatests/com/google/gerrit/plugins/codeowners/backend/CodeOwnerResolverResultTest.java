@@ -29,7 +29,17 @@ public class CodeOwnerResolverResultTest extends AbstractAutoValueTest {
             /* annotations= */ ImmutableMultimap.of(),
             /* ownedByAllUsers= */ false,
             /* hasUnresolvedCodeOwners= */ false,
-            /* hasUnresolvedImports= */ false,
+            ImmutableList.of(
+                ImportedCodeOwnerConfig.createResolvedImport(
+                    CodeOwnerConfig.Key.create(project, "master", "/"),
+                    CodeOwnerConfig.Key.create(project, "master", "/bar/"),
+                    CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))),
+            ImmutableList.of(
+                ImportedCodeOwnerConfig.createUnresolvedImport(
+                    CodeOwnerConfig.Key.create(project, "master", "/"),
+                    CodeOwnerConfig.Key.create(project, "master", "/bar/"),
+                    CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"),
+                    "test message")),
             ImmutableList.of("test message"));
     assertThatToStringIncludesAllData(codeOwnerResolverResult, CodeOwnerResolverResult.class);
   }
