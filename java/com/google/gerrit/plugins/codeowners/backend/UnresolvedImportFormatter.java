@@ -20,7 +20,7 @@ import com.google.gerrit.server.project.ProjectCache;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 
-/** Class to format an {@link UnresolvedImport} as a user-readable string. */
+/** Class to format an {@link ImportedCodeOwnerConfig} as a user-readable string. */
 public class UnresolvedImportFormatter {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ProjectCache projectCache;
@@ -37,7 +37,7 @@ public class UnresolvedImportFormatter {
   }
 
   /** Returns a user-readable string representation of the given unresolved import. */
-  public String format(UnresolvedImport unresolvedImport) {
+  public String format(ImportedCodeOwnerConfig unresolvedImport) {
     return String.format(
         "The import of %s:%s:%s in %s:%s:%s cannot be resolved: %s",
         unresolvedImport.keyOfImportedCodeOwnerConfig().project(),
@@ -46,7 +46,13 @@ public class UnresolvedImportFormatter {
         unresolvedImport.keyOfImportingCodeOwnerConfig().project(),
         unresolvedImport.keyOfImportingCodeOwnerConfig().shortBranchName(),
         getFilePath(unresolvedImport.keyOfImportingCodeOwnerConfig()),
-        unresolvedImport.message());
+        unresolvedImport
+            .errorMessage()
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        String.format(
+                            "unresolved import %s must have an error message", unresolvedImport))));
   }
 
   private Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {

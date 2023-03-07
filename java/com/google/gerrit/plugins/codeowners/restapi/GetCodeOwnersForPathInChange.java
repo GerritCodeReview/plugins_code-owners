@@ -73,7 +73,8 @@ public class GetCodeOwnersForPathInChange
       CodeOwnerConfigHierarchy codeOwnerConfigHierarchy,
       Provider<CodeOwnerResolver> codeOwnerResolver,
       ServiceUserClassifier serviceUserClassifier,
-      CodeOwnerJson.Factory codeOwnerJsonFactory) {
+      CodeOwnerJson.Factory codeOwnerJsonFactory,
+      CodeOwnerConfigFileJson codeOwnerConfigFileJson) {
     super(
         accountVisibility,
         accounts,
@@ -84,7 +85,8 @@ public class GetCodeOwnersForPathInChange
         codeOwnersPluginConfiguration,
         codeOwnerConfigHierarchy,
         codeOwnerResolver,
-        codeOwnerJsonFactory);
+        codeOwnerJsonFactory,
+        codeOwnerConfigFileJson);
     this.serviceUserClassifier = serviceUserClassifier;
   }
 

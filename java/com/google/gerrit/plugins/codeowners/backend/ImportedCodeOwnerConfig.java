@@ -15,22 +15,27 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
+import java.util.Optional;
 
-/** Information about an unresolved import. */
+/** Information about an imported {@link CodeOwnerConfig}. */
 @AutoValue
-public abstract class UnresolvedImport {
+public abstract class ImportedCodeOwnerConfig {
   /** Key of the importing code owner config. */
   public abstract CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig();
 
   /** Key of the imported code owner config. */
   public abstract CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig();
 
-  /** The code owner config reference that was attempted to be resolved. */
+  /** The code owner config reference that references the imported code owner config. */
   public abstract CodeOwnerConfigReference codeOwnerConfigReference();
 
-  /** Message explaining why the code owner config reference couldn't be resolved. */
-  public abstract String message();
+  /**
+   * If the import couldn't be resolved, a message explaining why the code owner config reference
+   * couldn't be resolved.
+   */
+  public abstract Optional<String> errorMessage();
 
   @Override
   public final String toString() {
@@ -38,20 +43,34 @@ public abstract class UnresolvedImport {
         .add("keyOfImportingCodeOwnerConfig", keyOfImportingCodeOwnerConfig())
         .add("keyOfImportedCodeOwnerConfig", keyOfImportedCodeOwnerConfig())
         .add("codeOwnerConfigReference", codeOwnerConfigReference())
-        .add("message", message())
+        .add("errorMessage", errorMessage())
         .toString();
   }
 
-  /** Creates a {@link UnresolvedImport} instance. */
-  static UnresolvedImport create(
+  /** Creates a {@link ImportedCodeOwnerConfig} instance for an unresolved import. */
+  @VisibleForTesting
+  public static ImportedCodeOwnerConfig createUnresolvedImport(
       CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
       CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig,
       CodeOwnerConfigReference codeOwnerConfigReference,
-      String message) {
-    return new AutoValue_UnresolvedImport(
+      String errorMessage) {
+    return new AutoValue_ImportedCodeOwnerConfig(
         keyOfImportingCodeOwnerConfig,
         keyOfImportedCodeOwnerConfig,
         codeOwnerConfigReference,
-        message);
+        Optional.of(errorMessage));
+  }
+
+  /** Creates a {@link ImportedCodeOwnerConfig} instance for a resolved import. */
+  @VisibleForTesting
+  public static ImportedCodeOwnerConfig createResolvedImport(
+      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig,
+      CodeOwnerConfigReference codeOwnerConfigReference) {
+    return new AutoValue_ImportedCodeOwnerConfig(
+        keyOfImportingCodeOwnerConfig,
+        keyOfImportedCodeOwnerConfig,
+        codeOwnerConfigReference,
+        Optional.empty());
   }
 }
