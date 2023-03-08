@@ -475,6 +475,36 @@ assigned to '*') and `resolve-all-users` is set to `true` a random set of
 (visible) users is returned, as many as are needed to fill up the requested
 limit.
 
+#### Request
+
+```
+  GET /projects/foo%2Fbar/branches/master/code_owners/docs%2Findex.md HTTP/1.0
+```
+
+#### Response
+
+```
+  HTTP/1.1 200 OK
+  Content-Disposition: attachment
+  Content-Type: application/json; charset=UTF-8
+
+  )]}'
+  {
+    "code_owners": [
+      {
+        "account": {
+          "_account_id": 1000096
+        }
+      },
+      {
+        "account": {
+          "_account_id": 1001439
+        },
+      }
+    ]
+  }
+```
+
 #### <a id="scoringFactors">Scoring Factors
 
 The following factors are taken into account for computing the scores of the
@@ -549,36 +579,6 @@ Local code owners are also preferred because it is more likely that they are
 experts of the modified code.
 
 The same applies for [default code owners](config-guide.html#codeOwners).
-
-#### Request
-
-```
-  GET /projects/foo%2Fbar/branches/master/code_owners/docs%2Findex.md HTTP/1.0
-```
-
-#### Response
-
-```
-  HTTP/1.1 200 OK
-  Content-Disposition: attachment
-  Content-Type: application/json; charset=UTF-8
-
-  )]}'
-  {
-    "code_owners": [
-      {
-        "account": {
-          "_account_id": 1000096
-        }
-      },
-      {
-        "account": {
-          "_account_id": 1001439
-        },
-      }
-    ]
-  }
-```
 
 #### <a id="batch-list-code-owners"> Batch Request
 
