@@ -225,7 +225,7 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
   protected void createNonParseableCodeOwnerConfig(String path) throws Exception {
     disableCodeOwnersForProject(project);
     String changeId =
-        createChange("Add invalid code owners file", JgitPath.of(path).get(), "@INVALID")
+        createChange("Add invalid code owners file", JgitPath.of(path).get(), "INVALID")
             .getChangeId();
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
@@ -240,9 +240,9 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
     return getParsingErrorMessage(
         ImmutableMap.of(
             FindOwnersBackend.class,
-            "invalid line: @INVALID",
+            "invalid line: INVALID",
             ProtoBackend.class,
-            "1:1: Expected identifier. Found '@'"));
+            "1:8: Expected \"{\"."));
   }
 
   protected String getParsingErrorMessage(

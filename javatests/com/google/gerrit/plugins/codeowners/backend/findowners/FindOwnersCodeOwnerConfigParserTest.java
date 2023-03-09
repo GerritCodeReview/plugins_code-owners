@@ -158,26 +158,14 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
                 codeOwnerConfigParser.parse(
                     TEST_REVISION,
                     CodeOwnerConfig.Key.create(project, "master", "/"),
-                    getCodeOwnerConfig(EMAIL_1, "@INVALID", "NOT_AN_EMAIL", EMAIL_2)));
+                    getCodeOwnerConfig(EMAIL_1, "INVALID", "NOT_AN_EMAIL", EMAIL_2)));
     assertThat(exception.getFullMessage(FindOwnersBackend.CODE_OWNER_CONFIG_FILE_NAME))
         .isEqualTo(
             String.format(
                 "invalid code owner config file '/OWNERS' (project = %s, branch = master):\n"
-                    + "  invalid line: @INVALID",
+                    + "  invalid line: INVALID\n"
+                    + "  invalid line: NOT_AN_EMAIL",
                 project));
-  }
-
-  @Test
-  public void codeOwnerConfigWithNonEmailLines() throws Exception {
-    assertParseAndFormat(
-        getCodeOwnerConfig(EMAIL_1, "NOT_AN_EMAIL", EMAIL_3),
-        codeOwnerConfig ->
-            assertThat(codeOwnerConfig)
-                .hasCodeOwnerSetsThat()
-                .onlyElement()
-                .hasCodeOwnersEmailsThat()
-                .containsExactly(EMAIL_1, "NOT_AN_EMAIL", EMAIL_3),
-        getCodeOwnerConfig(EMAIL_1, "NOT_AN_EMAIL", EMAIL_3));
   }
 
   @Test

@@ -149,10 +149,9 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
     private static final String EOL = "[\\s]*(#.*)?$"; // end-of-line
     private static final String GLOB = "[^\\s,=]+"; // a file glob
 
-    private static final String USERNAME_OR_EMAIL_OR_STAR =
-        "([^\\s<>@#,]+|[^\\s<>@,]+@[^\\s<>@#,]+|\\*)";
-    private static final String USERNAME_OR_EMAIL_LIST =
-        "(" + USERNAME_OR_EMAIL_OR_STAR + "(" + COMMA + USERNAME_OR_EMAIL_OR_STAR + ")*)";
+    private static final String EMAIL_OR_STAR = "([^\\s<>@,]+@[^\\s<>@#,]+|\\*)";
+    private static final String EMAIL_LIST =
+        "(" + EMAIL_OR_STAR + "(" + COMMA + EMAIL_OR_STAR + ")*)";
 
     // Optional name of a Gerrit project followed by a colon and optional spaces.
     private static final String PROJECT_NAME = "([^\\s:]+" + COLON + ")?";
@@ -173,15 +172,14 @@ public class FindOwnersCodeOwnerConfigParser implements CodeOwnerConfigParser {
 
     // Simple input lines with 0 or 1 sub-pattern.
     private static final Pattern PAT_COMMENT = Pattern.compile(BOL + EOL);
-    private static final Pattern PAT_EMAIL = Pattern.compile(BOL + USERNAME_OR_EMAIL_OR_STAR + EOL);
+    private static final Pattern PAT_EMAIL = Pattern.compile(BOL + EMAIL_OR_STAR + EOL);
     private static final Pattern PAT_ANNOTATION = Pattern.compile("#\\{([A-Za-z_]+)\\}");
     private static final Pattern PAT_INCLUDE =
         Pattern.compile(BOL + INCLUDE_OR_FILE + PROJECT_BRANCH_AND_FILE + EOL);
     private static final Pattern PAT_NO_PARENT = Pattern.compile(BOL + SET_NOPARENT + EOL);
 
     private static final Pattern PAT_PER_FILE_OWNERS =
-        Pattern.compile(
-            "^(" + USERNAME_OR_EMAIL_LIST + "|" + SET_NOPARENT + "|" + FILE_DIRECTIVE + ")$");
+        Pattern.compile("^(" + EMAIL_LIST + "|" + SET_NOPARENT + "|" + FILE_DIRECTIVE + ")$");
     private static final Pattern PAT_PER_FILE_INCLUDE =
         Pattern.compile("^(" + INCLUDE_DIRECTIVE + ")$");
     private static final Pattern PAT_GLOBS =
