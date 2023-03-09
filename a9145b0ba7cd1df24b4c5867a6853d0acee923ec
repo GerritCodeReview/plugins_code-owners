@@ -420,6 +420,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "54f1d4cd_ee5f3d0b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T15:33:20Z",
+      "side": 1,
+      "message": "I see. OK SGTM.",
+      "parentUuid": "4c3e7574_95a9c4d1",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "99ed2b61_74ef231a",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
         "patchSetId": 2
@@ -449,6 +473,24 @@
       "side": 1,
       "message": "Good point. Actually I wanted to name this class \"CodeOwnerConfigImport\" to avoid this confusion but there was already a class with a name in PathCodeOwners.\n\nI\u0027ve renamed PathCodeOwners.CodeOwnerConfigImport to PathCodeOwners.CodeOwnerImport now, so that this class can be named CodeOwnerConfigImport.",
       "parentUuid": "99ed2b61_74ef231a",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b48a7108_494b0bf0",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T15:33:20Z",
+      "side": 1,
+      "message": "Nice! thanks for handling.",
+      "parentUuid": "8b52e400_07a6fa33",
       "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -519,6 +561,24 @@
       "side": 1,
       "message": "Good point. Cycles are detected in PathCodeOwners so we should never see cycles here. But now that you say this, I think it\u0027s better to prevent cycles here too (to be on the safe side).\n\nDone.",
       "parentUuid": "f348ad7f_964ae63d",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "7fab5378_b1ca9a75",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigFileJson.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T15:33:20Z",
+      "side": 1,
+      "message": "I think the handling here is that we just stop if we hit the same file again (because each processed file is removed from the list).\n\n[Optional] we can add this handling to the javadocs, and also add a test with cycles in CodeOwnerConfigFileJsonIT.\n\nUpdate: Ah, you already did that.",
+      "parentUuid": "155cd3bc_aa21ee96",
       "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
