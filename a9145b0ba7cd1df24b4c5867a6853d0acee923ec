@@ -36,6 +36,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "8f73a064_6d8029a1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T13:53:11Z",
+      "side": 1,
+      "message": "OK. Knowing the problem we want to solve makes sense wrt. what is implemented in this change. I overlooked it from your commit message.\n\nThanks for clarifying!",
+      "parentUuid": "024c3b13_b8b6f10b",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "95da1aa8_42478fe9",
