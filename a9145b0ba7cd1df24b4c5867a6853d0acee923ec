@@ -77,6 +77,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "a1629ba1_ff5db5a9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "95da1aa8_42478fe9",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 9
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "8ab12c3f_c8912c11",
@@ -90,6 +114,30 @@
       "writtenOn": "2023-03-09T09:47:05Z",
       "side": 1,
       "message": "the*",
+      "range": {
+        "startLine": 13,
+        "startChar": 52,
+        "endLine": 13,
+        "endChar": 56
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d8a5703b_cae0fdad",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "8ab12c3f_c8912c11",
       "range": {
         "startLine": 13,
         "startChar": 52,
@@ -146,6 +194,54 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b3690ba_bb8b1c27",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "l. 22 already says that this depends on the code owners project configuration. I\u0027ve mentioned the relevant configuration parameter there now.",
+      "parentUuid": "c982b01e_cc32dca1",
+      "range": {
+        "startLine": 21,
+        "startChar": 1,
+        "endLine": 21,
+        "endChar": 15
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "3828cc76_51405b39",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "fc8e0a30_ff420606",
+      "range": {
+        "startLine": 21,
+        "startChar": 68,
+        "endLine": 21,
+        "endChar": 73
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "dc561a7e_db0cb3ea",
@@ -159,6 +255,30 @@
       "writtenOn": "2023-03-09T09:47:05Z",
       "side": 1,
       "message": "Is it possible to have cyclic imports?",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 50
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "f026d09f_43886b4c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Yes, cycles are possible. PathCodeOwners detects and handles them [1].\n\nI\u0027ve adapted CodeOwnerConfigFileJson to detect cycles there too. Thanks for asking about this.\n\n[1] https://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/java/com/google/gerrit/plugins/codeowners/backend/PathCodeOwners.java#355",
+      "parentUuid": "dc561a7e_db0cb3ea",
       "range": {
         "startLine": 55,
         "startChar": 0,
@@ -186,6 +306,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "31472a77_c43729b8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerConfigFileInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Thanks, that\u0027s a good idea. Done.",
+      "parentUuid": "e1a8bdb3_d3825ff5",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "2c43d8a4_0699d6b3",
@@ -199,6 +337,30 @@
       "writtenOn": "2023-03-09T09:47:05Z",
       "side": 1,
       "message": "This method is unused? Please delete.",
+      "range": {
+        "startLine": 113,
+        "startChar": 40,
+        "endLine": 113,
+        "endChar": 51
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "d1b32269_2c747126",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverResult.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Thanks, removed it.",
+      "parentUuid": "2c43d8a4_0699d6b3",
       "range": {
         "startLine": 113,
         "startChar": 40,
@@ -234,6 +396,30 @@
     {
       "unresolved": false,
       "key": {
+        "uuid": "4c3e7574_95a9c4d1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "2020 is correct, as this class was created as UnresolvedImport in 2020 and now it was just renamed and extended (only Gerrit didn\u0027t detect this as a rename).",
+      "parentUuid": "3ab8b8b9_da193187",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
         "uuid": "99ed2b61_74ef231a",
         "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
         "patchSetId": 2
@@ -245,6 +431,24 @@
       "writtenOn": "2023-03-09T09:47:05Z",
       "side": 1,
       "message": "Does this entity contain actual users who are defined in the code owners config file? \n\n[Optional] If not, I think we can add a sentence about it in Javadocs.",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8b52e400_07a6fa33",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Good point. Actually I wanted to name this class \"CodeOwnerConfigImport\" to avoid this confusion but there was already a class with a name in PathCodeOwners.\n\nI\u0027ve renamed PathCodeOwners.CodeOwnerConfigImport to PathCodeOwners.CodeOwnerImport now, so that this class can be named CodeOwnerConfigImport.",
+      "parentUuid": "99ed2b61_74ef231a",
       "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
@@ -266,6 +470,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "548a154a_70535db8",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/UnresolvedImportFormatter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Ah, I didn\u0027t realise that we have this method here.\n\nThanks for noticing this. I\u0027ve updated CodeOwnerConfigFileJson to make use of this method instead of having this method once again.",
+      "parentUuid": "55322962_63dbd22e",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "f348ad7f_964ae63d",
@@ -283,6 +505,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "155cd3bc_aa21ee96",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigFileJson.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "Good point. Cycles are detected in PathCodeOwners so we should never see cycles here. But now that you say this, I think it\u0027s better to prevent cycles here too (to be on the safe side).\n\nDone.",
+      "parentUuid": "f348ad7f_964ae63d",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "508844b8_6bee4eac",
@@ -296,6 +536,30 @@
       "writtenOn": "2023-03-09T09:47:05Z",
       "side": 1,
       "message": "nit: 2023*",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b5aa20e9_dde3b895",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfigTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T15:23:00Z",
+      "side": 1,
+      "message": "2020 is correct, as this class was created as UnresolvedImportTest in 2020 and now it was just renamed and extended (only Gerrit didn\u0027t detect this as a rename).",
+      "parentUuid": "508844b8_6bee4eac",
       "range": {
         "startLine": 1,
         "startChar": 17,
