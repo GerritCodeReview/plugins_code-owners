@@ -20,6 +20,24 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "024c3b13_b8b6f10b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-09T12:08:31Z",
+      "side": 1,
+      "message": "\u003e IIUC with this change your return:\n\u003e\n\u003e * file: a/b/c/abc.txt\n\u003e * accounts: [user_1, user_2, user_3]\n\u003e * code-owner-file: [a/b/OWNERS, a/OWNERS]\n\u003e\n\u003e But with this scheme, we can\u0027t associate which owner file caused which account\n\u003e to be added.\n\nYes, this is correct.\n\n\u003e To provide more visibility, why not return the code-owner file per suggested\n\u003e code-owner account?\n\nThe problem we are trying to solve here is this:\nA user that should be a code owner is not returned. To which OWNERS files can this user be added? E.g. if there are no code owners returned, we still want to know which files have been inspected.\n\nReturning for each suggested user the OWNERS file that made this user a code owner is also useful, but it is more difficult to implement. For your example we could easily tell if user_1 is a code owner through a/b/OWNERS or a/OWNERS but if a/b/OWNERS imports foo/OWNERS which imports bar/OWNERS we currently have no means to know if user_1 is a code owner through a/b/OWNERS, foo/OWNERS or bar/OWNERS.\n\nAnd even if we could tell, that it\u0027s bar/OWNERS which made user_1 a code owner, users would probably wonder why bar/OWNERS is relevant for file a/b/c/abc.txt. To understand this you need to know how bar/OWNERS was pulled in, which is the information that we provide with this change.\n\nSo I think returning for each suggested user the OWNERS file that made this user a code owner would be useful but we would still want to return the list of relevant files as implemented in this change.\n\nDoes this make sense?",
+      "parentUuid": "ae2b9492_c0ddb6a5",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "95da1aa8_42478fe9",
         "filename": "/COMMIT_MSG",
         "patchSetId": 2
