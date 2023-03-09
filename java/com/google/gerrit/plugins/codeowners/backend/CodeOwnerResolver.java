@@ -50,7 +50,6 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -234,6 +233,7 @@ public class CodeOwnerResolver {
       return resolve(
           pathCodeOwnersResult.get().getPathCodeOwners(),
           pathCodeOwnersResult.get().getAnnotations(),
+          pathCodeOwnersResult.get().resolvedImports(),
           pathCodeOwnersResult.get().unresolvedImports(),
           pathCodeOwnersResult.messages());
     }
@@ -260,6 +260,7 @@ public class CodeOwnerResolver {
     return resolve(
         codeOwnerReferences,
         /* annotationsByCodeOwnerReference= */ ImmutableMultimap.of(),
+        /* resolvedImports= */ ImmutableList.of(),
         /* unresolvedImports= */ ImmutableList.of(),
         /* pathCodeOwnersMessages= */ ImmutableList.of());
   }
@@ -279,9 +280,11 @@ public class CodeOwnerResolver {
   private CodeOwnerResolverResult resolve(
       Set<CodeOwnerReference> codeOwnerReferences,
       ImmutableMultimap<CodeOwnerReference, CodeOwnerAnnotation> annotationsByCodeOwnerReference,
-      List<UnresolvedImport> unresolvedImports,
+      ImmutableList<CodeOwnerConfigImport> resolvedImports,
+      ImmutableList<CodeOwnerConfigImport> unresolvedImports,
       ImmutableList<String> pathCodeOwnersMessages) {
     requireNonNull(codeOwnerReferences, "codeOwnerReferences");
+    requireNonNull(resolvedImports, "resolvedImports");
     requireNonNull(unresolvedImports, "unresolvedImports");
     requireNonNull(pathCodeOwnersMessages, "pathCodeOwnersMessages");
 
@@ -313,7 +316,8 @@ public class CodeOwnerResolver {
               annotationsByCodeOwner.build(),
               ownedByAllUsers.get(),
               hasUnresolvedCodeOwners.get(),
-              !unresolvedImports.isEmpty(),
+              resolvedImports,
+              unresolvedImports,
               messageBuilder.build());
       logger.atFine().log("resolve result = %s", codeOwnerResolverResult);
       return codeOwnerResolverResult;

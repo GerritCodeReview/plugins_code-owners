@@ -38,6 +38,9 @@ import com.google.gerrit.extensions.restapi.RestApiException;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.TestCodeOwnerConfigCreation.Builder;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
@@ -340,5 +343,14 @@ public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
       return ProtoBackend.CODE_OWNER_CONFIG_FILE_NAME;
     }
     throw new IllegalStateException("unknown code owner backend: " + backend.getClass().getName());
+  }
+
+  protected CodeOwnerConfigReference createCodeOwnerConfigReference(
+      CodeOwnerConfigImportMode importMode, CodeOwnerConfig.Key codeOwnerConfigKey) {
+    return CodeOwnerConfigReference.builder(
+            importMode, codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath())
+        .setProject(codeOwnerConfigKey.project())
+        .setBranch(codeOwnerConfigKey.branchNameKey().branch())
+        .build();
   }
 }

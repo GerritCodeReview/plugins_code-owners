@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.testing;
 
 import static com.google.common.truth.Truth.assertAbout;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigFileInfoSubject.codeOwnerConfigFileInfos;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.codeOwnerInfos;
 import static com.google.gerrit.truth.ListSubject.elements;
 
@@ -22,6 +23,7 @@ import com.google.common.truth.BooleanSubject;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.truth.ListSubject;
@@ -63,6 +65,13 @@ public class CodeOwnersInfoSubject extends Subject {
     for (String expectedMessage : expectedMessages) {
       check("debugLogs").that(codeOwnersInfo().debugLogs).contains(expectedMessage);
     }
+  }
+
+  public ListSubject<CodeOwnerConfigFileInfoSubject, CodeOwnerConfigFileInfo>
+      hasCodeOwnerConfigsThat() {
+    return check("codeOwnerConfigs()")
+        .about(elements())
+        .thatCustom(codeOwnersInfo().codeOwnerConfigs, codeOwnerConfigFileInfos());
   }
 
   public IterableSubject hasDebugLogsThat() {

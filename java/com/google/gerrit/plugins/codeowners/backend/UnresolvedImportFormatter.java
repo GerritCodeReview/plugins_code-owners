@@ -20,7 +20,7 @@ import com.google.gerrit.server.project.ProjectCache;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 
-/** Class to format an {@link UnresolvedImport} as a user-readable string. */
+/** Class to format an {@link CodeOwnerConfigImport} as a user-readable string. */
 public class UnresolvedImportFormatter {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final ProjectCache projectCache;
@@ -37,7 +37,7 @@ public class UnresolvedImportFormatter {
   }
 
   /** Returns a user-readable string representation of the given unresolved import. */
-  public String format(UnresolvedImport unresolvedImport) {
+  public String format(CodeOwnerConfigImport unresolvedImport) {
     return String.format(
         "The import of %s:%s:%s in %s:%s:%s cannot be resolved: %s",
         unresolvedImport.keyOfImportedCodeOwnerConfig().project(),
@@ -46,10 +46,16 @@ public class UnresolvedImportFormatter {
         unresolvedImport.keyOfImportingCodeOwnerConfig().project(),
         unresolvedImport.keyOfImportingCodeOwnerConfig().shortBranchName(),
         getFilePath(unresolvedImport.keyOfImportingCodeOwnerConfig()),
-        unresolvedImport.message());
+        unresolvedImport
+            .errorMessage()
+            .orElseThrow(
+                () ->
+                    new IllegalStateException(
+                        String.format(
+                            "unresolved import %s must have an error message", unresolvedImport))));
   }
 
-  private Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
+  public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
     return getBackend(codeOwnerConfigKey).getFilePath(codeOwnerConfigKey);
   }
 
@@ -60,6 +66,10 @@ public class UnresolvedImportFormatter {
    * returned.
    */
   private CodeOwnerBackend getBackend(CodeOwnerConfig.Key codeOwnerConfigKey) {
+    // For unresolved imports the project may not exist. Trying to get the project config for
+    // non-existing projects fails, hence check whether the project exists before trying to access
+    // the project config and fall back to the default code owner backend if the project doesn't
+    // exist.
     if (projectCache.get(codeOwnerConfigKey.project()).isPresent()) {
       return codeOwnersPluginConfiguration
           .getProjectConfig(codeOwnerConfigKey.project())

@@ -36,8 +36,11 @@ public abstract class PathCodeOwnersResult {
   /** Gets the resolved code owner config. */
   abstract CodeOwnerConfig codeOwnerConfig();
 
+  /** Gets a list of resolved imports. */
+  public abstract ImmutableList<CodeOwnerConfigImport> resolvedImports();
+
   /** Gets a list of unresolved imports. */
-  public abstract ImmutableList<UnresolvedImport> unresolvedImports();
+  public abstract ImmutableList<CodeOwnerConfigImport> unresolvedImports();
 
   /** Whether there are unresolved imports. */
   public boolean hasUnresolvedImports() {
@@ -104,14 +107,21 @@ public abstract class PathCodeOwnersResult {
     return MoreObjects.toStringHelper(this)
         .add("path", path())
         .add("codeOwnerConfig", codeOwnerConfig())
+        .add("resolvedImports", resolvedImports())
         .add("unresolvedImports", unresolvedImports())
         .toString();
   }
 
   /** Creates a {@link PathCodeOwnersResult} instance. */
   public static PathCodeOwnersResult create(
-      Path path, CodeOwnerConfig codeOwnerConfig, List<UnresolvedImport> unresolvedImports) {
+      Path path,
+      CodeOwnerConfig codeOwnerConfig,
+      List<CodeOwnerConfigImport> resolvedImports,
+      List<CodeOwnerConfigImport> unresolvedImports) {
     return new AutoValue_PathCodeOwnersResult(
-        path, codeOwnerConfig, ImmutableList.copyOf(unresolvedImports));
+        path,
+        codeOwnerConfig,
+        ImmutableList.copyOf(resolvedImports),
+        ImmutableList.copyOf(unresolvedImports));
   }
 }
