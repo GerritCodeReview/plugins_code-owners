@@ -1,0 +1,273 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ae2b9492_c0ddb6a5",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "IIUC with this change your return:\n  * file: a/b/c/abc.txt\n  * accounts: [user_1, user_2, user_3]\n  * code-owner-file: [a/b/OWNERS, a/OWNERS]\n\nBut with this scheme, we can\u0027t associate which owner file caused which account to be added. To provide more visibility, why not return the code-owner file per suggested code-owner account?",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "95da1aa8_42478fe9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "endpoints*",
+      "range": {
+        "startLine": 10,
+        "startChar": 0,
+        "endLine": 10,
+        "endChar": 9
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "8ab12c3f_c8912c11",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "the*",
+      "range": {
+        "startLine": 13,
+        "startChar": 52,
+        "endLine": 13,
+        "endChar": 56
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fc8e0a30_ff420606",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "nit: long line. Please wrap.",
+      "range": {
+        "startLine": 21,
+        "startChar": 68,
+        "endLine": 21,
+        "endChar": 73
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c982b01e_cc32dca1",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 21,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "Are users free to add OWNERS.\u003canyText\u003e file that\u0027s parsed by Gerrit? Could you please add one sentence about it?",
+      "range": {
+        "startLine": 21,
+        "startChar": 1,
+        "endLine": 21,
+        "endChar": 15
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dc561a7e_db0cb3ea",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 55,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "Is it possible to have cyclic imports?",
+      "range": {
+        "startLine": 55,
+        "startChar": 0,
+        "endLine": 55,
+        "endChar": 50
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e1a8bdb3_d3825ff5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerConfigFileInfo.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "[Optional] you could mention that this representation does not include owner file contents (i.e. usernames or other data). It only contains the file path and any imported files (if exists).",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2c43d8a4_0699d6b3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerResolverResult.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "This method is unused? Please delete.",
+      "range": {
+        "startLine": 113,
+        "startChar": 40,
+        "endLine": 113,
+        "endChar": 51
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3ab8b8b9_da193187",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "nit: 2023",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "99ed2b61_74ef231a",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfig.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "Does this entity contain actual users who are defined in the code owners config file? \n\n[Optional] If not, I think we can add a sentence about it in Javadocs.",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "55322962_63dbd22e",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/UnresolvedImportFormatter.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "This is exact to CodeOwnerConfigFileJson#getBackend().\n\n[Optional] you can extract this method.",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f348ad7f_964ae63d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigFileJson.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "since we don\u0027t check on cycles here I assume it\u0027s done somewhere else? We can mention in the javadocs of this method that it\u0027s guaranteed that resolved and unresolved imports lists do not contain a cycle.",
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "508844b8_6bee4eac",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/ImportedCodeOwnerConfigTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1091982
+      },
+      "writtenOn": "2023-03-09T09:47:05Z",
+      "side": 1,
+      "message": "nit: 2023*",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "revId": "a9145b0ba7cd1df24b4c5867a6853d0acee923ec",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
