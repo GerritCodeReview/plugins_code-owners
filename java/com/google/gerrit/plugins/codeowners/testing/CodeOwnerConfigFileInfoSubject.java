@@ -20,6 +20,7 @@ import static com.google.gerrit.truth.ListSubject.elements;
 import com.google.common.truth.FailureMetadata;
 import com.google.common.truth.StringSubject;
 import com.google.common.truth.Subject;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackend;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
@@ -97,6 +98,7 @@ public class CodeOwnerConfigFileInfoSubject extends Subject {
     return check("unresolvedErrorMessage()").that(codeOwnerConfigFileInfo().unresolvedErrorMessage);
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertKey(
       CodeOwnerBackend codeOwnerBackend, CodeOwnerConfig.Key codeOwnerConfigKey) {
     hasProjectThat().isEqualTo(codeOwnerConfigKey.project().get());
@@ -105,11 +107,13 @@ public class CodeOwnerConfigFileInfoSubject extends Subject {
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertNoResolvedImports() {
     hasImportsThat().isNull();
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertResolvedImport(
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig.Key codeOwnerConfigKey,
@@ -123,11 +127,13 @@ public class CodeOwnerConfigFileInfoSubject extends Subject {
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertNoUnresolvedImports() {
     hasUnresolvedImportsThat().isNull();
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertUnresolvedImport(
       CodeOwnerBackend codeOwnerBackend,
       CodeOwnerConfig.Key codeOwnerConfigKey,
@@ -143,28 +149,33 @@ public class CodeOwnerConfigFileInfoSubject extends Subject {
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertNoImports() {
     assertNoResolvedImports();
     assertNoUnresolvedImports();
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertImportMode(CodeOwnerConfigImportMode importMode) {
     hasImportModeThat().isEqualTo(importMode);
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertNoImportMode() {
     hasImportModeThat().isNull();
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertUnresolvedErrorMessage(
       String unresolvedErrorMessage) {
     hasUnresolvedErrorMessageThat().isEqualTo(unresolvedErrorMessage);
     return this;
   }
 
+  @CanIgnoreReturnValue
   public CodeOwnerConfigFileInfoSubject assertNoUnresolvedErrorMessage() {
     hasUnresolvedErrorMessageThat().isNull();
     return this;
