@@ -320,7 +320,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     ImmutableMap<CodeOwner, Double> scoredCodeOwners =
         codeOwnerScorings.getScorings(filteredCodeOwners);
 
-    ImmutableList<CodeOwner> sortedAndLimitedCodeOwners = sortAndLimit(rsrc, scoredCodeOwners);
+    ImmutableList<CodeOwner> sortedAndLimitedCodeOwners = sortAndLimit(scoredCodeOwners);
 
     if (highestScoreOnly) {
       Optional<Double> highestScore =
@@ -492,9 +492,8 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     return fillOptions;
   }
 
-  private ImmutableList<CodeOwner> sortAndLimit(
-      R rsrc, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
-    return sortCodeOwners(rsrc, seed, scoredCodeOwners).limit(limit).collect(toImmutableList());
+  private ImmutableList<CodeOwner> sortAndLimit(ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
+    return sortCodeOwners(seed, scoredCodeOwners).limit(limit).collect(toImmutableList());
   }
 
   /**
@@ -504,13 +503,12 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
    *
    * <p>The order of code owners with the same score is random.
    *
-   * @param rsrc resource on which this REST endpoint is invoked
    * @param seed seed that should be used to randomize the order
    * @param scoredCodeOwners the code owners with their scores
    * @return the sorted code owners
    */
   private Stream<CodeOwner> sortCodeOwners(
-      R rsrc, Optional<Long> seed, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
+      Optional<Long> seed, ImmutableMap<CodeOwner, Double> scoredCodeOwners) {
     return randomizeOrder(seed, scoredCodeOwners.keySet())
         .sorted(Comparator.comparingDouble(scoredCodeOwners::get).reversed());
   }
