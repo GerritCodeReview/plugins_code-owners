@@ -56,13 +56,6 @@ export class SuggestOwnersTrigger extends base {
       </gr-button>
       <span class="extras">
         <a
-          @click=${this.reportBugClick}
-          href="https://bugs.chromium.org/p/gerrit/issues/entry?template=code-owners-plugin"
-          target="_blank"
-        >
-          <gr-icon icon="bug_report" filled title="report a problem"></gr-icon>
-        </a>
-        <a
           @click=${this.reportDocClick}
           href="https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/how-to-use.md"
           target="_blank"
@@ -95,9 +88,5 @@ export class SuggestOwnersTrigger extends base {
 
   private reportDocClick() {
     this.reporting?.reportInteraction('code-owners-doc-click');
-  }
-
-  private reportBugClick() {
-    this.reporting?.reportInteraction('code-owners-bug-click');
   }
 }
