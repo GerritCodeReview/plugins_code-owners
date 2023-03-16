@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1b93f7ac_7a53aadf",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-16T12:47:36Z",
+      "side": 1,
+      "message": "Verified locally since the Zuul build is broken (it\u0027s failing because openjdk-8-jdk is not available).",
+      "revId": "574f0787a68858d832efe7187aeed59e9275d690",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
