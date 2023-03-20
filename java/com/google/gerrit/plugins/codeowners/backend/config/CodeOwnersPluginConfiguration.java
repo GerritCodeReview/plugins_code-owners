@@ -18,6 +18,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.server.cache.PerThreadCache;
+import com.google.gerrit.server.cache.PerThreadProjectCache;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -69,8 +70,9 @@ public class CodeOwnersPluginConfiguration {
    */
   public CodeOwnersPluginProjectConfigSnapshot getProjectConfig(Project.NameKey projectName) {
     requireNonNull(projectName, "projectName");
-    return PerThreadCache.getOrCompute(
-        PerThreadCache.Key.create(CodeOwnersPluginProjectConfigSnapshot.class, projectName),
+    return PerThreadProjectCache.getOrCompute(
+        PerThreadCache.Key.create(
+            Project.NameKey.class, projectName, "CodeOwnersPluginConfiguration"),
         () -> codeOwnersPluginProjectConfigSnapshotFactory.create(projectName));
   }
 }
