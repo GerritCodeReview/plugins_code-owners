@@ -12,6 +12,9 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
   added as a reviewer.
 ** `post_type':
    Whether the change message was posted synchronously or asynchronously.
+* `add_change_message_on_code_owner_approval`:
+  Latency for asynchronously adding a change message with the owned path when
+  a code owner approval is applied.
 * `compute_file_status`:
   Latency for computing the file status for one file.
 * `compute_file_statuses`:
@@ -25,8 +28,8 @@ All metrics have the following prefix: `plugins/@PLUGIN@/`
 * `compute_patch_set_approvals`:
   Latency for computing the approvals of the current patch set.
 * `extend_change_message_on_post_review`:
-  Latency for extending the change message with the owned path when a code owner
-  approval is applied.
+  Latency for synchronously extending the change message with the owned path
+  when a code owner approval is applied.
 * `get_changed_files`:
   Latency for getting changed files from diff cache.
 * `prepare_file_status_computation`:

@@ -43,10 +43,12 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
+import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
 import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
 import java.util.Map;
@@ -72,6 +74,31 @@ import org.junit.Before;
     name = "code-owners",
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestModule")
 public class AbstractCodeOwnersTest extends LightweightPluginDaemonTest {
+  /**
+   * Returns a {@code gerrit.config} without code owner backend configuration to test the default
+   * setup.
+   */
+  @ConfigSuite.Default
+  public static Config defaultConfig() {
+    Config cfg = new Config();
+
+    // Disable asynchronous posting of change messages during tests to avoid parallel updates to
+    // NoteDb and hence risking LOCK_FAILURES (especially needed since the test API does not retry
+    // on LOCK_FAILURES).
+    cfg.setBoolean(
+        "plugin",
+        "code-owners",
+        GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER,
+        /* value= */ false);
+    cfg.setBoolean(
+        "plugin",
+        "code-owners",
+        GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_CODE_OWNER_APPROVAL,
+        /* value= */ false);
+
+    return cfg;
+  }
+
   @Inject private ProjectOperations projectOperations;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;

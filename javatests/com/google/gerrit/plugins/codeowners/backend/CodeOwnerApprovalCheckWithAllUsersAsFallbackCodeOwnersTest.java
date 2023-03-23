@@ -52,7 +52,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
   /** Returns a {@code gerrit.config} that configures all users as fallback code owners. */
   @ConfigSuite.Default
   public static Config defaultConfig() {
-    Config cfg = new Config();
+    Config cfg = AbstractCodeOwnersTest.defaultConfig();
     cfg.setEnum(
         "plugin",
         "code-owners",

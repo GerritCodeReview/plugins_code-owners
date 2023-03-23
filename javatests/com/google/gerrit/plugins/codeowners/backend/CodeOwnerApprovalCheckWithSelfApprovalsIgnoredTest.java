@@ -46,7 +46,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
   /** Returns a {@code gerrit.config} that configures all users as fallback code owners. */
   @ConfigSuite.Default
   public static Config defaultConfig() {
-    Config cfg = new Config();
+    Config cfg = AbstractCodeOwnersTest.defaultConfig();
     cfg.setString(
         "plugin", "code-owners", OverrideApprovalConfig.KEY_OVERRIDE_APPROVAL, "Owners-Override+1");
     return cfg;

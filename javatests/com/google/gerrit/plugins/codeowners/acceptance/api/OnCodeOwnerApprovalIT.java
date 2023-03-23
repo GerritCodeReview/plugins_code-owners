@@ -16,7 +16,10 @@ package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
+import com.github.rholder.retry.RetryerBuilder;
+import com.github.rholder.retry.StopStrategies;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -34,12 +37,22 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.FakeEmailSender.Message;
 import com.google.inject.Inject;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.Callable;
 import org.junit.Test;
 
-/** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerApproval}. */
+/**
+ * Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerApproval}.
+ *
+ * <p>For tests the change message that is posted when a code owner approval is applied, is added
+ * synchronously by default (see {@link AbstractCodeOwnersIT #defaultConfig()}). Tests that want to
+ * verify the asynchronous posting of this change message need to set {@code
+ * plugin.code-owners.enableAsyncMessageOnCodeOwnerApproval=true} in {@code gerrit.config}
+ * explicitly (by using the {@link GerritConfig} annotation).
+ */
 public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
@@ -1142,5 +1155,50 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + " %s <%s>:\n"
                     + "* %s\n",
                 user.fullName(), user.email(), path));
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnCodeOwnerApproval", value = "true")
+  public void changeMessageListsNewlyApprovedPaths_async() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    String path = "foo/bar.baz";
+    String changeId = createChange("Test Change", path, "file content").getChangeId();
+
+    recommend(changeId);
+
+    assertAsyncChangeMessage(
+        changeId,
+        String.format(
+            "Patch Set 1: "
+                + "By voting Code-Review+1 the following files are now code-owner approved by"
+                + " %s:\n"
+                + "* %s\n",
+            AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+  }
+
+  private void assertAsyncChangeMessage(String changeId, String expectedChangeMessage)
+      throws Exception {
+    assertAsync(
+        () -> {
+          Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+          assertThat(Iterables.getLast(messages).message).isEqualTo(expectedChangeMessage);
+          return null;
+        });
+  }
+
+  private <T> T assertAsync(Callable<T> assertion) throws Exception {
+    return RetryerBuilder.<T>newBuilder()
+        .retryIfException(t -> true)
+        .withStopStrategy(
+            StopStrategies.stopAfterDelay(Duration.ofSeconds(1).toMillis(), MILLISECONDS))
+        .build()
+        .call(() -> assertion.call());
   }
 }

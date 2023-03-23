@@ -695,6 +695,22 @@ endpoint or by touching the change (e.g. by adding a comment).
         in `@PLUGIN@.config`.\
         By default `true`.
 
+<a id="pluginCodeOwnersEnableAsyncMessageOnCodeOwnerApproval">plugin.@PLUGIN@.enableAsyncMessageOnCodeOwnerApproval</a>
+:       When a code owner approval is applied on a change the @PLUGIN@ plugin
+        posts a change message that lists the paths that are owned by the code
+        owner to inform that these paths are code owner approved now. This
+        setting controls whether this change message should be posted
+        asynchronously instead of synchronously extending the change message
+        that is posted for the approval by Gerrit core.\
+        Posting these change messages asynchronously improves the latency for
+        post review, since it does not need to wait until the owned paths are
+        computed for the code owner (computing the owned path for a user is
+        rather expensive).\
+        Can be overridden per project by setting
+        [codeOwners.enableAsyncMessageOnCodeOwnerApproval](#codeOwnersEnableAsyncMessageOnCodeOwnerApproval)
+        in `@PLUGIN@.config`.\
+        By default `true`.
+
 <a id="pluginCodeOwnersMaxCodeOwnerConfigCacheSize">plugin.@PLUGIN@.maxCodeOwnerConfigCacheSize</a>
 :       When computing code owner file statuses for a change (e.g. to compute
         the results for the code owners submit rule) parsed code owner config
@@ -1275,6 +1291,25 @@ endpoint or by touching the change (e.g. by adding a comment).
         setting from parent projects.\
         If not set, the global setting
         [plugin.@PLUGIN@.enableAsyncMessageOnAddReviewer](#pluginCodeOwnersEnableAsyncMessageOnAddReviewer)
+        in `gerrit.config` is used.
+
+<a id="codeOwnersEnableAsyncMessageOnCodeOwnerApproval">codeOwners.enableAsyncMessageOnCodeOwnerApproval</a>
+:       When a code owner approval is applied on a change the @PLUGIN@ plugin
+        posts a change message that lists the paths that are owned by the code
+        owner to inform that these paths are code owner approved now. This
+        setting controls whether this change message should be posted
+        asynchronously instead of synchronously extending the change message
+        that is posted for the approval by Gerrit core.\
+        Posting these change messages asynchronously improves the latency for
+        post review, since it does not need to wait until the owned paths are
+        computed for the code owner (computing the owned path for a user is
+        rather expensive).\
+        Overrides the global setting
+        [plugin.@PLUGIN@.enableAsyncMessageOnCodeOwnerApproval](#pluginCodeOwnersEnableAsyncMessageOnOwnerApproval)
+        in `gerrit.config` and the `codeOwners.enableAsyncMessageOnCodeOwnerApproval`
+        setting from parent projects.\
+        If not set, the global setting
+        [plugin.@PLUGIN@.enableAsyncMessageOnCodeOwnerApproval](#pluginCodeOwnersEnableAsyncMessageOnCodeOwnerApproval)
         in `gerrit.config` is used.
 
 ---

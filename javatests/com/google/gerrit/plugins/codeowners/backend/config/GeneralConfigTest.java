@@ -18,6 +18,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.DEFAULT_MAX_PATHS_IN_CHANGE_MESSAGES;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER;
+import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_CODE_OWNER_APPROVAL;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_CODE_OWNER_CONFIG_FILES_WITH_FILE_EXTENSIONS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_IMPLICIT_APPROVALS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_ENABLE_STICKY_APPROVALS;
@@ -52,12 +53,19 @@ import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPoli
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.testing.ConfigSuite;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig}. */
 public class GeneralConfigTest extends AbstractCodeOwnersTest {
+  @ConfigSuite.Default
+  public static Config defaultConfig() {
+    // Override the settings from AbstractCodeOwnersTest.defaultConfig().
+    return new Config();
+  }
+
   private GeneralConfig generalConfig;
 
   @Before
@@ -2103,5 +2111,77 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void invalidEnableAsyncMessageOnAddReviewerConfigurationInGerritConfigIsIgnored()
       throws Exception {
     assertThat(generalConfig.enableAsyncMessageOnAddReviewer(project, new Config())).isTrue();
+  }
+
+  @Test
+  public void cannotGetEnableAsyncMessageOnCodeOwnerApprovalForNullProject() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.enableAsyncMessageOnCodeOwnerApproval(
+                    /* project= */ null, new Config()));
+    assertThat(npe).hasMessageThat().isEqualTo("project");
+  }
+
+  @Test
+  public void cannotGetEnableAsyncMessageOnCodeOwnerApprovalForNullPluginConfig() throws Exception {
+    NullPointerException npe =
+        assertThrows(
+            NullPointerException.class,
+            () ->
+                generalConfig.enableAsyncMessageOnCodeOwnerApproval(
+                    project, /* pluginConfig= */ null));
+    assertThat(npe).hasMessageThat().isEqualTo("pluginConfig");
+  }
+
+  @Test
+  public void noEnableAsyncMessageOnCodeOwnerApproval() throws Exception {
+    assertThat(generalConfig.enableAsyncMessageOnCodeOwnerApproval(project, new Config())).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnCodeOwnerApproval", value = "false")
+  public void
+      enableAsyncMessageOnCodeOwnerApprovalConfigurationIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
+          throws Exception {
+    assertThat(generalConfig.enableAsyncMessageOnCodeOwnerApproval(project, new Config()))
+        .isFalse();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnCodeOwnerApproval", value = "false")
+  public void
+      enableAsyncMessageOnCodeOwnerApprovalConfigurationInPluginConfigOverridesEnableAsyncMessageOnCodeOwnerApprovalConfigurationInGerritConfig()
+          throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_ASYNC_MESSAGE_ON_CODE_OWNER_APPROVAL,
+        "true");
+    assertThat(generalConfig.enableAsyncMessageOnCodeOwnerApproval(project, cfg)).isTrue();
+  }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.enableAsyncMessageOnCodeOwnerApproval", value = "false")
+  public void invalidEnableAsyncMessageOnCodeOwnerApprovalConfigurationInPluginConfigIsIgnored()
+      throws Exception {
+    Config cfg = new Config();
+    cfg.setString(
+        SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        KEY_ENABLE_ASYNC_MESSAGE_ON_CODE_OWNER_APPROVAL,
+        "INVALID");
+    assertThat(generalConfig.enableAsyncMessageOnCodeOwnerApproval(project, cfg)).isFalse();
+  }
+
+  @Test
+  @GerritConfig(
+      name = "plugin.code-owners.enableAsyncMessageOnCodeOwnerApproval",
+      value = "INVALID")
+  public void invalidEnableAsyncMessageOnCodeOwnerApprovalConfigurationInGerritConfigIsIgnored()
+      throws Exception {
+    assertThat(generalConfig.enableAsyncMessageOnCodeOwnerApproval(project, new Config())).isTrue();
   }
 }

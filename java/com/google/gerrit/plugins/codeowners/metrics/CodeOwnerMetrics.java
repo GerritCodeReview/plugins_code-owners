@@ -33,6 +33,7 @@ import com.google.inject.Singleton;
 public class CodeOwnerMetrics {
   // latency metrics
   public final Timer1<String> addChangeMessageOnAddReviewer;
+  public final Timer0 addChangeMessageOnCodeOwnerApproval;
   public final Timer0 computeFileStatus;
   public final Timer1<Boolean> computeFileStatuses;
   public final Timer0 computeOwnedPaths;
@@ -85,6 +86,11 @@ public class CodeOwnerMetrics {
                 .description(
                     "Whether the change message was posted synchronously or asynchronously.")
                 .build());
+    this.addChangeMessageOnCodeOwnerApproval =
+        createTimer(
+            "add_change_message_on_code_owner_approval",
+            "Latency for asynchronously adding a change message with the owned path when a code"
+                + " owner approval is applied");
     this.computeFileStatus =
         createTimer("compute_file_status", "Latency for computing the file status of one file");
     this.computeFileStatuses =
@@ -105,8 +111,8 @@ public class CodeOwnerMetrics {
     this.extendChangeMessageOnPostReview =
         createTimer(
             "extend_change_message_on_post_review",
-            "Latency for extending the change message with the owned path when a code owner"
-                + " approval is applied");
+            "Latency for synchronously extending the change message with the owned path when a"
+                + " code owner approval is applied");
     this.getChangedFiles =
         createTimer("get_changed_files", "Latency for getting changed files from diff cache");
     this.prepareFileStatusComputation =

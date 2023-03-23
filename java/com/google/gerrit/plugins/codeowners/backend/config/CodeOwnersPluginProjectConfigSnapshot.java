@@ -84,6 +84,7 @@ public class CodeOwnersPluginProjectConfigSnapshot {
   @Nullable private FallbackCodeOwners fallbackCodeOwners;
   @Nullable private Integer maxPathsInChangeMessages;
   @Nullable private Boolean enableAsyncMessageOnAddReviewer;
+  @Nullable private Boolean enableAsyncMessageOnCodeOwnerApproval;
   @Nullable private ImmutableSet<CodeOwnerReference> globalCodeOwners;
   @Nullable private ImmutableSet<Account.Id> exemptedAccounts;
   @Nullable private Optional<String> overrideInfoUrl;
@@ -331,6 +332,18 @@ public class CodeOwnersPluginProjectConfigSnapshot {
           generalConfig.enableAsyncMessageOnAddReviewer(projectName, pluginConfig);
     }
     return enableAsyncMessageOnAddReviewer;
+  }
+
+  /**
+   * Gets whether applying a code owner approval should post a change message asynchronously instead
+   * of synchronously extending the change message that is posted by Gerrit core.
+   */
+  public boolean enableAsyncMessageOnCodeOwnerApproval() {
+    if (enableAsyncMessageOnCodeOwnerApproval == null) {
+      enableAsyncMessageOnCodeOwnerApproval =
+          generalConfig.enableAsyncMessageOnCodeOwnerApproval(projectName, pluginConfig);
+    }
+    return enableAsyncMessageOnCodeOwnerApproval;
   }
 
   /** Gets the global code owners. */

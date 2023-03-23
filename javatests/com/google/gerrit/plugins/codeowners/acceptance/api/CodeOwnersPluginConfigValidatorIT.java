@@ -631,6 +631,27 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  public void configureEnableAsyncMessageOnCodeOwnerApproval() throws Exception {
+    fetchRefsMetaConfig();
+
+    Config cfg = new Config();
+    cfg.setBoolean(
+        CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS,
+        /* subsection= */ null,
+        GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_CODE_OWNER_APPROVAL,
+        false);
+    setCodeOwnersConfig(cfg);
+
+    PushResult r = pushRefsMetaConfig();
+    assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
+    assertThat(
+            codeOwnersPluginConfiguration
+                .getProjectConfig(project)
+                .enableAsyncMessageOnCodeOwnerApproval())
+        .isFalse();
+  }
+
+  @Test
   public void cannotSetInvalidMaxPathsInChangeMessages() throws Exception {
     fetchRefsMetaConfig();
 

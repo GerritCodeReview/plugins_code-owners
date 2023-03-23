@@ -25,7 +25,6 @@ import com.google.gerrit.plugins.codeowners.api.impl.CodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.api.impl.ProjectCodeOwnersFactory;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerBackendId;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
-import com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.testing.ConfigSuite;
 import java.util.Arrays;
@@ -44,26 +43,6 @@ import org.junit.Before;
  * all code owner backends.
  */
 public class AbstractCodeOwnersIT extends AbstractCodeOwnersTest {
-  /**
-   * Returns a {@code gerrit.config} without code owner backend configuration to test the default
-   * setup.
-   */
-  @ConfigSuite.Default
-  public static Config defaultConfig() {
-    Config cfg = new Config();
-
-    // Disable asynchronous posting of change messages during tests to avoid parallel updates to
-    // NoteDb and hence risking LOCK_FAILURES (especially needed since the test API does not retry
-    // on LOCK_FAILURES).
-    cfg.setBoolean(
-        "plugin",
-        "code-owners",
-        GeneralConfig.KEY_ENABLE_ASYNC_MESSAGE_ON_ADD_REVIEWER,
-        /* value= */ false);
-
-    return cfg;
-  }
-
   /**
    * Returns a {@code gerrit.config} for every code owner backend so that all code owner backends
    * are tested.

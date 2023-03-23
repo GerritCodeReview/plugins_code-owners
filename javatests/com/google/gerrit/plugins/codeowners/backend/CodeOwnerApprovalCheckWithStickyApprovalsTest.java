@@ -55,7 +55,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
   /** Returns a {@code gerrit.config} that configures all users as fallback code owners. */
   @ConfigSuite.Default
   public static Config defaultConfig() {
-    Config cfg = new Config();
+    Config cfg = AbstractCodeOwnersTest.defaultConfig();
     cfg.setBoolean(
         "plugin", "code-owners", GeneralConfig.KEY_ENABLE_STICKY_APPROVALS, /* value= */ true);
     return cfg;
