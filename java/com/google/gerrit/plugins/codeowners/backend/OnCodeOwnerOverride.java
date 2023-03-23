@@ -33,6 +33,7 @@ import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -60,6 +61,7 @@ class OnCodeOwnerOverride implements OnPostReview {
 
   @Override
   public Optional<String> getChangeMessageAddOn(
+      Instant when,
       IdentifiedUser user,
       ChangeNotes changeNotes,
       PatchSet patchSet,

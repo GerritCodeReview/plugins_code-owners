@@ -33,6 +33,7 @@ import com.google.gerrit.server.util.LabelVote;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -70,6 +71,7 @@ class OnCodeOwnerApproval implements OnPostReview {
 
   @Override
   public Optional<String> getChangeMessageAddOn(
+      Instant when,
       IdentifiedUser user,
       ChangeNotes changeNotes,
       PatchSet patchSet,
