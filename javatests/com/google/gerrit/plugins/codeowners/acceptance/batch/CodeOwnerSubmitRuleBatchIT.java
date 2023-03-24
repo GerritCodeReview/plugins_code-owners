@@ -19,13 +19,13 @@ import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.a
 import static com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject.assertThatCollection;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 
-import com.google.gerrit.acceptance.LightweightPluginDaemonTest;
 import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestPlugin;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.request.RequestScopeOperations;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject;
 import com.google.inject.Inject;
@@ -42,14 +42,14 @@ import org.junit.Test;
 @TestPlugin(
     name = "code-owners",
     sysModule = "com.google.gerrit.plugins.codeowners.acceptance.TestBatchModule")
-public class CodeOwnerSubmitRuleBatchIT extends LightweightPluginDaemonTest {
+public class CodeOwnerSubmitRuleBatchIT extends AbstractCodeOwnersTest {
   @Inject private ProjectOperations projectOperations;
   @Inject private RequestScopeOperations requestScopeOperations;
 
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
 
   @Before
-  public void testSetup() throws Exception {
+  public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnerConfigOperations =
         plugin.getSysInjector().getInstance(CodeOwnerConfigOperations.class);
   }
