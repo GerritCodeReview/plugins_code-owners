@@ -33,6 +33,23 @@
       "message": "Nice!",
       "revId": "f40e83d739694779bf2950ce6c01969a8c926bb4",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c7438c97_fe084c8d",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-24T08:59:51Z",
+      "side": 1,
+      "message": "Now that the predecessor change has been submitted, zuul was able to verify this, hence my manual Verify+1 is no longer needed.",
+      "revId": "f40e83d739694779bf2950ce6c01969a8c926bb4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
