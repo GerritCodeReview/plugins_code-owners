@@ -22,6 +22,7 @@ import com.github.rholder.retry.StopStrategies;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.entities.BranchNameKey;
@@ -453,6 +454,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         });
   }
 
+  @CanIgnoreReturnValue
   private <T> T assertAsync(Callable<T> assertion) throws Exception {
     return RetryerBuilder.<T>newBuilder()
         .retryIfException(t -> true)

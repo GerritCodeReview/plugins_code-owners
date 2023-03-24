@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
@@ -1193,6 +1194,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         });
   }
 
+  @CanIgnoreReturnValue
   private <T> T assertAsync(Callable<T> assertion) throws Exception {
     return RetryerBuilder.<T>newBuilder()
         .retryIfException(t -> true)
