@@ -485,7 +485,9 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
     if (options.contains(ListAccountsOption.ALL_EMAILS)) {
       // Secondary emails are only visible to users that have the 'Modify Account' global
       // capability.
-      permissionBackend.currentUser().check(GlobalPermission.MODIFY_ACCOUNT);
+      if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
+        permissionBackend.currentUser().check(GlobalPermission.VIEW_SECONDARY_EMAILS);
+      }
       fillOptions.add(FillOptions.EMAIL);
       fillOptions.add(FillOptions.SECONDARY_EMAILS);
     }

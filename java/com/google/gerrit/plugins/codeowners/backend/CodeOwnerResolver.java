@@ -841,7 +841,8 @@ public class CodeOwnerResolver {
       // emails
       try {
         if (user != null) {
-          if (!permissionBackend.user(user).test(GlobalPermission.MODIFY_ACCOUNT)) {
+          if (!permissionBackend.user(user).test(GlobalPermission.VIEW_SECONDARY_EMAILS)
+              && !permissionBackend.user(user).test(GlobalPermission.MODIFY_ACCOUNT)) {
             transientCodeOwnerCache.cacheNonResolvable(email);
             messages.add(
                 String.format(
@@ -856,7 +857,8 @@ public class CodeOwnerResolver {
                       + " and user %s can see secondary emails",
                   email, accountState.account().id(), user.getLoggableName()));
           return true;
-        } else if (!permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
+        } else if (!permissionBackend.currentUser().test(GlobalPermission.VIEW_SECONDARY_EMAILS)
+            && !permissionBackend.currentUser().test(GlobalPermission.MODIFY_ACCOUNT)) {
           transientCodeOwnerCache.cacheNonResolvable(email);
           messages.add(
               String.format(
@@ -873,10 +875,7 @@ public class CodeOwnerResolver {
           return true;
         }
       } catch (PermissionBackendException ex) {
-        throw newInternalServerError(
-            String.format(
-                "failed to test the %s global capability", GlobalPermission.MODIFY_ACCOUNT),
-            ex);
+        throw newInternalServerError("failed to test global capabilities", ex);
       }
     };
   }
