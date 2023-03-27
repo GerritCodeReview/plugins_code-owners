@@ -117,7 +117,7 @@ public class CodeOwnerConfigFileUpdateScanner {
                 /** pathGlob */
                 null)) {
       RevCommit revision = treeWalk.getRevision();
-      DirCache newTree = DirCache.newInCore();
+      DirCache newTree = DirCache.read(rw.getObjectReader(), revision.getTree());
       DirCacheEditor editor = newTree.editor();
 
       boolean dirty = false;
