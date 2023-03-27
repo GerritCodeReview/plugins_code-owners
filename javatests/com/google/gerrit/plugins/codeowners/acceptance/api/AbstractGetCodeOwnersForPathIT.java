@@ -387,8 +387,9 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
   }
 
   @Test
-  public void cannotGetCodeOwnersWithSecondaryEmailsWithoutModifyAccountCapability()
-      throws Exception {
+  public void
+      cannotGetCodeOwnersWithSecondaryEmailsWithoutViewSecondaryEmailAndWithoutModifyAccountCapability()
+          throws Exception {
     // create a code owner config
     codeOwnerConfigOperations
         .newCodeOwnerConfig()
@@ -412,7 +413,7 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
                 queryCodeOwners(
                     getCodeOwnersApi().query().withOptions(ListAccountsOption.ALL_EMAILS),
                     "/foo/bar/baz.md"));
-    assertThat(exception).hasMessageThat().isEqualTo("modify account not permitted");
+    assertThat(exception).hasMessageThat().isEqualTo("view secondary emails not permitted");
   }
 
   @Test
