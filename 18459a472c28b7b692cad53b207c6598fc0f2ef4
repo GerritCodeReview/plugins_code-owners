@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "61676978_f5e68f53",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-03-28T12:45:30Z",
+      "side": 1,
+      "message": "CI fails because it cannot find java version openjdk-8-jdk, verified it manually.",
+      "revId": "18459a472c28b7b692cad53b207c6598fc0f2ef4",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
