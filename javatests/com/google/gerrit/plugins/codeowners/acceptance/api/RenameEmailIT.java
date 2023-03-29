@@ -15,11 +15,13 @@
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
@@ -43,6 +45,14 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFileUpdateSca
 import com.google.gerrit.plugins.codeowners.restapi.RenameEmail;
 import com.google.inject.Inject;
 import java.util.Optional;
+import org.eclipse.jgit.junit.TestRepository;
+import org.eclipse.jgit.lib.Constants;
+import org.eclipse.jgit.lib.ObjectLoader;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.lib.Repository;
+import org.eclipse.jgit.revwalk.RevTree;
+import org.eclipse.jgit.revwalk.RevWalk;
+import org.eclipse.jgit.treewalk.TreeWalk;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -668,7 +678,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void renameEmail_emailThatContainsEmailToBeReplacesAsSubstringStaysIntact()
+  public void renameEmail_emailThatContainsEmailToBeReplacedAsSubstringStaysIntact()
       throws Exception {
     skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
 
@@ -719,6 +729,122 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
             secondaryEmail, otherUser1.email(), otherUser2.email(), otherUser3.email());
   }
 
+  @Test
+  public void renameEmailDoesNotTouchCodeOwnerConfigsThatDoNotContainTheEmail() throws Exception {
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
+
+    TestAccount user2 = accountCreator.user2();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey1 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    // Create a code owner config that doesn't contain the email to be replaced.
+    CodeOwnerConfig.Key codeOwnerConfigKey2 =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/foo/")
+            .addCodeOwnerEmail(user2.email())
+            .create();
+
+    // grant all users direct push permissions
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.PUSH).ref("refs/*").group(REGISTERED_USERS))
+        .update();
+
+    String secondaryEmail = "user-foo@example.com";
+    accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
+
+    requestScopeOperations.setApiUser(user.id());
+    RenameEmailInput input = new RenameEmailInput();
+    input.oldEmail = user.email();
+    input.newEmail = secondaryEmail;
+    RenameEmailResultInfo result = renameEmail(project, "master", input);
+    assertThat(result.commit).isNotNull();
+
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).get())
+        .hasCodeOwnerSetsThat()
+        .onlyElement()
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(secondaryEmail, admin.email());
+
+    // Check that the second code owner config is still intact.
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).get())
+        .hasCodeOwnerSetsThat()
+        .onlyElement()
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(user2.email());
+  }
+
+  @Test
+  public void renameEmailDoesNotTouchNonCodeOwnerConfigFiles() throws Exception {
+    skipTestIfRenameEmailNotSupportedByCodeOwnersBackend();
+
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .addCodeOwnerEmail(admin.email())
+            .addCodeOwnerEmail(user.email())
+            .create();
+
+    // Create non code owner config files.
+    String contentFileA = "some content";
+    String contentFileB =
+        String.format(
+            "some content that contains the email %s that is being renamed", user.email());
+    try (TestRepository<Repository> testRepo =
+        new TestRepository<>(repoManager.openRepository(project))) {
+      testRepo.update(
+          "master",
+          testRepo
+              .commit()
+              .message("Update project.config from test")
+              .parent(projectOperations.project(project).getHead("master"))
+              .add("A", contentFileA)
+              .add("B", contentFileB));
+    }
+
+    // grant all users direct push permissions
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.PUSH).ref("refs/*").group(REGISTERED_USERS))
+        .update();
+
+    String secondaryEmail = "user-foo@example.com";
+    accountOperations.account(user.id()).forUpdate().addSecondaryEmail(secondaryEmail).update();
+
+    requestScopeOperations.setApiUser(user.id());
+    RenameEmailInput input = new RenameEmailInput();
+    input.oldEmail = user.email();
+    input.newEmail = secondaryEmail;
+    RenameEmailResultInfo result = renameEmail(project, "master", input);
+    assertThat(result.commit).isNotNull();
+
+    assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get())
+        .hasCodeOwnerSetsThat()
+        .onlyElement()
+        .hasCodeOwnersEmailsThat()
+        .containsExactly(secondaryEmail, admin.email());
+
+    // Check that the non code owner config files are still intact.
+    assertThat(getFileContent(project, "master", "A")).hasValue(contentFileA);
+    assertThat(getFileContent(project, "master", "B")).hasValue(contentFileB);
+  }
+
   private RenameEmailResultInfo renameEmail(
       Project.NameKey projectName, String branchName, RenameEmailInput input)
       throws RestApiException {
@@ -731,5 +857,28 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
   private void skipTestIfRenameEmailNotSupportedByCodeOwnersBackend() {
     // the proto backend doesn't support renaming emails
     assumeThatCodeOwnersBackendIsNotProtoBackend();
+  }
+
+  private Optional<String> getFileContent(Project.NameKey project, String branch, String fileName) {
+    try (Repository repo = repoManager.openRepository(project);
+        RevWalk rw = new RevWalk(repo)) {
+      if (!branch.startsWith(Constants.R_REFS)) {
+        branch = Constants.R_HEADS + branch;
+      }
+      Ref ref = repo.exactRef(branch);
+      if (ref == null) {
+        return Optional.empty();
+      }
+      RevTree tree = rw.parseTree(ref.getObjectId());
+      TreeWalk tw = TreeWalk.forPath(rw.getObjectReader(), fileName, tree);
+      if (tw == null) {
+        return Optional.empty();
+      }
+      ObjectLoader loader = rw.getObjectReader().open(tw.getObjectId(0));
+      String fileContent = new String(loader.getCachedBytes(), UTF_8);
+      return Optional.of(fileContent);
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
   }
 }
