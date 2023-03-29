@@ -333,12 +333,18 @@ export class CodeOwnerService {
   private isOnNewerPatchset(patchsetId: number) {
     if (this.change.current_revision === undefined) return false;
     const latestRevision = this.change.revisions![this.change.current_revision];
+    if (latestRevision._number === 'edit') {
+      return false;
+    }
     return patchsetId > latestRevision._number;
   }
 
   private isOnOlderPatchset(patchsetId: number) {
     if (this.change.current_revision === undefined) return false;
     const latestRevision = this.change.revisions![this.change.current_revision];
+    if (latestRevision._number === 'edit') {
+      return false;
+    }
     return patchsetId < latestRevision._number;
   }
 
