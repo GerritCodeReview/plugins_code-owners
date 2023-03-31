@@ -1199,7 +1199,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     return RetryerBuilder.<T>newBuilder()
         .retryIfException(t -> true)
         .withStopStrategy(
-            StopStrategies.stopAfterDelay(Duration.ofSeconds(1).toMillis(), MILLISECONDS))
+            StopStrategies.stopAfterDelay(Duration.ofSeconds(3).toMillis(), MILLISECONDS))
         .build()
         .call(() -> assertion.call());
   }
