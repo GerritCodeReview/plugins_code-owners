@@ -509,10 +509,7 @@ class OnCodeOwnerApproval implements OnPostReview, CommentAddedListener {
         return false;
       }
 
-      changeMessageUtil.setChangeMessage(
-          ctx,
-          String.format("Patch Set %s: %s", patchSet.id().get(), message.get()),
-          TAG_ADD_CODE_OWNER_APPROVAL);
+      changeMessageUtil.setChangeMessage(ctx, message.get(), TAG_ADD_CODE_OWNER_APPROVAL);
       return true;
     }
   }
