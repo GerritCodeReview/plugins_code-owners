@@ -1183,8 +1183,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     assertAsyncChangeMessage(
         changeId,
         String.format(
-            "Patch Set 1: "
-                + "By voting Code-Review+1 the following files are now code-owner approved by"
+            "By voting Code-Review+1 the following files are now code-owner approved by"
                 + " %s:\n"
                 + "* %s\n",
             AccountTemplateUtil.getAccountTemplate(admin.id()), path),
