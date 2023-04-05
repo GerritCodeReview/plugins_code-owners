@@ -1172,7 +1172,13 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     String path = "foo/bar.baz";
     String changeId = createChange("Test Change", path, "file content").getChangeId();
 
+    int numberOfChangeMessages = gApi.changes().id(changeId).get().messages.size();
+
     recommend(changeId);
+
+    // expect that 2 changes messages are posted, one for applying the approval and one to inform
+    // about the owned paths
+    int expectedNumberOfChangeMessages = numberOfChangeMessages + 2;
 
     assertAsyncChangeMessage(
         changeId,
@@ -1181,15 +1187,18 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                 + "By voting Code-Review+1 the following files are now code-owner approved by"
                 + " %s:\n"
                 + "* %s\n",
-            AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+            AccountTemplateUtil.getAccountTemplate(admin.id()), path),
+        expectedNumberOfChangeMessages);
   }
 
-  private void assertAsyncChangeMessage(String changeId, String expectedChangeMessage)
+  private void assertAsyncChangeMessage(
+      String changeId, String expectedChangeMessage, int expectedNumberOfChangeMessages)
       throws Exception {
     assertAsync(
         () -> {
           Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
           assertThat(Iterables.getLast(messages).message).isEqualTo(expectedChangeMessage);
+          assertThat(messages).hasSize(expectedNumberOfChangeMessages);
           return null;
         });
   }

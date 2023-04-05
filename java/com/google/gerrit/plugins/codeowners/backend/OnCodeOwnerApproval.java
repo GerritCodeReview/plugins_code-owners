@@ -15,12 +15,18 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.CHANGE_MODIFICATION;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.flogger.FluentLogger;
+import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
+import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.common.ApprovalInfo;
+import com.google.gerrit.extensions.events.CommentAddedListener;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
@@ -28,6 +34,7 @@ import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ChangeMessagesUtil;
+import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.git.WorkQueue;
 import com.google.gerrit.server.notedb.ChangeNotes;
@@ -42,6 +49,7 @@ import com.google.gerrit.server.util.LabelVote;
 import com.google.gerrit.server.util.ManualRequestContext;
 import com.google.gerrit.server.util.OneOffRequestContext;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.nio.file.Path;
 import java.time.Instant;
@@ -63,7 +71,7 @@ import java.util.stream.Stream;
  * </ul>
  */
 @Singleton
-class OnCodeOwnerApproval implements OnPostReview {
+class OnCodeOwnerApproval implements OnPostReview, CommentAddedListener {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private static final String TAG_ADD_CODE_OWNER_APPROVAL =
@@ -74,7 +82,9 @@ class OnCodeOwnerApproval implements OnPostReview {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private final CodeOwnerMetrics codeOwnerMetrics;
+  private final ChangeNotes.Factory changeNotesFactory;
   private final ChangeMessagesUtil changeMessageUtil;
+  private final Provider<CurrentUser> userProvider;
   private final RetryHelper retryHelper;
 
   @Inject
@@ -84,14 +94,18 @@ class OnCodeOwnerApproval implements OnPostReview {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       CodeOwnerApprovalCheck codeOwnerApprovalCheck,
       CodeOwnerMetrics codeOwnerMetrics,
+      ChangeNotes.Factory changeNotesFactory,
       ChangeMessagesUtil changeMessageUtil,
+      Provider<CurrentUser> userProvider,
       RetryHelper retryHelper) {
     this.workQueue = workQueue;
     this.oneOffRequestContext = oneOffRequestContext;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.codeOwnerApprovalCheck = codeOwnerApprovalCheck;
     this.codeOwnerMetrics = codeOwnerMetrics;
+    this.changeNotesFactory = changeNotesFactory;
     this.changeMessageUtil = changeMessageUtil;
+    this.userProvider = userProvider;
     this.retryHelper = retryHelper;
   }
 
@@ -108,11 +122,20 @@ class OnCodeOwnerApproval implements OnPostReview {
     int maxPathsInChangeMessage = codeOwnersConfig.getMaxPathsInChangeMessages();
     if (codeOwnersConfig.isDisabled(changeNotes.getChange().getDest().branch())
         || maxPathsInChangeMessage <= 0) {
+      logger.atFine().log("skip extending the change message since message posting is disabled");
+      return Optional.empty();
+    }
+    if (codeOwnersConfig.enableAsyncMessageOnCodeOwnerApproval()) {
+      // To avoid adding latency to PostReview post the change message asynchronously from
+      // #onCommentAdded(Event) after PostReview is done.
+      logger.atFine().log(
+          "skip extending the change message since async message posting is enabled");
       return Optional.empty();
     }
 
     // code owner approvals are only computed for the current patch set
     if (!changeNotes.getChange().currentPatchSetId().equals(patchSet.id())) {
+      logger.atFine().log("skip extending the change message on non-current patch set");
       return Optional.empty();
     }
 
@@ -122,32 +145,6 @@ class OnCodeOwnerApproval implements OnPostReview {
       // If oldApprovals doesn't contain the label or if the labels value in it is null, the label
       // was not changed.
       // This means that the user only voted on unrelated labels.
-      return Optional.empty();
-    }
-
-    if (codeOwnersConfig.enableAsyncMessageOnCodeOwnerApproval()) {
-      // post change message asynchronously to avoid adding latency to PostReview
-      logger.atFine().log("schedule asynchronous posting of the change message");
-      @SuppressWarnings("unused")
-      WorkQueue.Task<?> possiblyIgnoredError =
-          (WorkQueue.Task<?>)
-              workQueue
-                  .getDefaultQueue()
-                  .submit(
-                      () -> {
-                        try (ManualRequestContext ignored =
-                            oneOffRequestContext.openAs(user.getAccountId())) {
-                          postChangeMessage(
-                              when,
-                              user,
-                              changeNotes,
-                              patchSet,
-                              oldApprovals,
-                              approvals,
-                              requiredApproval,
-                              maxPathsInChangeMessage);
-                        }
-                      });
       return Optional.empty();
     }
 
@@ -179,6 +176,75 @@ class OnCodeOwnerApproval implements OnPostReview {
       }
       return Optional.empty();
     }
+  }
+
+  @Override
+  public void onCommentAdded(Event event) {
+    Project.NameKey projectName = Project.nameKey(event.getChange().project);
+    CodeOwnersPluginProjectConfigSnapshot codeOwnersConfig =
+        codeOwnersPluginConfiguration.getProjectConfig(projectName);
+    int maxPathsInChangeMessage = codeOwnersConfig.getMaxPathsInChangeMessages();
+    if (codeOwnersConfig.isDisabled(event.getChange().branch) || maxPathsInChangeMessage <= 0) {
+      logger.atFine().log("skip posting the change message since message posting is disabled");
+      return;
+    }
+    if (!codeOwnersConfig.enableAsyncMessageOnCodeOwnerApproval()) {
+      // The change message has already been synchronously extended by #getChangeMessageAddOn(...).
+      logger.atFine().log(
+          "skip posting the change message since async message posting is disabled");
+      return;
+    }
+
+    // post change message asynchronously to avoid adding latency to PostReview
+    logger.atFine().log("schedule asynchronous posting of the change message");
+
+    CurrentUser user = userProvider.get();
+    if (!user.isIdentifiedUser()) {
+      // cannot compute owned paths for non-identified user
+      logger.atFine().log(
+          "skip posting the change message for non-identified user %s", user.getLoggableName());
+      return;
+    }
+
+    Change.Id changeId = Change.id(event.getChange()._number);
+    ChangeNotes changeNotes = changeNotesFactory.create(projectName, changeId);
+    PatchSet.Id patchSetId = PatchSet.id(changeId, event.getRevision()._number);
+    RequiredApproval requiredApproval = codeOwnersConfig.getRequiredApproval();
+
+    // code owner approvals are only computed for the current patch set
+    PatchSet currentPatchSet = changeNotes.getCurrentPatchSet();
+    if (!currentPatchSet.id().equals(patchSetId)) {
+      logger.atFine().log("skip posting the change message on non-current patch set");
+      return;
+    }
+
+    if (event.getOldApprovals().get(requiredApproval.labelType().getName()) == null) {
+      // If oldApprovals doesn't contain the label or if the labels value in it is null, the label
+      // was not changed.
+      // This means that the user only voted on unrelated labels.
+      return;
+    }
+
+    @SuppressWarnings("unused")
+    WorkQueue.Task<?> possiblyIgnoredError =
+        (WorkQueue.Task<?>)
+            workQueue
+                .getDefaultQueue()
+                .submit(
+                    () -> {
+                      try (ManualRequestContext ignored =
+                          oneOffRequestContext.openAs(user.getAccountId())) {
+                        postChangeMessage(
+                            event.getWhen(),
+                            user.asIdentifiedUser(),
+                            changeNotes,
+                            currentPatchSet,
+                            mapApprovalInfosToVotingValues(event.getOldApprovals()),
+                            mapApprovalInfosToVotingValues(event.getApprovals()),
+                            requiredApproval,
+                            maxPathsInChangeMessage);
+                      }
+                    });
   }
 
   private void postChangeMessage(
@@ -396,6 +462,15 @@ class OnCodeOwnerApproval implements OnPostReview {
         labelName,
         approvals);
     return LabelVote.create(labelName, approvals.get(labelName));
+  }
+
+  private static ImmutableMap<String, Short> mapApprovalInfosToVotingValues(
+      Map<String, ApprovalInfo> approvals) {
+    return approvals.entrySet().stream()
+        .collect(
+            toImmutableMap(
+                Map.Entry::getKey,
+                e -> e.getValue().value != null ? e.getValue().value.shortValue() : null));
   }
 
   private class Op implements BatchUpdateOp {
