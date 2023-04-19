@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersChangeMessageUtil.appendPaths;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.CHANGE_MODIFICATION;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 import static java.util.stream.Collectors.joining;
@@ -29,7 +30,6 @@ import com.google.gerrit.metrics.Timer1;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
-import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.git.WorkQueue;
@@ -49,7 +49,6 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Callback that is invoked when a user is added as a reviewer.
@@ -160,9 +159,9 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
               "addCodeOwnersMessageOnAddReviewer",
               updateFactory -> {
                 try (BatchUpdate batchUpdate =
-                    updateFactory.create(projectName, currentUser, when);
+                        updateFactory.create(projectName, currentUser, when);
                     RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
-                RefUpdateContext changeCtx = RefUpdateContext.open(CHANGE_MODIFICATION)) {
+                    RefUpdateContext changeCtx = RefUpdateContext.open(CHANGE_MODIFICATION)) {
                   batchUpdate.addOp(changeId, new Op(reviewers, maxPathsInChangeMessages));
                   batchUpdate.execute();
                 }
@@ -248,11 +247,6 @@ public class CodeOwnersOnAddReviewer implements ReviewerAddedListener {
       }
 
       return Optional.of(message.toString());
-    }
-
-    private void appendPaths(StringBuilder message, Stream<Path> pathsToAppend) {
-      pathsToAppend.forEach(
-          path -> message.append(String.format("* %s\n", JgitPath.of(path).get())));
     }
   }
 }

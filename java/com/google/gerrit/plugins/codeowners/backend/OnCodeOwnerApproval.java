@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
+import static com.google.gerrit.plugins.codeowners.backend.CodeOwnersChangeMessageUtil.appendPaths;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.CHANGE_MODIFICATION;
 import static com.google.gerrit.server.update.context.RefUpdateContext.RefUpdateType.PLUGIN;
 
@@ -32,7 +33,6 @@ import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfi
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginProjectConfigSnapshot;
 import com.google.gerrit.plugins.codeowners.backend.config.RequiredApproval;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
-import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ChangeMessagesUtil;
 import com.google.gerrit.server.CurrentUser;
 import com.google.gerrit.server.IdentifiedUser;
@@ -55,7 +55,6 @@ import java.nio.file.Path;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Callback that is invoked on post review and that extends the change message if a code owner
@@ -421,10 +420,6 @@ class OnCodeOwnerApproval implements OnPostReview, CommentAddedListener {
     }
 
     return Optional.of(message.toString());
-  }
-
-  private void appendPaths(StringBuilder message, Stream<Path> pathsToAppend) {
-    pathsToAppend.forEach(path -> message.append(String.format("* %s\n", JgitPath.of(path).get())));
   }
 
   private boolean isIgnoredDueToSelfApproval(
