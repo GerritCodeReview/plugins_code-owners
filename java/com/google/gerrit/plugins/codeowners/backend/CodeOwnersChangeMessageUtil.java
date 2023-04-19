@@ -28,7 +28,40 @@ public class CodeOwnersChangeMessageUtil {
    * @param pathsToAppend the paths to append to the message builder
    */
   public static void appendPaths(StringBuilder message, Stream<Path> pathsToAppend) {
-    pathsToAppend.forEach(path -> message.append(String.format("* %s\n", JgitPath.of(path).get())));
+    pathsToAppend.forEach(
+        path -> message.append(String.format("* %s\n", escapeMarkdown(JgitPath.of(path).get()))));
+  }
+
+  /**
+   * Escapes Markdown characters in a string that is being used in a change message to prevent
+   * Markdown formatting that is applied for change messages in the web frontend.
+   *
+   * <p>This method escapes all characters that are listed at
+   * https://www.markdownguide.org/basic-syntax/#characters-you-can-escape.
+   *
+   * @param stringToBeEscaped the string to be escaped
+   * @return the escaped string
+   */
+  private static String escapeMarkdown(String stringToBeEscaped) {
+    return stringToBeEscaped
+        .replace("\\", "\\\\")
+        .replace("`", "\\`")
+        .replace("*", "\\*")
+        .replace("_", "\\_")
+        .replace("{", "\\{")
+        .replace("}", "\\}")
+        .replace("[", "\\[")
+        .replace("]", "\\]")
+        .replace("<", "\\<")
+        .replace(">", "\\>")
+        .replace("(", "\\(")
+        .replace(")", "\\)")
+        .replace("#", "\\#")
+        .replace("+", "\\+")
+        .replace("-", "\\-")
+        .replace(".", "\\.")
+        .replace("!", "\\!")
+        .replace("|", "\\|");
   }
 
   /**

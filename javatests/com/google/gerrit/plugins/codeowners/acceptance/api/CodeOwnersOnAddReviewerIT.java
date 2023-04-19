@@ -46,6 +46,9 @@ import org.junit.Test;
  * using the {@link GerritConfig} annotation).
  */
 public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
+  private static String TEST_PATH = "foo/bar.baz";
+  private static String TEST_PATH_ESCAPED = "foo/bar\\.baz";
+
   @Test
   @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
   public void noChangeMessageAddedIfCodeOwnersFuctionalityIsDisabled() throws Exception {
@@ -57,7 +60,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     gApi.changes().id(changeId).addReviewer(user.email());
 
@@ -75,7 +78,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     gApi.changes().id(changeId).addReviewer(user.email());
 
@@ -87,7 +90,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
   public void noChangeMessageAddedIfInvalidCodeOwnerConfigFilesExist() throws Exception {
     createNonParseableCodeOwnerConfig(getCodeOwnerConfigFileName());
 
-    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     gApi.changes().id(changeId).addReviewer(user.email());
 
@@ -105,8 +108,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     gApi.changes().id(changeId).addReviewer(user.email());
 
@@ -115,7 +117,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "%s, who was added as reviewer owns the following files:\n* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path));
+                AccountTemplateUtil.getAccountTemplate(user.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -128,15 +130,17 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path1 = "foo/bar.baz";
-    String path2 = "foo/baz.bar";
+    String testPath1 = "foo/bar.baz";
+    String testPath1Escaped = "foo/bar\\.baz";
+    String testPath2 = "foo/baz.bar";
+    String testPath2Escaped = "foo/baz\\.bar";
     String changeId =
         createChange(
                 "Test Change",
                 ImmutableMap.of(
-                    path1,
+                    testPath1,
                     "file content",
-                    path2,
+                    testPath2,
                     "file content",
                     "bar/foo.baz",
                     "file content",
@@ -151,7 +155,9 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "%s, who was added as reviewer owns the following files:\n* %s\n* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path1, path2));
+                AccountTemplateUtil.getAccountTemplate(user.id()),
+                testPath1Escaped,
+                testPath2Escaped));
   }
 
   @Test
@@ -164,8 +170,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     gApi.changes().id(changeId).addReviewer(user.email());
 
@@ -189,21 +194,25 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path1 = "foo/bar.baz";
-    String path2 = "foo/baz.bar";
-    String path3 = "bar/foo.baz";
-    String path4 = "bar/baz.foo";
+    String testPath1 = "foo/bar.baz";
+    String testPath1Escaped = "foo/bar\\.baz";
+    String testPath2 = "foo/baz.bar";
+    String testPath2Escaped = "foo/baz\\.bar";
+    String testPath3 = "bar/foo.baz";
+    String testPath3Escaped = "bar/foo\\.baz";
+    String testPath4 = "bar/baz.foo";
+    String testPath4Escaped = "bar/baz\\.foo";
     String changeId =
         createChange(
                 "Test Change",
                 ImmutableMap.of(
-                    path1,
+                    testPath1,
                     "file content",
-                    path2,
+                    testPath2,
                     "file content",
-                    path3,
+                    testPath3,
                     "file content",
-                    path4,
+                    testPath4,
                     "file content"))
             .getChangeId();
 
@@ -218,7 +227,11 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path4, path3, path1, path2));
+                AccountTemplateUtil.getAccountTemplate(user.id()),
+                testPath4Escaped,
+                testPath3Escaped,
+                testPath1Escaped,
+                testPath2Escaped));
   }
 
   @Test
@@ -232,24 +245,27 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path1 = "foo/bar.baz";
-    String path2 = "foo/baz.bar";
-    String path3 = "bar/foo.baz";
-    String path4 = "bar/baz.foo";
-    String path5 = "baz/foo.bar";
+    String testPath1 = "foo/bar.baz";
+    String testPath2 = "foo/baz.bar";
+    String testPath3 = "bar/foo.baz";
+    String testPath3Escaped = "bar/foo\\.baz";
+    String testPath4 = "bar/baz.foo";
+    String testPath4Escaped = "bar/baz\\.foo";
+    String testPath5 = "baz/foo.bar";
+    String testPath5Escaped = "baz/foo\\.bar";
     String changeId =
         createChange(
                 "Test Change",
                 ImmutableMap.of(
-                    path1,
+                    testPath1,
                     "file content",
-                    path2,
+                    testPath2,
                     "file content",
-                    path3,
+                    testPath3,
                     "file content",
-                    path4,
+                    testPath4,
                     "file content",
-                    path5,
+                    testPath5,
                     "file content"))
             .getChangeId();
 
@@ -264,7 +280,10 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "(more files)\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path4, path3, path5));
+                AccountTemplateUtil.getAccountTemplate(user.id()),
+                testPath4Escaped,
+                testPath3Escaped,
+                testPath5Escaped));
   }
 
   @Test
@@ -335,8 +354,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     // Add reviewer via PostReview.
     gApi.changes().id(changeId).current().review(ReviewInput.create().reviewer(user.email()));
@@ -346,7 +364,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "%s, who was added as reviewer owns the following files:\n* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path));
+                AccountTemplateUtil.getAccountTemplate(user.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -362,8 +380,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user2.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     // Add code owners 'user' and 'user2' as reviewers.
     gApi.changes()
@@ -380,9 +397,9 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                 "%s, who was added as reviewer owns the following files:\n* %s\n\n"
                     + "%s, who was added as reviewer owns the following files:\n* %s\n",
                 AccountTemplateUtil.getAccountTemplate(user.id()),
-                path,
+                TEST_PATH_ESCAPED,
                 AccountTemplateUtil.getAccountTemplate(user2.id()),
-                path));
+                TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -396,8 +413,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     // 'admin' grants a code owner approval (Code-Review+1) and adds 'user' as reviewer.
     gApi.changes().id(changeId).current().review(ReviewInput.recommend().reviewer(user.email()));
@@ -413,12 +429,59 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
     assertThat(Iterables.getLast(messages).message)
         .isEqualTo(
             String.format(
                 "%s, who was added as reviewer owns the following files:\n* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path));
+                AccountTemplateUtil.getAccountTemplate(user.id()), TEST_PATH_ESCAPED));
+  }
+
+  @Test
+  public void markdownCharactersInPathsAreEscaped() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    testMarkdownCharactersInPathsAreEscaped('\\', user);
+    testMarkdownCharactersInPathsAreEscaped('`', user);
+    testMarkdownCharactersInPathsAreEscaped('*', user);
+    testMarkdownCharactersInPathsAreEscaped('_', user);
+    testMarkdownCharactersInPathsAreEscaped('{', user);
+    testMarkdownCharactersInPathsAreEscaped('}', user);
+    testMarkdownCharactersInPathsAreEscaped('[', user);
+    testMarkdownCharactersInPathsAreEscaped(']', user);
+    testMarkdownCharactersInPathsAreEscaped('<', user);
+    testMarkdownCharactersInPathsAreEscaped('>', user);
+    testMarkdownCharactersInPathsAreEscaped('(', user);
+    testMarkdownCharactersInPathsAreEscaped(')', user);
+    testMarkdownCharactersInPathsAreEscaped('#', user);
+    testMarkdownCharactersInPathsAreEscaped('+', user);
+    testMarkdownCharactersInPathsAreEscaped('-', user);
+    testMarkdownCharactersInPathsAreEscaped('.', user);
+    testMarkdownCharactersInPathsAreEscaped('!', user);
+    testMarkdownCharactersInPathsAreEscaped('|', user);
+  }
+
+  private void testMarkdownCharactersInPathsAreEscaped(
+      char markdownCharacter, TestAccount codeOwner) throws Exception {
+    String testPath = markdownCharacter + "foo" + markdownCharacter + ".bar";
+    String testPathEscaped = "\\" + markdownCharacter + "foo\\" + markdownCharacter + "\\.bar";
+
+    String changeId = createChange("Test Change", testPath, "file content").getChangeId();
+
+    gApi.changes().id(changeId).addReviewer(codeOwner.email());
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "%s, who was added as reviewer owns the following files:\n* %s\n",
+                AccountTemplateUtil.getAccountTemplate(codeOwner.id()), testPathEscaped));
   }
 
   @Test
@@ -432,8 +495,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     gApi.changes().id(changeId).addReviewer(user.email());
 
@@ -441,7 +503,7 @@ public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
         changeId,
         String.format(
             "%s, who was added as reviewer owns the following files:\n* %s\n",
-            AccountTemplateUtil.getAccountTemplate(user.id()), path));
+            AccountTemplateUtil.getAccountTemplate(user.id()), TEST_PATH_ESCAPED));
   }
 
   private void assertAsyncChangeMessage(String changeId, String expectedChangeMessage)

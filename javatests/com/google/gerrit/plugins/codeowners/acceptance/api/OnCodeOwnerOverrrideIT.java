@@ -42,6 +42,9 @@ import org.junit.Test;
 
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerOverride}. */
 public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
+  private static String TEST_PATH = "foo/bar.baz";
+  private static String TEST_PATH_ESCAPED = "foo/bar\\.baz";
+
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
 
@@ -289,13 +292,12 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
       throws Exception {
     createOwnersOverrideLabel();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     ReviewInput.CommentInput commentInput = new ReviewInput.CommentInput();
     commentInput.line = 1;
     commentInput.message = "some comment";
-    commentInput.path = path;
+    commentInput.path = TEST_PATH;
     ReviewInput reviewInput = new ReviewInput();
     reviewInput.labels = new HashMap<>();
     reviewInput.labels.put("Owners-Override", (short) 1);
@@ -401,8 +403,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
 
     createOwnersOverrideLabel();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     ReviewInput reviewInput = new ReviewInput();
     reviewInput.labels = new HashMap<>();
@@ -431,7 +432,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
                 "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -632,8 +633,7 @@ public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", -1));
 

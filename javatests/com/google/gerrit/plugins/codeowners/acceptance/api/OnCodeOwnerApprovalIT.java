@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
 import com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate;
@@ -55,6 +56,9 @@ import org.junit.Test;
  * explicitly (by using the {@link GerritConfig} annotation).
  */
 public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
+  private static String TEST_PATH = "foo/bar.baz";
+  private static String TEST_PATH_ESCAPED = "foo/bar\\.baz";
+
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
 
@@ -69,8 +73,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -82,8 +85,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   public void changeMessageNotExtendedIfInvalidCodeOwnerConfigFilesExist() throws Exception {
     createNonParseableCodeOwnerConfig(getCodeOwnerConfigFileName());
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -101,8 +103,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -114,7 +115,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -127,8 +128,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -148,7 +148,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -177,8 +177,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -190,7 +189,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
 
     // Apply the Code-Review+1 approval again and add an unrelated vote (Code-Review+1 is ignored).
     ReviewInput reviewInput = ReviewInput.recommend();
@@ -227,8 +226,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -240,13 +238,13 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
 
     // Apply the Code-Review+1 approval again and add a comment (Code-Review +1 is ignored)
     ReviewInput.CommentInput commentInput = new ReviewInput.CommentInput();
     commentInput.line = 1;
     commentInput.message = "some comment";
-    commentInput.path = path;
+    commentInput.path = TEST_PATH;
     ReviewInput reviewInput = ReviewInput.recommend();
     reviewInput.comments = new HashMap<>();
     reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
@@ -268,8 +266,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -281,7 +278,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
 
     // Apply the Code-Review+1 by another code owner
     requestScopeOperations.setApiUser(user.id());
@@ -295,7 +292,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path));
+                AccountTemplateUtil.getAccountTemplate(user.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -308,8 +305,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -324,7 +320,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+2 the following files are still code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -340,8 +336,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     approve(changeId);
 
@@ -356,7 +351,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are still explicitly code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -372,8 +367,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -388,7 +382,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+2 the following files are still explicitly code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -401,8 +395,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     approve(changeId);
 
@@ -417,7 +410,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are still code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -430,8 +423,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -446,7 +438,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By removing the Code-Review vote the following files are no longer"
                     + " code-owner approved by %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -460,8 +452,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -476,7 +467,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review-1 the following files are no longer code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -489,15 +480,17 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path1 = "foo/bar.baz";
-    String path2 = "foo/baz.bar";
+    String testPath1 = "foo/bar.baz";
+    String testPath1Escaped = "foo/bar\\.baz";
+    String testPath2 = "foo/baz.bar";
+    String testPath2Escaped = "foo/baz\\.bar";
     String changeId =
         createChange(
                 "Test Change",
                 ImmutableMap.of(
-                    path1,
+                    testPath1,
                     "file content",
-                    path2,
+                    testPath2,
                     "file content",
                     "bar/foo.baz",
                     "file content",
@@ -516,7 +509,9 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + " %s:\n"
                     + "* %s\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path1, path2));
+                AccountTemplateUtil.getAccountTemplate(admin.id()),
+                testPath1Escaped,
+                testPath2Escaped));
   }
 
   @Test
@@ -531,6 +526,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
 
     // createChangeWithFileRename creates a change with 2 patch sets
     String oldPath = "foo/bar.baz";
+    String oldPathEscaped = "foo/bar\\.baz";
     String newPath = "bar/baz.bar";
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
@@ -544,7 +540,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), oldPath));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), oldPathEscaped));
   }
 
   @Test
@@ -584,7 +580,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -604,8 +600,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -617,7 +612,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now explicitly code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -632,8 +627,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -651,7 +645,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "\n"
                     + "The listed files are still implicitly approved by %s.\n",
                 AccountTemplateUtil.getAccountTemplate(admin.id()),
-                path,
+                TEST_PATH_ESCAPED,
                 AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
@@ -667,8 +661,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -686,7 +679,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "\n"
                     + "The listed files are still implicitly approved by %s.\n",
                 AccountTemplateUtil.getAccountTemplate(admin.id()),
-                path,
+                TEST_PATH_ESCAPED,
                 AccountTemplateUtil.getAccountTemplate(admin.id())));
   }
 
@@ -702,8 +695,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange(user, "Test Change", path, "file content").getChangeId();
+    String changeId = createChange(user, "Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -715,7 +707,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -731,8 +723,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange(user, "Test Change", path, "file content").getChangeId();
+    String changeId = createChange(user, "Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -747,7 +738,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By removing the Code-Review vote the following files are no longer"
                     + " code-owner approved by %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -763,8 +754,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange(user, "Test Change", path, "file content").getChangeId();
+    String changeId = createChange(user, "Test Change", TEST_PATH, "file content").getChangeId();
 
     recommend(changeId);
 
@@ -779,7 +769,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review-1 the following files are no longer code-owner"
                     + " approved by %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -793,21 +783,25 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path1 = "foo/bar.baz";
-    String path2 = "foo/baz.bar";
-    String path3 = "bar/foo.baz";
-    String path4 = "bar/baz.foo";
+    String testPath1 = "foo/bar.baz";
+    String testPath1Escaped = "foo/bar\\.baz";
+    String testPath2 = "foo/baz.bar";
+    String testPath2Escaped = "foo/baz\\.bar";
+    String testPath3 = "bar/foo.baz";
+    String testPath3Escaped = "bar/foo\\.baz";
+    String testPath4 = "bar/baz.foo";
+    String testPath4Escaped = "bar/baz\\.foo";
     String changeId =
         createChange(
                 "Test Change",
                 ImmutableMap.of(
-                    path1,
+                    testPath1,
                     "file content",
-                    path2,
+                    testPath2,
                     "file content",
-                    path3,
+                    testPath3,
                     "file content",
-                    path4,
+                    testPath4,
                     "file content"))
             .getChangeId();
 
@@ -824,7 +818,11 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path4, path3, path1, path2));
+                AccountTemplateUtil.getAccountTemplate(admin.id()),
+                testPath4Escaped,
+                testPath3Escaped,
+                testPath1Escaped,
+                testPath2Escaped));
   }
 
   @Test
@@ -838,24 +836,27 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path1 = "foo/bar.baz";
-    String path2 = "foo/baz.bar";
-    String path3 = "bar/foo.baz";
-    String path4 = "bar/baz.foo";
-    String path5 = "baz/foo.bar";
+    String testPath1 = "foo/bar.baz";
+    String testPath2 = "foo/baz.bar";
+    String testPath3 = "bar/foo.baz";
+    String testPath3Escaped = "bar/foo\\.baz";
+    String testPath4 = "bar/baz.foo";
+    String testPath4Escaped = "bar/baz\\.foo";
+    String testPath5 = "baz/foo.bar";
+    String testPath5Escaped = "baz/foo\\.bar";
     String changeId =
         createChange(
                 "Test Change",
                 ImmutableMap.of(
-                    path1,
+                    testPath1,
                     "file content",
-                    path2,
+                    testPath2,
                     "file content",
-                    path3,
+                    testPath3,
                     "file content",
-                    path4,
+                    testPath4,
                     "file content",
-                    path5,
+                    testPath5,
                     "file content"))
             .getChangeId();
 
@@ -872,7 +873,10 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "* %s\n"
                     + "* %s\n"
                     + "(more files)\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path4, path3, path5));
+                AccountTemplateUtil.getAccountTemplate(admin.id()),
+                testPath4Escaped,
+                testPath3Escaped,
+                testPath5Escaped));
   }
 
   @Test
@@ -917,13 +921,12 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     ReviewInput.CommentInput commentInput = new ReviewInput.CommentInput();
     commentInput.line = 1;
     commentInput.message = "some comment";
-    commentInput.path = path;
+    commentInput.path = TEST_PATH;
     ReviewInput reviewInput = ReviewInput.recommend();
     reviewInput.comments = new HashMap<>();
     reviewInput.comments.put(commentInput.path, Lists.newArrayList(commentInput));
@@ -938,7 +941,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(admin.id()), path));
+                AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -951,7 +954,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String changeId = createChange("Test Change", "foo/bar.baz", "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     // create a second patch set
     amendChange(changeId);
@@ -1083,8 +1086,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     input.ignoreSelfApproval = true;
     gApi.projects().name(allProjects.get()).label("Code-Review").update(input);
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     requestScopeOperations.setApiUser(user.id());
     recommend(changeId);
@@ -1097,7 +1099,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s:\n"
                     + "* %s\n",
-                AccountTemplateUtil.getAccountTemplate(user.id()), path));
+                AccountTemplateUtil.getAccountTemplate(user.id()), TEST_PATH_ESCAPED));
   }
 
   @Test
@@ -1110,8 +1112,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     // Apply the Code-Review-1.
     gApi.changes().id(changeId).current().review(ReviewInput.dislike());
@@ -1134,8 +1135,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     // Do the voting as a different user to trigger an email notification (if the only recipient is
     // also the sender the email is omitted).
@@ -1155,7 +1155,58 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
                     + "By voting Code-Review+1 the following files are now code-owner approved by"
                     + " %s <%s>:\n"
                     + "* %s\n",
-                user.fullName(), user.email(), path));
+                user.fullName(), user.email(), TEST_PATH_ESCAPED));
+  }
+
+  @Test
+  public void markdownCharactersInPathsAreEscaped() throws Exception {
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    testMarkdownCharactersInPathsAreEscaped('\\', user);
+    testMarkdownCharactersInPathsAreEscaped('`', user);
+    testMarkdownCharactersInPathsAreEscaped('*', user);
+    testMarkdownCharactersInPathsAreEscaped('_', user);
+    testMarkdownCharactersInPathsAreEscaped('{', user);
+    testMarkdownCharactersInPathsAreEscaped('}', user);
+    testMarkdownCharactersInPathsAreEscaped('[', user);
+    testMarkdownCharactersInPathsAreEscaped(']', user);
+    testMarkdownCharactersInPathsAreEscaped('<', user);
+    testMarkdownCharactersInPathsAreEscaped('>', user);
+    testMarkdownCharactersInPathsAreEscaped('(', user);
+    testMarkdownCharactersInPathsAreEscaped(')', user);
+    testMarkdownCharactersInPathsAreEscaped('#', user);
+    testMarkdownCharactersInPathsAreEscaped('+', user);
+    testMarkdownCharactersInPathsAreEscaped('-', user);
+    testMarkdownCharactersInPathsAreEscaped('.', user);
+    testMarkdownCharactersInPathsAreEscaped('!', user);
+    testMarkdownCharactersInPathsAreEscaped('|', user);
+  }
+
+  private void testMarkdownCharactersInPathsAreEscaped(
+      char markdownCharacter, TestAccount codeOwner) throws Exception {
+    String testPath = markdownCharacter + "foo" + markdownCharacter + ".bar";
+    String testPathEscaped = "\\" + markdownCharacter + "foo\\" + markdownCharacter + "\\.bar";
+
+    String changeId = createChange("Test Change", testPath, "file content").getChangeId();
+
+    requestScopeOperations.setApiUser(user.id());
+    recommend(changeId);
+
+    Collection<ChangeMessageInfo> messages = gApi.changes().id(changeId).get().messages;
+    assertThat(Iterables.getLast(messages).message)
+        .isEqualTo(
+            String.format(
+                "Patch Set 1: Code-Review+1\n\n"
+                    + "By voting Code-Review+1 the following files are now code-owner approved by"
+                    + " %s:\n"
+                    + "* %s\n",
+                AccountTemplateUtil.getAccountTemplate(codeOwner.id()), testPathEscaped));
   }
 
   @Test
@@ -1169,8 +1220,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(admin.email())
         .create();
 
-    String path = "foo/bar.baz";
-    String changeId = createChange("Test Change", path, "file content").getChangeId();
+    String changeId = createChange("Test Change", TEST_PATH, "file content").getChangeId();
 
     int numberOfChangeMessages = gApi.changes().id(changeId).get().messages.size();
 
@@ -1186,7 +1236,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
             "By voting Code-Review+1 the following files are now code-owner approved by"
                 + " %s:\n"
                 + "* %s\n",
-            AccountTemplateUtil.getAccountTemplate(admin.id()), path),
+            AccountTemplateUtil.getAccountTemplate(admin.id()), TEST_PATH_ESCAPED),
         expectedNumberOfChangeMessages);
   }
 
