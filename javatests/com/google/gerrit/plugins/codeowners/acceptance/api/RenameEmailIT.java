@@ -25,6 +25,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.AtomicLongMap;
+import com.google.gerrit.acceptance.ExtensionRegistry;
+import com.google.gerrit.acceptance.ExtensionRegistry.Registration;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.testsuite.account.AccountOperations;
 import com.google.gerrit.acceptance.testsuite.project.ProjectOperations;
@@ -33,6 +36,7 @@ import com.google.gerrit.common.data.GlobalCapability;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Permission;
 import com.google.gerrit.entities.Project;
+import com.google.gerrit.extensions.events.GitReferenceUpdatedListener;
 import com.google.gerrit.extensions.restapi.AuthException;
 import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.RestApiException;
@@ -44,6 +48,8 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigFileUpdateScanner;
 import com.google.gerrit.plugins.codeowners.restapi.RenameEmail;
 import com.google.inject.Inject;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Constants;
@@ -68,6 +74,7 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
   @Inject private AccountOperations accountOperations;
   @Inject private ProjectOperations projectOperations;
   @Inject private RequestScopeOperations requestScopeOperations;
+  @Inject private ExtensionRegistry extensionRegistry;
 
   private CodeOwnerConfigFileUpdateScanner codeOwnerConfigFileUpdateScanner;
 
@@ -308,8 +315,12 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
     RenameEmailInput input = new RenameEmailInput();
     input.oldEmail = admin.email();
     input.newEmail = secondaryEmail;
-    RenameEmailResultInfo result = renameEmail(project, "master", input);
-    assertThat(result.commit).isNotNull();
+    RefUpdateCounter refUpdateCounter = new RefUpdateCounter();
+    try (Registration registration = extensionRegistry.newRegistration().add(refUpdateCounter)) {
+      RenameEmailResultInfo result = renameEmail(project, "master", input);
+      assertThat(result.commit).isNotNull();
+    }
+    refUpdateCounter.assertRefUpdateFor(RefUpdateCounter.projectRef(project, "refs/heads/master"));
 
     assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).get())
         .hasCodeOwnerSetsThat()
@@ -352,8 +363,12 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
     RenameEmailInput input = new RenameEmailInput();
     input.oldEmail = admin.email();
     input.newEmail = secondaryEmail;
-    RenameEmailResultInfo result = renameEmail(project, "master", input);
-    assertThat(result.commit).isNotNull();
+    RefUpdateCounter refUpdateCounter = new RefUpdateCounter();
+    try (Registration registration = extensionRegistry.newRegistration().add(refUpdateCounter)) {
+      RenameEmailResultInfo result = renameEmail(project, "master", input);
+      assertThat(result.commit).isNotNull();
+    }
+    refUpdateCounter.assertRefUpdateFor(RefUpdateCounter.projectRef(project, "refs/heads/master"));
 
     assertThat(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).get())
         .hasCodeOwnerSetsThat()
@@ -879,6 +894,41 @@ public class RenameEmailIT extends AbstractCodeOwnersIT {
       return Optional.of(fileContent);
     } catch (Exception e) {
       throw new IllegalStateException(e);
+    }
+  }
+
+  private static class RefUpdateCounter implements GitReferenceUpdatedListener {
+    private final AtomicLongMap<String> countsByProjectRefs = AtomicLongMap.create();
+
+    static String projectRef(Project.NameKey project, String ref) {
+      return projectRef(project.get(), ref);
+    }
+
+    static String projectRef(String project, String ref) {
+      return project + ":" + ref;
+    }
+
+    @Override
+    public void onGitReferenceUpdated(Event event) {
+      countsByProjectRefs.incrementAndGet(projectRef(event.getProjectName(), event.getRefName()));
+    }
+
+    void clear() {
+      countsByProjectRefs.clear();
+    }
+
+    void assertRefUpdateFor(String... projectRefs) {
+      Map<String, Long> expectedRefUpdateCounts = new HashMap<>();
+      for (String projectRef : projectRefs) {
+        expectedRefUpdateCounts.put(projectRef, 1L);
+      }
+      assertRefUpdateFor(expectedRefUpdateCounts);
+    }
+
+    void assertRefUpdateFor(Map<String, Long> expectedProjectRefUpdateCounts) {
+      assertThat(countsByProjectRefs.asMap())
+          .containsExactlyEntriesIn(expectedProjectRefUpdateCounts);
+      clear();
     }
   }
 }

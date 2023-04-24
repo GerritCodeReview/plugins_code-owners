@@ -25,6 +25,7 @@ import com.google.gerrit.git.RefUpdateUtil;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.server.extensions.events.GitReferenceUpdated;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.update.context.RefUpdateContext;
 import com.google.inject.Inject;
@@ -59,6 +60,7 @@ public class CodeOwnerConfigFileUpdateScanner {
   private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
   private final GitRepositoryManager repoManager;
+  private final GitReferenceUpdated gitRefUpdated;
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final Provider<PersonIdent> serverIdentProvider;
   private final Provider<IdentifiedUser> identifiedUser;
@@ -66,10 +68,12 @@ public class CodeOwnerConfigFileUpdateScanner {
   @Inject
   CodeOwnerConfigFileUpdateScanner(
       GitRepositoryManager repoManager,
+      GitReferenceUpdated gitRefUpdated,
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       @GerritPersonIdent Provider<PersonIdent> serverIdentProvider,
       Provider<IdentifiedUser> identifiedUser) {
     this.repoManager = repoManager;
+    this.gitRefUpdated = gitRefUpdated;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.serverIdentProvider = serverIdentProvider;
     this.identifiedUser = identifiedUser;
@@ -103,8 +107,7 @@ public class CodeOwnerConfigFileUpdateScanner {
         "updating code owner files in branch %s of project %s",
         branchNameKey.branch(), branchNameKey.project());
 
-    try (
-        RefUpdateContext ctx = RefUpdateContext.open(PLUGIN);
+    try (RefUpdateContext ctx = RefUpdateContext.open(PLUGIN);
         Repository repository = repoManager.openRepository(branchNameKey.project());
         RevWalk rw = new RevWalk(repository);
         ObjectInserter oi = repository.newObjectInserter();
@@ -142,7 +145,7 @@ public class CodeOwnerConfigFileUpdateScanner {
       editor.finish();
       ObjectId treeId = newTree.writeTree(oi);
       ObjectId commitId = createCommit(oi, commitMessage, revision, treeId);
-      updateBranch(branchNameKey.branch(), repository, revision, commitId);
+      updateBranch(repository, branchNameKey, revision, commitId);
       return Optional.of(rw.parseCommit(commitId));
     } catch (IOException e) {
       throw newInternalServerError(
@@ -198,18 +201,22 @@ public class CodeOwnerConfigFileUpdateScanner {
   /**
    * Update the given branch.
    *
-   * @param branchName the name of the branch that should be updated
    * @param repository the repository in which the branch should be updated
+   * @param branchNameKey the project and branch that should be updated
    * @param oldObjectId the expected old object ID of the branch
    * @param newObjectId the new object ID that should be set for the branch
    */
   private void updateBranch(
-      String branchName, Repository repository, ObjectId oldObjectId, ObjectId newObjectId)
+      Repository repository,
+      BranchNameKey branchNameKey,
+      ObjectId oldObjectId,
+      ObjectId newObjectId)
       throws IOException {
-    RefUpdate ru = repository.updateRef(branchName);
+    RefUpdate ru = repository.updateRef(branchNameKey.branch());
     ru.setExpectedOldObjectId(oldObjectId);
     ru.setNewObjectId(newObjectId);
     ru.update();
     RefUpdateUtil.checkResult(ru);
+    gitRefUpdated.fire(branchNameKey.project(), ru, identifiedUser.get().state());
   }
 }
