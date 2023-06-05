@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6001ce69_dfbae340",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/backend/AbstractCodeOwnerConfigParserTest.java",
+        "patchSetId": 2
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1083225
+      },
+      "writtenOn": "2023-06-05T11:13:35Z",
+      "side": 1,
+      "message": "truth is always good",
+      "range": {
+        "startLine": 17,
+        "startChar": 25,
+        "endLine": 17,
+        "endChar": 43
+      },
+      "revId": "9a05f226a565d1172b65708eb36e1abfcc5ddd65",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
