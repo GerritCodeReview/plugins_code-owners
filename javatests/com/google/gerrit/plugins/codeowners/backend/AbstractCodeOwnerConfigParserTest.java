@@ -16,14 +16,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
-import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static java.util.stream.Collectors.joining;
-
-import com.google.common.base.Splitter;
-import com.google.gerrit.entities.Project;
-import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.function.Function;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Before;
