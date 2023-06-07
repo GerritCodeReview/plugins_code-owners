@@ -30,7 +30,6 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.metrics.Timer0;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
-import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -58,18 +57,18 @@ public class PathCodeOwners {
   @Singleton
   public static class Factory {
     private final CodeOwnerMetrics codeOwnerMetrics;
-    private final ProjectCache projectCache;
+    private final PerThreadProjectCache.Factory perThreadProjectCacheFactory;
     private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
     private final CodeOwners codeOwners;
 
     @Inject
     Factory(
         CodeOwnerMetrics codeOwnerMetrics,
-        ProjectCache projectCache,
+        PerThreadProjectCache.Factory perThreadProjectCacheFactory,
         CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
         CodeOwners codeOwners) {
       this.codeOwnerMetrics = codeOwnerMetrics;
-      this.projectCache = projectCache;
+      this.perThreadProjectCacheFactory = perThreadProjectCacheFactory;
       this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
       this.codeOwners = codeOwners;
     }
@@ -78,7 +77,7 @@ public class PathCodeOwners {
       requireNonNull(codeOwnerConfig, "codeOwnerConfig");
       return new PathCodeOwners(
           codeOwnerMetrics,
-          projectCache,
+          perThreadProjectCacheFactory.getOrCreate(),
           /* transientCodeOwnerConfigCache= */ null,
           codeOwners,
           codeOwnerConfig,
@@ -100,7 +99,7 @@ public class PathCodeOwners {
               codeOwnerConfig ->
                   new PathCodeOwners(
                       codeOwnerMetrics,
-                      projectCache,
+                      perThreadProjectCacheFactory.getOrCreate(),
                       transientCodeOwnerConfigCache,
                       codeOwners,
                       codeOwnerConfig,
@@ -137,7 +136,7 @@ public class PathCodeOwners {
   }
 
   private final CodeOwnerMetrics codeOwnerMetrics;
-  private final ProjectCache projectCache;
+  private final PerThreadProjectCache perThreadProjectCache;
   private final CodeOwnerConfigLoader codeOwnerConfigLoader;
   private final CodeOwners codeOwners;
   private final CodeOwnerConfig codeOwnerConfig;
@@ -148,14 +147,14 @@ public class PathCodeOwners {
 
   private PathCodeOwners(
       CodeOwnerMetrics codeOwnerMetrics,
-      ProjectCache projectCache,
+      PerThreadProjectCache perThreadProjectCache,
       @Nullable TransientCodeOwnerConfigCache transientCodeOwnerConfigCache,
       CodeOwners codeOwners,
       CodeOwnerConfig codeOwnerConfig,
       Path path,
       PathExpressionMatcher pathExpressionMatcher) {
     this.codeOwnerMetrics = requireNonNull(codeOwnerMetrics, "codeOwnerMetrics");
-    this.projectCache = requireNonNull(projectCache, "projectCache");
+    this.perThreadProjectCache = requireNonNull(perThreadProjectCache, "perThreadProjectCache");
     this.codeOwnerConfigLoader =
         transientCodeOwnerConfigCache != null ? transientCodeOwnerConfigCache : codeOwners;
     this.codeOwners = requireNonNull(codeOwners, "codeOwners");
@@ -391,7 +390,7 @@ public class PathCodeOwners {
               "resolve import of code owner config %s", keyOfImportedCodeOwnerConfig);
 
           Optional<ProjectState> projectState =
-              projectCache.get(keyOfImportedCodeOwnerConfig.project());
+              perThreadProjectCache.get(keyOfImportedCodeOwnerConfig.project());
           if (!projectState.isPresent()) {
             unresolvedImports.add(
                 CodeOwnerConfigImport.createUnresolvedImport(

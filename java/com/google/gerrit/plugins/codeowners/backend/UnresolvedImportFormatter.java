@@ -16,23 +16,24 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
-import com.google.gerrit.server.project.ProjectCache;
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import java.nio.file.Path;
 
 /** Class to format an {@link CodeOwnerConfigImport} as a user-readable string. */
+@Singleton
 public class UnresolvedImportFormatter {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
-  private final ProjectCache projectCache;
+  private final PerThreadProjectCache.Factory perThreadProjectCacheFactory;
   private final BackendConfig backendConfig;
 
   @Inject
   UnresolvedImportFormatter(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
-      ProjectCache projectCache,
+      PerThreadProjectCache.Factory perThreadProjectCacheFactory,
       BackendConfig backendConfig) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
-    this.projectCache = projectCache;
+    this.perThreadProjectCacheFactory = perThreadProjectCacheFactory;
     this.backendConfig = backendConfig;
   }
 
@@ -70,7 +71,7 @@ public class UnresolvedImportFormatter {
     // non-existing projects fails, hence check whether the project exists before trying to access
     // the project config and fall back to the default code owner backend if the project doesn't
     // exist.
-    if (projectCache.get(codeOwnerConfigKey.project()).isPresent()) {
+    if (perThreadProjectCacheFactory.getOrCreate().isPresent(codeOwnerConfigKey.project())) {
       return codeOwnersPluginConfiguration
           .getProjectConfig(codeOwnerConfigKey.project())
           .getBackend(codeOwnerConfigKey.branchNameKey().branch());

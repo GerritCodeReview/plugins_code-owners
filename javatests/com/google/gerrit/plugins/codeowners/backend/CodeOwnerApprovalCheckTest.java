@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.GitUtil;
+import com.google.gerrit.acceptance.PushOneCommit;
 import com.google.gerrit.acceptance.TestAccount;
 import com.google.gerrit.acceptance.TestProjectInput;
 import com.google.gerrit.acceptance.config.GerritConfig;
@@ -35,6 +36,7 @@ import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Change;
 import com.google.gerrit.entities.PatchSet;
 import com.google.gerrit.entities.Permission;
+import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.extensions.api.changes.ReviewInput;
 import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
@@ -46,6 +48,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfigOperations;
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
+import com.google.gerrit.server.cache.PerThreadCache;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.inject.Inject;
@@ -67,6 +70,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @Inject private ChangeNotes.Factory changeNotesFactory;
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
+  @Inject private PerThreadProjectCache.Factory perThreadProjectCacheFactory;
 
   private CodeOwnerApprovalCheck codeOwnerApprovalCheck;
   private CodeOwnerConfigOperations codeOwnerConfigOperations;
@@ -2235,6 +2239,74 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     assertThatCollection(fileCodeOwnerStatuses)
         .containsExactly(
             FileCodeOwnerStatus.addition(path, CodeOwnerStatus.INSUFFICIENT_REVIEWERS));
+  }
+
+  @Test
+  public void missingProjectOfUnresolvedImportsIsCached() throws Exception {
+    // Create a root code owner config with an unresolvable import from a non-existing project.
+    Project.NameKey nonExistingProject = Project.nameKey("non-existing");
+    CodeOwnerConfigReference nonResolvablecodeOwnerConfigReference =
+        CodeOwnerConfigReference.builder(
+                CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
+                codeOwnerConfigOperations
+                    .codeOwnerConfig(CodeOwnerConfig.Key.create(nonExistingProject, "master", "/"))
+                    .getFilePath())
+            .setProject(nonExistingProject)
+            .build();
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(user.email())
+        .addImport(nonResolvablecodeOwnerConfigReference)
+        .create();
+
+    // Create a change with 2 files, so that the root code owner config is evaluated 2 times (once
+    // per file).
+    Path path1 = Paths.get("/foo/bar.txt");
+    Path path2 = Paths.get("/foo/baz.txt");
+    PushOneCommit push =
+        pushFactory.create(
+            admin.newIdent(),
+            testRepo,
+            "Change Adding Files",
+            ImmutableMap.of(
+                JgitPath.of(path1).get(), "file content",
+                JgitPath.of(path2).get(), "file content"));
+    String changeId = push.to("refs/for/master").getChangeId();
+
+    // Add a reviewer that is a code owner.
+    gApi.changes().id(changeId).addReviewer(user.email());
+
+    // Get the code owner status for all files in the change.
+    ChangeNotes changeNotes = getChangeNotes(changeId);
+    ImmutableSet<FileCodeOwnerStatus> fileCodeOwnerStatuses;
+    // Create the PerThreadCache. This is needed because we invoke CodeOwnerApprovalCheck directly,
+    // rather than making a REST call in which case the framework would take care to create it.
+    try (PerThreadCache threadLocalCache = PerThreadCache.create()) {
+      fileCodeOwnerStatuses =
+          codeOwnerApprovalCheck.getFileStatusesAsSet(changeNotes, /* start= */ 0, /* limit= */ 0);
+      // Verify that the non-existing project was cached as missing project
+      assertThat(perThreadProjectCacheFactory.getOrCreate().getMissingProjects())
+          .containsExactly(nonExistingProject);
+    }
+
+    // Verify that the correct result was returned.
+    assertThatCollection(fileCodeOwnerStatuses)
+        .containsExactly(
+            FileCodeOwnerStatus.addition(
+                path1,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    AccountTemplateUtil.getAccountTemplate(user.id()))),
+            FileCodeOwnerStatus.addition(
+                path2,
+                CodeOwnerStatus.PENDING,
+                String.format(
+                    "reviewer %s is a code owner",
+                    AccountTemplateUtil.getAccountTemplate(user.id()))));
   }
 
   private ImmutableSet<FileCodeOwnerStatus> getFileCodeOwnerStatuses(String changeId)
