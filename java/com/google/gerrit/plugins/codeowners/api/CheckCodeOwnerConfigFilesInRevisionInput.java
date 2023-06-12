@@ -14,13 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.api.config.ConsistencyCheckInfo.ConsistencyProblemInfo;
-
-/**
- * The input for the {@link
- * com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerConfigFilesInRevision} REST endpoint.
- */
-public class CheckCodeOwnerConfigFilesInRevisionInput {
   /**
    * Glob that limits the validation to code owner config files that have a path that matches this
    * glob.
