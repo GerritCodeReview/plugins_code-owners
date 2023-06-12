@@ -106,7 +106,8 @@ public class SkipCodeOwnerConfigValidationPushOption implements PluginPushOption
     } catch (PermissionBackendException e) {
       throw newInternalServerError(
           String.format(
-              "Failed to check %s capability", SkipCodeOwnerConfigValidationCapability.ID),
+              "Failed to check %s~%s capability",
+              pluginName, SkipCodeOwnerConfigValidationCapability.ID),
           e);
     }
   }
