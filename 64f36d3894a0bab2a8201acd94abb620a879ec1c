@@ -16,6 +16,24 @@
       "message": "Can we do this in the project cache instead so it covers all callers?\n\nhttps://gerrit-review.googlesource.com/c/gerrit/+/376576",
       "revId": "64f36d3894a0bab2a8201acd94abb620a879ec1c",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "34f4d6c9_610ea6d0",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-06-13T10:14:11Z",
+      "side": 1,
+      "message": "Thanks a lot for coming up with this change. Let\u0027s discuss there :)",
+      "parentUuid": "72fc01bb_4e3e16bc",
+      "revId": "64f36d3894a0bab2a8201acd94abb620a879ec1c",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
