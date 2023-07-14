@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allow;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowCapability;
@@ -23,6 +22,7 @@ import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.p
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerCheckInfoSubject.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.gerrit.acceptance.RestResponse;
@@ -59,7 +59,7 @@ import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
 import com.google.gerrit.server.account.externalids.ExternalIdFactory;
-import com.google.gerrit.server.account.externalids.ExternalIdNotes;
+import com.google.gerrit.server.account.externalids.storage.notedb.ExternalIdNotes;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -577,7 +577,8 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
-                "found the all users wildcard ('%s') as a code owner in %s which makes %s a code owner",
+                "found the all users wildcard ('%s') as a code owner in %s which makes %s a code"
+                    + " owner",
                 CodeOwnerResolver.ALL_USERS_WILDCARD,
                 getCodeOwnerConfigFilePath(ROOT_PATH),
                 CodeOwnerResolver.ALL_USERS_WILDCARD));

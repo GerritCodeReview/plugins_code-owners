@@ -30,7 +30,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.server.account.AccountsUpdate;
 import com.google.gerrit.server.account.externalids.ExternalIdFactory;
-import com.google.gerrit.server.account.externalids.ExternalIdNotes;
+import com.google.gerrit.server.account.externalids.storage.notedb.ExternalIdNotes;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
 import com.google.inject.Key;
@@ -257,7 +257,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         .hasMessagesThat()
         .contains(
             String.format(
-                "resolved code owner email %s: account %s is referenced by secondary email and the calling user %s can see secondary emails",
+                "resolved code owner email %s: account %s is referenced by secondary email and the"
+                    + " calling user %s can see secondary emails",
                 secondaryEmail, user.id(), admin.username()));
 
     // admin has the "Modify Account" global capability and hence can see the secondary email of the
@@ -273,7 +274,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         .hasMessagesThat()
         .contains(
             String.format(
-                "resolved code owner email %s: account %s is referenced by secondary email and user %s can see secondary emails",
+                "resolved code owner email %s: account %s is referenced by secondary email and user"
+                    + " %s can see secondary emails",
                 secondaryEmail, user.id(), admin.username()));
 
     // user can see its own secondary email.
@@ -287,7 +289,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         .hasMessagesThat()
         .contains(
             String.format(
-                "email %s is visible to the calling user %s: email is a secondary email that is owned by this user",
+                "email %s is visible to the calling user %s: email is a secondary email that is"
+                    + " owned by this user",
                 secondaryEmail, user.username()));
 
     // user can see its own secondary email if another user is the calling user.
@@ -302,7 +305,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         .hasMessagesThat()
         .contains(
             String.format(
-                "email %s is visible to user %s: email is a secondary email that is owned by this user",
+                "email %s is visible to user %s: email is a secondary email that is owned by this"
+                    + " user",
                 secondaryEmail, user.username()));
   }
 
@@ -324,7 +328,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         .hasMessagesThat()
         .contains(
             String.format(
-                "cannot resolve code owner email %s: account %s is referenced by secondary email but the calling user %s cannot see secondary emails",
+                "cannot resolve code owner email %s: account %s is referenced by secondary email"
+                    + " but the calling user %s cannot see secondary emails",
                 secondaryEmail, admin.id(), user.username()));
 
     // user doesn't have the "Modify Account" global capability and hence cannot see the secondary
@@ -340,7 +345,8 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
         .hasMessagesThat()
         .contains(
             String.format(
-                "cannot resolve code owner email %s: account %s is referenced by secondary email but user %s cannot see secondary emails",
+                "cannot resolve code owner email %s: account %s is referenced by secondary email"
+                    + " but user %s cannot see secondary emails",
                 secondaryEmail, admin.id(), user.username()));
   }
 
