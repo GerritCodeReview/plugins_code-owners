@@ -22,6 +22,30 @@
       },
       "revId": "bce996726b6fd8f3563f809582f7746a05a75f86",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "12fee65e_4c102f21",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnersChangeMessageUtil.java",
+        "patchSetId": 3
+      },
+      "lineNbr": 32,
+      "author": {
+        "id": 1139611
+      },
+      "writtenOn": "2023-08-04T11:12:09Z",
+      "side": 1,
+      "message": "Otherwise you end up with `foo.bar`.baz`",
+      "parentUuid": "a7642fcb_0c8c0093",
+      "range": {
+        "startLine": 32,
+        "startChar": 80,
+        "endLine": 32,
+        "endChar": 100
+      },
+      "revId": "bce996726b6fd8f3563f809582f7746a05a75f86",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
