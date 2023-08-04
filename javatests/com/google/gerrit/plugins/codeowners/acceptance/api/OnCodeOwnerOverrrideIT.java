@@ -43,7 +43,7 @@ import org.junit.Test;
 /** Acceptance test for {@code com.google.gerrit.plugins.codeowners.backend.OnCodeOwnerOverride}. */
 public class OnCodeOwnerOverrrideIT extends AbstractCodeOwnersIT {
   private static String TEST_PATH = "foo/bar.baz";
-  private static String TEST_PATH_ESCAPED = "foo/bar\\.baz";
+  private static String TEST_PATH_ESCAPED = "`foo/bar.baz`";
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;

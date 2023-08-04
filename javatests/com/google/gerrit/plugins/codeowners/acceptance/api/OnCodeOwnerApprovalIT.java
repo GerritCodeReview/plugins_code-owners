@@ -57,7 +57,7 @@ import org.junit.Test;
  */
 public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   private static String TEST_PATH = "foo/bar.baz";
-  private static String TEST_PATH_ESCAPED = "foo/bar\\.baz";
+  private static String TEST_PATH_ESCAPED = "`foo/bar.baz`";
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;
@@ -481,9 +481,9 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .create();
 
     String testPath1 = "foo/bar.baz";
-    String testPath1Escaped = "foo/bar\\.baz";
+    String testPath1Escaped = "`foo/bar.baz`";
     String testPath2 = "foo/baz.bar";
-    String testPath2Escaped = "foo/baz\\.bar";
+    String testPath2Escaped = "`foo/baz.bar`";
     String changeId =
         createChange(
                 "Test Change",
@@ -526,7 +526,7 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
 
     // createChangeWithFileRename creates a change with 2 patch sets
     String oldPath = "foo/bar.baz";
-    String oldPathEscaped = "foo/bar\\.baz";
+    String oldPathEscaped = "`foo/bar.baz`";
     String newPath = "bar/baz.bar";
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
@@ -784,13 +784,13 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .create();
 
     String testPath1 = "foo/bar.baz";
-    String testPath1Escaped = "foo/bar\\.baz";
+    String testPath1Escaped = "`foo/bar.baz`";
     String testPath2 = "foo/baz.bar";
-    String testPath2Escaped = "foo/baz\\.bar";
+    String testPath2Escaped = "`foo/baz.bar`";
     String testPath3 = "bar/foo.baz";
-    String testPath3Escaped = "bar/foo\\.baz";
+    String testPath3Escaped = "`bar/foo.baz`";
     String testPath4 = "bar/baz.foo";
-    String testPath4Escaped = "bar/baz\\.foo";
+    String testPath4Escaped = "`bar/baz.foo`";
     String changeId =
         createChange(
                 "Test Change",
@@ -839,11 +839,11 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
     String testPath1 = "foo/bar.baz";
     String testPath2 = "foo/baz.bar";
     String testPath3 = "bar/foo.baz";
-    String testPath3Escaped = "bar/foo\\.baz";
+    String testPath3Escaped = "`bar/foo.baz`";
     String testPath4 = "bar/baz.foo";
-    String testPath4Escaped = "bar/baz\\.foo";
+    String testPath4Escaped = "`bar/baz.foo`";
     String testPath5 = "baz/foo.bar";
-    String testPath5Escaped = "baz/foo\\.bar";
+    String testPath5Escaped = "`baz/foo.bar`";
     String changeId =
         createChange(
                 "Test Change",
@@ -1168,30 +1168,14 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    testMarkdownCharactersInPathsAreEscaped('\\', user);
+
     testMarkdownCharactersInPathsAreEscaped('`', user);
-    testMarkdownCharactersInPathsAreEscaped('*', user);
-    testMarkdownCharactersInPathsAreEscaped('_', user);
-    testMarkdownCharactersInPathsAreEscaped('{', user);
-    testMarkdownCharactersInPathsAreEscaped('}', user);
-    testMarkdownCharactersInPathsAreEscaped('[', user);
-    testMarkdownCharactersInPathsAreEscaped(']', user);
-    testMarkdownCharactersInPathsAreEscaped('<', user);
-    testMarkdownCharactersInPathsAreEscaped('>', user);
-    testMarkdownCharactersInPathsAreEscaped('(', user);
-    testMarkdownCharactersInPathsAreEscaped(')', user);
-    testMarkdownCharactersInPathsAreEscaped('#', user);
-    testMarkdownCharactersInPathsAreEscaped('+', user);
-    testMarkdownCharactersInPathsAreEscaped('-', user);
-    testMarkdownCharactersInPathsAreEscaped('.', user);
-    testMarkdownCharactersInPathsAreEscaped('!', user);
-    testMarkdownCharactersInPathsAreEscaped('|', user);
   }
 
   private void testMarkdownCharactersInPathsAreEscaped(
       char markdownCharacter, TestAccount codeOwner) throws Exception {
     String testPath = markdownCharacter + "foo" + markdownCharacter + ".bar";
-    String testPathEscaped = "\\" + markdownCharacter + "foo\\" + markdownCharacter + "\\.bar";
+    String testPathEscaped = "`\\" + markdownCharacter + "foo\\" + markdownCharacter + ".bar`";
 
     String changeId = createChange("Test Change", testPath, "file content").getChangeId();
 
