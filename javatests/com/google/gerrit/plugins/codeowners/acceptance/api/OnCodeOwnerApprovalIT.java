@@ -57,7 +57,7 @@ import org.junit.Test;
  */
 public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
   private static String TEST_PATH = "foo/bar.baz";
-  private static String TEST_PATH_ESCAPED = "foo/bar\\.baz";
+  private static String TEST_PATH_ESCAPED = "`foo/bar.baz`";
 
   @Inject private RequestScopeOperations requestScopeOperations;
   @Inject private ProjectOperations projectOperations;

@@ -47,7 +47,7 @@ import org.junit.Test;
  */
 public class CodeOwnersOnAddReviewerIT extends AbstractCodeOwnersIT {
   private static String TEST_PATH = "foo/bar.baz";
-  private static String TEST_PATH_ESCAPED = "foo/bar\\.baz";
+  private static String TEST_PATH_ESCAPED = "`foo/bar.baz`";
 
   @Test
   @GerritConfig(name = "plugin.code-owners.disabled", value = "true")
