@@ -1,6 +1,40 @@
 {
   "comments": [
     {
+      "unresolved": true,
+      "key": {
+        "uuid": "c3eefebc_6693b96e",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-08-04T10:34:41Z",
+      "side": 1,
+      "message": "nit: please wrap this line",
+      "revId": "0d1b6ef7049a4ac20b4f44062c3318463ff85d43",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a6bd61eb_feba27e7",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-08-04T10:34:41Z",
+      "side": 1,
+      "message": "Maybe add the bug footer to link to the issue.",
+      "revId": "0d1b6ef7049a4ac20b4f44062c3318463ff85d43",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": false,
       "key": {
         "uuid": "1ddc18e3_c189b90e",
