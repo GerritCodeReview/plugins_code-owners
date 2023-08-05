@@ -16,6 +16,23 @@
       "message": "Zuul verification takes too long, verifying manually.",
       "revId": "96a672a84fee39e3804d9e434538265df49d3dca",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c83817e8_10e16f33",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1162845
+      },
+      "writtenOn": "2023-08-05T02:28:34Z",
+      "side": 1,
+      "message": "Comment removed by: Edwin Kempin; Reason: spam",
+      "revId": "96a672a84fee39e3804d9e434538265df49d3dca",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
