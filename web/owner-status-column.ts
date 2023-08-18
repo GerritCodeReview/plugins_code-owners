@@ -302,6 +302,7 @@ export class OwnerStatusColumnContent extends BaseEl {
       return html` <gr-avatar-stack
           .accounts=${allOwners.slice(0, 3)}
           .forceFetch=${true}
+          .enableHover=${true}
         >
           <gr-tooltip-content
             slot="fallback"
