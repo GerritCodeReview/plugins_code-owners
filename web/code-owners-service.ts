@@ -205,6 +205,7 @@ export class CodeOwnerService {
       newerPatchsetUploaded: this.isOnNewerPatchset(
         ownerStatus.patch_set_number
       ),
+      accounts: ownerStatus.accounts,
     };
   }
 
@@ -288,6 +289,7 @@ export class CodeOwnerService {
           changeType: cur.change_type,
           status: oldPathStatus.status,
           newPath: newPathStatus ? newPathStatus.path : null,
+          reasons: oldPathStatus.reasons,
         });
       }
       if (newPathStatus) {
@@ -295,6 +297,7 @@ export class CodeOwnerService {
           changeType: cur.change_type,
           status: newPathStatus.status,
           oldPath: oldPathStatus ? oldPathStatus.path : null,
+          reasons: newPathStatus.reasons,
         });
       }
       return prev;

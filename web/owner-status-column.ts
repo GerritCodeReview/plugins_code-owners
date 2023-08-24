@@ -32,6 +32,8 @@ export interface PatchRange {
   basePatchNum: BasePatchSetNum;
 }
 
+const ACCOUNT_TEMPLATE_REGEX = '<GERRIT_ACCOUNT_(\\d+)>';
+
 const MAGIC_FILES = ['/COMMIT_MSG', '/MERGE_LIST', '/PATCHSET_LEVEL'];
 const STATUS_CODE = {
   NO_STATUS: 'no-status',
@@ -198,6 +200,9 @@ export class OwnerStatusColumnContent extends BaseEl {
   @property({type: String, reflect: true, attribute: 'owner-status'})
   ownerStatus?: string;
 
+  @property({type: Array})
+  ownerReasons?: Array<string>;
+
   static override get styles() {
     return [
       css`
@@ -250,11 +255,28 @@ export class OwnerStatusColumnContent extends BaseEl {
     this.computeStatus();
   }
 
+  private renderReason(reason: string): string {
+    let reasonWithAccounts = reason.replace(
+      new RegExp(ACCOUNT_TEMPLATE_REGEX, 'g'),
+      (_accountIdTemplate, accountId) => {
+        const parsedAccountId = Number(accountId);
+        const accountInText = (this.status?.accounts || {})[parsedAccountId];
+        if (!accountInText) {
+          return `Gerrit Account ${parsedAccountId}`;
+        }
+        return accountInText.display_name ?? accountInText.name ?? '';
+      }
+    );
+    return (
+      reasonWithAccounts.charAt(0).toUpperCase() + reasonWithAccounts.slice(1)
+    );
+  }
+
   override render() {
     if (
       this.computeHidden() ||
       this.status === undefined ||
-      !this.path || 
+      !this.path ||
       MAGIC_FILES.includes(this.path)
     )
       return nothing;
@@ -262,7 +284,10 @@ export class OwnerStatusColumnContent extends BaseEl {
   }
 
   private renderStatus() {
-    const info = STATUS_TOOLTIP[this.ownerStatus!];
+    let info = STATUS_TOOLTIP[this.ownerStatus!];
+    if (this.ownerReasons) {
+      info = this.ownerReasons.map(r => this.renderReason(r)).join('\n');
+    }
     const summary = STATUS_SUMMARY[this.ownerStatus!];
     const icon = STATUS_ICON[this.ownerStatus!];
     return html`
@@ -358,20 +383,29 @@ export class OwnerStatusColumnContent extends BaseEl {
 
     const statuses = (paths ?? [])
       .filter(path => !MAGIC_FILES.includes(path))
-      .map(path => this.extractStatus(codeOwnerStatusMap.get(path)!, false));
+      .map(path => ({
+        status: this.extractStatus(codeOwnerStatusMap.get(path)!, false),
+        reasons: codeOwnerStatusMap.get(path)!.reasons,
+      }));
     // oldPath may contain null, so filter that as well.
     const oldStatuses = (oldPaths ?? [])
       .filter(path => !MAGIC_FILES.includes(path) && !!path)
-      .map(path => this.extractStatus(codeOwnerStatusMap.get(path)!, true));
+      .map(path => ({
+        status: this.extractStatus(codeOwnerStatusMap.get(path)!, true),
+        reasons: codeOwnerStatusMap.get(path)!.reasons,
+      }));
     const allStatuses = statuses.concat(oldStatuses);
     if (allStatuses.length === 0) {
       return;
     }
-    this.ownerStatus = allStatuses.reduce((a, b) =>
-      STATUS_PRIORITY_ORDER.indexOf(a) < STATUS_PRIORITY_ORDER.indexOf(b)
+    const computedStatus = allStatuses.reduce((a, b) =>
+      STATUS_PRIORITY_ORDER.indexOf(a.status) <
+      STATUS_PRIORITY_ORDER.indexOf(b.status)
         ? a
         : b
     );
+    this.ownerStatus = computedStatus.status;
+    this.ownerReasons = computedStatus.reasons;
   }
 
   private extractStatus(statusItem: FileStatus, oldPath: boolean) {

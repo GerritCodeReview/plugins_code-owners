@@ -87,6 +87,7 @@ export interface Status {
   codeOwnerStatusMap: Map<string, FileStatus>;
   rawStatuses: Array<FileCodeOwnerStatusInfo>;
   newerPatchsetUploaded: boolean;
+  accounts?: {[account_id: number]: AccountInfo};
 }
 
 export interface FileStatus {
@@ -94,6 +95,7 @@ export interface FileStatus {
   status: OwnerStatus;
   newPath?: string | null;
   oldPath?: string | null;
+  reasons?: Array<string>;
 }
 
 export const BestSuggestionsLimit = 5;
