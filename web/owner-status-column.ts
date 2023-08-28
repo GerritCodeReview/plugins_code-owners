@@ -384,15 +384,15 @@ export class OwnerStatusColumnContent extends BaseEl {
     const statuses = (paths ?? [])
       .filter(path => !MAGIC_FILES.includes(path))
       .map(path => ({
-        status: this.extractStatus(codeOwnerStatusMap.get(path)!, false),
-        reasons: codeOwnerStatusMap.get(path)!.reasons,
+        status: this.extractStatus(codeOwnerStatusMap.get(path), false),
+        reasons: codeOwnerStatusMap.get(path)?.reasons,
       }));
     // oldPath may contain null, so filter that as well.
     const oldStatuses = (oldPaths ?? [])
       .filter(path => !MAGIC_FILES.includes(path) && !!path)
       .map(path => ({
-        status: this.extractStatus(codeOwnerStatusMap.get(path)!, true),
-        reasons: codeOwnerStatusMap.get(path)!.reasons,
+        status: this.extractStatus(codeOwnerStatusMap.get(path), true),
+        reasons: codeOwnerStatusMap.get(path)?.reasons,
       }));
     const allStatuses = statuses.concat(oldStatuses);
     if (allStatuses.length === 0) {
@@ -408,7 +408,7 @@ export class OwnerStatusColumnContent extends BaseEl {
     this.ownerReasons = computedStatus.reasons;
   }
 
-  private extractStatus(statusItem: FileStatus, oldPath: boolean) {
+  private extractStatus(statusItem: FileStatus | undefined, oldPath: boolean) {
     if (statusItem === undefined) {
       return STATUS_CODE.NO_STATUS;
     } else if (statusItem.status === OwnerStatus.INSUFFICIENT_REVIEWERS) {
