@@ -21,7 +21,6 @@ import {
   AccountInfo,
   BranchName,
   ChangeInfo,
-  NumericChangeId,
   RepoName,
 } from '@gerritcodereview/typescript-api/rest-api';
 
@@ -150,6 +149,10 @@ export interface OwnedPathsInfo {
   owned_changed_files?: Array<OwnedChangedFileInfo>;
 }
 
+function changeBaseURL(change: ChangeInfo): string {
+  return `/changes/${encodeURIComponent(change.project)}~${change._number}`;
+}
+
 /**
  * Responsible for communicating with the rest-api
  *
@@ -186,9 +189,9 @@ export class CodeOwnersApi {
    * @doc
    * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#change-endpoints
    */
-  listOwnerStatus(changeId: NumericChangeId): Promise<CodeOwnerStatusInfo> {
+  listOwnerStatus(change: ChangeInfo): Promise<CodeOwnerStatusInfo> {
     return this.get(
-      `/changes/${changeId}/code_owners.status?limit=100000`
+      `${changeBaseURL(change)}/code_owners.status?limit=100000`
     ) as Promise<CodeOwnerStatusInfo>;
   }
 
@@ -196,12 +199,14 @@ export class CodeOwnersApi {
    * Returns a promise fetching which files are owned by a given user as well
    * as which reviewers own which files.
    */
-  listOwnedPaths(changeId: NumericChangeId, account: AccountInfo) {
+  listOwnedPaths(change: ChangeInfo, account: AccountInfo) {
     if (!account.email && !account._account_id)
       return Promise.resolve(undefined);
     const user = account.email ?? account._account_id;
     return this.get(
-      `/changes/${changeId}/revisions/current/owned_paths?user=${user}&limit=10000&check_reviewers`
+      `${changeBaseURL(
+        change
+      )}/revisions/current/owned_paths?user=${user}&limit=10000&check_reviewers`
     ) as Promise<OwnedPathsInfo>;
   }
 
@@ -212,12 +217,12 @@ export class CodeOwnersApi {
    * https://gerrit.googlesource.com/plugins/code-owners/+/HEAD/resources/Documentation/rest-api.md#list-code-owners-for-path-in-branch
    */
   listOwnersForPath(
-    changeId: NumericChangeId,
+    change: ChangeInfo,
     path: string,
     limit: number
   ): Promise<CodeOwnersInfo> {
     return this.get(
-      `/changes/${changeId}/revisions/current/code_owners` +
+      `${changeBaseURL(change)}/revisions/current/code_owners` +
         `/${encodeURIComponent(path)}?limit=${limit}&o=DETAILS`
     ) as Promise<CodeOwnersInfo>;
   }
@@ -247,7 +252,7 @@ export class CodeOwnersApi {
       const config = (await this.get(
         `/projects/${encodeURIComponent(project)}/` +
           `branches/${encodeURIComponent(branch)}/` +
-          `code_owners.branch_config`
+          'code_owners.branch_config'
       )) as CodeOwnerBranchConfigInfo;
       return config;
     } catch (err) {
@@ -313,7 +318,7 @@ export class CodeOwnersCacheApi {
 
   listOwnerStatus(): Promise<CodeOwnerStatusInfo> {
     return this.fetchOnce('listOwnerStatus', () =>
-      this.codeOwnerApi.listOwnerStatus(this.change._number)
+      this.codeOwnerApi.listOwnerStatus(this.change)
     ) as Promise<CodeOwnerStatusInfo>;
   }
 
@@ -321,7 +326,7 @@ export class CodeOwnersCacheApi {
     const account = await this.getAccount();
     if (!account) return undefined;
     return this.fetchOnce('listOwnedPaths', () =>
-      this.codeOwnerApi.listOwnedPaths(this.change._number, account)
+      this.codeOwnerApi.listOwnedPaths(this.change, account)
     ) as Promise<OwnedPathsInfo | undefined>;
   }
 

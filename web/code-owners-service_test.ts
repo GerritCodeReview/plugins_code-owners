@@ -119,7 +119,7 @@ suite('code owners service tests', () => {
       getApiStub
         .withArgs(
           sinon.match.any,
-          `/changes/${fakeChange._number}/code_owners.status?limit=100000`,
+          `/changes/${fakeChange.project}~${fakeChange._number}/code_owners.status?limit=100000`,
           sinon.match.any,
           sinon.match.any
         )
@@ -148,7 +148,7 @@ suite('code owners service tests', () => {
       assert.isTrue(getApiStub.called);
       assert.equal(
         getApiStub.lastCall.args[1],
-        `/changes/${fakeChange._number}/code_owners.status?limit=100000`
+        `/changes/${fakeChange.project}~${fakeChange._number}/code_owners.status?limit=100000`
       );
     });
 
@@ -212,7 +212,7 @@ suite('code owners service tests', () => {
       getApiStub
         .withArgs(
           sinon.match.any,
-          `/changes/${fakeChange._number}/code_owners.status?limit=100000`,
+          `/changes/${fakeChange.project}~${fakeChange._number}/code_owners.status?limit=100000`,
           sinon.match.any,
           sinon.match.any
         )

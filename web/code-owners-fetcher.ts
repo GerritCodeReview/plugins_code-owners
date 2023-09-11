@@ -14,11 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-import {
-  ChangeInfo,
-  NumericChangeId,
-} from '@gerritcodereview/typescript-api/rest-api.js';
+import {ChangeInfo} from '@gerritcodereview/typescript-api/rest-api.js';
 import {RestPluginApi} from '@gerritcodereview/typescript-api/rest.js';
 import {CodeOwnersApi, FetchedOwner, OwnerStatus} from './code-owners-api.js';
 import {FileStatus} from './code-owners-model.js';
@@ -59,7 +55,7 @@ class OwnersFetcher {
    */
   constructor(
     private readonly codeOwnerApi: CodeOwnersApi,
-    private readonly changeId: NumericChangeId,
+    private readonly change: ChangeInfo,
     private readonly filesToFetch: Array<string>,
     private readonly ownersLimit: number,
     maxConcurrentRequest: number
@@ -76,7 +72,7 @@ class OwnersFetcher {
       try {
         this.fetchedOwners.set(filePath, {
           owners: await this.codeOwnerApi.listOwnersForPath(
-            this.changeId,
+            this.change,
             filePath,
             this.ownersLimit
           ),
@@ -178,7 +174,7 @@ export class OwnersProvider {
     this.totalFetchCount = filesToFetch.length;
     this.ownersFetcher = new OwnersFetcher(
       this.codeOwnerApi,
-      this.change._number,
+      this.change,
       filesToFetch,
       this.options.ownersLimit,
       this.options.maxConcurrentRequests
