@@ -39,7 +39,7 @@ import com.google.gerrit.server.account.AccountCache;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.AccountState;
 import com.google.gerrit.server.account.externalids.ExternalId;
-import com.google.gerrit.server.account.externalids.ExternalIds;
+import com.google.gerrit.server.account.externalids.ExternalIdCache;
 import com.google.gerrit.server.permissions.GlobalPermission;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
@@ -105,7 +105,7 @@ public class CodeOwnerResolver {
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final PermissionBackend permissionBackend;
   private final Provider<CurrentUser> currentUser;
-  private final ExternalIds externalIds;
+  private final ExternalIdCache externalIdCache;
   private final AccountCache accountCache;
   private final AccountControl.Factory accountControlFactory;
   private final PathCodeOwners.Factory pathCodeOwnersFactory;
@@ -126,7 +126,7 @@ public class CodeOwnerResolver {
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       PermissionBackend permissionBackend,
       Provider<CurrentUser> currentUser,
-      ExternalIds externalIds,
+      ExternalIdCache externalIdCache,
       AccountCache accountCache,
       AccountControl.Factory accountControlFactory,
       PathCodeOwners.Factory pathCodeOwnersFactory,
@@ -136,7 +136,7 @@ public class CodeOwnerResolver {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.permissionBackend = permissionBackend;
     this.currentUser = currentUser;
-    this.externalIds = externalIds;
+    this.externalIdCache = externalIdCache;
     this.accountCache = accountCache;
     this.accountControlFactory = accountControlFactory;
     this.pathCodeOwnersFactory = pathCodeOwnersFactory;
@@ -577,7 +577,7 @@ public class CodeOwnerResolver {
    * Looks up the external IDs for the given emails.
    *
    * <p>Looks up all emails from the external ID cache at once, which is more efficient than looking
-   * up external IDs for emails one by one (see {@link ExternalIds#byEmails(String...)}).
+   * up external IDs for emails one by one (see {@link ExternalIdCache#byEmail(String)}).
    *
    * @param messages builder to which debug messages are added
    * @param emails the emails for which the external IDs should be looked up
@@ -587,7 +587,7 @@ public class CodeOwnerResolver {
       ImmutableList.Builder<String> messages, ImmutableSet<String> emails) {
     try {
       ImmutableMap<String, Collection<ExternalId>> extIdsByEmail =
-          externalIds.byEmails(emails.toArray(new String[0])).asMap();
+          externalIdCache.byEmails(emails.toArray(new String[0])).asMap();
       emails.stream()
           .filter(email -> !extIdsByEmail.containsKey(email))
           .forEach(
@@ -845,8 +845,8 @@ public class CodeOwnerResolver {
             transientCodeOwnerCache.cacheNonResolvable(email);
             messages.add(
                 String.format(
-                    "cannot resolve code owner email %s: account %s is referenced by secondary email"
-                        + " but user %s cannot see secondary emails",
+                    "cannot resolve code owner email %s: account %s is referenced by secondary"
+                        + " email but user %s cannot see secondary emails",
                     email, accountState.account().id(), user.getLoggableName()));
             return false;
           }
