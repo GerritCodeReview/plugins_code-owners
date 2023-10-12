@@ -23,6 +23,7 @@ import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfi
 import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
+import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.update.RetryHelper;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -47,12 +48,14 @@ public class FindOwnersBackend extends AbstractFileBasedCodeOwnerBackend {
       CodeOwnerConfigFile.Factory codeOwnerConfigFileFactory,
       FindOwnersCodeOwnerConfigParser codeOwnerConfigParser,
       GitRepositoryManager repoManager,
+      ProjectCache projectCache,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
       RetryHelper retryHelper) {
     super(
         codeOwnersPluginConfiguration,
         repoManager,
+        projectCache,
         serverIdent,
         metaDataUpdateInternalFactory,
         retryHelper,

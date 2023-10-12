@@ -1925,4 +1925,32 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
             unresolvableCodeOwnerConfigReference.importMode(),
             String.format("project %s not found", nonExistingProject));
   }
+
+  @Test
+  @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
+  public void returnedOwnersFileContainsFileExtension() throws Exception {
+    CodeOwnerConfig.Key codeOwnerConfigKey =
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .folderPath("/")
+            .fileName(getCodeOwnerConfigFileName() + ".foo")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+
+    CodeOwnersInfo codeOwnersInfo = queryCodeOwners("foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id());
+
+    assertThat(codeOwnersInfo.codeOwnerConfigs).hasSize(1);
+    CodeOwnerConfigFileInfo codeOwnerConfigFileInfo = codeOwnersInfo.codeOwnerConfigs.get(0);
+    assertThat(codeOwnerConfigFileInfo)
+        .assertKey(backend, codeOwnerConfigKey)
+        .assertNoImports()
+        .assertNoImportMode()
+        .assertNoUnresolvedErrorMessage();
+  }
 }
