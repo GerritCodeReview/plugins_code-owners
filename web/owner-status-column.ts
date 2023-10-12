@@ -23,7 +23,7 @@ import {
 import {css, html, LitElement, nothing, PropertyValues} from 'lit';
 import {customElement, property} from 'lit/decorators';
 import {OwnerStatus} from './code-owners-api';
-import {FileStatus} from './code-owners-model';
+import {FileStatus, PluginState} from './code-owners-model';
 import {CodeOwnersModelMixin} from './code-owners-model-mixin';
 
 // TODO: Extend the API for plugins.
@@ -128,6 +128,7 @@ class BaseEl extends base {
     ) {
       return true;
     }
+    if (this.pluginStatus?.state !== PluginState.Enabled) return true;
     if (this.change.status === 'MERGED') return true;
     // if code-owners is not a submit requirement, don't show status column
     if (
