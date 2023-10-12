@@ -60,7 +60,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
   }
 
   @Test
-  public void getProject() throws Exception {
+  public void testGetProject() throws Exception {
     Project.NameKey project = Project.nameKey("project");
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/foo/bar/");
