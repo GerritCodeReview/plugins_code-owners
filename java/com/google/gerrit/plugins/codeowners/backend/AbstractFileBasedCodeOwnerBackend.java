@@ -31,6 +31,7 @@ import com.google.gerrit.server.GerritPersonIdent;
 import com.google.gerrit.server.IdentifiedUser;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.git.meta.MetaDataUpdate;
+import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.update.RetryHelper;
 import com.google.gerrit.server.update.context.RefUpdateContext;
 import java.io.IOException;
@@ -55,6 +56,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
   private final CodeOwnersPluginConfiguration codeOwnersPluginConfiguration;
   private final GitRepositoryManager repoManager;
+  private final ProjectCache projectCache;
   private final PersonIdent serverIdent;
   private final MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory;
   private final RetryHelper retryHelper;
@@ -65,6 +67,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
   protected AbstractFileBasedCodeOwnerBackend(
       CodeOwnersPluginConfiguration codeOwnersPluginConfiguration,
       GitRepositoryManager repoManager,
+      ProjectCache projectCache,
       @GerritPersonIdent PersonIdent serverIdent,
       MetaDataUpdate.InternalFactory metaDataUpdateInternalFactory,
       RetryHelper retryHelper,
@@ -73,6 +76,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
       CodeOwnerConfigParser codeOwnerConfigParser) {
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
+    this.projectCache = projectCache;
     this.serverIdent = serverIdent;
     this.metaDataUpdateInternalFactory = metaDataUpdateInternalFactory;
     this.retryHelper = retryHelper;
@@ -132,7 +136,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
   @Override
   public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-    return codeOwnerConfigKey.filePath(defaultFileName);
+    return codeOwnerConfigKey.filePath(getFileName(codeOwnerConfigKey.project()));
   }
 
   @Override
@@ -191,9 +195,13 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
 
   private String getFileName(Project.NameKey project) {
     return defaultFileName
-        + codeOwnersPluginConfiguration
-            .getProjectConfig(project)
-            .getFileExtension()
+        + projectCache
+            .get(project)
+            .flatMap(
+                projectState ->
+                    codeOwnersPluginConfiguration
+                        .getProjectConfig(projectState.getNameKey())
+                        .getFileExtension())
             .map(ext -> "." + ext)
             .orElse("");
   }
@@ -254,11 +262,10 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
                   codeOwnerConfigKey)
               .setCodeOwnerConfigUpdate(codeOwnerConfigUpdate);
 
-      try (
-          RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
+      try (RefUpdateContext pluginCtx = RefUpdateContext.open(PLUGIN);
           RefUpdateContext ctx = RefUpdateContext.open(VERSIONED_META_DATA_CHANGE);
           MetaDataUpdate metaDataUpdate =
-          createMetaDataUpdate(codeOwnerConfigKey.project(), repository, currentUser)) {
+              createMetaDataUpdate(codeOwnerConfigKey.project(), repository, currentUser)) {
         codeOwnerConfigFile.commit(metaDataUpdate);
       }
 
