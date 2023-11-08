@@ -449,10 +449,7 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
                 .codeOwnerConfig(createCodeOwnerConfigKey("/"))
                 .getJGitFilePath(),
             "INVALID");
-    assertOkWithHints(
-        r,
-        "skipping validation of code owner config files",
-        "code-owners functionality is disabled");
+    assertOkWithoutMessages(r);
   }
 
   @Test
