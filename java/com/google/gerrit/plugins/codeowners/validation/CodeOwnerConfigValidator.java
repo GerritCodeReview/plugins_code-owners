@@ -463,12 +463,9 @@ public class CodeOwnerConfigValidator
         codeOwnersPluginConfiguration.getProjectConfig(branchNameKey.project());
     logger.atFine().log("force = %s", force);
     if (!force && codeOwnersConfig.isDisabled(branchNameKey.branch())) {
-      return Optional.of(
-          ValidationResult.create(
-              pluginName,
-              "skipping validation of code owner config files",
-              new CommitValidationMessage(
-                  "code-owners functionality is disabled", ValidationMessage.Type.HINT)));
+      logger.atFine().log(
+          "skipping validation of code owner config files due to code-owners functionality is disabled");
+      return Optional.empty();
     }
 
     try {
