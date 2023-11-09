@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "36eb13ab_3b1561d5",
+        "filename": "java/com/google/gerrit/plugins/codeowners/validation/CodeOwnerConfigValidator.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 466,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2023-11-09T07:11:45Z",
+      "side": 1,
+      "message": "Could we please add a fine logging then, so that it\u0027s visible from traces that the code owners validation is skipped because the code owners functionality is disabled?",
+      "revId": "9f56ac80ab9517ab15ab3b5e316fb7be7ca9e342",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
