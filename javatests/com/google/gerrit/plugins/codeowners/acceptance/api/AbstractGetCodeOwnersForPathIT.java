@@ -1578,6 +1578,22 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .element(1)
         .hasAccountIdThat()
         .isAnyOf(user.id(), user2.id());
+
+    codeOwnersInfo =
+        queryCodeOwners(
+            getCodeOwnersApi()
+                .query()
+                .withHighestScoreOnly(/* highestScoreOnly= */ true)
+                .withLimit(1),
+            "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo).hasCodeOwnersThat().hasSize(1);
+    // the first 2 code owners have the same scoring, so their order is random and we don't know
+    // which of them is returned
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .element(0)
+        .hasAccountIdThat()
+        .isAnyOf(user.id(), user2.id());
   }
 
   @Test
