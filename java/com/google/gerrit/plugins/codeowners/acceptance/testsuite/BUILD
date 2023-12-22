@@ -10,6 +10,7 @@ java_library(
     srcs = glob(["*.java"]),
     deps = [
         "//java/com/google/gerrit/acceptance:lib",
+        "//lib/errorprone:annotations",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],

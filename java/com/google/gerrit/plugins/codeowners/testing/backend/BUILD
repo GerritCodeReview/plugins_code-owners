@@ -13,6 +13,7 @@ java_library(
         "//java/com/google/gerrit/server",
         "//lib:jgit",
         "//lib:jgit-junit",
+        "//lib/errorprone:annotations",
         "//lib/guice",
         "//lib/guice:guice-assistedinject",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
