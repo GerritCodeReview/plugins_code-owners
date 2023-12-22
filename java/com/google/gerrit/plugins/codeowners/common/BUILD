@@ -6,6 +6,7 @@ java_library(
     srcs = glob(["*.java"]),
     visibility = ["//visibility:public"],
     deps = PLUGIN_DEPS_NEVERLINK + [
+        "//lib/errorprone:annotations",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/util",
     ],
 )

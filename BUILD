@@ -23,6 +23,7 @@ gerrit_plugin(
     resource_strip_prefix = "plugins/code-owners/resources",
     resources = glob(["resources/**/*"]),
     deps = [
+        "//lib/errorprone:annotations",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/api/impl",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/backend",
         "//plugins/code-owners/java/com/google/gerrit/plugins/codeowners/common",
