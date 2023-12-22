@@ -5,5 +5,7 @@ java_library(
     name = "metrics",
     srcs = glob(["*.java"]),
     visibility = ["//visibility:public"],
-    deps = PLUGIN_DEPS_NEVERLINK,
+    deps = PLUGIN_DEPS_NEVERLINK + [
+        "//lib/errorprone:annotations",
+    ],
 )
