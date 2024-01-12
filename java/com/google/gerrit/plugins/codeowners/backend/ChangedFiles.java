@@ -31,8 +31,10 @@ import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.git.GitRepositoryManager;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.patch.DiffOperations;
+import com.google.gerrit.server.patch.DiffOperationsForCommitValidation;
 import com.google.gerrit.server.patch.DiffOptions;
 import com.google.gerrit.server.patch.filediff.FileDiffOutput;
+import com.google.gerrit.server.patch.gitdiff.ModifiedFile;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
@@ -112,7 +114,9 @@ public class ChangedFiles {
                 project, revision, 1, DiffOptions.DEFAULTS);
       }
 
-      return toChangedFiles(filterOutMagicFilesAndSort(fileDiffOutputs)).collect(toImmutableList());
+      return fileDiffOutputToChangedFiles(
+              filterOutMagicFilesFromFileDiffOutputAndSort(fileDiffOutputs))
+          .collect(toImmutableList());
     }
   }
 
@@ -157,6 +161,60 @@ public class ChangedFiles {
         revisionResource.getProject(), revisionResource.getPatchSet().commitId());
   }
 
+  /**
+   * Gets the changed files from {@link DiffOperationsForCommitValidation} which needs to be used to
+   * retrieve modified files during commit validation.
+   *
+   * <p>Rename detection is enabled.
+   *
+   * @param diffOperationsForCommitValidation the {@link DiffOperationsForCommitValidation} instance
+   *     (e.g. from {@link com.google.gerrit.server.events.CommitReceivedEvent#diffOperations}) to
+   *     be used to retrieve the modified files
+   * @param project the project
+   * @param revision the revision for which the changed files should be retrieved
+   * @param mergeCommitStrategy the merge commit strategy that should be used to compute the changed
+   *     files for merge commits
+   * @return the files that have been changed in the given revision, sorted alphabetically by path
+   */
+  public ImmutableList<ChangedFile> getDuringCommitValidation(
+      DiffOperationsForCommitValidation diffOperationsForCommitValidation,
+      Project.NameKey project,
+      ObjectId revision,
+      MergeCommitStrategy mergeCommitStrategy)
+      throws IOException, DiffNotAvailableException {
+    requireNonNull(project, "project");
+    requireNonNull(revision, "revision");
+    requireNonNull(mergeCommitStrategy, "mergeCommitStrategy");
+
+    try (Timer0.Context ctx = codeOwnerMetrics.getChangedFiles.start()) {
+      Map<String, ModifiedFile> modifiedFiles;
+      if (mergeCommitStrategy.equals(MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION)
+          || isInitialCommit(project, revision)) {
+        // Use parentNum=0 to do the comparison against the default base.
+        // For non-merge commits the default base is the only parent (aka parent 1).
+        // Initial commits are supported when using parentNum=0.
+        // For merge commits the default base is the auto-merge commit which should be used as base
+        // if the merge commit strategy is FILES_WITH_CONFLICT_RESOLUTION.
+        modifiedFiles =
+            diffOperationsForCommitValidation.loadModifiedFilesAgainstParentIfNecessary(
+                project, revision, /* parentNum=*/ 0, /* enableRenameDetection= */ true);
+      } else {
+        checkState(mergeCommitStrategy.equals(MergeCommitStrategy.ALL_CHANGED_FILES));
+        // Always use parent 1 to do the comparison.
+        // Non-merge commits should always be compared against the first parent (initial commits are
+        // handled above).
+        // For merge commits also the first parent should be used if the merge commit strategy is
+        // ALL_CHANGED_FILES.
+        modifiedFiles =
+            diffOperationsForCommitValidation.loadModifiedFilesAgainstParentIfNecessary(
+                project, revision, 1, /* enableRenameDetection= */ true);
+      }
+
+      return modifiedFilesToChangedFiles(filterOutMagicFilesFromModifiedFilesAndSort(modifiedFiles))
+          .collect(toImmutableList());
+    }
+  }
+
   private boolean isInitialCommit(Project.NameKey project, ObjectId objectId) throws IOException {
     try (Repository repo = repoManager.openRepository(project);
         RevWalk revWalk = new RevWalk(repo)) {
@@ -164,15 +222,27 @@ public class ChangedFiles {
     }
   }
 
-  private Stream<Map.Entry<String, FileDiffOutput>> filterOutMagicFilesAndSort(
+  private Stream<Map.Entry<String, FileDiffOutput>> filterOutMagicFilesFromFileDiffOutputAndSort(
       Map<String, FileDiffOutput> fileDiffOutputs) {
     return fileDiffOutputs.entrySet().stream()
         .filter(e -> !Patch.isMagic(e.getKey()))
         .sorted(comparing(Map.Entry::getKey));
   }
 
-  private Stream<ChangedFile> toChangedFiles(
+  private Stream<ChangedFile> fileDiffOutputToChangedFiles(
       Stream<Map.Entry<String, FileDiffOutput>> fileDiffOutputs) {
     return fileDiffOutputs.map(Map.Entry::getValue).map(ChangedFile::create);
+  }
+
+  private Stream<Map.Entry<String, ModifiedFile>> filterOutMagicFilesFromModifiedFilesAndSort(
+      Map<String, ModifiedFile> modifiedFiles) {
+    return modifiedFiles.entrySet().stream()
+        .filter(e -> !Patch.isMagic(e.getKey()))
+        .sorted(comparing(Map.Entry::getKey));
+  }
+
+  private Stream<ChangedFile> modifiedFilesToChangedFiles(
+      Stream<Map.Entry<String, ModifiedFile>> modifiedFiles) {
+    return modifiedFiles.map(Map.Entry::getValue).map(ChangedFile::create);
   }
 }
