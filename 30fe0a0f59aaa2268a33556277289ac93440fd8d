@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "08a3861f_9fef81af",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-01-12T10:55:29Z",
+      "side": 1,
+      "message": "Requires https://gerrit-review.googlesource.com/c/gerrit/+/402302 to compile.\nI\u0027ve manually verified this change against that change.",
+      "revId": "30fe0a0f59aaa2268a33556277289ac93440fd8d",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
