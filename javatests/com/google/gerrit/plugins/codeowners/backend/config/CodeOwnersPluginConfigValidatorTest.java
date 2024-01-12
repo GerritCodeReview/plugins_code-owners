@@ -23,11 +23,16 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.FallbackCodeOwners;
 import com.google.gerrit.server.events.CommitReceivedEvent;
 import com.google.gerrit.server.git.validators.CommitValidationException;
+import com.google.gerrit.server.patch.DiffOperationsForCommitValidation;
+import com.google.gerrit.server.update.RepoView;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Config;
+import org.eclipse.jgit.lib.ObjectInserter;
+import org.eclipse.jgit.lib.ObjectReader;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
+import org.eclipse.jgit.revwalk.RevWalk;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -39,11 +44,14 @@ import org.junit.Test;
  */
 public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest {
   private CodeOwnersPluginConfigValidator codeOwnersPluginConfigValidator;
+  private DiffOperationsForCommitValidation.Factory diffOperationsForCommitValidationFactory;
 
   @Before
   public void setUpCodeOwnersPlugin() throws Exception {
     codeOwnersPluginConfigValidator =
         plugin.getSysInjector().getInstance(CodeOwnersPluginConfigValidator.class);
+    diffOperationsForCommitValidationFactory =
+        plugin.getSysInjector().getInstance(DiffOperationsForCommitValidation.Factory.class);
   }
 
   @Test
@@ -55,7 +63,10 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
         GeneralConfig.KEY_FALLBACK_CODE_OWNERS,
         FallbackCodeOwners.ALL_USERS);
     try (TestRepository<Repository> testRepo =
-        new TestRepository<>(repoManager.openRepository(project))) {
+            new TestRepository<>(repoManager.openRepository(project));
+        ObjectInserter ins = testRepo.getRepository().newObjectInserter();
+        ObjectReader reader = ins.newReader();
+        RevWalk revWalk = new RevWalk(reader)) {
       RevCommit commit =
           testRepo
               .commit()
@@ -70,6 +81,9 @@ public class CodeOwnersPluginConfigValidatorTest extends AbstractCodeOwnersTest 
       receiveEvent.commit = commit;
       receiveEvent.revWalk = testRepo.getRevWalk();
       receiveEvent.repoConfig = new Config();
+      receiveEvent.diffOperations =
+          diffOperationsForCommitValidationFactory.create(
+              new RepoView(testRepo.getRepository(), revWalk, ins), ins);
       CommitValidationException exception =
           assertThrows(
               CommitValidationException.class,

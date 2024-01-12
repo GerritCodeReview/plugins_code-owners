@@ -25,6 +25,7 @@ import com.google.gerrit.entities.Patch;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.patch.PatchListEntry;
 import com.google.gerrit.server.patch.filediff.FileDiffOutput;
+import com.google.gerrit.server.patch.gitdiff.ModifiedFile;
 import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.diff.DiffEntry;
@@ -175,6 +176,20 @@ public abstract class ChangedFile {
         convertPathFromFileDiffOutput(fileDiffOutput.newPath()),
         convertPathFromFileDiffOutput(fileDiffOutput.oldPath()),
         CHANGE_TYPE.get(fileDiffOutput.changeType()));
+  }
+
+  /**
+   * Creates a {@link ChangedFile} instance from a {@link ModifiedFile}.
+   *
+   * @param modifiedFile the modified file
+   */
+  public static ChangedFile create(ModifiedFile modifiedFile) {
+    requireNonNull(modifiedFile, "modifiedFile");
+
+    return new AutoValue_ChangedFile(
+        convertPathFromFileDiffOutput(modifiedFile.newPath()),
+        convertPathFromFileDiffOutput(modifiedFile.oldPath()),
+        CHANGE_TYPE.get(modifiedFile.changeType()));
   }
 
   /** Converts the given string path to an absolute path. */

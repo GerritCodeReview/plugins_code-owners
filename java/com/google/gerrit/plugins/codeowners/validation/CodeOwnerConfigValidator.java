@@ -60,6 +60,7 @@ import com.google.gerrit.server.events.RefReceivedEvent;
 import com.google.gerrit.server.git.CodeReviewCommit;
 import com.google.gerrit.server.git.CodeReviewCommit.CodeReviewRevWalk;
 import com.google.gerrit.server.git.GitRepositoryManager;
+import com.google.gerrit.server.git.InMemoryInserter;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
@@ -72,12 +73,14 @@ import com.google.gerrit.server.logging.TraceContext;
 import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
+import com.google.gerrit.server.patch.DiffOperationsForCommitValidation;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
 import com.google.gerrit.server.permissions.ProjectPermission;
 import com.google.gerrit.server.permissions.RefPermission;
 import com.google.gerrit.server.project.ProjectCache;
 import com.google.gerrit.server.project.ProjectState;
+import com.google.gerrit.server.update.RepoView;
 import com.google.gerrit.server.validators.ValidationException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -154,6 +157,7 @@ public class CodeOwnerConfigValidator
   private final SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption;
   private final CodeOwnerMetrics codeOwnerMetrics;
   private final DynamicItem<UrlFormatter> urlFormatter;
+  private final DiffOperationsForCommitValidation.Factory diffOperationsForCommitValidationFactory;
 
   @Inject
   CodeOwnerConfigValidator(
@@ -169,7 +173,8 @@ public class CodeOwnerConfigValidator
       IdentifiedUser.GenericFactory userFactory,
       SkipCodeOwnerConfigValidationPushOption skipCodeOwnerConfigValidationPushOption,
       CodeOwnerMetrics codeOwnerMetrics,
-      DynamicItem<UrlFormatter> urlFormatter) {
+      DynamicItem<UrlFormatter> urlFormatter,
+      DiffOperationsForCommitValidation.Factory diffOperationsForCommitValidationFactory) {
     this.pluginName = pluginName;
     this.codeOwnersPluginConfiguration = codeOwnersPluginConfiguration;
     this.repoManager = repoManager;
@@ -183,6 +188,7 @@ public class CodeOwnerConfigValidator
     this.skipCodeOwnerConfigValidationPushOption = skipCodeOwnerConfigValidationPushOption;
     this.codeOwnerMetrics = codeOwnerMetrics;
     this.urlFormatter = urlFormatter;
+    this.diffOperationsForCommitValidationFactory = diffOperationsForCommitValidationFactory;
   }
 
   @Override
@@ -216,6 +222,7 @@ public class CodeOwnerConfigValidator
         try {
           validationResult =
               validateCodeOwnerConfig(
+                  receiveEvent.diffOperations,
                   receiveEvent.getBranchNameKey(),
                   receiveEvent.commit,
                   receiveEvent.user,
@@ -298,13 +305,17 @@ public class CodeOwnerConfigValidator
                     new CommitValidationMessage(
                         "code owners config validation is disabled", ValidationMessage.Type.HINT)));
       } else {
-        try {
+        try (InMemoryInserter ins = new InMemoryInserter(repository);
+            ObjectReader reader = ins.newReader();
+            RevWalk rw = new RevWalk(reader)) {
           ChangeNotes changeNotes =
               changeNotesFactory.create(projectState.getNameKey(), commit.change().getId());
           PatchSet patchSet = patchSetUtil.get(changeNotes, patchSetId);
           IdentifiedUser patchSetUploader = userFactory.create(patchSet.uploader());
           validationResult =
               validateCodeOwnerConfig(
+                  diffOperationsForCommitValidationFactory.create(
+                      new RepoView(repository, rw, ins), ins),
                   branchNameKey,
                   commit,
                   patchSetUploader,
@@ -378,9 +389,14 @@ public class CodeOwnerConfigValidator
       } else {
         try {
           try (Repository repo = repoManager.openRepository(refReceivedEvent.getProjectNameKey());
-              RevWalk revWalk = new RevWalk(repo)) {
+              InMemoryInserter ins = new InMemoryInserter(repo);
+              ObjectReader reader = ins.newReader();
+              RevWalk rw = new RevWalk(reader);
+              RevWalk revWalk = new RevWalk(reader)) {
             validationResult =
                 validateCodeOwnerConfig(
+                    diffOperationsForCommitValidationFactory.create(
+                        new RepoView(repo, rw, ins), ins),
                     refReceivedEvent.getBranchNameKey(),
                     revWalk.parseCommit(refReceivedEvent.command.getNewId()),
                     refReceivedEvent.user,
@@ -441,6 +457,8 @@ public class CodeOwnerConfigValidator
   /**
    * Validates the code owner config files which are newly added or modified in the given commit.
    *
+   * @param diffOperationsForCommitValidation the {@link DiffOperationsForCommitValidation} instance
+   *     to be used to retrieve the modified files
    * @param branchNameKey the project and branch that contains the provided commit or for which the
    *     commit is being pushed
    * @param revCommit the commit for which newly added and modified code owner configs should be
@@ -453,6 +471,7 @@ public class CodeOwnerConfigValidator
    *     the given commit doesn't contain newly added or modified code owner configs
    */
   private Optional<ValidationResult> validateCodeOwnerConfig(
+      DiffOperationsForCommitValidation diffOperationsForCommitValidation,
       BranchNameKey branchNameKey,
       RevCommit revCommit,
       IdentifiedUser user,
@@ -514,7 +533,10 @@ public class CodeOwnerConfigValidator
           isBranchCreation
               ? getAllCodeOwnerConfigFiles(codeOwnerBackend, branchNameKey.project(), revCommit)
               : getModifiedCodeOwnerConfigFiles(
-                  codeOwnerBackend, branchNameKey.project(), revCommit);
+                  diffOperationsForCommitValidation,
+                  codeOwnerBackend,
+                  branchNameKey.project(),
+                  revCommit);
 
       if (codeOwnerConfigFilesToValidate.isEmpty()) {
         return Optional.empty();
@@ -559,7 +581,10 @@ public class CodeOwnerConfigValidator
   }
 
   public ImmutableList<ChangedFile> getModifiedCodeOwnerConfigFiles(
-      CodeOwnerBackend codeOwnerBackend, Project.NameKey project, ObjectId revCommit)
+      DiffOperationsForCommitValidation diffOperationsForCommitValidation,
+      CodeOwnerBackend codeOwnerBackend,
+      Project.NameKey project,
+      ObjectId revCommit)
       throws IOException, DiffNotAvailableException {
     // For merge commits, always do the comparison against the destination branch
     // (MergeCommitStrategy.ALL_CHANGED_FILES). Doing the comparison against the auto-merge
@@ -568,7 +593,12 @@ public class CodeOwnerConfigValidator
     // trying to get the auto merge would fail with a missing object exception. This is why we
     // use MergeCommitStrategy.ALL_CHANGED_FILES here even if
     // MergeCommitStrategy.FILES_WITH_CONFLICT_RESOLUTION is configured.
-    return changedFiles.getFromDiffCache(project, revCommit, MergeCommitStrategy.ALL_CHANGED_FILES)
+    return changedFiles
+        .getDuringCommitValidation(
+            diffOperationsForCommitValidation,
+            project,
+            revCommit,
+            MergeCommitStrategy.ALL_CHANGED_FILES)
         .stream()
         // filter out deletions (files without new path)
         .filter(changedFile -> changedFile.newPath().isPresent())
