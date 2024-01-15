@@ -671,7 +671,8 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     assertThat(r.getMessages())
         .contains(
             "The value for max paths in change messages 'INVALID' that is configured in"
-                + " code-owners.config (parameter codeOwners.maxPathsInChangeMessages) is invalid.");
+                + " code-owners.config (parameter codeOwners.maxPathsInChangeMessages) is"
+                + " invalid.");
   }
 
   @Test
@@ -865,7 +866,8 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
     r.assertMessage(
         String.format(
             "hint: commit %s: Section 'codeOwners' in project.config is ignored and has no effect."
-                + " The configuration for the code-owners plugin must be done in code-owners.config.",
+                + " The configuration for the code-owners plugin must be done in"
+                + " code-owners.config.",
             ObjectIds.abbreviateName(r.getCommit(), testRepo.getRevWalk().getObjectReader())));
   }
 
