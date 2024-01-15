@@ -16,11 +16,11 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.extensions.restapi.MethodNotAllowedException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
+import com.google.gerrit.truth.OptionalSubject;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -65,7 +65,7 @@ public class CodeOwnersPluginGlobalConfigSnapshotTest extends AbstractCodeOwners
 
   @Test
   public void codeOwnerConfigCacheSizeIsLimitedByDefault() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize())
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize())
         .value()
         .isEqualTo(CodeOwnersPluginGlobalConfigSnapshot.DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
   }
@@ -73,26 +73,28 @@ public class CodeOwnersPluginGlobalConfigSnapshotTest extends AbstractCodeOwners
   @Test
   @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "0")
   public void codeOwnerConfigCacheSizeIsUnlimited() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize()).isEmpty();
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize()).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "10")
   public void codeOwnerConfigCacheSizeIsLimited() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize()).value().isEqualTo(10);
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize())
+        .value()
+        .isEqualTo(10);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.maxCodeOwnerConfigCacheSize", value = "invalid")
   public void maxCodeOwnerConfigCacheSize_invalidConfig() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize())
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerConfigCacheSize())
         .value()
         .isEqualTo(CodeOwnersPluginGlobalConfigSnapshot.DEFAULT_MAX_CODE_OWNER_CONFIG_CACHE_SIZE);
   }
 
   @Test
   public void codeOwnerCacheSizeIsLimitedByDefault() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize())
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize())
         .value()
         .isEqualTo(CodeOwnersPluginGlobalConfigSnapshot.DEFAULT_MAX_CODE_OWNER_CACHE_SIZE);
   }
@@ -100,19 +102,19 @@ public class CodeOwnersPluginGlobalConfigSnapshotTest extends AbstractCodeOwners
   @Test
   @GerritConfig(name = "plugin.code-owners.maxCodeOwnerCacheSize", value = "0")
   public void codeOwnerCacheSizeIsUnlimited() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize()).isEmpty();
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize()).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.maxCodeOwnerCacheSize", value = "10")
   public void codeOwnerCacheSizeIsLimited() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize()).value().isEqualTo(10);
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize()).value().isEqualTo(10);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.maxCodeOwnerCacheSize", value = "invalid")
   public void maxCodeOwnerCacheSize_invalidConfig() throws Exception {
-    assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize())
+    OptionalSubject.assertThat(cfgSnapshot().getMaxCodeOwnerCacheSize())
         .value()
         .isEqualTo(CodeOwnersPluginGlobalConfigSnapshot.DEFAULT_MAX_CODE_OWNER_CACHE_SIZE);
   }

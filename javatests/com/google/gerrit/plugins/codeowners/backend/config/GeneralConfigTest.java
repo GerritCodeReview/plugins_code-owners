@@ -39,7 +39,6 @@ import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.KEY_REJECT_NON_RESOLVABLE_IMPORTS;
 import static com.google.gerrit.plugins.codeowners.backend.config.GeneralConfig.SECTION_VALIDATION;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -54,6 +53,7 @@ import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.testing.ConfigSuite;
+import com.google.gerrit.truth.OptionalSubject;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -84,14 +84,16 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noFileExtensionConfigured() throws Exception {
-    assertThat(generalConfig.getFileExtension(new Config())).isEmpty();
+    OptionalSubject.assertThat(generalConfig.getFileExtension(new Config())).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
   public void fileExtensionIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
       throws Exception {
-    assertThat(generalConfig.getFileExtension(new Config())).value().isEqualTo("foo");
+    OptionalSubject.assertThat(generalConfig.getFileExtension(new Config()))
+        .value()
+        .isEqualTo("foo");
   }
 
   @Test
@@ -99,7 +101,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
   public void fileExtensionInPluginConfigOverridesFileExtensionInGerritConfig() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, /* subsection= */ null, KEY_FILE_EXTENSION, "bar");
-    assertThat(generalConfig.getFileExtension(cfg)).value().isEqualTo("bar");
+    OptionalSubject.assertThat(generalConfig.getFileExtension(cfg)).value().isEqualTo("bar");
   }
 
   @Test
@@ -401,7 +403,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noBranchSpecificRejectNonResolvableCodeOwnersConfiguration() throws Exception {
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), new Config()))
         .isEmpty();
@@ -416,7 +418,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/foo",
         KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -431,7 +433,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/foo/*",
         KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -446,7 +448,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*foo.*",
         KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -461,7 +463,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/[",
         KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -476,7 +478,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/master",
         KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -492,7 +494,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/*",
         KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -508,7 +510,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*bar.*",
         KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "foobarbaz"), cfg))
         .value()
@@ -521,7 +523,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/master", KEY_REJECT_NON_RESOLVABLE_CODE_OWNERS, "INVALID");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -549,7 +551,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
     // it is non-deterministic which of the branch-specific configurations takes precedence, but
     // since they all configure the same value it's not important for this assertion
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableCodeOwnersForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -638,7 +640,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noBranchSpecificRejectNonResolvableImportsConfiguration() throws Exception {
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), new Config()))
         .isEmpty();
@@ -653,7 +655,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/foo",
         KEY_REJECT_NON_RESOLVABLE_IMPORTS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -668,7 +670,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/foo/*",
         KEY_REJECT_NON_RESOLVABLE_IMPORTS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -683,7 +685,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*foo.*",
         KEY_REJECT_NON_RESOLVABLE_IMPORTS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -695,7 +697,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setBoolean(
         SECTION_VALIDATION, "^refs/heads/[", KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -710,7 +712,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/master",
         KEY_REJECT_NON_RESOLVABLE_IMPORTS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -723,7 +725,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setBoolean(
         SECTION_VALIDATION, "refs/heads/*", KEY_REJECT_NON_RESOLVABLE_IMPORTS, /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -739,7 +741,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*bar.*",
         KEY_REJECT_NON_RESOLVABLE_IMPORTS,
         /* value= */ false);
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "foobarbaz"), cfg))
         .value()
@@ -752,7 +754,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/master", KEY_REJECT_NON_RESOLVABLE_IMPORTS, "INVALID");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -777,7 +779,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
     // it is non-deterministic which of the branch-specific configurations takes precedence, but
     // since they all configure the same value it's not important for this assertion
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getRejectNonResolvableImportsForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -889,7 +891,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noBranchSpecificEnableValidationOnBranchCreationConfiguration() throws Exception {
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), new Config()))
         .isEmpty();
@@ -901,7 +903,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/foo", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -913,7 +915,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/foo/*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -928,7 +930,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*foo.*",
         KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
         "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -940,7 +942,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "^refs/heads/[", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -952,7 +954,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -965,7 +967,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -981,7 +983,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*bar.*",
         KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
         "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "foobarbaz"), cfg))
         .value()
@@ -997,7 +999,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/master",
         KEY_ENABLE_VALIDATION_ON_BRANCH_CREATION,
         "INVALID");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1016,7 +1018,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
     // it is non-deterministic which of the branch-specific configurations takes precedence, but
     // since they all configure the same value it's not important for this assertion
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForBranchCreationForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -1117,7 +1119,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noBranchSpecificEnableValidationOnCommitReceivedConfiguration() throws Exception {
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), new Config()))
         .isEmpty();
@@ -1129,7 +1131,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/foo", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1141,7 +1143,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/foo/*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1156,7 +1158,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*foo.*",
         KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
         "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1168,7 +1170,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "^refs/heads/[", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1180,7 +1182,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -1193,7 +1195,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -1209,7 +1211,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "^refs/heads/.*bar.*",
         KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
         "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "foobarbaz"), cfg))
         .value()
@@ -1225,7 +1227,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/master",
         KEY_ENABLE_VALIDATION_ON_COMMIT_RECEIVED,
         "INVALID");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1244,7 +1246,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
     // it is non-deterministic which of the branch-specific configurations takes precedence, but
     // since they all configure the same value it's not important for this assertion
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -1343,7 +1345,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noBranchSpecificEnableValidationOnSubmitConfiguration() throws Exception {
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), new Config()))
         .isEmpty();
@@ -1354,7 +1356,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_VALIDATION, "refs/heads/foo", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1365,7 +1367,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_VALIDATION, "refs/heads/foo/*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1377,7 +1379,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "^refs/heads/.*foo.*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForCommitReceivedForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1388,7 +1390,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_VALIDATION, "^refs/heads/[", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1399,7 +1401,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -1411,7 +1413,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_VALIDATION, "refs/heads/*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -1423,7 +1425,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "^refs/heads/.*bar.*", KEY_ENABLE_VALIDATION_ON_SUBMIT, "false");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "foobarbaz"), cfg))
         .value()
@@ -1436,7 +1438,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_VALIDATION, "refs/heads/master", KEY_ENABLE_VALIDATION_ON_SUBMIT, "INVALID");
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .isEmpty();
@@ -1453,7 +1455,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
     // it is non-deterministic which of the branch-specific configurations takes precedence, but
     // since they all configure the same value it's not important for this assertion
-    assertThat(
+    OptionalSubject.assertThat(
             generalConfig.getCodeOwnerConfigValidationPolicyForSubmitForBranch(
                 BranchNameKey.create(project, "master"), cfg))
         .value()
@@ -1856,14 +1858,14 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noOverrideInfoUrlConfigured() throws Exception {
-    assertThat(generalConfig.getOverrideInfoUrl(new Config())).isEmpty();
+    OptionalSubject.assertThat(generalConfig.getOverrideInfoUrl(new Config())).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.overrideInfoUrl", value = "http://foo.example.com")
   public void overrideInfoIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
       throws Exception {
-    assertThat(generalConfig.getOverrideInfoUrl(new Config()))
+    OptionalSubject.assertThat(generalConfig.getOverrideInfoUrl(new Config()))
         .value()
         .isEqualTo("http://foo.example.com");
   }
@@ -1878,7 +1880,9 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         /* subsection= */ null,
         KEY_OVERRIDE_INFO_URL,
         "http://bar.example.com");
-    assertThat(generalConfig.getOverrideInfoUrl(cfg)).value().isEqualTo("http://bar.example.com");
+    OptionalSubject.assertThat(generalConfig.getOverrideInfoUrl(cfg))
+        .value()
+        .isEqualTo("http://bar.example.com");
   }
 
   @Test
@@ -1892,7 +1896,8 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void noInvalidCodeOwnerConfigInfoUrlConfigured() throws Exception {
-    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config())).isEmpty();
+    OptionalSubject.assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config()))
+        .isEmpty();
   }
 
   @Test
@@ -1901,7 +1906,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
       value = "http://foo.example.com")
   public void invalidCodeOwnerConfigInfoIsRetrievedFromGerritConfigIfNotSpecifiedOnProjectLevel()
       throws Exception {
-    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config()))
+    OptionalSubject.assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(new Config()))
         .value()
         .isEqualTo("http://foo.example.com");
   }
@@ -1918,7 +1923,7 @@ public class GeneralConfigTest extends AbstractCodeOwnersTest {
         /* subsection= */ null,
         KEY_INVALID_CODE_OWNER_CONFIG_INFO_URL,
         "http://bar.example.com");
-    assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(cfg))
+    OptionalSubject.assertThat(generalConfig.getInvalidCodeOwnerConfigInfoUrl(cfg))
         .value()
         .isEqualTo("http://bar.example.com");
   }

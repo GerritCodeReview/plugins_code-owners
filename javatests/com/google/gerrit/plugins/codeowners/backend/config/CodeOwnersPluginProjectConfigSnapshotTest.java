@@ -19,7 +19,6 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject.hasEmail;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -48,6 +47,7 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend
 import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPolicy;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.IdentifiedUser;
+import com.google.gerrit.truth.OptionalSubject;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.util.Providers;
@@ -76,28 +76,28 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
   @Test
   @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
   public void getFileExtensionIfNoneIsConfiguredOnProjectLevel() throws Exception {
-    assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("foo");
+    OptionalSubject.assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("foo");
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
   public void fileExtensionOnProjectLevelOverridesDefaultFileExtension() throws Exception {
     configureFileExtension(project, "bar");
-    assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("bar");
+    OptionalSubject.assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("bar");
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.fileExtension", value = "foo")
   public void fileExtensionIsInheritedFromParentProject() throws Exception {
     configureFileExtension(allProjects, "bar");
-    assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("bar");
+    OptionalSubject.assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("bar");
   }
 
   @Test
   public void inheritedFileExtensionCanBeOverridden() throws Exception {
     configureFileExtension(allProjects, "foo");
     configureFileExtension(project, "bar");
-    assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("bar");
+    OptionalSubject.assertThat(cfgSnapshot().getFileExtension()).value().isEqualTo("bar");
   }
 
   @Test
@@ -1043,18 +1043,20 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
 
   @Test
   public void getPathExpressionsForNonExistingBranch() throws Exception {
-    assertThat(cfgSnapshot().getPathExpressions("non-existing")).isEmpty();
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("non-existing")).isEmpty();
   }
 
   @Test
   public void getPathExpressionsWhenNoPathExpressionsAreConfigured() throws Exception {
-    assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
   public void getConfiguredPathExpressions() throws Exception {
-    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
@@ -1062,13 +1064,15 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
       name = "plugin.code-owners.pathExpressions",
       value = "non-existing-path-expressions")
   public void getPathExpressionsIfNonExistingPathExpressionsAreConfigured() throws Exception {
-    assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
   }
 
   @Test
   public void getPathExpressionsConfiguredOnProjectLevel() throws Exception {
     configurePathExpressions(project, PathExpressions.GLOB.name());
-    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
@@ -1076,7 +1080,7 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
   public void pathExpressionsConfiguredOnProjectLevelOverrideDefaultPathExpressions()
       throws Exception {
     configurePathExpressions(project, PathExpressions.SIMPLE.name());
-    assertThat(cfgSnapshot().getPathExpressions("master"))
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
         .value()
         .isEqualTo(PathExpressions.SIMPLE);
   }
@@ -1084,14 +1088,16 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
   @Test
   public void pathExpressionsAreInheritedFromParentProject() throws Exception {
     configurePathExpressions(allProjects, PathExpressions.GLOB.name());
-    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
   public void inheritedPathExpressionsOverrideDefaultPathExpressions() throws Exception {
     configurePathExpressions(allProjects, PathExpressions.SIMPLE.name());
-    assertThat(cfgSnapshot().getPathExpressions("master"))
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
         .value()
         .isEqualTo(PathExpressions.SIMPLE);
   }
@@ -1100,7 +1106,7 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
   public void projectLevelPathExpressionsOverrideInheritedPathExpressions() throws Exception {
     configurePathExpressions(allProjects, PathExpressions.GLOB.name());
     configurePathExpressions(project, PathExpressions.SIMPLE.name());
-    assertThat(cfgSnapshot().getPathExpressions("master"))
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
         .value()
         .isEqualTo(PathExpressions.SIMPLE);
   }
@@ -1111,26 +1117,32 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
       pathExpressionsAreReadFromGlobalConfigIfNonExistingPathExpressionsAreConfiguredOnProjectLevel()
           throws Exception {
     configurePathExpressions(project, "non-existing-path-expressions");
-    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
   public void projectLevelPathExpressionsForOtherProjectHasNoEffect() throws Exception {
     Project.NameKey otherProject = projectOperations.newProject().create();
     configurePathExpressions(otherProject, PathExpressions.GLOB.name());
-    assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
   }
 
   @Test
   public void getPathExpressionsConfiguredOnBranchLevel() throws Exception {
     configurePathExpressions(project, "refs/heads/master", PathExpressions.GLOB.name());
-    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
   public void getPathExpressionsConfiguredOnBranchLevelShortName() throws Exception {
     configurePathExpressions(project, "master", PathExpressions.GLOB.name());
-    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
@@ -1139,7 +1151,7 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
           throws Exception {
     configurePathExpressions(project, "master", PathExpressions.GLOB.name());
     configurePathExpressions(project, "refs/heads/master", PathExpressions.SIMPLE.name());
-    assertThat(cfgSnapshot().getPathExpressions("master"))
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
         .value()
         .isEqualTo(PathExpressions.SIMPLE);
   }
@@ -1148,7 +1160,7 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
   public void branchLevelPathExpressionsOverridesProjectLevelPathExpressions() throws Exception {
     configurePathExpressions(project, PathExpressions.GLOB.name());
     configurePathExpressions(project, "master", PathExpressions.SIMPLE.name());
-    assertThat(cfgSnapshot().getPathExpressions("master"))
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
         .value()
         .isEqualTo(PathExpressions.SIMPLE);
   }
@@ -1171,13 +1183,15 @@ public class CodeOwnersPluginProjectConfigSnapshotTest extends AbstractCodeOwner
               BackendConfig.KEY_PATH_EXPRESSIONS,
               "non-existing-path-expressions");
         });
-    assertThat(cfgSnapshot().getPathExpressions("master")).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master"))
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
   public void branchLevelPathExpressionsForOtherBranchHaveNoEffect() throws Exception {
     configurePathExpressions(project, "foo", PathExpressions.GLOB.name());
-    assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
+    OptionalSubject.assertThat(cfgSnapshot().getPathExpressions("master")).isEmpty();
   }
 
   @Test

@@ -15,13 +15,13 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.backend.config.InvalidPluginConfigurationException;
 import com.google.gerrit.server.ExceptionHook.Status;
+import com.google.gerrit.truth.OptionalSubject;
 import java.nio.file.InvalidPathException;
 import java.util.Optional;
 import org.junit.Before;
@@ -114,29 +114,36 @@ public class CodeOwnersExceptionHookTest extends AbstractCodeOwnersTest {
   @Test
   public void getStatus() throws Exception {
     Status conflictStatus = Status.create(409, "Conflict");
-    assertThat(getStatus(newInvalidPluginConfigurationException()))
+    OptionalSubject.assertThat(getStatus(newInvalidPluginConfigurationException()))
         .value()
         .isEqualTo(conflictStatus);
-    assertThat(getStatus(newExceptionWithCause(newInvalidPluginConfigurationException())))
-        .value()
-        .isEqualTo(conflictStatus);
-
-    assertThat(getStatus(newInvalidCodeOwnerConfigException())).value().isEqualTo(conflictStatus);
-    assertThat(getStatus(newExceptionWithCause(newInvalidCodeOwnerConfigException())))
+    OptionalSubject.assertThat(
+            getStatus(newExceptionWithCause(newInvalidPluginConfigurationException())))
         .value()
         .isEqualTo(conflictStatus);
 
-    assertThat(getStatus(newInvalidPathException())).value().isEqualTo(conflictStatus);
-    assertThat(getStatus(newExceptionWithCause(newInvalidPathException())))
+    OptionalSubject.assertThat(getStatus(newInvalidCodeOwnerConfigException()))
+        .value()
+        .isEqualTo(conflictStatus);
+    OptionalSubject.assertThat(
+            getStatus(newExceptionWithCause(newInvalidCodeOwnerConfigException())))
         .value()
         .isEqualTo(conflictStatus);
 
-    assertThat(getStatus(new Exception())).isEmpty();
-    assertThat(getStatus(newExceptionWithCause(new Exception()))).isEmpty();
+    OptionalSubject.assertThat(getStatus(newInvalidPathException()))
+        .value()
+        .isEqualTo(conflictStatus);
+    OptionalSubject.assertThat(getStatus(newExceptionWithCause(newInvalidPathException())))
+        .value()
+        .isEqualTo(conflictStatus);
 
-    assertThat(getStatus(CodeOwnersInternalServerErrorException.newInternalServerError("msg")))
+    OptionalSubject.assertThat(getStatus(new Exception())).isEmpty();
+    OptionalSubject.assertThat(getStatus(newExceptionWithCause(new Exception()))).isEmpty();
+
+    OptionalSubject.assertThat(
+            getStatus(CodeOwnersInternalServerErrorException.newInternalServerError("msg")))
         .isEmpty();
-    assertThat(
+    OptionalSubject.assertThat(
             getStatus(
                 newExceptionWithCause(
                     CodeOwnersInternalServerErrorException.newInternalServerError("msg"))))
