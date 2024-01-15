@@ -19,7 +19,6 @@ import static com.google.gerrit.plugins.codeowners.backend.config.BackendConfig.
 import static com.google.gerrit.plugins.codeowners.backend.config.BackendConfig.KEY_PATH_EXPRESSIONS;
 import static com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration.SECTION_CODE_OWNERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -32,6 +31,7 @@ import com.google.gerrit.plugins.codeowners.backend.findowners.FindOwnersBackend
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
+import com.google.gerrit.truth.OptionalSubject;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -65,7 +65,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getBackendForBranchWhenBackendIsNotSet() throws Exception {
-    assertThat(
+    OptionalSubject.assertThat(
             backendConfig.getBackendForBranch(
                 new Config(), BranchNameKey.create(project, "master")))
         .isEmpty();
@@ -79,7 +79,8 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/master",
         KEY_BACKEND,
         CodeOwnerBackendId.FIND_OWNERS.getBackendId());
-    assertThat(backendConfig.getBackendForBranch(cfg, BranchNameKey.create(project, "master")))
+    OptionalSubject.assertThat(
+            backendConfig.getBackendForBranch(cfg, BranchNameKey.create(project, "master")))
         .value()
         .isInstanceOf(FindOwnersBackend.class);
   }
@@ -89,7 +90,8 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, "master", KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
-    assertThat(backendConfig.getBackendForBranch(cfg, BranchNameKey.create(project, "master")))
+    OptionalSubject.assertThat(
+            backendConfig.getBackendForBranch(cfg, BranchNameKey.create(project, "master")))
         .value()
         .isInstanceOf(FindOwnersBackend.class);
   }
@@ -131,7 +133,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getBackendForProjectWhenBackendIsNotSet() throws Exception {
-    assertThat(backendConfig.getBackendForProject(new Config(), project)).isEmpty();
+    OptionalSubject.assertThat(backendConfig.getBackendForProject(new Config(), project)).isEmpty();
   }
 
   @Test
@@ -139,7 +141,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
     Config cfg = new Config();
     cfg.setString(
         SECTION_CODE_OWNERS, null, KEY_BACKEND, CodeOwnerBackendId.FIND_OWNERS.getBackendId());
-    assertThat(backendConfig.getBackendForProject(cfg, project))
+    OptionalSubject.assertThat(backendConfig.getBackendForProject(cfg, project))
         .value()
         .isInstanceOf(FindOwnersBackend.class);
   }
@@ -209,7 +211,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getPathExpressionsForBranchWhenPathExpressionsAreNotSet() throws Exception {
-    assertThat(
+    OptionalSubject.assertThat(
             backendConfig.getPathExpressionsForBranch(
                 new Config(), BranchNameKey.create(project, "master")))
         .isEmpty();
@@ -223,7 +225,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
         "refs/heads/master",
         KEY_PATH_EXPRESSIONS,
         PathExpressions.GLOB.name());
-    assertThat(
+    OptionalSubject.assertThat(
             backendConfig.getPathExpressionsForBranch(cfg, BranchNameKey.create(project, "master")))
         .value()
         .isEqualTo(PathExpressions.GLOB);
@@ -233,7 +235,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   public void getPathExpressionsForBranchShortName() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, "master", KEY_PATH_EXPRESSIONS, PathExpressions.GLOB.name());
-    assertThat(
+    OptionalSubject.assertThat(
             backendConfig.getPathExpressionsForBranch(cfg, BranchNameKey.create(project, "master")))
         .value()
         .isEqualTo(PathExpressions.GLOB);
@@ -243,7 +245,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   public void getPathExpressionsForBranchIfConfigIsInvalid() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, "master", KEY_PATH_EXPRESSIONS, "INVALID");
-    assertThat(
+    OptionalSubject.assertThat(
             backendConfig.getPathExpressionsForBranch(cfg, BranchNameKey.create(project, "master")))
         .isEmpty();
   }
@@ -268,14 +270,15 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getPathExpressionsForProjectWhenBackendIsNotSet() throws Exception {
-    assertThat(backendConfig.getPathExpressionsForProject(new Config(), project)).isEmpty();
+    OptionalSubject.assertThat(backendConfig.getPathExpressionsForProject(new Config(), project))
+        .isEmpty();
   }
 
   @Test
   public void getPathExpressionsForProject() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_PATH_EXPRESSIONS, PathExpressions.GLOB.name());
-    assertThat(backendConfig.getPathExpressionsForProject(cfg, project))
+    OptionalSubject.assertThat(backendConfig.getPathExpressionsForProject(cfg, project))
         .value()
         .isEqualTo(PathExpressions.GLOB);
   }
@@ -284,7 +287,7 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
   public void getPathExpressionsForProjectIfConfigIsInvalid() throws Exception {
     Config cfg = new Config();
     cfg.setString(SECTION_CODE_OWNERS, null, KEY_PATH_EXPRESSIONS, "INVALID");
-    assertThat(backendConfig.getPathExpressionsForProject(cfg, project)).isEmpty();
+    OptionalSubject.assertThat(backendConfig.getPathExpressionsForProject(cfg, project)).isEmpty();
   }
 
   @Test
@@ -307,19 +310,21 @@ public class BackendConfigTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getDefaultPathExpressions() throws Exception {
-    assertThat(backendConfig.getDefaultPathExpressions()).isEmpty();
+    OptionalSubject.assertThat(backendConfig.getDefaultPathExpressions()).isEmpty();
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "GLOB")
   public void getConfiguredDefaultPathExpressions() throws Exception {
-    assertThat(backendConfig.getDefaultPathExpressions()).value().isEqualTo(PathExpressions.GLOB);
+    OptionalSubject.assertThat(backendConfig.getDefaultPathExpressions())
+        .value()
+        .isEqualTo(PathExpressions.GLOB);
   }
 
   @Test
   @GerritConfig(name = "plugin.code-owners.pathExpressions", value = "INVALID")
   public void getDefaultPathExpressionsIfConfigIsInvalid() throws Exception {
-    assertThat(backendConfig.getDefaultPathExpressions()).isEmpty();
+    OptionalSubject.assertThat(backendConfig.getDefaultPathExpressions()).isEmpty();
   }
 
   @Test

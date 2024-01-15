@@ -20,7 +20,6 @@ import static com.google.gerrit.acceptance.GitUtil.pushHead;
 import static com.google.gerrit.extensions.client.ListChangesOption.CURRENT_REVISION;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
-import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -46,6 +45,7 @@ import com.google.gerrit.plugins.codeowners.backend.config.RequiredApprovalConfi
 import com.google.gerrit.plugins.codeowners.backend.config.StatusConfig;
 import com.google.gerrit.plugins.codeowners.backend.proto.ProtoBackend;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
+import com.google.gerrit.truth.OptionalSubject;
 import org.eclipse.jgit.lib.Config;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevObject;
@@ -257,7 +257,8 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getPathExpressions("master"))
+    OptionalSubject.assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).getPathExpressions("master"))
         .value()
         .isEqualTo(PathExpressions.GLOB);
   }
@@ -276,7 +277,8 @@ public class CodeOwnersPluginConfigValidatorIT extends AbstractCodeOwnersIT {
 
     PushResult r = pushRefsMetaConfig();
     assertThat(r.getRemoteUpdate(RefNames.REFS_CONFIG).getStatus()).isEqualTo(Status.OK);
-    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getPathExpressions("master"))
+    OptionalSubject.assertThat(
+            codeOwnersPluginConfiguration.getProjectConfig(project).getPathExpressions("master"))
         .value()
         .isEqualTo(PathExpressions.GLOB);
   }
