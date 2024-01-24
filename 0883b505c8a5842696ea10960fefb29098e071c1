@@ -106,6 +106,24 @@
       "parentUuid": "4c3fef39_2e0ab596",
       "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0d41aad5_588349f6",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-01-24T16:22:44Z",
+      "side": 1,
+      "message": "Or under https://gerrit-review.googlesource.com/plugins/code-owners/Documentation/index.html which is the external URL.",
+      "parentUuid": "e287a116_7e2215eb",
+      "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
