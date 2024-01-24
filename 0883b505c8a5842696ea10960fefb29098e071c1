@@ -34,6 +34,24 @@
       "parentUuid": "dc0e15b2_027702a2",
       "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "40b7261e_79bf571b",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3239041
+      },
+      "writtenOn": "2024-01-24T16:03:56Z",
+      "side": 1,
+      "message": "Rendering doesn\u0027t seem to work for me (using gerrit host rather than android) eg:\n\nhttps://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/about.html\n\nbut \n\nhttps://gerrit.googlesource.com/plugins/code-owners/+/refs/heads/master/resources/Documentation/about.md\n\nis fine.",
+      "parentUuid": "4b2f627c_4c1595c4",
+      "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
