@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc0e15b2_027702a2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-01-24T15:51:13Z",
+      "side": 1,
+      "message": "Thanks, actually it\u0027s intended that the links go to .html and not .md.\n\nHow this works is that on access of an .html file the corresponding .md file is parsed and rendered as HTML. E.g. https://android-review.googlesource.com/plugins/code-owners/Documentation/about.html works, although the source file is about.md and not about.html.\n\nWe prefer using the HTML files since they are independent of the doc format that is used in the source.\n\nFWIW this is consistent with the Gerrit core the documentation that is also served as HTML files (the Gerrit core documentation is written in Asciidoc, but since we are serving it as HTML files, we could easily switch to Markdown one day without breaking links).",
+      "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
