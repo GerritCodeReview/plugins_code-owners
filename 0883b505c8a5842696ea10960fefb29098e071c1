@@ -88,6 +88,24 @@
       "parentUuid": "5be58acb_91f8b02e",
       "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e287a116_7e2215eb",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-01-24T16:21:13Z",
+      "side": 1,
+      "message": "Actually, I see that it got installed recently. You can access the documentation at: https://gerrit-review.git.corp.google.com/plugins/code-owners/Documentation/index.html",
+      "parentUuid": "4c3fef39_2e0ab596",
+      "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
