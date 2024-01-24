@@ -70,6 +70,24 @@
       "parentUuid": "4b2f627c_4c1595c4",
       "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4c3fef39_2e0ab596",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-01-24T16:19:25Z",
+      "side": 1,
+      "message": "\u003e Rendering doesn\u0027t seem to work for me (using gerrit host rather than android) \n\nYes, that\u0027s because the code-owners plugin is not installed on the \"gerrit\" host.",
+      "parentUuid": "5be58acb_91f8b02e",
+      "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
