@@ -52,6 +52,24 @@
       "parentUuid": "4b2f627c_4c1595c4",
       "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5be58acb_91f8b02e",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-01-24T16:18:04Z",
+      "side": 1,
+      "message": "Right, this is a problem when you are looking at the documentation in a source browser like Gitiles. The links only work when the documentation is hosted inside a Gerrit server that knows how to do the rendering.\n\nSimilarly links to the Gerrit core documentation that appear in the code-owners documentation cannot be resolved if the documentation is viewed in Gitiles, as these are relative links that only work when the documentation is hosted in Gerrit, where the Gerrit core documentation is present as well.\n\nTo avoid trouble with broken links please prefer viewing the documentation at a place where it\u0027s hosted in Gerrit, e.g. at https://android-review.googlesource.com/plugins/code-owners/Documentation/index.html",
+      "parentUuid": "4b2f627c_4c1595c4",
+      "revId": "0883b505c8a5842696ea10960fefb29098e071c1",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ]
 }
