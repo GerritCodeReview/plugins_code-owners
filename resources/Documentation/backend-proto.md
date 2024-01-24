@@ -15,7 +15,7 @@ subdirectories (except if a subdirectory contains an `OWNERS_METADATA` file that
 disables the inheritance of code owners from the parent directories).
 
 **NOTE:** It's possible that projects have a [file extension for code owner
-config files](config.html#codeOwnersFileExtension) configured. In this case the
+config files](config.md#codeOwnersFileExtension) configured. In this case the
 code owners are defined in `OWNERS_METADATA.<file-extension>` files and
 `OWNERS_METADATA` files are ignored.
 

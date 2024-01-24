@@ -4,7 +4,7 @@ This page describes the code owners REST endpoints that are added by the
 @PLUGIN@ plugin.
 
 Please also take note of the general information on the
-[REST API](../../../Documentation/rest-api.html).
+[REST API](../../../Documentation/rest-api.md).
 
 ## <a id="project-endpoints">Project Endpoints
 
@@ -112,13 +112,13 @@ Input options can be set in the request body as a
 [CheckCodeOwnerConfigFilesInput](#check-code-owner-config-files-input) entity.
 
 No validation is done for branches for which the code owner functionality is
-[disabled](config.html#codeOwnersDisabledBranch), unless
+[disabled](config.md#codeOwnersDisabledBranch), unless
 `validate_disabled_branches` is set to `true` in the
 [input](#check-code-owner-config-files-input).
 
 As a response a map is returned that maps a branch name to a map that maps an
 owner configuration file path to a list of
-[ConsistencyProblemInfo](../../../Documentation/rest-api-config.html#consistency-problem-info)
+[ConsistencyProblemInfo](../../../Documentation/rest-api-config.md#consistency-problem-info)
 entities.
 
 Code owner config files that have no issues are omitted from the response.
@@ -394,7 +394,7 @@ The code owner config is returned as
 
 This REST endpoint is experimental which means that the response format is
 likely still going to be changed. It is only available if
-[experimental REST endpoints are enabled](config.html#pluginCodeOwnersEnableExperimentalRestEndpoints)
+[experimental REST endpoints are enabled](config.md#pluginCodeOwnersEnableExperimentalRestEndpoints)
 in `gerrit.config`.
 
 #### Request
@@ -446,9 +446,9 @@ setting)
 * are not resolvable (emails for which no Gerrit account exists)
 * are ambiguous (the same email is assigned to multiple accounts)
 * are referenced by an email with a disallowed domain (see
-  [allowedEmailDomain configuration](config.html#pluginCodeOwnersAllowedEmailDomain))
+  [allowedEmailDomain configuration](config.md#pluginCodeOwnersAllowedEmailDomain))
 * do not have read access to the branch
-* [fallback code owners](config.html#pluginCodeOwnersFallbackCodeOwners)
+* [fallback code owners](config.md#pluginCodeOwnersFallbackCodeOwners)
 
 are omitted from the result.
 
@@ -613,7 +613,7 @@ often don't appear amongst the top suggestions.
 Local code owners are also preferred because it is more likely that they are
 experts of the modified code.
 
-The same applies for [default code owners](config-guide.html#codeOwners).
+The same applies for [default code owners](config-guide.md#codeOwners).
 
 #### <a id="batch-list-code-owners"> Batch Request
 
@@ -745,7 +745,7 @@ The following code owners are filtered out additionally:
 * [service users](#serviceUsers) (members of the `Service Users` group)
 * the change owner (since the change owner cannot be added as reviewer)
 * code owners that are annotated with
-  [LAST_RESORT_SUGGESTION](backend-find-owners.html#lastResortSuggestion),
+  [LAST_RESORT_SUGGESTION](backend-find-owners.md#lastResortSuggestion),
   except if dropping these code owners would make the suggestion result empty or
   if these code owners are already reviewers of the change
 
@@ -836,7 +836,7 @@ entity.
 
 As a response a map is returned that that maps an owner configuration file path
 to a list of
-[ConsistencyProblemInfo](../../../Documentation/rest-api-config.html#consistency-problem-info)
+[ConsistencyProblemInfo](../../../Documentation/rest-api-config.md#consistency-problem-info)
 entities.
 
 Code owner config files that were not modified in the revision are omitted from
@@ -941,9 +941,9 @@ ownership of a user for a path in a branch.
 | `is_resolvable` | Whether the given email is resolvable for the specified user or the calling user if no user was specified.
 | `can_read_ref` | Whether the user to which the given email was resolved has read permissions on the branch. Not set if the given email is not resolvable or if the given email is the all users wildcard (aka '*').
 | `can_see_change`| Whether the user to which the given email was resolved can see the specified change. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
-| `can_approve_change`| Whether the user to which the given email was resolved can code-owner approve the specified change. Being able to code-owner approve the change means that the user has permissions to vote on the label that is [required as code owner approval](config.html#pluginCodeOwnersRequiredApproval). Other permissions are not considered for computing this flag. In particular missing read permissions on the change don't have any effect on this flag. Whether the user misses read permissions on the change (and hence cannot apply the code owner approval) can be seen from the `can_see_change` flag. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
+| `can_approve_change`| Whether the user to which the given email was resolved can code-owner approve the specified change. Being able to code-owner approve the change means that the user has permissions to vote on the label that is [required as code owner approval](config.md#pluginCodeOwnersRequiredApproval). Other permissions are not considered for computing this flag. In particular missing read permissions on the change don't have any effect on this flag. Whether the user misses read permissions on the change (and hence cannot apply the code owner approval) can be seen from the `can_see_change` flag. Not set if the given email is not resolvable, if the given email is the all users wildcard (aka '*') or if no change was specified.
 | `code_owner_config_file_paths` | Paths of the code owner config files that assign code ownership to the specified email and path as a list. Note that if code ownership is assigned to the email via a code owner config files, but the email is not resolvable (see field `is_resolvable` field), the user is not a code owner.
-| `is_fallback_code_owner` | Whether the given email is a fallback code owner of the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) no code owners are defined for the specified path in the branch and c) parent code owners are not ignored and d) the user is a fallback code owner according to the [configured fallback code owner policy](config.html#pluginCodeOwnersFallbackCodeOwners)
+| `is_fallback_code_owner` | Whether the given email is a fallback code owner of the specified path in the branch. True if: a) the given email is resolvable (see field `is_resolvable') and b) no code owners are defined for the specified path in the branch and c) parent code owners are not ignored and d) the user is a fallback code owner according to the [configured fallback code owner policy](config.md#pluginCodeOwnersFallbackCodeOwners)
 | `is_default_code_owner` | Whether the given email is configured as a default code owner in the code owner config file in `refs/meta/config`. Note that if the email is configured as default code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
 | `is_global_code_owner` | Whether the given email is configured as a global
 code owner. Note that if the email is configured as global code owner, but the email is not resolvable (see `is_resolvable` field), the user is not a code owner.
@@ -1034,7 +1034,7 @@ If a field in this input is not set, the corresponding parameter in the
 | `fallback_code_owners` | optional | Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.
 | `global_code_owners` | optional | List of emails of users that should be code owners globally across all branches.
 | `exempted_users` | optional | List of emails of users that should be exempted from requiring code owners approvals.
-| `merge_commit_strategy` | optional | Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
+| `merge_commit_strategy` | optional | Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.md#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
 | `implicit_approvals` | optional | Whether an implicit code owner approval from the last uploader is assumed.
 | `override_info_url` | optional | URL for a page that provides project/host-specific information about how to request a code owner override.
 | `invalid_code_owner_config_info_url` | optional | URL for a page that provides project/host-specific information about how to deal with invalid code owner config files.
@@ -1112,8 +1112,8 @@ The `GeneralInfo` entity contains general code owners configuration parameters.
 | Field Name       |          | Description |
 | ---------------- | -------- | ----------- |
 | `file_extension` | optional | The file extension that is used for the code owner config files in this project. Not set if no file extension is used.
-| `merge_commit_strategy` || Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.html#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
-| `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.html#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
+| `merge_commit_strategy` || Strategy that defines for merge commits which files require code owner approvals. Can be `ALL_CHANGED_FILES` or `FILES_WITH_CONFLICT_RESOLUTION` (see [mergeCommitStrategy](config.md#pluginCodeOwnersMergeCommitStrategy) for an explanation of these values).
+| `implicit_approvals` | optional |  Whether an implicit code owner approval from the last uploader is assumed (see [enableImplicitApprovals](config.md#pluginCodeOwnersEnableImplicitApprovals) for details). When unset, `false`.
 | `override_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to request a code owner override.
 | `invalid_code_owner_config_info_url` | optional | Optional URL for a page that provides project/host-specific information about how to deal with invalid code owner config files.
 |`fallback_code_owners` || Policy that controls who should own paths that have no code owners defined. Possible values are: `NONE`: Paths for which no code owners are defined are owned by no one. `ALL_USERS`: Paths for which no code owners are defined are owned by all users.

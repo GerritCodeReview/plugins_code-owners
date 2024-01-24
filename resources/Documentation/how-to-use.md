@@ -1,20 +1,20 @@
 # Intro
 
 The `@PLUGIN@` plugin provides support for
-[code owners](user-guide.html#codeOwners) in Gerrit.
+[code owners](user-guide.md#codeOwners) in Gerrit.
 
 **NOTE:** You would want to use the `@PLUGIN@` plugin if you have a repository /
 branch that contains files / folders that are owned by different users. If this
 is not the case, and all files / folders in the repository / branch are owned by
 the same users, using the `@PLUGIN@` plugin is not recommended, and [using plain
 Gerrit permissions should be preferred
-instead](config-guide.html#configureCodeOwnersByPermissions).
+instead](config-guide.md#configureCodeOwnersByPermissions).
 
 If the `@PLUGIN@` plugin is enabled, changes can only be submitted if all
-touched files are covered by [approvals](user-guide.html#codeOwnerApproval) from
+touched files are covered by [approvals](user-guide.md#codeOwnerApproval) from
 code owners.
 
-The features of the `@PLUGIN@` plugin are described [here](feature-set.html).
+The features of the `@PLUGIN@` plugin are described [here](feature-set.md).
 
 **NOTE:** The `@PLUGIN@` is replacing the `find-owners` plugin. For projects that
 used code owners with the `find-owners` plugin before, the existing `OWNERS`
@@ -23,7 +23,7 @@ plugin comes with a new UI for selecting code owners and showing the code owner
 status.
 
 This document focuses on the workflows in the UI. Further information can be
-found in the [user guide](user-guide.html).
+found in the [user guide](user-guide.md).
 
 ## <a id="enableThePlugin">Enable the plugin
 
@@ -31,7 +31,7 @@ As a user you don’t need to do anything as the plugin is enabled by the host
 administrator.
 
 **NOTE:** As host administrator please follow the instructions in the [setup
-guide](setup-guide.html).
+guide](setup-guide.md).
 
 ## <a id="reportBug">Bug report / Feedback
 
@@ -52,7 +52,7 @@ you'll need their approval to submit your change.
 For each file (or group of files that share the same code owners) you get the 5
 best suitable code owners suggested. Which code owners are best suitable to
 review a file is computed based on multiple [scoring
-factors](rest-api.html#scoringFactors), e.g. the distance of the code owner
+factors](rest-api.md#scoringFactors), e.g. the distance of the code owner
 config file that defines the code owner to the path for which code owners are
 listed (the lower the distance the better the code owner). If wanted the code
 owner suggestion can be expanded to all code owners.
@@ -212,9 +212,9 @@ the icon** to get additional information displayed as a tooltip.
 - **Approved by code owner:**\
   A code owner of this file has approved the change. You can also see this icon
   if you are a code owner of the file and [implicit code owner
-  approvals](user-guide.html#implicitApprovals) are
+  approvals](user-guide.md#implicitApprovals) are
   enabled, as in this case the file is implicitly approved by you, or if the
-  change has been [exempted](user-guide.html#codeOwnerExemptions) from requiring
+  change has been [exempted](user-guide.md#codeOwnerExemptions) from requiring
   code owner approvals.
 \
 ![approved owner tooltip](./tooltip-approved-owner.png "Tooltip for approved status")
@@ -239,7 +239,7 @@ If no reviewer is an owner of the given file, a red question mark is shown.
 ### <a id="noStatus">No label and no status
 
 When you own all the files in your change and [implicit code owner
-approvals](user-guide.html#implicitApprovals) are enabled, the `@PLUGIN@` plugin
+approvals](user-guide.md#implicitApprovals) are enabled, the `@PLUGIN@` plugin
 will:
 
 - Not show the `Code-Owners` submit requirement
@@ -249,7 +249,7 @@ will:
 
 Users with certain permissions (e.g. sheriffs) can bypass the `Code Owners`
 submit requirement by applying a [code owner
-override](user-guide.html#codeOwnerOverride) approval (usually a
+override](user-guide.md#codeOwnerOverride) approval (usually a
 `Owners-Override+1` vote).
 
 The code owner override approval is applied by voting on the override label in
@@ -275,8 +275,8 @@ this row indicates the overall approval status of the cleanly merged files.
 ## <a id="definingCodeOwners">Defining code owners
 
 Code owners are defined in [code owner config
-files](user-guide.html#codeOwnerConfigFiles) (e.g.
-[OWNERS](backend-find-owners.html#syntax) files) that are stored in the source
+files](user-guide.md#codeOwnerConfigFiles) (e.g.
+[OWNERS](backend-find-owners.md#syntax) files) that are stored in the source
 tree of the repository.
 
 **NOTE:** If you have used code owners via the `find-owners` plugin before, code

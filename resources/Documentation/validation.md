@@ -2,27 +2,27 @@
 
 The code owners functionality relies on the validity of the following:
 
-* [code owner config files](user-guide.html#codeOwnerConfigFiles) that define
+* [code owner config files](user-guide.md#codeOwnerConfigFiles) that define
   the code owners
-* [code-owner.config](config.html#projectLevelConfigFile) files in the
+* [code-owner.config](config.md#projectLevelConfigFile) files in the
   'refs/meta/config' branches of the projects that contain the project-level
   configuration of the `@PLUGIN@` plugin
 
 To reduce the risk that these files become invalid, they are validated when
 they are modified and invalid modifications are rejected. In addition code owner
 config files in a repository can be validated on demand by the [Check code
-owners files REST endpoint](rest-api.html#check-code-owner-config-files).
+owners files REST endpoint](rest-api.md#check-code-owner-config-files).
 
 **NOTE:** Most configuration issues are gracefully handled and do not break the
 code owners functionality (e.g. non-resolveable code owners or non-resolveable
 imports are silently ignored), however some configuration issue (non-parseable
-configuration files, configuration of a non-existing [backend](backends.html)
+configuration files, configuration of a non-existing [backend](backends.md)
 etc.) are severe errors and block the submission of all changes for which the
 affected configuration files are relevant.
 
 **NOTE:** It's possible to disable the validation of code owner config files on
 push and setup an [external
-validation](config-guide.html#externalValidationOfCodeOwnerConfigs) by a CI bot
+validation](config-guide.md#externalValidationOfCodeOwnerConfigs) by a CI bot
 instead. In this case findings would be posted on the change.
 
 All validations are best effort to prevent invalid configurations from
@@ -38,13 +38,13 @@ No validation is done when:
   already exist in the repository)
 * updates happen behind Gerrit's back (e.g. pushes that bypass Gerrit)
 * the validation is disabled via the
-  [enableValidationOnCommitReceived](config.html#codeOwnersEnableValidationOnCommitReceived)
-  or [enableValidationOnSubmit](config.html#codeOwnersEnableValidationOnSubmit)
+  [enableValidationOnCommitReceived](config.md#codeOwnersEnableValidationOnCommitReceived)
+  or [enableValidationOnSubmit](config.md#codeOwnersEnableValidationOnSubmit)
   config options
 * the [--code-owners~skip-validation](#skipCodeOwnerConfigValidationOnDemand)
   push option was specified on push
 
-In addition for [code owner config files](user-guide.html#codeOwnerConfigFiles)
+In addition for [code owner config files](user-guide.md#codeOwnerConfigFiles)
 no validation is done when:
 
 * the code owners functionality is disabled for the repository or branch (this
@@ -63,18 +63,18 @@ submitted:
 * configuration parameters that are relevant for the validation are changed
   (e.g. the [accounts.visibility](../../../Documentation/config-gerrit.html#accounts.visibility)
   setting is changed, [another code owners backend is
-  configured](setup-guide.html#configureCodeOwnersBackend) which now uses a
+  configured](setup-guide.md#configureCodeOwnersBackend) which now uses a
   different syntax or different names for code owner config files, the [file
-  extension for code owner config file is set/changed](config.html#codeOwnersFileExtension),
-  [arbitrary file extensions for code owner config files](config.html#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
+  extension for code owner config file is set/changed](config.md#codeOwnersFileExtension),
+  [arbitrary file extensions for code owner config files](config.md#codeOwnersEnableCodeOwnerConfigFilesWithFileExtensions)
   get enabled/disabled or the [allowed email domains are
-  changed](config.html#pluginCodeOwnersAllowedEmailDomain))
+  changed](config.md#pluginCodeOwnersAllowedEmailDomain))
 * emails of users may change so that emails in code owner configs can no longer
   be resolved
 * imported code owner config files may get deleted or renamed so that import
   references can no longer be resolved
 
-When updating [code owner config files](user-guide.html#codeOwnerConfigFiles)
+When updating [code owner config files](user-guide.md#codeOwnerConfigFiles)
 the validation only rejects the update if it introduces **new** issues. This
 means the update is allowed if:
 
@@ -85,10 +85,10 @@ means the update is allowed if:
   file)
 * the file was non-parseable and with the update it is still non-parseable
 
-For [code owner config files](user-guide.html#codeOwnerConfigFiles) the
+For [code owner config files](user-guide.md#codeOwnerConfigFiles) the
 validation may also be performed on submit (in addition to the validation that
 is performed on upload of the change, see
-[enableValidationOnSubmit](config.html#codeOwnersEnableValidationOnSubmit)
+[enableValidationOnSubmit](config.md#codeOwnersEnableValidationOnSubmit)
 config setting). Repeating the validation on submit can make sense because
 relevant configuration can change between the time a change is uploaded and the
 time a change is submitted. If enabled, on submit we repeat the exact same
@@ -98,7 +98,7 @@ done from the perspective of the uploader.
 ## <a id="codeOwnerConfigValidationOnBranchCreation">Code owner config validation on branch creation
 
 It's possible to [enable validation of code owner config files on branch
-creation](config.html#pluginCodeOwnersEnableValidationOnBranchCreation) (off by
+creation](config.md#pluginCodeOwnersEnableValidationOnBranchCreation) (off by
 default).
 
 If the validation is enabled and a new branch is created, all code owner config
@@ -110,7 +110,7 @@ because:
 
 * the validation configuration of the new branch may differ from the validation
   configuration of the branch that already contains the commit
-* [imports from other projects](backend-find-owners.html#referenceCodeOwnerConfigFilesFromOtherProjects)
+* [imports from other projects](backend-find-owners.md#referenceCodeOwnerConfigFilesFromOtherProjects)
   that do not specify a branch may not be resolvable: If a branch is not
   specified it's assumed that the code owner config file from the other project
   should be imported from the same branch that contains the importing code owner
@@ -122,7 +122,7 @@ because:
 
 What should be done if the creation of a branch fails due to invalid code owner
 config files is explained in the
-[config FAQs](config-faqs.html#branchCreationFailsDueInvalidCodeOwnerConfigFiles).
+[config FAQs](config-faqs.md#branchCreationFailsDueInvalidCodeOwnerConfigFiles).
 
 ## <a id="skipCodeOwnerConfigValidationOnDemand">Skip code owner config validation on demand
 
@@ -145,19 +145,19 @@ administrators have this capability implicitly assigned via the `Administrate
 Server` global capability.
 
 **NOTE:** Using this option only makes sense if the [code owner config validation
-on submit](config.html#pluginCodeOwnersEnableValidationOnSubmit) is disabled, as
+on submit](config.md#pluginCodeOwnersEnableValidationOnSubmit) is disabled, as
 otherwise it's not possible to submit the created change (using the push option
 only skips the validation for the push, but not for the submission of the
 change).
 
 ### <a id="codeOwnerConfigFileChecks">Validation checks for code owner config files
 
-For [code owner config files](user-guide.html#codeOwnerConfigFiles) the
+For [code owner config files](user-guide.md#codeOwnerConfigFiles) the
 following checks are performed:
 
 * the code owner config files are parseable
 * the code owner emails are resolveable (unless this check is
-  [disabled](config.html#codeOwnersRejectNonResolvableCodeOwners)):\
+  [disabled](config.md#codeOwnersRejectNonResolvableCodeOwners)):\
   a code owners email is not resolveable if:
     * the account that owns it is inactive
     * the account that owns it is not visible to the uploader (according to
@@ -167,10 +167,10 @@ following checks are performed:
     * there is no account that has this email assigned
     * it is ambiguous (the same email is assigned to multiple active accounts)
     * it has an email domain that is disallowed (see
-      [allowedEmailDomain](config.html#pluginCodeOwnersAllowedEmailDomain))
+      [allowedEmailDomain](config.md#pluginCodeOwnersAllowedEmailDomain))
       configuration
 * the imports are resolveable (unless this check is
-  [disabled](config.html#codeOwnersRejectNonResolvableImports)):\
+  [disabled](config.md#codeOwnersRejectNonResolvableImports)):\
   an import is not resolveable if:
     * the imported file is not a code owner config file
     * the imported file is not parseable
@@ -192,8 +192,8 @@ the messages which emails/accounts exist, which would a privacy issue).
 **NOTE:** Whether commits that newly add non-resolvable code owners and
 non-resolvable imports are rejected on commit received and on submit is
 controlled by the
-[rejectNonResolvableCodeOwners](config.html#pluginCodeOwnersRejectNonResolvableCodeOwners)
-and [rejectNonResolvableImports](config.html#pluginCodeOwnersRejectNonResolvableImports)
+[rejectNonResolvableCodeOwners](config.md#pluginCodeOwnersRejectNonResolvableCodeOwners)
+and [rejectNonResolvableImports](config.md#pluginCodeOwnersRejectNonResolvableImports)
 config settings.
 
 The following things are **not** checked (not an exhaustive list):
@@ -208,33 +208,33 @@ The following things are **not** checked (not an exhaustive list):
   It is possible to create a code owner configuration where some folders/files
   have no code owners. In this case nobody can give a code owner approval for
   these folders/files, and submitting changes to them requires a
-  [code owner override](user-guide.html#codeOwnerOverride).
+  [code owner override](user-guide.md#codeOwnerOverride).
 
 
 ### <a id="codeOwnersConfigFileChecks">Validation checks for code-owners.config files
 
-For the [code-owner.config](config.html#projectLevelConfigFile) in the
+For the [code-owner.config](config.md#projectLevelConfigFile) in the
 `refs/meta/config` branch the following checks are performed:
 
 * `code-owner.config` file is parseable
-* the [codeOwners.backend](config.html#codeOwnersBackend) and
-  [codeOwners.\<branch\>.backend](config.html#codeOwnersBranchBackend)
+* the [codeOwners.backend](config.md#codeOwnersBackend) and
+  [codeOwners.\<branch\>.backend](config.md#codeOwnersBranchBackend)
   configurations are valid (that they reference an existing [code owner
-  backend](backends.html))
-* the [codeOwners.disabled](config.html#codeOwnersDisabled) and
-  [codeOwners.disabledBranch](config.html#codeOwnersDisabledBranch)
+  backend](backends.md))
+* the [codeOwners.disabled](config.md#codeOwnersDisabled) and
+  [codeOwners.disabledBranch](config.md#codeOwnersDisabledBranch)
   configurations are valid (that they have parseable value)
-* the [codeOwners.requiredApproval](config.html#codeOwnersRequiredApproval)
-  and [codeOwners.overrideApproval](config.html#codeOwnersOverrideApproval)
+* the [codeOwners.requiredApproval](config.md#codeOwnersRequiredApproval)
+  and [codeOwners.overrideApproval](config.md#codeOwnersOverrideApproval)
   configurations are valid (that they reference an existing label that has a
   range that covers the specified voting value, it's currently not possible to
   add the definition of this label in the same commit but it must be present
   before)
-* the [codeOwners.mergeCommitStrategy](config.html#codeOwnersMergeCommitStrategy)
+* the [codeOwners.mergeCommitStrategy](config.md#codeOwnersMergeCommitStrategy)
   configuration is valid
-* the [codeOwners.fallbackCodeOwners](config.html#codeOwnersFallbackCodeOwners)
+* the [codeOwners.fallbackCodeOwners](config.md#codeOwnersFallbackCodeOwners)
   configuration is valid
-* the [codeOwners.maxPathsInChangeMessages](config.html#codeOwnersMaxPathsInChangeMessages)
+* the [codeOwners.maxPathsInChangeMessages](config.md#codeOwnersMaxPathsInChangeMessages)
   configuration is valid
 
 ---

@@ -9,11 +9,11 @@ The @PLUGIN@ plugin can be configured on host and on project-level:
   of the projects
 
 This page describes all available configuration parameters. For configuration
-recommendations please consult the [config guide](config-guide.html).
+recommendations please consult the [config guide](config-guide.md).
 
 **NOTE**: This is the configuration that controls the behavior of the @PLUGIN@
 plugin. Code owners (except global code owners) are not defined here, but in
-[code owner config files](user-guide.html#codeOwnerConfigFiles) (e.g. `OWNERS`
+[code owner config files](user-guide.md#codeOwnerConfigFiles) (e.g. `OWNERS`
 files) that are stored in the source tree of the repository.
 
 ## <a id="inheritance">Inheritance</a>
@@ -138,11 +138,11 @@ endpoint or by touching the change (e.g. by adding a comment).
         [codeOwners.backend](#codeOwnersBackend) in
         `@PLUGIN@.config`.\
         The supported code owner backends are listed at the
-        [Backends](backends.html) page.\
+        [Backends](backends.md) page.\
         By default `find-owners`.\
         \
         **NOTE:** Be careful with changing this parameter as it invalidates all
-        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        existing [code owner config files](user-guide.md#codeOwnerConfigFiles).
         E.g. by changing the backend code owner configurations may now be read
         from different files, or even worse from the same files but with another
         syntax so that the existing code owner config files can no longer be
@@ -150,18 +150,18 @@ endpoint or by touching the change (e.g. by adding a comment).
 
 <a id="pluginCodeOwnersPathExpressions">plugin.@PLUGIN@.pathExpressions</a>
 :       The path expression syntax that is used in
-        [code owner config files](user-guide.html#codeOwnerConfigFiles).\
+        [code owner config files](user-guide.md#codeOwnerConfigFiles).\
         Can be overridden per project by setting
         [codeOwners.pathExpressions](#codeOwnersPathExpressions) in
         `@PLUGIN@.config`.\
         The supported path expression syntaxes are listed and explained at the
-        [Path Expressions](path-expressions.html) page.\
+        [Path Expressions](path-expressions.md) page.\
         By default unset which means that the path expression syntax is derived
         from the configured [code owner backend](#pluginCodeOwnersBackend).\
         \
         **NOTE:** Be careful with changing this parameter as it affects how path
         expressions in existing
-        [code owner config files](user-guide.html#codeOwnerConfigFiles) are
+        [code owner config files](user-guide.md#codeOwnerConfigFiles) are
         interpreted. E.g. by changing the path expression syntax existing path
         expressions may now match different files, or existing path expressions
         may no longer be valid and fail to parse, in which case they would not
@@ -284,7 +284,7 @@ endpoint or by touching the change (e.g. by adding a comment).
         \
         Since code owner approvals that are sticky on file level are not shown
         in the UI, users need to inspect the [per-file code owner
-        statuses](how-to-use.html#perFileCodeOwnerStatuses) to know which files
+        statuses](how-to-use.md#perFileCodeOwnerStatuses) to know which files
         are code owner approved.\
         \
         Example:\
@@ -766,13 +766,13 @@ endpoint or by touching the change (e.g. by adding a comment).
         Can be overridden per branch by setting
         [codeOwners.\<branch\>.backend](#codeOwnersBranchBackend).\
         The supported code owner backends are listed at the
-        [Backends](backends.html) page.\
+        [Backends](backends.md) page.\
         If not set, the global setting
         [plugin.@PLUGIN@.backend](#pluginCodeOwnersBackend) in `gerrit.config`
         is used.\
         \
         **NOTE:** Be careful with changing this parameter as it invalidates all
-        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        existing [code owner config files](user-guide.md#codeOwnerConfigFiles).
         E.g. by changing the backend code owner configurations may now be read
         from different files, or even worse from the same files but with another
         syntax so that the existing code owner config files can no longer be
@@ -786,12 +786,12 @@ endpoint or by touching the change (e.g. by adding a comment).
         [codeOwners.backend](#codeOwnersBackend) and the
         `codeOwners.<branch>.backend` setting from parent projects.\
         The supported code owner backends are listed at the
-        [Backends](backends.html) page.\
+        [Backends](backends.md) page.\
         If not set, the project level configuration
         [codeOwners.backend](#codeOwnersBackend) is used.\
         \
         **NOTE:** Be careful with changing this parameter as it invalidates all
-        existing [code owner config files](user-guide.html#codeOwnerConfigFiles).
+        existing [code owner config files](user-guide.md#codeOwnerConfigFiles).
         E.g. by changing the backend code owner configurations may now be read
         from different files, or even worse from the same files but with another
         syntax so that the existing code owner config files can no longer be
@@ -799,7 +799,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 
 <a id="codeOwnersPathExpressions">codeOwners.pathExpressions</a>
 :       The path expression syntax that is used in`
-        [code owner config files](user-guide.html#codeOwnerConfigFiles).\
+        [code owner config files](user-guide.md#codeOwnerConfigFiles).\
         Overrides the global setting
         [plugin.@PLUGIN@.pathExpressions](#pluginCodeOwnersPathExpressions) in
         `gerrit.config` and the `codeOwners.pathExpressions` setting from parent
@@ -807,14 +807,14 @@ endpoint or by touching the change (e.g. by adding a comment).
         Can be overridden per branch by setting
         [codeOwners.\<branch\>.pathExpressions](#codeOwnersBranchPathExpressions).\
         The supported path expression syntaxes are listed and explained at the
-        [Path Expressions](path-expressions.html) page.\
+        [Path Expressions](path-expressions.md) page.\
         If not set, the global setting
         [plugin.@PLUGIN@.pathExpressions](#pluginCodeOwnersPathExpressions) in
         `gerrit.config` is used.\
         \
         **NOTE:** Be careful with changing this parameter as it affects how path
         expressions in existing
-        [code owner config files](user-guide.html#codeOwnerConfigFiles) are
+        [code owner config files](user-guide.md#codeOwnerConfigFiles) are
         interpreted. E.g. by changing the path expression syntax existing path
         expressions may now match different files, or existing path expressions
         may no longer be valid and fail to parse, in which case they would not
@@ -822,7 +822,7 @@ endpoint or by touching the change (e.g. by adding a comment).
 
 <a id="codeOwnersBranchPathExpressions">codeOwners.\<branch\>.pathExpressions</a>
 :       The path expression syntax that is used in
-        [code owner config files](user-guide.html#codeOwnerConfigFiles) that are
+        [code owner config files](user-guide.md#codeOwnerConfigFiles) that are
         contained in this branch.\
         The branch can be the short or full name. If both configurations exist
         the one for the full name takes precedence.\
@@ -830,13 +830,13 @@ endpoint or by touching the change (e.g. by adding a comment).
         [codeOwners.pathExpressions](#codeOwnersPathExpressions) and the
         `codeOwners.<branch>.pathExpressions` setting from parent projects.\
         The path expression syntax that is used in
-        [code owner config files](user-guide.html#codeOwnerConfigFiles).\
+        [code owner config files](user-guide.md#codeOwnerConfigFiles).\
         If not set, the project level configuration
         [codeOwners.pathExpressions](#codeOwnersPathExpressions) is used.\
         \
         **NOTE:** Be careful with changing this parameter as it affects how path
         expressions in existing
-        [code owner config files](user-guide.html#codeOwnerConfigFiles) are
+        [code owner config files](user-guide.md#codeOwnerConfigFiles) are
         interpreted. E.g. by changing the path expression syntax existing path
         expressions may now match different files, or existing path expressions
         may no longer be valid and fail to parse, in which case they would not
