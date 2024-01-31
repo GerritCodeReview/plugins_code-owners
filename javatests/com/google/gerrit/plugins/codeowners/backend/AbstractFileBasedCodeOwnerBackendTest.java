@@ -15,10 +15,10 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.truth.Truth8;
 import com.google.gerrit.acceptance.config.GerritConfig;
 import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
@@ -476,7 +476,7 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   @Test
   public void getFilePathForCodeOwnerConfigKeyWithoutFileName() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
-    assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
+    Truth8.assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
         .isEqualTo(Paths.get(codeOwnerConfigKey.folderPath() + getFileName()));
   }
 
@@ -484,7 +484,7 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   public void getFilePathForCodeOwnerConfigKeyWithFileName() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/", getFileName() + "_foo_bar");
-    assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
+    Truth8.assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
         .isEqualTo(
             Paths.get(codeOwnerConfigKey.folderPath() + codeOwnerConfigKey.fileName().get()));
   }
