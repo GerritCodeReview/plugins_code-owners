@@ -15,9 +15,9 @@
 package com.google.gerrit.plugins.codeowners.util;
 
 import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.truth.Truth8;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,7 +53,7 @@ public class JgitPathTest extends AbstractCodeOwnersTest {
 
   @Test
   public void getPathAsAbsolutePath() throws Exception {
-    assertThat(JgitPath.of("foo/bar/OWNERS").getAsAbsolutePath())
+    Truth8.assertThat(JgitPath.of("foo/bar/OWNERS").getAsAbsolutePath())
         .isEqualTo(Paths.get("/foo/bar/OWNERS"));
   }
 

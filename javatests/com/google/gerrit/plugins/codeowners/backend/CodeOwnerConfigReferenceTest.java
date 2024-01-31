@@ -17,9 +17,9 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.truth.PathSubject.paths;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
-import static com.google.common.truth.Truth8.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
+import com.google.common.truth.Truth8;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -66,7 +66,7 @@ public class CodeOwnerConfigReferenceTest extends AbstractCodeOwnersTest {
   public void relativeFilePathCanBeSpecified() throws Exception {
     Path path =
         CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "foo/OWNERS").filePath();
-    assertThat(path).isEqualTo(Paths.get("foo/OWNERS"));
+    Truth8.assertThat(path).isEqualTo(Paths.get("foo/OWNERS"));
     assertThat(path.isAbsolute()).isFalse();
   }
 }
