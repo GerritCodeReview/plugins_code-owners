@@ -32,7 +32,6 @@ import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.inject.Inject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.junit.Test;
 
 /**
@@ -347,8 +346,8 @@ public class GetCodeOwnerStatusIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-    Path oldPath = Paths.get("/foo/old.bar");
-    Path newPath = Paths.get("/bar/new.bar");
+    Path oldPath = Path.of("/foo/old.bar");
+    Path newPath = Path.of("/bar/new.bar");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is a code owner of the old path.

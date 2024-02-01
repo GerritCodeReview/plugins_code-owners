@@ -37,7 +37,6 @@ import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
@@ -70,7 +69,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
 
   @Test
   public void notApproved_noStickyApproval() throws Exception {
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -93,7 +92,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
 
   @Test
   public void notApproved_byPreviousApprovalOfNonCodeOwner() throws Exception {
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -118,7 +117,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -149,7 +148,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -189,8 +188,8 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner2", "codeOwner2@example.com", "CodeOwner2", /* displayName= */ null);
     setAsCodeOwners("/bar/", codeOwner2);
 
-    Path path1 = Paths.get("/foo/bar.baz");
-    Path path2 = Paths.get("/bar/foo.baz");
+    Path path1 = Path.of("/foo/bar.baz");
+    Path path2 = Path.of("/bar/foo.baz");
     String changeId =
         createChange(
                 "Change Adding A File",
@@ -269,7 +268,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -325,7 +324,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -376,7 +375,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -424,7 +423,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
     TestAccount implicitCodeOwner = admin; // the changes is created by the admit user
     setAsRootCodeOwners(implicitCodeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -457,7 +456,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -466,7 +465,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
     recommend(changeId);
 
     // create a second patch set that adds a new file
-    Path path2 = Paths.get("/foo/abc.xyz");
+    Path path2 = Path.of("/foo/abc.xyz");
     amendChange(
             changeId,
             "Change Adding A File",
@@ -526,7 +525,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
         .addCodeOwnerEmail("*")
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -557,7 +556,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsDefaultCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -593,7 +592,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
         .addCodeOwnerEmail("*")
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -625,7 +624,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
     TestAccount bot =
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -653,7 +652,7 @@ public class CodeOwnerApprovalCheckWithStickyApprovalsTest extends AbstractCodeO
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void approved_byStickyApprovalOfGlobalCodeOnPreviousPatchSet_everyoneIsGlobalCodeOwner()
       throws Exception {
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 

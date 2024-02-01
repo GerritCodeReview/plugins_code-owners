@@ -34,7 +34,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.FileSystems;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,9 +103,7 @@ public class CheckCodeOwnerConfigFilesInRevision
                   changedFile ->
                       codeOwnerBackend.isCodeOwnerConfigFile(
                           revisionResource.getProject(),
-                          Paths.get(changedFile.newPath().get().toString())
-                              .getFileName()
-                              .toString()))
+                          Path.of(changedFile.newPath().get().toString()).getFileName().toString()))
               .filter(
                   changedFile ->
                       input.path == null

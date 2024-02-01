@@ -50,7 +50,6 @@ import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.inject.Inject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -93,7 +92,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileAddition_insufficientReviewers() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -114,7 +113,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileModification_insufficientReviewers() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
     String changeId =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
@@ -137,7 +136,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileDeletion_insufficientReviewers() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId = createChangeWithFileDeletion(path);
 
     // Add a reviewer that is not a code owner.
@@ -157,8 +156,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_insufficientReviewers() throws Exception {
     TestAccount user2 = accountCreator.user2();
 
-    Path oldPath = Paths.get("/foo/old.bar");
-    Path newPath = Paths.get("/foo/new.bar");
+    Path oldPath = Path.of("/foo/old.bar");
+    Path newPath = Path.of("/foo/new.bar");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is not a code owner.
@@ -184,7 +183,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsRootCodeOwners(user);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -212,7 +211,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsRootCodeOwners(user);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
     String changeId =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
@@ -242,7 +241,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsRootCodeOwners(user);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId = createChangeWithFileDeletion(path);
 
     // Add a reviewer that is a code owner.
@@ -269,8 +268,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsCodeOwners("/foo/bar/", user);
 
-    Path oldPath = Paths.get("/foo/bar/abc.txt");
-    Path newPath = Paths.get("/foo/baz/abc.txt");
+    Path oldPath = Path.of("/foo/bar/abc.txt");
+    Path newPath = Path.of("/foo/baz/abc.txt");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is a code owner old path.
@@ -300,8 +299,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsCodeOwners("/foo/baz/", user);
 
-    Path oldPath = Paths.get("/foo/bar/abc.txt");
-    Path newPath = Paths.get("/foo/baz/abc.txt");
+    Path oldPath = Path.of("/foo/bar/abc.txt");
+    Path newPath = Path.of("/foo/baz/abc.txt");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     // Add a reviewer that is a code owner of the new path.
@@ -329,7 +328,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileAddition_approved() throws Exception {
     setAsRootCodeOwners(user);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -352,7 +351,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileModification_approved() throws Exception {
     setAsRootCodeOwners(user);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     createChange("Test Change", JgitPath.of(path).get(), "file content").getChangeId();
     String changeId =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
@@ -377,7 +376,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileDeletion_approved() throws Exception {
     setAsRootCodeOwners(user);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId = createChangeWithFileDeletion(path);
 
     // Add a Code-Review+1 from a code owner (by default this counts as code owner approval).
@@ -399,8 +398,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_approvedOldPath() throws Exception {
     setAsCodeOwners("/foo/bar/", user);
 
-    Path oldPath = Paths.get("/foo/bar/abc.txt");
-    Path newPath = Paths.get("/foo/baz/abc.txt");
+    Path oldPath = Path.of("/foo/bar/abc.txt");
+    Path newPath = Path.of("/foo/baz/abc.txt");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     // Add a Code-Review+1 from a code owner of the old path (by default this counts as code owner
@@ -426,8 +425,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void getStatusForFileRename_approvedNewPath() throws Exception {
     setAsCodeOwners("/foo/baz/", user);
 
-    Path oldPath = Paths.get("/foo/bar/abc.txt");
-    Path newPath = Paths.get("/foo/baz/abc.txt");
+    Path oldPath = Path.of("/foo/bar/abc.txt");
+    Path newPath = Path.of("/foo/baz/abc.txt");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     // Add a Code-Review+1 from a code owner of the new path (by default this counts as code owner
@@ -479,7 +478,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsRootCodeOwners(changeOwner, otherCodeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -537,7 +536,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsRootCodeOwners(changeOwner, otherCodeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     createChange("Test Change", JgitPath.of(path).get(), "file content");
     String changeId =
         createChange("Change Modifying A File", JgitPath.of(path).get(), "new file content")
@@ -597,7 +596,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsRootCodeOwners(changeOwner, otherCodeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId = createChangeWithFileDeletion(path);
 
     if (uploaderMatchesChangeOwner) {
@@ -654,8 +653,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsCodeOwners("/foo/bar/", changeOwner, otherCodeOwner);
 
-    Path oldPath = Paths.get("/foo/bar/abc.txt");
-    Path newPath = Paths.get("/foo/baz/abc.txt");
+    Path oldPath = Path.of("/foo/bar/abc.txt");
+    Path newPath = Path.of("/foo/baz/abc.txt");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     if (uploaderMatchesChangeOwner) {
@@ -719,8 +718,8 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsCodeOwners("/foo/baz/", changeOwner, otherCodeOwner);
 
-    Path oldPath = Paths.get("/foo/bar/abc.txt");
-    Path newPath = Paths.get("/foo/baz/abc.txt");
+    Path oldPath = Path.of("/foo/bar/abc.txt");
+    Path newPath = Path.of("/foo/baz/abc.txt");
     String changeId = createChangeWithFileRename(oldPath, newPath);
 
     if (uploaderMatchesChangeOwner) {
@@ -761,7 +760,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
           throws Exception {
     setAsRootCodeOwners(admin);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     amendChange(user, changeId);
@@ -784,7 +783,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .create();
 
     // Create a change.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -848,7 +847,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .create();
 
     // Create a change as a user that is a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -889,7 +888,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         .create();
 
     // Create a change as a user that is a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -923,7 +922,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -993,7 +992,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         accountCreator.create(
             "other_bot", "otherBot@example.com", "Other Bot", /* displayName= */ null);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(bot, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1031,7 +1030,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1083,7 +1082,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void approvedByAnyoneWhenEveryoneIsGlobalCodeOwner() throws Exception {
     // Create a change.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1141,7 +1140,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     TestAccount changeOwner = admin;
     TestAccount otherCodeOwner = user;
     // Create a change as a user that is a code owner only through the global code ownership.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -1174,7 +1173,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "*")
   public void anyReviewerWhenEveryoneIsGlobalCodeOwner() throws Exception {
     // Create a change as a user that is a code owner only through the global code ownership.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -1210,7 +1209,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsCodeOwners("/foo/", user2);
     setAsCodeOwners("/foo/bar/", user3);
 
-    Path path = Paths.get("/foo/bar/baz.txt");
+    Path path = Path.of("/foo/bar/baz.txt");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -1486,7 +1485,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     createBranch(BranchNameKey.create(project, branchName));
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1502,7 +1501,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @TestProjectInput(createEmptyCommit = false)
   public void getStatus_initialChange_defaultCodeOwner() throws Exception {
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1557,7 +1556,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     createBranch(BranchNameKey.create(project, branchName));
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1578,7 +1577,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         accountCreator.create("bot", "bot@example.com", "Bot", /* displayName= */ null);
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1633,7 +1632,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     createBranch(BranchNameKey.create(project, branchName));
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1650,7 +1649,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
   public void getStatus_initialChange_override() throws Exception {
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(admin, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1689,7 +1688,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(user);
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user2, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1759,7 +1758,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     gApi.projects().name(project.get()).label("Owners-Override").update(input);
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1819,7 +1818,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(user);
 
     // Create a change as 'user2' that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user2, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1876,7 +1875,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsRootCodeOwners(admin);
 
     // Create a change as 'user' that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1911,7 +1910,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsDefaultCodeOwners(user);
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user2, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -1974,7 +1973,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
 
     setAsDefaultCodeOwners(changeOwner, otherCodeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -2009,7 +2008,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     setAsDefaultCodeOwners(user);
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user2, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -2061,7 +2060,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void pureRevertsAreNotExemptedByDefault() throws Exception {
     setAsRootCodeOwners(admin);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     approve(changeId);
@@ -2083,7 +2082,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void pureRevertsAreExemptedIfConfigured() throws Exception {
     setAsRootCodeOwners(admin);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     approve(changeId);
@@ -2108,7 +2107,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
   public void nonPureRevertsAreNotExempted() throws Exception {
     setAsRootCodeOwners(admin);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     approve(changeId);
@@ -2147,7 +2146,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
         accountCreator.create(
             "exemptedUser", "exempted-user@example.com", "Exempted User", /* displayName= */ null);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(exemptedUser, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -2183,7 +2182,7 @@ public class CodeOwnerApprovalCheckTest extends AbstractCodeOwnersTest {
     TestAccount changeOwner = admin;
     setAsRootCodeOwners(changeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 

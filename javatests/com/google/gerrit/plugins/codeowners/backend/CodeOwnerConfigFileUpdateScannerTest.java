@@ -30,7 +30,6 @@ import com.google.gerrit.plugins.codeowners.acceptance.testsuite.CodeOwnerConfig
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.inject.Inject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.junit.TestRepository;
 import org.eclipse.jgit.lib.Ref;
@@ -170,7 +169,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
             .addCodeOwnerEmail(admin.email())
             .create();
     Path path =
-        Paths.get(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
+        Path.of(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
     String content = codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getContent();
 
     RevCommit oldHead = projectOperations.project(project).getHead("master");
@@ -204,7 +203,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
             .addCodeOwnerEmail(admin.email())
             .create();
     Path path1 =
-        Paths.get(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath());
+        Path.of(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getFilePath());
     String oldContent1 =
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).getContent();
     String newContent1 = user.email() + "\n";
@@ -220,7 +219,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
             .addCodeOwnerEmail(user.email())
             .create();
     Path path2 =
-        Paths.get(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath());
+        Path.of(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getFilePath());
     String oldContent2 =
         codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).getContent();
     String newContent2 = user2.email() + "\n";
@@ -265,7 +264,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
     assertThat(update).isPresent();
 
     // Verify that we received the expected callbacks for the invalid code onwer config.
-    Mockito.verify(updater).update(Paths.get("/OWNERS"), "INVALID");
+    Mockito.verify(updater).update(Path.of("/OWNERS"), "INVALID");
     verifyNoMoreInteractions(updater);
 
     // Verify the code owner config file was updated.
@@ -282,7 +281,7 @@ public class CodeOwnerConfigFileUpdateScannerTest extends AbstractCodeOwnersTest
     approve(changeId);
     gApi.changes().id(changeId).current().submit();
     enableCodeOwnersForProject(project);
-    Path path = Paths.get(filePath);
+    Path path = Path.of(filePath);
     return CodeOwnerConfig.Key.create(
         project, "master", path.getParent().toString(), path.getFileName().toString());
   }

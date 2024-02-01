@@ -23,7 +23,6 @@ import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.project.BranchResource;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.eclipse.jgit.lib.ObjectId;
 
 /**
@@ -41,14 +40,14 @@ abstract class AbstractPathResource implements RestResource {
   protected static Path parsePath(IdString id) throws BadRequestException {
     Path path;
     try {
-      path = Paths.get(id.get());
+      path = Path.of(id.get());
     } catch (InvalidPathException e) {
       throw new BadRequestException("invalid path: " + e.getReason());
     }
 
     if (!path.isAbsolute()) {
       // we assume that all paths are absolute, add the missing leading '/'
-      path = Paths.get("/").resolve(path);
+      path = Path.of("/").resolve(path);
     }
     return path;
   }

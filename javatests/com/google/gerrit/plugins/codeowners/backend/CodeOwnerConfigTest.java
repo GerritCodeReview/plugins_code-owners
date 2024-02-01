@@ -23,7 +23,6 @@ import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
@@ -40,7 +39,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKeyCreatedByCustomConstructor =
         CodeOwnerConfig.Key.create(project, branch, folderPath);
     CodeOwnerConfig.Key codeOwnerConfigKeyCreatedByAutoValueConstructor =
-        CodeOwnerConfig.Key.create(BranchNameKey.create(project, branch), Paths.get(folderPath));
+        CodeOwnerConfig.Key.create(BranchNameKey.create(project, branch), Path.of(folderPath));
     assertThat(codeOwnerConfigKeyCreatedByCustomConstructor)
         .isEqualTo(codeOwnerConfigKeyCreatedByAutoValueConstructor);
   }
@@ -89,7 +88,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", folderPath);
     Truth8.assertThat(codeOwnerConfigKey.filePath("OWNERS"))
-        .isEqualTo(Paths.get(folderPath, "OWNERS"));
+        .isEqualTo(Path.of(folderPath, "OWNERS"));
   }
 
   @Test
@@ -100,7 +99,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
         CodeOwnerConfig.Key.create(
             Project.nameKey("project"), "master", folderPath, customFileName);
     Truth8.assertThat(codeOwnerConfigKey.filePath("OWNERS"))
-        .isEqualTo(Paths.get(folderPath, customFileName));
+        .isEqualTo(Path.of(folderPath, customFileName));
   }
 
   @Test
@@ -138,17 +137,17 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
         CodeOwnerConfig.builder(
                 CodeOwnerConfig.Key.create(
                     BranchNameKey.create(Project.nameKey("project"), "master"),
-                    Paths.get("/foo/bar/")),
+                    Path.of("/foo/bar/")),
                 TEST_REVISION)
             .build();
-    Path relativizedPath = codeOwnerConfig.relativize(Paths.get("/foo/bar/baz.md"));
-    Truth8.assertThat(relativizedPath).isEqualTo(Paths.get("baz.md"));
+    Path relativizedPath = codeOwnerConfig.relativize(Path.of("/foo/bar/baz.md"));
+    Truth8.assertThat(relativizedPath).isEqualTo(Path.of("baz.md"));
   }
 
   private static CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
         CodeOwnerConfig.Key.create(
-            BranchNameKey.create(Project.nameKey("project"), "master"), Paths.get("/")),
+            BranchNameKey.create(Project.nameKey("project"), "master"), Path.of("/")),
         TEST_REVISION);
   }
 }

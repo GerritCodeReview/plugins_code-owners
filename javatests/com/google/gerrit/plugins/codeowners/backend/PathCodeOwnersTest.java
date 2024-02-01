@@ -45,7 +45,6 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -78,7 +77,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   public void createPathCodeOwnersForCodeOwnerConfig() throws Exception {
     PathCodeOwners pathCodeOwners =
         pathCodeOwnersFactory.createWithoutCache(
-            createCodeOwnerBuilder().build(), Paths.get("/foo/bar/baz.md"));
+            createCodeOwnerBuilder().build(), Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isNotNull();
   }
 
@@ -89,7 +88,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             NullPointerException.class,
             () ->
                 pathCodeOwnersFactory.createWithoutCache(
-                    /* codeOwnerConfig= */ null, Paths.get("/foo/bar/baz.md")));
+                    /* codeOwnerConfig= */ null, Path.of("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
@@ -112,8 +111,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () ->
-                pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Paths.get(relativePath)));
+            () -> pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -135,7 +133,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             codeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
   }
 
@@ -148,9 +146,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                 pathCodeOwnersFactory.create(
                     /* transientCodeOwnerConfigCache= */ null,
                     CodeOwnerConfig.Key.create(
-                        BranchNameKey.create(project, "master"), Paths.get("/")),
+                        BranchNameKey.create(project, "master"), Path.of("/")),
                     projectOperations.project(project).getHead("master"),
-                    Paths.get("/foo/bar/baz.md")));
+                    Path.of("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("transientCodeOwnerConfigCache");
   }
 
@@ -164,7 +162,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     transientCodeOwnerConfigCacheProvider.get(),
                     /* codeOwnerConfigKey= */ null,
                     projectOperations.project(project).getHead("master"),
-                    Paths.get("/foo/bar/baz.md")));
+                    Path.of("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
   }
 
@@ -177,9 +175,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                 pathCodeOwnersFactory.create(
                     transientCodeOwnerConfigCacheProvider.get(),
                     CodeOwnerConfig.Key.create(
-                        BranchNameKey.create(project, "master"), Paths.get("/")),
+                        BranchNameKey.create(project, "master"), Path.of("/")),
                     /* revision= */ null,
-                    Paths.get("/foo/bar/baz.md")));
+                    Path.of("/foo/bar/baz.md")));
     assertThat(npe).hasMessageThat().isEqualTo("revision");
   }
 
@@ -226,7 +224,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     transientCodeOwnerConfigCacheProvider.get(),
                     codeOwnerConfigKey,
                     projectOperations.project(project).getHead("master"),
-                    Paths.get(relativePath)));
+                    Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -236,8 +234,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   public void getEmptyPathCodeOwners() throws Exception {
     CodeOwnerConfig emptyCodeOwnerConfig = createCodeOwnerBuilder().build();
     PathCodeOwners pathCodeOwners =
-        pathCodeOwnersFactory.createWithoutCache(
-            emptyCodeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+        pathCodeOwnersFactory.createWithoutCache(emptyCodeOwnerConfig, Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().getPathCodeOwners()).isEmpty();
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().resolvedImports()).isEmpty();
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().unresolvedImports()).isEmpty();
@@ -250,7 +247,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.createWithoutPathExpressions(admin.email(), user.email()))
             .build();
     PathCodeOwners pathCodeOwners =
-        pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+        pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().getPathCodeOwners())
         .comparingElementsUsing(hasEmail())
         .containsExactly(admin.email(), user.email());
@@ -288,7 +285,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(nonMatchingCodeOwnerSet)
               .build();
       PathCodeOwners pathCodeOwners =
-          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Path.of("/foo/bar/baz.md"));
       assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
@@ -309,7 +306,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                       .build())
               .build();
       PathCodeOwners pathCodeOwners =
-          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Path.of("/foo/bar/baz.md"));
       assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().getPathCodeOwners()).isEmpty();
     }
   }
@@ -341,7 +338,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(globalCodeOwnerSet)
               .build();
       PathCodeOwners pathCodeOwners =
-          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Path.of("/foo/bar/baz.md"));
       assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email());
@@ -375,7 +372,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(globalCodeOwnerSet)
               .build();
       PathCodeOwners pathCodeOwners =
-          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Path.of("/foo/bar/baz.md"));
       assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
@@ -410,7 +407,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
               .addCodeOwnerSet(perFileCodeOwnerSet2)
               .build();
       PathCodeOwners pathCodeOwners =
-          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Paths.get("/foo/bar/baz.md"));
+          pathCodeOwnersFactory.createWithoutCache(codeOwnerConfig, Path.of("/foo/bar/baz.md"));
       assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().getPathCodeOwners())
           .comparingElementsUsing(hasEmail())
           .containsExactly(admin.email(), user.email());
@@ -423,7 +420,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     PathCodeOwners pathCodeOwners =
         pathCodeOwnersFactory.createWithoutCache(
             createCodeOwnerBuilder().setIgnoreParentCodeOwners().build(),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().ignoreParentCodeOwners()).isTrue();
   }
 
@@ -433,7 +430,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     PathCodeOwners pathCodeOwners =
         pathCodeOwnersFactory.createWithoutCache(
             createCodeOwnerBuilder().setIgnoreParentCodeOwners(false).build(),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().ignoreParentCodeOwners()).isFalse();
   }
 
@@ -449,7 +446,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                         .addPathExpression("*.md")
                         .build())
                 .build(),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().ignoreParentCodeOwners()).isTrue();
   }
 
@@ -466,7 +463,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                         .addPathExpression("*.txt")
                         .build())
                 .build(),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners.resolveCodeOwnerConfig().get().ignoreParentCodeOwners()).isFalse();
   }
 
@@ -493,7 +490,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owner from the importing code owner config, the
@@ -549,7 +546,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owner from the importing code owner config, the
@@ -608,7 +605,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owner from the importing code owner config, the
@@ -669,7 +666,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owner from the importing code owner config and the global
@@ -727,7 +724,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owners from the importing and the imported code owner
@@ -784,7 +781,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the matching per-file code owners from the importing and the imported
@@ -841,7 +838,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we only get the matching per-file code owners from the importing code owner
@@ -900,7 +897,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we only get the matching per-file code owners from the importing code owner
@@ -958,7 +955,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we only get the matching per-file code owners from the imported code owner
@@ -1019,7 +1016,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we only get the global code owners from the importing code owner config, the
@@ -1079,7 +1076,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we only get the global code owners from the importing code owner config, the
@@ -1131,7 +1128,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: ignoreParentCodeOwners is true because the ignoreParentCodeOwners flag in the
@@ -1180,7 +1177,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: ignoreParentCodeOwners is false because the ignoreParentCodeOwners flag in the
@@ -1255,7 +1252,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config, the imported code
@@ -1332,7 +1329,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config and the imported
@@ -1400,7 +1397,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owners from the importing and the imported code owner
@@ -1454,7 +1451,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
@@ -1516,7 +1513,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             rootCodeOwnerConfigKey,
             oldRevision,
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
@@ -1557,7 +1554,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
@@ -1597,7 +1594,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config
@@ -1650,7 +1647,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config, the global code
@@ -1695,7 +1692,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config
@@ -1746,7 +1743,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
@@ -1805,7 +1802,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead(branchName),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
@@ -1857,7 +1854,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
@@ -1911,7 +1908,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo/bar/baz.md"));
+            Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing and the imported code owner config
@@ -1956,7 +1953,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the per file code owner from the importing code owner config, the
@@ -2025,7 +2022,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the per file code owners from the importing and the global code owner
@@ -2101,7 +2098,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config, the imported code
@@ -2179,7 +2176,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config and the imported
@@ -2276,7 +2273,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.xyz"));
+            Path.of("/foo.xyz"));
     assertThat(pathCodeOwners).isPresent();
     PathCodeOwnersResult pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig().get();
     assertThat(pathCodeOwnersResult.getPathCodeOwners()).isEmpty();
@@ -2294,7 +2291,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
     pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig().get();
     assertThat(pathCodeOwnersResult.getPathCodeOwners())
@@ -2319,7 +2316,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.txt"));
+            Path.of("/foo.txt"));
     assertThat(pathCodeOwners).isPresent();
     pathCodeOwnersResult = pathCodeOwners.get().resolveCodeOwnerConfig().get();
     assertThat(pathCodeOwnersResult.getPathCodeOwners())
@@ -2345,7 +2342,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             () ->
                 PathCodeOwners.matches(
                     /* codeOwnerSet= */ null,
-                    Paths.get("bar/baz.md"),
+                    Path.of("bar/baz.md"),
                     mock(PathExpressionMatcher.class)));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerSet");
   }
@@ -2372,7 +2369,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             () ->
                 PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
-                    Paths.get(absolutePath),
+                    Path.of(absolutePath),
                     mock(PathExpressionMatcher.class)));
     assertThat(exception)
         .hasMessageThat()
@@ -2387,7 +2384,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             () ->
                 PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
-                    Paths.get("bar/baz.md"),
+                    Path.of("bar/baz.md"),
                     /* matcher= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("matcher");
   }
@@ -2401,7 +2398,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             () ->
                 PathCodeOwners.matches(
                     CodeOwnerSet.createWithoutPathExpressions(admin.email()),
-                    Paths.get("bar/baz.md"),
+                    Path.of("bar/baz.md"),
                     pathExpressionMatcher));
     assertThat(exception).hasMessageThat().isEqualTo("code owner set must have path expressions");
   }
@@ -2416,7 +2413,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .addPathExpression("*.md")
                     .addCodeOwnerEmail(admin.email())
                     .build(),
-                Paths.get("bar/baz.md"),
+                Path.of("bar/baz.md"),
                 pathExpressionMatcher))
         .isTrue();
   }
@@ -2431,7 +2428,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .addPathExpression("*.md")
                     .addCodeOwnerEmail(admin.email())
                     .build(),
-                Paths.get("bar/baz.md"),
+                Path.of("bar/baz.md"),
                 pathExpressionMatcher))
         .isFalse();
   }
@@ -2450,7 +2447,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .addPathExpression("build/*")
                     .addCodeOwnerEmail(admin.email())
                     .build(),
-                Paths.get("bar/baz.md"),
+                Path.of("bar/baz.md"),
                 pathExpressionMatcher))
         .isTrue();
   }
@@ -2496,7 +2493,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global code owner from the imported code owner config (since it is
@@ -2564,7 +2561,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the code owner from the matching per-file rule in the importing code
@@ -2635,7 +2632,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config and from the
@@ -2708,7 +2705,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             transientCodeOwnerConfigCacheProvider.get(),
             importingCodeOwnerConfigKey,
             projectOperations.project(project).getHead("master"),
-            Paths.get("/foo.md"));
+            Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
 
     // Expectation: we get the global owners from the importing code owner config and from the
@@ -2732,7 +2729,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
   private CodeOwnerConfig.Builder createCodeOwnerBuilder() {
     return CodeOwnerConfig.builder(
-        CodeOwnerConfig.Key.create(BranchNameKey.create(project, "master"), Paths.get("/")),
+        CodeOwnerConfig.Key.create(BranchNameKey.create(project, "master"), Path.of("/")),
         ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef"));
   }
 

@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.util;
 import static java.util.Objects.requireNonNull;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
@@ -62,7 +61,7 @@ public class JgitPath {
 
   /** Returns the path as absolute path. */
   public Path getAsAbsolutePath() {
-    return Paths.get("/" + get());
+    return Path.of("/" + get());
   }
 
   @Override

@@ -36,7 +36,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigReferenceSubject;
 import com.google.gerrit.plugins.codeowners.testing.CodeOwnerSetSubject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.regex.Pattern;
 import org.junit.Test;
 
@@ -221,7 +220,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
   @Test
   public void importCodeOwnerConfigWithComment() throws Exception {
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path).build();
     assertParseAndFormat(
@@ -385,7 +384,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
   @Test
   public void importCodeOwnerConfigFromSameProjectAndBranch() throws Exception {
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path).build();
     assertParseAndFormat(
@@ -402,7 +401,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   @Test
   public void importCodeOwnerConfigFromOtherProject() throws Exception {
     String otherProject = "otherProject";
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path)
             .setProject(Project.nameKey(otherProject))
@@ -420,7 +419,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   @Test
   public void cannotFormatCodeOwnerConfigWithImportThatSpecifiesBranchWithoutProject()
       throws Exception {
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path)
             .setBranch("refs/heads/foo")
@@ -453,7 +452,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   }
 
   private void testImportCodeOwnerConfigFromOtherBranch(String branchName) throws Exception {
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path)
             .setProject(project)
@@ -507,10 +506,10 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
   @Test
   public void importMultipleCodeOwnerConfigs() throws Exception {
-    Path path1 = Paths.get("/foo/bar/OWNERS");
+    Path path1 = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference1 =
         CodeOwnerConfigReference.builder(CodeOwnerConfigImportMode.ALL, path1).build();
-    Path path2 = Paths.get("/foo/baz/OWNERS");
+    Path path2 = Path.of("/foo/baz/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference2 =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path2)
@@ -569,7 +568,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
   @Test
   public void perFileCodeOwnerConfigImportFromSameProjectAndBranch() throws Exception {
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
@@ -600,7 +599,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   @Test
   public void perFileCodeOwnerConfigImportFromOtherProject() throws Exception {
     String otherProject = "otherProject";
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
@@ -631,7 +630,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
   @Test
   public void cannotFormatCodeOwnerConfigWithPerFileImportThatSpecifiesBranchWithoutProject()
       throws Exception {
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)
@@ -670,7 +669,7 @@ public class FindOwnersCodeOwnerConfigParserTest extends AbstractCodeOwnerConfig
 
   private void testPerFileImportOfCodeOwnerConfigFromOtherBranch(String branchName)
       throws Exception {
-    Path path = Paths.get("/foo/bar/OWNERS");
+    Path path = Path.of("/foo/bar/OWNERS");
     CodeOwnerConfigReference codeOwnerConfigReference =
         CodeOwnerConfigReference.builder(
                 CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, path)

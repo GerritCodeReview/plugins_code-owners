@@ -87,7 +87,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -607,7 +606,7 @@ public class CodeOwnerConfigValidator
             changedFile ->
                 codeOwnerBackend.isCodeOwnerConfigFile(
                     project,
-                    Paths.get(changedFile.newPath().get().toString()).getFileName().toString()))
+                    Path.of(changedFile.newPath().get().toString()).getFileName().toString()))
         .collect(toImmutableList());
   }
 
@@ -741,7 +740,7 @@ public class CodeOwnerConfigValidator
     Path folderPath =
         filePath.getParent() != null
             ? JgitPath.of(filePath.getParent()).getAsAbsolutePath()
-            : Paths.get("/");
+            : Path.of("/");
     String fileName = filePath.getFileName().toString();
     return CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
   }

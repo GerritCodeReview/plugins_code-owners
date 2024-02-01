@@ -27,7 +27,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -142,7 +141,7 @@ public abstract class TestCodeOwnerConfigCreation {
                     new IllegalStateException(
                         "project not specified, specifying a project is required for code owner config creation"));
     String branchName = branch().orElse("master");
-    Path folderPath = folderPath().orElse(Paths.get("/"));
+    Path folderPath = folderPath().orElse(Path.of("/"));
     return CodeOwnerConfig.Key.create(
         BranchNameKey.create(projectName, branchName), folderPath, fileName().orElse(null));
   }
@@ -215,7 +214,7 @@ public abstract class TestCodeOwnerConfigCreation {
      * @return the Builder instance for chaining calls
      */
     public Builder folderPath(String folderPath) {
-      return folderPath(Paths.get(folderPath));
+      return folderPath(Path.of(folderPath));
     }
 
     /**
