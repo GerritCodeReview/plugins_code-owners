@@ -33,7 +33,6 @@ import com.google.gerrit.server.notedb.ChangeNotes;
 import com.google.gerrit.truth.ListSubject;
 import com.google.inject.Inject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.stream.Stream;
 import org.junit.Before;
 import org.junit.Test;
@@ -58,7 +57,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
 
   @Test
   public void notApprovedByUser() throws Exception {
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     ChangeNotes changeNotes = getChangeNotes(changeId);
@@ -92,7 +91,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .addCodeOwnerEmail(codeOwner.email())
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     ChangeNotes changeNotes = getChangeNotes(changeId);
@@ -130,7 +129,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .addCodeOwnerEmail(codeOwner.email())
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     ChangeNotes changeNotes = getChangeNotes(changeId);
@@ -176,7 +175,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .addCodeOwnerEmail(codeOwner.email())
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     ChangeNotes changeNotes = getChangeNotes(changeId);
@@ -211,7 +210,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .addCodeOwnerEmail(user.email())
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     ChangeNotes changeNotes = getChangeNotes(changeId);
@@ -241,13 +240,13 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .addCodeOwnerEmail(user.email())
         .create();
 
-    Path path1 = Paths.get("/foo/bar.baz");
+    Path path1 = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path1).get(), "file content")
             .getChangeId();
 
     // amend change and add another file
-    Path path2 = Paths.get("/foo/baz.bar");
+    Path path2 = Path.of("/foo/baz.bar");
     PushOneCommit push =
         pushFactory.create(
             admin.newIdent(),
@@ -305,7 +304,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
   @GerritConfig(name = "plugin.code-owners.fallbackCodeOwners", value = "ALL_USERS")
   @Test
   public void approvedByFallbackCodeOwner() throws Exception {
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     ChangeNotes changeNotes = getChangeNotes(changeId);
@@ -340,7 +339,7 @@ public class CodeOwnerApprovalCheckForAccountTest extends AbstractCodeOwnersTest
         .addCodeOwnerEmail(codeOwner.email())
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
     ChangeNotes changeNotes = getChangeNotes(changeId);

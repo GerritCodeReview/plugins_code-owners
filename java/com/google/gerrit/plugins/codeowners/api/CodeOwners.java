@@ -22,7 +22,6 @@ import com.google.gerrit.extensions.client.ListAccountsOption;
 import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Optional;
@@ -69,7 +68,7 @@ public interface CodeOwners {
      * @return the code owners for the given path
      */
     public CodeOwnersInfo get(String path) throws RestApiException {
-      return get(Paths.get(path));
+      return get(Path.of(path));
     }
 
     /**

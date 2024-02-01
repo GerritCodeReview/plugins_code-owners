@@ -18,7 +18,7 @@ import static com.google.common.truth.Truth.assertWithMessage;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 
 /** Base class for testing {@link PathExpressionMatcher}s. */
 public abstract class AbstractPathExpressionMatcherTest extends AbstractCodeOwnersTest {
@@ -37,7 +37,7 @@ public abstract class AbstractPathExpressionMatcherTest extends AbstractCodeOwne
       boolean expectedToMatch, String pathExpression, String firstPath, String... morePaths) {
     for (String path : toList(firstPath, morePaths)) {
       assertWithMessage("path expression %s matches path %s", pathExpression, path)
-          .that(getPathExpressionMatcher().matches(pathExpression, Paths.get(path)))
+          .that(getPathExpressionMatcher().matches(pathExpression, Path.of(path)))
           .isEqualTo(expectedToMatch);
     }
   }

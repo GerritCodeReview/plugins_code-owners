@@ -45,7 +45,7 @@ import com.google.gerrit.server.change.ChangeResource;
 import com.google.gerrit.server.change.RevisionResource;
 import com.google.gerrit.server.restapi.change.ChangesCollection;
 import com.google.inject.Inject;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -134,7 +134,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.getFromDiffCache(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
     assertThat(changedFile).hasOldPath().isEmpty();
     assertThat(changedFile).isNoRename();
     assertThat(changedFile).isNoDeletion();
@@ -153,8 +153,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.getFromDiffCache(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
-    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
+    assertThat(changedFile).hasOldPath().value().isEqualTo(Path.of(path));
     assertThat(changedFile).isNoRename();
     assertThat(changedFile).isNoDeletion();
   }
@@ -172,7 +172,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
     assertThat(changedFile).hasNewPath().isEmpty();
-    assertThat(changedFile).hasOldPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasOldPath().value().isEqualTo(Path.of(path));
     assertThat(changedFile).isNoRename();
     assertThat(changedFile).isDeletion();
   }
@@ -191,8 +191,8 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
             getRevisionResource(changeId).getPatchSet().commitId(),
             MergeCommitStrategy.ALL_CHANGED_FILES);
     ChangedFileSubject changedFile = assertThatCollection(changedFilesSet).onlyElement();
-    changedFile.hasNewPath().value().isEqualTo(Paths.get(newPath));
-    changedFile.hasOldPath().value().isEqualTo(Paths.get(oldPath));
+    changedFile.hasNewPath().value().isEqualTo(Path.of(newPath));
+    changedFile.hasOldPath().value().isEqualTo(Path.of(oldPath));
     changedFile.isRename();
     changedFile.isNoDeletion();
   }
@@ -209,7 +209,7 @@ public class ChangedFilesTest extends AbstractCodeOwnersTest {
         changedFiles.getFromDiffCache(project, commit, MergeCommitStrategy.ALL_CHANGED_FILES);
     assertThat(changedFilesSet).hasSize(1);
     ChangedFile changedFile = Iterables.getOnlyElement(changedFilesSet);
-    assertThat(changedFile).hasNewPath().value().isEqualTo(Paths.get(path));
+    assertThat(changedFile).hasNewPath().value().isEqualTo(Path.of(path));
     assertThat(changedFile).hasOldPath().isEmpty();
     assertThat(changedFile).isNoRename();
     assertThat(changedFile).isNoDeletion();

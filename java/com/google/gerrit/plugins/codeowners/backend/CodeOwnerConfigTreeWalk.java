@@ -25,7 +25,6 @@ import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.eclipse.jgit.lib.Constants;
 import org.eclipse.jgit.lib.ObjectLoader;
 import org.eclipse.jgit.lib.Ref;
@@ -93,8 +92,8 @@ public class CodeOwnerConfigTreeWalk extends TreeWalk {
     Path folderPath =
         filePath.getParent() != null
             ? JgitPath.of(filePath.getParent()).getAsAbsolutePath()
-            : Paths.get("/");
-    String fileName = Paths.get(getPathString()).getFileName().toString();
+            : Path.of("/");
+    String fileName = Path.of(getPathString()).getFileName().toString();
     return CodeOwnerConfig.Key.create(branchNameKey, folderPath, fileName);
   }
 
@@ -162,7 +161,7 @@ public class CodeOwnerConfigTreeWalk extends TreeWalk {
               "%s filtered out because it doesn't match the path glob", walker.getPathString());
           return false;
         }
-        String fileName = Paths.get(walker.getPathString()).getFileName().toString();
+        String fileName = Path.of(walker.getPathString()).getFileName().toString();
         return codeOwnerBackend.isCodeOwnerConfigFile(project, fileName);
       }
 

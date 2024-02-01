@@ -26,7 +26,7 @@ import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
 import com.google.gerrit.plugins.codeowners.testing.backend.TestCodeOwnerConfigStorage;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.IdentifiedUser;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.errors.MissingObjectException;
@@ -477,7 +477,7 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
   public void getFilePathForCodeOwnerConfigKeyWithoutFileName() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
     Truth8.assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
-        .isEqualTo(Paths.get(codeOwnerConfigKey.folderPath() + getFileName()));
+        .isEqualTo(Path.of(codeOwnerConfigKey.folderPath() + getFileName()));
   }
 
   @Test
@@ -485,8 +485,7 @@ public abstract class AbstractFileBasedCodeOwnerBackendTest extends AbstractCode
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(project, "master", "/", getFileName() + "_foo_bar");
     Truth8.assertThat(codeOwnerBackend.getFilePath(codeOwnerConfigKey))
-        .isEqualTo(
-            Paths.get(codeOwnerConfigKey.folderPath() + codeOwnerConfigKey.fileName().get()));
+        .isEqualTo(Path.of(codeOwnerConfigKey.folderPath() + codeOwnerConfigKey.fileName().get()));
   }
 
   @Test

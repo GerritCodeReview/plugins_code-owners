@@ -24,7 +24,6 @@ import com.google.gerrit.common.Nullable;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
 
@@ -328,7 +327,7 @@ public abstract class CodeOwnerConfig {
      * @return the code owner config key
      */
     public static Key create(Project.NameKey project, String branch, String folderPath) {
-      return create(BranchNameKey.create(project, branch), Paths.get(folderPath));
+      return create(BranchNameKey.create(project, branch), Path.of(folderPath));
     }
 
     /**
@@ -343,7 +342,7 @@ public abstract class CodeOwnerConfig {
      */
     public static Key create(
         Project.NameKey project, String branch, String folderPath, @Nullable String fileName) {
-      return create(BranchNameKey.create(project, branch), Paths.get(folderPath), fileName);
+      return create(BranchNameKey.create(project, branch), Path.of(folderPath), fileName);
     }
 
     /**

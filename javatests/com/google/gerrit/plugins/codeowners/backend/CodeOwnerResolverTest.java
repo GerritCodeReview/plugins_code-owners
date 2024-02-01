@@ -35,7 +35,7 @@ import com.google.gerrit.server.git.meta.MetaDataUpdate;
 import com.google.inject.Inject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import org.eclipse.jgit.lib.ObjectId;
@@ -358,7 +358,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwners()).isEmpty();
     assertThat(result.ownedByAllUsers()).isFalse();
     assertThat(result.hasUnresolvedCodeOwners()).isFalse();
@@ -374,7 +374,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
     assertThat(result.ownedByAllUsers()).isFalse();
     assertThat(result.hasUnresolvedCodeOwners()).isFalse();
@@ -391,7 +391,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwnersAccountIds()).isEmpty();
     assertThat(result.ownedByAllUsers()).isTrue();
     assertThat(result.hasUnresolvedCodeOwners()).isFalse();
@@ -408,7 +408,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
     assertThat(result.ownedByAllUsers()).isFalse();
     assertThat(result.hasUnresolvedCodeOwners()).isTrue();
@@ -426,7 +426,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id());
     assertThat(result.ownedByAllUsers()).isTrue();
     assertThat(result.hasUnresolvedCodeOwners()).isTrue();
@@ -452,7 +452,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id(), user2.id());
     assertThat(result.annotations().keySet())
         .containsExactly(CodeOwner.create(admin.id()), CodeOwner.create(user.id()));
@@ -480,7 +480,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(admin.id(), user.id());
     assertThat(result.annotations().keySet())
         .containsExactly(CodeOwner.create(admin.id()), CodeOwner.create(user.id()));
@@ -513,7 +513,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
     CodeOwnerResolverResult result =
         codeOwnerResolverProvider
             .get()
-            .resolvePathCodeOwners(codeOwnerConfig, Paths.get("/README.md"));
+            .resolvePathCodeOwners(codeOwnerConfig, Path.of("/README.md"));
     assertThat(result.codeOwnersAccountIds()).containsExactly(user.id());
     assertThat(result.annotations().keySet()).containsExactly(CodeOwner.create(user.id()));
     assertThat(result.annotations().get(CodeOwner.create(user.id())))
@@ -528,7 +528,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerResolverProvider
                     .get()
-                    .resolvePathCodeOwners(/* codeOwnerConfig= */ null, Paths.get("/README.md")));
+                    .resolvePathCodeOwners(/* codeOwnerConfig= */ null, Path.of("/README.md")));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
@@ -571,7 +571,7 @@ public class CodeOwnerResolverTest extends AbstractCodeOwnersTest {
             () ->
                 codeOwnerResolverProvider
                     .get()
-                    .resolvePathCodeOwners(codeOwnerConfig, Paths.get(relativePath)));
+                    .resolvePathCodeOwners(codeOwnerConfig, Path.of(relativePath)));
     assertThat(npe)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));

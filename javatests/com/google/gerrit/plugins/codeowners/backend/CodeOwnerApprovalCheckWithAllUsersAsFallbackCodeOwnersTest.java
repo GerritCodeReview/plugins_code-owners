@@ -35,7 +35,6 @@ import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,7 +74,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -115,7 +114,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -136,7 +135,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         .addCodeOwnerEmail("non-resolvable-code-owner@example.com")
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -180,7 +179,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         .addCodeOwnerEmail("non-resolvable-code-owner@example.com")
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -193,7 +192,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
 
   @Test
   public void approvedByFallbackCodeOwner() throws Exception {
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -238,7 +237,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
   @Test
   @GerritConfig(name = "plugin.code-owners.enableImplicitApprovals", value = "true")
   public void implicitlyApprovedByFallbackCodeOwner() throws Exception {
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -266,7 +265,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         .ignoreParentCodeOwners()
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -309,7 +308,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
         .ignoreParentCodeOwners()
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -331,7 +330,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
             CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/non-existing/OWNERS"))
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -375,7 +374,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
             CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/non-existing/OWNERS"))
         .create();
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -402,7 +401,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 .autoBuild())
         .create();
 
-    Path path = Paths.get("/foo/bar.md");
+    Path path = Path.of("/foo/bar.md");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -452,7 +451,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
                 .autoBuild())
         .create();
 
-    Path path = Paths.get("/foo/bar.md");
+    Path path = Path.of("/foo/bar.md");
     String changeId =
         createChange("Change Adding A File", JgitPath.of(path).get(), "file content").getChangeId();
 
@@ -469,7 +468,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
     createBranch(BranchNameKey.create(project, branchName));
 
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -485,7 +484,7 @@ public class CodeOwnerApprovalCheckWithAllUsersAsFallbackCodeOwnersTest
   @TestProjectInput(createEmptyCommit = false)
   public void getStatus_initialChange() throws Exception {
     // Create a change as a user that is not a code owner.
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(user, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();

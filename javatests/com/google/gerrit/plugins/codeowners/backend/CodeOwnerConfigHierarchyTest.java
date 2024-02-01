@@ -35,7 +35,7 @@ import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.restapi.project.DeleteRef;
 import com.google.inject.Inject;
 import java.io.IOException;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.function.Consumer;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.Ref;
@@ -83,7 +83,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
                 codeOwnerConfigHierarchy.visit(
                     /* branchNameKey= */ null,
                     getCurrentRevision(BranchNameKey.create(project, "master")),
-                    Paths.get("/foo/bar/baz.md"),
+                    Path.of("/foo/bar/baz.md"),
                     visitor));
     assertThat(npe).hasMessageThat().isEqualTo("branch");
   }
@@ -93,7 +93,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     codeOwnerConfigHierarchy.visit(
         BranchNameKey.create(project, "master"),
         /* revision= */ null,
-        Paths.get("/foo/bar/baz.md"),
+        Path.of("/foo/bar/baz.md"),
         visitor);
     verifyNoInteractions(visitor);
   }
@@ -124,7 +124,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
                 codeOwnerConfigHierarchy.visit(
                     branchNameKey,
                     getCurrentRevision(branchNameKey),
-                    Paths.get(relativePath),
+                    Path.of(relativePath),
                     visitor));
     assertThat(exception)
         .hasMessageThat()
@@ -141,7 +141,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
                 codeOwnerConfigHierarchy.visit(
                     branchNameKey,
                     getCurrentRevision(branchNameKey),
-                    Paths.get("/foo/bar/baz.md"),
+                    Path.of("/foo/bar/baz.md"),
                     /* codeOwnerConfigVisitor= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigVisitor");
   }
@@ -156,7 +156,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
                 codeOwnerConfigHierarchy.visit(
                     branchNameKey,
                     getCurrentRevision(branchNameKey),
-                    Paths.get("/foo/bar/baz.md"),
+                    Path.of("/foo/bar/baz.md"),
                     visitor,
                     /* parentCodeOwnersIgnoredCallback= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("parentCodeOwnersIgnoredCallback");
@@ -320,7 +320,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
 
     when(visitor.visit(any(CodeOwnerConfig.class))).thenReturn(true);
     codeOwnerConfigHierarchy.visit(
-        BranchNameKey.create(project, branch), revision1, Paths.get("/foo/bar/baz.md"), visitor);
+        BranchNameKey.create(project, branch), revision1, Path.of("/foo/bar/baz.md"), visitor);
 
     // Verify that we received the callbacks for the code owner configs from the old revison, in
     // the right order, starting from the folder of the given path up to the root folder.
@@ -593,7 +593,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     codeOwnerConfigHierarchy.visit(
         BranchNameKey.create(project, "master"),
         /* revision= */ null,
-        Paths.get("/foo/bar/baz.md"),
+        Path.of("/foo/bar/baz.md"),
         visitor);
     verify(visitor).visit(codeOwnerConfigOperations.codeOwnerConfig(metaCodeOwnerConfigKey).get());
     verifyNoMoreInteractions(visitor);
@@ -781,7 +781,7 @@ public class CodeOwnerConfigHierarchyTest extends AbstractCodeOwnersTest {
     codeOwnerConfigHierarchy.visit(
         branchNameKey,
         getCurrentRevision(branchNameKey),
-        Paths.get(path),
+        Path.of(path),
         visitor,
         parentCodeOwnersIgnoredCallback);
   }

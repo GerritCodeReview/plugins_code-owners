@@ -32,7 +32,6 @@ import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.testing.ConfigSuite;
 import com.google.inject.Inject;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import org.eclipse.jgit.lib.Config;
 import org.junit.Before;
 import org.junit.Test;
@@ -77,7 +76,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(codeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -106,7 +105,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
     setAsRootCodeOwners(changeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -148,7 +147,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -192,7 +191,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(codeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -216,7 +215,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -239,7 +238,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(codeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -268,7 +267,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
             "codeOwner", "codeOwner@example.com", "CodeOwner", /* displayName= */ null);
     setAsRootCodeOwners(codeOwner);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -289,7 +288,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -318,7 +317,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();
@@ -355,7 +354,7 @@ public class CodeOwnerApprovalCheckWithSelfApprovalsIgnoredTest extends Abstract
         accountCreator.create(
             "changeOwner", "changeOwner@example.com", "ChangeOwner", /* displayName= */ null);
 
-    Path path = Paths.get("/foo/bar.baz");
+    Path path = Path.of("/foo/bar.baz");
     String changeId =
         createChange(changeOwner, "Change Adding A File", JgitPath.of(path).get(), "file content")
             .getChangeId();

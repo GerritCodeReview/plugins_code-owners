@@ -22,7 +22,6 @@ import com.google.auto.value.AutoValue;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -67,7 +66,7 @@ public abstract class CodeOwnerConfigReference {
    * <p>May be absolute or relative to the path of the importing code owner config.
    */
   public Path path() {
-    return firstNonNull(filePath().getParent(), Paths.get(""));
+    return firstNonNull(filePath().getParent(), Path.of(""));
   }
 
   /** The name of the code owner config file. */
@@ -118,7 +117,7 @@ public abstract class CodeOwnerConfigReference {
    */
   public static Builder builder(CodeOwnerConfigImportMode importMode, String filePath) {
     requireNonNull(filePath, "filePath");
-    return builder(importMode, Paths.get(filePath));
+    return builder(importMode, Path.of(filePath));
   }
 
   /**

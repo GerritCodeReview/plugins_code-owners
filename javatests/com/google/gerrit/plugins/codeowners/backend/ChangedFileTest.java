@@ -25,7 +25,7 @@ import com.google.gerrit.plugins.codeowners.common.ChangedFile;
 import com.google.gerrit.server.patch.PatchListEntry;
 import com.google.gerrit.server.patch.filediff.FileDiffOutput;
 import com.google.gerrit.truth.OptionalSubject;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.eclipse.jgit.diff.DiffEntry.ChangeType;
@@ -50,7 +50,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupDiffEntry(newPath, /* oldPath= */ null, ChangeType.ADD);
     OptionalSubject.assertThat(ChangedFile.create(diffEntry).newPath())
         .value()
-        .isEqualTo(Paths.get("/" + newPath));
+        .isEqualTo(Path.of("/" + newPath));
   }
 
   @Test
@@ -59,7 +59,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupPatchListEntry(newPath, /* oldPath= */ null, Patch.ChangeType.ADDED);
     OptionalSubject.assertThat(ChangedFile.create(patchListEntry).newPath())
         .value()
-        .isEqualTo(Paths.get("/" + newPath));
+        .isEqualTo(Path.of("/" + newPath));
   }
 
   @Test
@@ -68,7 +68,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupFileDiffOutput(newPath, /* oldPath= */ null, Patch.ChangeType.ADDED);
     OptionalSubject.assertThat(ChangedFile.create(fileDiffOutput).newPath())
         .value()
-        .isEqualTo(Paths.get("/" + newPath));
+        .isEqualTo(Path.of("/" + newPath));
   }
 
   @Test
@@ -95,8 +95,8 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupDiffEntry(newPath, /* oldPath= */ null, ChangeType.ADD);
 
     ChangedFile changedFile = ChangedFile.create(diffEntry);
-    assertThat(changedFile.hasNewPath(Paths.get("/" + newPath))).isTrue();
-    assertThat(changedFile.hasNewPath(Paths.get("/otherPath"))).isFalse();
+    assertThat(changedFile.hasNewPath(Path.of("/" + newPath))).isTrue();
+    assertThat(changedFile.hasNewPath(Path.of("/otherPath"))).isFalse();
   }
 
   @Test
@@ -105,8 +105,8 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupPatchListEntry(newPath, /* oldPath= */ null, Patch.ChangeType.ADDED);
 
     ChangedFile changedFile = ChangedFile.create(patchListEntry);
-    assertThat(changedFile.hasNewPath(Paths.get("/" + newPath))).isTrue();
-    assertThat(changedFile.hasNewPath(Paths.get("/otherPath"))).isFalse();
+    assertThat(changedFile.hasNewPath(Path.of("/" + newPath))).isTrue();
+    assertThat(changedFile.hasNewPath(Path.of("/otherPath"))).isFalse();
   }
 
   @Test
@@ -115,8 +115,8 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupFileDiffOutput(newPath, /* oldPath= */ null, Patch.ChangeType.ADDED);
 
     ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
-    assertThat(changedFile.hasNewPath(Paths.get("/" + newPath))).isTrue();
-    assertThat(changedFile.hasNewPath(Paths.get("/otherPath"))).isFalse();
+    assertThat(changedFile.hasNewPath(Path.of("/" + newPath))).isTrue();
+    assertThat(changedFile.hasNewPath(Path.of("/otherPath"))).isFalse();
   }
 
   @Test
@@ -159,7 +159,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> ChangedFile.create(diffEntry).hasNewPath(Paths.get(relativePath)));
+            () -> ChangedFile.create(diffEntry).hasNewPath(Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -172,7 +172,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> ChangedFile.create(patchListEntry).hasNewPath(Paths.get(relativePath)));
+            () -> ChangedFile.create(patchListEntry).hasNewPath(Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -185,7 +185,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> ChangedFile.create(fileDiffOutput).hasNewPath(Paths.get(relativePath)));
+            () -> ChangedFile.create(fileDiffOutput).hasNewPath(Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -197,7 +197,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupDiffEntry(/* newPath= */ null, oldPath, ChangeType.DELETE);
     OptionalSubject.assertThat(ChangedFile.create(diffEntry).oldPath())
         .value()
-        .isEqualTo(Paths.get("/" + oldPath));
+        .isEqualTo(Path.of("/" + oldPath));
   }
 
   @Test
@@ -206,7 +206,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupPatchListEntry(/* newPath= */ null, oldPath, Patch.ChangeType.DELETED);
     OptionalSubject.assertThat(ChangedFile.create(patchListEntry).oldPath())
         .value()
-        .isEqualTo(Paths.get("/" + oldPath));
+        .isEqualTo(Path.of("/" + oldPath));
   }
 
   @Test
@@ -215,7 +215,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupFileDiffOutput(/* newPath= */ null, oldPath, Patch.ChangeType.DELETED);
     OptionalSubject.assertThat(ChangedFile.create(fileDiffOutput).oldPath())
         .value()
-        .isEqualTo(Paths.get("/" + oldPath));
+        .isEqualTo(Path.of("/" + oldPath));
   }
 
   @Test
@@ -243,8 +243,8 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupDiffEntry(/* newPath= */ null, oldPath, ChangeType.DELETE);
 
     ChangedFile changedFile = ChangedFile.create(diffEntry);
-    assertThat(changedFile.hasOldPath(Paths.get("/" + oldPath))).isTrue();
-    assertThat(changedFile.hasOldPath(Paths.get("/otherPath"))).isFalse();
+    assertThat(changedFile.hasOldPath(Path.of("/" + oldPath))).isTrue();
+    assertThat(changedFile.hasOldPath(Path.of("/otherPath"))).isFalse();
   }
 
   @Test
@@ -253,8 +253,8 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupPatchListEntry(/* newPath= */ null, oldPath, Patch.ChangeType.DELETED);
 
     ChangedFile changedFile = ChangedFile.create(patchListEntry);
-    assertThat(changedFile.hasOldPath(Paths.get("/" + oldPath))).isTrue();
-    assertThat(changedFile.hasOldPath(Paths.get("/otherPath"))).isFalse();
+    assertThat(changedFile.hasOldPath(Path.of("/" + oldPath))).isTrue();
+    assertThat(changedFile.hasOldPath(Path.of("/otherPath"))).isFalse();
   }
 
   @Test
@@ -263,8 +263,8 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     setupFileDiffOutput(/* newPath= */ null, oldPath, Patch.ChangeType.DELETED);
 
     ChangedFile changedFile = ChangedFile.create(fileDiffOutput);
-    assertThat(changedFile.hasOldPath(Paths.get("/" + oldPath))).isTrue();
-    assertThat(changedFile.hasOldPath(Paths.get("/otherPath"))).isFalse();
+    assertThat(changedFile.hasOldPath(Path.of("/" + oldPath))).isTrue();
+    assertThat(changedFile.hasOldPath(Path.of("/otherPath"))).isFalse();
   }
 
   @Test
@@ -304,7 +304,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> ChangedFile.create(diffEntry).hasOldPath(Paths.get(relativePath)));
+            () -> ChangedFile.create(diffEntry).hasOldPath(Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -317,7 +317,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> ChangedFile.create(patchListEntry).hasOldPath(Paths.get(relativePath)));
+            () -> ChangedFile.create(patchListEntry).hasOldPath(Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));
@@ -330,7 +330,7 @@ public class ChangedFileTest extends AbstractCodeOwnersTest {
     IllegalStateException exception =
         assertThrows(
             IllegalStateException.class,
-            () -> ChangedFile.create(fileDiffOutput).hasOldPath(Paths.get(relativePath)));
+            () -> ChangedFile.create(fileDiffOutput).hasOldPath(Path.of(relativePath)));
     assertThat(exception)
         .hasMessageThat()
         .isEqualTo(String.format("path %s must be absolute", relativePath));

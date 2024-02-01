@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.api;
 import com.google.gerrit.extensions.restapi.NotImplementedException;
 import com.google.gerrit.extensions.restapi.RestApiException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -41,7 +40,7 @@ public interface CodeOwnerConfigs {
    * @return the code owner config if it exists
    */
   default Optional<CodeOwnerConfigInfo> get(String path) throws RestApiException {
-    return get(Paths.get(path));
+    return get(Path.of(path));
   }
 
   /**

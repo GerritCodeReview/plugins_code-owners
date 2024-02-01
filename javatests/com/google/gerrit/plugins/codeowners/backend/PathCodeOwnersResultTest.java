@@ -15,7 +15,7 @@
 package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.common.collect.ImmutableList;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
@@ -33,7 +33,7 @@ public class PathCodeOwnersResultTest extends AbstractAutoValueTest {
         CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/baz/OWNERS");
     PathCodeOwnersResult pathCodeOwnersResult =
         PathCodeOwnersResult.create(
-            Paths.get("/foo/bar/baz.md"),
+            Path.of("/foo/bar/baz.md"),
             CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION)
                 .addImport(resolvableCodeOwnerConfigReference)
                 .addImport(unresolvableCodeOwnerConfigReference)

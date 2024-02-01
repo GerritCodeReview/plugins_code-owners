@@ -38,7 +38,7 @@ import com.google.gerrit.plugins.codeowners.common.CodeOwnerStatus;
 import com.google.gerrit.plugins.codeowners.testing.FileCodeOwnerStatusInfoSubject;
 import com.google.gerrit.server.util.AccountTemplateUtil;
 import com.google.gerrit.truth.ListSubject;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Optional;
 import org.eclipse.jgit.diff.DiffEntry;
 import org.junit.Before;
@@ -67,7 +67,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatPathCodeOwnerStatus() throws Exception {
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
     PathCodeOwnerStatusInfo pathCodeOwnerStatusInfo =
         CodeOwnerStatusInfoJson.format(pathCodeOwnerStatus);
     assertThat(pathCodeOwnerStatusInfo).hasPathThat().isEqualTo("foo/bar.baz");
@@ -78,7 +78,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
   @Test
   public void formatPathCodeOwnerStatusWithReasons() throws Exception {
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.builder(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
+        PathCodeOwnerStatus.builder(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
             .addReason("one reason")
             .addReason("another reason")
             .build();
@@ -107,7 +107,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus =
         FileCodeOwnerStatus.create(changedFile, Optional.of(pathCodeOwnerStatus), Optional.empty());
     FileCodeOwnerStatusInfo fileCodeOwnerStatusInfo =
@@ -131,7 +131,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.MODIFY);
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus =
         FileCodeOwnerStatus.create(changedFile, Optional.of(pathCodeOwnerStatus), Optional.empty());
     FileCodeOwnerStatusInfo fileCodeOwnerStatusInfo =
@@ -155,7 +155,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.DELETE);
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus =
         FileCodeOwnerStatus.create(changedFile, Optional.empty(), Optional.of(pathCodeOwnerStatus));
     FileCodeOwnerStatusInfo fileCodeOwnerStatusInfo =
@@ -179,9 +179,9 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.RENAME);
     PathCodeOwnerStatus newPathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(Paths.get("/foo/new.baz"), CodeOwnerStatus.PENDING);
+        PathCodeOwnerStatus.create(Path.of("/foo/new.baz"), CodeOwnerStatus.PENDING);
     PathCodeOwnerStatus oldPathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(Paths.get("/foo/old.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/old.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus =
         FileCodeOwnerStatus.create(
             changedFile, Optional.of(newPathCodeOwnerStatus), Optional.of(oldPathCodeOwnerStatus));
@@ -235,7 +235,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.create(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus =
         FileCodeOwnerStatus.create(changedFile, Optional.of(pathCodeOwnerStatus), Optional.empty());
     CodeOwnerStatusInfo codeOwnerStatusInfo =
@@ -265,7 +265,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.builder(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
+        PathCodeOwnerStatus.builder(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
             .addReason("one reason")
             .addReason("another reason")
             .build();
@@ -312,7 +312,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile = mock(ChangedFile.class);
     when(changedFile.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
     PathCodeOwnerStatus pathCodeOwnerStatus =
-        PathCodeOwnerStatus.builder(Paths.get("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
+        PathCodeOwnerStatus.builder(Path.of("/foo/bar.baz"), CodeOwnerStatus.APPROVED)
             .addReason(reason1)
             .addReason(reason2)
             .build();
@@ -349,7 +349,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile1 = mock(ChangedFile.class);
     when(changedFile1.changeType()).thenReturn(DiffEntry.ChangeType.ADD);
     PathCodeOwnerStatus pathCodeOwnerStatus1 =
-        PathCodeOwnerStatus.create(Paths.get("/foo/a/bar.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/a/bar.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus1 =
         FileCodeOwnerStatus.create(
             changedFile1, Optional.of(pathCodeOwnerStatus1), Optional.empty());
@@ -357,7 +357,7 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile2 = mock(ChangedFile.class);
     when(changedFile2.changeType()).thenReturn(DiffEntry.ChangeType.DELETE);
     PathCodeOwnerStatus pathCodeOwnerStatus2 =
-        PathCodeOwnerStatus.create(Paths.get("/foo/b/bar.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/b/bar.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus2 =
         FileCodeOwnerStatus.create(
             changedFile2, Optional.empty(), Optional.of(pathCodeOwnerStatus2));
@@ -365,9 +365,9 @@ public class CodeOwnerStatusInfoJsonTest extends AbstractCodeOwnersTest {
     ChangedFile changedFile3 = mock(ChangedFile.class);
     when(changedFile3.changeType()).thenReturn(DiffEntry.ChangeType.DELETE);
     PathCodeOwnerStatus newPathCodeOwnerStatus3 =
-        PathCodeOwnerStatus.create(Paths.get("/foo/c/new.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/c/new.baz"), CodeOwnerStatus.APPROVED);
     PathCodeOwnerStatus oldPathCodeOwnerStatus3 =
-        PathCodeOwnerStatus.create(Paths.get("/foo/c/old.baz"), CodeOwnerStatus.APPROVED);
+        PathCodeOwnerStatus.create(Path.of("/foo/c/old.baz"), CodeOwnerStatus.APPROVED);
     FileCodeOwnerStatus fileCodeOwnerStatus3 =
         FileCodeOwnerStatus.create(
             changedFile3,

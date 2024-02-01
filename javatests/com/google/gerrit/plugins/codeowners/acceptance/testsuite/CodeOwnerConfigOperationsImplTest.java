@@ -39,7 +39,7 @@ import com.google.gerrit.server.ServerInitiated;
 import com.google.gerrit.truth.OptionalSubject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -176,7 +176,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .folderPath(folderPath)
             .addCodeOwnerEmail(admin.email())
             .create();
-    Truth8.assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Paths.get(folderPath));
+    Truth8.assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Path.of(folderPath));
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
         .hasCodeOwnerSetsThat()
         .onlyElement()
