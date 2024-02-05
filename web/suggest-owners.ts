@@ -770,12 +770,12 @@ export class SuggestOwners extends base {
 
   private getOwnedByAllUsersContent() {
     if (this.selectedSuggestionsState === SuggestionsState.Loading) {
-      return 'Any user can approve';
+      return 'All users are considered owners';
     }
     // If all users own all the files in the change suggestedOwners.length === 1
     // (suggestedOwners - collection of owners groupbed by owners)
     return this.suggestedOwners && this.suggestedOwners.length === 1
-      ? 'Any user can approve. Please select a user manually'
+      ? 'All users are considered owners. Please select a user manually'
       : 'Any user from the other files can approve';
   }
 
