@@ -176,7 +176,7 @@ public abstract class AbstractFileBasedCodeOwnerBackend implements CodeOwnerBack
                 .getFileExtension()
                 .map(ext -> "." + ext)
                 .orElse(""));
-    String nameExtension = "(\\w)+";
+    String nameExtension = "([A-Za-z0-9_-])+";
 
     return Pattern.compile(
                 "^" + quotedDefaultFileName + "_" + nameExtension + quotedFileExtension + "$")
