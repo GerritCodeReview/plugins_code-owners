@@ -1363,8 +1363,18 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
   }
 
   @Test
+  public void importCodeOwnerConfigWithPostFixThatContainsHyphen() throws Exception {
+    testImportCodeOwnerConfigWithNameExtension("OWNERS_post-fix");
+  }
+
+  @Test
   public void importCodeOwnerConfigWithPreFix() throws Exception {
     testImportCodeOwnerConfigWithNameExtension("pre_fix_OWNERS");
+  }
+
+  @Test
+  public void importCodeOwnerConfigWithPreFixThatContainsHyphen() throws Exception {
+    testImportCodeOwnerConfigWithNameExtension("pre-fix_OWNERS");
   }
 
   private void testImportCodeOwnerConfigWithNameExtension(String nameOfImportedCodeOwnerConfig)
