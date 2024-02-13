@@ -1,5 +1,23 @@
 {
-  "comments": [],
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "160ed8e4_3d9716e2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3282654
+      },
+      "writtenOn": "2024-02-13T16:09:47Z",
+      "side": 1,
+      "message": "https://gerrit-review.googlesource.com/#/q/I1593951c2a1e534c738044f706d22eb363ec6741",
+      "revId": "833a2b0ffb081dd7d538bede43fcbd4949c45bbe",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ],
   "submitRequirementResults": [
     {
       "submitRequirement": {
