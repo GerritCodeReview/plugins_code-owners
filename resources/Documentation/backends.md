@@ -43,6 +43,9 @@ owner config file.
 | `find-owners` | `<prefix>_OWNERS`, `OWNERS_<extension>`                   |
 | `proto`       | `<prefix>_OWNERS_METADATA`, `OWNERS_METADATA_<extension>` |
 
+For "`<prefix>`" and "`<extension>`" only strings are allowed that match with
+"`([A-Za-z0-9_-])+`".
+
 Primary and secondary code owner config files are [validated](validation.html)
 by the `@PLUGIN@` plugin when they are changed to ensure that they are always
 parsable and valid.
