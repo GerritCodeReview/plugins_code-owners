@@ -16,6 +16,23 @@
       "message": "https://gerrit-review.googlesource.com/#/q/I1593951c2a1e534c738044f706d22eb363ec6741",
       "revId": "833a2b0ffb081dd7d538bede43fcbd4949c45bbe",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2dfac3cb_ffcdc134",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 3282654
+      },
+      "writtenOn": "2024-02-13T16:11:05Z",
+      "side": 1,
+      "message": "409318: Merge branch \u0027origin/stable-3.9\u0027 | https://gerrit-review.googlesource.com/c/plugins/code-owners/+/409318",
+      "revId": "833a2b0ffb081dd7d538bede43fcbd4949c45bbe",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
   ],
   "submitRequirementResults": [
