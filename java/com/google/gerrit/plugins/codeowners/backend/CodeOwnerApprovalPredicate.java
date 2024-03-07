@@ -16,6 +16,8 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import com.google.gerrit.entities.SubmitRecord;
 import com.google.gerrit.extensions.annotations.PluginName;
+import com.google.gerrit.server.logging.TraceContext;
+import com.google.gerrit.server.logging.TraceContext.TraceTimer;
 import com.google.gerrit.server.query.change.ChangeData;
 import com.google.gerrit.server.query.change.SubmitRequirementPredicate;
 import com.google.inject.Inject;
@@ -46,8 +48,14 @@ public class CodeOwnerApprovalPredicate extends SubmitRequirementPredicate {
 
   @Override
   public boolean match(ChangeData changeData) {
-    Optional<SubmitRecord> submitRecord = codeOwnerSubmitRule.evaluate(changeData);
-    return submitRecord.isPresent() && submitRecord.get().status == SubmitRecord.Status.OK;
+    try (TraceTimer timer =
+        TraceContext.newTimer(
+            String.format(
+                "Run code owners submit rule for 'has:%s' predicate",
+                CodeOwnerApprovalHasOperand.OPERAND))) {
+      Optional<SubmitRecord> submitRecord = codeOwnerSubmitRule.evaluate(changeData);
+      return submitRecord.isPresent() && submitRecord.get().status == SubmitRecord.Status.OK;
+    }
   }
 
   @Override
