@@ -14,7 +14,6 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.TruthJUnit.assume;
 import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.allowLabel;
@@ -22,6 +21,7 @@ import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerStatusInfoSu
 import static com.google.gerrit.plugins.codeowners.testing.LegacySubmitRequirementInfoSubject.assertThatCollection;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -41,6 +41,7 @@ import com.google.gerrit.extensions.api.projects.DeleteBranchesInput;
 import com.google.gerrit.extensions.client.ChangeStatus;
 import com.google.gerrit.extensions.client.ListChangesOption;
 import com.google.gerrit.extensions.common.ChangeInfo;
+import com.google.gerrit.extensions.common.SubmitRequirementInput;
 import com.google.gerrit.extensions.restapi.ResourceConflictException;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerStatusInfo;
@@ -695,6 +696,31 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
     // Submit rules are computed freshly, but only once.
     assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))
         .isEqualTo(1);
+  }
+
+  @Test
+  public void submitRuleIsInvokedTwiceWhenACodeOwnersSubmitRequirementIsConfigured()
+      throws Exception {
+    // Configure a Code-Owners submit requirement
+    SubmitRequirementInput input = new SubmitRequirementInput();
+    input.name = "Code-Owners";
+    input.submittabilityExpression = "has:approval_code-owners";
+    gApi.projects().name(project.get()).submitRequirement("Code-Owners").create(input);
+
+    // Getting change details triggers the Code-Owners submit requirement twice, once because the
+    // CodeOwnerSubmitRule implements the SubmitRule extension point and once because there is a
+    // submit requirement configured that uses the CodeOwnerApprovalPredicate.
+    PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+
+    testMetricMaker.reset();
+    gApi.changes()
+        .id(changeId)
+        .get(ListChangesOption.ALL_REVISIONS, ListChangesOption.CURRENT_ACTIONS);
+
+    // Submit rules are computed freshly, but only once.
+    assertThat(testMetricMaker.getCount("plugins/code-owners/count_code_owner_submit_rule_runs"))
+        .isEqualTo(2);
   }
 
   @Test
