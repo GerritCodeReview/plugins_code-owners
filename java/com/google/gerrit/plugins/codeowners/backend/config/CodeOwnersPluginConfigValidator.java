@@ -24,13 +24,13 @@ import com.google.gerrit.plugins.codeowners.backend.ChangedFiles;
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.plugins.codeowners.util.JgitPath;
 import com.google.gerrit.server.events.CommitReceivedEvent;
+import com.google.gerrit.server.git.meta.VersionedConfigFile;
 import com.google.gerrit.server.git.validators.CommitValidationException;
 import com.google.gerrit.server.git.validators.CommitValidationListener;
 import com.google.gerrit.server.git.validators.CommitValidationMessage;
 import com.google.gerrit.server.git.validators.ValidationMessage;
 import com.google.gerrit.server.patch.DiffNotAvailableException;
 import com.google.gerrit.server.project.ProjectConfig;
-import com.google.gerrit.server.project.ProjectLevelConfig;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -98,7 +98,7 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
       }
 
       ProjectState projectState = getProjectState(receiveEvent);
-      ProjectLevelConfig.Bare cfg = loadConfig(receiveEvent, codeOwnersConfigFileName);
+      VersionedConfigFile cfg = loadConfig(receiveEvent, codeOwnersConfigFileName);
       validationMessageBuilder.addAll(
           validateConfig(projectState, codeOwnersConfigFileName, cfg.getConfig()));
 
@@ -130,7 +130,7 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
 
       ImmutableList.Builder<CommitValidationMessage> validationMessageBuilder =
           ImmutableList.builder();
-      ProjectLevelConfig.Bare cfg = loadConfig(receiveEvent, ProjectConfig.PROJECT_CONFIG);
+      VersionedConfigFile cfg = loadConfig(receiveEvent, ProjectConfig.PROJECT_CONFIG);
 
       if (cfg.getConfig().getSubsections("plugin").contains(pluginName)) {
         // The plugin.code-owners section is only read from gerrit.config, but not from
@@ -201,9 +201,9 @@ public class CodeOwnersPluginConfigValidator implements CommitValidationListener
    * @return the loaded configuration
    * @throws CommitValidationException thrown if the configuration is invalid and cannot be parsed
    */
-  private ProjectLevelConfig.Bare loadConfig(CommitReceivedEvent receiveEvent, String fileName)
+  private VersionedConfigFile loadConfig(CommitReceivedEvent receiveEvent, String fileName)
       throws CommitValidationException, IOException {
-    ProjectLevelConfig.Bare cfg = new ProjectLevelConfig.Bare(fileName);
+    VersionedConfigFile cfg = new VersionedConfigFile(fileName);
     try {
       cfg.load(receiveEvent.project.getNameKey(), receiveEvent.revWalk, receiveEvent.commit);
     } catch (ConfigInvalidException e) {
