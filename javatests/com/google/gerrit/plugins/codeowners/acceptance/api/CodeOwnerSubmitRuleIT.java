@@ -724,6 +724,55 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
   }
 
   @Test
+  @GerritConfig(name = "plugin.code-owners.overrideApproval", value = "Owners-Override+1")
+  public void cannotDefineOverrideWithCodeOwnersSubmitRequirement() throws Exception {
+    // Create the Owners-Override label that is configured as override for the Code-Owners submit
+    // requirement.
+    createOwnersOverrideLabel();
+
+    // Configure a Code-Owners submit requirement with Other-Override+1 as override (note this is a
+    // different label than the one that is configured as override in the code-owners plugin
+    // configuration).
+    createOwnersOverrideLabel("Other-Override");
+    SubmitRequirementInput input = new SubmitRequirementInput();
+    input.name = "Code-Owners";
+    input.submittabilityExpression = "has:approval_code-owners";
+    input.overrideExpression = "label:Other-Override+1";
+    gApi.projects().name(project.get()).submitRequirement("Code-Owners").create(input);
+
+    // Create a change and approve the Code-Review submit requirement.
+    PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
+    String changeId = r.getChangeId();
+    approve(changeId);
+
+    // Check that the change is not submittable since the Code-Owners submit rule is not satisfied
+    // yet.
+    assertThat(gApi.changes().id(changeId).get().submittable).isFalse();
+
+    // Apply the override that is configured in the Code-Owners submit requirement and see that it
+    // has no effect (since the hard-coded code-owners submit rule is not overridden by it).
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Other-Override", 1));
+    assertThat(gApi.changes().id(changeId).get().submittable).isFalse();
+
+    // Apply the override that is configured in the code-owners plugin configuration and see that it
+    // makes the change submittable.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 1));
+    assertThat(gApi.changes().id(changeId).get().submittable).isTrue();
+
+    // Remove the override that is configured in the Code-Owners submit requirement and see that it
+    // has no effect and the change is still submittable (this is because the code-owners submit
+    // rule is fulfilled now and hence the submittableIf condition of the Code-Owners submit
+    // requirement passes).
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Other-Override", 0));
+    assertThat(gApi.changes().id(changeId).get().submittable).isTrue();
+
+    // Removing the override that is configured in the code-owners plugin configuration makes the
+    // change again not submittable.
+    gApi.changes().id(changeId).current().review(new ReviewInput().label("Owners-Override", 0));
+    assertThat(gApi.changes().id(changeId).get().submittable).isFalse();
+  }
+
+  @Test
   public void submitRuleIsNotInvokedWhenQueryingChange() throws Exception {
     PushOneCommit.Result r = createChange("Some Change", "foo.txt", "some content");
     String changeId = r.getChangeId();
