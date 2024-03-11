@@ -16,8 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend.config;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.gerrit.entities.RefNames;
-import com.google.gerrit.server.git.meta.VersionedMetaData;
+import com.google.gerrit.server.git.meta.VersionedConfigFile;
 import java.io.IOException;
 import org.eclipse.jgit.errors.ConfigInvalidException;
 import org.eclipse.jgit.lib.CommitBuilder;
@@ -27,15 +26,13 @@ import org.eclipse.jgit.lib.Config;
  * Reads/writes the code-owners project configuration from/to the {@code code-owners.config} file in
  * the {@code refs/meta/config} branch.
  */
-public class CodeOwnersProjectConfigFile extends VersionedMetaData {
+public class CodeOwnersProjectConfigFile extends VersionedConfigFile {
   public static final String FILE_NAME = "code-owners.config";
 
   private boolean isLoaded = false;
-  private Config config;
 
-  @Override
-  protected String getRefName() {
-    return RefNames.REFS_CONFIG;
+  public CodeOwnersProjectConfigFile() {
+    super(FILE_NAME);
   }
 
   /**
@@ -43,26 +40,22 @@ public class CodeOwnersProjectConfigFile extends VersionedMetaData {
    *
    * <p>Fails if loading was not done yet.
    */
+  @Override
   public Config getConfig() {
     checkLoaded();
-    return config;
+    return cfg;
   }
 
   @Override
   protected void onLoad() throws IOException, ConfigInvalidException {
-    if (revision != null) {
-      config = readConfig(FILE_NAME);
-    } else {
-      config = new Config();
-    }
+    super.onLoad();
     isLoaded = true;
   }
 
   @Override
   protected boolean onSave(CommitBuilder commit) throws IOException, ConfigInvalidException {
     checkLoaded();
-    saveConfig(FILE_NAME, config);
-    return true;
+    return super.onSave(commit);
   }
 
   private void checkLoaded() {
