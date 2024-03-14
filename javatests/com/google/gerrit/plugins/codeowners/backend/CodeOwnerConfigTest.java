@@ -17,7 +17,6 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
-import com.google.common.truth.Truth8;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
@@ -87,8 +86,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     String folderPath = "/foo/bar/";
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", folderPath);
-    Truth8.assertThat(codeOwnerConfigKey.filePath("OWNERS"))
-        .isEqualTo(Path.of(folderPath, "OWNERS"));
+    assertThat(codeOwnerConfigKey.filePath("OWNERS")).isEqualTo(Path.of(folderPath, "OWNERS"));
   }
 
   @Test
@@ -98,7 +96,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         CodeOwnerConfig.Key.create(
             Project.nameKey("project"), "master", folderPath, customFileName);
-    Truth8.assertThat(codeOwnerConfigKey.filePath("OWNERS"))
+    assertThat(codeOwnerConfigKey.filePath("OWNERS"))
         .isEqualTo(Path.of(folderPath, customFileName));
   }
 
@@ -141,7 +139,7 @@ public class CodeOwnerConfigTest extends AbstractCodeOwnersTest {
                 TEST_REVISION)
             .build();
     Path relativizedPath = codeOwnerConfig.relativize(Path.of("/foo/bar/baz.md"));
-    Truth8.assertThat(relativizedPath).isEqualTo(Path.of("baz.md"));
+    assertThat(relativizedPath).isEqualTo(Path.of("baz.md"));
   }
 
   private static CodeOwnerConfig.Builder createCodeOwnerBuilder() {

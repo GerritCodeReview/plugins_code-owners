@@ -17,10 +17,10 @@ package com.google.gerrit.plugins.codeowners.acceptance.testsuite;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.Truth8;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
@@ -36,7 +36,6 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSetModification;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwners;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnersUpdate;
 import com.google.gerrit.server.ServerInitiated;
-import com.google.gerrit.truth.OptionalSubject;
 import com.google.inject.Key;
 import com.google.inject.Provider;
 import java.nio.file.Path;
@@ -176,7 +175,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .folderPath(folderPath)
             .addCodeOwnerEmail(admin.email())
             .create();
-    Truth8.assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Path.of(folderPath));
+    assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Path.of(folderPath));
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
         .hasCodeOwnerSetsThat()
         .onlyElement()
@@ -195,7 +194,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .fileName("OWNERS_foo")
             .addCodeOwnerEmail(admin.email())
             .create();
-    OptionalSubject.assertThat(codeOwnerConfigKey.fileName()).value().isEqualTo("OWNERS_foo");
+    assertThat(codeOwnerConfigKey.fileName()).value().isEqualTo("OWNERS_foo");
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
         .hasCodeOwnerSetsThat()
         .onlyElement()
@@ -441,7 +440,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
     // was dropped.
     // Since this made the code owner config empty it caused a deletion of the code owner config
     // file.
-    OptionalSubject.assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
+    assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
   }
 
   @Test
@@ -507,7 +506,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .update();
 
     // Removing all code owner sets leads to a deletion of the code owner config file.
-    OptionalSubject.assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
+    assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
   }
 
   @Test
@@ -570,7 +569,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
         .update();
 
     // Removing all code owner sets leads to a deletion of the code owner config file.
-    OptionalSubject.assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
+    assertThat(codeOwners.getFromCurrentRevision(codeOwnerConfig.key())).isEmpty();
   }
 
   @Test

@@ -16,6 +16,7 @@ package com.google.gerrit.plugins.codeowners.backend;
 
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,7 +26,6 @@ import com.google.gerrit.extensions.registration.DynamicMap;
 import com.google.gerrit.extensions.registration.PrivateInternals_DynamicMapImpl;
 import com.google.gerrit.extensions.registration.RegistrationHandle;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersTest;
-import com.google.gerrit.truth.OptionalSubject;
 import com.google.inject.Key;
 import com.google.inject.util.Providers;
 import java.util.Optional;
@@ -92,7 +92,7 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnerBackendMock)) {
       Optional<CodeOwnerConfig> codeOwnerConfig =
           codeOwners.getFromCurrentRevision(codeOwnerConfigKey);
-      OptionalSubject.assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
+      assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
       verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey, /* revision= */ null);
     }
   }
@@ -110,7 +110,7 @@ public class CodeOwnersTest extends AbstractCodeOwnersTest {
         .thenReturn(Optional.of(expectedCodeOwnersConfig));
     try (AutoCloseable registration = registerTestBackend("test-backend", codeOwnerBackendMock)) {
       Optional<CodeOwnerConfig> codeOwnerConfig = codeOwners.get(codeOwnerConfigKey, TEST_REVISION);
-      OptionalSubject.assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
+      assertThat(codeOwnerConfig).value().isEqualTo(expectedCodeOwnersConfig);
       verify(codeOwnerBackendMock).getCodeOwnerConfig(codeOwnerConfigKey, TEST_REVISION);
     }
   }

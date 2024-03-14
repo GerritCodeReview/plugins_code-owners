@@ -19,6 +19,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.RequiredApprovalSubject.assertThat;
 import static com.google.gerrit.server.project.ProjectCache.illegalState;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.truth.OptionalSubject.assertThat;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -43,7 +44,6 @@ import com.google.gerrit.plugins.codeowners.common.CodeOwnerConfigValidationPoli
 import com.google.gerrit.plugins.codeowners.common.MergeCommitStrategy;
 import com.google.gerrit.server.project.ProjectState;
 import com.google.gerrit.server.restapi.project.DeleteRef;
-import com.google.gerrit.truth.OptionalSubject;
 import com.google.inject.Inject;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.junit.Before;
@@ -181,8 +181,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void setFileExtension() throws Exception {
-    OptionalSubject.assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
         .isEmpty();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
@@ -190,16 +189,14 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.fileExtension).isEqualTo("foo");
-    OptionalSubject.assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
         .value()
         .isEqualTo("foo");
 
     input.fileExtension = "";
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.fileExtension).isNull();
-    OptionalSubject.assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getFileExtension())
         .isEmpty();
   }
 
@@ -409,8 +406,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
 
   @Test
   public void setOverrideInfoUrl() throws Exception {
-    OptionalSubject.assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
         .isEmpty();
 
     CodeOwnerProjectConfigInput input = new CodeOwnerProjectConfigInput();
@@ -418,22 +414,20 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.overrideInfoUrl).isEqualTo("http://foo.bar");
-    OptionalSubject.assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
         .value()
         .isEqualTo("http://foo.bar");
 
     input.overrideInfoUrl = "";
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.overrideInfoUrl).isNull();
-    OptionalSubject.assertThat(
-            codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
+    assertThat(codeOwnersPluginConfiguration.getProjectConfig(project).getOverrideInfoUrl())
         .isEmpty();
   }
 
   @Test
   public void setInvalidCodeOwnerConfigInfoUrl() throws Exception {
-    OptionalSubject.assertThat(
+    assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
                 .getInvalidCodeOwnerConfigInfoUrl())
@@ -444,7 +438,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     CodeOwnerProjectConfigInfo updatedConfig =
         projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.invalidCodeOwnerConfigInfoUrl).isEqualTo("http://foo.bar");
-    OptionalSubject.assertThat(
+    assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
                 .getInvalidCodeOwnerConfigInfoUrl())
@@ -454,7 +448,7 @@ public class PutCodeOwnerProjectConfigIT extends AbstractCodeOwnersIT {
     input.invalidCodeOwnerConfigInfoUrl = "";
     updatedConfig = projectCodeOwnersApiFactory.project(project).updateConfig(input);
     assertThat(updatedConfig.general.invalidCodeOwnerConfigInfoUrl).isNull();
-    OptionalSubject.assertThat(
+    assertThat(
             codeOwnersPluginConfiguration
                 .getProjectConfig(project)
                 .getInvalidCodeOwnerConfigInfoUrl())
