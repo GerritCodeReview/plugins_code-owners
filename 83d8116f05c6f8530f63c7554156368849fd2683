@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "40a8e73d_cfd614d1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1083648
+      },
+      "writtenOn": "2024-03-14T19:32:33Z",
+      "side": 1,
+      "message": "I\u0027m setting this aside, as I just explained on https://gerrit-review.git.corp.google.com/c/gerrit/+/413538.\n\nIn its place, I offer https://gerrit-review.git.corp.google.com/c/plugins/code-owners/+/413677. I\u0027ll assign a reviewer if it passes testing.",
+      "revId": "83d8116f05c6f8530f63c7554156368849fd2683",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
