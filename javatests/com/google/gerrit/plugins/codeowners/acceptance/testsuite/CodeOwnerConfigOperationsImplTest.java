@@ -20,7 +20,6 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.truth.Truth8;
 import com.google.gerrit.entities.BranchNameKey;
 import com.google.gerrit.entities.Project;
 import com.google.gerrit.entities.RefNames;
@@ -176,7 +175,7 @@ public class CodeOwnerConfigOperationsImplTest extends AbstractCodeOwnersTest {
             .folderPath(folderPath)
             .addCodeOwnerEmail(admin.email())
             .create();
-    Truth8.assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Path.of(folderPath));
+    assertThat(codeOwnerConfigKey.folderPath()).isEqualTo(Path.of(folderPath));
     assertThat(getCodeOwnerConfigFromServer(codeOwnerConfigKey))
         .hasCodeOwnerSetsThat()
         .onlyElement()
