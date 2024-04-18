@@ -2558,6 +2558,11 @@ public class CodeOwnerConfigValidatorIT extends AbstractCodeOwnersIT {
 
     // Trying to use the skip validation option on revert is rejected because user has no permission
     // to skip the validation.
+    projectOperations
+        .project(project)
+        .forUpdate()
+        .add(allow(Permission.REVERT).ref("refs/*").group(REGISTERED_USERS))
+        .update();
     requestScopeOperations.setApiUser(user.id());
     RevertInput revertInput = new RevertInput();
     revertInput.validationOptions =
