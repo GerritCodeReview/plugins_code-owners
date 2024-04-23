@@ -1382,7 +1382,6 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .project(project)
             .branch("master")
             .folderPath("/bar/")
-            .fileName("OWNERS")
             .fileName(nameOfImportedCodeOwnerConfig)
             .addCodeOwnerEmail(user.email())
             .create();
