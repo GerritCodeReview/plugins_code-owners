@@ -14,10 +14,10 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigInfoSubject.assertThatOptional;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 
 import com.google.gerrit.acceptance.RestResponse;
 import com.google.gerrit.acceptance.config.GerritConfig;

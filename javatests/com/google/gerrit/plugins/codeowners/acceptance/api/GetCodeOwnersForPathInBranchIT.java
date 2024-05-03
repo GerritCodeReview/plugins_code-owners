@@ -14,11 +14,11 @@
 
 package com.google.gerrit.plugins.codeowners.acceptance.api;
 
-import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
+import static com.google.gerrit.testing.TestActionRefUpdateContext.testRefAction;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.fail;
 

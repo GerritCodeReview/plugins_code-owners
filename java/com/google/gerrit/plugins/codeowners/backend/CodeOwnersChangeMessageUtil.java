@@ -29,8 +29,8 @@ public class CodeOwnersChangeMessageUtil {
    */
   public static void appendPaths(StringBuilder message, Stream<Path> pathsToAppend) {
     pathsToAppend.forEach(
-        path -> message.append(
-          String.format("* `%s`\n", JgitPath.of(path).get().replace("`", "\\`"))));
+        path ->
+            message.append(String.format("* `%s`\n", JgitPath.of(path).get().replace("`", "\\`"))));
   }
 
   /**

@@ -264,7 +264,7 @@ public class CodeOwnerConfigFile extends VersionedMetaData {
         getRefName());
     // The commit goes to an ordinary branch (e.g. refs/heads/main). PLUGIN context is enough for
     // such cases.
-    try(RefUpdateContext ctx = RefUpdateContext.open(PLUGIN)) {
+    try (RefUpdateContext ctx = RefUpdateContext.open(PLUGIN)) {
       return super.commit(update);
     }
   }
