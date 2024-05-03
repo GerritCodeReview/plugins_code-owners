@@ -1168,7 +1168,6 @@ public class OnCodeOwnerApprovalIT extends AbstractCodeOwnersIT {
         .addCodeOwnerEmail(user.email())
         .create();
 
-
     testMarkdownCharactersInPathsAreEscaped('`', user);
   }
 
