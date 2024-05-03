@@ -1,4 +1,3 @@
-
 load("//tools/js:eslint.bzl", "plugin_eslint")
 load("//tools/bzl:js.bzl", "gerrit_js_bundle", "karma_test")
 load("@npm//@bazel/typescript:index.bzl", "ts_config", "ts_project")
@@ -44,7 +43,7 @@ ts_project(
     tsconfig = ":tsconfig",
     deps = [
         "@plugins_npm//:node_modules",
-        "@ui_dev_npm//:node_modules"
+        "@ui_dev_npm//:node_modules",
     ],
 )
 
