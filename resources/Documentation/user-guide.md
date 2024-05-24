@@ -30,6 +30,12 @@ changes, but permissions to vote on the label that is required as a
 means it's possible that a user is a code owner, but misses permissions to apply
 code owner approvals.
 
+**NOTE**: Vice versa, having the permissions to vote on the label that is
+required as a [code owner approval](#codeOwnerApproval) doesn't make the user a
+code owner. Only users that are listed as a code owner in a relevant [code
+owner config file](#codeOwnerConfigFiles) (e.g. `OWNERS` file) are considered as
+code owner.
+
 ## <a id="whyCodeOwners">Why should code owners be used?
 
 Code owners are gatekeepers before a change is submitted, they enforce standards
