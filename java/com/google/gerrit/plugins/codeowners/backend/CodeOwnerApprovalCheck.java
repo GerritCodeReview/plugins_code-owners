@@ -360,7 +360,8 @@ public class CodeOwnerApprovalCheck {
 
       CodeOwnerApprovalCheckInput input =
           inputLoaderFactory.create(codeOwnersConfig, codeOwnerResolver, changeNotes).load();
-
+      ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
+          changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
       return changedFiles
           .getFromDiffCache(
               changeNotes.getProjectName(), changeNotes.getCurrentPatchSet().commitId())
@@ -371,7 +372,7 @@ public class CodeOwnerApprovalCheck {
                       codeOwnerConfigHierarchy,
                       codeOwnerResolver,
                       codeOwnersConfig,
-                      changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes),
+                      changedFilesByPatchSetCache,
                       branch,
                       revision.orElse(null),
                       changedFile,
@@ -435,6 +436,8 @@ public class CodeOwnerApprovalCheck {
       CodeOwnerApprovalCheckInput input =
           CodeOwnerApprovalCheckInput.createForComputingOwnedPaths(
               codeOwnersConfig, codeOwnerResolver, changeNotes, accountIds);
+      ChangedFilesByPatchSetCache changedFilesByPatchSetCache =
+          changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes);
       return changedFiles.getFromDiffCache(changeNotes.getProjectName(), patchSet.commitId())
           .stream()
           .map(
@@ -443,7 +446,7 @@ public class CodeOwnerApprovalCheck {
                       codeOwnerConfigHierarchy,
                       codeOwnerResolver,
                       codeOwnersConfig,
-                      changedFilesByPatchSetCacheFactory.create(codeOwnersConfig, changeNotes),
+                      changedFilesByPatchSetCache,
                       branch,
                       revision.orElse(null),
                       changedFile,
