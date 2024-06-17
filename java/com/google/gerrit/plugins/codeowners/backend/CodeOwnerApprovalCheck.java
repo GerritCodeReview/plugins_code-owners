@@ -243,7 +243,7 @@ public class CodeOwnerApprovalCheck {
           codeOwnerConfigHierarchy.getCodeOwnerConfigCounters().getCacheReadCount());
       codeOwnerMetrics.codeOwnerResolutionsPerChange.record(
           codeOwnerResolver.getCodeOwnerCounters().getResolutionCount());
-      codeOwnerMetrics.codeOwnerConfigCacheReadsPerChange.record(
+      codeOwnerMetrics.codeOwnerCacheReadsPerChange.record(
           codeOwnerResolver.getCodeOwnerCounters().getCacheReadCount());
     }
   }
