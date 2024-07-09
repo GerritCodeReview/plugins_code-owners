@@ -38,6 +38,11 @@ public class CodeOwnersInfo {
   public List<CodeOwnerConfigFileInfo> codeOwnerConfigs;
 
   /**
+   * The code owner scorings that reflect ownership distance.
+   */
+  public Map<CodeOwner, Double> codeOwnerScorings;
+
+  /**
    * Debug logs that may help to understand why a user is or isn't suggested as a code owner.
    *
    * <p>Only set if requested via {@code --debug}.
