@@ -39,14 +39,17 @@ import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
 import com.google.gerrit.server.account.Accounts;
 import com.google.gerrit.server.account.ServiceUserClassifier;
+import com.google.gerrit.server.config.GerritServerConfig;
 import com.google.gerrit.server.notedb.ReviewerStateInternal;
 import com.google.gerrit.server.permissions.PermissionBackend;
 import com.google.gerrit.server.permissions.PermissionBackendException;
+import com.google.gerrit.server.restapi.change.SuggestReviewers;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import org.eclipse.jgit.lib.Config;
 
 /**
  * REST endpoint that gets the code owners for an arbitrary path in a revision of a change.
@@ -59,10 +62,12 @@ import java.util.stream.Stream;
 public class GetCodeOwnersForPathInChange
     extends AbstractGetCodeOwnersForPath<CodeOwnersInChangeCollection.PathResource> {
 
+  private final Config cfg;
   private final ServiceUserClassifier serviceUserClassifier;
 
   @Inject
   GetCodeOwnersForPathInChange(
+      @GerritServerConfig Config cfg,
       AccountVisibility accountVisibility,
       Accounts accounts,
       AccountControl.Factory accountControlFactory,
@@ -87,6 +92,7 @@ public class GetCodeOwnersForPathInChange
         codeOwnerResolver,
         codeOwnerJsonFactory,
         codeOwnerConfigFileJson);
+    this.cfg = cfg;
     this.serviceUserClassifier = serviceUserClassifier;
   }
 
@@ -222,6 +228,13 @@ public class GetCodeOwnersForPathInChange
   }
 
   private Predicate<CodeOwner> filterOutServiceUsers(ImmutableList.Builder<String> debugLogs) {
+    if (!cfg.getBoolean(
+        "suggest", "skipServiceUsers", SuggestReviewers.DEFAULT_SKIP_SERVICE_USERS)) {
+      // Returning true from the Predicate here means that the code owner should not be filtered
+      // out.
+      return codeOwner -> true;
+    }
+
     return codeOwner -> {
       if (!isServiceUser(codeOwner)) {
         // Returning true from the Predicate here means that the code owner should be kept.

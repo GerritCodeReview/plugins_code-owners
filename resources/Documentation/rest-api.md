@@ -742,7 +742,9 @@ suggestion.
 
 The following code owners are filtered out additionally:
 
-* [service users](#serviceUsers) (members of the `Service Users` group)
+* [service users](#serviceUsers) (members of the `Service Users` group), unless
+  Gerrit is [configured](../../../Documentation/config-gerrit.html#suggest.skipServiceUsers)
+  to not skip service users
 * the change owner (since the change owner cannot be added as reviewer)
 * code owners that are annotated with
   [LAST_RESORT_SUGGESTION](backend-find-owners.html#lastResortSuggestion),
