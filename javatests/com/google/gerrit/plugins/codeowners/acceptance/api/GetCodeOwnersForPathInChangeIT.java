@@ -300,6 +300,37 @@ public class GetCodeOwnersForPathInChangeIT extends AbstractGetCodeOwnersForPath
   }
 
   @Test
+  @GerritConfig(name = "suggest.skipServiceUsers", value = "false")
+  public void codeOwnersThatAreServiceUsersAreNotFilteredOutIfSkippingServiceUsersIsDisabled()
+      throws Exception {
+    TestAccount serviceUser =
+        accountCreator.create("serviceUser", "service.user@example.com", "Service User", null);
+
+    // Create a code owner config with 2 code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .addCodeOwnerEmail(serviceUser.email())
+        .create();
+
+    // Make 'serviceUser' a service user.
+    groupOperations
+        .group(groupCache.get(AccountGroup.nameKey("Service Users")).get().getGroupUUID())
+        .forUpdate()
+        .addMember(serviceUser.id())
+        .update();
+
+    // Check that both code owners are suggested, i.e. the service user is not filtered out.
+    assertThat(queryCodeOwners("/foo/bar/baz.md"))
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), serviceUser.id());
+  }
+
+  @Test
   @GerritConfig(name = "plugin.code-owners.globalCodeOwner", value = "service.user@example.com")
   public void globalCodeOwnersThatAreServiceUsersAreFilteredOut() throws Exception {
     TestAccount serviceUser =
