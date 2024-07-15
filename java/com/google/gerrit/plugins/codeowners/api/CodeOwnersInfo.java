@@ -14,7 +14,9 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Representation of a code owners list in the REST API.
@@ -36,6 +38,11 @@ public class CodeOwnersInfo {
 
   /** The code owner config files that have been inspected to gather the code owners. */
   public List<CodeOwnerConfigFileInfo> codeOwnerConfigs;
+
+  /**
+   * The code owner scorings that reflect ownership distance.
+   */
+  public Map<CodeOwner, Double> codeOwnerScorings;
 
   /**
    * Debug logs that may help to understand why a user is or isn't suggested as a code owner.

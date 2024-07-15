@@ -333,11 +333,16 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       }
     }
 
+    ImmutableMap<CodeOwner, Double> sortedAndLimitedCodeOwnersWithScores =
+        sortedAndLimitedCodeOwners.stream()
+            .collect(toImmutableMap(codeOwner -> codeOwner, scoredCodeOwners::get));
+
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     codeOwnersInfo.codeOwnerConfigs = codeOwnerConfigFileInfosBuilder.build();
+    codeOwnersInfo.codeOwnerScorings = sortedAndLimitedCodeOwnersWithScores;
     ImmutableList<String> debugLogs = debugLogsBuilder.build();
     codeOwnersInfo.debugLogs = debug ? debugLogs : null;
     logger.atFine().log("debug logs: %s", debugLogs);
