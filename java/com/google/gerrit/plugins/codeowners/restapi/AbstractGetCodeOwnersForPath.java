@@ -15,6 +15,7 @@
 package com.google.gerrit.plugins.codeowners.restapi;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
+import static com.google.common.collect.ImmutableMap.toImmutableMap;
 import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.IS_EXPLICITLY_MENTIONED_SCORING_VALUE;
 import static com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore.NOT_EXPLICITLY_MENTIONED_SCORING_VALUE;
@@ -333,11 +334,16 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       }
     }
 
+    ImmutableMap<CodeOwner, Double> sortedAndLimitedCodeOwnersWithScores =
+        sortedAndLimitedCodeOwners.stream()
+            .collect(toImmutableMap(codeOwner -> codeOwner, scoredCodeOwners::get));
+
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
     codeOwnersInfo.codeOwners =
         codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     codeOwnersInfo.codeOwnerConfigs = codeOwnerConfigFileInfosBuilder.build();
+    codeOwnersInfo.codeOwnerScorings = sortedAndLimitedCodeOwnersWithScores;
     ImmutableList<String> debugLogs = debugLogsBuilder.build();
     codeOwnersInfo.debugLogs = debug ? debugLogs : null;
     logger.atFine().log("debug logs: %s", debugLogs);
