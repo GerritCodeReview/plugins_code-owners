@@ -56,8 +56,6 @@ interface CodeOwnerServiceOptions {
   maxConcurrentRequests?: number;
 }
 
-function noAwait(_promise: Promise<unknown>) {}
-
 /**
  * Service for the data layer used in the plugin UI.
  */
@@ -175,7 +173,7 @@ export class CodeOwnerService {
       // new status - it is expected, that after several retry a status
       // for the newest patchset is returned
       this.reset();
-      noAwait(this.prefetch());
+      void this.prefetch()
       return await this.getStatus();
     }
     return status;
