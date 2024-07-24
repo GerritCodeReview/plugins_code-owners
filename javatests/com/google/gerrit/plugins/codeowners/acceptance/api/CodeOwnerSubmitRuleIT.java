@@ -154,8 +154,9 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: submit requirement 'Code-Owners' is unsatisfied.",
-                changeInfo._number));
+                    + "Change %d: Change %d is not ready:"
+                    + " submit requirement 'Code-Owners' is unsatisfied.",
+                changeInfo._number, changeInfo._number));
   }
 
   @Test
@@ -220,8 +221,9 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %d: submit requirement 'Code-Owners' is unsatisfied.",
-                changeInfo._number));
+                    + "Change %d: Change %d is not ready:"
+                    + " submit requirement 'Code-Owners' is unsatisfied.",
+                changeInfo._number, changeInfo._number));
   }
 
   @Test
@@ -465,11 +467,13 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit requirement 'Code-Owners' has an"
-                    + " error: Submittability expression result has an error:"
+                    + "Change %d: Change %d is not ready:"
+                    + " submit requirement 'Code-Owners' has an error:"
+                    + " Submittability expression result has an error:"
                     + " Failed to evaluate code owner statuses for"
-                    + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
+                    + " patch set 1 of change %d (cause: invalid code owner config file '%s'"
                     + " (project = %s, branch = master):\n  %s).%s",
+                changeInfo._number,
                 changeInfo._number,
                 changeInfo._number,
                 JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath(),
@@ -519,11 +523,13 @@ public class CodeOwnerSubmitRuleIT extends AbstractCodeOwnersIT {
         .isEqualTo(
             String.format(
                 "Failed to submit 1 change due to the following problems:\n"
-                    + "Change %s: submit requirement 'Code-Owners' has an"
+                    + "Change %d: Change %d is not ready:"
+                    + " submit requirement 'Code-Owners' has an"
                     + " error: Submittability expression result has an error:"
                     + " Failed to evaluate code owner statuses for"
-                    + " patch set 1 of change %s (cause: invalid code owner config file '%s'"
+                    + " patch set 1 of change %d (cause: invalid code owner config file '%s'"
                     + " (project = %s, branch = master):\n  %s).",
+                changeInfo._number,
                 changeInfo._number,
                 changeInfo._number,
                 JgitPath.of(nameOfInvalidCodeOwnerConfigFile).getAsAbsolutePath(),
