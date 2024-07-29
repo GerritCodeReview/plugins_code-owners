@@ -17,8 +17,11 @@ package com.google.gerrit.plugins.codeowners.backend;
 import static com.google.common.collect.ImmutableMap.toImmutableMap;
 
 import com.google.auto.value.AutoValue;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -59,5 +62,20 @@ public abstract class CodeOwnerScorings {
             .map(scoring -> scoring.weightedScoring(codeOwner))
             .collect(Collectors.summingDouble(Double::doubleValue));
     return sum;
+  }
+
+  /** Returns the map with the scoring factors for each code owner. */
+  public ImmutableMap<CodeOwner, CodeOwnerScoringFactors> getScoringFactors(
+      ImmutableCollection<CodeOwner> codeOwners) {
+    Map<CodeOwner, CodeOwnerScoringFactors> codeOwnerToScoringFactors = new HashMap<>();
+    for (CodeOwner codeOwner : codeOwners) {
+      CodeOwnerScoringFactors scoringFactors = new CodeOwnerScoringFactors();
+      for (CodeOwnerScoring scoring : scorings()) {
+        scoring.bestValue(codeOwner)
+            .ifPresent(value -> scoringFactors.put(scoring.score(), value));
+      }
+      codeOwnerToScoringFactors.put(codeOwner, scoringFactors);
+    }
+    return ImmutableMap.copyOf(codeOwnerToScoringFactors);
   }
 }
