@@ -27,6 +27,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.Streams;
 import com.google.common.flogger.FluentLogger;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.entities.Project;
@@ -39,6 +40,7 @@ import com.google.gerrit.extensions.restapi.BadRequestException;
 import com.google.gerrit.extensions.restapi.Response;
 import com.google.gerrit.extensions.restapi.RestReadView;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
+import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnersInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwner;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerAnnotation;
@@ -47,7 +49,9 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolverResult;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoring;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScoringFactors;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScorings;
+import com.google.gerrit.plugins.codeowners.backend.Pair;
 import com.google.gerrit.plugins.codeowners.backend.config.CodeOwnersPluginConfiguration;
 import com.google.gerrit.plugins.codeowners.metrics.CodeOwnerMetrics;
 import com.google.gerrit.server.account.AccountControl;
@@ -64,12 +68,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.kohsuke.args4j.Option;
 
@@ -333,16 +341,41 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
       }
     }
 
+    ImmutableList<CodeOwnerInfo> codeOwnersInfoList = codeOwnerJsonFactory.create(getFillOptions())
+        .format(sortedAndLimitedCodeOwners);
+    Map<CodeOwnerInfo, Map<String, Integer>> codeOwnersScoringFactors = getCodeOwnersScoringFactors(
+        sortedAndLimitedCodeOwners, codeOwnersInfoList, codeOwnerScorings);
+
     CodeOwnersInfo codeOwnersInfo = new CodeOwnersInfo();
-    codeOwnersInfo.codeOwners =
-        codeOwnerJsonFactory.create(getFillOptions()).format(sortedAndLimitedCodeOwners);
+    codeOwnersInfo.codeOwners = codeOwnersInfoList;
     codeOwnersInfo.ownedByAllUsers = ownedByAllUsers.get() ? true : null;
     codeOwnersInfo.codeOwnerConfigs = codeOwnerConfigFileInfosBuilder.build();
+    codeOwnersInfo.codeOwnersScoringFactors = codeOwnersScoringFactors;
     ImmutableList<String> debugLogs = debugLogsBuilder.build();
     codeOwnersInfo.debugLogs = debug ? debugLogs : null;
     logger.atFine().log("debug logs: %s", debugLogs);
 
     return Response.ok(codeOwnersInfo);
+  }
+
+  private Map<CodeOwnerInfo, Map<String, Integer>> getCodeOwnersScoringFactors(
+      ImmutableList<CodeOwner> codeOwnersList,
+      ImmutableList<CodeOwnerInfo> codeOwnersInfoList,
+      CodeOwnerScorings codeOwnerScorings) {
+    Map<CodeOwner, CodeOwnerInfo> codeOwnerMapping = Streams.zip(codeOwnersList.stream(),
+        codeOwnersInfoList.stream(), Pair::of).collect(
+        Collectors.toMap(Pair::key, Pair::value));
+    ImmutableMap<CodeOwner, CodeOwnerScoringFactors> scoringFactors = codeOwnerScorings.getScoringFactors(
+        codeOwnersList);
+
+    Map<CodeOwnerInfo, Map<String, Integer>> codeOwnersScoringFactors = new HashMap<>();
+    for(CodeOwner codeOwner : codeOwnersList) {
+      if(codeOwnerMapping.containsKey(codeOwner) && scoringFactors.containsKey(codeOwner)) {
+        codeOwnersScoringFactors.put(codeOwnerMapping.get(codeOwner),
+            scoringFactors.get(codeOwner).getScoringFactors());
+      }
+    }
+    return codeOwnersScoringFactors;
   }
 
   private CodeOwnerScorings createScorings(
