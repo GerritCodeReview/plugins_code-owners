@@ -18,6 +18,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "512ee4b7_0c3fcf7d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-07-30T18:39:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "55b6adff_ed7ae78c",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "434cd7ef_79727af9",
@@ -48,6 +66,24 @@
       "writtenOn": "2024-07-30T07:47:52Z",
       "side": 1,
       "message": "You may add a reference to the tracking bug here:\n\nBug: Google b/349187606",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "8cf61011_6627ce35",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-07-30T18:39:22Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "db143fb1_e69c130f",
       "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
