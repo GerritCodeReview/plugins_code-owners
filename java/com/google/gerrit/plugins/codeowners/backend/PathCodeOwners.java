@@ -218,13 +218,22 @@ public class PathCodeOwners {
     }
 
     try (Timer0.Context ctx = codeOwnerMetrics.resolveCodeOwnerConfig.start()) {
+      Path codeOwnerConfigFilePath = codeOwners.getFilePath(codeOwnerConfig.key());
       logger.atFine().log(
-          "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key());
+          "resolve code owners for %s from code owner config %s:%s:%s",
+          path,
+          codeOwnerConfig.key().project(),
+          codeOwnerConfig.key().shortBranchName(),
+          codeOwnerConfigFilePath);
 
       List<String> messages = new ArrayList<>();
       messages.add(
           String.format(
-              "resolve code owners for %s from code owner config %s", path, codeOwnerConfig.key()));
+              "resolve code owners for %s from code owner config %s:%s:%s",
+              path,
+              codeOwnerConfig.key().project(),
+              codeOwnerConfig.key().shortBranchName(),
+              codeOwnerConfigFilePath));
 
       // Create a code owner config builder to create the resolved code owner config (= code owner
       // config that is scoped to the path and which has imports resolved)
