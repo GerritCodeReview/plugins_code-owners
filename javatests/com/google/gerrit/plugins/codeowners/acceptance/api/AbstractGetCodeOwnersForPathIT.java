@@ -20,6 +20,7 @@ import static com.google.gerrit.acceptance.testsuite.project.TestProjectUpdate.b
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerConfigFileInfoSubject.assertThat;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountId;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasAccountName;
+import static com.google.gerrit.plugins.codeowners.testing.CodeOwnerInfoSubject.hasScoringFactor;
 import static com.google.gerrit.plugins.codeowners.testing.CodeOwnersInfoSubject.assertThat;
 import static com.google.gerrit.server.group.SystemGroupBackend.REGISTERED_USERS;
 import static com.google.gerrit.testing.GerritJUnit.assertThrows;
@@ -54,6 +55,7 @@ import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerResolver;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerSet;
 import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
@@ -187,6 +189,21 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .comparingElementsUsing(hasAccountName())
         .containsExactly(null, null, null);
     assertThat(codeOwnersInfo).hasOwnedByAllUsersThat().isNull();
+
+    String adminOwnershipDistance = "3";
+    String userOwnershipDistance = "2";
+    String user2OwnershipDistance = "1";
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasScoringFactor(CodeOwnerScore.DISTANCE))
+        .containsExactly(user2OwnershipDistance, userOwnershipDistance, adminOwnershipDistance)
+        .inOrder();
+
+    String explicitlyMentioned = "1";
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasScoringFactor(CodeOwnerScore.IS_EXPLICITLY_MENTIONED))
+        .containsExactly(explicitlyMentioned, explicitlyMentioned, explicitlyMentioned);
 
     assertThat(codeOwnersInfo.codeOwnerConfigs).hasSize(3);
     CodeOwnerConfigFileInfo codeOwnerConfigFileInfo3 = codeOwnersInfo.codeOwnerConfigs.get(0);
@@ -1968,5 +1985,83 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .assertNoImports()
         .assertNoImportMode()
         .assertNoUnresolvedErrorMessage();
+  }
+
+
+  @Test
+  public void testCodeOwnersScoringFactorsDistance() throws Exception {
+    TestAccount user2 = accountCreator.user2();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/")
+        .addCodeOwnerEmail(user.email())
+        .create();
+
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/foo/bar/")
+        .addCodeOwnerEmail(user2.email())
+        .create();
+
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners("/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(user2.id(), user.id(), admin.id())
+        .inOrder();
+
+    String adminOwnershipDistance = "3";
+    String userOwnershipDistance = "2";
+    String user2OwnershipDistance = "1";
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasScoringFactor(CodeOwnerScore.DISTANCE))
+        .containsExactly(user2OwnershipDistance, userOwnershipDistance, adminOwnershipDistance)
+        .inOrder();
+  }
+
+
+  @Test
+  @GerritConfig(name = "accounts.visibility", value = "ALL")
+  public void testCodeOwnersScoringFactorsIsExplicitlyMentioned() throws Exception {
+    // Add a code owner config that makes all users code owners.
+    codeOwnerConfigOperations
+        .newCodeOwnerConfig()
+        .project(project)
+        .branch("master")
+        .folderPath("/")
+        .addCodeOwnerEmail("*")
+        .addCodeOwnerEmail(admin.email())
+        .create();
+
+    CodeOwnersInfo codeOwnersInfo =
+        queryCodeOwners(getCodeOwnersApi().query().setResolveAllUsers(true), "/foo/bar/baz.md");
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasAccountId())
+        .containsExactly(admin.id(), user.id())
+        .inOrder();
+
+    String explicitlyMentioned = "1";
+    String notExplicitlyMentioned = "0";
+    assertThat(codeOwnersInfo)
+        .hasCodeOwnersThat()
+        .comparingElementsUsing(hasScoringFactor(CodeOwnerScore.IS_EXPLICITLY_MENTIONED))
+        .containsExactly(explicitlyMentioned, notExplicitlyMentioned)
+        .inOrder();
   }
 }

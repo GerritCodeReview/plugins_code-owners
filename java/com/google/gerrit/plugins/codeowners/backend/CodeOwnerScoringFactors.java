@@ -12,20 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package com.google.gerrit.plugins.codeowners.api;
+package com.google.gerrit.plugins.codeowners.backend;
 
-import com.google.gerrit.extensions.common.AccountInfo;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Representation of a code owner in the REST API.
- *
- * <p>This class determines the JSON format of code owners in the REST API.
+ * Container with scoring factors for a code owner.
  */
-public class CodeOwnerInfo {
-  /** The account of the code owner. */
-  public AccountInfo account;
+public class CodeOwnerScoringFactors {
 
-  /** The scoring factors used to determine the order of code owners. */
-  public List<CodeOwnerScoringFactorInfo> codeOwnersScoringFactors;
+  private final Map<CodeOwnerScore, Integer> scoringFactors;
+
+  public CodeOwnerScoringFactors() {
+    scoringFactors = new HashMap<>();
+  }
+
+  public void put(CodeOwnerScore codeOwnerScore, Integer value) {
+    if (codeOwnerScore != null && value != null) {
+      scoringFactors.put(codeOwnerScore, value);
+    }
+  }
+
+  public Map<CodeOwnerScore, Integer> getScoringFactors() {
+    return scoringFactors;
+  }
 }

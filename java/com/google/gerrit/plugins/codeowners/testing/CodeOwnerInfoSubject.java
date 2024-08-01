@@ -21,6 +21,7 @@ import com.google.common.truth.IterableSubject;
 import com.google.common.truth.Subject;
 import com.google.gerrit.entities.Account;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerInfo;
+import com.google.gerrit.plugins.codeowners.backend.CodeOwnerScore;
 import com.google.gerrit.truth.NullAwareCorrespondence;
 
 /** {@link Subject} for doing assertions on {@link CodeOwnerInfo}s. */
@@ -38,6 +39,16 @@ public class CodeOwnerInfoSubject extends Subject {
   public static final Correspondence<CodeOwnerInfo, String> hasAccountName() {
     return NullAwareCorrespondence.transforming(
         codeOwnerInfo -> codeOwnerInfo.account.name, "has account name");
+  }
+
+  public static final Correspondence<CodeOwnerInfo, String> hasScoringFactor(CodeOwnerScore score) {
+    return NullAwareCorrespondence.transforming(
+        codeOwnerInfo -> codeOwnerInfo.codeOwnersScoringFactors.stream()
+            .filter(factor -> factor.score.equals(score.name()))
+            .findFirst()
+            .orElseThrow()
+            .value,
+        "has scoring factor");
   }
 
   public static Factory<CodeOwnerInfoSubject, CodeOwnerInfo> codeOwnerInfos() {
