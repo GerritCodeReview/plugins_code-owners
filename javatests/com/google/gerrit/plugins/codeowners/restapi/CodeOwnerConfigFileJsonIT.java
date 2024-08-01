@@ -19,18 +19,25 @@ import static com.google.gerrit.testing.GerritJUnit.assertThrows;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import com.google.gerrit.entities.Project;
+import com.google.gerrit.acceptance.ExtensionRegistry;
+import com.google.gerrit.acceptance.ExtensionRegistry.Registration;
+import com.google.gerrit.entities.BranchNameKey;
+import com.google.gerrit.extensions.common.WebLinkInfo;
+import com.google.gerrit.extensions.webui.FileWebLink;
 import com.google.gerrit.plugins.codeowners.acceptance.AbstractCodeOwnersIT;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImport;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigReference;
+import com.google.inject.Inject;
 import org.junit.Before;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigFileJson}. */
 public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
+  @Inject private ExtensionRegistry extensionRegistry;
+
   private CodeOwnerConfigFileJson CodeOwnerConfigFileJson;
 
   @Before
@@ -39,28 +46,35 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
   }
 
   @Test
-  public void cannotFormatWithNullCodeOwnerConfigKey() throws Exception {
+  public void cannotFormatWithNullCodeOwnerConfig() throws Exception {
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
             () ->
                 CodeOwnerConfigFileJson.format(
-                    /* codeOwnerConfigKey= */ null,
+                    /* codeOwnerConfig= */ null,
                     /* resolvedImports= */ ImmutableList.of(),
                     /* unresolvedImports= */ ImmutableList.of()));
-    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfigKey");
+    assertThat(npe).hasMessageThat().isEqualTo("codeOwnerConfig");
   }
 
   @Test
   public void cannotFormatWithNullResolvedImports() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
-        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    CodeOwnerConfig codeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get();
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
             () ->
                 CodeOwnerConfigFileJson.format(
-                    codeOwnerConfigKey,
+                    codeOwnerConfig,
                     /* resolvedImports= */ null,
                     /* unresolvedImports= */ ImmutableList.of()));
     assertThat(npe).hasMessageThat().isEqualTo("resolvedImports");
@@ -69,13 +83,20 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
   @Test
   public void cannotFormatWithNullUnresolvedImports() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
-        CodeOwnerConfig.Key.create(Project.nameKey("project"), "master", "/");
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("master")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    CodeOwnerConfig codeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get();
     NullPointerException npe =
         assertThrows(
             NullPointerException.class,
             () ->
                 CodeOwnerConfigFileJson.format(
-                    codeOwnerConfigKey,
+                    codeOwnerConfig,
                     /* resolvedImports= */ ImmutableList.of(),
                     /* unresolvedImports= */ null));
     assertThat(npe).hasMessageThat().isEqualTo("unresolvedImports");
@@ -83,6 +104,18 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
 
   @Test
   public void formatWithoutImports() throws Exception {
+    testFormatWithoutImports(/* expectWebLinks= */ false);
+  }
+
+  @Test
+  public void formatWithoutImports_WithWebLinks() throws Exception {
+    try (Registration registration =
+        extensionRegistry.newRegistration().add(new CodeOwnersConfigFileWebLink())) {
+      testFormatWithoutImports(/* expectWebLinks= */ true);
+    }
+  }
+
+  private void testFormatWithoutImports(boolean expectWebLinks) throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
@@ -91,10 +124,12 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/baz/")
             .addCodeOwnerEmail(admin.email())
             .create();
+    CodeOwnerConfig codeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).get();
 
     CodeOwnerConfigFileInfo codeOwnerConfigFileInfo =
         CodeOwnerConfigFileJson.format(
-            codeOwnerConfigKey,
+            codeOwnerConfig,
             /* resolvedImports= */ ImmutableList.of(),
             /* unresolvedImports= */ ImmutableList.of());
     assertThat(codeOwnerConfigFileInfo.project).isEqualTo(codeOwnerConfigKey.project().get());
@@ -106,11 +141,29 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
     assertThat(codeOwnerConfigFileInfo.imports).isNull();
     assertThat(codeOwnerConfigFileInfo.unresolvedImports).isNull();
     assertThat(codeOwnerConfigFileInfo.unresolvedErrorMessage).isNull();
+
+    if (expectWebLinks) {
+      assertThat(codeOwnerConfigFileInfo.webLinks).containsExactly(createWebLink(codeOwnerConfig));
+    } else {
+      assertThat(codeOwnerConfigFileInfo.webLinks).isNull();
+    }
   }
 
   @Test
   public void formatWithUnresolvedImports() throws Exception {
-    CodeOwnerConfig.Key codeOwnerConfigKey =
+    testFormatWithUnresolvedImports(/* expectWebLinks= */ false);
+  }
+
+  @Test
+  public void formatWithUnresolvedImports_WithWebLinks() throws Exception {
+    try (Registration registration =
+        extensionRegistry.newRegistration().add(new CodeOwnersConfigFileWebLink())) {
+      testFormatWithUnresolvedImports(/* expectWebLinks= */ true);
+    }
+  }
+
+  private void testFormatWithUnresolvedImports(boolean expectWebLinks) throws Exception {
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -118,6 +171,8 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/bar/")
             .addCodeOwnerEmail(admin.email())
             .create();
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
 
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
         CodeOwnerConfig.Key.create(project, "stable", "/foo/baz/");
@@ -127,19 +182,21 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
 
     CodeOwnerConfigFileInfo codeOwnerConfigFileInfo =
         CodeOwnerConfigFileJson.format(
-            codeOwnerConfigKey,
+            importingCodeOwnerConfig,
             /* resolvedImports= */ ImmutableList.of(),
             /* unresolvedImports= */ ImmutableList.of(
                 CodeOwnerConfigImport.createUnresolvedImport(
-                    codeOwnerConfigKey,
+                    importingCodeOwnerConfig,
                     keyOfImportedCodeOwnerConfig,
                     codeOwnerConfigReference,
                     "error message")));
-    assertThat(codeOwnerConfigFileInfo.project).isEqualTo(codeOwnerConfigKey.project().get());
+    assertThat(codeOwnerConfigFileInfo.project)
+        .isEqualTo(keyOfImportingCodeOwnerConfig.project().get());
     assertThat(codeOwnerConfigFileInfo.branch)
-        .isEqualTo(codeOwnerConfigKey.branchNameKey().branch());
+        .isEqualTo(keyOfImportingCodeOwnerConfig.branchNameKey().branch());
     assertThat(codeOwnerConfigFileInfo.path)
-        .isEqualTo(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
+        .isEqualTo(
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath());
     assertThat(codeOwnerConfigFileInfo.importMode).isNull();
     assertThat(codeOwnerConfigFileInfo.imports).isNull();
     assertThat(codeOwnerConfigFileInfo.unresolvedErrorMessage).isNull();
@@ -158,11 +215,32 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
     assertThat(unresolvedImportInfo.imports).isNull();
     assertThat(unresolvedImportInfo.unresolvedImports).isNull();
     assertThat(unresolvedImportInfo.unresolvedErrorMessage).isEqualTo("error message");
+
+    if (expectWebLinks) {
+      assertThat(codeOwnerConfigFileInfo.webLinks)
+          .containsExactly(createWebLink(importingCodeOwnerConfig));
+      assertThat(unresolvedImportInfo.webLinks).isNull();
+    } else {
+      assertThat(codeOwnerConfigFileInfo.webLinks).isNull();
+      assertThat(unresolvedImportInfo.webLinks).isNull();
+    }
   }
 
   @Test
   public void formatWithImports() throws Exception {
-    CodeOwnerConfig.Key codeOwnerConfigKey =
+    testFormatWithImports(/* expectWebLinks= */ false);
+  }
+
+  @Test
+  public void formatWithImports_WithWebLinks() throws Exception {
+    try (Registration registration =
+        extensionRegistry.newRegistration().add(new CodeOwnersConfigFileWebLink())) {
+      testFormatWithImports(/* expectWebLinks= */ true);
+    }
+  }
+
+  private void testFormatWithImports(boolean expectWebLinks) throws Exception {
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -170,25 +248,38 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/bar/")
             .addCodeOwnerEmail(admin.email())
             .create();
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
 
+    createBranch(BranchNameKey.create(project, "stable"));
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
-        CodeOwnerConfig.Key.create(project, "stable", "/foo/baz/");
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("stable")
+            .folderPath("/foo/baz/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
     CodeOwnerConfigReference codeOwnerConfigReference =
         createCodeOwnerConfigReference(
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
     CodeOwnerConfigFileInfo codeOwnerConfigFileInfo =
         CodeOwnerConfigFileJson.format(
-            codeOwnerConfigKey,
+            importingCodeOwnerConfig,
             /* resolvedImports= */ ImmutableList.of(
                 CodeOwnerConfigImport.createResolvedImport(
-                    codeOwnerConfigKey, keyOfImportedCodeOwnerConfig, codeOwnerConfigReference)),
+                    importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference)),
             /* unresolvedImports= */ ImmutableList.of());
-    assertThat(codeOwnerConfigFileInfo.project).isEqualTo(codeOwnerConfigKey.project().get());
+    assertThat(codeOwnerConfigFileInfo.project)
+        .isEqualTo(keyOfImportingCodeOwnerConfig.project().get());
     assertThat(codeOwnerConfigFileInfo.branch)
-        .isEqualTo(codeOwnerConfigKey.branchNameKey().branch());
+        .isEqualTo(keyOfImportingCodeOwnerConfig.branchNameKey().branch());
     assertThat(codeOwnerConfigFileInfo.path)
-        .isEqualTo(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
+        .isEqualTo(
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath());
     assertThat(codeOwnerConfigFileInfo.importMode).isNull();
     assertThat(codeOwnerConfigFileInfo.unresolvedImports).isNull();
     assertThat(codeOwnerConfigFileInfo.unresolvedErrorMessage).isNull();
@@ -206,11 +297,33 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
     assertThat(resolvedImportInfo.imports).isNull();
     assertThat(resolvedImportInfo.unresolvedImports).isNull();
     assertThat(resolvedImportInfo.unresolvedErrorMessage).isNull();
+
+    if (expectWebLinks) {
+      assertThat(codeOwnerConfigFileInfo.webLinks)
+          .containsExactly(createWebLink(importingCodeOwnerConfig));
+      assertThat(resolvedImportInfo.webLinks)
+          .containsExactly(createWebLink(importedCodeOwnerConfig));
+    } else {
+      assertThat(codeOwnerConfigFileInfo.webLinks).isNull();
+      assertThat(resolvedImportInfo.webLinks).isNull();
+    }
   }
 
   @Test
   public void formatWithNestedImports() throws Exception {
-    CodeOwnerConfig.Key codeOwnerConfigKey =
+    testFormatWithNestedImports(/* expectWebLinks= */ false);
+  }
+
+  @Test
+  public void formatWithNestedImports_WithWebLinks() throws Exception {
+    try (Registration registration =
+        extensionRegistry.newRegistration().add(new CodeOwnersConfigFileWebLink())) {
+      testFormatWithNestedImports(/* expectWebLinks= */ true);
+    }
+  }
+
+  private void testFormatWithNestedImports(boolean expectWebLinks) throws Exception {
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -218,6 +331,8 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/bar/")
             .addCodeOwnerEmail(admin.email())
             .create();
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
 
     CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
         codeOwnerConfigOperations
@@ -227,12 +342,23 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/bar/baz")
             .addCodeOwnerEmail(admin.email())
             .create();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
     CodeOwnerConfigReference codeOwnerConfigReference =
         createCodeOwnerConfigReference(
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
+    createBranch(BranchNameKey.create(project, "stable"));
     CodeOwnerConfig.Key keyOfNestedImportedCodeOwnerConfig1 =
-        CodeOwnerConfig.Key.create(project, "stable", "/foo/baz1/");
+        codeOwnerConfigOperations
+            .newCodeOwnerConfig()
+            .project(project)
+            .branch("stable")
+            .folderPath("/foo/baz1/")
+            .addCodeOwnerEmail(admin.email())
+            .create();
+    CodeOwnerConfig nestedImportedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfNestedImportedCodeOwnerConfig1).get();
     CodeOwnerConfigReference nestedCodeOwnerConfigReference1 =
         createCodeOwnerConfigReference(
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
@@ -246,25 +372,27 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
 
     CodeOwnerConfigFileInfo codeOwnerConfigFileInfo =
         CodeOwnerConfigFileJson.format(
-            codeOwnerConfigKey,
+            importingCodeOwnerConfig,
             /* resolvedImports= */ ImmutableList.of(
                 CodeOwnerConfigImport.createResolvedImport(
-                    codeOwnerConfigKey, keyOfImportedCodeOwnerConfig, codeOwnerConfigReference),
+                    importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference),
                 CodeOwnerConfigImport.createResolvedImport(
-                    keyOfImportedCodeOwnerConfig,
-                    keyOfNestedImportedCodeOwnerConfig1,
+                    importedCodeOwnerConfig,
+                    nestedImportedCodeOwnerConfig1,
                     nestedCodeOwnerConfigReference1)),
             /* unresolvedImports= */ ImmutableList.of(
                 CodeOwnerConfigImport.createUnresolvedImport(
-                    keyOfImportedCodeOwnerConfig,
+                    importedCodeOwnerConfig,
                     keyOfNestedImportedCodeOwnerConfig2,
                     nestedCodeOwnerConfigReference2,
                     "error message")));
-    assertThat(codeOwnerConfigFileInfo.project).isEqualTo(codeOwnerConfigKey.project().get());
+    assertThat(codeOwnerConfigFileInfo.project)
+        .isEqualTo(keyOfImportingCodeOwnerConfig.project().get());
     assertThat(codeOwnerConfigFileInfo.branch)
-        .isEqualTo(codeOwnerConfigKey.branchNameKey().branch());
+        .isEqualTo(keyOfImportingCodeOwnerConfig.branchNameKey().branch());
     assertThat(codeOwnerConfigFileInfo.path)
-        .isEqualTo(codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey).getFilePath());
+        .isEqualTo(
+            codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).getFilePath());
     assertThat(codeOwnerConfigFileInfo.importMode).isNull();
     assertThat(codeOwnerConfigFileInfo.unresolvedImports).isNull();
     assertThat(codeOwnerConfigFileInfo.unresolvedErrorMessage).isNull();
@@ -316,10 +444,37 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
     assertThat(nestedUnresolvedImportInfo1.imports).isNull();
     assertThat(nestedUnresolvedImportInfo1.unresolvedImports).isNull();
     assertThat(nestedUnresolvedImportInfo1.unresolvedErrorMessage).isEqualTo("error message");
+
+    if (expectWebLinks) {
+      assertThat(codeOwnerConfigFileInfo.webLinks)
+          .containsExactly(createWebLink(importingCodeOwnerConfig));
+      assertThat(resolvedImportInfo.webLinks)
+          .containsExactly(createWebLink(importedCodeOwnerConfig));
+      assertThat(nestedResolvedImportInfo.webLinks)
+          .containsExactly(createWebLink(nestedImportedCodeOwnerConfig1));
+      assertThat(nestedUnresolvedImportInfo1.webLinks).isNull();
+    } else {
+      assertThat(codeOwnerConfigFileInfo.webLinks).isNull();
+      assertThat(resolvedImportInfo.webLinks).isNull();
+      assertThat(nestedResolvedImportInfo.webLinks).isNull();
+      assertThat(nestedUnresolvedImportInfo1.webLinks).isNull();
+    }
   }
 
   @Test
   public void formatWithCyclicImports() throws Exception {
+    testFormatWithCyclicImports(/* expectWebLinks= */ false);
+  }
+
+  @Test
+  public void formatWithCyclicImports_WithWebLinks() throws Exception {
+    try (Registration registration =
+        extensionRegistry.newRegistration().add(new CodeOwnersConfigFileWebLink())) {
+      testFormatWithCyclicImports(/* expectWebLinks= */ true);
+    }
+  }
+
+  private void testFormatWithCyclicImports(boolean expectWebLinks) throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey1 =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
@@ -328,6 +483,8 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/bar/")
             .addCodeOwnerEmail(admin.email())
             .create();
+    CodeOwnerConfig codeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey1).get();
     CodeOwnerConfigReference codeOwnerConfigReference1 =
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, codeOwnerConfigKey1);
 
@@ -339,17 +496,19 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
             .folderPath("/foo/bar/baz")
             .addCodeOwnerEmail(admin.email())
             .create();
+    CodeOwnerConfig codeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfigKey2).get();
     CodeOwnerConfigReference codeOwnerConfigReference2 =
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, codeOwnerConfigKey2);
 
     CodeOwnerConfigFileInfo codeOwnerConfigFileInfo =
         CodeOwnerConfigFileJson.format(
-            codeOwnerConfigKey1,
+            codeOwnerConfig1,
             /* resolvedImports= */ ImmutableList.of(
                 CodeOwnerConfigImport.createResolvedImport(
-                    codeOwnerConfigKey1, codeOwnerConfigKey2, codeOwnerConfigReference1),
+                    codeOwnerConfig1, codeOwnerConfig2, codeOwnerConfigReference1),
                 CodeOwnerConfigImport.createResolvedImport(
-                    codeOwnerConfigKey2, codeOwnerConfigKey1, codeOwnerConfigReference2)),
+                    codeOwnerConfig2, codeOwnerConfig1, codeOwnerConfigReference2)),
             /* unresolvedImports= */ ImmutableList.of());
 
     assertThat(codeOwnerConfigFileInfo.project).isEqualTo(codeOwnerConfigKey1.project().get());
@@ -384,5 +543,40 @@ public class CodeOwnerConfigFileJsonIT extends AbstractCodeOwnersIT {
     assertThat(nestedResolvedImportInfo.imports).isNull();
     assertThat(nestedResolvedImportInfo.unresolvedImports).isNull();
     assertThat(nestedResolvedImportInfo.unresolvedErrorMessage).isNull();
+
+    if (expectWebLinks) {
+      assertThat(codeOwnerConfigFileInfo.webLinks).containsExactly(createWebLink(codeOwnerConfig1));
+      assertThat(resolvedImportInfo.webLinks).containsExactly(createWebLink(codeOwnerConfig2));
+      assertThat(nestedResolvedImportInfo.webLinks)
+          .containsExactly(createWebLink(codeOwnerConfig1));
+    } else {
+      assertThat(codeOwnerConfigFileInfo.webLinks).isNull();
+      assertThat(resolvedImportInfo.webLinks).isNull();
+      assertThat(nestedResolvedImportInfo.webLinks).isNull();
+    }
+  }
+
+  private WebLinkInfo createWebLink(CodeOwnerConfig codeOwnerConfig) {
+    return createWebLink(
+        codeOwnerConfig.key().project().get(),
+        codeOwnerConfig.key().branchNameKey().branch(),
+        codeOwnerConfig.revision().getName(),
+        codeOwnerConfigOperations.codeOwnerConfig(codeOwnerConfig.key()).getFilePath());
+  }
+
+  private WebLinkInfo createWebLink(
+      String projectName, String revision, String hash, String fileName) {
+    return new WebLinkInfo(
+        "name",
+        "imageURL",
+        "http://view/" + projectName + "/" + revision + "/" + hash + "/" + fileName);
+  }
+
+  private class CodeOwnersConfigFileWebLink implements FileWebLink {
+    @Override
+    public WebLinkInfo getFileWebLink(
+        String projectName, String revision, String hash, String fileName) {
+      return createWebLink(projectName, revision, hash, fileName);
+    }
   }
 }

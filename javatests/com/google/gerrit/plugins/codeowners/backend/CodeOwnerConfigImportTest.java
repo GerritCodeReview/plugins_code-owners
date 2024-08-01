@@ -14,16 +14,24 @@
 
 package com.google.gerrit.plugins.codeowners.backend;
 
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerConfigImport}. */
 public class CodeOwnerConfigImportTest extends AbstractAutoValueTest {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   @Test
   public void toStringIncludesAllData_resolvedImport() throws Exception {
     CodeOwnerConfigImport resolvedImport =
         CodeOwnerConfigImport.createResolvedImport(
-            CodeOwnerConfig.Key.create(project, "master", "/"),
-            CodeOwnerConfig.Key.create(project, "master", "/bar/"),
+            CodeOwnerConfig.builder(
+                    CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+                .build(),
+            CodeOwnerConfig.builder(
+                    CodeOwnerConfig.Key.create(project, "master", "/bar/"), TEST_REVISION)
+                .build(),
             CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"));
     assertThatToStringIncludesAllData(resolvedImport, CodeOwnerConfigImport.class);
   }
@@ -32,7 +40,9 @@ public class CodeOwnerConfigImportTest extends AbstractAutoValueTest {
   public void toStringIncludesAllData_unresolvedImport() throws Exception {
     CodeOwnerConfigImport unresolvedImport =
         CodeOwnerConfigImport.createUnresolvedImport(
-            CodeOwnerConfig.Key.create(project, "master", "/"),
+            CodeOwnerConfig.builder(
+                    CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+                .build(),
             CodeOwnerConfig.Key.create(project, "master", "/bar/"),
             CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"),
             "test message");

@@ -22,21 +22,29 @@ import java.util.Optional;
 /**
  * Information about an import of a {@link CodeOwnerConfig}.
  *
- * <p>Contains the keys of the importing and the imported code owner config, as well as the
- * reference that the importing code owner config uses to reference the imported code owner config
- * (contains the import mode).
+ * <p>Contains the importing code owner config, the key of the imported code owner config, the
+ * imported code owner config if the import could be resolved, as well as the reference that the
+ * importing code owner config uses to reference the imported code owner config (contains the import
+ * mode).
  *
  * <p>It's possible that this class represents non-resolveable imports (e.g. an import of a
- * non-existing code owner config). In this case an error message is contained that explains why the
- * import couldn't be resolved.
+ * non-existing code owner config). In this case the imported code owner config is not available and
+ * an error message is contained that explains why the import couldn't be resolved.
  */
 @AutoValue
 public abstract class CodeOwnerConfigImport {
   /** Key of the importing code owner config. */
-  public abstract CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig();
+  public abstract CodeOwnerConfig importingCodeOwnerConfig();
 
   /** Key of the imported code owner config. */
   public abstract CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig();
+
+  /**
+   * Imported code owner config.
+   *
+   * <p>Not set for unresolved imports.
+   */
+  public abstract Optional<CodeOwnerConfig> importedCodeOwnerConfig();
 
   /** The code owner config reference that references the imported code owner config. */
   public abstract CodeOwnerConfigReference codeOwnerConfigReference();
@@ -50,8 +58,9 @@ public abstract class CodeOwnerConfigImport {
   @Override
   public final String toString() {
     return MoreObjects.toStringHelper(this)
-        .add("keyOfImportingCodeOwnerConfig", keyOfImportingCodeOwnerConfig())
+        .add("importingCodeOwnerConfig", importingCodeOwnerConfig())
         .add("keyOfImportedCodeOwnerConfig", keyOfImportedCodeOwnerConfig())
+        .add("importedCodeOwnerConfig", importedCodeOwnerConfig())
         .add("codeOwnerConfigReference", codeOwnerConfigReference())
         .add("errorMessage", errorMessage())
         .toString();
@@ -60,13 +69,14 @@ public abstract class CodeOwnerConfigImport {
   /** Creates a {@link CodeOwnerConfigImport} instance for an unresolved import. */
   @VisibleForTesting
   public static CodeOwnerConfigImport createUnresolvedImport(
-      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
+      CodeOwnerConfig importingCodeOwnerConfig,
       CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig,
       CodeOwnerConfigReference codeOwnerConfigReference,
       String errorMessage) {
     return new AutoValue_CodeOwnerConfigImport(
-        keyOfImportingCodeOwnerConfig,
+        importingCodeOwnerConfig,
         keyOfImportedCodeOwnerConfig,
+        Optional.empty(),
         codeOwnerConfigReference,
         Optional.of(errorMessage));
   }
@@ -74,12 +84,13 @@ public abstract class CodeOwnerConfigImport {
   /** Creates a {@link CodeOwnerConfigImport} instance for a resolved import. */
   @VisibleForTesting
   public static CodeOwnerConfigImport createResolvedImport(
-      CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig,
-      CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig,
+      CodeOwnerConfig importingCodeOwnerConfig,
+      CodeOwnerConfig importedCodeOwnerConfig,
       CodeOwnerConfigReference codeOwnerConfigReference) {
     return new AutoValue_CodeOwnerConfigImport(
-        keyOfImportingCodeOwnerConfig,
-        keyOfImportedCodeOwnerConfig,
+        importingCodeOwnerConfig,
+        importedCodeOwnerConfig.key(),
+        Optional.of(importedCodeOwnerConfig),
         codeOwnerConfigReference,
         Optional.empty());
   }
