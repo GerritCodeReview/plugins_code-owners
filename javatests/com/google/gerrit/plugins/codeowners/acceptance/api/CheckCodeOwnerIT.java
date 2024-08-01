@@ -174,6 +174,9 @@ public class CheckCodeOwnerIT extends AbstractCodeOwnersIT {
     assertThat(checkCodeOwnerInfo)
         .hasDebugLogsThatContainAllOf(
             String.format(
+                "resolve code owners for %s from code owner config %s:master:%s",
+                path, project, getCodeOwnerConfigFilePath("/foo/")),
+            String.format(
                 "found email %s as a code owner in %s",
                 codeOwner.email(), getCodeOwnerConfigFilePath("/foo/")),
             String.format("resolved email %s to account %s", codeOwner.email(), codeOwner.id()));

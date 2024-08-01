@@ -44,6 +44,7 @@ import com.google.inject.Key;
 import com.google.inject.Provider;
 import com.google.inject.util.Providers;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.revwalk.RevCommit;
@@ -2886,7 +2887,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     @Override
     public Path getFilePath(CodeOwnerConfig.Key codeOwnerConfigKey) {
-      throw new UnsupportedOperationException("not implemented");
+      return Paths.get(codeOwnerConfigKey.folderPath().toString(), "OWNERS");
     }
   }
 }
