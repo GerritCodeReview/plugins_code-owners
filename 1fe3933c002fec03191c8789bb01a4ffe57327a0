@@ -1,0 +1,96 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "de54af22_3ddce968",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-01T14:19:58Z",
+      "side": 1,
+      "message": "nit: means",
+      "range": {
+        "startLine": 46,
+        "startChar": 15,
+        "endLine": 46,
+        "endChar": 20
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "0b14bce3_80577cea",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigImport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-01T14:19:58Z",
+      "side": 1,
+      "message": "The docstring is slightly outdated now in relation to keys vs. configs",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 30
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "dbb2cfca_b07ab232",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigFileJson.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-01T14:19:58Z",
+      "side": 1,
+      "message": "The commit message says\n\n\"\"\"\nNote that file web links are only available if they are configured.\n\"\"\"\n\nSanity check: Is WebLinks always non-null?",
+      "range": {
+        "startLine": 37,
+        "startChar": 26,
+        "endLine": 37,
+        "endChar": 43
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "fd09b5c1_b738b5fb",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1148215
+      },
+      "writtenOn": "2024-08-01T14:19:58Z",
+      "side": 1,
+      "message": "... Or if web_links provider is not configured",
+      "range": {
+        "startLine": 967,
+        "startChar": 178,
+        "endLine": 967,
+        "endChar": 291
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
