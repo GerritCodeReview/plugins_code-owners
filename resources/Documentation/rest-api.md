@@ -959,14 +959,15 @@ code owner. Note that if the email is configured as global code owner, but the e
 The `CodeOwnerConfigFileInfo` entity contains information about a code owner
 config file and its imports.
 
-| Field Name |          | Description |
-| ---------- | -------- | ----------- |
-| `project`  || The name of the project from which the code owner config was loaded, or for unresolved imports, from which the code owner config was supposed to be loaded.
-| `branch`   || The name of the branch from which the code owner config was loaded, or for unresolved imports, from which the code owner config was supposed to be loaded.
-| `path`     || The absolute path of the code owner config file.
-| `imports`  | optional | Imported code owner config files as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
+| Field Name  |          | Description |
+| ----------- | -------- | ----------- |
+| `project`   || The name of the project from which the code owner config was loaded, or for unresolved imports, from which the code owner config was supposed to be loaded.
+| `branch`    || The name of the branch from which the code owner config was loaded, or for unresolved imports, from which the code owner config was supposed to be loaded.
+| `path`      || The absolute path of the code owner config file.
+| `web_links` | optional | Links to the code owner config file in external sites as a list of [WebLinkInfo](../../../Documentation/rest-api-changes.html#web-link-info) entities. Not set if the `CodeOwnerConfigFileInfo` represents an imported code owner config file that couldn't be resolved or if [web links](../../../Documentation/dev-plugins.html#links-to-external-tools) are not configured.
+| `imports`   | optional | Imported code owner config files as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
 | `unresolved_imports` | optional | Imported code owner config files that couldn't be resolved as [CodeOwnerConfigFileInfo](#code-owner-config-file-info) entities.
-| `unresolved_error_message` | optional | Message explaining why this code owner config couldn't be resolved. Only set if the `CodeOwnerConfigFileInfo` represents an import code owner config file that couldn't be resolved.
+| `unresolved_error_message` | optional | Message explaining why this code owner config couldn't be resolved. Only set if the `CodeOwnerConfigFileInfo` represents an imported code owner config file that couldn't be resolved.
 | `import_mode` | optional | The import mode (`ALL` or `GLOBAL_CODE_OWNER_SETS_ONLY`). Only set if the `CodeOwnerConfigFileInfo` represents an imported code owner config file.
 
 ---

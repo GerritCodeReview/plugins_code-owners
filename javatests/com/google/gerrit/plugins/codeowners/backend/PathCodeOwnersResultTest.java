@@ -27,6 +27,8 @@ public class PathCodeOwnersResultTest extends AbstractAutoValueTest {
   @Test
   public void toStringIncludesAllData() throws Exception {
     CodeOwnerConfig.Key codeOwnerConfigKey = CodeOwnerConfig.Key.create(project, "master", "/");
+    CodeOwnerConfig codeOwnerConfig =
+        CodeOwnerConfig.builder(codeOwnerConfigKey, TEST_REVISION).build();
     CodeOwnerConfigReference resolvableCodeOwnerConfigReference =
         CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS");
     CodeOwnerConfigReference unresolvableCodeOwnerConfigReference =
@@ -40,12 +42,14 @@ public class PathCodeOwnersResultTest extends AbstractAutoValueTest {
                 .build(),
             ImmutableList.of(
                 CodeOwnerConfigImport.createResolvedImport(
-                    codeOwnerConfigKey,
-                    CodeOwnerConfig.Key.create(project, "master", "/bar/"),
+                    codeOwnerConfig,
+                    CodeOwnerConfig.builder(
+                            CodeOwnerConfig.Key.create(project, "master", "/bar/"), TEST_REVISION)
+                        .build(),
                     resolvableCodeOwnerConfigReference)),
             ImmutableList.of(
                 CodeOwnerConfigImport.createUnresolvedImport(
-                    codeOwnerConfigKey,
+                    codeOwnerConfig,
                     CodeOwnerConfig.Key.create(project, "master", "/baz/"),
                     unresolvableCodeOwnerConfigReference,
                     "test message")));

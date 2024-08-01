@@ -474,7 +474,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with non-resolveable import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -484,10 +484,13 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -502,7 +505,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createUnresolvedImport(
-                importingCodeOwnerConfigKey,
+                importingCodeOwnerConfig,
                 keyOfImportedCodeOwnerConfig,
                 codeOwnerConfigReference,
                 String.format(
@@ -530,7 +533,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create config with import of non code owner config file
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -540,10 +543,13 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -558,7 +564,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createUnresolvedImport(
-                importingCodeOwnerConfigKey,
+                importingCodeOwnerConfig,
                 keyOfImportedCodeOwnerConfig,
                 codeOwnerConfigReference,
                 String.format(
@@ -589,7 +595,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create the importing config
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -599,10 +605,13 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -618,7 +627,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createUnresolvedImport(
-                importingCodeOwnerConfigKey,
+                importingCodeOwnerConfig,
                 keyOfImportedCodeOwnerConfig,
                 codeOwnerConfigReference,
                 String.format(
@@ -650,7 +659,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create the importing config
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -660,10 +669,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addCodeOwnerSet(CodeOwnerSet.builder().addCodeOwnerEmail(admin.email()).build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -677,9 +691,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -708,7 +720,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(importMode, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -718,10 +730,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -735,9 +752,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -761,7 +776,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with matching per-file code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -775,10 +790,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -792,9 +812,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -818,7 +836,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with matching per-file code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -832,10 +850,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -850,9 +873,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -877,7 +898,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
     // create importing config with matching per-file code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -891,10 +912,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -909,9 +935,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -939,7 +963,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -949,10 +973,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -970,9 +999,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1000,7 +1027,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1010,10 +1037,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1030,9 +1062,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1060,7 +1090,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1070,10 +1100,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1090,9 +1125,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1112,7 +1145,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1122,10 +1155,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1137,9 +1175,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1161,7 +1197,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
     // create importing config
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1171,10 +1207,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1186,9 +1227,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1236,7 +1275,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(importMode, keyOfImportedCodeOwnerConfig1);
 
     // create importing config with global code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1246,10 +1285,17 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference1)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig1).get();
+    CodeOwnerConfig importedCodeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig2).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1263,13 +1309,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig2,
-                codeOwnerConfigReference2));
+                importedCodeOwnerConfig1, importedCodeOwnerConfig2, codeOwnerConfigReference2));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1313,7 +1355,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // create importing config with global code owner and import with import mode
     // GLOBAL_CODE_OWNER_SETS_ONLY
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1323,10 +1365,17 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference1)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig1).get();
+    CodeOwnerConfig importedCodeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig2).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1341,12 +1390,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig2,
+                importedCodeOwnerConfig1,
+                importedCodeOwnerConfig2,
                 createCodeOwnerConfigReference(
                     CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
                     keyOfImportedCodeOwnerConfig2)));
@@ -1390,7 +1437,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1400,10 +1447,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1417,9 +1469,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1443,7 +1493,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1454,10 +1504,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference1)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1470,13 +1525,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig,
-                importingCodeOwnerConfigKey,
-                codeOwnerConfigReference2));
+                importedCodeOwnerConfig, importingCodeOwnerConfig, codeOwnerConfigReference2));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1547,7 +1598,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import with relative path
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1557,10 +1608,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1573,9 +1629,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1587,7 +1641,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import from non-existing project
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1597,10 +1651,13 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1614,7 +1671,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createUnresolvedImport(
-                importingCodeOwnerConfigKey,
+                importingCodeOwnerConfig,
                 keyOfImportedCodeOwnerConfig,
                 codeOwnerConfigReference,
                 String.format("project %s not found", keyOfImportedCodeOwnerConfig.project())));
@@ -1640,7 +1697,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import from the hidden project
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1650,10 +1707,13 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1669,7 +1729,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createUnresolvedImport(
-                importingCodeOwnerConfigKey,
+                importingCodeOwnerConfig,
                 keyOfImportedCodeOwnerConfig,
                 codeOwnerConfigReference,
                 String.format(
@@ -1685,7 +1745,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import from non-existing branch
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1695,10 +1755,13 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1712,7 +1775,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createUnresolvedImport(
-                importingCodeOwnerConfigKey,
+                importingCodeOwnerConfig,
                 keyOfImportedCodeOwnerConfig,
                 codeOwnerConfigReference,
                 "code owner config does not exist (revision = current)"));
@@ -1736,7 +1799,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import with relative path
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1746,10 +1809,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1762,9 +1830,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1795,7 +1861,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .build();
 
     // create importing config with global code owner and import with relative path
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1805,10 +1871,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead(branchName),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1821,9 +1892,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1847,7 +1916,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import with relative path
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1857,10 +1926,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1873,9 +1947,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1901,7 +1973,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
         createCodeOwnerConfigReference(CodeOwnerConfigImportMode.ALL, keyOfImportedCodeOwnerConfig);
 
     // create importing config with global code owner and import with relative path
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1911,10 +1983,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo/bar/baz.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1927,9 +2004,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -1942,7 +2017,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
     // create importing config with non-resolveable per file import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -1956,10 +2031,13 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -1974,7 +2052,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.unresolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createUnresolvedImport(
-                importingCodeOwnerConfigKey,
+                importingCodeOwnerConfig,
                 keyOfImportedCodeOwnerConfig,
                 codeOwnerConfigReference,
                 String.format(
@@ -2011,7 +2089,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig);
 
     // create importing config with per code owner and per file import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2025,10 +2103,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2047,9 +2130,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -2087,7 +2168,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig1);
 
     // create importing config with per file code owner and per file import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2101,10 +2182,17 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig1).get();
+    CodeOwnerConfig importedCodeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig2).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2118,13 +2206,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig2,
-                codeOwnerConfigReference2));
+                importedCodeOwnerConfig1, importedCodeOwnerConfig2, codeOwnerConfigReference2));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -2165,7 +2249,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig1);
 
     // create importing config with per file code owner and per file import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2179,10 +2263,17 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig1).get();
+    CodeOwnerConfig importedCodeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig2).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2197,12 +2288,10 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig2,
+                importedCodeOwnerConfig1,
+                importedCodeOwnerConfig2,
                 createCodeOwnerConfigReference(
                     CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY,
                     keyOfImportedCodeOwnerConfig2)));
@@ -2265,7 +2354,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig1);
 
     // create importing config with global import
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2274,12 +2363,21 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference1)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig1).get();
+    CodeOwnerConfig importedCodeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig2).get();
+    CodeOwnerConfig importedCodeOwnerConfig3 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig3).get();
+
     // Expectation for foo.xyz file: code owners is empty since foo.xyz neither matches *.md nor
     // *.txt
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.xyz"));
     assertThat(pathCodeOwners).isPresent();
@@ -2288,16 +2386,14 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1));
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
 
     // Expectation for foo.md file: code owners contains only user since foo.md only matches *.md
     pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2308,13 +2404,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig2,
-                codeOwnerConfigReference2));
+                importedCodeOwnerConfig1, importedCodeOwnerConfig2, codeOwnerConfigReference2));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
 
     // Expectation for foo.txt file: code owners contains only user2 since foo.txt only matches
@@ -2322,7 +2414,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.txt"));
     assertThat(pathCodeOwners).isPresent();
@@ -2333,13 +2425,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig3,
-                codeOwnerConfigReference3));
+                importedCodeOwnerConfig1, importedCodeOwnerConfig3, codeOwnerConfigReference3));
   }
 
   @Test
@@ -2481,7 +2569,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     // * has a global code owner
     // * has a per-file import for md files
     // * ignores global and parent code owners for md files
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2496,10 +2584,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2514,9 +2607,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -2548,7 +2639,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
 
     // create importing config that has a global import with mode ALL and a per-file rule for md
     // files that ignores global and parent code owners
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2564,10 +2655,15 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
                     .build())
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2583,9 +2679,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig,
-                codeOwnerConfigReference));
+                importingCodeOwnerConfig, importedCodeOwnerConfig, codeOwnerConfigReference));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -2625,7 +2719,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig1);
 
     // create importing config
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2635,10 +2729,17 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference1)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig1).get();
+    CodeOwnerConfig importedCodeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig2).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2652,13 +2753,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig2,
-                codeOwnerConfigReference2));
+                importedCodeOwnerConfig1, importedCodeOwnerConfig2, codeOwnerConfigReference2));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 
@@ -2698,7 +2795,7 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY, keyOfImportedCodeOwnerConfig1);
 
     // create importing config
-    CodeOwnerConfig.Key importingCodeOwnerConfigKey =
+    CodeOwnerConfig.Key keyOfImportingCodeOwnerConfig =
         codeOwnerConfigOperations
             .newCodeOwnerConfig()
             .project(project)
@@ -2708,10 +2805,17 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
             .addImport(codeOwnerConfigReference1)
             .create();
 
+    CodeOwnerConfig importingCodeOwnerConfig =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportingCodeOwnerConfig).get();
+    CodeOwnerConfig importedCodeOwnerConfig1 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig1).get();
+    CodeOwnerConfig importedCodeOwnerConfig2 =
+        codeOwnerConfigOperations.codeOwnerConfig(keyOfImportedCodeOwnerConfig2).get();
+
     Optional<PathCodeOwners> pathCodeOwners =
         pathCodeOwnersFactory.create(
             transientCodeOwnerConfigCacheProvider.get(),
-            importingCodeOwnerConfigKey,
+            keyOfImportingCodeOwnerConfig,
             projectOperations.project(project).getHead("master"),
             Path.of("/foo.md"));
     assertThat(pathCodeOwners).isPresent();
@@ -2725,13 +2829,9 @@ public class PathCodeOwnersTest extends AbstractCodeOwnersTest {
     assertThat(pathCodeOwnersResult.resolvedImports())
         .containsExactly(
             CodeOwnerConfigImport.createResolvedImport(
-                importingCodeOwnerConfigKey,
-                keyOfImportedCodeOwnerConfig1,
-                codeOwnerConfigReference1),
+                importingCodeOwnerConfig, importedCodeOwnerConfig1, codeOwnerConfigReference1),
             CodeOwnerConfigImport.createResolvedImport(
-                keyOfImportedCodeOwnerConfig1,
-                keyOfImportedCodeOwnerConfig2,
-                codeOwnerConfigReference2));
+                importedCodeOwnerConfig1, importedCodeOwnerConfig2, codeOwnerConfigReference2));
     assertThat(pathCodeOwnersResult.unresolvedImports()).isEmpty();
   }
 

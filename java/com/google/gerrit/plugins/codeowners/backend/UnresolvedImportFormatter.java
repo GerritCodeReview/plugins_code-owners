@@ -43,9 +43,9 @@ public class UnresolvedImportFormatter {
         unresolvedImport.keyOfImportedCodeOwnerConfig().project(),
         unresolvedImport.keyOfImportedCodeOwnerConfig().shortBranchName(),
         getFilePath(unresolvedImport.keyOfImportedCodeOwnerConfig()),
-        unresolvedImport.keyOfImportingCodeOwnerConfig().project(),
-        unresolvedImport.keyOfImportingCodeOwnerConfig().shortBranchName(),
-        getFilePath(unresolvedImport.keyOfImportingCodeOwnerConfig()),
+        unresolvedImport.importingCodeOwnerConfig().key().project(),
+        unresolvedImport.importingCodeOwnerConfig().key().shortBranchName(),
+        getFilePath(unresolvedImport.importingCodeOwnerConfig().key()),
         unresolvedImport
             .errorMessage()
             .orElseThrow(

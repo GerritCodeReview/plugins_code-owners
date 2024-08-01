@@ -14,31 +14,35 @@
 
 package com.google.gerrit.plugins.codeowners.restapi;
 
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.collect.ImmutableList;
+import com.google.gerrit.extensions.common.WebLinkInfo;
 import com.google.gerrit.plugins.codeowners.api.CodeOwnerConfigFileInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfig;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImport;
 import com.google.gerrit.plugins.codeowners.backend.UnresolvedImportFormatter;
+import com.google.gerrit.server.WebLinks;
 import com.google.inject.Inject;
 import java.util.List;
 
 /** Collection of routines to populate {@link CodeOwnerConfigFileInfo}. */
 public class CodeOwnerConfigFileJson {
+  private final WebLinks webLinks;
   private final UnresolvedImportFormatter unresolvedImportFormatter;
 
   @Inject
-  CodeOwnerConfigFileJson(UnresolvedImportFormatter unresolvedImportFormatter) {
+  CodeOwnerConfigFileJson(WebLinks webLinks, UnresolvedImportFormatter unresolvedImportFormatter) {
+    this.webLinks = webLinks;
     this.unresolvedImportFormatter = unresolvedImportFormatter;
   }
 
   /**
    * Formats the provided code owner config file information as a {@link CodeOwnerConfigFileInfo}.
    *
-   * @param codeOwnerConfigKey the key of the code owner config file as {@link
-   *     CodeOwnerConfigFileInfo}
+   * @param codeOwnerConfig the code owner config
    * @param resolvedImports code owner config files which have been successfully imported directly
    *     or indirectly
    * @param unresolvedImports code owner config files which are imported directly or indirectly but
@@ -47,6 +51,25 @@ public class CodeOwnerConfigFileJson {
    *     as {@link CodeOwnerConfigFileInfo}
    */
   public CodeOwnerConfigFileInfo format(
+      CodeOwnerConfig codeOwnerConfig,
+      List<CodeOwnerConfigImport> resolvedImports,
+      List<CodeOwnerConfigImport> unresolvedImports) {
+    requireNonNull(codeOwnerConfig, "codeOwnerConfig");
+    requireNonNull(resolvedImports, "resolvedImports");
+    requireNonNull(unresolvedImports, "unresolvedImports");
+
+    CodeOwnerConfigFileInfo info =
+        format(codeOwnerConfig.key(), resolvedImports, unresolvedImports);
+
+    ImmutableList<WebLinkInfo> fileLinks =
+        webLinks.getFileLinks(
+            info.project, info.branch, codeOwnerConfig.revision().getName(), info.path);
+    info.webLinks = !fileLinks.isEmpty() ? fileLinks : null;
+
+    return info;
+  }
+
+  private CodeOwnerConfigFileInfo format(
       CodeOwnerConfig.Key codeOwnerConfigKey,
       List<CodeOwnerConfigImport> resolvedImports,
       List<CodeOwnerConfigImport> unresolvedImports) {
@@ -64,7 +87,7 @@ public class CodeOwnerConfigFileJson {
         unresolvedImports.stream()
             .filter(
                 unresolvedImport ->
-                    unresolvedImport.keyOfImportingCodeOwnerConfig().equals(codeOwnerConfigKey))
+                    unresolvedImport.importingCodeOwnerConfig().key().equals(codeOwnerConfigKey))
             .map(
                 unresolvedImport -> {
                   CodeOwnerConfigFileInfo unresolvedCodeOwnerConfigFileInfo =
@@ -92,12 +115,15 @@ public class CodeOwnerConfigFileJson {
         resolvedImports.stream()
             .filter(
                 resolvedImport ->
-                    resolvedImport.keyOfImportingCodeOwnerConfig().equals(codeOwnerConfigKey))
+                    resolvedImport.importingCodeOwnerConfig().key().equals(codeOwnerConfigKey))
             .map(
                 resolvedImport -> {
+                  checkState(
+                      resolvedImport.importedCodeOwnerConfig().isPresent(),
+                      "no imported code owner config for resolved import");
                   CodeOwnerConfigFileInfo resolvedCodeOwnerConfigFileInfo =
                       format(
-                          resolvedImport.keyOfImportedCodeOwnerConfig(),
+                          resolvedImport.importedCodeOwnerConfig().get(),
                           removeImportEntriesFor(resolvedImports, codeOwnerConfigKey),
                           removeImportEntriesFor(unresolvedImports, codeOwnerConfigKey));
                   resolvedCodeOwnerConfigFileInfo.importMode =
@@ -113,7 +139,7 @@ public class CodeOwnerConfigFileJson {
   private ImmutableList<CodeOwnerConfigImport> removeImportEntriesFor(
       List<CodeOwnerConfigImport> imports, CodeOwnerConfig.Key codeOwnerConfigKey) {
     return imports.stream()
-        .filter(i -> !i.keyOfImportingCodeOwnerConfig().equals(codeOwnerConfigKey))
+        .filter(i -> !i.importingCodeOwnerConfig().key().equals(codeOwnerConfigKey))
         .collect(toImmutableList());
   }
 }

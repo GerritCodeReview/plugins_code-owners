@@ -17,10 +17,14 @@ package com.google.gerrit.plugins.codeowners.backend;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
+import org.eclipse.jgit.lib.ObjectId;
 import org.junit.Test;
 
 /** Tests for {@link CodeOwnerResolverResult}. */
 public class CodeOwnerResolverResultTest extends AbstractAutoValueTest {
+  private static final ObjectId TEST_REVISION =
+      ObjectId.fromString("deadbeefdeadbeefdeadbeefdeadbeefdeadbeef");
+
   @Test
   public void toStringIncludesAllData() throws Exception {
     CodeOwnerResolverResult codeOwnerResolverResult =
@@ -31,12 +35,18 @@ public class CodeOwnerResolverResultTest extends AbstractAutoValueTest {
             /* hasUnresolvedCodeOwners= */ false,
             ImmutableList.of(
                 CodeOwnerConfigImport.createResolvedImport(
-                    CodeOwnerConfig.Key.create(project, "master", "/"),
-                    CodeOwnerConfig.Key.create(project, "master", "/bar/"),
+                    CodeOwnerConfig.builder(
+                            CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+                        .build(),
+                    CodeOwnerConfig.builder(
+                            CodeOwnerConfig.Key.create(project, "master", "/bar/"), TEST_REVISION)
+                        .build(),
                     CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"))),
             ImmutableList.of(
                 CodeOwnerConfigImport.createUnresolvedImport(
-                    CodeOwnerConfig.Key.create(project, "master", "/"),
+                    CodeOwnerConfig.builder(
+                            CodeOwnerConfig.Key.create(project, "master", "/"), TEST_REVISION)
+                        .build(),
                     CodeOwnerConfig.Key.create(project, "master", "/bar/"),
                     CodeOwnerConfigReference.create(CodeOwnerConfigImportMode.ALL, "/bar/OWNERS"),
                     "test message")),
