@@ -320,8 +320,7 @@ public class PathCodeOwners {
 
       // Resolve per-file imports.
       ImmutableSet<CodeOwnerImport> perFileImports =
-          getPerFileImports(
-              0, codeOwnerConfig.key(), resolvedCodeOwnerConfigBuilder.codeOwnerSets());
+          getPerFileImports(0, codeOwnerConfig, resolvedCodeOwnerConfigBuilder.codeOwnerSets());
       OptionalResultWithMessages<CodeOwnerConfigImports> perFileImportedCodeOwnerConfigs =
           resolveImports(codeOwnerConfig.key(), perFileImports, resolvedCodeOwnerConfigBuilder);
       messages.addAll(perFileImportedCodeOwnerConfigs.messages());
@@ -384,7 +383,7 @@ public class PathCodeOwners {
             codeOwnerConfigImport.referenceToImportedCodeOwnerConfig();
         CodeOwnerConfig.Key keyOfImportedCodeOwnerConfig =
             createKeyForImportedCodeOwnerConfig(
-                codeOwnerConfigImport.importingCodeOwnerConfig(), codeOwnerConfigReference);
+                codeOwnerConfigImport.importingCodeOwnerConfig().key(), codeOwnerConfigReference);
 
         try (Timer0.Context ctx2 = codeOwnerMetrics.resolveCodeOwnerConfigImport.start()) {
           logger.atFine().log(
@@ -450,7 +449,7 @@ public class PathCodeOwners {
           resolvedImports.add(
               CodeOwnerConfigImport.createResolvedImport(
                   codeOwnerConfigImport.importingCodeOwnerConfig(),
-                  keyOfImportedCodeOwnerConfig,
+                  importedCodeOwnerConfig,
                   codeOwnerConfigReference));
 
           CodeOwnerConfigImportMode importMode = codeOwnerConfigReference.importMode();
@@ -495,7 +494,7 @@ public class PathCodeOwners {
             transitiveImports.addAll(
                 getPerFileImports(
                     codeOwnerConfigImport.importLevel() + 1,
-                    importedCodeOwnerConfig.key(),
+                    importedCodeOwnerConfig,
                     matchingPerFileCodeOwnerSets));
 
             if (importMode == CodeOwnerConfigImportMode.GLOBAL_CODE_OWNER_SETS_ONLY) {
@@ -539,15 +538,12 @@ public class PathCodeOwners {
     return codeOwnerConfig.imports().stream()
         .map(
             codeOwnerConfigReference ->
-                CodeOwnerImport.create(
-                    importLevel, codeOwnerConfig.key(), codeOwnerConfigReference))
+                CodeOwnerImport.create(importLevel, codeOwnerConfig, codeOwnerConfigReference))
         .collect(toImmutableSet());
   }
 
   private ImmutableSet<CodeOwnerImport> getPerFileImports(
-      int importLevel,
-      CodeOwnerConfig.Key importingCodeOwnerConfig,
-      Set<CodeOwnerSet> codeOwnerSets) {
+      int importLevel, CodeOwnerConfig importingCodeOwnerConfig, Set<CodeOwnerSet> codeOwnerSets) {
     ImmutableSet.Builder<CodeOwnerImport> codeOwnerConfigImports = ImmutableSet.builder();
     for (CodeOwnerSet codeOwnerSet : codeOwnerSets) {
       codeOwnerSet.imports().stream()
@@ -646,8 +642,8 @@ public class PathCodeOwners {
      */
     public abstract int importLevel();
 
-    /** The key of the code owner config that contains the import. */
-    public abstract CodeOwnerConfig.Key importingCodeOwnerConfig();
+    /** The code owner config that contains the import. */
+    public abstract CodeOwnerConfig importingCodeOwnerConfig();
 
     /** The reference to the imported code owner config */
     public abstract CodeOwnerConfigReference referenceToImportedCodeOwnerConfig();
@@ -699,7 +695,7 @@ public class PathCodeOwners {
 
     public static CodeOwnerImport create(
         int importLevel,
-        CodeOwnerConfig.Key importingCodeOwnerConfig,
+        CodeOwnerConfig importingCodeOwnerConfig,
         CodeOwnerConfigReference codeOwnerConfigReference) {
       return create(
           importLevel, importingCodeOwnerConfig, codeOwnerConfigReference, Optional.empty());
@@ -707,7 +703,7 @@ public class PathCodeOwners {
 
     public static CodeOwnerImport create(
         int importLevel,
-        CodeOwnerConfig.Key importingCodeOwnerConfig,
+        CodeOwnerConfig importingCodeOwnerConfig,
         CodeOwnerConfigReference codeOwnerConfigReference,
         CodeOwnerSet codeOwnerSet) {
       return create(
@@ -719,7 +715,7 @@ public class PathCodeOwners {
 
     public static CodeOwnerImport create(
         int importLevel,
-        CodeOwnerConfig.Key importingCodeOwnerConfig,
+        CodeOwnerConfig importingCodeOwnerConfig,
         CodeOwnerConfigReference codeOwnerConfigReference,
         Optional<CodeOwnerSet> codeOwnerSet) {
       return new AutoValue_PathCodeOwners_CodeOwnerImport(

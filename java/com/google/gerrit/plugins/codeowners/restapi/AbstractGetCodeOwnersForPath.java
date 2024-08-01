@@ -229,7 +229,7 @@ public abstract class AbstractGetCodeOwnersForPath<R extends AbstractPathResourc
 
           codeOwnerConfigFileInfosBuilder.add(
               codeOwnerConfigFileJson.format(
-                  codeOwnerConfig.key(),
+                  codeOwnerConfig,
                   pathCodeOwners.resolvedImports(),
                   pathCodeOwners.unresolvedImports()));
 

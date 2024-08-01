@@ -14,6 +14,7 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
+import com.google.gerrit.extensions.common.WebLinkInfo;
 import com.google.gerrit.plugins.codeowners.backend.CodeOwnerConfigImportMode;
 import java.util.List;
 
@@ -42,6 +43,9 @@ public class CodeOwnerConfigFileInfo {
 
   /** The path of the code owner config file. */
   public String path;
+
+  /** Links to the code owner config file in external sites. */
+  public List<WebLinkInfo> webLinks;
 
   /** Imported code owner config files. */
   public List<CodeOwnerConfigFileInfo> imports;
