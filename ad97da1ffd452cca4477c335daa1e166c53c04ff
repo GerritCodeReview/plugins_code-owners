@@ -53,6 +53,24 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "00e04568_42a959ca",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 10
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-01T19:53:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "434cd7ef_79727af9",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "db143fb1_e69c130f",
@@ -156,6 +174,60 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "03683181_e0821447",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnersInfo.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-01T19:53:54Z",
+      "side": 1,
+      "message": "Getting the best scores of scoring factors for each code owners should be sufficient.\n`CodeOwnerScoringFactorInfo` can be extended if the need for more details appears in the future.",
+      "parentUuid": "6b176d9e_ef1638cd",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "6c22efb4_5d8a34ec",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnersInfo.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-01T19:53:54Z",
+      "side": 1,
+      "message": "Good point, moved to CodeOwnerInfo.",
+      "parentUuid": "4b0b7949_2a34e7fb",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "2300f9f7_6597affc",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnersInfo.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-01T19:53:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "54effef7_84c5622c",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "967e071c_a03becce",
@@ -169,6 +241,24 @@
       "writtenOn": "2024-07-30T07:47:52Z",
       "side": 1,
       "message": "Please add license headers for new classes.",
+      "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "4aa75a64_c5050d83",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringFactors.java",
+        "patchSetId": 10
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 3402586
+      },
+      "writtenOn": "2024-08-01T19:53:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "967e071c_a03becce",
       "revId": "ad97da1ffd452cca4477c335daa1e166c53c04ff",
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     }
