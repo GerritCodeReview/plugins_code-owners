@@ -14,18 +14,15 @@
 
 package com.google.gerrit.plugins.codeowners.api;
 
-import com.google.gerrit.extensions.common.AccountInfo;
-import java.util.List;
-
 /**
- * Representation of a code owner in the REST API.
+ * Representation of CodeOwnerScoringFactor in the REST
+ * API.
  *
- * <p>This class determines the JSON format of code owners in the REST API.
+ * <p>This class determines the JSON format in the REST API.
  */
-public class CodeOwnerInfo {
-  /** The account of the code owner. */
-  public AccountInfo account;
-
-  /** The scoring factors used to determine the order of code owners. */
-  public List<CodeOwnerScoringFactorInfo> codeOwnersScoringFactors;
+public class CodeOwnerScoringFactorInfo {
+  /** The score used */
+  public String score;
+  /** The value of the score */
+  public String value;
 }

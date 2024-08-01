@@ -561,9 +561,6 @@ returned first.
 Other factors like OOO state, recent review activity or code authorship are not
 considered.
 
-**NOTE:** The scores for the code owners are not exposed via the REST API but
-only influence the sort order.
-
 #### <a id="sortingExample">Sorting Example
 
 The returned code owners are sorted by an internal score that is computed from
@@ -985,9 +982,10 @@ for a path.
 ### <a id="code-owner-info"> CodeOwnerInfo
 The `CodeOwnerInfo` entity contains information about a code owner.
 
-| Field Name  |          | Description |
-| ----------- | -------- | ----------- |
+| Field Name  |          | Description                                                                                                                                                                                                                                                                                             |
+| ----------- |----------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `account`   | optional | The account of the code owner as an [AccountInfo](../../../Documentation/rest-api-accounts.html#account-info) entity. At the moment the `account` field is always set, but it's marked as optional as in the future we may also return groups as code owner and then the `account` field would be unset.
+| `codeOwnersScoringFactors` | optional | The [scoring factors](#scoringFactors) that were taken into account when computing the score of the listed code owner.                                                                                                                                                                                                     |
 
 ---
 
