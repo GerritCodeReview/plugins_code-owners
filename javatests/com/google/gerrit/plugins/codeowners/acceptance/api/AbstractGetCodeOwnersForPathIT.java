@@ -59,6 +59,7 @@ import com.google.gerrit.plugins.codeowners.backend.config.BackendConfig;
 import com.google.gerrit.plugins.codeowners.restapi.CheckCodeOwnerCapability;
 import com.google.gerrit.plugins.codeowners.restapi.GetCodeOwnersForPathInBranch;
 import com.google.inject.Inject;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Random;
 import org.junit.Before;
@@ -1704,7 +1705,12 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
         .inOrder();
     assertThat(codeOwnersInfo)
         .hasDebugLogsThatContainAllOf(
-            String.format("resolve code owners for %s from code owner config %s", path, fooBarKey),
+            String.format(
+                "resolve code owners for %s from code owner config %s:%s:%s",
+                path,
+                fooBarKey.project(),
+                fooBarKey.shortBranchName(),
+                Paths.get(fooBarKey.folderPath().toString(), getCodeOwnerConfigFileName())),
             "per-file code owner set with path expressions [*.md] matches",
             String.format(
                 "The import of %s:master:/%s in %s:master:/foo/bar/%s cannot be resolved:"
@@ -1715,11 +1721,21 @@ public abstract class AbstractGetCodeOwnersForPathIT extends AbstractCodeOwnersI
                 getCodeOwnerConfigFileName(),
                 nonExistingProject.get()),
             String.format("resolved email %s to account %d", user.email(), user.id().get()),
-            String.format("resolve code owners for %s from code owner config %s", path, fooKey),
+            String.format(
+                "resolve code owners for %s from code owner config %s:%s:%s",
+                path,
+                fooKey.project(),
+                fooKey.shortBranchName(),
+                Paths.get(fooKey.folderPath().toString(), getCodeOwnerConfigFileName())),
             String.format(
                 "cannot resolve code owner email %s: no account with this email exists",
                 nonExistingEmail),
-            String.format("resolve code owners for %s from code owner config %s", path, rootKey),
+            String.format(
+                "resolve code owners for %s from code owner config %s:%s:%s",
+                path,
+                rootKey.project(),
+                rootKey.shortBranchName(),
+                Paths.get(rootKey.folderPath().toString(), getCodeOwnerConfigFileName())),
             String.format("resolved email %s to account %d", admin.email(), admin.id().get()),
             "resolve global code owners",
             String.format("resolved email %s to account %d", admin.email(), admin.id().get()));
