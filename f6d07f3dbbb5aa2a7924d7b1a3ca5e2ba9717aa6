@@ -1,0 +1,411 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "136c6437_d1135a8b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerInfo.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Maybe omit the \"codeOwners\" prefix. Since this is a field in CodeOwnerInfo, the \"codeOwners\" prefix doesn\u0027t add much value.\n\nActually, I think this should rather be called \"scorings\" instead of \"scoringFactors\", as so far the code-owners plugin has 2 terms:\n \n* scores: Scores by which we rate how good we consider a code owner as reviewer/approver for a certain path. (e.g. DISTANCE, IS_REVIEWER, IS_EXPLICITLY_MENTIONED)\n\n* scorings: Scorings for code owners on a particular scores that express how good the code owners are considered as reviewers/approvers for a certain path. (e.g. distance\u003d2)\n\nWe shouldn\u0027t introduce a third term \"scoring factor\" unless there is a distinct meaning.",
+      "range": {
+        "startLine": 30,
+        "startChar": 42,
+        "endLine": 30,
+        "endChar": 66
+      },
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6fcb4f56_b021997d",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerScoringFactorInfo.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "nit: should be \"2024\"",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "fixSuggestions": [
+        {
+          "fixId": "5940f8d7_a904e63a",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerScoringFactorInfo.java",
+              "range": {
+                "startLine": 1,
+                "startChar": 0,
+                "endLine": 2,
+                "endChar": 0
+              },
+              "replacement": "// Copyright (C) 2024 The Android Open Source Project\n"
+            }
+          ]
+        }
+      ],
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "cde56f0d_7194d7b3",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerScoringFactorInfo.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 23,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Do we expect that further fields will be added here?\n\nIf not, we could omit this class and make the codeOwnersScoringFactors field in CodeOwnerInfo a Map\u003cString, Integer\u003e.\n\nMaybe we should also return the total scoring? E.g. we could have these fields in CodeOwnerInfo:\n* Integer totalScoring\n* Map\u003cString, Integer\u003e scorings",
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6527b51a_f9e11d4b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/api/CodeOwnerScoringFactorInfo.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Should this rather be Integer?",
+      "range": {
+        "startLine": 27,
+        "startChar": 9,
+        "endLine": 27,
+        "endChar": 15
+      },
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c62feca_7e3d0d07",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringFactors.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "nit: should be \"2024\"",
+      "range": {
+        "startLine": 1,
+        "startChar": 17,
+        "endLine": 1,
+        "endChar": 21
+      },
+      "fixSuggestions": [
+        {
+          "fixId": "7b261ab8_4243738d",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScoringFactors.java",
+              "range": {
+                "startLine": 1,
+                "startChar": 0,
+                "endLine": 2,
+                "endChar": 0
+              },
+              "replacement": "// Copyright (C) 2024 The Android Open Source Project\n"
+            }
+          ]
+        }
+      ],
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c77cc359_4f8fd7e1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Maybe use ImmutableMap.builder() to avoid ImmutableMap.copyOf below",
+      "range": {
+        "startLine": 70,
+        "startChar": 72,
+        "endLine": 70,
+        "endChar": 87
+      },
+      "fixSuggestions": [
+        {
+          "fixId": "737f10ff_0e001def",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+              "range": {
+                "startLine": 23,
+                "startChar": 0,
+                "endLine": 25,
+                "endChar": 0
+              },
+              "replacement": ""
+            },
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+              "range": {
+                "startLine": 70,
+                "startChar": 0,
+                "endLine": 71,
+                "endChar": 0
+              },
+              "replacement": "    ImmutableMap.Builder\u003cCodeOwner, CodeOwnerScoringFactors\u003e codeOwnerToScoringFactors \u003d\n        ImmutableMap.builder();\n"
+            },
+            {
+              "path": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerScorings.java",
+              "range": {
+                "startLine": 79,
+                "startChar": 0,
+                "endLine": 80,
+                "endChar": 0
+              },
+              "replacement": "    return codeOwnerToScoringFactors.build();\n"
+            }
+          ]
+        }
+      ],
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a30d2db7_27e703e1",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 359,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "CodeOwnerJson is the class that creates and populates CodeOwnerInfo, since the scoring factors are now part of CodeOwnerInfo the code that populates the codeOwnersScoringFactors field should be moved into CodeOwnerJson.",
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "20faea33_c907f98b",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/AbstractGetCodeOwnersForPath.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 375,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Instead of getting the scorings in an ImmutableMap above in l. 366, could we just get them here by a new codeOwnerScoring.getScoringsByScore(CodeOwner) method that returns a Map\u003cCodeOwnerScore, Integer\u003e? Then we could also drop the CodeOwnerScoringFactors class.",
+      "range": {
+        "startLine": 375,
+        "startChar": 58,
+        "endLine": 375,
+        "endChar": 88
+      },
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "31db7d65_1a7d9b86",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 1992,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "nit: please remove the \"test\" prefix. We use it only for private methods that are invoked from multiple tests (same for the test below)",
+      "range": {
+        "startLine": 1992,
+        "startChar": 14,
+        "endLine": 1992,
+        "endChar": 18
+      },
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "397f83dc_ece58c63",
+        "filename": "javatests/com/google/gerrit/plugins/codeowners/acceptance/api/AbstractGetCodeOwnersForPathIT.java",
+        "patchSetId": 14
+      },
+      "lineNbr": 2040,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Should there also be a test for the IS_REVIEWER score?",
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "f0edfccc_643d0f50",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 14
+      },
+      "lineNbr": 563,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Maybe add a new note here that says where the scores are returned in the API?",
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "50ccf5d0_aa7850e1",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 14
+      },
+      "lineNbr": 985,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "nit: unneeded blank line",
+      "fixSuggestions": [
+        {
+          "fixId": "9dce79be_fb9dbd87",
+          "description": "prompt_to_edit API",
+          "replacements": [
+            {
+              "path": "resources/Documentation/rest-api.md",
+              "range": {
+                "startLine": 985,
+                "startChar": 0,
+                "endLine": 986,
+                "endChar": 0
+              },
+              "replacement": ""
+            }
+          ]
+        }
+      ],
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ac39bd87_d3f66b2c",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 14
+      },
+      "lineNbr": 989,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "In JSON the fields have lowercase_underscore names.",
+      "range": {
+        "startLine": 989,
+        "startChar": 3,
+        "endLine": 989,
+        "endChar": 27
+      },
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "2d9024c8_825f43b8",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 14
+      },
+      "lineNbr": 1068,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "You may drop this column, when all fields are mandatory, e.g. see example for CodeOwnerReferenceInfo above.",
+      "range": {
+        "startLine": 1068,
+        "startChar": 15,
+        "endLine": 1068,
+        "endChar": 23
+      },
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "9a894321_beb46f69",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 14
+      },
+      "lineNbr": 1070,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:09:28Z",
+      "side": 1,
+      "message": "Should we mention here that this is the plain non-weighted scoring?",
+      "range": {
+        "startLine": 1070,
+        "startChar": 26,
+        "endLine": 1070,
+        "endChar": 49
+      },
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    }
+  ]
+}
