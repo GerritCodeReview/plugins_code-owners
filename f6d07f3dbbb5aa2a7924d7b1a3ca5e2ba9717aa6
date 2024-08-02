@@ -289,6 +289,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "807f79b2_73bd8736",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 14
+      },
+      "lineNbr": 493,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T11:23:16Z",
+      "side": 1,
+      "message": "Please also update the example response here.",
+      "revId": "f6d07f3dbbb5aa2a7924d7b1a3ca5e2ba9717aa6",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "f0edfccc_643d0f50",
         "filename": "resources/Documentation/rest-api.md",
         "patchSetId": 14
