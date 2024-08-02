@@ -24,6 +24,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "dc932d48_14f359b3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 46,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T06:43:15Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "de54af22_3ddce968",
+      "range": {
+        "startLine": 46,
+        "startChar": 15,
+        "endLine": 46,
+        "endChar": 20
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0b14bce3_80577cea",
@@ -37,6 +61,30 @@
       "writtenOn": "2024-08-01T14:19:58Z",
       "side": 1,
       "message": "The docstring is slightly outdated now in relation to keys vs. configs",
+      "range": {
+        "startLine": 25,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 30
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ad956c04_885745ff",
+        "filename": "java/com/google/gerrit/plugins/codeowners/backend/CodeOwnerConfigImport.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T06:43:15Z",
+      "side": 1,
+      "message": "Thanks for noticing!\n\nDone.",
+      "parentUuid": "0b14bce3_80577cea",
       "range": {
         "startLine": 25,
         "startChar": 0,
@@ -70,6 +118,30 @@
       "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "7260bd87_0d910975",
+        "filename": "java/com/google/gerrit/plugins/codeowners/restapi/CodeOwnerConfigFileJson.java",
+        "patchSetId": 1
+      },
+      "lineNbr": 37,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T06:43:15Z",
+      "side": 1,
+      "message": "Yes, WebLinks is always non-null. If web links are not configured webLinks.getFileLinks(...) returns an empty list.",
+      "parentUuid": "dbb2cfca_b07ab232",
+      "range": {
+        "startLine": 37,
+        "startChar": 26,
+        "endLine": 37,
+        "endChar": 43
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "fd09b5c1_b738b5fb",
@@ -83,6 +155,30 @@
       "writtenOn": "2024-08-01T14:19:58Z",
       "side": 1,
       "message": "... Or if web_links provider is not configured",
+      "range": {
+        "startLine": 967,
+        "startChar": 178,
+        "endLine": 967,
+        "endChar": 291
+      },
+      "revId": "1fe3933c002fec03191c8789bb01a4ffe57327a0",
+      "serverId": "173816e5-2b9a-37c3-8a2e-48639d4f1153"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "409d1283_e4d9db56",
+        "filename": "resources/Documentation/rest-api.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 967,
+      "author": {
+        "id": 1003935
+      },
+      "writtenOn": "2024-08-02T06:43:15Z",
+      "side": 1,
+      "message": "Good reminder! \n\nDone.",
+      "parentUuid": "fd09b5c1_b738b5fb",
       "range": {
         "startLine": 967,
         "startChar": 178,
